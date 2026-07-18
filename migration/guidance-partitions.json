@@ -1,0 +1,117 @@
+{
+  "baselineCommit": "baa34546589413aa898429051d1702442bbd2dd2",
+  "oracle": "fixtures/oracles/clio-guidance-v0/provenance.json",
+  "partitions": [
+    {
+      "id": "MIG-ESQ",
+      "status": "migrated",
+      "issue": null,
+      "guideIds": [
+        "esq",
+        "esq-filter-parsing",
+        "esq-filters",
+        "esq-filters-backend",
+        "esq-filters-frontend"
+      ]
+    },
+    {
+      "id": "MIG1",
+      "status": "ready-after-mig0",
+      "issue": 15,
+      "guideIds": [
+        "data-bindings",
+        "page-creation",
+        "page-modification",
+        "page-modification-components",
+        "page-modification-containers",
+        "page-modification-field-contract",
+        "page-modification-overview"
+      ]
+    },
+    {
+      "id": "MIG2",
+      "status": "ready-after-mig0",
+      "issue": 16,
+      "guideIds": [
+        "creatio-freedom-iframe-section",
+        "desktop-page",
+        "mobile-page-modification",
+        "page-schema-converters",
+        "page-schema-creatio-devkit-common",
+        "page-schema-handlers",
+        "page-schema-resources",
+        "page-schema-validators",
+        "related-list",
+        "related-page-binding"
+      ]
+    },
+    {
+      "id": "MIG3",
+      "status": "ready-after-mig0",
+      "issue": 17,
+      "guideIds": [
+        "chart-widget",
+        "dashboard-creation",
+        "dashboard-design",
+        "dashboards",
+        "indicator-widget",
+        "theming"
+      ]
+    },
+    {
+      "id": "MIG4",
+      "status": "ready-after-mig0",
+      "issue": 18,
+      "guideIds": [
+        "atf-repository-dev",
+        "atf-repository-model-management",
+        "atf-repository-tests",
+        "composable-app-e2e-test-implementation",
+        "composable-app-repo-bootstrap",
+        "configuration-entity-event-listener",
+        "configuration-entity-event-listener-tests",
+        "configuration-webservice",
+        "configuration-webservice-tests",
+        "creatio-composable-app-development",
+        "dataforge-orchestration",
+        "feature-toggle",
+        "feature-toggle-tests",
+        "integration-testing",
+        "package-dependencies",
+        "server-to-server-oauth",
+        "sys-setting",
+        "sys-setting-tests",
+        "sys-settings",
+        "virtual-entities"
+      ]
+    },
+    {
+      "id": "MIG5",
+      "status": "ready-after-mig0",
+      "issue": 19,
+      "guideIds": [
+        "agent-execution",
+        "app-modeling",
+        "business-rule-filters",
+        "business-rules",
+        "deploy-lifecycle",
+        "describe-environment",
+        "existing-app-maintenance",
+        "identity-assertion",
+        "process-modeling",
+        "run-process-button",
+        "support-mode",
+        "ui-project"
+      ]
+    },
+    {
+      "id": "MIG-SAFETY",
+      "status": "requires-separate-review",
+      "issue": null,
+      "guideIds": [
+        "core-rules",
+        "routing"
+      ]
+    }
+  ]
+}
