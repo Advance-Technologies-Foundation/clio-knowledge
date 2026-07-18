@@ -1,0 +1,59 @@
+{
+  "clioCommit": "baa34546589413aa898429051d1702442bbd2dd2",
+  "clioAssemblyVersion": "8.1.0.86\u002Bbaa34546589413aa898429051d1702442bbd2dd2",
+  "mcpTool": "get-guidance",
+  "mcpToolContractSourceSha256": "a0a48dc61916cdee61e12785371bb682c6e0e057bde66448bec45ef066ef364a",
+  "captureCommand": "dotnet run --project automation/Clio.Knowledge.OracleCapture -- \u0022C:\\Projects\\clio-worktrees\\knowledge-bundle-poc\\clio\\bin\\Release\\net10.0\\clio.dll\u0022 baa34546589413aa898429051d1702442bbd2dd2 \u0022C:\\Projects\\clio-worktrees\\knowledge-bundle-poc\\clio\\Command\\McpServer\\Tools\\GuidanceGetTool.cs\u0022 \u0022C:\\Projects\\clio-knowledge-worktrees\\codex-p1-prototype\\fixtures\\oracles\\esq\u0022",
+  "resources": [
+    {
+      "id": "esq",
+      "uri": "docs://mcp/guides/esq",
+      "mediaType": "text/plain",
+      "path": "resources/esq.md",
+      "length": 13600,
+      "sha256": "8b3baf96f157f5e2a30a8eeef773660db4a6d9c7db72c9ed7121311807b42e1b",
+      "sourceType": "Clio.Command.McpServer.Resources.EsqGuidanceResource",
+      "sourceField": "Guide"
+    },
+    {
+      "id": "esq-filter-parsing",
+      "uri": "docs://mcp/guides/esq-filter-parsing",
+      "mediaType": "text/plain",
+      "path": "resources/esq-filter-parsing.md",
+      "length": 29002,
+      "sha256": "4bc13bebeb5563e1d2a9a933dcf368837018fae04bc4740de8b47a7f83cb9838",
+      "sourceType": "Clio.Command.McpServer.Resources.EsqFilterParsingGuidanceResource",
+      "sourceField": "Guide"
+    },
+    {
+      "id": "esq-filters",
+      "uri": "docs://mcp/guides/esq-filters",
+      "mediaType": "text/plain",
+      "path": "resources/esq-filters.md",
+      "length": 1926,
+      "sha256": "60b14ceaa7bee3c5a7e5bd3c8014f32d015603f514682200ecb033b5af695c49",
+      "sourceType": "Clio.Command.McpServer.Resources.EsqFiltersGuidanceResource",
+      "sourceField": "Guide"
+    },
+    {
+      "id": "esq-filters-backend",
+      "uri": "docs://mcp/guides/esq-filters/backend",
+      "mediaType": "text/plain",
+      "path": "resources/esq-filters-backend.md",
+      "length": 22776,
+      "sha256": "9bcb3d041e488f00324c7f345fb4fd53005a61c6a77eff733fc6f717ece2c8f5",
+      "sourceType": "Clio.Command.McpServer.Resources.EsqFiltersBackendGuidanceResource",
+      "sourceField": "Guide"
+    },
+    {
+      "id": "esq-filters-frontend",
+      "uri": "docs://mcp/guides/esq-filters/frontend",
+      "mediaType": "text/plain",
+      "path": "resources/esq-filters-frontend.md",
+      "length": 25711,
+      "sha256": "2ddcdd18ac80d02c85770b68bd25b60697c48a9329aa29e83cfe994bbff049a1",
+      "sourceType": "Clio.Command.McpServer.Resources.EsqFiltersGuidanceResource",
+      "sourceField": "FrontendGuide"
+    }
+  ]
+}
