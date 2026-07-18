@@ -25,3 +25,9 @@ dotnet run --project automation/Clio.Knowledge.Bundle -- <bundle-source.json> <t
 ```
 
 The P1 key is disposable test material and must not be reused for production publication.
+
+## NuGet runtime spike
+
+`Clio.Knowledge.NuGetSpike` uses the official NuGet Client SDK in-process to discover, download,
+and extract the signed knowledge payload. It intentionally does not verify or activate the inner
+bundle; that remains the consumer runtime's responsibility.
