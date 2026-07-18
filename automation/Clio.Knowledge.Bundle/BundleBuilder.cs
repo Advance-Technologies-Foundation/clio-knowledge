@@ -2,6 +2,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Clio.Knowledge.Bundle;
 
@@ -9,6 +10,10 @@ public sealed class BundleBuilder
 {
     private const string DigestAlgorithm = "SHA-256";
     private static readonly DateTimeOffset ZipEpoch = new(1980, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
+    private static readonly Regex CompatibilityVersionPattern = new(
+        "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+        RegexOptions.CultureInvariant);
 
     public BundleBuildResult Build(string sourceFilePath, string outputPath, ECDsa signingKey)
     {
@@ -91,6 +96,8 @@ public sealed class BundleBuilder
             source.Requirements.ResourceUris,
             "resource URIs",
             "required resource URIs");
+        ValidateVersionRange(source.Compatibility.Clio, "Clio");
+        ValidateVersionRange(source.Compatibility.McpToolContract, "MCP tool contract");
         foreach (SourceResource resource in source.Resources)
         {
             ValidateBundlePath(resource.BundlePath);
@@ -98,6 +105,22 @@ public sealed class BundleBuilder
             {
                 throw new InvalidDataException($"P1 resource '{resource.Id}' must use a text/* media type.");
             }
+        }
+    }
+
+    private static void ValidateVersionRange(VersionRange range, string label)
+    {
+        if (!CompatibilityVersionPattern.IsMatch(range.Min)
+            || !CompatibilityVersionPattern.IsMatch(range.Max)
+            || !Version.TryParse(range.Min, out Version? min)
+            || !Version.TryParse(range.Max, out Version? max))
+        {
+            throw new InvalidDataException(
+                $"{label} compatibility bounds must use exact MAJOR.MINOR.PATCH versions.");
+        }
+        if (min > max)
+        {
+            throw new InvalidDataException($"{label} compatibility minimum must not exceed its maximum.");
         }
     }
 
@@ -148,9 +171,40 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException($"Source path '{descriptor.SourcePath}' escapes the bundle source directory.");
         }
-        string canonicalText = CanonicalizeText(File.ReadAllText(fullPath, Encoding.UTF8));
-        byte[] bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(canonicalText);
+        RejectReparsePoints(sourceDirectory, fullPath, descriptor.SourcePath);
+        string decodedText;
+        try
+        {
+            decodedText = StrictUtf8.GetString(File.ReadAllBytes(fullPath));
+        }
+        catch (DecoderFallbackException exception)
+        {
+            throw new InvalidDataException(
+                $"Source resource '{descriptor.SourcePath}' must contain valid UTF-8 text.",
+                exception);
+        }
+        string canonicalText = CanonicalizeText(decodedText.TrimStart('\uFEFF'));
+        byte[] bytes = StrictUtf8.GetBytes(canonicalText);
         return new PreparedResource(descriptor, bytes, Convert.ToHexStringLower(SHA256.HashData(bytes)));
+    }
+
+    private static void RejectReparsePoints(string sourceDirectory, string fullPath, string sourcePath)
+    {
+        string currentPath = sourceDirectory;
+        if ((File.GetAttributes(currentPath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The bundle source directory must not be a symbolic link or junction.");
+        }
+        foreach (string segment in Path.GetRelativePath(sourceDirectory, fullPath)
+                     .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+        {
+            currentPath = Path.Combine(currentPath, segment);
+            if ((File.GetAttributes(currentPath) & FileAttributes.ReparsePoint) != 0)
+            {
+                throw new InvalidDataException(
+                    $"Source resource '{sourcePath}' must not traverse a symbolic link or junction.");
+            }
+        }
     }
 
     private static KnowledgeBundleManifest CreateManifest(BundleSource source, IReadOnlyList<PreparedResource> resources) => new(

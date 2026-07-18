@@ -104,10 +104,74 @@ public sealed class BundleBuilderTests
                 because: "published archives must not contain traversal paths");
     }
 
+    [Test]
+    public void Build_ShouldRejectMalformedUtf8_WhenResourceCannotBeDecodedLosslessly()
+    {
+        // Arrange
+        File.WriteAllBytes(Path.Combine(_directory, "a.md"), [0xC3, 0x28]);
+        string sourcePath = WriteSource("""
+			[
+			  { "id": "guide-a", "uri": "docs://mcp/guides/a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*valid UTF-8*",
+                because: "malformed source bytes must never be normalized and signed as replacement characters");
+    }
+
+    [Test]
+    public void Build_ShouldRejectWildcardCompatibilityVersion_WhenSelectionWouldBeAmbiguous()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
+        string sourcePath = WriteSource("""
+			[
+			  { "id": "guide-a", "uri": "docs://mcp/guides/a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""", clioMax: "8.1.x");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*exact MAJOR.MINOR.PATCH*",
+                because: "producer and consumer must share one deterministic compatibility comparison grammar");
+    }
+
+    [Test]
+    public void Build_ShouldAcceptZeroLengthResource_WhenBundleIsOtherwiseValid()
+    {
+        // Arrange
+        File.WriteAllBytes(Path.Combine(_directory, "a.md"), []);
+        string sourcePath = WriteSource("""
+			[
+			  { "id": "guide-a", "uri": "docs://mcp/guides/a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        string outputPath = Path.Combine(_directory, "bundle.zip");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key);
+
+        // Assert
+        result.Manifest.Resources.Single().Length.Should().Be(0,
+            because: "the valid-empty fixture means one zero-length resource, not a manifest with no resources");
+    }
+
     private string WriteSource(
         string resourcesJson,
         string guidanceIdsJson = "[\"guide-a\"]",
-        string resourceUrisJson = "[\"docs://mcp/guides/a\"]")
+        string resourceUrisJson = "[\"docs://mcp/guides/a\"]",
+        string clioMax = "8.1.999")
     {
         string sourcePath = Path.Combine(_directory, "bundle-source.json");
         File.WriteAllText(sourcePath, $$"""
@@ -119,8 +183,8 @@ public sealed class BundleBuilderTests
 			  "issuedAt": "2026-07-18T00:00:00Z",
 			  "source": { "repository": "example/repo", "commit": "0123456789abcdef" },
 			  "compatibility": {
-			    "clio": { "min": "8.1.0", "max": "8.1.x" },
-			    "mcpToolContract": { "min": "1.0.0", "max": "1.x" }
+			    "clio": { "min": "8.1.0", "max": "{{clioMax}}" },
+			    "mcpToolContract": { "min": "1.0.0", "max": "1.999.999" }
 			  },
 			  "requirements": {
 			    "tools": ["get-guidance"],
