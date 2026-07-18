@@ -2,7 +2,7 @@
 
 Clio Knowledge is an experimental home for independently published guidance, safety advisories, capability definitions, and the catalog of vetted reference implementations used by [Clio](https://github.com/Advance-Technologies-Foundation/clio).
 
-The experiment separates knowledge content from Clio's executable delivery mechanics. Clio should own MCP tools, bundle verification, caching, compatibility selection, and offline fallback. This repository should own the content those tools deliver.
+The experiment separates knowledge content from Clio's executable delivery mechanics. Clio should own MCP tools, lazy bundle download, verification, caching, and compatibility selection. This repository should own the content those tools deliver.
 
 The intended result is that correcting an article, publishing a safety advisory, or registering a reference implementation does not require a Clio binary release.
 
@@ -46,12 +46,12 @@ Complete examples remain in independent repositories. This repository records th
 
 ## Design principles
 
-1. **One delivery contract.** Embedded fallback content, downloaded content, and test fixtures use the same bundle format.
+1. **One delivery contract.** Published knowledge content and conformance fixtures use the same bundle format. Clio contains no embedded knowledge content.
 2. **Stable identifiers.** Article, capability, advisory, and example IDs remain stable while their content evolves.
 3. **Immutable publication.** Clio consumes versioned artifacts, never mutable content from a default branch.
 4. **Evidence over assertion.** Prescriptive behavioral claims identify the source, test, lab, or version boundary that supports them.
 5. **Clear authority.** Canonical guidance, tested reference patterns, observed implementations, and experimental ideas are labeled distinctly.
-6. **Safe failure.** An invalid or incompatible bundle must never replace Clio's last-known-good guidance.
+6. **Safe failure.** An invalid or incompatible bundle must never replace Clio's active verified guidance.
 7. **Independent examples.** Every reference implementation remains directly downloadable, testable, and deployable on its own.
 8. **No combinatorial portfolio.** Examples declare their primary use case and supporting decisions without requiring every possible technology combination.
 
