@@ -21,8 +21,13 @@ This repository is the knowledge control plane for Clio. It owns guidance conten
 - Keep compatibility declarations explicit. Guidance that references a Clio tool must declare a compatible tool contract or Clio version.
 - Keep examples independent. Catalog changes must not require cloning every reference repository to consume ordinary guidance.
 - Prefer small, reviewable content changes. Do not mix a schema redesign with unrelated guidance edits.
-- Create linked worktrees only under this repository's `.worktrees/` directory. Never create a
-  sibling worktree elsewhere on disk.
+- Treat the primary checkout at the repository root as coordination-only. Do not edit files, stage
+  changes, or commit task work from the primary checkout.
+- Before changing anything, run `git worktree list`, identify the worktree assigned to the task,
+  and verify that the current directory and branch are correct.
+- Every agent and task must use its own branch and dedicated linked worktree under this
+  repository's `.worktrees/<task>/` directory. Never share a worktree or branch between agents
+  working concurrently, and never create a sibling worktree elsewhere on disk.
 
 ## Validation expectations
 
