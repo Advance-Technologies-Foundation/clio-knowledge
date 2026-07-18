@@ -1,16 +1,19 @@
 # Clio Knowledge
 
-Clio Knowledge is an experimental home for independently published guidance, safety advisories, capability definitions, and the catalog of vetted reference implementations used by [Clio](https://github.com/Advance-Technologies-Foundation/clio).
+Clio Knowledge is the canonical source repository for independently published guidance, safety advisories, capability definitions, and the catalog of vetted reference implementations used by [Clio](https://github.com/Advance-Technologies-Foundation/clio).
 
-The experiment separates knowledge content from Clio's executable delivery mechanics. Clio should own MCP tools, lazy bundle download, verification, caching, and compatibility selection. This repository should own the content those tools deliver.
+The repository separates knowledge content from Clio's executable delivery mechanics. Clio owns MCP tools, lazy bundle download, verification, caching, and compatibility selection. This repository owns the content those tools deliver.
 
 The intended result is that correcting an article, publishing a safety advisory, or registering a reference implementation does not require a Clio binary release.
 
 ## Status
 
-This repository is an experiment supporting [Clio discussion #924](https://github.com/Advance-Technologies-Foundation/clio/discussions/924). Its schemas, publication format, and governance model are not stable yet.
+Content migration is active. The first canonical articles live under `guidance/mcp/guides/` and the
+root `bundle-source.json` builds them into the v0 signed bundle.
 
-Do not treat content in this repository as released Clio guidance until it is included in a versioned, validated knowledge bundle.
+The remote publication, production signing, and automatic Clio update path remain under review for
+the Monday architecture decision. Do not treat content as released Clio guidance until it is included
+in a versioned, validated, published knowledge bundle.
 
 ## Responsibilities
 
@@ -40,7 +43,8 @@ It is not intended to contain:
 | [`capabilities/`](capabilities/README.md) | Controlled identifiers for features, patterns, and architectural choices. |
 | [`catalog/`](catalog/README.md) | Trusted metadata pointing to independently versioned reference repositories. |
 | [`schemas/`](schemas/README.md) | Machine-readable contracts for articles, advisories, and catalog entries. |
-| [`automation/`](automation/README.md) | Validation, packaging, publication, and knowledge-gap analysis. |
+| [`automation/`](automation/README.md) | Validation, deterministic packaging, and publication. |
+| [`bundle-source.json`](bundle-source.json) | Current stable ID, URI, compatibility, and canonical source mapping. |
 
 Complete examples remain in independent repositories. This repository records their immutable source revision, compatibility, validation evidence, and relationship to guidance.
 
@@ -55,7 +59,7 @@ Complete examples remain in independent repositories. This repository records th
 7. **Independent examples.** Every reference implementation remains directly downloadable, testable, and deployable on its own.
 8. **No combinatorial portfolio.** Examples declare their primary use case and supporting decisions without requiring every possible technology combination.
 
-## Envisioned publication model
+## Publication model
 
 The source files in this repository will eventually produce independently versioned artifacts such as:
 
@@ -66,7 +70,8 @@ clio-reference-catalog-2026.07.18.1.json
 
 Clio will download the newest compatible trusted artifact, verify it, cache it locally, and serve its articles through stable MCP resource URIs and `get-guidance` names.
 
-The initial proof of concept will establish the format and delivery contract before attempting to migrate every existing article.
+The ESQ family is the first real migration slice. Additional guidance families will move from Clio
+incrementally while stable MCP names and `docs://` URIs remain unchanged.
 
 ## Contributing
 

@@ -1,6 +1,7 @@
 # Contributing to Clio Knowledge
 
-Clio Knowledge is currently an architecture experiment. Contributions should help establish a trustworthy, independently released knowledge system for Clio without prematurely locking in a bundle format.
+Clio Knowledge is the canonical authoring repository for Clio guidance. Contributions must keep the
+independently released knowledge system trustworthy while the v0 remote publication path is finalized.
 
 ## Before contributing
 
