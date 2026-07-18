@@ -1,0 +1,28 @@
+{
+  "contractVersion": "0.1.0",
+  "bundleSchemaVersion": "0.1.0",
+  "sequence": 1,
+  "bundleVersion": "2026.07.18.1",
+  "issuedAt": "2026-07-18T00:00:00Z",
+  "source": {
+    "repository": "Advance-Technologies-Foundation/clio",
+    "commit": "baa34546589413aa898429051d1702442bbd2dd2"
+  },
+  "compatibility": {
+    "clio": { "min": "8.1.0", "max": "8.1.999" },
+    "mcpToolContract": { "min": "1.0.0", "max": "1.0.0" }
+  },
+  "requirements": {
+    "tools": ["get-guidance"],
+    "guidanceIds": ["esq", "esq-filter-parsing", "esq-filters", "esq-filters-backend", "esq-filters-frontend"],
+    "resourceUris": ["docs://mcp/guides/esq", "docs://mcp/guides/esq-filter-parsing", "docs://mcp/guides/esq-filters", "docs://mcp/guides/esq-filters/backend", "docs://mcp/guides/esq-filters/frontend"]
+  },
+  "signature": { "algorithm": "ECDSA-P256-SHA256", "keyId": "p1-test" },
+  "resources": [
+    { "id": "esq", "uri": "docs://mcp/guides/esq", "sourcePath": "oracles/esq/resources/esq.md", "bundlePath": "resources/esq.md", "mediaType": "text/plain" },
+    { "id": "esq-filter-parsing", "uri": "docs://mcp/guides/esq-filter-parsing", "sourcePath": "oracles/esq/resources/esq-filter-parsing.md", "bundlePath": "resources/esq-filter-parsing.md", "mediaType": "text/plain" },
+    { "id": "esq-filters", "uri": "docs://mcp/guides/esq-filters", "sourcePath": "oracles/esq/resources/esq-filters.md", "bundlePath": "resources/esq-filters.md", "mediaType": "text/plain" },
+    { "id": "esq-filters-backend", "uri": "docs://mcp/guides/esq-filters/backend", "sourcePath": "oracles/esq/resources/esq-filters-backend.md", "bundlePath": "resources/esq-filters-backend.md", "mediaType": "text/plain" },
+    { "id": "esq-filters-frontend", "uri": "docs://mcp/guides/esq-filters/frontend", "sourcePath": "oracles/esq/resources/esq-filters-frontend.md", "bundlePath": "resources/esq-filters-frontend.md", "mediaType": "text/plain" }
+  ]
+}
