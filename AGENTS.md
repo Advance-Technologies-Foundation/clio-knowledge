@@ -4,7 +4,7 @@
 
 ## Repository purpose
 
-This repository is the experimental knowledge control plane for Clio. It owns guidance content, advisories, capability identifiers, reference-example metadata, validation contracts, and publication automation. It does not own Clio executable behavior or complete reference workspaces.
+This repository is the knowledge control plane for Clio. It owns guidance content, advisories, capability identifiers, reference-example metadata, validation contracts, and publication automation. It does not own Clio executable behavior or complete reference workspaces.
 
 ## Working rules
 
@@ -21,6 +21,8 @@ This repository is the experimental knowledge control plane for Clio. It owns gu
 - Keep compatibility declarations explicit. Guidance that references a Clio tool must declare a compatible tool contract or Clio version.
 - Keep examples independent. Catalog changes must not require cloning every reference repository to consume ordinary guidance.
 - Prefer small, reviewable content changes. Do not mix a schema redesign with unrelated guidance edits.
+- Create linked worktrees only under this repository's `.worktrees/` directory. Never create a
+  sibling worktree elsewhere on disk.
 
 ## Validation expectations
 
@@ -36,6 +38,9 @@ Until automated validation is implemented, review changes manually for:
 
 When automation is added, run the narrowest relevant validation before committing and record the result in the change description.
 
-## Experimental status
+## Delivery status
 
-The bundle format and repository contracts are under discussion. Do not present a proposed schema as stable or production-ready unless the discussion records that decision. Do not modify the Clio repository from this repository without an explicitly scoped coordinated task.
+This is the real authoring repository, but the v0 bundle delivery path is not production-ready until
+its publication and signing decisions are ratified. Do not present a proposed schema as stable or
+production-ready unless the discussion records that decision. Do not modify the Clio repository
+from this repository without an explicitly scoped coordinated task.
