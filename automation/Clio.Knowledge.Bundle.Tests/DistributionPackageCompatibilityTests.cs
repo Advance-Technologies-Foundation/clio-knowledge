@@ -143,6 +143,8 @@ public sealed class DistributionPackageCompatibilityTests
             using JsonDocument manifestDocument = JsonDocument.Parse(ReadEntry(manifest!));
             manifestDocument.RootElement.GetProperty("libraryVersion").GetString().Should().Be(packageVersion,
                 because: "Clio binds a NuGet transport version to the signed library version");
+            manifestDocument.RootElement.TryGetProperty("issuedAt", out _).Should().BeFalse(
+                because: "the immutable source commit already carries the publication timestamp");
         }
         finally
         {

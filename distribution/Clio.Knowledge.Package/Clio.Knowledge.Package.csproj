@@ -14,6 +14,8 @@
     <IsPackable>true</IsPackable>
     <AllowTestSignedPackage Condition="'$(AllowTestSignedPackage)' == ''">false</AllowTestSignedPackage>
     <GeneratedBundlePath>$(MSBuildProjectDirectory)\obj\$(Configuration)\knowledge-bundle.zip</GeneratedBundlePath>
+    <KnowledgeSigningKeyId>p1-test</KnowledgeSigningKeyId>
+    <KnowledgeRepositoryId>Advance-Technologies-Foundation/clio-knowledge</KnowledgeRepositoryId>
     <GenerateNuspecDependsOn>RejectAccidentalTestSignedPackage;BuildKnowledgeBundle;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
   </PropertyGroup>
   <ItemGroup>
@@ -29,6 +31,11 @@
   <Target Name="BuildKnowledgeBundle"
           Condition="'$(AllowTestSignedPackage)' == 'true'">
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(GeneratedBundlePath)'))" />
-    <Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\..\automation\Clio.Knowledge.Bundle\Clio.Knowledge.Bundle.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\..\..\bundle-source.json&quot; &quot;$(MSBuildProjectDirectory)\..\..\fixtures\keys\p1-test-private.pem&quot; &quot;$(GeneratedBundlePath)&quot;" />
+    <Exec Command="git -C &quot;$(MSBuildProjectDirectory)\..\..&quot; rev-parse HEAD"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="Low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="KnowledgeSourceCommit" />
+    </Exec>
+    <Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\..\automation\Clio.Knowledge.Bundle\Clio.Knowledge.Bundle.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\..\..\bundle-source.json&quot; &quot;$(MSBuildProjectDirectory)\..\..\fixtures\keys\p1-test-private.pem&quot; &quot;$(GeneratedBundlePath)&quot; &quot;$(KnowledgeSigningKeyId)&quot; &quot;$(KnowledgeRepositoryId)&quot; &quot;$(KnowledgeSourceCommit)&quot;" />
   </Target>
 </Project>

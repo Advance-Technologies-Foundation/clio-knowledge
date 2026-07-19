@@ -3,17 +3,20 @@ using System.Text.Json.Serialization;
 namespace Clio.Knowledge.Bundle;
 
 public sealed record BundleSource(
+    [property: JsonPropertyName("$schema")]
+    string Schema,
     string ContractVersion,
     string BundleSchemaVersion,
     string LibraryId,
     string LibraryVersion,
     ulong Sequence,
-    DateTimeOffset IssuedAt,
-    SourceProvenance Source,
     CompatibilityRange Compatibility,
     BundleRequirements Requirements,
-    SignatureDescriptor Signature,
     IReadOnlyList<SourceResource> Resources);
+
+public sealed record BundlePublicationMetadata(
+    SourceProvenance Source,
+    SignatureDescriptor Signature);
 
 public sealed record SourceProvenance(string Repository, string Commit);
 
@@ -44,7 +47,6 @@ public sealed record KnowledgeBundleManifest(
     string LibraryId,
     string LibraryVersion,
     ulong Sequence,
-    DateTimeOffset IssuedAt,
     SourceProvenance Source,
     CompatibilityRange Compatibility,
     BundleRequirements Requirements,
