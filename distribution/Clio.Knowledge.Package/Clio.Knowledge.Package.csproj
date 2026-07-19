@@ -2,19 +2,33 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <PackageId>ATF.Clio.Knowledge</PackageId>
-    <Version>0.1.0-alpha.1</Version>
+    <Version>1.2.0</Version>
     <Authors>Advance Technologies Foundation</Authors>
-    <Description>Signed external knowledge bundle for the Clio MCP server.</Description>
+    <Description>Signed com.creatio.clio knowledge library for the Clio MCP server.</Description>
+    <PackageTags>clio;knowledge;com.creatio.clio</PackageTags>
+    <RepositoryUrl>https://github.com/Advance-Technologies-Foundation/clio-knowledge</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <IsPackable>true</IsPackable>
+    <AllowTestSignedPackage Condition="'$(AllowTestSignedPackage)' == ''">false</AllowTestSignedPackage>
+    <GeneratedBundlePath>$(MSBuildProjectDirectory)\obj\$(Configuration)\knowledge-bundle.zip</GeneratedBundlePath>
+    <GenerateNuspecDependsOn>RejectAccidentalTestSignedPackage;BuildKnowledgeBundle;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\fixtures\bundles\esq-v0\valid.zip"
+    <None Include="$(GeneratedBundlePath)"
           Pack="true"
-          PackagePath="knowledge\knowledge.bundle.zip" />
+          PackagePath="content\knowledge-bundle.zip" />
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+  <Target Name="RejectAccidentalTestSignedPackage"
+          Condition="'$(AllowTestSignedPackage)' != 'true'">
+    <Error Text="This experimental package uses a publicly committed test signing key. Pass -p:AllowTestSignedPackage=true only for an explicitly approved POC build." />
+  </Target>
+  <Target Name="BuildKnowledgeBundle"
+          Condition="'$(AllowTestSignedPackage)' == 'true'">
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(GeneratedBundlePath)'))" />
+    <Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\..\automation\Clio.Knowledge.Bundle\Clio.Knowledge.Bundle.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\..\..\bundle-source.json&quot; &quot;$(MSBuildProjectDirectory)\..\..\fixtures\keys\p1-test-private.pem&quot; &quot;$(GeneratedBundlePath)&quot;" />
+  </Target>
 </Project>

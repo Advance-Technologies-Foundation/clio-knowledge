@@ -1,28 +1,900 @@
 {
-  "contractVersion": "0.1.0",
-  "bundleSchemaVersion": "0.1.0",
-  "sequence": 1,
-  "bundleVersion": "2026.07.18.1",
-  "issuedAt": "2026-07-18T00:00:00Z",
+  "contractVersion": "1.0.0",
+  "bundleSchemaVersion": "1.0.0",
+  "libraryId": "com.creatio.clio",
+  "libraryVersion": "1.2.0",
+  "sequence": 4,
+  "issuedAt": "2026-07-19T00:00:00Z",
   "source": {
-    "repository": "Advance-Technologies-Foundation/clio",
-    "commit": "baa34546589413aa898429051d1702442bbd2dd2"
+    "repository": "Advance-Technologies-Foundation/clio-knowledge",
+    "commit": "b057b64040663087cad53ad00355616426d1cc81"
   },
   "compatibility": {
-    "clio": { "min": "8.1.0", "max": "8.1.999" },
-    "mcpToolContract": { "min": "1.0.0", "max": "1.0.0" }
+    "clio": {
+      "min": "8.1.0",
+      "max": "8.1.999"
+    },
+    "mcpToolContract": {
+      "min": "1.1.0",
+      "max": "1.1.0"
+    }
   },
   "requirements": {
-    "tools": ["get-guidance"],
-    "guidanceIds": ["esq", "esq-filter-parsing", "esq-filters", "esq-filters-backend", "esq-filters-frontend"],
-    "resourceUris": ["docs://mcp/guides/esq", "docs://mcp/guides/esq-filter-parsing", "docs://mcp/guides/esq-filters", "docs://mcp/guides/esq-filters/backend", "docs://mcp/guides/esq-filters/frontend"]
+    "tools": [
+      "get-guidance",
+      "list-knowledge-examples"
+    ],
+    "itemIds": [
+      "atf.creatio.google-pubsub-reference",
+      "atf.creatio.kafka-reference",
+      "agent-execution",
+      "app-modeling",
+      "atf-repository-dev",
+      "atf-repository-model-management",
+      "atf-repository-tests",
+      "business-rule-filters",
+      "business-rules",
+      "chart-widget",
+      "composable-app-e2e-test-implementation",
+      "composable-app-repo-bootstrap",
+      "configuration-entity-event-listener",
+      "configuration-entity-event-listener-tests",
+      "configuration-webservice",
+      "configuration-webservice-tests",
+      "creatio-composable-app-development",
+      "creatio-freedom-iframe-section",
+      "dashboard-creation",
+      "dashboard-design",
+      "dashboards",
+      "data-bindings",
+      "dataforge-orchestration",
+      "deploy-lifecycle",
+      "describe-environment",
+      "desktop-page",
+      "esq",
+      "esq-filter-parsing",
+      "esq-filters",
+      "esq-filters-backend",
+      "esq-filters-frontend",
+      "existing-app-maintenance",
+      "feature-toggle",
+      "feature-toggle-tests",
+      "identity-assertion",
+      "indicator-widget",
+      "integration-testing",
+      "mobile-page-modification",
+      "package-dependencies",
+      "page-creation",
+      "page-modification",
+      "page-modification-components",
+      "page-modification-containers",
+      "page-modification-field-contract",
+      "page-modification-overview",
+      "page-schema-converters",
+      "page-schema-creatio-devkit-common",
+      "page-schema-handlers",
+      "page-schema-resources",
+      "page-schema-validators",
+      "process-modeling",
+      "related-list",
+      "related-page-binding",
+      "run-process-button",
+      "server-to-server-oauth",
+      "support-mode",
+      "sys-setting",
+      "sys-setting-tests",
+      "sys-settings",
+      "theming",
+      "ui-project",
+      "virtual-entities"
+    ],
+    "resourceUris": [
+      "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
+      "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "docs://knowledge/com.creatio.clio/agent-execution",
+      "docs://knowledge/com.creatio.clio/app-modeling",
+      "docs://knowledge/com.creatio.clio/atf-repository-dev",
+      "docs://knowledge/com.creatio.clio/atf-repository-model-management",
+      "docs://knowledge/com.creatio.clio/atf-repository-tests",
+      "docs://knowledge/com.creatio.clio/business-rule-filters",
+      "docs://knowledge/com.creatio.clio/business-rules",
+      "docs://knowledge/com.creatio.clio/chart-widget",
+      "docs://knowledge/com.creatio.clio/composable-app-e2e-test-implementation",
+      "docs://knowledge/com.creatio.clio/composable-app-repo-bootstrap",
+      "docs://knowledge/com.creatio.clio/configuration-entity-event-listener",
+      "docs://knowledge/com.creatio.clio/configuration-entity-event-listener-tests",
+      "docs://knowledge/com.creatio.clio/configuration-webservice",
+      "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
+      "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
+      "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
+      "docs://knowledge/com.creatio.clio/dashboard-creation",
+      "docs://knowledge/com.creatio.clio/dashboard-design",
+      "docs://knowledge/com.creatio.clio/dashboards",
+      "docs://knowledge/com.creatio.clio/data-bindings",
+      "docs://knowledge/com.creatio.clio/dataforge-orchestration",
+      "docs://knowledge/com.creatio.clio/deploy-lifecycle",
+      "docs://knowledge/com.creatio.clio/describe-environment",
+      "docs://knowledge/com.creatio.clio/desktop-page",
+      "docs://knowledge/com.creatio.clio/esq",
+      "docs://knowledge/com.creatio.clio/esq-filter-parsing",
+      "docs://knowledge/com.creatio.clio/esq-filters",
+      "docs://knowledge/com.creatio.clio/esq-filters-backend",
+      "docs://knowledge/com.creatio.clio/esq-filters-frontend",
+      "docs://knowledge/com.creatio.clio/existing-app-maintenance",
+      "docs://knowledge/com.creatio.clio/feature-toggle",
+      "docs://knowledge/com.creatio.clio/feature-toggle-tests",
+      "docs://knowledge/com.creatio.clio/identity-assertion",
+      "docs://knowledge/com.creatio.clio/indicator-widget",
+      "docs://knowledge/com.creatio.clio/integration-testing",
+      "docs://knowledge/com.creatio.clio/mobile-page-modification",
+      "docs://knowledge/com.creatio.clio/package-dependencies",
+      "docs://knowledge/com.creatio.clio/page-creation",
+      "docs://knowledge/com.creatio.clio/page-modification",
+      "docs://knowledge/com.creatio.clio/page-modification-components",
+      "docs://knowledge/com.creatio.clio/page-modification-containers",
+      "docs://knowledge/com.creatio.clio/page-modification-field-contract",
+      "docs://knowledge/com.creatio.clio/page-modification-overview",
+      "docs://knowledge/com.creatio.clio/page-schema-converters",
+      "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
+      "docs://knowledge/com.creatio.clio/page-schema-handlers",
+      "docs://knowledge/com.creatio.clio/page-schema-resources",
+      "docs://knowledge/com.creatio.clio/page-schema-validators",
+      "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/related-list",
+      "docs://knowledge/com.creatio.clio/related-page-binding",
+      "docs://knowledge/com.creatio.clio/run-process-button",
+      "docs://knowledge/com.creatio.clio/server-to-server-oauth",
+      "docs://knowledge/com.creatio.clio/support-mode",
+      "docs://knowledge/com.creatio.clio/sys-setting",
+      "docs://knowledge/com.creatio.clio/sys-setting-tests",
+      "docs://knowledge/com.creatio.clio/sys-settings",
+      "docs://knowledge/com.creatio.clio/theming",
+      "docs://knowledge/com.creatio.clio/ui-project",
+      "docs://knowledge/com.creatio.clio/virtual-entities"
+    ]
   },
-  "signature": { "algorithm": "ECDSA-P256-SHA256", "keyId": "p1-test" },
+  "signature": {
+    "algorithm": "ECDSA-P256-SHA256",
+    "keyId": "p1-test"
+  },
   "resources": [
-    { "id": "esq", "uri": "docs://mcp/guides/esq", "sourcePath": "guidance/mcp/guides/esq.md", "bundlePath": "resources/esq.md", "mediaType": "text/plain" },
-    { "id": "esq-filter-parsing", "uri": "docs://mcp/guides/esq-filter-parsing", "sourcePath": "guidance/mcp/guides/esq-filter-parsing.md", "bundlePath": "resources/esq-filter-parsing.md", "mediaType": "text/plain" },
-    { "id": "esq-filters", "uri": "docs://mcp/guides/esq-filters", "sourcePath": "guidance/mcp/guides/esq-filters/index.md", "bundlePath": "resources/esq-filters.md", "mediaType": "text/plain" },
-    { "id": "esq-filters-backend", "uri": "docs://mcp/guides/esq-filters/backend", "sourcePath": "guidance/mcp/guides/esq-filters/backend.md", "bundlePath": "resources/esq-filters-backend.md", "mediaType": "text/plain" },
-    { "id": "esq-filters-frontend", "uri": "docs://mcp/guides/esq-filters/frontend", "sourcePath": "guidance/mcp/guides/esq-filters/frontend.md", "bundlePath": "resources/esq-filters-frontend.md", "mediaType": "text/plain" }
+    {
+      "itemId": "atf.creatio.google-pubsub-reference",
+      "topicId": "atf.creatio.google-pubsub-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
+      "sourcePath": "catalog/reference-examples/creatio-google-pubsub.yaml",
+      "bundlePath": "resources/atf.creatio.google-pubsub-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "atf.creatio.kafka-reference",
+      "topicId": "atf.creatio.kafka-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
+      "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "agent-execution",
+      "topicId": "creatio.agent-execution",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/agent-execution",
+      "legacyUris": [
+        "docs://mcp/guides/agent-execution"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/agent-execution.md",
+      "bundlePath": "resources/agent-execution.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "app-modeling",
+      "topicId": "creatio.app-modeling",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/app-modeling",
+      "legacyUris": [
+        "docs://mcp/guides/app-modeling"
+      ],
+      "sourcePath": "guidance/mcp/guides/applications/app-modeling.md",
+      "bundlePath": "resources/app-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "atf-repository-dev",
+      "topicId": "creatio.atf-repository-dev",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/atf-repository-dev",
+      "legacyUris": [
+        "docs://mcp/guides/atf-repository-dev"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/atf-repository-dev.md",
+      "bundlePath": "resources/atf-repository-dev.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "atf-repository-model-management",
+      "topicId": "creatio.atf-repository-model-management",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/atf-repository-model-management",
+      "legacyUris": [
+        "docs://mcp/guides/atf-repository-model-management"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/atf-repository-model-management.md",
+      "bundlePath": "resources/atf-repository-model-management.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "atf-repository-tests",
+      "topicId": "creatio.atf-repository-tests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/atf-repository-tests",
+      "legacyUris": [
+        "docs://mcp/guides/atf-repository-tests"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/atf-repository-tests.md",
+      "bundlePath": "resources/atf-repository-tests.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "business-rule-filters",
+      "topicId": "creatio.business-rule-filters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/business-rule-filters",
+      "legacyUris": [
+        "docs://mcp/guides/business-rule-filters"
+      ],
+      "sourcePath": "guidance/mcp/guides/business-rules/business-rule-filters.md",
+      "bundlePath": "resources/business-rule-filters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "business-rules",
+      "topicId": "creatio.business-rules",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/business-rules",
+      "legacyUris": [
+        "docs://mcp/guides/business-rules"
+      ],
+      "sourcePath": "guidance/mcp/guides/business-rules/business-rules.md",
+      "bundlePath": "resources/business-rules.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "chart-widget",
+      "topicId": "creatio.chart-widget",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/chart-widget",
+      "legacyUris": [
+        "docs://mcp/guides/chart-widget"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/chart-widget.md",
+      "bundlePath": "resources/chart-widget.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "composable-app-e2e-test-implementation",
+      "topicId": "creatio.composable-app-e2e-test-implementation",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/composable-app-e2e-test-implementation",
+      "legacyUris": [
+        "docs://mcp/guides/composable-app-e2e-test-implementation"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/composable-app-e2e-test-implementation.md",
+      "bundlePath": "resources/composable-app-e2e-test-implementation.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "composable-app-repo-bootstrap",
+      "topicId": "creatio.composable-app-repo-bootstrap",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/composable-app-repo-bootstrap",
+      "legacyUris": [
+        "docs://mcp/guides/composable-app-repo-bootstrap"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/composable-app-repo-bootstrap.md",
+      "bundlePath": "resources/composable-app-repo-bootstrap.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "configuration-entity-event-listener",
+      "topicId": "creatio.configuration-entity-event-listener",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/configuration-entity-event-listener",
+      "legacyUris": [
+        "docs://mcp/guides/configuration-entity-event-listener"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/configuration-entity-event-listener.md",
+      "bundlePath": "resources/configuration-entity-event-listener.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "configuration-entity-event-listener-tests",
+      "topicId": "creatio.configuration-entity-event-listener-tests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/configuration-entity-event-listener-tests",
+      "legacyUris": [
+        "docs://mcp/guides/configuration-entity-event-listener-tests"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/configuration-entity-event-listener-tests.md",
+      "bundlePath": "resources/configuration-entity-event-listener-tests.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "configuration-webservice",
+      "topicId": "creatio.configuration-webservice",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/configuration-webservice",
+      "legacyUris": [
+        "docs://mcp/guides/configuration-webservice"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/configuration-webservice.md",
+      "bundlePath": "resources/configuration-webservice.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "configuration-webservice-tests",
+      "topicId": "creatio.configuration-webservice-tests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
+      "legacyUris": [
+        "docs://mcp/guides/configuration-webservice-tests"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/configuration-webservice-tests.md",
+      "bundlePath": "resources/configuration-webservice-tests.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "creatio-composable-app-development",
+      "topicId": "creatio.creatio-composable-app-development",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
+      "legacyUris": [
+        "docs://mcp/guides/creatio-composable-app-development"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/creatio-composable-app-development.md",
+      "bundlePath": "resources/creatio-composable-app-development.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "creatio-freedom-iframe-section",
+      "topicId": "creatio.creatio-freedom-iframe-section",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
+      "legacyUris": [
+        "docs://mcp/guides/creatio-freedom-iframe-section"
+      ],
+      "sourcePath": "guidance/mcp/guides/platform/freedom-ui/iframe-section.md",
+      "bundlePath": "resources/creatio-freedom-iframe-section.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "dashboard-creation",
+      "topicId": "creatio.dashboard-creation",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dashboard-creation",
+      "legacyUris": [
+        "docs://mcp/guides/dashboard-creation"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/creation.md",
+      "bundlePath": "resources/dashboard-creation.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "dashboard-design",
+      "topicId": "creatio.dashboard-design",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dashboard-design",
+      "legacyUris": [
+        "docs://mcp/guides/dashboard-design"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/design.md",
+      "bundlePath": "resources/dashboard-design.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "dashboards",
+      "topicId": "creatio.dashboards",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dashboards",
+      "legacyUris": [
+        "docs://mcp/guides/dashboards"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/index.md",
+      "bundlePath": "resources/dashboards.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "data-bindings",
+      "topicId": "creatio.data-bindings",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/data-bindings",
+      "legacyUris": [
+        "docs://mcp/guides/data-bindings"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/data-bindings.md",
+      "bundlePath": "resources/data-bindings.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "dataforge-orchestration",
+      "topicId": "creatio.dataforge-orchestration",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dataforge-orchestration",
+      "legacyUris": [
+        "docs://mcp/guides/dataforge-orchestration"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/dataforge-orchestration.md",
+      "bundlePath": "resources/dataforge-orchestration.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "deploy-lifecycle",
+      "topicId": "creatio.deploy-lifecycle",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
+      "legacyUris": [
+        "docs://mcp/guides/deploy-lifecycle"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/deploy-lifecycle.md",
+      "bundlePath": "resources/deploy-lifecycle.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "describe-environment",
+      "topicId": "creatio.describe-environment",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/describe-environment",
+      "legacyUris": [
+        "docs://mcp/guides/describe-environment"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/describe-environment.md",
+      "bundlePath": "resources/describe-environment.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "desktop-page",
+      "topicId": "creatio.desktop-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/desktop-page",
+      "legacyUris": [
+        "docs://mcp/guides/desktop-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/platform/desktop/page.md",
+      "bundlePath": "resources/desktop-page.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq",
+      "topicId": "creatio.esq",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq",
+      "legacyUris": [
+        "docs://mcp/guides/esq"
+      ],
+      "sourcePath": "guidance/mcp/guides/esq.md",
+      "bundlePath": "resources/esq.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filter-parsing",
+      "topicId": "creatio.esq.filter-parsing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filter-parsing",
+      "legacyUris": [
+        "docs://mcp/guides/esq-filter-parsing"
+      ],
+      "sourcePath": "guidance/mcp/guides/esq-filter-parsing.md",
+      "bundlePath": "resources/esq-filter-parsing.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filters",
+      "topicId": "creatio.esq.filters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filters",
+      "legacyUris": [
+        "docs://mcp/guides/esq-filters"
+      ],
+      "sourcePath": "guidance/mcp/guides/esq-filters/index.md",
+      "bundlePath": "resources/esq-filters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filters-backend",
+      "topicId": "creatio.esq.filters.backend",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filters-backend",
+      "legacyUris": [
+        "docs://mcp/guides/esq-filters/backend"
+      ],
+      "sourcePath": "guidance/mcp/guides/esq-filters/backend.md",
+      "bundlePath": "resources/esq-filters-backend.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filters-frontend",
+      "topicId": "creatio.esq.filters.frontend",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filters-frontend",
+      "legacyUris": [
+        "docs://mcp/guides/esq-filters/frontend"
+      ],
+      "sourcePath": "guidance/mcp/guides/esq-filters/frontend.md",
+      "bundlePath": "resources/esq-filters-frontend.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "existing-app-maintenance",
+      "topicId": "creatio.existing-app-maintenance",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance",
+      "legacyUris": [
+        "docs://mcp/guides/existing-app-maintenance"
+      ],
+      "sourcePath": "guidance/mcp/guides/applications/existing-app-maintenance.md",
+      "bundlePath": "resources/existing-app-maintenance.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "feature-toggle",
+      "topicId": "creatio.feature-toggle",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/feature-toggle",
+      "legacyUris": [
+        "docs://mcp/guides/feature-toggle"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/feature-toggle.md",
+      "bundlePath": "resources/feature-toggle.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "feature-toggle-tests",
+      "topicId": "creatio.feature-toggle-tests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/feature-toggle-tests",
+      "legacyUris": [
+        "docs://mcp/guides/feature-toggle-tests"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/feature-toggle-tests.md",
+      "bundlePath": "resources/feature-toggle-tests.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "identity-assertion",
+      "topicId": "creatio.identity-assertion",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/identity-assertion",
+      "legacyUris": [
+        "docs://mcp/guides/identity-assertion"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/identity-assertion.md",
+      "bundlePath": "resources/identity-assertion.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "indicator-widget",
+      "topicId": "creatio.indicator-widget",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/indicator-widget",
+      "legacyUris": [
+        "docs://mcp/guides/indicator-widget"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/indicator-widget.md",
+      "bundlePath": "resources/indicator-widget.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "integration-testing",
+      "topicId": "creatio.integration-testing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/integration-testing",
+      "legacyUris": [
+        "docs://mcp/guides/integration-testing"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/integration-testing.md",
+      "bundlePath": "resources/integration-testing.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "mobile-page-modification",
+      "topicId": "creatio.mobile-page-modification",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/mobile-page-modification",
+      "legacyUris": [
+        "docs://mcp/guides/mobile-page-modification"
+      ],
+      "sourcePath": "guidance/mcp/guides/platform/mobile/page-modification.md",
+      "bundlePath": "resources/mobile-page-modification.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "package-dependencies",
+      "topicId": "creatio.package-dependencies",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/package-dependencies",
+      "legacyUris": [
+        "docs://mcp/guides/package-dependencies"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/package-dependencies.md",
+      "bundlePath": "resources/package-dependencies.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-creation",
+      "topicId": "creatio.page-creation",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-creation",
+      "legacyUris": [
+        "docs://mcp/guides/page-creation"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/creation.md",
+      "bundlePath": "resources/page-creation.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification",
+      "topicId": "creatio.page-modification",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/index.md",
+      "bundlePath": "resources/page-modification.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification-components",
+      "topicId": "creatio.page-modification-components",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-components",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-components"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/components.md",
+      "bundlePath": "resources/page-modification-components.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification-containers",
+      "topicId": "creatio.page-modification-containers",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-containers",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-containers"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/containers.md",
+      "bundlePath": "resources/page-modification-containers.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification-field-contract",
+      "topicId": "creatio.page-modification-field-contract",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-field-contract",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-field-contract"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/field-contract.md",
+      "bundlePath": "resources/page-modification-field-contract.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification-overview",
+      "topicId": "creatio.page-modification-overview",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-overview",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-overview"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/overview.md",
+      "bundlePath": "resources/page-modification-overview.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-schema-converters",
+      "topicId": "creatio.page-schema-converters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-converters",
+      "legacyUris": [
+        "docs://mcp/guides/page-schema-converters"
+      ],
+      "sourcePath": "guidance/mcp/guides/page-schema/converters.md",
+      "bundlePath": "resources/page-schema-converters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-schema-creatio-devkit-common",
+      "topicId": "creatio.page-schema-creatio-devkit-common",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
+      "legacyUris": [
+        "docs://mcp/guides/page-schema-creatio-devkit-common"
+      ],
+      "sourcePath": "guidance/mcp/guides/page-schema/creatio-devkit-common.md",
+      "bundlePath": "resources/page-schema-creatio-devkit-common.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-schema-handlers",
+      "topicId": "creatio.page-schema-handlers",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-handlers",
+      "legacyUris": [
+        "docs://mcp/guides/page-schema-handlers"
+      ],
+      "sourcePath": "guidance/mcp/guides/page-schema/handlers.md",
+      "bundlePath": "resources/page-schema-handlers.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-schema-resources",
+      "topicId": "creatio.page-schema-resources",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-resources",
+      "legacyUris": [
+        "docs://mcp/guides/page-schema-resources"
+      ],
+      "sourcePath": "guidance/mcp/guides/page-schema/resources.md",
+      "bundlePath": "resources/page-schema-resources.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-schema-validators",
+      "topicId": "creatio.page-schema-validators",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-validators",
+      "legacyUris": [
+        "docs://mcp/guides/page-schema-validators"
+      ],
+      "sourcePath": "guidance/mcp/guides/page-schema/validators.md",
+      "bundlePath": "resources/page-schema-validators.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-modeling",
+      "topicId": "creatio.process-modeling",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-modeling",
+      "legacyUris": [
+        "docs://mcp/guides/process-modeling"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
+      "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "related-list",
+      "topicId": "creatio.related-list",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/related-list",
+      "legacyUris": [
+        "docs://mcp/guides/related-list"
+      ],
+      "sourcePath": "guidance/mcp/guides/related-data/list.md",
+      "bundlePath": "resources/related-list.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "related-page-binding",
+      "topicId": "creatio.related-page-binding",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/related-page-binding",
+      "legacyUris": [
+        "docs://mcp/guides/related-page-binding"
+      ],
+      "sourcePath": "guidance/mcp/guides/related-data/page-binding.md",
+      "bundlePath": "resources/related-page-binding.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "run-process-button",
+      "topicId": "creatio.run-process-button",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/run-process-button",
+      "legacyUris": [
+        "docs://mcp/guides/run-process-button"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/run-process-button.md",
+      "bundlePath": "resources/run-process-button.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "server-to-server-oauth",
+      "topicId": "creatio.server-to-server-oauth",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/server-to-server-oauth",
+      "legacyUris": [
+        "docs://mcp/guides/server-to-server-oauth"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/server-to-server-oauth.md",
+      "bundlePath": "resources/server-to-server-oauth.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "support-mode",
+      "topicId": "creatio.support-mode",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/support-mode",
+      "legacyUris": [
+        "docs://mcp/guides/support-mode"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/support-mode.md",
+      "bundlePath": "resources/support-mode.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "sys-setting",
+      "topicId": "creatio.sys-setting",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/sys-setting",
+      "legacyUris": [
+        "docs://mcp/guides/sys-setting"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/sys-setting.md",
+      "bundlePath": "resources/sys-setting.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "sys-setting-tests",
+      "topicId": "creatio.sys-setting-tests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/sys-setting-tests",
+      "legacyUris": [
+        "docs://mcp/guides/sys-setting-tests"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/sys-setting-tests.md",
+      "bundlePath": "resources/sys-setting-tests.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "sys-settings",
+      "topicId": "creatio.sys-settings",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/sys-settings",
+      "legacyUris": [
+        "docs://mcp/guides/sys-settings"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/sys-settings.md",
+      "bundlePath": "resources/sys-settings.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "theming",
+      "topicId": "creatio.theming",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/theming",
+      "legacyUris": [
+        "docs://mcp/guides/theming"
+      ],
+      "sourcePath": "guidance/mcp/guides/theming/index.md",
+      "bundlePath": "resources/theming.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "ui-project",
+      "topicId": "creatio.ui-project",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/ui-project",
+      "legacyUris": [
+        "docs://mcp/guides/ui-project"
+      ],
+      "sourcePath": "guidance/mcp/guides/applications/ui-project.md",
+      "bundlePath": "resources/ui-project.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "virtual-entities",
+      "topicId": "creatio.virtual-entities",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/virtual-entities",
+      "legacyUris": [
+        "docs://mcp/guides/virtual-entities"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
+      "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    }
   ]
 }
