@@ -13,7 +13,7 @@ Content migration is active. Canonical articles live under `guidance/mcp/guides/
 
 The remote publication, production signing, and automatic Clio update path remain under review for
 the Monday architecture decision. Do not treat content as released Clio guidance until it is included
-in a versioned, validated, published knowledge bundle.
+in a reviewed Git revision or a versioned, validated, published NuGet bundle.
 
 ## Responsibilities
 
@@ -52,7 +52,7 @@ Complete examples remain in independent repositories. This repository records th
 
 1. **One source contract.** Git reads the human-readable repository directly; packaging transports may generate delivery artifacts without committing them. Clio contains no embedded knowledge content.
 2. **Stable identifiers.** Article, capability, advisory, and example IDs remain stable while their content evolves.
-3. **Immutable activation.** A source may follow a Git branch, but Clio serves only a verified bundle generation with a signed monotonic sequence and recorded resolved commit.
+3. **Transport-specific provenance.** Git is a direct checkout of a configured branch, tag, or commit and records the resolved commit. NuGet delivers an immutable package containing a signed bundle.
 4. **Evidence over assertion.** Prescriptive behavioral claims identify the source, test, lab, or version boundary that supports them.
 5. **Clear authority.** Canonical guidance, tested reference patterns, observed implementations, and experimental ideas are labeled distinctly.
 6. **Safe failure.** An invalid or incompatible bundle must never replace Clio's active verified guidance.
@@ -68,14 +68,17 @@ clio-guidance-2026.07.18.1.zip
 clio-reference-catalog-2026.07.18.1.json
 ```
 
-Clio will obtain compatible trusted artifacts from independently configured transports, verify and
-cache each library generation, and serve articles through exact namespaced resource URIs and
-logical topic resolution. The canonical identity is `(libraryId, sequence, bundleDigest)`; NuGet
-versions, Git branches, tags, and commits describe retrieval and provenance rather than identity.
+Clio obtains compatible knowledge from independently configured transports and caches each library
+locally. For Git, it clones or updates the configured repository and records the resolved commit. For
+NuGet, it retrieves an immutable package and verifies the signed bundle before activation. If a new
+candidate is invalid or incompatible, Clio retains the last-known-good active content. It serves
+articles through exact namespaced resource URIs and logical topic resolution. The canonical identity
+is `(libraryId, sequence, bundleDigest)`; NuGet versions and Git branches, tags, and commits describe
+retrieval and provenance rather than identity.
 
 The ESQ family is the first real migration slice. Additional guidance families will move from Clio
 incrementally. Its canonical routes are
-`docs://knowledge/com.creatio.clio/<item-id>`. Signed `legacyUris` preserve the former
+`docs://knowledge/com.creatio.clio/<item-id>`. `legacyUris` preserve the former
 `docs://mcp/guides/...` routes during the POC transition without making them canonical v1 identity.
 
 ## Multi-source bundle identity

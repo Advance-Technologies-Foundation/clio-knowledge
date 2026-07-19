@@ -73,11 +73,11 @@
       "properties": {
         "min": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
         },
         "max": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
         }
       }
     },
@@ -127,6 +127,24 @@
     "resource": {
       "type": "object",
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "role": { "const": "guidance" } }, "required": ["role"] },
+          "then": { "properties": { "sourcePath": { "pattern": "^guidance/(?!.*\\.\\.)[^\\\\]+$" } } }
+        },
+        {
+          "if": { "properties": { "role": { "const": "advisory" } }, "required": ["role"] },
+          "then": { "properties": { "sourcePath": { "pattern": "^advisories/(?!.*\\.\\.)[^\\\\]+$" } } }
+        },
+        {
+          "if": { "properties": { "role": { "const": "capability" } }, "required": ["role"] },
+          "then": { "properties": { "sourcePath": { "pattern": "^capabilities/(?!.*\\.\\.)[^\\\\]+$" } } }
+        },
+        {
+          "if": { "properties": { "role": { "const": "reference-example" } }, "required": ["role"] },
+          "then": { "properties": { "sourcePath": { "pattern": "^catalog/(?!.*\\.\\.)[^\\\\]+$" } } }
+        }
+      ],
       "required": [
         "itemId",
         "topicId",
