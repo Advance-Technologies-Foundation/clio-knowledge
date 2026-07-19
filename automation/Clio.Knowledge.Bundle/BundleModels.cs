@@ -5,8 +5,9 @@ namespace Clio.Knowledge.Bundle;
 public sealed record BundleSource(
     string ContractVersion,
     string BundleSchemaVersion,
+    string LibraryId,
+    string LibraryVersion,
     ulong Sequence,
-    string BundleVersion,
     DateTimeOffset IssuedAt,
     SourceProvenance Source,
     CompatibilityRange Compatibility,
@@ -22,14 +23,17 @@ public sealed record VersionRange(string Min, string Max);
 
 public sealed record BundleRequirements(
     IReadOnlyList<string> Tools,
-    IReadOnlyList<string> GuidanceIds,
+    IReadOnlyList<string> ItemIds,
     IReadOnlyList<string> ResourceUris);
 
 public sealed record SignatureDescriptor(string Algorithm, string KeyId);
 
 public sealed record SourceResource(
-    string Id,
+    string ItemId,
+    string TopicId,
+    string Role,
     string Uri,
+    IReadOnlyList<string>? LegacyUris,
     string SourcePath,
     string BundlePath,
     string MediaType);
@@ -37,8 +41,9 @@ public sealed record SourceResource(
 public sealed record KnowledgeBundleManifest(
     string ContractVersion,
     string BundleSchemaVersion,
+    string LibraryId,
+    string LibraryVersion,
     ulong Sequence,
-    string BundleVersion,
     DateTimeOffset IssuedAt,
     SourceProvenance Source,
     CompatibilityRange Compatibility,
@@ -48,8 +53,12 @@ public sealed record KnowledgeBundleManifest(
     IReadOnlyList<BundleResource> Resources);
 
 public sealed record BundleResource(
-    string Id,
+    string ItemId,
+    string TopicId,
+    string Role,
     string Uri,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<string>? LegacyUris,
     string Path,
     string MediaType,
     long Length,
@@ -61,7 +70,9 @@ public sealed record BundleBuildResult(
     byte[] SignatureBytes,
     string ArtifactSha256);
 
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+[JsonSourceGenerationOptions(
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow)]
 [JsonSerializable(typeof(BundleSource))]
 [JsonSerializable(typeof(KnowledgeBundleManifest))]
 internal sealed partial class BundleJsonContext : JsonSerializerContext;

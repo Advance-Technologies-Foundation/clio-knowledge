@@ -14,7 +14,8 @@ try
     signingKey.ImportFromPem(File.ReadAllText(args[1]));
     BundleBuildResult result = new BundleBuilder().Build(args[0], args[2], signingKey);
     Console.WriteLine($"Built {args[2]}");
-    Console.WriteLine($"Bundle: {result.Manifest.BundleVersion} sequence {result.Manifest.Sequence}");
+    Console.WriteLine(
+        $"Library: {result.Manifest.LibraryId} {result.Manifest.LibraryVersion} sequence {result.Manifest.Sequence}");
     Console.WriteLine($"Artifact SHA-256: {result.ArtifactSha256}");
     return 0;
 }

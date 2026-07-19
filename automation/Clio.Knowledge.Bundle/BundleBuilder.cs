@@ -8,11 +8,29 @@ namespace Clio.Knowledge.Bundle;
 
 public sealed class BundleBuilder
 {
+    private const string ContractVersion = "1.0.0";
+    private const string BundleSchemaVersion = "1.0.0";
     private const string DigestAlgorithm = "SHA-256";
+    private const int MaxArchiveBytes = 40 * 1024 * 1024;
+    private const int MaxArchiveEntries = 1024;
+    private const int MaxResourceBytes = 4 * 1024 * 1024;
+    private const int MaxBundleResourceBytes = 32 * 1024 * 1024;
     private static readonly DateTimeOffset ZipEpoch = new(1980, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
     private static readonly Regex CompatibilityVersionPattern = new(
         "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+        RegexOptions.CultureInvariant);
+    private static readonly Regex LibraryIdPattern = new(
+        "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*)+$",
+        RegexOptions.CultureInvariant);
+    private static readonly Regex StableIdPattern = new(
+        "^[a-z0-9]+(?:[.-][a-z0-9]+)*$",
+        RegexOptions.CultureInvariant);
+    private static readonly Regex RolePattern = new(
+        "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+        RegexOptions.CultureInvariant);
+    private static readonly Regex CompleteCommitPattern = new(
+        "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$",
         RegexOptions.CultureInvariant);
 
     public BundleBuildResult Build(string sourceFilePath, string outputPath, ECDsa signingKey)
@@ -26,30 +44,69 @@ public sealed class BundleBuilder
         BundleSource source = ReadSource(sourceFilePath);
         ValidateSource(source, signingKey);
 
-        List<PreparedResource> resources = source.Resources
-            .OrderBy(resource => resource.BundlePath, StringComparer.Ordinal)
-            .Select(resource => PrepareResource(sourceDirectory, resource))
-            .ToList();
+        List<PreparedResource> resources = [];
+        long totalResourceBytes = 0;
+        foreach (SourceResource descriptor in source.Resources.OrderBy(
+                     resource => resource.ItemId,
+                     StringComparer.Ordinal))
+        {
+            PreparedResource resource = PrepareResource(sourceDirectory, descriptor);
+            totalResourceBytes = checked(totalResourceBytes + resource.Bytes.LongLength);
+            if (totalResourceBytes > MaxBundleResourceBytes)
+            {
+                throw new InvalidDataException(
+                    $"Bundle resources exceed the {MaxBundleResourceBytes}-byte total size limit.");
+            }
+            resources.Add(resource);
+        }
         KnowledgeBundleManifest manifest = CreateManifest(source, resources);
         byte[] manifestBytes = JsonSerializer.SerializeToUtf8Bytes(manifest, BundleJsonContext.Default.KnowledgeBundleManifest);
         byte[] signatureBytes = signingKey.SignData(manifestBytes, HashAlgorithmName.SHA256);
 
         string fullOutputPath = Path.GetFullPath(outputPath);
-        Directory.CreateDirectory(Path.GetDirectoryName(fullOutputPath)
-            ?? throw new InvalidOperationException("Bundle output path must have a parent directory."));
-        using (FileStream output = File.Create(fullOutputPath))
+        string outputDirectory = Path.GetDirectoryName(fullOutputPath)
+            ?? throw new InvalidOperationException("Bundle output path must have a parent directory.");
+        Directory.CreateDirectory(outputDirectory);
+        string temporaryPath = Path.Combine(
+            outputDirectory,
+            $".{Path.GetFileName(fullOutputPath)}.{Guid.NewGuid():N}.tmp");
+        try
         {
-            using ZipArchive archive = new(output, ZipArchiveMode.Create, leaveOpen: true);
-            WriteEntry(archive, "manifest.json", manifestBytes);
-            WriteEntry(archive, "manifest.sig", signatureBytes);
-            foreach (PreparedResource resource in resources)
+            using (FileStream output = new(
+                       temporaryPath,
+                       FileMode.CreateNew,
+                       FileAccess.Write,
+                       FileShare.None))
             {
-                WriteEntry(archive, resource.Descriptor.BundlePath, resource.Bytes);
+                using ZipArchive archive = new(output, ZipArchiveMode.Create, leaveOpen: true);
+                WriteEntry(archive, "manifest.json", manifestBytes);
+                WriteEntry(archive, "manifest.sig", signatureBytes);
+                foreach (PreparedResource resource in resources)
+                {
+                    WriteEntry(archive, resource.Descriptor.BundlePath, resource.Bytes);
+                }
+            }
+            long archiveLength = new FileInfo(temporaryPath).Length;
+            if (archiveLength > MaxArchiveBytes)
+            {
+                throw new InvalidDataException(
+                    $"Bundle archive exceeds the {MaxArchiveBytes}-byte compressed size limit.");
+            }
+            string artifactDigest;
+            using (FileStream artifact = File.OpenRead(temporaryPath))
+            {
+                artifactDigest = Convert.ToHexStringLower(SHA256.HashData(artifact));
+            }
+            PublishAtomically(temporaryPath, fullOutputPath);
+            return new BundleBuildResult(manifest, manifestBytes, signatureBytes, artifactDigest);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+            {
+                File.Delete(temporaryPath);
             }
         }
-
-        string artifactDigest = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(fullOutputPath)));
-        return new BundleBuildResult(manifest, manifestBytes, signatureBytes, artifactDigest);
     }
 
     public static string CanonicalizeText(string value)
@@ -67,9 +124,55 @@ public sealed class BundleBuilder
 
     private static void ValidateSource(BundleSource source, ECDsa signingKey)
     {
+        if (!string.Equals(source.ContractVersion, ContractVersion, StringComparison.Ordinal)
+            || !string.Equals(source.BundleSchemaVersion, BundleSchemaVersion, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException(
+                $"The canonical multi-source builder requires contract and schema version {ContractVersion}.");
+        }
+        if (string.IsNullOrWhiteSpace(source.LibraryId) || !LibraryIdPattern.IsMatch(source.LibraryId))
+        {
+            throw new InvalidDataException(
+                "Library ID must be a lowercase reverse-DNS identifier such as 'com.creatio.clio'.");
+        }
+        if (string.IsNullOrWhiteSpace(source.LibraryVersion) || source.LibraryVersion.Length > 128)
+        {
+            throw new InvalidDataException("Library version must be a non-empty publisher generation label.");
+        }
         if (source.Sequence == 0)
         {
             throw new InvalidDataException("Bundle sequence must be greater than zero.");
+        }
+        if (source.Source is null
+            || string.IsNullOrWhiteSpace(source.Source.Repository)
+            || string.IsNullOrWhiteSpace(source.Source.Commit))
+        {
+            throw new InvalidDataException("Bundle source provenance must identify a repository and immutable commit.");
+        }
+        if (source.Compatibility is null
+            || source.Compatibility.Clio is null
+            || source.Compatibility.McpToolContract is null
+            || source.Requirements is null
+            || source.Requirements.Tools is null
+            || source.Requirements.ItemIds is null
+            || source.Requirements.ResourceUris is null
+            || source.Signature is null
+            || string.IsNullOrWhiteSpace(source.Signature.KeyId)
+            || source.Resources is null
+            || source.Resources.Count == 0
+            || source.Resources.Any(resource => resource is null))
+        {
+            throw new InvalidDataException("Bundle source is missing required v1 values.");
+        }
+        if (!CompleteCommitPattern.IsMatch(source.Source.Commit))
+        {
+            throw new InvalidDataException(
+                "Bundle source provenance commit must be a complete SHA-1 or SHA-256 hexadecimal object ID.");
+        }
+        if (source.Resources.Count > MaxArchiveEntries - 2)
+        {
+            throw new InvalidDataException(
+                $"Bundle archive cannot contain more than {MaxArchiveEntries} entries including its manifest and signature.");
         }
         if (!string.Equals(source.Signature.Algorithm, "ECDSA-P256-SHA256", StringComparison.Ordinal))
         {
@@ -80,17 +183,20 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException("The ECDSA-P256-SHA256 signature requires a P-256 signing key.");
         }
-        EnsureUnique(source.Resources.Select(resource => resource.Id), "resource id");
-        EnsureUnique(source.Resources.Select(resource => resource.Uri), "resource URI");
+        EnsureUnique(source.Resources.Select(resource => resource.ItemId), "resource item ID");
+        EnsureUnique(source.Resources.Select(resource => resource.Uri), "canonical resource URI");
         EnsureUnique(source.Resources.Select(resource => resource.BundlePath), "bundle path");
+        EnsureUnique(
+            source.Resources.Select(resource => $"{resource.TopicId}\u001f{resource.Role}"),
+            "resource topic and role pair");
         EnsureUnique(source.Requirements.Tools, "required tool");
-        EnsureUnique(source.Requirements.GuidanceIds, "required guidance id");
+        EnsureUnique(source.Requirements.ItemIds, "required item ID");
         EnsureUnique(source.Requirements.ResourceUris, "required resource URI");
         EnsureSameValues(
-            source.Resources.Select(resource => resource.Id),
-            source.Requirements.GuidanceIds,
-            "resource ids",
-            "required guidance ids");
+            source.Resources.Select(resource => resource.ItemId),
+            source.Requirements.ItemIds,
+            "resource item IDs",
+            "required item IDs");
         EnsureSameValues(
             source.Resources.Select(resource => resource.Uri),
             source.Requirements.ResourceUris,
@@ -98,13 +204,67 @@ public sealed class BundleBuilder
             "required resource URIs");
         ValidateVersionRange(source.Compatibility.Clio, "Clio");
         ValidateVersionRange(source.Compatibility.McpToolContract, "MCP tool contract");
+        List<string> allRoutes = [];
         foreach (SourceResource resource in source.Resources)
         {
-            ValidateBundlePath(resource.BundlePath);
-            if (!resource.MediaType.StartsWith("text/", StringComparison.Ordinal))
+            ValidateStableId(resource.ItemId, "item ID");
+            ValidateStableId(resource.TopicId, "topic ID");
+            if (string.IsNullOrWhiteSpace(resource.SourcePath))
             {
-                throw new InvalidDataException($"P1 resource '{resource.Id}' must use a text/* media type.");
+                throw new InvalidDataException($"Resource '{resource.ItemId}' must declare a source path.");
             }
+            if (string.IsNullOrWhiteSpace(resource.Role) || !RolePattern.IsMatch(resource.Role))
+            {
+                throw new InvalidDataException(
+                    $"Resource '{resource.ItemId}' role must be a lowercase stable role identifier.");
+            }
+            string expectedUri = CreateCanonicalUri(source.LibraryId, resource.ItemId);
+            if (!string.Equals(resource.Uri, expectedUri, StringComparison.Ordinal))
+            {
+                throw new InvalidDataException(
+                    $"Resource '{resource.ItemId}' URI must be exactly '{expectedUri}'.");
+            }
+            allRoutes.Add(resource.Uri);
+            foreach (string legacyUri in resource.LegacyUris ?? [])
+            {
+                ValidateLegacyUri(resource, legacyUri, expectedUri);
+                allRoutes.Add(legacyUri);
+            }
+            ValidateBundlePath(resource.BundlePath);
+            if (string.IsNullOrWhiteSpace(resource.MediaType)
+                || !resource.MediaType.StartsWith("text/", StringComparison.Ordinal))
+            {
+                throw new InvalidDataException($"P1 resource '{resource.ItemId}' must use a text/* media type.");
+            }
+        }
+        EnsureUnique(allRoutes, "canonical or legacy resource route");
+    }
+
+    public static string CreateCanonicalUri(string libraryId, string itemId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(libraryId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
+        return $"docs://knowledge/{libraryId}/{itemId}";
+    }
+
+    private static void ValidateStableId(string value, string label)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length > 160 || !StableIdPattern.IsMatch(value))
+        {
+            throw new InvalidDataException(
+                $"Every resource {label} must be a lowercase dot-or-hyphen separated stable identifier.");
+        }
+    }
+
+    private static void ValidateLegacyUri(SourceResource resource, string legacyUri, string canonicalUri)
+    {
+        if (string.IsNullOrWhiteSpace(legacyUri)
+            || !legacyUri.StartsWith("docs://", StringComparison.Ordinal)
+            || !Uri.TryCreate(legacyUri, UriKind.Absolute, out _)
+            || string.Equals(legacyUri, canonicalUri, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException(
+                $"Resource '{resource.ItemId}' contains an invalid legacy URI alias '{legacyUri}'.");
         }
     }
 
@@ -152,7 +312,8 @@ public sealed class BundleBuilder
 
     private static void ValidateBundlePath(string path)
     {
-        if (Path.IsPathRooted(path)
+        if (string.IsNullOrWhiteSpace(path)
+            || Path.IsPathRooted(path)
             || path.Contains("..", StringComparison.Ordinal)
             || path.Contains('\\')
             || !path.StartsWith("resources/", StringComparison.Ordinal))
@@ -172,10 +333,22 @@ public sealed class BundleBuilder
             throw new InvalidDataException($"Source path '{descriptor.SourcePath}' escapes the bundle source directory.");
         }
         RejectReparsePoints(sourceDirectory, fullPath, descriptor.SourcePath);
+        long sourceLength = new FileInfo(fullPath).Length;
+        if (sourceLength > MaxResourceBytes)
+        {
+            throw new InvalidDataException(
+                $"Source resource '{descriptor.SourcePath}' exceeds the {MaxResourceBytes}-byte item size limit.");
+        }
         string decodedText;
         try
         {
-            decodedText = StrictUtf8.GetString(File.ReadAllBytes(fullPath));
+            byte[] sourceBytes = File.ReadAllBytes(fullPath);
+            if (sourceBytes.Length > MaxResourceBytes)
+            {
+                throw new InvalidDataException(
+                    $"Source resource '{descriptor.SourcePath}' exceeds the {MaxResourceBytes}-byte item size limit.");
+            }
+            decodedText = StrictUtf8.GetString(sourceBytes);
         }
         catch (DecoderFallbackException exception)
         {
@@ -210,20 +383,26 @@ public sealed class BundleBuilder
     private static KnowledgeBundleManifest CreateManifest(BundleSource source, IReadOnlyList<PreparedResource> resources) => new(
         source.ContractVersion,
         source.BundleSchemaVersion,
+        source.LibraryId,
+        source.LibraryVersion,
         source.Sequence,
-        source.BundleVersion,
         source.IssuedAt.ToUniversalTime(),
         source.Source,
         source.Compatibility,
         new BundleRequirements(
             source.Requirements.Tools.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
-            source.Requirements.GuidanceIds.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
+            source.Requirements.ItemIds.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
             source.Requirements.ResourceUris.OrderBy(value => value, StringComparer.Ordinal).ToArray()),
         DigestAlgorithm,
         source.Signature,
         resources.Select(resource => new BundleResource(
-            resource.Descriptor.Id,
+            resource.Descriptor.ItemId,
+            resource.Descriptor.TopicId,
+            resource.Descriptor.Role,
             resource.Descriptor.Uri,
+            resource.Descriptor.LegacyUris is { Count: > 0 }
+                ? resource.Descriptor.LegacyUris.OrderBy(value => value, StringComparer.Ordinal).ToArray()
+                : null,
             resource.Descriptor.BundlePath,
             resource.Descriptor.MediaType,
             resource.Bytes.LongLength,
@@ -236,6 +415,16 @@ public sealed class BundleBuilder
         entry.ExternalAttributes = 0;
         using Stream stream = entry.Open();
         stream.Write(bytes);
+    }
+
+    private static void PublishAtomically(string temporaryPath, string outputPath)
+    {
+        if (File.Exists(outputPath))
+        {
+            File.Replace(temporaryPath, outputPath, destinationBackupFileName: null, ignoreMetadataErrors: true);
+            return;
+        }
+        File.Move(temporaryPath, outputPath);
     }
 
     private sealed record PreparedResource(SourceResource Descriptor, byte[] Bytes, string Digest);

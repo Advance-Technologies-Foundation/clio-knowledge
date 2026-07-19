@@ -1,12 +1,13 @@
 {
-  "contractVersion": "0.1.0",
-  "bundleSchemaVersion": "0.1.0",
-  "sequence": 1,
-  "bundleVersion": "2026.07.18.1",
-  "issuedAt": "2026-07-18T00:00:00Z",
+  "contractVersion": "1.0.0",
+  "bundleSchemaVersion": "1.0.0",
+  "libraryId": "com.creatio.clio",
+  "libraryVersion": "1.0.0",
+  "sequence": 2,
+  "issuedAt": "2026-07-19T00:00:00Z",
   "source": {
-    "repository": "Advance-Technologies-Foundation/clio",
-    "commit": "baa34546589413aa898429051d1702442bbd2dd2"
+    "repository": "Advance-Technologies-Foundation/clio-knowledge",
+    "commit": "9834c13c444971b1cb8bf43c429c70db3c8d9a8a"
   },
   "compatibility": {
     "clio": { "min": "8.1.0", "max": "8.1.999" },
@@ -14,15 +15,66 @@
   },
   "requirements": {
     "tools": ["get-guidance"],
-    "guidanceIds": ["esq", "esq-filter-parsing", "esq-filters", "esq-filters-backend", "esq-filters-frontend"],
-    "resourceUris": ["docs://mcp/guides/esq", "docs://mcp/guides/esq-filter-parsing", "docs://mcp/guides/esq-filters", "docs://mcp/guides/esq-filters/backend", "docs://mcp/guides/esq-filters/frontend"]
+    "itemIds": ["esq", "esq-filter-parsing", "esq-filters", "esq-filters-backend", "esq-filters-frontend"],
+    "resourceUris": [
+      "docs://knowledge/com.creatio.clio/esq",
+      "docs://knowledge/com.creatio.clio/esq-filter-parsing",
+      "docs://knowledge/com.creatio.clio/esq-filters",
+      "docs://knowledge/com.creatio.clio/esq-filters-backend",
+      "docs://knowledge/com.creatio.clio/esq-filters-frontend"
+    ]
   },
   "signature": { "algorithm": "ECDSA-P256-SHA256", "keyId": "p1-test" },
   "resources": [
-    { "id": "esq", "uri": "docs://mcp/guides/esq", "sourcePath": "guidance/mcp/guides/esq.md", "bundlePath": "resources/esq.md", "mediaType": "text/plain" },
-    { "id": "esq-filter-parsing", "uri": "docs://mcp/guides/esq-filter-parsing", "sourcePath": "guidance/mcp/guides/esq-filter-parsing.md", "bundlePath": "resources/esq-filter-parsing.md", "mediaType": "text/plain" },
-    { "id": "esq-filters", "uri": "docs://mcp/guides/esq-filters", "sourcePath": "guidance/mcp/guides/esq-filters/index.md", "bundlePath": "resources/esq-filters.md", "mediaType": "text/plain" },
-    { "id": "esq-filters-backend", "uri": "docs://mcp/guides/esq-filters/backend", "sourcePath": "guidance/mcp/guides/esq-filters/backend.md", "bundlePath": "resources/esq-filters-backend.md", "mediaType": "text/plain" },
-    { "id": "esq-filters-frontend", "uri": "docs://mcp/guides/esq-filters/frontend", "sourcePath": "guidance/mcp/guides/esq-filters/frontend.md", "bundlePath": "resources/esq-filters-frontend.md", "mediaType": "text/plain" }
+    {
+      "itemId": "esq",
+      "topicId": "creatio.esq",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq",
+      "legacyUris": ["docs://mcp/guides/esq"],
+      "sourcePath": "guidance/mcp/guides/esq.md",
+      "bundlePath": "resources/esq.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filter-parsing",
+      "topicId": "creatio.esq.filter-parsing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filter-parsing",
+      "legacyUris": ["docs://mcp/guides/esq-filter-parsing"],
+      "sourcePath": "guidance/mcp/guides/esq-filter-parsing.md",
+      "bundlePath": "resources/esq-filter-parsing.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filters",
+      "topicId": "creatio.esq.filters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filters",
+      "legacyUris": ["docs://mcp/guides/esq-filters"],
+      "sourcePath": "guidance/mcp/guides/esq-filters/index.md",
+      "bundlePath": "resources/esq-filters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filters-backend",
+      "topicId": "creatio.esq.filters.backend",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filters-backend",
+      "legacyUris": ["docs://mcp/guides/esq-filters/backend"],
+      "sourcePath": "guidance/mcp/guides/esq-filters/backend.md",
+      "bundlePath": "resources/esq-filters-backend.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "esq-filters-frontend",
+      "topicId": "creatio.esq.filters.frontend",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/esq-filters-frontend",
+      "legacyUris": ["docs://mcp/guides/esq-filters/frontend"],
+      "sourcePath": "guidance/mcp/guides/esq-filters/frontend.md",
+      "bundlePath": "resources/esq-filters-frontend.md",
+      "mediaType": "text/plain"
+    }
   ]
 }

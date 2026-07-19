@@ -6,7 +6,7 @@ Guidance states concise rules, workflows, applicability, and safety boundaries. 
 
 ## Authoring layout
 
-The filesystem mirrors the stable `docs://` hierarchy beneath `guidance/`:
+The filesystem preserves the human-readable migration layout beneath `guidance/`:
 
 ```text
 guidance/
@@ -20,13 +20,14 @@ guidance/
         frontend.md
 ```
 
-An `index.md` file owns the resource at the directory URI. Sibling files own child resources. For
-example, `esq-filters/index.md` is `docs://mcp/guides/esq-filters`, while `backend.md` is
-`docs://mcp/guides/esq-filters/backend`.
+An `index.md` file owns the topic router for a directory and sibling files own focused items. The
+layout intentionally remains readable and does not encode publisher selection rules.
 
 Developers edit these files. Files under `fixtures/oracles/` are immutable migration snapshots used
 to prove that the first external bundle preserves the previous Clio output; they are not the
 authoring source.
 
-`bundle-source.json` at the repository root maps stable guidance IDs and URIs to these canonical
-files. The bundle builder must consume the canonical `guidance/` paths, never the oracle snapshots.
+`bundle-source.json` at the repository root maps stable item IDs, logical topic IDs, roles, exact
+`docs://knowledge/com.creatio.clio/<item-id>` routes, and transitional legacy routes to these
+canonical files. The bundle builder must consume the canonical `guidance/` paths, never the oracle
+snapshots. Renaming a file does not rename its item or topic identity.

@@ -1,13 +1,11 @@
 # ESQ v0 conformance bundle
 
-`valid.zip` is generated from the frozen compiled-Clio oracle with the disposable P1 test key:
+This fixture is retained as immutable compatibility evidence for consumers that support the legacy
+implicit `com.creatio.clio` source. The canonical builder and distribution package now use v1; do
+not regenerate this archive with the v1-only builder.
 
-```powershell
-dotnet run --project automation/Clio.Knowledge.Bundle -- `
-  fixtures/esq-v0-bundle-source.json `
-  fixtures/keys/p1-test-private.pem `
-  fixtures/bundles/esq-v0/valid.zip
-```
+`valid.zip` was generated from `fixtures/esq-v0-bundle-source.json` and the disposable P1 test key
+by the historical v0 builder. Its detached signature and bytes are intentionally frozen.
 
 Consumers trust only `p1-test-public.pem`. The committed private key is test material, not a
 production publishing credential.

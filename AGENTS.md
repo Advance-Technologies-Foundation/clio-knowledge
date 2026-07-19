@@ -45,7 +45,7 @@ When automation is added, run the narrowest relevant validation before committin
 
 ## Delivery status
 
-This is the real authoring repository, but the v0 bundle delivery path is not production-ready until
+This is the real authoring repository, but the v1 multi-source bundle delivery path is not production-ready until
 its publication and signing decisions are ratified. Do not present a proposed schema as stable or
 production-ready unless the discussion records that decision. Do not modify the Clio repository
 from this repository without an explicitly scoped coordinated task.

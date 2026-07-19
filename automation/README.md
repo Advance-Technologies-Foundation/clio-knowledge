@@ -14,9 +14,20 @@ dotnet run --project automation/Clio.Knowledge.OracleCapture -- `
   oracle\esq
 ```
 
-This directory contains the experimental v0 bundle builder and will later contain publication and compatibility automation.
+This directory contains the experimental v1 multi-source bundle builder and will later contain
+publication and compatibility automation. The legacy v0 schema and conformance fixture remain
+available as migration evidence, but the builder accepts only canonical v1 source descriptors.
 
-`Clio.Knowledge.Bundle` canonicalizes text as UTF-8 without BOM with LF newlines, orders resources ordinally, computes resource digests, signs deterministic manifest bytes with a detached P1 test signature, and writes a fixed-layout uncompressed ZIP. Detached ECDSA signatures are intentionally not byte-deterministic, so reproducibility is asserted on canonical resource and manifest bytes rather than the final archive hash.
+`Clio.Knowledge.Bundle` canonicalizes text as UTF-8 without BOM with LF newlines, orders items by
+`itemId`, sorts requirements and aliases ordinally, validates exact namespaced routes, computes
+resource digests, signs deterministic manifest bytes with a detached P1 test signature, and writes
+a fixed-layout uncompressed ZIP through a sibling temporary file and atomic destination replacement.
+Failed builds preserve an existing destination and remove their temporary file. Producer bounds match
+the Clio consumer: 1,024 total archive entries, 4 MiB per resource, 32 MiB total resource bytes, and
+40 MiB compressed archive bytes. Source provenance accepts only complete 40-character SHA-1 or
+64-character SHA-256 object IDs. Detached ECDSA signatures are intentionally not byte-deterministic,
+so reproducibility is asserted on canonical resource and manifest bytes rather than the final archive
+hash.
 
 Build the current canonical guidance bundle from the repository root with:
 
@@ -24,12 +35,23 @@ Build the current canonical guidance bundle from the repository root with:
 dotnet run --project automation/Clio.Knowledge.Bundle -- `
   bundle-source.json `
   fixtures/keys/p1-test-private.pem `
-  artifacts/knowledge.bundle.zip
+  knowledge-bundle.zip
 ```
 
 The P1 key is disposable test material and must not be reused for production publication.
 `bundle-source.json` must reference files under `guidance/`. Files under `fixtures/oracles/` are
 immutable migration evidence and must never become the publication source.
+
+The v1 manifest identity is `(libraryId, sequence, bundleDigest)`. `libraryVersion` is the publisher
+release version and must equal the stable NuGet package version when the same artifact is distributed
+through NuGet. Each item has one exact `docs://knowledge/<library-id>/<item-id>` URI plus optional
+signed `legacyUris`; aliases are compatibility metadata and are not eligible as canonical identity.
+
+`knowledge-bundle.zip` is the Git transport artifact contract. Retrieval must read it directly and
+must not execute this builder. After the one signing build, copy the same artifact bytes to
+`fixtures/bundles/clio-knowledge-v1/valid.zip`; the distribution project packages the root artifact
+directly. Do not build the root and fixture independently because detached ECDSA signatures are not
+byte-deterministic.
 
 ## NuGet runtime spike
 
