@@ -10,6 +10,7 @@ public sealed class BundleBuilder
 {
     private const string ContractVersion = "1.0.0";
     private const string BundleSchemaVersion = "1.0.0";
+    private const string RepositorySchemaPath = "./schemas/v1/knowledge-repository.schema.json";
     private const string DigestAlgorithm = "SHA-256";
     private const int MaxArchiveBytes = 40 * 1024 * 1024;
     private const int MaxArchiveEntries = 1024;
@@ -33,16 +34,22 @@ public sealed class BundleBuilder
         "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$",
         RegexOptions.CultureInvariant);
 
-    public BundleBuildResult Build(string sourceFilePath, string outputPath, ECDsa signingKey)
+    public BundleBuildResult Build(
+        string sourceFilePath,
+        string outputPath,
+        ECDsa signingKey,
+        BundlePublicationMetadata publication)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceFilePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
         ArgumentNullException.ThrowIfNull(signingKey);
+        ArgumentNullException.ThrowIfNull(publication);
 
         string sourceDirectory = Path.GetDirectoryName(Path.GetFullPath(sourceFilePath))
             ?? throw new InvalidOperationException("Bundle source file must have a parent directory.");
         BundleSource source = ReadSource(sourceFilePath);
-        ValidateSource(source, signingKey);
+        ValidateSource(source);
+        ValidatePublication(publication, signingKey);
 
         List<PreparedResource> resources = [];
         long totalResourceBytes = 0;
@@ -59,7 +66,7 @@ public sealed class BundleBuilder
             }
             resources.Add(resource);
         }
-        KnowledgeBundleManifest manifest = CreateManifest(source, resources);
+        KnowledgeBundleManifest manifest = CreateManifest(source, publication, resources);
         byte[] manifestBytes = JsonSerializer.SerializeToUtf8Bytes(manifest, BundleJsonContext.Default.KnowledgeBundleManifest);
         byte[] signatureBytes = signingKey.SignData(manifestBytes, HashAlgorithmName.SHA256);
 
@@ -122,8 +129,13 @@ public sealed class BundleBuilder
             ?? throw new InvalidDataException("Bundle source JSON is empty.");
     }
 
-    private static void ValidateSource(BundleSource source, ECDsa signingKey)
+    private static void ValidateSource(BundleSource source)
     {
+        if (!string.Equals(source.Schema, RepositorySchemaPath, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException(
+                $"The repository manifest must reference '{RepositorySchemaPath}'.");
+        }
         if (!string.Equals(source.ContractVersion, ContractVersion, StringComparison.Ordinal)
             || !string.Equals(source.BundleSchemaVersion, BundleSchemaVersion, StringComparison.Ordinal))
         {
@@ -143,12 +155,6 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException("Bundle sequence must be greater than zero.");
         }
-        if (source.Source is null
-            || string.IsNullOrWhiteSpace(source.Source.Repository)
-            || string.IsNullOrWhiteSpace(source.Source.Commit))
-        {
-            throw new InvalidDataException("Bundle source provenance must identify a repository and immutable commit.");
-        }
         if (source.Compatibility is null
             || source.Compatibility.Clio is null
             || source.Compatibility.McpToolContract is null
@@ -156,32 +162,16 @@ public sealed class BundleBuilder
             || source.Requirements.Tools is null
             || source.Requirements.ItemIds is null
             || source.Requirements.ResourceUris is null
-            || source.Signature is null
-            || string.IsNullOrWhiteSpace(source.Signature.KeyId)
             || source.Resources is null
             || source.Resources.Count == 0
             || source.Resources.Any(resource => resource is null))
         {
             throw new InvalidDataException("Bundle source is missing required v1 values.");
         }
-        if (!CompleteCommitPattern.IsMatch(source.Source.Commit))
-        {
-            throw new InvalidDataException(
-                "Bundle source provenance commit must be a complete SHA-1 or SHA-256 hexadecimal object ID.");
-        }
         if (source.Resources.Count > MaxArchiveEntries - 2)
         {
             throw new InvalidDataException(
                 $"Bundle archive cannot contain more than {MaxArchiveEntries} entries including its manifest and signature.");
-        }
-        if (!string.Equals(source.Signature.Algorithm, "ECDSA-P256-SHA256", StringComparison.Ordinal))
-        {
-            throw new InvalidDataException("P1 supports only ECDSA-P256-SHA256 detached signatures.");
-        }
-        ECParameters keyParameters = signingKey.ExportParameters(includePrivateParameters: false);
-        if (!string.Equals(keyParameters.Curve.Oid.Value, ECCurve.NamedCurves.nistP256.Oid.Value, StringComparison.Ordinal))
-        {
-            throw new InvalidDataException("The ECDSA-P256-SHA256 signature requires a P-256 signing key.");
         }
         EnsureUnique(source.Resources.Select(resource => resource.ItemId), "resource item ID");
         EnsureUnique(source.Resources.Select(resource => resource.Uri), "canonical resource URI");
@@ -238,6 +228,31 @@ public sealed class BundleBuilder
             }
         }
         EnsureUnique(allRoutes, "canonical or legacy resource route");
+    }
+
+    private static void ValidatePublication(BundlePublicationMetadata publication, ECDsa signingKey)
+    {
+        if (publication.Source is null
+            || string.IsNullOrWhiteSpace(publication.Source.Repository)
+            || string.IsNullOrWhiteSpace(publication.Source.Commit))
+        {
+            throw new InvalidDataException("Bundle publication provenance must identify a repository and immutable commit.");
+        }
+        if (!CompleteCommitPattern.IsMatch(publication.Source.Commit))
+        {
+            throw new InvalidDataException(
+                "Bundle publication commit must be a complete SHA-1 or SHA-256 hexadecimal object ID.");
+        }
+        if (publication.Signature is null || string.IsNullOrWhiteSpace(publication.Signature.KeyId)
+            || !string.Equals(publication.Signature.Algorithm, "ECDSA-P256-SHA256", StringComparison.Ordinal))
+        {
+            throw new InvalidDataException("P1 supports only ECDSA-P256-SHA256 detached signatures.");
+        }
+        ECParameters keyParameters = signingKey.ExportParameters(includePrivateParameters: false);
+        if (!string.Equals(keyParameters.Curve.Oid.Value, ECCurve.NamedCurves.nistP256.Oid.Value, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException("The ECDSA-P256-SHA256 signature requires a P-256 signing key.");
+        }
     }
 
     public static string CreateCanonicalUri(string libraryId, string itemId)
@@ -380,21 +395,23 @@ public sealed class BundleBuilder
         }
     }
 
-    private static KnowledgeBundleManifest CreateManifest(BundleSource source, IReadOnlyList<PreparedResource> resources) => new(
+    private static KnowledgeBundleManifest CreateManifest(
+        BundleSource source,
+        BundlePublicationMetadata publication,
+        IReadOnlyList<PreparedResource> resources) => new(
         source.ContractVersion,
         source.BundleSchemaVersion,
         source.LibraryId,
         source.LibraryVersion,
         source.Sequence,
-        source.IssuedAt.ToUniversalTime(),
-        source.Source,
+        publication.Source,
         source.Compatibility,
         new BundleRequirements(
             source.Requirements.Tools.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
             source.Requirements.ItemIds.OrderBy(value => value, StringComparer.Ordinal).ToArray(),
             source.Requirements.ResourceUris.OrderBy(value => value, StringComparer.Ordinal).ToArray()),
         DigestAlgorithm,
-        source.Signature,
+        publication.Signature,
         resources.Select(resource => new BundleResource(
             resource.Descriptor.ItemId,
             resource.Descriptor.TopicId,

@@ -62,6 +62,41 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
+    [Description("Keeps the checked-in Git repository manifest associated with its strict source schema and free of publication metadata.")]
+    public void BundleSource_ShouldReferenceRepositorySchema_WithoutPublicationMetadata()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string sourcePath = Path.Combine(repositoryRoot, "bundle-source.json");
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(sourcePath));
+        JsonElement root = source.RootElement;
+        string schemaReference = root.GetProperty("$schema").GetString()!;
+        string schemaPath = Path.GetFullPath(Path.Combine(repositoryRoot, schemaReference));
+
+        // Act
+        bool schemaExists = File.Exists(schemaPath);
+        using JsonDocument schema = JsonDocument.Parse(File.ReadAllBytes(schemaPath));
+        JsonElement properties = schema.RootElement.GetProperty("properties");
+
+        // Assert
+        schemaExists.Should().BeTrue(because: "editors and agents need a resolvable schema beside the repository manifest");
+        schema.RootElement.GetProperty("additionalProperties").GetBoolean().Should().BeFalse(
+            because: "the repository contract must reject accidental transport or publication fields");
+        root.TryGetProperty("source", out _).Should().BeFalse(
+            because: "Git already provides repository and commit identity");
+        root.TryGetProperty("signature", out _).Should().BeFalse(
+            because: "signing is a NuGet publication concern rather than repository content");
+        root.TryGetProperty("issuedAt", out _).Should().BeFalse(
+            because: "Git already records the commit timestamp");
+        properties.TryGetProperty("source", out _).Should().BeFalse(
+            because: "the source schema must not redeclare Git provenance");
+        properties.TryGetProperty("signature", out _).Should().BeFalse(
+            because: "the source schema must stay transport-neutral");
+        properties.TryGetProperty("issuedAt", out _).Should().BeFalse(
+            because: "the source schema must not duplicate Git timestamps");
+    }
+
+    [Test]
     [Description("Keeps the v1 schema aligned with the builder's complete Git object provenance requirement.")]
     public void BundleSchema_ShouldRequireCompleteCommitObjectId()
     {
@@ -115,7 +150,15 @@ public sealed class GuidanceMigrationTests
         try
         {
             // Act
-            BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key);
+            BundleBuildResult result = new BundleBuilder().Build(
+                sourcePath,
+                outputPath,
+                key,
+                new BundlePublicationMetadata(
+                    new SourceProvenance(
+                        "Advance-Technologies-Foundation/clio-knowledge",
+                        "0123456789abcdef0123456789abcdef01234567"),
+                    new SignatureDescriptor("ECDSA-P256-SHA256", "p1-test")));
 
             // Assert
             root.GetProperty("contractVersion").GetString().Should().Be("1.0.0",

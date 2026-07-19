@@ -47,7 +47,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key);
+        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key, Publication());
 
         // Assert
         result.Manifest.Resources.Select(resource => resource.Path).Should().Equal(
@@ -90,7 +90,7 @@ public sealed class BundleBuilderTests
         BundleBuilder builder = new();
 
         // Act
-        BundleBuildResult first = builder.Build(sourcePath, Path.Combine(_directory, "first.zip"), key);
+        BundleBuildResult first = builder.Build(sourcePath, Path.Combine(_directory, "first.zip"), key, Publication());
         sourcePath = WriteSource("""
 			[
 			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
@@ -98,7 +98,7 @@ public sealed class BundleBuilderTests
 			]
 			""", "[\"guide-a\", \"guide-b\"]",
             "[\"docs://knowledge/com.example.knowledge/guide-a\", \"docs://knowledge/com.example.knowledge/guide-b\"]");
-        BundleBuildResult second = builder.Build(sourcePath, Path.Combine(_directory, "second.zip"), key);
+        BundleBuildResult second = builder.Build(sourcePath, Path.Combine(_directory, "second.zip"), key, Publication());
 
         // Assert
         second.ManifestBytes.Should().Equal(first.ManifestBytes,
@@ -122,7 +122,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -144,7 +144,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -169,7 +169,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -194,7 +194,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -216,7 +216,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -238,7 +238,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -260,7 +260,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -283,7 +283,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key);
+        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key, Publication());
 
         // Assert
         result.Manifest.Resources.Single().Length.Should().Be(0,
@@ -300,11 +300,15 @@ public sealed class BundleBuilderTests
 			[
 			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
-			""", commit: "0123456789abcdef");
+			""");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(
+            sourcePath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication("0123456789abcdef"));
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -323,14 +327,15 @@ public sealed class BundleBuilderTests
 			[
 			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
-			""", commit: commit);
+			""");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
         BundleBuildResult result = new BundleBuilder().Build(
             sourcePath,
             Path.Combine(_directory, "bundle.zip"),
-            key);
+            key,
+            Publication(commit));
 
         // Assert
         result.Manifest.Source.Commit.Should().Be(commit,
@@ -354,7 +359,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, outputPath, key);
+        Action act = () => new BundleBuilder().Build(sourcePath, outputPath, key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -380,7 +385,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -401,7 +406,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key);
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
 
         // Assert
         act.Should().Throw<InvalidDataException>()
@@ -425,7 +430,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        Action act = () => new BundleBuilder().Build(sourcePath, outputPath, key);
+        Action act = () => new BundleBuilder().Build(sourcePath, outputPath, key, Publication());
 
         // Assert
         act.Should().Throw<IOException>(because: "a file cannot atomically replace an existing directory");
@@ -452,7 +457,7 @@ public sealed class BundleBuilderTests
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
 
         // Act
-        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key);
+        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key, Publication());
 
         // Assert
         File.ReadAllBytes(outputPath).Should().NotEqual(previous,
@@ -468,19 +473,17 @@ public sealed class BundleBuilderTests
         string resourcesJson,
         string itemIdsJson = "[\"guide-a\"]",
         string resourceUrisJson = "[\"docs://knowledge/com.example.knowledge/guide-a\"]",
-        string clioMax = "8.1.999",
-        string commit = "0123456789abcdef0123456789abcdef01234567")
+        string clioMax = "8.1.999")
     {
         string sourcePath = Path.Combine(_directory, "bundle-source.json");
         File.WriteAllText(sourcePath, $$"""
 			{
+			  "$schema": "./schemas/v1/knowledge-repository.schema.json",
 			  "contractVersion": "1.0.0",
 			  "bundleSchemaVersion": "1.0.0",
 			  "libraryId": "com.example.knowledge",
 			  "libraryVersion": "2026.07.19.1",
 			  "sequence": 1,
-			  "issuedAt": "2026-07-19T00:00:00Z",
-			  "source": { "repository": "example/repo", "commit": "{{commit}}" },
 			  "compatibility": {
 			    "clio": { "min": "8.1.0", "max": "{{clioMax}}" },
 			    "mcpToolContract": { "min": "1.0.0", "max": "1.999.999" }
@@ -490,12 +493,16 @@ public sealed class BundleBuilderTests
 			    "itemIds": {{itemIdsJson}},
 			    "resourceUris": {{resourceUrisJson}}
 			  },
-			  "signature": { "algorithm": "ECDSA-P256-SHA256", "keyId": "p1-test" },
 			  "resources": {{resourcesJson}}
 			}
 			""");
         return sourcePath;
     }
+
+    private static BundlePublicationMetadata Publication(
+        string commit = "0123456789abcdef0123456789abcdef01234567") => new(
+        new SourceProvenance("example/repo", commit),
+        new SignatureDescriptor("ECDSA-P256-SHA256", "p1-test"));
 
     private static (string ResourcesJson, string ItemIdsJson, string ResourceUrisJson)
         CreateResourceDeclarations(int count, string sourcePath)

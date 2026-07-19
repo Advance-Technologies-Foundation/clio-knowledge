@@ -1,14 +1,10 @@
 {
+  "$schema": "./schemas/v1/knowledge-repository.schema.json",
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
   "libraryVersion": "1.2.0",
   "sequence": 4,
-  "issuedAt": "2026-07-19T00:00:00Z",
-  "source": {
-    "repository": "Advance-Technologies-Foundation/clio-knowledge",
-    "commit": "b057b64040663087cad53ad00355616426d1cc81"
-  },
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -152,10 +148,6 @@
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities"
     ]
-  },
-  "signature": {
-    "algorithm": "ECDSA-P256-SHA256",
-    "keyId": "p1-test"
   },
   "resources": [
     {

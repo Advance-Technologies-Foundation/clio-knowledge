@@ -35,7 +35,10 @@ Build the current canonical guidance bundle from the repository root with:
 dotnet run --project automation/Clio.Knowledge.Bundle -- `
   bundle-source.json `
   fixtures/keys/p1-test-private.pem `
-  artifacts/knowledge-bundle.zip
+  artifacts/knowledge-bundle.zip `
+  p1-test `
+  Advance-Technologies-Foundation/clio-knowledge `
+  (git rev-parse HEAD)
 ```
 
 The P1 key is disposable test material and must not be reused for production publication.
