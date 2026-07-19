@@ -1,0 +1,36 @@
+schemaVersion: 0
+id: atf.creatio.google-pubsub-reference
+title: Creatio Google Pub/Sub reference
+status: published
+primaryUseCase:
+  id: creatio-google-pubsub-integration
+  summary: Implement a complete Google Pub/Sub request, reply, publisher, and streaming-subscriber integration in Creatio.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-google-pubsub-reference
+  revision: a2b1a3454f7f74d96cc038c69db30738ea302990
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/AtfGooglePubSubReference
+  unitTests: tests/AtfGooglePubSubReference
+  endToEndTests: tests/AtfGooglePubSubReference.E2E
+  testingConsole: tools/GooglePubSubRoundTrip.Console
+supportingCapabilities:
+  - creatio-application-lifecycle
+  - google-pubsub-request-reply
+  - streaming-message-subscriber
+  - native-library-lifecycle
+  - creatio-rest-web-services
+  - esq-data-access
+  - unit-testing
+  - end-to-end-testing
+  - load-testing-console
+compatibility:
+  status: example-declared
+  details: See the pinned repository README and workspace configuration.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - This is an agent reference example, not a production package or universal policy.
+  - Registration does not promote every implementation choice to canonical Clio guidance.

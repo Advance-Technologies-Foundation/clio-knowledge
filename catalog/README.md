@@ -11,6 +11,7 @@ Registration makes an example discoverable. Validation, vetting, and recommendat
 | Example | Primary use case | Status |
 |---|---|---|
 | [Creatio Kafka reference](reference-examples/creatio-kafka.yaml) | Kafka integration with Creatio | Published |
+| [Creatio Google Pub/Sub reference](reference-examples/creatio-google-pubsub.yaml) | Google Pub/Sub integration with Creatio | Published |
 
 These v0 entries are intentionally small and human-readable while the catalog schema is still experimental. Each
 entry pins an immutable repository revision and identifies useful starting points for coding agents.
