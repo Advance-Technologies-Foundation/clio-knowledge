@@ -32,8 +32,6 @@ This proves the native .NET discovery/download/extraction path and exact payload
 does not yet prove remote-feed authentication, feed-specific signature enforcement, or offline
 global-package-cache behavior; those remain explicit follow-up experiments.
 
-The current package metadata carries the repository-root `knowledge-bundle.zip` for the v1
-`com.creatio.clio` library. Git reads that ready artifact directly, and NuGet packages those exact
-bytes at `content/knowledge-bundle.zip` under the stable transport version `1.1.0`, matching Clio's
-NuGet catalog and extraction contract. Future transport adapters must deliver the same signed ZIP
-without executing repository code.
+The package build generates the v1 `com.creatio.clio` bundle into its intermediate output directory
+and packages it at `content/knowledge-bundle.zip` under transport version `1.2.0`. Git does not use
+that archive; it reads the checked-out repository directly. Generated ZIP files are never committed.

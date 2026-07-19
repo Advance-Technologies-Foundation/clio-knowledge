@@ -35,7 +35,7 @@ Build the current canonical guidance bundle from the repository root with:
 dotnet run --project automation/Clio.Knowledge.Bundle -- `
   bundle-source.json `
   fixtures/keys/p1-test-private.pem `
-  knowledge-bundle.zip
+  artifacts/knowledge-bundle.zip
 ```
 
 The P1 key is disposable test material and must not be reused for production publication.
@@ -47,11 +47,9 @@ release version and must equal the stable NuGet package version when the same ar
 through NuGet. Each item has one exact `docs://knowledge/<library-id>/<item-id>` URI plus optional
 signed `legacyUris`; aliases are compatibility metadata and are not eligible as canonical identity.
 
-`knowledge-bundle.zip` is the Git transport artifact contract. Retrieval must read it directly and
-must not execute this builder. After the one signing build, copy the same artifact bytes to
-`fixtures/bundles/clio-knowledge-v1/valid.zip`; the distribution project packages the root artifact
-directly. Do not build the root and fixture independently because detached ECDSA signatures are not
-byte-deterministic.
+Git transport does not use this builder; it reads the repository manifest and source files directly.
+The NuGet distribution project invokes the builder into its intermediate output directory while
+packing. Generated ZIP files are build artifacts and must not be committed.
 
 ## NuGet runtime spike
 

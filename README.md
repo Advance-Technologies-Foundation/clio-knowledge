@@ -8,8 +8,8 @@ The intended result is that correcting an article, publishing a safety advisory,
 
 ## Status
 
-Content migration is active. The first canonical articles live under `guidance/mcp/guides/` and the
-root `bundle-source.json` builds them into the v1 library-scoped signed bundle.
+Content migration is active. Canonical articles live under `guidance/mcp/guides/` and the root
+`bundle-source.json` publishes the complete direct-source catalog consumed by Git installations.
 
 The remote publication, production signing, and automatic Clio update path remain under review for
 the Monday architecture decision. Do not treat content as released Clio guidance until it is included
@@ -45,13 +45,12 @@ It is not intended to contain:
 | [`schemas/`](schemas/README.md) | Machine-readable contracts for articles, advisories, and catalog entries. |
 | [`automation/`](automation/README.md) | Validation, deterministic packaging, and publication. |
 | [`bundle-source.json`](bundle-source.json) | Canonical library, generation, item/topic, URI, compatibility, and source mapping. |
-| [`knowledge-bundle.zip`](knowledge-bundle.zip) | Ready signed v1 artifact consumed directly by Git transport without executing repository code. |
 
 Complete examples remain in independent repositories. This repository records their immutable source revision, compatibility, validation evidence, and relationship to guidance.
 
 ## Design principles
 
-1. **One delivery contract.** Published knowledge content and conformance fixtures use the same bundle format. Clio contains no embedded knowledge content.
+1. **One source contract.** Git reads the human-readable repository directly; packaging transports may generate delivery artifacts without committing them. Clio contains no embedded knowledge content.
 2. **Stable identifiers.** Article, capability, advisory, and example IDs remain stable while their content evolves.
 3. **Immutable activation.** A source may follow a Git branch, but Clio serves only a verified bundle generation with a signed monotonic sequence and recorded resolved commit.
 4. **Evidence over assertion.** Prescriptive behavioral claims identify the source, test, lab, or version boundary that supports them.
@@ -89,9 +88,9 @@ mismatch, duplicate item, duplicate route or alias, and duplicate topic/role pai
 Logical selection policy belongs to Clio and operator configuration. A library publishes identity,
 content, compatibility, and provenance; it does not publish its own priority or override rights.
 
-Git transport reads the ready repository-root `knowledge-bundle.zip`. It must never run the builder
-or another repository script while retrieving knowledge. Publication automation generates the root
-artifact once; the committed v1 conformance fixture and NuGet payload retain those exact bytes.
+Git transport clones or fast-forward-updates this repository and reads `bundle-source.json` plus each
+declared `sourcePath` directly. It does not execute repository scripts. NuGet may generate a signed
+delivery archive during packaging, but generated ZIP files are never committed to this repository.
 
 ## Contributing
 

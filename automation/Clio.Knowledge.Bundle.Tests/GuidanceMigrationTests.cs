@@ -122,8 +122,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(3,
-                because: "the reference catalog expands the initial guidance-only v1 sequence-two generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(4,
+                because: "the complete migrated guidance catalog follows the reference-example generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Select(resource => $"{resource.GetProperty("topicId").GetString()}|{resource.GetProperty("role").GetString()}")
@@ -137,26 +137,17 @@ public sealed class GuidanceMigrationTests
             resources.Where(resource => resource.GetProperty("role").GetString() == "guidance")
                 .Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
                     because: "every currently migrated v0 guidance route remains available as signed transition metadata");
+            resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(60,
+                because: "every guidance article merged into the repository must be published by the manifest");
             result.Manifest.Resources.Select(resource => resource.ItemId).Should().Equal(
                 resources.Select(resource => resource.GetProperty("itemId").GetString())
                     .OrderBy(itemId => itemId, StringComparer.Ordinal),
                 because: "the builder emits the real repository inventory in deterministic item order");
-            string rootArtifactPath = Path.Combine(repositoryRoot, "knowledge-bundle.zip");
-            string fixturePath = Path.Combine(repositoryRoot, "fixtures/bundles/clio-knowledge-v1/valid.zip");
-            File.ReadAllBytes(fixturePath).Should().Equal(File.ReadAllBytes(rootArtifactPath),
-                because: "the v1 fixture must preserve the exact signed artifact consumed by Git transport");
-            using ZipArchive rootArtifact = ZipFile.OpenRead(rootArtifactPath);
-            byte[] artifactManifest = ReadEntry(rootArtifact, "manifest.json");
-            artifactManifest.Should().Equal(result.ManifestBytes,
-                because: "the ready root artifact must contain the current deterministic manifest");
-            key.VerifyData(artifactManifest, ReadEntry(rootArtifact, "manifest.sig"), HashAlgorithmName.SHA256)
-                .Should().BeTrue(
-                    because: "the ready root artifact must retain a valid detached signature over its exact manifest bytes");
             File.ReadAllText(Path.Combine(
                     repositoryRoot,
                     "distribution/Clio.Knowledge.Package/Clio.Knowledge.Package.csproj"))
-                .Should().Contain("..\\..\\knowledge-bundle.zip",
-                    because: "NuGet distribution must package the same root artifact rather than an independently signed copy");
+                .Should().Contain("GeneratedBundlePath",
+                    because: "NuGet may generate its delivery archive without committing ZIP artifacts to the Git repository");
         }
         finally
         {
