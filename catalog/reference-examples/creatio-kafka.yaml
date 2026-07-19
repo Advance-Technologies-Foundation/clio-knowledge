@@ -1,0 +1,36 @@
+schemaVersion: 0
+id: atf.creatio.kafka-reference
+title: Creatio Kafka reference
+status: published
+primaryUseCase:
+  id: creatio-kafka-integration
+  summary: Implement a complete Kafka request, reply, notification, and background-consumer integration in Creatio.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-kafka-reference
+  revision: a1770613923ed48bea547a67be466e663feea1ef
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/AtfKafkaReference
+  unitTests: tests/AtfKafkaReference
+  endToEndTests: tests/AtfKafkaReference.IntegrationTests
+  testingConsole: tools/KafkaRoundTrip.Console
+supportingCapabilities:
+  - creatio-application-lifecycle
+  - kafka-request-reply
+  - kafka-notification-publishing
+  - background-message-consumers
+  - native-library-lifecycle
+  - creatio-rest-web-services
+  - unit-testing
+  - end-to-end-testing
+  - load-testing-console
+compatibility:
+  status: example-declared
+  details: See the pinned repository README and workspace configuration.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - This is an agent reference example, not a production package or universal policy.
+  - Registration does not promote every implementation choice to canonical Clio guidance.
