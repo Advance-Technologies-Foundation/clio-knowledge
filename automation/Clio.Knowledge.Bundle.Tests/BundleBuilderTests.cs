@@ -177,6 +177,60 @@ public sealed class BundleBuilderTests
                 because: "logical selection must yield at most one eligible item per role from a library");
     }
 
+    [TestCase("guidance", "catalog/sample.md")]
+    [TestCase("advisory", "guidance/sample.md")]
+    [TestCase("capability", "advisories/sample.md")]
+    [TestCase("reference-example", "capabilities/sample.md")]
+    [Description("Rejects a resource whose source directory does not match its semantic role.")]
+    public void Build_ShouldRejectSourcePath_WhenRoleUsesAnotherCanonicalRoot(string role, string sourcePath)
+    {
+        // Arrange
+        string manifestPath = WriteSource($$"""
+			[
+			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "{{role}}", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "{{sourcePath}}", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            manifestPath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*must use a safe source path under*",
+                because: "a role must only publish content from its canonical repository directory");
+    }
+
+    [Test]
+    [Description("Rejects a source path longer than the public repository schema allows.")]
+    public void Build_ShouldRejectSourcePath_WhenPathExceedsSchemaLengthLimit()
+    {
+        // Arrange
+        string overlongPath = "guidance/" + new string('a', 504);
+        string manifestPath = WriteSource($$"""
+			[
+			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "{{overlongPath}}", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            manifestPath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*must use a safe source path under*",
+                because: "the producer must enforce the same 512-character bound as its public schema");
+    }
+
     [Test]
     [Description("Rejects legacy v0 source descriptors from the canonical v1 builder.")]
     public void Build_ShouldRejectLegacyContract_WhenCanonicalIdentityIsMissing()
@@ -475,6 +529,15 @@ public sealed class BundleBuilderTests
         string resourceUrisJson = "[\"docs://knowledge/com.example.knowledge/guide-a\"]",
         string clioMax = "8.1.999")
     {
+        string guidanceDirectory = Path.Combine(_directory, "guidance");
+        Directory.CreateDirectory(guidanceDirectory);
+        foreach (string file in Directory.EnumerateFiles(_directory))
+        {
+            File.Copy(file, Path.Combine(guidanceDirectory, Path.GetFileName(file)), overwrite: true);
+        }
+        resourcesJson = resourcesJson
+            .Replace("\"sourcePath\": \"a.md\"", "\"sourcePath\": \"guidance/a.md\"", StringComparison.Ordinal)
+            .Replace("\"sourcePath\": \"b.md\"", "\"sourcePath\": \"guidance/b.md\"", StringComparison.Ordinal);
         string sourcePath = Path.Combine(_directory, "bundle-source.json");
         File.WriteAllText(sourcePath, $$"""
 			{
@@ -507,6 +570,9 @@ public sealed class BundleBuilderTests
     private static (string ResourcesJson, string ItemIdsJson, string ResourceUrisJson)
         CreateResourceDeclarations(int count, string sourcePath)
     {
+        sourcePath = sourcePath.Contains('/')
+            ? sourcePath
+            : $"guidance/{sourcePath}";
         var resources = Enumerable.Range(0, count).Select(index => new
         {
             itemId = $"guide-{index}",
