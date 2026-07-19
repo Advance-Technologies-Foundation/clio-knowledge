@@ -11,9 +11,10 @@ dotnet run --project automation/Clio.Knowledge.Bundle -- `
 Copy-Item knowledge-bundle.zip fixtures/bundles/clio-knowledge-v1/valid.zip
 ```
 
-The manifest declares library `com.creatio.clio` at sequence 2, following the implicit v0 sequence
-1 generation. It carries exact namespaced item routes, logical topics and roles, and signed legacy
-URI aliases. Consumers trust only `p1-test-public.pem`. The committed
+The manifest declares library `com.creatio.clio` at sequence 3, following the implicit v0 sequence
+1 generation and the initial guidance-only v1 sequence 2 generation. It carries exact namespaced
+item routes, logical topics and roles, signed legacy URI aliases, and the signed reference-example
+catalog. Consumers trust only `p1-test-public.pem`. The committed
 private key is test material, not a production publishing credential.
 
 The older `fixtures/bundles/esq-v0/valid.zip` remains immutable compatibility evidence for the

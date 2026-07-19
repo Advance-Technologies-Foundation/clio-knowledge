@@ -34,6 +34,6 @@ global-package-cache behavior; those remain explicit follow-up experiments.
 
 The current package metadata carries the repository-root `knowledge-bundle.zip` for the v1
 `com.creatio.clio` library. Git reads that ready artifact directly, and NuGet packages those exact
-bytes at `content/knowledge-bundle.zip` under the stable transport version `1.0.0`, matching Clio's
+bytes at `content/knowledge-bundle.zip` under the stable transport version `1.1.0`, matching Clio's
 NuGet catalog and extraction contract. Future transport adapters must deliver the same signed ZIP
 without executing repository code.

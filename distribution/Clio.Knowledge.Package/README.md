@@ -11,7 +11,7 @@ key is deliberately not shipped in this package.
 
 The packed payload is the repository-root `knowledge-bundle.zip`, byte-for-byte. It is the same
 ready signed artifact consumed by Git transport and copied into the canonical v1 fixture. The
-stable `1.0.0` transport version and exact inner path match Clio's NuGet discovery and extraction
+stable `1.1.0` transport version and exact inner path match Clio's NuGet discovery and extraction
 contract.
 
 This POC artifact is signed by a publicly committed disposable test key. Packing is blocked by

@@ -39,8 +39,8 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Verifies that publication reads only canonical human-authored guidance rather than frozen oracle fixtures.")]
-    public void BundleSource_ShouldPublishOnlyCanonicalGuidanceFiles()
+    [Description("Verifies that publication reads only canonical human-authored knowledge rather than frozen oracle fixtures.")]
+    public void BundleSource_ShouldPublishOnlyCanonicalKnowledgeFiles()
     {
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
@@ -54,9 +54,11 @@ public sealed class GuidanceMigrationTests
             .ToArray();
 
         // Assert
-        sourcePaths.Should().NotBeEmpty(because: "a published bundle must contain guidance resources");
-        sourcePaths.Should().OnlyContain(path => path.StartsWith("guidance/", StringComparison.Ordinal),
-            because: "developers must publish canonical guidance rather than immutable oracle fixtures");
+        sourcePaths.Should().NotBeEmpty(because: "a published bundle must contain knowledge resources");
+        sourcePaths.Should().OnlyContain(path =>
+                path.StartsWith("guidance/", StringComparison.Ordinal)
+                || path.StartsWith("catalog/", StringComparison.Ordinal),
+            because: "developers must publish canonical guidance or catalog content rather than immutable oracle fixtures");
     }
 
     [Test]
@@ -120,8 +122,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(2,
-                because: "v1 must advance beyond the implicit com.creatio.clio v0 sequence-one generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(3,
+                because: "the reference catalog expands the initial guidance-only v1 sequence-two generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Select(resource => $"{resource.GetProperty("topicId").GetString()}|{resource.GetProperty("role").GetString()}")
@@ -132,8 +134,9 @@ public sealed class GuidanceMigrationTests
                         libraryId,
                         resource.GetProperty("itemId").GetString()!),
                 because: "namespaced lookup must be exact and derivable without transport state");
-            resources.Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
-                because: "every currently migrated v0 route remains available as signed transition metadata");
+            resources.Where(resource => resource.GetProperty("role").GetString() == "guidance")
+                .Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
+                    because: "every currently migrated v0 guidance route remains available as signed transition metadata");
             result.Manifest.Resources.Select(resource => resource.ItemId).Should().Equal(
                 resources.Select(resource => resource.GetProperty("itemId").GetString())
                     .OrderBy(itemId => itemId, StringComparer.Ordinal),

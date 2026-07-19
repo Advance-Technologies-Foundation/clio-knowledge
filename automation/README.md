@@ -39,8 +39,8 @@ dotnet run --project automation/Clio.Knowledge.Bundle -- `
 ```
 
 The P1 key is disposable test material and must not be reused for production publication.
-`bundle-source.json` must reference files under `guidance/`. Files under `fixtures/oracles/` are
-immutable migration evidence and must never become the publication source.
+`bundle-source.json` must reference canonical files under `guidance/` or `catalog/`. Files under
+`fixtures/oracles/` are immutable migration evidence and must never become the publication source.
 
 The v1 manifest identity is `(libraryId, sequence, bundleDigest)`. `libraryVersion` is the publisher
 release version and must equal the stable NuGet package version when the same artifact is distributed
