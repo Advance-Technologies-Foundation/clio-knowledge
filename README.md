@@ -41,6 +41,7 @@ It is not intended to contain:
 | Path | Purpose |
 |---|---|
 | [`guidance/`](guidance/README.md) | Canonical human-readable guidance articles. |
+| [`references/`](references/README.md) | Supporting articles linked by primary guidance without becoming bare `get-guidance` topics. |
 | [`advisories/`](advisories/README.md) | High-visibility safety rules, limitations, and urgent corrections. |
 | [`capabilities/`](capabilities/README.md) | Controlled identifiers for features, patterns, and architectural choices. |
 | [`catalog/`](catalog/README.md) | Trusted metadata pointing to independently versioned reference repositories. |

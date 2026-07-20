@@ -302,6 +302,56 @@ public sealed class BundleBuilderTests
     }
 
     [Test]
+    [Description("Accepts the dedicated reference role so supporting articles stay outside bare guidance discovery.")]
+    public void Build_ShouldAcceptReferenceRole_WhenSupportingArticleIsValid()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "supporting reference\n", Encoding.UTF8);
+        string sourcePath = WriteSource("""
+			[
+			  { "itemId": "reference.guide-a.detail", "title": "Guide A detail", "description": "Supporting detail for guide A.", "topicId": "creatio.reference.guide-a.detail", "role": "reference", "uri": "docs://knowledge/com.example.knowledge/reference.guide-a.detail", "legacyUris": ["docs://mcp/references/guide-a/detail"], "sourcePath": "a.md", "bundlePath": "resources/reference.guide-a.detail.md", "mediaType": "text/markdown" }
+			]
+			""",
+            "[\"reference.guide-a.detail\"]",
+            "[\"docs://knowledge/com.example.knowledge/reference.guide-a.detail\"]");
+        string outputPath = Path.Combine(_directory, "bundle.zip");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        BundleBuildResult result = new BundleBuilder().Build(sourcePath, outputPath, key, Publication());
+
+        // Assert
+        result.Manifest.Resources.Should().ContainSingle(resource => resource.Role == "reference",
+            because: "the delivery manifest must preserve the role that keeps supporting articles out of get-guidance names");
+    }
+
+    [Test]
+    [Description("Rejects publisher-defined roles that the v1 consumer cannot interpret consistently.")]
+    public void Build_ShouldRejectUnknownRole_WhenRoleIsSyntacticallyStable()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "unknown role\n", Encoding.UTF8);
+        string sourcePath = WriteSource("""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "publisher-extension", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            sourcePath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*role is not supported*",
+                because: "producer and consumer must share one closed role vocabulary");
+    }
+
+    [Test]
     [Description("Rejects legacy v0 source descriptors from the canonical v1 builder.")]
     public void Build_ShouldRejectLegacyContract_WhenCanonicalIdentityIsMissing()
     {

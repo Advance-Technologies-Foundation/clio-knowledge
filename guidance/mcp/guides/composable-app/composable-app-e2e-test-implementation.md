@@ -23,7 +23,7 @@ If target repo URL is not provided, default to `https://creatio.ghe.com/engineer
 
 ## Workflow Overview
 
-The detailed step-by-step flow with exact commands lives in `references/flow.md`. The readiness check command matrix lives in `references/environment-readiness.md`. Read those files when executing each step.
+The detailed step-by-step flow with exact commands lives in `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.flow`. The readiness check command matrix lives in `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.environment-readiness`. Read those files when executing each step.
 
 ### 0. Application testability preflight
 
@@ -38,11 +38,11 @@ Do not start any parallel analysis/implementation work before Step 0 passes.
 
 ### 1. Analyze source repository
 
-Resolve context source (Jira URL/key or manual tested-case description). Inspect ticket/commits/diffs to extract testable behavior. Build implementation targets. See `references/flow.md` for details.
+Resolve context source (Jira URL/key or manual tested-case description). Inspect ticket/commits/diffs to extract testable behavior. Build implementation targets. See `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.flow` for details.
 
 ### 2. Bootstrap target E2E repository
 
-Search one level above source repo. Clone or pull + setup. Verify TestKit docs exist. See `references/flow.md` for exact commands.
+Search one level above source repo. Clone or pull + setup. Verify TestKit docs exist. See `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.flow` for exact commands.
 
 ### 3. Test scope selection
 
@@ -50,7 +50,7 @@ Default: `Extended`. Override only if user explicitly requested `Basic` or `Full
 
 ### 4. Stand readiness gate
 
-Use stand URL from `.env`. Run readiness checks via Clio and SQL probes per `references/environment-readiness.md`. If readiness fails, stop and emit blocker details -- do not auto-install licenses or test users.
+Use stand URL from `.env`. Run readiness checks via Clio and SQL probes per `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.environment-readiness`. If readiness fails, stop and emit blocker details -- do not auto-install licenses or test users.
 
 ### 5. Implement scenarios and tests
 
@@ -77,8 +77,8 @@ Return a structured report covering: context source, repository bootstrap, readi
 
 ## Reference Files
 
-- `references/flow.md` -- detailed step-by-step workflow with commands
-- `references/environment-readiness.md` -- readiness check command matrix
-- `references/sources.md` -- fixed artifact sources
+- `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.flow` -- detailed step-by-step workflow with commands
+- `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.environment-readiness` -- readiness check command matrix
+- `docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.sources` -- fixed artifact sources
 - `.env.example` -- environment configuration template
 - `scripts/validate_app_testability.py` -- preflight validation script

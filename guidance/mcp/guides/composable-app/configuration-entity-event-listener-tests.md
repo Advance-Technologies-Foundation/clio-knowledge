@@ -62,9 +62,9 @@ public class AccountAnniversaryEntityEventListenerTests : BaseConfigurationTestF
 ## References
 
 Read only what you need:
-- `references/test-patterns.md`: fixture shape, entity creation, helper rebinding, and event invocation examples
-- `references/validation-test-patterns.md`: how to test `entity.Validating` handlers and validation messages
-- `references/review-checklist.md`: review points and common listener-test defects
+- `docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.test-patterns`: fixture shape, entity creation, helper rebinding, and event invocation examples
+- `docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.validation-test-patterns`: how to test `entity.Validating` handlers and validation messages
+- `docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.review-checklist`: review points and common listener-test defects
 
 ## Build And Verify
 

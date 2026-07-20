@@ -57,8 +57,9 @@ public sealed class GuidanceMigrationTests
         sourcePaths.Should().NotBeEmpty(because: "a published bundle must contain knowledge resources");
         sourcePaths.Should().OnlyContain(path =>
                 path.StartsWith("guidance/", StringComparison.Ordinal)
+                || path.StartsWith("references/", StringComparison.Ordinal)
                 || path.StartsWith("catalog/", StringComparison.Ordinal),
-            because: "developers must publish canonical guidance or catalog content rather than immutable oracle fixtures");
+            because: "developers must publish canonical guidance, references, or catalog content rather than immutable oracle fixtures");
     }
 
     [Test]
@@ -165,8 +166,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(6,
-                because: "per-resource feature gating follows the mandatory guidance migration generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(7,
+                because: "restoring the supporting reference articles creates a new immutable knowledge generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>
@@ -186,6 +187,8 @@ public sealed class GuidanceMigrationTests
                     because: "every currently migrated v0 guidance route remains available as signed transition metadata");
             resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(63,
                 because: "every guidance article merged into the repository must be published by the manifest");
+            resources.Count(resource => resource.GetProperty("role").GetString() == "reference").Should().Be(43,
+                because: "supporting references must not appear as bare get-guidance article names");
             result.Manifest.Resources.Select(resource => resource.ItemId).Should().Equal(
                 resources.Select(resource => resource.GetProperty("itemId").GetString())
                     .OrderBy(itemId => itemId, StringComparer.Ordinal),

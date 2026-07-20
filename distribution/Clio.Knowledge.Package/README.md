@@ -11,7 +11,7 @@ key is deliberately not shipped in this package.
 
 The packed payload is generated into the package project's intermediate output directory. Git
 transport reads repository source files directly and does not consume this archive. The stable
-`1.4.0` transport version and exact inner path match Clio's NuGet discovery and extraction contract.
+`1.5.0` transport version and exact inner path match Clio's NuGet discovery and extraction contract.
 
 This POC artifact is signed by a publicly committed disposable test key. Packing is blocked by
 default to prevent accidental publication. An explicitly approved internal experiment must opt in

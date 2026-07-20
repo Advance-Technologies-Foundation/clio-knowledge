@@ -116,7 +116,7 @@ When using this skill, provide:
 
 ## References
 
-- `references/creatio-iframe-section-template.md`
+- `docs://knowledge/com.creatio.clio/reference.creatio-freedom-iframe-section.creatio-iframe-section-template`
 - Radar working example:
   - `packages/Radar/Schemas/RADAR_ListPage/RADAR_ListPage.js`
   - `packages/Radar/Data/SysModule_RADAR/data.json`

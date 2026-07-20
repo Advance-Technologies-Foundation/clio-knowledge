@@ -52,7 +52,7 @@ public sealed class Mig2PageSchemaMigrationTests
     ];
 
     [Test]
-    [Description("Verifies that every MIG2 canonical article is byte-identical to its frozen Clio oracle.")]
+    [Description("Verifies that every MIG2 canonical article differs from its frozen Clio oracle only by canonicalized reference links.")]
     public void CanonicalPageSchemaGuidance_ShouldMatchFrozenClioOracleByteForByte()
     {
         // Arrange
@@ -60,15 +60,16 @@ public sealed class Mig2PageSchemaMigrationTests
 
         // Act
         string[] differences = Articles
-            .Where(article => !ReadBytes(repositoryRoot, article.CanonicalPath)
-                .SequenceEqual(ReadBytes(repositoryRoot,
-                    $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md")))
+            .Where(article => !string.Equals(
+                ReferenceLinkMigration.NormalizeToFrozenLinkText(ReadText(repositoryRoot, article.CanonicalPath)),
+                ReadText(repositoryRoot, $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md"),
+                StringComparison.Ordinal))
             .Select(article => article.Id)
             .ToArray();
 
         // Assert
         differences.Should().BeEmpty(
-            because: "the initial MIG2 migration must preserve the exact UTF-8 and LF bytes served by Clio");
+            because: "the reference migration changes only links that now target independently published articles");
     }
 
     [Test]
@@ -122,6 +123,11 @@ public sealed class Mig2PageSchemaMigrationTests
 
     private static byte[] ReadBytes(string repositoryRoot, string relativePath) =>
         File.ReadAllBytes(Path.Combine(
+            repositoryRoot,
+            relativePath.Replace('/', Path.DirectorySeparatorChar)));
+
+    private static string ReadText(string repositoryRoot, string relativePath) =>
+        File.ReadAllText(Path.Combine(
             repositoryRoot,
             relativePath.Replace('/', Path.DirectorySeparatorChar)));
 

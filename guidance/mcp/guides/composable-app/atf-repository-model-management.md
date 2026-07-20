@@ -33,9 +33,9 @@
 
 Read only what you need:
 
-- `references/model-graph-selection.md`: choosing the minimal schema and member graph for the task
-- `references/generation-workflow.md`: `add-item-model` usage, folder constraints, fallback behavior, and broad-generation checks
-- `references/collision-and-cleanup.md`: duplicate models, naming collisions, namespace ambiguity, and cleanup decisions
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.model-graph-selection`: choosing the minimal schema and member graph for the task
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.generation-workflow`: `add-item-model` usage, folder constraints, fallback behavior, and broad-generation checks
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.collision-and-cleanup`: duplicate models, naming collisions, namespace ambiguity, and cleanup decisions
 
 ## What To Report Back
 

@@ -69,9 +69,9 @@ public class MyTests : MyTestsBase {
 ## References
 
 Read only what you need:
-- `references/mock-settings-attribute.md`: when and why to require `[MockSettings(RequireMock.All)]`
-- `references/setup-sys-settings-pattern.md`: exact `SetupSysSettings()` and `FakeSysSettingsEngine` pattern
-- `references/coverage-checklist.md`: minimum expectations for sys-setting test coverage
+- `docs://knowledge/com.creatio.clio/reference.sys-setting-tests.mock-settings-attribute`: when and why to require `[MockSettings(RequireMock.All)]`
+- `docs://knowledge/com.creatio.clio/reference.sys-setting-tests.setup-sys-settings-pattern`: exact `SetupSysSettings()` and `FakeSysSettingsEngine` pattern
+- `docs://knowledge/com.creatio.clio/reference.sys-setting-tests.coverage-checklist`: minimum expectations for sys-setting test coverage
 
 ## Build And Verify
 

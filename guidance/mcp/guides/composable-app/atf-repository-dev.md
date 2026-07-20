@@ -20,7 +20,7 @@
 - If a task creates, extends, or selects repository models, apply `atf-repository-model-management` first instead of handcrafting models here.
 - Keep repository creation close to composition root boundaries. Business logic should depend on injected abstractions, not construct remote providers ad hoc inside deep domain code.
 - Match the provider pattern to the host application. Package code, tests, and external utilities may construct or inject providers differently, but feature logic should still depend on repository abstractions rather than on ad hoc transport details.
-- Stay within the supported `Models<T>()` query surface documented in `references/query-patterns.md`.
+- Stay within the supported `Models<T>()` query surface documented in `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.query-patterns`.
 - `RemoteDataProvider` is not `IDisposable`. Do not wrap it in `using` or `await using`.
 - For small remote read-only reports, prefer tiny hand-authored models over broad generated model sets when the task only needs a few scalar fields or one clearly defined reverse relation.
 - When the feature reads child rows from an already loaded master model, prefer a `DetailProperty` relation over issuing a second top-level query and grouping client-side.
@@ -41,18 +41,18 @@
 
 Read only what you need:
 
-- `references/package-and-version.md`: package acquisition rules, version checks, and validating the current `IAppDataContext` API surface
-- `references/models-and-relations.md`: minimal model pattern plus direct, reverse, and many-to-many relation mapping
-- `references/provider-and-context.md`: local provider creation, remote provider creation, DI guidance, and standalone console-app patterns
-- `references/query-patterns.md`: querying with `Models<T>()`, allowed LINQ surface, filtering, ordering, paging, and loading tracked models
-- `references/write-operations.md`: insert, update, delete, and save-result handling
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version`: package acquisition rules, version checks, and validating the current `IAppDataContext` API surface
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations`: minimal model pattern plus direct, reverse, and many-to-many relation mapping
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context`: local provider creation, remote provider creation, DI guidance, and standalone console-app patterns
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.query-patterns`: querying with `Models<T>()`, allowed LINQ surface, filtering, ordering, paging, and loading tracked models
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.write-operations`: insert, update, delete, and save-result handling
 
 Suggested loading order:
 
-1. `references/models-and-relations.md` when you need to create or review model mappings.
-2. `references/provider-and-context.md` when you need local DI setup or remote utility/console setup.
-3. `references/query-patterns.md` or `references/write-operations.md` only for the operation style you are implementing.
-4. `references/package-and-version.md` only when package acquisition or API-surface validation is relevant.
+1. `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations` when you need to create or review model mappings.
+2. `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context` when you need local DI setup or remote utility/console setup.
+3. `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.query-patterns` or `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.write-operations` only for the operation style you are implementing.
+4. `docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version` only when package acquisition or API-surface validation is relevant.
 
 ## Review Checklist
 

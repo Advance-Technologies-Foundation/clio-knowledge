@@ -30,6 +30,10 @@ public sealed class BundleBuilder
     private static readonly Regex RolePattern = new(
         "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
         RegexOptions.CultureInvariant);
+    private static readonly HashSet<string> AllowedRoles = new(StringComparer.Ordinal)
+    {
+        "guidance", "reference", "advisory", "capability", "reference-example"
+    };
     private static readonly Regex CompleteCommitPattern = new(
         "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$",
         RegexOptions.CultureInvariant);
@@ -211,10 +215,12 @@ public sealed class BundleBuilder
             {
                 throw new InvalidDataException($"Resource '{resource.ItemId}' must declare a source path.");
             }
-            if (string.IsNullOrWhiteSpace(resource.Role) || !RolePattern.IsMatch(resource.Role))
+            if (string.IsNullOrWhiteSpace(resource.Role)
+                || !RolePattern.IsMatch(resource.Role)
+                || !AllowedRoles.Contains(resource.Role))
             {
                 throw new InvalidDataException(
-                    $"Resource '{resource.ItemId}' role must be a lowercase stable role identifier.");
+                    $"Resource '{resource.ItemId}' role is not supported by the v1 repository contract.");
             }
             string expectedUri = CreateCanonicalUri(source.LibraryId, resource.ItemId);
             if (!string.Equals(resource.Uri, expectedUri, StringComparison.Ordinal))

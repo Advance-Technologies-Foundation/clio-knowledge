@@ -57,10 +57,10 @@ Use void plus Response.OutputStream or return Stream only when transport-level c
 
 References
 Read only what you need:
-- docs://mcp/references/configuration-webservice/dto-patterns: request/response DTO rules and concrete return-type examples
-- docs://mcp/references/configuration-webservice/status-code-patterns: framework-specific status handling and response-style tradeoffs
-- docs://mcp/references/configuration-webservice/composition-root-pattern: package DI registration and thin-service pattern
-- docs://mcp/references/configuration-webservice/manual-runtime-checklist: manual endpoint verification steps after implementation
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice.dto-patterns: request/response DTO rules and concrete return-type examples
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice.status-code-patterns: framework-specific status handling and response-style tradeoffs
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice.composition-root-pattern: package DI registration and thin-service pattern
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice.manual-runtime-checklist: manual endpoint verification steps after implementation
 
 Response Patterns
 Choose one pattern deliberately.
