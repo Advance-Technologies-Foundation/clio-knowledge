@@ -129,6 +129,8 @@
       "additionalProperties": false,
       "required": [
         "itemId",
+        "title",
+        "description",
         "topicId",
         "role",
         "uri",
@@ -139,6 +141,18 @@
       "properties": {
         "itemId": {
           "$ref": "#/$defs/stableId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^\\S(?:.*\\S)?$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "^\\S(?:.*\\S)?$"
         },
         "topicId": {
           "$ref": "#/$defs/stableId"

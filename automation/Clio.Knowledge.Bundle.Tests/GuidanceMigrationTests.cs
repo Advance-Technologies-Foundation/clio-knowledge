@@ -169,6 +169,10 @@ public sealed class GuidanceMigrationTests
                 because: "the complete migrated guidance catalog follows the reference-example generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
+            resources.Should().OnlyContain(resource =>
+                    !string.IsNullOrWhiteSpace(resource.GetProperty("title").GetString())
+                    && !string.IsNullOrWhiteSpace(resource.GetProperty("description").GetString()),
+                because: "every published item must be discoverable without loading its body");
             resources.Select(resource => $"{resource.GetProperty("topicId").GetString()}|{resource.GetProperty("role").GetString()}")
                 .Should().OnlyHaveUniqueItems(
                     because: "one library must not offer ambiguous candidates for the same topic and role");
@@ -186,6 +190,10 @@ public sealed class GuidanceMigrationTests
                 resources.Select(resource => resource.GetProperty("itemId").GetString())
                     .OrderBy(itemId => itemId, StringComparer.Ordinal),
                 because: "the builder emits the real repository inventory in deterministic item order");
+            result.Manifest.Resources.Should().OnlyContain(resource =>
+                    !string.IsNullOrWhiteSpace(resource.Title)
+                    && !string.IsNullOrWhiteSpace(resource.Description),
+                because: "generated delivery manifests must preserve producer-owned discovery metadata");
             File.ReadAllText(Path.Combine(
                     repositoryRoot,
                     "distribution/Clio.Knowledge.Package/Clio.Knowledge.Package.csproj"))

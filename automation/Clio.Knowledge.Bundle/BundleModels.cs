@@ -33,6 +33,8 @@ public sealed record SignatureDescriptor(string Algorithm, string KeyId);
 
 public sealed record SourceResource(
     string ItemId,
+    string Title,
+    string Description,
     string TopicId,
     string Role,
     string Uri,
@@ -56,6 +58,8 @@ public sealed record KnowledgeBundleManifest(
 
 public sealed record BundleResource(
     string ItemId,
+    string Title,
+    string Description,
     string TopicId,
     string Role,
     string Uri,

@@ -199,6 +199,8 @@ public sealed class BundleBuilder
         {
             ValidateStableId(resource.ItemId, "item ID");
             ValidateStableId(resource.TopicId, "topic ID");
+            ValidateDiscoveryText(resource.Title, "title", resource.ItemId, 160);
+            ValidateDiscoveryText(resource.Description, "description", resource.ItemId, 1000);
             if (string.IsNullOrWhiteSpace(resource.SourcePath))
             {
                 throw new InvalidDataException($"Resource '{resource.ItemId}' must declare a source path.");
@@ -268,6 +270,21 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException(
                 $"Every resource {label} must be a lowercase dot-or-hyphen separated stable identifier.");
+        }
+    }
+
+    private static void ValidateDiscoveryText(
+        string value,
+        string label,
+        string itemId,
+        int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value)
+            || value.Length > maxLength
+            || !string.Equals(value, value.Trim(), StringComparison.Ordinal))
+        {
+            throw new InvalidDataException(
+                $"Resource '{itemId}' {label} must be non-empty, trimmed, and at most {maxLength} characters.");
         }
     }
 
@@ -414,6 +431,8 @@ public sealed class BundleBuilder
         publication.Signature,
         resources.Select(resource => new BundleResource(
             resource.Descriptor.ItemId,
+            resource.Descriptor.Title,
+            resource.Descriptor.Description,
             resource.Descriptor.TopicId,
             resource.Descriptor.Role,
             resource.Descriptor.Uri,

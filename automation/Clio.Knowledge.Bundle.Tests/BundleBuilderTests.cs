@@ -37,8 +37,8 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "first\nline\n", Encoding.UTF8);
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-b", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://mcp/guides/b"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "legacyUris": ["docs://mcp/guides/a"], "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://mcp/guides/b"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "legacyUris": ["docs://mcp/guides/a"], "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""",
             "[\"guide-b\", \"guide-a\"]",
@@ -60,6 +60,10 @@ public sealed class BundleBuilderTests
                 "docs://knowledge/com.example.knowledge/guide-a",
                 "docs://knowledge/com.example.knowledge/guide-b"
             ], because: "every exact route must be derived from library and item identity");
+        result.Manifest.Resources.Should().OnlyContain(
+            resource => resource.Title == "Example guidance"
+                && resource.Description == "Example guidance used to validate bundle behavior.",
+            because: "agents need discovery metadata without loading every resource body");
         result.Manifest.Resources.Single(resource => resource.ItemId == "guide-a").LegacyUris.Should()
             .ContainSingle(because: "migrated content keeps one transitional v0 route as signed metadata")
             .Which.Should().Be("docs://mcp/guides/a",
@@ -81,8 +85,8 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "b.md"), "b\n");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-b", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-two", "docs://legacy/b-one"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-two", "docs://legacy/b-one"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""", "[\"guide-b\", \"guide-a\"]",
             "[\"docs://knowledge/com.example.knowledge/guide-b\", \"docs://knowledge/com.example.knowledge/guide-a\"]");
@@ -93,8 +97,8 @@ public sealed class BundleBuilderTests
         BundleBuildResult first = builder.Build(sourcePath, Path.Combine(_directory, "first.zip"), key, Publication());
         sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
-			  { "itemId": "guide-b", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-one", "docs://legacy/b-two"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-one", "docs://legacy/b-two"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
 			]
 			""", "[\"guide-a\", \"guide-b\"]",
             "[\"docs://knowledge/com.example.knowledge/guide-a\", \"docs://knowledge/com.example.knowledge/guide-b\"]");
@@ -114,8 +118,8 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "b.md"), "b");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "legacyUris": ["docs://mcp/guides/same"], "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
-			  { "itemId": "guide-b", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://mcp/guides/same"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "legacyUris": ["docs://mcp/guides/same"], "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://mcp/guides/same"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
 			]
 			""", "[\"guide-a\", \"guide-b\"]",
             "[\"docs://knowledge/com.example.knowledge/guide-a\", \"docs://knowledge/com.example.knowledge/guide-b\"]");
@@ -138,7 +142,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.other.library/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.other.library/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""", resourceUrisJson: "[\"docs://knowledge/com.other.library/guide-a\"]");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -153,6 +157,32 @@ public sealed class BundleBuilderTests
     }
 
     [Test]
+    [Description("Rejects missing or whitespace-only discovery descriptions before publishing a bundle.")]
+    public void Build_ShouldRejectDescription_WhenItIsNotHumanReadable()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
+        string sourcePath = WriteSource("""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": " ", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            sourcePath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*description must be non-empty, trimmed*",
+                because: "a catalog entry must advertise why an agent should load its content");
+    }
+
+    [Test]
     [Description("Rejects two items from one library that compete for the same logical topic and role.")]
     public void Build_ShouldRejectDuplicateTopicRole_WhenLibraryResolutionWouldBeAmbiguous()
     {
@@ -161,8 +191,8 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "b.md"), "b");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.shared", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
-			  { "itemId": "guide-b", "topicId": "creatio.shared", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.shared", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.shared", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
 			]
 			""", "[\"guide-a\", \"guide-b\"]",
             "[\"docs://knowledge/com.example.knowledge/guide-a\", \"docs://knowledge/com.example.knowledge/guide-b\"]");
@@ -185,7 +215,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         string legacyJson = File.ReadAllText(sourcePath)
@@ -210,7 +240,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/../a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/../a.md", "mediaType": "text/markdown" }
 			]
 			""");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -232,7 +262,7 @@ public sealed class BundleBuilderTests
         File.WriteAllBytes(Path.Combine(_directory, "a.md"), [0xC3, 0x28]);
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -254,7 +284,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""", clioMax: "8.1.x");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -276,7 +306,7 @@ public sealed class BundleBuilderTests
         File.WriteAllBytes(Path.Combine(_directory, "a.md"), []);
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         string outputPath = Path.Combine(_directory, "bundle.zip");
@@ -298,7 +328,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -325,7 +355,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
@@ -350,7 +380,7 @@ public sealed class BundleBuilderTests
         File.WriteAllBytes(Path.Combine(_directory, "a.md"), new byte[4 * 1024 * 1024 + 1]);
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         string outputPath = Path.Combine(_directory, "bundle.zip");
@@ -422,7 +452,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         string outputPath = Path.Combine(_directory, "bundle.zip");
@@ -448,7 +478,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "replacement");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-a", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""");
         string outputPath = Path.Combine(_directory, "bundle.zip");
@@ -510,6 +540,8 @@ public sealed class BundleBuilderTests
         var resources = Enumerable.Range(0, count).Select(index => new
         {
             itemId = $"guide-{index}",
+            title = $"Guide {index}",
+            description = $"Example guidance {index} used to validate bundle limits.",
             topicId = $"creatio.guide-{index}",
             role = "guidance",
             uri = $"docs://knowledge/com.example.knowledge/guide-{index}",

@@ -14,13 +14,17 @@ Schemas must remain versioned and backward-compatible where practical. A Clio cl
 [`v1/knowledge-repository.schema.json`](v1/knowledge-repository.schema.json) is the source contract
 for `bundle-source.json` in a trusted Git repository. It deliberately omits repository, commit,
 timestamp, and signature fields: Git supplies provenance and time, while a transport publisher
-supplies any transport-specific signing metadata.
+supplies any transport-specific signing metadata. Every resource owns a concise `title` and
+`description`; consumers use this metadata to advertise and select knowledge before loading the
+resource body.
 
 [`v1/knowledge-bundle.schema.json`](v1/knowledge-bundle.schema.json) is the generated NuGet bundle
 contract. It makes the immutable generation identity explicit with `libraryId`, `libraryVersion`,
 and `sequence`; every resource has an `itemId`, logical `topicId`, `role`, and exact
 `docs://knowledge/<library-id>/<item-id>` route. Optional `legacyUris` are signed transition metadata
-and never replace the canonical identity. Generated source provenance uses a complete 40-character
+and never replace the canonical identity. The producer-owned `title` and `description` are preserved
+in the generated manifest so packaged transports expose the same discovery experience as Git.
+Generated source provenance uses a complete 40-character
 SHA-1 or 64-character SHA-256 Git object ID; abbreviated commit names are not immutable publication
 evidence. The source commit itself supplies the timestamp.
 
