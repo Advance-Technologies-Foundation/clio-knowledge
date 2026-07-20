@@ -33,5 +33,5 @@ does not yet prove remote-feed authentication, feed-specific signature enforceme
 global-package-cache behavior; those remain explicit follow-up experiments.
 
 The package build generates the v1 `com.creatio.clio` bundle into its intermediate output directory
-and packages it at `content/knowledge-bundle.zip` under transport version `1.2.0`. Git does not use
+and packages it at `content/knowledge-bundle.zip` under transport version `1.3.0`. Git does not use
 that archive; it reads the checked-out repository directly. Generated ZIP files are never committed.

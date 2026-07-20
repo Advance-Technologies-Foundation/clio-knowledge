@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.2.0",
-  "sequence": 4,
+  "libraryVersion": "1.3.0",
+  "sequence": 5,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -37,6 +37,7 @@
       "configuration-entity-event-listener-tests",
       "configuration-webservice",
       "configuration-webservice-tests",
+      "core-rules",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
       "dashboard-creation",
@@ -74,6 +75,7 @@
       "process-modeling",
       "related-list",
       "related-page-binding",
+      "routing",
       "run-process-button",
       "server-to-server-oauth",
       "support-mode",
@@ -82,7 +84,8 @@
       "sys-settings",
       "theming",
       "ui-project",
-      "virtual-entities"
+      "virtual-entities",
+      "when-to-use-requests"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
@@ -101,6 +104,7 @@
       "docs://knowledge/com.creatio.clio/configuration-entity-event-listener-tests",
       "docs://knowledge/com.creatio.clio/configuration-webservice",
       "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
+      "docs://knowledge/com.creatio.clio/core-rules",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
       "docs://knowledge/com.creatio.clio/dashboard-creation",
@@ -138,6 +142,7 @@
       "docs://knowledge/com.creatio.clio/process-modeling",
       "docs://knowledge/com.creatio.clio/related-list",
       "docs://knowledge/com.creatio.clio/related-page-binding",
+      "docs://knowledge/com.creatio.clio/routing",
       "docs://knowledge/com.creatio.clio/run-process-button",
       "docs://knowledge/com.creatio.clio/server-to-server-oauth",
       "docs://knowledge/com.creatio.clio/support-mode",
@@ -146,7 +151,8 @@
       "docs://knowledge/com.creatio.clio/sys-settings",
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
-      "docs://knowledge/com.creatio.clio/virtual-entities"
+      "docs://knowledge/com.creatio.clio/virtual-entities",
+      "docs://knowledge/com.creatio.clio/when-to-use-requests"
     ]
   },
   "resources": [
@@ -366,6 +372,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/configuration-webservice-tests.md",
       "bundlePath": "resources/configuration-webservice-tests.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "core-rules",
+      "title": "Core rules",
+      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
+      "topicId": "creatio.core-rules",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/core-rules",
+      "legacyUris": [
+        "docs://mcp/guides/core-rules"
+      ],
+      "sourcePath": "guidance/mcp/guides/core-rules.md",
+      "bundlePath": "resources/core-rules.md",
       "mediaType": "text/plain"
     },
     {
@@ -887,6 +907,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "routing",
+      "title": "Routing",
+      "description": "The canonical clio MCP routing map: a two-level, names-only table that maps a task (pages, entities, data, applications) to the get-guidance article(s) to read before acting. The server instructions mandate reading this first on any operation.",
+      "topicId": "creatio.routing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/routing",
+      "legacyUris": [
+        "docs://mcp/guides/routing"
+      ],
+      "sourcePath": "guidance/mcp/guides/routing.md",
+      "bundlePath": "resources/routing.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "run-process-button",
       "title": "Run process buttons",
       "description": "Guides adding a Freedom UI button that starts a Creatio business process with the correct request, parameters, and page context.",
@@ -1010,6 +1044,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "when-to-use-requests",
+      "title": "When to use requests",
+      "description": "Canonical MCP guidance for wiring Freedom UI page actions to platform requests: when to reuse a built-in crt.*Request vs chain a handler vs author a usr.*Request, and the mandatory get-request-info catalog discipline — parameters as the only authorable keys (empty map = no params block), platform-injected baseParameters never in params, per-request documentation, and version scoping.",
+      "topicId": "creatio.when-to-use-requests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/when-to-use-requests",
+      "legacyUris": [
+        "docs://mcp/guides/when-to-use-requests"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/when-to-use-requests.md",
+      "bundlePath": "resources/when-to-use-requests.md",
       "mediaType": "text/plain"
     }
   ]

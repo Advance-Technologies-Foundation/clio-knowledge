@@ -106,7 +106,7 @@
     },
     {
       "id": "MIG-SAFETY",
-      "status": "requires-separate-review",
+      "status": "migrated",
       "issue": null,
       "guideIds": [
         "core-rules",

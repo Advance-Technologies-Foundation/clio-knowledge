@@ -165,8 +165,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(4,
-                because: "the complete migrated guidance catalog follows the reference-example generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(5,
+                because: "the mandatory guidance migration follows the complete catalog generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>
@@ -184,7 +184,7 @@ public sealed class GuidanceMigrationTests
             resources.Where(resource => resource.GetProperty("role").GetString() == "guidance")
                 .Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
                     because: "every currently migrated v0 guidance route remains available as signed transition metadata");
-            resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(60,
+            resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(63,
                 because: "every guidance article merged into the repository must be published by the manifest");
             result.Manifest.Resources.Select(resource => resource.ItemId).Should().Equal(
                 resources.Select(resource => resource.GetProperty("itemId").GetString())

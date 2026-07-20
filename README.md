@@ -8,8 +8,10 @@ The intended result is that correcting an article, publishing a safety advisory,
 
 ## Status
 
-Content migration is active. Canonical articles live under `guidance/mcp/guides/` and the root
-`bundle-source.json` publishes the complete direct-source catalog consumed by Git installations.
+The initial Clio guidance migration is complete. Canonical articles live under
+`guidance/mcp/guides/` and the root `bundle-source.json` publishes the complete direct-source
+catalog consumed by Git installations. The required inventory includes `core-rules`, `routing`,
+and `when-to-use-requests`, which Clio instructions depend on before ordinary tool execution.
 
 The remote publication, production signing, and automatic Clio update path remain under review for
 the Monday architecture decision. Do not treat content as released Clio guidance until it is included
