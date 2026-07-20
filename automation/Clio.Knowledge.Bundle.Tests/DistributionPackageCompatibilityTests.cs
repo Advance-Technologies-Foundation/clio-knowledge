@@ -133,7 +133,7 @@ public sealed class DistributionPackageCompatibilityTests
             XDocument metadata = XDocument.Load(nuspecStream);
             XNamespace ns = metadata.Root!.Name.Namespace;
             string packageVersion = metadata.Root.Element(ns + "metadata")!.Element(ns + "version")!.Value;
-            packageVersion.Should().Be("1.3.0",
+            packageVersion.Should().Be("1.4.0",
                 because: "Clio deliberately ignores prerelease knowledge transport versions");
             using MemoryStream payloadStream = new(payloadBytes);
             using ZipArchive bundle = new(payloadStream, ZipArchiveMode.Read);

@@ -19,8 +19,9 @@ publication and compatibility automation. The legacy v0 schema and conformance f
 available as migration evidence, but the builder accepts only canonical v1 source descriptors.
 
 `Clio.Knowledge.Bundle` canonicalizes text as UTF-8 without BOM with LF newlines, orders items by
-`itemId`, sorts requirements and aliases ordinally, validates exact namespaced routes, computes
-resource digests, preserves each resource's required discovery `title` and `description`, signs
+`itemId`, sorts requirements, aliases, and optional per-resource `requiredFeatures` ordinally,
+validates exact namespaced routes, computes resource digests, preserves each resource's required
+discovery `title` and `description`, rejects control characters in discovery text, signs
 deterministic manifest bytes with a detached P1 test signature, and writes
 a fixed-layout uncompressed ZIP through a sibling temporary file and atomic destination replacement.
 Failed builds preserve an existing destination and remove their temporary file. Producer bounds match

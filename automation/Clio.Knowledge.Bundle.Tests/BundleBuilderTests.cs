@@ -37,7 +37,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "first\nline\n", Encoding.UTF8);
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://mcp/guides/b"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "requiredFeatures": ["z-feature", "a-feature"], "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://mcp/guides/b"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
 			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "legacyUris": ["docs://mcp/guides/a"], "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""",
@@ -68,6 +68,11 @@ public sealed class BundleBuilderTests
             .ContainSingle(because: "migrated content keeps one transitional v0 route as signed metadata")
             .Which.Should().Be("docs://mcp/guides/a",
                 because: "migrated content keeps its transitional v0 route as signed metadata");
+        result.Manifest.Resources.Single(resource => resource.ItemId == "guide-b").RequiredFeatures.Should()
+            .Equal(["a-feature", "z-feature"],
+                because: "feature requirements are signed in deterministic stable-ID order");
+        result.Manifest.Resources.Single(resource => resource.ItemId == "guide-a").RequiredFeatures.Should().BeNull(
+            because: "ordinary resources remain backward compatible when no feature gate is declared");
         key.VerifyData(result.ManifestBytes, result.SignatureBytes, HashAlgorithmName.SHA256).Should().BeTrue(
             because: "the detached signature must cover the exact canonical manifest bytes");
         using ZipArchive archive = ZipFile.OpenRead(outputPath);
@@ -85,7 +90,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "b.md"), "b\n");
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-two", "docs://legacy/b-one"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "requiredFeatures": ["z-feature", "a-feature"], "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-two", "docs://legacy/b-one"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" },
 			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
 			]
 			""", "[\"guide-b\", \"guide-a\"]",
@@ -98,7 +103,7 @@ public sealed class BundleBuilderTests
         sourcePath = WriteSource("""
 			[
 			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" },
-			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-one", "docs://legacy/b-two"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
+			  { "itemId": "guide-b", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-b", "role": "guidance", "requiredFeatures": ["a-feature", "z-feature"], "uri": "docs://knowledge/com.example.knowledge/guide-b", "legacyUris": ["docs://legacy/b-one", "docs://legacy/b-two"], "sourcePath": "b.md", "bundlePath": "resources/b.md", "mediaType": "text/markdown" }
 			]
 			""", "[\"guide-a\", \"guide-b\"]",
             "[\"docs://knowledge/com.example.knowledge/guide-a\", \"docs://knowledge/com.example.knowledge/guide-b\"]");
@@ -180,6 +185,95 @@ public sealed class BundleBuilderTests
         act.Should().Throw<InvalidDataException>()
             .WithMessage("*description must be non-empty, trimmed*",
                 because: "a catalog entry must advertise why an agent should load its content");
+    }
+
+    [TestCase("title")]
+    [TestCase("description")]
+    [Description("Rejects control characters in publisher-owned discovery text.")]
+    public void Build_ShouldRejectDiscoveryText_WhenItContainsControlCharacters(string field)
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
+        Dictionary<string, object?> resource = new(StringComparer.Ordinal)
+        {
+            ["itemId"] = "guide-a",
+            ["title"] = field == "title" ? "Example\tguidance" : "Example guidance",
+            ["description"] = field == "description"
+                ? "Example guidance\u0085used to validate bundle behavior."
+                : "Example guidance used to validate bundle behavior.",
+            ["topicId"] = "creatio.guide-a",
+            ["role"] = "guidance",
+            ["uri"] = "docs://knowledge/com.example.knowledge/guide-a",
+            ["sourcePath"] = "a.md",
+            ["bundlePath"] = "resources/a.md",
+            ["mediaType"] = "text/markdown"
+        };
+        string sourcePath = WriteSource(JsonSerializer.Serialize(new[] { resource }));
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            sourcePath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage($"*{field}*control characters*",
+                because: "resource discovery text is rendered directly in agent-facing MCP output");
+    }
+
+    [Test]
+    [Description("Rejects a required feature that is not a stable lowercase identifier.")]
+    public void Build_ShouldRejectRequiredFeature_WhenItsIdentityIsInvalid()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
+        string sourcePath = WriteSource("""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "requiredFeatures": ["process_designer"], "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            sourcePath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*required feature*lowercase dot-or-hyphen separated stable identifier*",
+                because: "Clio feature gates are stable machine-readable identities rather than display names");
+    }
+
+    [Test]
+    [Description("Rejects duplicate required feature declarations on one resource.")]
+    public void Build_ShouldRejectRequiredFeatures_WhenTheSameFeatureIsRepeated()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
+        string sourcePath = WriteSource("""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "requiredFeatures": ["process-designer", "process-designer"], "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            sourcePath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*required feature*non-empty and unique*",
+                because: "the signed feature-gate contract must remain canonical and unambiguous");
     }
 
     [Test]

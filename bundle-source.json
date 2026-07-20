@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.3.0",
-  "sequence": 5,
+  "libraryVersion": "1.4.0",
+  "sequence": 6,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -870,6 +870,9 @@
       "description": "Guides declarative Creatio business-process design, supported BPMN elements, process inspection, mutation, and connection rules.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
+      "requiredFeatures": [
+        "process-designer"
+      ],
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
       "legacyUris": [
         "docs://mcp/guides/process-modeling"

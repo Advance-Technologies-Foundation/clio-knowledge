@@ -165,8 +165,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(5,
-                because: "the mandatory guidance migration follows the complete catalog generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(6,
+                because: "per-resource feature gating follows the mandatory guidance migration generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>
@@ -204,6 +204,50 @@ public sealed class GuidanceMigrationTests
         {
             File.Delete(outputPath);
         }
+    }
+
+    [Test]
+    [Description("Declares process-modeling as feature-gated and keeps requiredFeatures optional in both v1 contracts.")]
+    public void FeatureGating_ShouldBeDeclaredByTheResourceAndBothSchemas()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(
+            repositoryRoot,
+            "bundle-source.json")));
+        using JsonDocument repositorySchema = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(
+            repositoryRoot,
+            "schemas/v1/knowledge-repository.schema.json")));
+        using JsonDocument bundleSchema = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(
+            repositoryRoot,
+            "schemas/v1/knowledge-bundle.schema.json")));
+
+        // Act
+        JsonElement processModeling = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(resource => resource.GetProperty("itemId").GetString() == "process-modeling");
+        string[] requiredFeatures = processModeling.GetProperty("requiredFeatures")
+            .EnumerateArray()
+            .Select(feature => feature.GetString()!)
+            .ToArray();
+        JsonElement repositoryResource = repositorySchema.RootElement.GetProperty("$defs")
+            .GetProperty("resource");
+        JsonElement bundleResource = bundleSchema.RootElement.GetProperty("$defs")
+            .GetProperty("resource");
+
+        // Assert
+        requiredFeatures.Should().Equal(["process-designer"],
+            because: "process-modeling must not be advertised while its experimental Clio feature is disabled");
+        repositoryResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(
+            because: "Git repositories must be able to declare per-resource feature requirements");
+        bundleResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(
+            because: "packaged manifests must preserve the same feature-gating contract");
+        repositoryResource.GetProperty("required").EnumerateArray()
+            .Select(property => property.GetString()).Should().NotContain("requiredFeatures",
+                because: "resources without feature requirements remain backward compatible");
+        bundleResource.GetProperty("required").EnumerateArray()
+            .Select(property => property.GetString()).Should().NotContain("requiredFeatures",
+                because: "the delivery contract keeps feature requirements optional");
     }
 
     private static byte[] CanonicalBytes(string repositoryRoot, string relativePath)

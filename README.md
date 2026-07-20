@@ -84,8 +84,10 @@ without making those aliases part of Clio's compiled source or canonical v1 iden
 
 Every v1 bundle declares a reverse-DNS `libraryId`, publisher-facing `libraryVersion`, and positive
 monotonic `sequence`. Every item declares a stable `itemId`, cross-library `topicId`, `role`, and
-exact route. The builder derives the expected route from the library and item IDs and rejects a
-mismatch, duplicate item, duplicate route or alias, and duplicate topic/role pair within a library.
+exact route. An item may also declare optional `requiredFeatures` stable IDs; Clio must hide that
+item unless every named feature is enabled. The builder derives the expected route from the library
+and item IDs and rejects a mismatch, duplicate item, duplicate route or alias, duplicate feature ID,
+and duplicate topic/role pair within a library.
 
 Logical selection policy belongs to Clio and operator configuration. A library publishes identity,
 content, compatibility, and provenance; it does not publish its own priority or override rights.

@@ -37,6 +37,7 @@ public sealed record SourceResource(
     string Description,
     string TopicId,
     string Role,
+    IReadOnlyList<string>? RequiredFeatures,
     string Uri,
     IReadOnlyList<string>? LegacyUris,
     string SourcePath,
@@ -62,6 +63,8 @@ public sealed record BundleResource(
     string Description,
     string TopicId,
     string Role,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<string>? RequiredFeatures,
     string Uri,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<string>? LegacyUris,

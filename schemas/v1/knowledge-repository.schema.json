@@ -146,13 +146,13 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 160,
-          "pattern": "^\\S(?:.*\\S)?$"
+          "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F])\\S(?:.*\\S)?$"
         },
         "description": {
           "type": "string",
           "minLength": 1,
           "maxLength": 1000,
-          "pattern": "^\\S(?:.*\\S)?$"
+          "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F])\\S(?:.*\\S)?$"
         },
         "topicId": {
           "$ref": "#/$defs/stableId"
@@ -160,6 +160,13 @@
         "role": {
           "type": "string",
           "enum": ["guidance", "advisory", "capability", "reference-example"]
+        },
+        "requiredFeatures": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
         },
         "uri": {
           "type": "string",

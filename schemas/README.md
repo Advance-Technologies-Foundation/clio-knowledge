@@ -18,6 +18,10 @@ supplies any transport-specific signing metadata. Every resource owns a concise 
 `description`; consumers use this metadata to advertise and select knowledge before loading the
 resource body.
 
+Both v1 resource contracts support an optional `requiredFeatures` array of stable lowercase IDs.
+Consumers expose a resource only when every declared feature is enabled. Publisher-owned `title`
+and `description` values are trimmed discovery text and must not contain Unicode control characters.
+
 [`v1/knowledge-bundle.schema.json`](v1/knowledge-bundle.schema.json) is the generated NuGet bundle
 contract. It makes the immutable generation identity explicit with `libraryId`, `libraryVersion`,
 and `sequence`; every resource has an `itemId`, logical `topicId`, `role`, and exact

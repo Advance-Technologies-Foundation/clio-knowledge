@@ -201,6 +201,12 @@ public sealed class BundleBuilder
             ValidateStableId(resource.TopicId, "topic ID");
             ValidateDiscoveryText(resource.Title, "title", resource.ItemId, 160);
             ValidateDiscoveryText(resource.Description, "description", resource.ItemId, 1000);
+            IReadOnlyList<string> requiredFeatures = resource.RequiredFeatures ?? [];
+            EnsureUnique(requiredFeatures, $"required feature for resource '{resource.ItemId}'");
+            foreach (string requiredFeature in requiredFeatures)
+            {
+                ValidateStableId(requiredFeature, $"required feature for resource '{resource.ItemId}'");
+            }
             if (string.IsNullOrWhiteSpace(resource.SourcePath))
             {
                 throw new InvalidDataException($"Resource '{resource.ItemId}' must declare a source path.");
@@ -281,10 +287,12 @@ public sealed class BundleBuilder
     {
         if (string.IsNullOrWhiteSpace(value)
             || value.Length > maxLength
-            || !string.Equals(value, value.Trim(), StringComparison.Ordinal))
+            || !string.Equals(value, value.Trim(), StringComparison.Ordinal)
+            || value.Any(char.IsControl))
         {
             throw new InvalidDataException(
-                $"Resource '{itemId}' {label} must be non-empty, trimmed, and at most {maxLength} characters.");
+                $"Resource '{itemId}' {label} must be non-empty, trimmed, free of control characters, "
+                + $"and at most {maxLength} characters.");
         }
     }
 
@@ -435,6 +443,9 @@ public sealed class BundleBuilder
             resource.Descriptor.Description,
             resource.Descriptor.TopicId,
             resource.Descriptor.Role,
+            resource.Descriptor.RequiredFeatures is { Count: > 0 }
+                ? resource.Descriptor.RequiredFeatures.OrderBy(value => value, StringComparer.Ordinal).ToArray()
+                : null,
             resource.Descriptor.Uri,
             resource.Descriptor.LegacyUris is { Count: > 0 }
                 ? resource.Descriptor.LegacyUris.OrderBy(value => value, StringComparer.Ordinal).ToArray()
