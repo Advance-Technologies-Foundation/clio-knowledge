@@ -73,10 +73,10 @@ cache each library generation, and serve articles through exact namespaced resou
 logical topic resolution. The canonical identity is `(libraryId, sequence, bundleDigest)`; NuGet
 versions, Git branches, tags, and commits describe retrieval and provenance rather than identity.
 
-The ESQ family is the first real migration slice. Additional guidance families will move from Clio
-incrementally. Its canonical routes are
-`docs://knowledge/com.creatio.clio/<item-id>`. Signed `legacyUris` preserve the former
-`docs://mcp/guides/...` routes during the POC transition without making them canonical v1 identity.
+All Clio MCP guidance articles now live in this repository. Their canonical routes are
+`docs://knowledge/com.creatio.clio/<item-id>`. Publisher-owned `title` and `description` fields drive
+live MCP resource discovery, while `legacyUris` preserve former `docs://mcp/guides/...` routes
+without making those aliases part of Clio's compiled source or canonical v1 identity.
 
 ## Multi-source bundle identity
 
