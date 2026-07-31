@@ -44,15 +44,15 @@
 
 Read only what you need:
 
-- `references/minimal-test-setup.md`: a compact end-to-end test example with `MemoryDataProviderMock`
-- `references/memory-provider-setup.md`: creating `MemoryDataProviderMock`, registering schemas, and building `IAppDataContext`
-- `references/data-seeding-patterns.md`: `AddModel`, `AddModelRawData`, fixed ids, defaults, and relation graph setup
-- `references/assertion-patterns.md`: AAA layout, local assertion style, and how to verify query and save outcomes
-- `references/build-and-verify.md`: build and test command patterns for repository test work
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-tests.minimal-test-setup`: a compact end-to-end test example with `MemoryDataProviderMock`
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-tests.memory-provider-setup`: creating `MemoryDataProviderMock`, registering schemas, and building `IAppDataContext`
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-tests.data-seeding-patterns`: `AddModel`, `AddModelRawData`, fixed ids, defaults, and relation graph setup
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-tests.assertion-patterns`: AAA layout, local assertion style, and how to verify query and save outcomes
+- `docs://knowledge/com.creatio.clio/reference.atf-repository-tests.build-and-verify`: build and test command patterns for repository test work
 
 ## Build And Verify
 
-Use `references/build-and-verify.md` when you need concrete command patterns.
+Use `docs://knowledge/com.creatio.clio/reference.atf-repository-tests.build-and-verify` when you need concrete command patterns.
 
 Use the configuration that matches the current target framework and repository setup, and run build and test sequentially unless the current environment has a documented reason to do otherwise.
 

@@ -58,9 +58,9 @@ Rules:
 ## References
 
 Read only what you need:
-- `references/constants-pattern.md`: where to keep feature-name constants and how to reference them
-- `references/implementation-patterns.md`: example usage in methods and review guidance
-- `references/runtime-behavior.md`: what `GetIsEnabled` means for global, user, and group assignments
+- `docs://knowledge/com.creatio.clio/reference.feature-toggle.constants-pattern`: where to keep feature-name constants and how to reference them
+- `docs://knowledge/com.creatio.clio/reference.feature-toggle.implementation-patterns`: example usage in methods and review guidance
+- `docs://knowledge/com.creatio.clio/reference.feature-toggle.runtime-behavior`: what `GetIsEnabled` means for global, user, and group assignments
 
 ## Build And Verify
 

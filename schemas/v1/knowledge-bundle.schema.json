@@ -111,11 +111,18 @@
     "resource": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["itemId", "topicId", "role", "uri", "path", "mediaType", "length", "digest"],
+      "required": ["itemId", "title", "description", "topicId", "role", "uri", "path", "mediaType", "length", "digest"],
       "properties": {
         "itemId": { "$ref": "#/$defs/stableId" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160, "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F])\\S(?:.*\\S)?$" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 1000, "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F])\\S(?:.*\\S)?$" },
         "topicId": { "$ref": "#/$defs/stableId" },
         "role": { "$ref": "#/$defs/role" },
+        "requiredFeatures": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stableId" },
+          "uniqueItems": true
+        },
         "uri": { "type": "string", "pattern": "^docs://knowledge/" },
         "legacyUris": {
           "type": "array",

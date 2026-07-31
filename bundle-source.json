@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.2.0",
-  "sequence": 4,
+  "libraryVersion": "1.5.0",
+  "sequence": 7,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -21,13 +21,13 @@
       "list-knowledge-examples"
     ],
     "itemIds": [
-      "atf.creatio.google-pubsub-reference",
-      "atf.creatio.kafka-reference",
       "agent-execution",
       "app-modeling",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
+      "atf.creatio.google-pubsub-reference",
+      "atf.creatio.kafka-reference",
       "business-rule-filters",
       "business-rules",
       "chart-widget",
@@ -37,6 +37,7 @@
       "configuration-entity-event-listener-tests",
       "configuration-webservice",
       "configuration-webservice-tests",
+      "core-rules",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
       "dashboard-creation",
@@ -72,8 +73,52 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "reference.atf-repository-dev.models-and-relations",
+      "reference.atf-repository-dev.package-and-version",
+      "reference.atf-repository-dev.provider-and-context",
+      "reference.atf-repository-dev.query-patterns",
+      "reference.atf-repository-dev.write-operations",
+      "reference.atf-repository-model-management.collision-and-cleanup",
+      "reference.atf-repository-model-management.generation-workflow",
+      "reference.atf-repository-model-management.model-graph-selection",
+      "reference.atf-repository-tests.assertion-patterns",
+      "reference.atf-repository-tests.build-and-verify",
+      "reference.atf-repository-tests.data-seeding-patterns",
+      "reference.atf-repository-tests.memory-provider-setup",
+      "reference.atf-repository-tests.minimal-test-setup",
+      "reference.composable-app-e2e-test-implementation.environment-readiness",
+      "reference.composable-app-e2e-test-implementation.flow",
+      "reference.composable-app-e2e-test-implementation.sources",
+      "reference.configuration-entity-event-listener-tests.review-checklist",
+      "reference.configuration-entity-event-listener-tests.test-patterns",
+      "reference.configuration-entity-event-listener-tests.validation-test-patterns",
+      "reference.configuration-entity-event-listener.listener-patterns",
+      "reference.configuration-entity-event-listener.review-checklist",
+      "reference.configuration-entity-event-listener.validation-patterns",
+      "reference.configuration-webservice-tests.assertion-style",
+      "reference.configuration-webservice-tests.endpoint-test-patterns",
+      "reference.configuration-webservice-tests.test-fixture-pattern",
+      "reference.configuration-webservice.composition-root-pattern",
+      "reference.configuration-webservice.dto-patterns",
+      "reference.configuration-webservice.manual-runtime-checklist",
+      "reference.configuration-webservice.status-code-patterns",
+      "reference.creatio-composable-app-development.official-docs",
+      "reference.creatio-freedom-iframe-section.creatio-iframe-section-template",
+      "reference.feature-toggle-tests.constants-and-fixture-pattern",
+      "reference.feature-toggle-tests.feature-stub-pattern",
+      "reference.feature-toggle-tests.test-coverage-checklist",
+      "reference.feature-toggle.constants-pattern",
+      "reference.feature-toggle.implementation-patterns",
+      "reference.feature-toggle.runtime-behavior",
+      "reference.sys-setting-tests.coverage-checklist",
+      "reference.sys-setting-tests.mock-settings-attribute",
+      "reference.sys-setting-tests.setup-sys-settings-pattern",
+      "reference.sys-setting.access-patterns",
+      "reference.sys-setting.constants-pattern",
+      "reference.sys-setting.review-checklist",
       "related-list",
       "related-page-binding",
+      "routing",
       "run-process-button",
       "server-to-server-oauth",
       "support-mode",
@@ -82,16 +127,17 @@
       "sys-settings",
       "theming",
       "ui-project",
-      "virtual-entities"
+      "virtual-entities",
+      "when-to-use-requests"
     ],
     "resourceUris": [
-      "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
-      "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
       "docs://knowledge/com.creatio.clio/agent-execution",
       "docs://knowledge/com.creatio.clio/app-modeling",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
+      "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
+      "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
       "docs://knowledge/com.creatio.clio/business-rule-filters",
       "docs://knowledge/com.creatio.clio/business-rules",
       "docs://knowledge/com.creatio.clio/chart-widget",
@@ -101,6 +147,7 @@
       "docs://knowledge/com.creatio.clio/configuration-entity-event-listener-tests",
       "docs://knowledge/com.creatio.clio/configuration-webservice",
       "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
+      "docs://knowledge/com.creatio.clio/core-rules",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
       "docs://knowledge/com.creatio.clio/dashboard-creation",
@@ -136,8 +183,52 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.query-patterns",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.write-operations",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.collision-and-cleanup",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.generation-workflow",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.model-graph-selection",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.assertion-patterns",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.build-and-verify",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.data-seeding-patterns",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.memory-provider-setup",
+      "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.minimal-test-setup",
+      "docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.environment-readiness",
+      "docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.flow",
+      "docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.sources",
+      "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.review-checklist",
+      "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.test-patterns",
+      "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.validation-test-patterns",
+      "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.listener-patterns",
+      "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.review-checklist",
+      "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.validation-patterns",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.assertion-style",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.endpoint-test-patterns",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.test-fixture-pattern",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice.composition-root-pattern",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice.dto-patterns",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice.manual-runtime-checklist",
+      "docs://knowledge/com.creatio.clio/reference.configuration-webservice.status-code-patterns",
+      "docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs",
+      "docs://knowledge/com.creatio.clio/reference.creatio-freedom-iframe-section.creatio-iframe-section-template",
+      "docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.constants-and-fixture-pattern",
+      "docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.feature-stub-pattern",
+      "docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.test-coverage-checklist",
+      "docs://knowledge/com.creatio.clio/reference.feature-toggle.constants-pattern",
+      "docs://knowledge/com.creatio.clio/reference.feature-toggle.implementation-patterns",
+      "docs://knowledge/com.creatio.clio/reference.feature-toggle.runtime-behavior",
+      "docs://knowledge/com.creatio.clio/reference.sys-setting-tests.coverage-checklist",
+      "docs://knowledge/com.creatio.clio/reference.sys-setting-tests.mock-settings-attribute",
+      "docs://knowledge/com.creatio.clio/reference.sys-setting-tests.setup-sys-settings-pattern",
+      "docs://knowledge/com.creatio.clio/reference.sys-setting.access-patterns",
+      "docs://knowledge/com.creatio.clio/reference.sys-setting.constants-pattern",
+      "docs://knowledge/com.creatio.clio/reference.sys-setting.review-checklist",
       "docs://knowledge/com.creatio.clio/related-list",
       "docs://knowledge/com.creatio.clio/related-page-binding",
+      "docs://knowledge/com.creatio.clio/routing",
       "docs://knowledge/com.creatio.clio/run-process-button",
       "docs://knowledge/com.creatio.clio/server-to-server-oauth",
       "docs://knowledge/com.creatio.clio/support-mode",
@@ -146,30 +237,15 @@
       "docs://knowledge/com.creatio.clio/sys-settings",
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
-      "docs://knowledge/com.creatio.clio/virtual-entities"
+      "docs://knowledge/com.creatio.clio/virtual-entities",
+      "docs://knowledge/com.creatio.clio/when-to-use-requests"
     ]
   },
   "resources": [
     {
-      "itemId": "atf.creatio.google-pubsub-reference",
-      "topicId": "atf.creatio.google-pubsub-reference",
-      "role": "reference-example",
-      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
-      "sourcePath": "catalog/reference-examples/creatio-google-pubsub.yaml",
-      "bundlePath": "resources/atf.creatio.google-pubsub-reference.yaml",
-      "mediaType": "text/yaml"
-    },
-    {
-      "itemId": "atf.creatio.kafka-reference",
-      "topicId": "atf.creatio.kafka-reference",
-      "role": "reference-example",
-      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
-      "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
-      "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
-      "mediaType": "text/yaml"
-    },
-    {
       "itemId": "agent-execution",
+      "title": "Agent execution",
+      "description": "Explains how agents execute approved plans through clio MCP, including transport rules, execution order, branching, evidence, and recovery patterns.",
       "topicId": "creatio.agent-execution",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/agent-execution",
@@ -182,6 +258,8 @@
     },
     {
       "itemId": "app-modeling",
+      "title": "Application modeling",
+      "description": "Guides Creatio application modeling, schema design decisions, and the page and data workflows used to implement an approved application plan.",
       "topicId": "creatio.app-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/app-modeling",
@@ -194,6 +272,8 @@
     },
     {
       "itemId": "atf-repository-dev",
+      "title": "ATF.Repository development",
+      "description": "Shows how to read and write Creatio data with ATF.Repository models, providers, data contexts, relation mapping, and supported query patterns.",
       "topicId": "creatio.atf-repository-dev",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-dev",
@@ -206,6 +286,8 @@
     },
     {
       "itemId": "atf-repository-model-management",
+      "title": "ATF.Repository model management",
+      "description": "Explains how to generate, organize, validate, and update ATF.Repository models for the exact Creatio schemas and members an implementation needs.",
       "topicId": "creatio.atf-repository-model-management",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-model-management",
@@ -218,6 +300,8 @@
     },
     {
       "itemId": "atf-repository-tests",
+      "title": "ATF.Repository tests",
+      "description": "Guides unit and integration testing for code that uses ATF.Repository models, relations, providers, and data contexts.",
       "topicId": "creatio.atf-repository-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -229,7 +313,31 @@
       "mediaType": "text/markdown"
     },
     {
+      "itemId": "atf.creatio.google-pubsub-reference",
+      "title": "Creatio Google Pub/Sub reference",
+      "description": "Vetted reference workspace for Google Pub/Sub request/reply, publishing, streaming subscriptions, native-library lifecycle, tests, and a round-trip console in Creatio.",
+      "topicId": "atf.creatio.google-pubsub-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
+      "sourcePath": "catalog/reference-examples/creatio-google-pubsub.yaml",
+      "bundlePath": "resources/atf.creatio.google-pubsub-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "atf.creatio.kafka-reference",
+      "title": "Creatio Kafka reference",
+      "description": "Vetted reference workspace for Kafka request/reply, notifications, background consumers, native-library lifecycle, tests, and a round-trip console in Creatio.",
+      "topicId": "atf.creatio.kafka-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
+      "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
       "itemId": "business-rule-filters",
+      "title": "Business rule filters",
+      "description": "Defines the static-filter contract for Freedom UI business rules, including comparisons, nested groups, lookup values, macros, backward references, and aggregations.",
       "topicId": "creatio.business-rule-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/business-rule-filters",
@@ -242,6 +350,8 @@
     },
     {
       "itemId": "business-rules",
+      "title": "Business rules",
+      "description": "Guides entity-level and page-level Freedom UI business rules for visibility, editability, required state, value assignment, and lookup filtering.",
       "topicId": "creatio.business-rules",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/business-rules",
@@ -254,6 +364,8 @@
     },
     {
       "itemId": "chart-widget",
+      "title": "Chart widgets",
+      "description": "Guides Freedom UI chart widgets, including chart and series selection, aggregation, runtime configuration, and static filter authoring.",
       "topicId": "creatio.chart-widget",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/chart-widget",
@@ -266,6 +378,8 @@
     },
     {
       "itemId": "composable-app-e2e-test-implementation",
+      "title": "Composable app end-to-end test implementation",
+      "description": "Describes a repeatable cross-repository delivery flow for implementing and validating composable-app end-to-end tests against a Creatio environment.",
       "topicId": "creatio.composable-app-e2e-test-implementation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/composable-app-e2e-test-implementation",
@@ -278,6 +392,8 @@
     },
     {
       "itemId": "composable-app-repo-bootstrap",
+      "title": "Composable app repository bootstrap",
+      "description": "Explains how to initialize an app-specific repository from the composable-app starter without overwriting files that have already been customized.",
       "topicId": "creatio.composable-app-repo-bootstrap",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/composable-app-repo-bootstrap",
@@ -290,6 +406,8 @@
     },
     {
       "itemId": "configuration-entity-event-listener",
+      "title": "Configuration entity event listeners",
+      "description": "Guides implementation of Creatio configuration EntityEventListener classes, dependency resolution, event selection, and listener behavior.",
       "topicId": "creatio.configuration-entity-event-listener",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/configuration-entity-event-listener",
@@ -302,6 +420,8 @@
     },
     {
       "itemId": "configuration-entity-event-listener-tests",
+      "title": "Configuration entity event listener tests",
+      "description": "Guides focused tests for Creatio configuration EntityEventListener implementations, including listener construction, event contexts, and assertions.",
       "topicId": "creatio.configuration-entity-event-listener-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/configuration-entity-event-listener-tests",
@@ -314,6 +434,8 @@
     },
     {
       "itemId": "configuration-webservice",
+      "title": "Configuration web services",
+      "description": "Guides implementation of Creatio configuration web services, including routes, DTOs, status codes, service composition, and runtime verification.",
       "topicId": "creatio.configuration-webservice",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/configuration-webservice",
@@ -326,6 +448,8 @@
     },
     {
       "itemId": "configuration-webservice-tests",
+      "title": "Configuration web service tests",
+      "description": "Guides tests for Creatio configuration web services, including local fixtures, endpoint coverage, HTTP results, and assertion patterns.",
       "topicId": "creatio.configuration-webservice-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
@@ -337,7 +461,23 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "core-rules",
+      "title": "Core rules",
+      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
+      "topicId": "creatio.core-rules",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/core-rules",
+      "legacyUris": [
+        "docs://mcp/guides/core-rules"
+      ],
+      "sourcePath": "guidance/mcp/guides/core-rules.md",
+      "bundlePath": "resources/core-rules.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "creatio-composable-app-development",
+      "title": "Creatio composable app development",
+      "description": "Provides the source-level workflow for Creatio packages, Freedom UI schemas, page changes, compilation, deployment, and verification in a composable app repository.",
       "topicId": "creatio.creatio-composable-app-development",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
@@ -350,6 +490,8 @@
     },
     {
       "itemId": "creatio-freedom-iframe-section",
+      "title": "Creatio Freedom UI iframe section",
+      "description": "Explains how to create a minimal Freedom UI section that hosts an external application through one crt.IFrame component.",
       "topicId": "creatio.creatio-freedom-iframe-section",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
@@ -362,6 +504,8 @@
     },
     {
       "itemId": "dashboard-creation",
+      "title": "Dashboard creation",
+      "description": "Guides creation of Freedom UI dashboard pages with the supported dashboard template and correct dashboard metadata bindings.",
       "topicId": "creatio.dashboard-creation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-creation",
@@ -374,6 +518,8 @@
     },
     {
       "itemId": "dashboard-design",
+      "title": "Dashboard design",
+      "description": "Guides layout, sizing, grouping, styling, and data-source decisions for Freedom UI analytical widgets on dashboards.",
       "topicId": "creatio.dashboard-design",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-design",
@@ -386,6 +532,8 @@
     },
     {
       "itemId": "dashboards",
+      "title": "Dashboards",
+      "description": "Routes dashboard work to the dashboard creation, design, indicator widget, and chart widget guidance articles.",
       "topicId": "creatio.dashboards",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboards",
@@ -398,6 +546,8 @@
     },
     {
       "itemId": "data-bindings",
+      "title": "Data bindings",
+      "description": "Guides generic Creatio data bindings, lookup seeding, and binding artifact creation, installation, and validation workflows.",
       "topicId": "creatio.data-bindings",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/data-bindings",
@@ -410,6 +560,8 @@
     },
     {
       "itemId": "dataforge-orchestration",
+      "title": "DataForge orchestration",
+      "description": "Defines the four-layer DataForge orchestration protocol for agents that model and implement Creatio applications through clio MCP.",
       "topicId": "creatio.dataforge-orchestration",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dataforge-orchestration",
@@ -422,6 +574,8 @@
     },
     {
       "itemId": "deploy-lifecycle",
+      "title": "Deployment lifecycle",
+      "description": "Guides the Creatio provisioning lifecycle from infrastructure checks and port selection through deployment, registration, and ClioGate installation.",
       "topicId": "creatio.deploy-lifecycle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
@@ -434,6 +588,8 @@
     },
     {
       "itemId": "describe-environment",
+      "title": "Describe environment",
+      "description": "Explains the describe-environment report, the source of each field, and the permissions and ClioGate prerequisites needed to collect it.",
       "topicId": "creatio.describe-environment",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/describe-environment",
@@ -446,6 +602,8 @@
     },
     {
       "itemId": "desktop-page",
+      "title": "Desktop pages",
+      "description": "Guides Creatio desktop page creation, template and Desktop-group invariants, container placement, selector registration, and visibility by record rights.",
       "topicId": "creatio.desktop-page",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/desktop-page",
@@ -458,6 +616,8 @@
     },
     {
       "itemId": "esq",
+      "title": "EntitySchemaQuery",
+      "description": "Guides EntitySchemaQuery authoring and routes filter construction and parsing work to the appropriate frontend or backend article.",
       "topicId": "creatio.esq",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq",
@@ -470,6 +630,8 @@
     },
     {
       "itemId": "esq-filter-parsing",
+      "title": "Backend ESQ filter parsing",
+      "description": "Explains how backend C# code inspects and parses EntitySchemaQuery filter groups, leaf filters, operands, disabled nodes, and negation.",
       "topicId": "creatio.esq.filter-parsing",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filter-parsing",
@@ -482,6 +644,8 @@
     },
     {
       "itemId": "esq-filters",
+      "title": "ESQ filters",
+      "description": "Routes ESQ filter work to frontend filter construction, backend C# construction, or backend filter parsing guidance.",
       "topicId": "creatio.esq.filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filters",
@@ -494,6 +658,8 @@
     },
     {
       "itemId": "esq-filters-backend",
+      "title": "Backend ESQ filter construction",
+      "description": "Guides creation of EntitySchemaQuery filters with Creatio's native backend C# API, including values, groups, comparisons, and nesting.",
       "topicId": "creatio.esq.filters.backend",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filters-backend",
@@ -506,6 +672,8 @@
     },
     {
       "itemId": "esq-filters-frontend",
+      "title": "Frontend ESQ filter construction",
+      "description": "Guides creation and serialization of EntitySchemaQuery filters in Freedom UI and DataService JavaScript code.",
       "topicId": "creatio.esq.filters.frontend",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filters-frontend",
@@ -518,6 +686,8 @@
     },
     {
       "itemId": "existing-app-maintenance",
+      "title": "Existing application maintenance",
+      "description": "Guides discovery, inspection, and minimal safe mutation of existing Creatio applications and their packages, schemas, and pages.",
       "topicId": "creatio.existing-app-maintenance",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance",
@@ -530,6 +700,8 @@
     },
     {
       "itemId": "feature-toggle",
+      "title": "Feature toggles",
+      "description": "Explains how to implement package-level feature toggles through Creatio system settings and injected access abstractions.",
       "topicId": "creatio.feature-toggle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/feature-toggle",
@@ -542,6 +714,8 @@
     },
     {
       "itemId": "feature-toggle-tests",
+      "title": "Feature toggle tests",
+      "description": "Guides tests for enabled, disabled, missing, and malformed feature-toggle settings without coupling tests to live Creatio state.",
       "topicId": "creatio.feature-toggle-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/feature-toggle-tests",
@@ -554,6 +728,8 @@
     },
     {
       "itemId": "identity-assertion",
+      "title": "Identity assertion and token exchange",
+      "description": "Guides Creatio Identity Service V3 identity assertion and token exchange for AI chat scenarios, including setup, claims, verification, and troubleshooting.",
       "topicId": "creatio.identity-assertion",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/identity-assertion",
@@ -566,6 +742,8 @@
     },
     {
       "itemId": "indicator-widget",
+      "title": "Indicator widgets",
+      "description": "Guides Freedom UI indicator widgets, including aggregation, runtime configuration, intent translation, and static filter authoring.",
       "topicId": "creatio.indicator-widget",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/indicator-widget",
@@ -578,6 +756,8 @@
     },
     {
       "itemId": "integration-testing",
+      "title": "Integration testing",
+      "description": "Guides portable Creatio integration tests, process scenarios, CI authentication, Allure reporting, and optional browser-based validation.",
       "topicId": "creatio.integration-testing",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/integration-testing",
@@ -590,6 +770,8 @@
     },
     {
       "itemId": "mobile-page-modification",
+      "title": "Mobile page modification",
+      "description": "Guides mobile Freedom UI page editing, including plain JSON bodies, validators, converters, scaffold merges, components, and supported requests.",
       "topicId": "creatio.mobile-page-modification",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/mobile-page-modification",
@@ -602,6 +784,8 @@
     },
     {
       "itemId": "package-dependencies",
+      "title": "Package dependencies",
+      "description": "Guides adding and removing Creatio package dependencies through clio, including managed-package boundaries, recovery, and prohibited direct database writes.",
       "topicId": "creatio.package-dependencies",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/package-dependencies",
@@ -614,6 +798,8 @@
     },
     {
       "itemId": "page-creation",
+      "title": "Page creation",
+      "description": "Guides creation of Freedom UI pages from supported templates through the clio create-page workflow.",
       "topicId": "creatio.page-creation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-creation",
@@ -626,6 +812,8 @@
     },
     {
       "itemId": "page-modification",
+      "title": "Page modification",
+      "description": "Defines the mandatory pre-edit checks and routes Freedom UI page changes to lifecycle, field, container, and component guidance.",
       "topicId": "creatio.page-modification",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification",
@@ -638,6 +826,8 @@
     },
     {
       "itemId": "page-modification-components",
+      "title": "Page modification components",
+      "description": "Guides Freedom UI viewConfigDiff composition, component insertion, button handlers, control selection, and component metadata inspection.",
       "topicId": "creatio.page-modification-components",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-components",
@@ -650,6 +840,8 @@
     },
     {
       "itemId": "page-modification-containers",
+      "title": "Page modification containers",
+      "description": "Explains how to inspect page bundles and select valid parent containers before inserting Freedom UI components.",
       "topicId": "creatio.page-modification-containers",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-containers",
@@ -662,6 +854,8 @@
     },
     {
       "itemId": "page-modification-field-contract",
+      "title": "Page modification field contract",
+      "description": "Defines the Freedom UI inserted-field contract, including attribute binding, labels, controls, data sources, body forms, and validation diagnostics.",
       "topicId": "creatio.page-modification-field-contract",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-field-contract",
@@ -674,6 +868,8 @@
     },
     {
       "itemId": "page-modification-overview",
+      "title": "Page modification lifecycle",
+      "description": "Guides the Freedom UI page read, edit, update, synchronization, conflict detection, formatting, and verification lifecycle.",
       "topicId": "creatio.page-modification-overview",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-overview",
@@ -686,6 +882,8 @@
     },
     {
       "itemId": "page-schema-converters",
+      "title": "Page schema converters",
+      "description": "Guides creation and editing of Freedom UI converters in raw page schema bodies.",
       "topicId": "creatio.page-schema-converters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-converters",
@@ -698,6 +896,8 @@
     },
     {
       "itemId": "page-schema-creatio-devkit-common",
+      "title": "Creatio DevKit common page APIs",
+      "description": "Guides supported uses of @creatio-devkit/common in deployed Freedom UI handlers, validators, converters, and related schema-body code.",
       "topicId": "creatio.page-schema-creatio-devkit-common",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
@@ -710,6 +910,8 @@
     },
     {
       "itemId": "page-schema-handlers",
+      "title": "Page schema handlers",
+      "description": "Guides creation and editing of Freedom UI request handlers in raw page schema bodies.",
       "topicId": "creatio.page-schema-handlers",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-handlers",
@@ -722,6 +924,8 @@
     },
     {
       "itemId": "page-schema-resources",
+      "title": "Page schema resources",
+      "description": "Guides Freedom UI localizable strings, resource expressions, key naming, parameter usage, and data-bound label conventions.",
       "topicId": "creatio.page-schema-resources",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-resources",
@@ -734,6 +938,8 @@
     },
     {
       "itemId": "page-schema-validators",
+      "title": "Page schema validators",
+      "description": "Guides creation and editing of Freedom UI validators in raw page schema bodies.",
       "topicId": "creatio.page-schema-validators",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-validators",
@@ -746,8 +952,13 @@
     },
     {
       "itemId": "process-modeling",
+      "title": "Process modeling",
+      "description": "Guides declarative Creatio business-process design, supported BPMN elements, process inspection, mutation, and connection rules.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
+      "requiredFeatures": [
+        "process-designer"
+      ],
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
       "legacyUris": [
         "docs://mcp/guides/process-modeling"
@@ -757,7 +968,611 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "reference.atf-repository-dev.models-and-relations",
+      "title": "ATF.Repository development: Models And Relations",
+      "description": "Reference resource for atf-repository-dev: models-and-relations.",
+      "topicId": "creatio.reference.atf-repository-dev.models-and-relations",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-dev/models-and-relations"
+      ],
+      "sourcePath": "references/atf-repository-dev/models-and-relations.md",
+      "bundlePath": "resources/reference.atf-repository-dev.models-and-relations.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-dev.package-and-version",
+      "title": "ATF.Repository development: Package And Version",
+      "description": "Reference resource for atf-repository-dev: package-and-version.",
+      "topicId": "creatio.reference.atf-repository-dev.package-and-version",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-dev/package-and-version"
+      ],
+      "sourcePath": "references/atf-repository-dev/package-and-version.md",
+      "bundlePath": "resources/reference.atf-repository-dev.package-and-version.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-dev.provider-and-context",
+      "title": "ATF.Repository development: Provider And Context",
+      "description": "Reference resource for atf-repository-dev: provider-and-context.",
+      "topicId": "creatio.reference.atf-repository-dev.provider-and-context",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-dev/provider-and-context"
+      ],
+      "sourcePath": "references/atf-repository-dev/provider-and-context.md",
+      "bundlePath": "resources/reference.atf-repository-dev.provider-and-context.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-dev.query-patterns",
+      "title": "ATF.Repository development: Query Patterns",
+      "description": "Reference resource for atf-repository-dev: query-patterns.",
+      "topicId": "creatio.reference.atf-repository-dev.query-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.query-patterns",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-dev/query-patterns"
+      ],
+      "sourcePath": "references/atf-repository-dev/query-patterns.md",
+      "bundlePath": "resources/reference.atf-repository-dev.query-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-dev.write-operations",
+      "title": "ATF.Repository development: Write Operations",
+      "description": "Reference resource for atf-repository-dev: write-operations.",
+      "topicId": "creatio.reference.atf-repository-dev.write-operations",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.write-operations",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-dev/write-operations"
+      ],
+      "sourcePath": "references/atf-repository-dev/write-operations.md",
+      "bundlePath": "resources/reference.atf-repository-dev.write-operations.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-model-management.collision-and-cleanup",
+      "title": "ATF.Repository model management: Collision And Cleanup",
+      "description": "Reference resource for atf-repository-model-management: collision-and-cleanup.",
+      "topicId": "creatio.reference.atf-repository-model-management.collision-and-cleanup",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.collision-and-cleanup",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-model-management/collision-and-cleanup"
+      ],
+      "sourcePath": "references/atf-repository-model-management/collision-and-cleanup.md",
+      "bundlePath": "resources/reference.atf-repository-model-management.collision-and-cleanup.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-model-management.generation-workflow",
+      "title": "ATF.Repository model management: Generation Workflow",
+      "description": "Reference resource for atf-repository-model-management: generation-workflow.",
+      "topicId": "creatio.reference.atf-repository-model-management.generation-workflow",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.generation-workflow",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-model-management/generation-workflow"
+      ],
+      "sourcePath": "references/atf-repository-model-management/generation-workflow.md",
+      "bundlePath": "resources/reference.atf-repository-model-management.generation-workflow.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-model-management.model-graph-selection",
+      "title": "ATF.Repository model management: Model Graph Selection",
+      "description": "Reference resource for atf-repository-model-management: model-graph-selection.",
+      "topicId": "creatio.reference.atf-repository-model-management.model-graph-selection",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-model-management.model-graph-selection",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-model-management/model-graph-selection"
+      ],
+      "sourcePath": "references/atf-repository-model-management/model-graph-selection.md",
+      "bundlePath": "resources/reference.atf-repository-model-management.model-graph-selection.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-tests.assertion-patterns",
+      "title": "ATF.Repository tests: Assertion Patterns",
+      "description": "Reference resource for atf-repository-tests: assertion-patterns.",
+      "topicId": "creatio.reference.atf-repository-tests.assertion-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.assertion-patterns",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-tests/assertion-patterns"
+      ],
+      "sourcePath": "references/atf-repository-tests/assertion-patterns.md",
+      "bundlePath": "resources/reference.atf-repository-tests.assertion-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-tests.build-and-verify",
+      "title": "ATF.Repository tests: Build And Verify",
+      "description": "Reference resource for atf-repository-tests: build-and-verify.",
+      "topicId": "creatio.reference.atf-repository-tests.build-and-verify",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.build-and-verify",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-tests/build-and-verify"
+      ],
+      "sourcePath": "references/atf-repository-tests/build-and-verify.md",
+      "bundlePath": "resources/reference.atf-repository-tests.build-and-verify.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-tests.data-seeding-patterns",
+      "title": "ATF.Repository tests: Data Seeding Patterns",
+      "description": "Reference resource for atf-repository-tests: data-seeding-patterns.",
+      "topicId": "creatio.reference.atf-repository-tests.data-seeding-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.data-seeding-patterns",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-tests/data-seeding-patterns"
+      ],
+      "sourcePath": "references/atf-repository-tests/data-seeding-patterns.md",
+      "bundlePath": "resources/reference.atf-repository-tests.data-seeding-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-tests.memory-provider-setup",
+      "title": "ATF.Repository tests: Memory Provider Setup",
+      "description": "Reference resource for atf-repository-tests: memory-provider-setup.",
+      "topicId": "creatio.reference.atf-repository-tests.memory-provider-setup",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.memory-provider-setup",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-tests/memory-provider-setup"
+      ],
+      "sourcePath": "references/atf-repository-tests/memory-provider-setup.md",
+      "bundlePath": "resources/reference.atf-repository-tests.memory-provider-setup.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.atf-repository-tests.minimal-test-setup",
+      "title": "ATF.Repository tests: Minimal Test Setup",
+      "description": "Reference resource for atf-repository-tests: minimal-test-setup.",
+      "topicId": "creatio.reference.atf-repository-tests.minimal-test-setup",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.atf-repository-tests.minimal-test-setup",
+      "legacyUris": [
+        "docs://mcp/references/atf-repository-tests/minimal-test-setup"
+      ],
+      "sourcePath": "references/atf-repository-tests/minimal-test-setup.md",
+      "bundlePath": "resources/reference.atf-repository-tests.minimal-test-setup.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.composable-app-e2e-test-implementation.environment-readiness",
+      "title": "Composable-app E2E test implementation: Environment Readiness",
+      "description": "Reference resource for composable-app-e2e-test-implementation: environment-readiness.",
+      "topicId": "creatio.reference.composable-app-e2e-test-implementation.environment-readiness",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.environment-readiness",
+      "legacyUris": [
+        "docs://mcp/references/composable-app-e2e-test-implementation/environment-readiness"
+      ],
+      "sourcePath": "references/composable-app-e2e-test-implementation/environment-readiness.md",
+      "bundlePath": "resources/reference.composable-app-e2e-test-implementation.environment-readiness.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.composable-app-e2e-test-implementation.flow",
+      "title": "Composable-app E2E test implementation: Flow",
+      "description": "Reference resource for composable-app-e2e-test-implementation: flow.",
+      "topicId": "creatio.reference.composable-app-e2e-test-implementation.flow",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.flow",
+      "legacyUris": [
+        "docs://mcp/references/composable-app-e2e-test-implementation/flow"
+      ],
+      "sourcePath": "references/composable-app-e2e-test-implementation/flow.md",
+      "bundlePath": "resources/reference.composable-app-e2e-test-implementation.flow.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.composable-app-e2e-test-implementation.sources",
+      "title": "Composable-app E2E test implementation: Sources",
+      "description": "Reference resource for composable-app-e2e-test-implementation: sources.",
+      "topicId": "creatio.reference.composable-app-e2e-test-implementation.sources",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.composable-app-e2e-test-implementation.sources",
+      "legacyUris": [
+        "docs://mcp/references/composable-app-e2e-test-implementation/sources"
+      ],
+      "sourcePath": "references/composable-app-e2e-test-implementation/sources.md",
+      "bundlePath": "resources/reference.composable-app-e2e-test-implementation.sources.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-entity-event-listener-tests.review-checklist",
+      "title": "Configuration entity event listener tests: Review Checklist",
+      "description": "Reference resource for configuration-entity-event-listener-tests: review-checklist.",
+      "topicId": "creatio.reference.configuration-entity-event-listener-tests.review-checklist",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.review-checklist",
+      "legacyUris": [
+        "docs://mcp/references/configuration-entity-event-listener-tests/review-checklist"
+      ],
+      "sourcePath": "references/configuration-entity-event-listener-tests/review-checklist.md",
+      "bundlePath": "resources/reference.configuration-entity-event-listener-tests.review-checklist.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-entity-event-listener-tests.test-patterns",
+      "title": "Configuration entity event listener tests: Test Patterns",
+      "description": "Reference resource for configuration-entity-event-listener-tests: test-patterns.",
+      "topicId": "creatio.reference.configuration-entity-event-listener-tests.test-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.test-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-entity-event-listener-tests/test-patterns"
+      ],
+      "sourcePath": "references/configuration-entity-event-listener-tests/test-patterns.md",
+      "bundlePath": "resources/reference.configuration-entity-event-listener-tests.test-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-entity-event-listener-tests.validation-test-patterns",
+      "title": "Configuration entity event listener tests: Validation Test Patterns",
+      "description": "Reference resource for configuration-entity-event-listener-tests: validation-test-patterns.",
+      "topicId": "creatio.reference.configuration-entity-event-listener-tests.validation-test-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener-tests.validation-test-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-entity-event-listener-tests/validation-test-patterns"
+      ],
+      "sourcePath": "references/configuration-entity-event-listener-tests/validation-test-patterns.md",
+      "bundlePath": "resources/reference.configuration-entity-event-listener-tests.validation-test-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-entity-event-listener.listener-patterns",
+      "title": "Configuration entity event listener: Listener Patterns",
+      "description": "Reference resource for configuration-entity-event-listener: listener-patterns.",
+      "topicId": "creatio.reference.configuration-entity-event-listener.listener-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.listener-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-entity-event-listener/listener-patterns"
+      ],
+      "sourcePath": "references/configuration-entity-event-listener/listener-patterns.md",
+      "bundlePath": "resources/reference.configuration-entity-event-listener.listener-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-entity-event-listener.review-checklist",
+      "title": "Configuration entity event listener: Review Checklist",
+      "description": "Reference resource for configuration-entity-event-listener: review-checklist.",
+      "topicId": "creatio.reference.configuration-entity-event-listener.review-checklist",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.review-checklist",
+      "legacyUris": [
+        "docs://mcp/references/configuration-entity-event-listener/review-checklist"
+      ],
+      "sourcePath": "references/configuration-entity-event-listener/review-checklist.md",
+      "bundlePath": "resources/reference.configuration-entity-event-listener.review-checklist.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-entity-event-listener.validation-patterns",
+      "title": "Configuration entity event listener: Validation Patterns",
+      "description": "Reference resource for configuration-entity-event-listener: validation-patterns.",
+      "topicId": "creatio.reference.configuration-entity-event-listener.validation-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.validation-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-entity-event-listener/validation-patterns"
+      ],
+      "sourcePath": "references/configuration-entity-event-listener/validation-patterns.md",
+      "bundlePath": "resources/reference.configuration-entity-event-listener.validation-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice-tests.assertion-style",
+      "title": "Configuration web service tests: Assertion Style",
+      "description": "Reference resource for configuration-webservice-tests: assertion-style.",
+      "topicId": "creatio.reference.configuration-webservice-tests.assertion-style",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.assertion-style",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice-tests/assertion-style"
+      ],
+      "sourcePath": "references/configuration-webservice-tests/assertion-style.md",
+      "bundlePath": "resources/reference.configuration-webservice-tests.assertion-style.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice-tests.endpoint-test-patterns",
+      "title": "Configuration web service tests: Endpoint Test Patterns",
+      "description": "Reference resource for configuration-webservice-tests: endpoint-test-patterns.",
+      "topicId": "creatio.reference.configuration-webservice-tests.endpoint-test-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.endpoint-test-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice-tests/endpoint-test-patterns"
+      ],
+      "sourcePath": "references/configuration-webservice-tests/endpoint-test-patterns.md",
+      "bundlePath": "resources/reference.configuration-webservice-tests.endpoint-test-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice-tests.test-fixture-pattern",
+      "title": "Configuration web service tests: Test Fixture Pattern",
+      "description": "Reference resource for configuration-webservice-tests: test-fixture-pattern.",
+      "topicId": "creatio.reference.configuration-webservice-tests.test-fixture-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.test-fixture-pattern",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice-tests/test-fixture-pattern"
+      ],
+      "sourcePath": "references/configuration-webservice-tests/test-fixture-pattern.md",
+      "bundlePath": "resources/reference.configuration-webservice-tests.test-fixture-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice.composition-root-pattern",
+      "title": "Configuration web service: Composition Root Pattern",
+      "description": "Reference resource for configuration-webservice: composition-root-pattern.",
+      "topicId": "creatio.reference.configuration-webservice.composition-root-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice.composition-root-pattern",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice/composition-root-pattern"
+      ],
+      "sourcePath": "references/configuration-webservice/composition-root-pattern.md",
+      "bundlePath": "resources/reference.configuration-webservice.composition-root-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice.dto-patterns",
+      "title": "Configuration web service: Dto Patterns",
+      "description": "Reference resource for configuration-webservice: dto-patterns.",
+      "topicId": "creatio.reference.configuration-webservice.dto-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice.dto-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice/dto-patterns"
+      ],
+      "sourcePath": "references/configuration-webservice/dto-patterns.md",
+      "bundlePath": "resources/reference.configuration-webservice.dto-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice.manual-runtime-checklist",
+      "title": "Configuration web service: Manual Runtime Checklist",
+      "description": "Reference resource for configuration-webservice: manual-runtime-checklist.",
+      "topicId": "creatio.reference.configuration-webservice.manual-runtime-checklist",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice.manual-runtime-checklist",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice/manual-runtime-checklist"
+      ],
+      "sourcePath": "references/configuration-webservice/manual-runtime-checklist.md",
+      "bundlePath": "resources/reference.configuration-webservice.manual-runtime-checklist.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.configuration-webservice.status-code-patterns",
+      "title": "Configuration web service: Status Code Patterns",
+      "description": "Reference resource for configuration-webservice: status-code-patterns.",
+      "topicId": "creatio.reference.configuration-webservice.status-code-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.configuration-webservice.status-code-patterns",
+      "legacyUris": [
+        "docs://mcp/references/configuration-webservice/status-code-patterns"
+      ],
+      "sourcePath": "references/configuration-webservice/status-code-patterns.md",
+      "bundlePath": "resources/reference.configuration-webservice.status-code-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.creatio-composable-app-development.official-docs",
+      "title": "Creatio composable-app development: Official Docs",
+      "description": "Reference resource for creatio-composable-app-development: official-docs.",
+      "topicId": "creatio.reference.creatio-composable-app-development.official-docs",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs",
+      "legacyUris": [
+        "docs://mcp/references/creatio-composable-app-development/official-docs"
+      ],
+      "sourcePath": "references/creatio-composable-app-development/official-docs.md",
+      "bundlePath": "resources/reference.creatio-composable-app-development.official-docs.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.creatio-freedom-iframe-section.creatio-iframe-section-template",
+      "title": "Creatio Freedom UI iframe section: Creatio Iframe Section Template",
+      "description": "Reference resource for creatio-freedom-iframe-section: creatio-iframe-section-template.",
+      "topicId": "creatio.reference.creatio-freedom-iframe-section.creatio-iframe-section-template",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.creatio-freedom-iframe-section.creatio-iframe-section-template",
+      "legacyUris": [
+        "docs://mcp/references/creatio-freedom-iframe-section/creatio-iframe-section-template"
+      ],
+      "sourcePath": "references/creatio-freedom-iframe-section/creatio-iframe-section-template.md",
+      "bundlePath": "resources/reference.creatio-freedom-iframe-section.creatio-iframe-section-template.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.feature-toggle-tests.constants-and-fixture-pattern",
+      "title": "Feature toggle tests: Constants And Fixture Pattern",
+      "description": "Reference resource for feature-toggle-tests: constants-and-fixture-pattern.",
+      "topicId": "creatio.reference.feature-toggle-tests.constants-and-fixture-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.constants-and-fixture-pattern",
+      "legacyUris": [
+        "docs://mcp/references/feature-toggle-tests/constants-and-fixture-pattern"
+      ],
+      "sourcePath": "references/feature-toggle-tests/constants-and-fixture-pattern.md",
+      "bundlePath": "resources/reference.feature-toggle-tests.constants-and-fixture-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.feature-toggle-tests.feature-stub-pattern",
+      "title": "Feature toggle tests: Feature Stub Pattern",
+      "description": "Reference resource for feature-toggle-tests: feature-stub-pattern.",
+      "topicId": "creatio.reference.feature-toggle-tests.feature-stub-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.feature-stub-pattern",
+      "legacyUris": [
+        "docs://mcp/references/feature-toggle-tests/feature-stub-pattern"
+      ],
+      "sourcePath": "references/feature-toggle-tests/feature-stub-pattern.md",
+      "bundlePath": "resources/reference.feature-toggle-tests.feature-stub-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.feature-toggle-tests.test-coverage-checklist",
+      "title": "Feature toggle tests: Test Coverage Checklist",
+      "description": "Reference resource for feature-toggle-tests: test-coverage-checklist.",
+      "topicId": "creatio.reference.feature-toggle-tests.test-coverage-checklist",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.test-coverage-checklist",
+      "legacyUris": [
+        "docs://mcp/references/feature-toggle-tests/test-coverage-checklist"
+      ],
+      "sourcePath": "references/feature-toggle-tests/test-coverage-checklist.md",
+      "bundlePath": "resources/reference.feature-toggle-tests.test-coverage-checklist.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.feature-toggle.constants-pattern",
+      "title": "Feature toggle: Constants Pattern",
+      "description": "Reference resource for feature-toggle: constants-pattern.",
+      "topicId": "creatio.reference.feature-toggle.constants-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.feature-toggle.constants-pattern",
+      "legacyUris": [
+        "docs://mcp/references/feature-toggle/constants-pattern"
+      ],
+      "sourcePath": "references/feature-toggle/constants-pattern.md",
+      "bundlePath": "resources/reference.feature-toggle.constants-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.feature-toggle.implementation-patterns",
+      "title": "Feature toggle: Implementation Patterns",
+      "description": "Reference resource for feature-toggle: implementation-patterns.",
+      "topicId": "creatio.reference.feature-toggle.implementation-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.feature-toggle.implementation-patterns",
+      "legacyUris": [
+        "docs://mcp/references/feature-toggle/implementation-patterns"
+      ],
+      "sourcePath": "references/feature-toggle/implementation-patterns.md",
+      "bundlePath": "resources/reference.feature-toggle.implementation-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.feature-toggle.runtime-behavior",
+      "title": "Feature toggle: Runtime Behavior",
+      "description": "Reference resource for feature-toggle: runtime-behavior.",
+      "topicId": "creatio.reference.feature-toggle.runtime-behavior",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.feature-toggle.runtime-behavior",
+      "legacyUris": [
+        "docs://mcp/references/feature-toggle/runtime-behavior"
+      ],
+      "sourcePath": "references/feature-toggle/runtime-behavior.md",
+      "bundlePath": "resources/reference.feature-toggle.runtime-behavior.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.sys-setting-tests.coverage-checklist",
+      "title": "System setting tests: Coverage Checklist",
+      "description": "Reference resource for sys-setting-tests: coverage-checklist.",
+      "topicId": "creatio.reference.sys-setting-tests.coverage-checklist",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.sys-setting-tests.coverage-checklist",
+      "legacyUris": [
+        "docs://mcp/references/sys-setting-tests/coverage-checklist"
+      ],
+      "sourcePath": "references/sys-setting-tests/coverage-checklist.md",
+      "bundlePath": "resources/reference.sys-setting-tests.coverage-checklist.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.sys-setting-tests.mock-settings-attribute",
+      "title": "System setting tests: Mock Settings Attribute",
+      "description": "Reference resource for sys-setting-tests: mock-settings-attribute.",
+      "topicId": "creatio.reference.sys-setting-tests.mock-settings-attribute",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.sys-setting-tests.mock-settings-attribute",
+      "legacyUris": [
+        "docs://mcp/references/sys-setting-tests/mock-settings-attribute"
+      ],
+      "sourcePath": "references/sys-setting-tests/mock-settings-attribute.md",
+      "bundlePath": "resources/reference.sys-setting-tests.mock-settings-attribute.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.sys-setting-tests.setup-sys-settings-pattern",
+      "title": "System setting tests: Setup Sys Settings Pattern",
+      "description": "Reference resource for sys-setting-tests: setup-sys-settings-pattern.",
+      "topicId": "creatio.reference.sys-setting-tests.setup-sys-settings-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.sys-setting-tests.setup-sys-settings-pattern",
+      "legacyUris": [
+        "docs://mcp/references/sys-setting-tests/setup-sys-settings-pattern"
+      ],
+      "sourcePath": "references/sys-setting-tests/setup-sys-settings-pattern.md",
+      "bundlePath": "resources/reference.sys-setting-tests.setup-sys-settings-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.sys-setting.access-patterns",
+      "title": "System setting: Access Patterns",
+      "description": "Reference resource for sys-setting: access-patterns.",
+      "topicId": "creatio.reference.sys-setting.access-patterns",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.sys-setting.access-patterns",
+      "legacyUris": [
+        "docs://mcp/references/sys-setting/access-patterns"
+      ],
+      "sourcePath": "references/sys-setting/access-patterns.md",
+      "bundlePath": "resources/reference.sys-setting.access-patterns.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.sys-setting.constants-pattern",
+      "title": "System setting: Constants Pattern",
+      "description": "Reference resource for sys-setting: constants-pattern.",
+      "topicId": "creatio.reference.sys-setting.constants-pattern",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.sys-setting.constants-pattern",
+      "legacyUris": [
+        "docs://mcp/references/sys-setting/constants-pattern"
+      ],
+      "sourcePath": "references/sys-setting/constants-pattern.md",
+      "bundlePath": "resources/reference.sys-setting.constants-pattern.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.sys-setting.review-checklist",
+      "title": "System setting: Review Checklist",
+      "description": "Reference resource for sys-setting: review-checklist.",
+      "topicId": "creatio.reference.sys-setting.review-checklist",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.sys-setting.review-checklist",
+      "legacyUris": [
+        "docs://mcp/references/sys-setting/review-checklist"
+      ],
+      "sourcePath": "references/sys-setting/review-checklist.md",
+      "bundlePath": "resources/reference.sys-setting.review-checklist.md",
+      "mediaType": "text/markdown"
+    },
+    {
       "itemId": "related-list",
+      "title": "Related lists",
+      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies.",
       "topicId": "creatio.related-list",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-list",
@@ -770,6 +1585,8 @@
     },
     {
       "itemId": "related-page-binding",
+      "title": "Page-to-object binding",
+      "description": "Guides binding Freedom UI record and add pages to an object, including role and type variants, replacement semantics, discovery, and errors.",
       "topicId": "creatio.related-page-binding",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-page-binding",
@@ -781,7 +1598,23 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "routing",
+      "title": "Routing",
+      "description": "The canonical clio MCP routing map: a two-level, names-only table that maps a task (pages, entities, data, applications) to the get-guidance article(s) to read before acting. The server instructions mandate reading this first on any operation.",
+      "topicId": "creatio.routing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/routing",
+      "legacyUris": [
+        "docs://mcp/guides/routing"
+      ],
+      "sourcePath": "guidance/mcp/guides/routing.md",
+      "bundlePath": "resources/routing.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "run-process-button",
+      "title": "Run process buttons",
+      "description": "Guides adding a Freedom UI button that starts a Creatio business process with the correct request, parameters, and page context.",
       "topicId": "creatio.run-process-button",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/run-process-button",
@@ -794,6 +1627,8 @@
     },
     {
       "itemId": "server-to-server-oauth",
+      "title": "Server-to-server OAuth",
+      "description": "Guides use of Creatio server-to-server OAuth clients, token acquisition, API calls, secret handling, verification, and troubleshooting.",
       "topicId": "creatio.server-to-server-oauth",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/server-to-server-oauth",
@@ -806,6 +1641,8 @@
     },
     {
       "itemId": "support-mode",
+      "title": "Support mode",
+      "description": "Guides diagnostic-first execution in support mode, including severity routing, confirmation probes, fail-fast evidence, and reporting.",
       "topicId": "creatio.support-mode",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/support-mode",
@@ -818,6 +1655,8 @@
     },
     {
       "itemId": "sys-setting",
+      "title": "System settings",
+      "description": "Guides package code that reads and writes Creatio system settings through focused abstractions and dependency injection.",
       "topicId": "creatio.sys-setting",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-setting",
@@ -830,6 +1669,8 @@
     },
     {
       "itemId": "sys-setting-tests",
+      "title": "System setting tests",
+      "description": "Guides tests for package code that consumes Creatio system settings through mocked access abstractions.",
       "topicId": "creatio.sys-setting-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-setting-tests",
@@ -842,6 +1683,8 @@
     },
     {
       "itemId": "sys-settings",
+      "title": "System settings MCP operations",
+      "description": "Guides the Creatio system-settings create, read, and update tool flow, supported value types, lookup resolution, secure values, dates, and binary uploads.",
       "topicId": "creatio.sys-settings",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-settings",
@@ -854,6 +1697,8 @@
     },
     {
       "itemId": "theming",
+      "title": "Custom themes",
+      "description": "Guides creation, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes.",
       "topicId": "creatio.theming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/theming",
@@ -866,6 +1711,8 @@
     },
     {
       "itemId": "ui-project",
+      "title": "Freedom UI projects",
+      "description": "Guides scaffolding a Freedom UI Angular remote-module project inside an existing clio workspace, including arguments, names, paths, and prerequisites.",
       "topicId": "creatio.ui-project",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/ui-project",
@@ -878,6 +1725,8 @@
     },
     {
       "itemId": "virtual-entities",
+      "title": "Virtual entities",
+      "description": "Guides creation and verification of a virtual entity object, IEntityQueryExecutor implementation, querying, and Creatio 10.0+ EntityEventListener writes.",
       "topicId": "creatio.virtual-entities",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/virtual-entities",
@@ -886,6 +1735,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "when-to-use-requests",
+      "title": "When to use requests",
+      "description": "Canonical MCP guidance for wiring Freedom UI page actions to platform requests: when to reuse a built-in crt.*Request vs chain a handler vs author a usr.*Request, and the mandatory get-request-info catalog discipline — parameters as the only authorable keys (empty map = no params block), platform-injected baseParameters never in params, per-request documentation, and version scoping.",
+      "topicId": "creatio.when-to-use-requests",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/when-to-use-requests",
+      "legacyUris": [
+        "docs://mcp/guides/when-to-use-requests"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/when-to-use-requests.md",
+      "bundlePath": "resources/when-to-use-requests.md",
       "mediaType": "text/plain"
     }
   ]

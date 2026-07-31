@@ -119,6 +119,63 @@ public sealed class GuidanceInventoryTests
     }
 
     [Test]
+    [Description("Verifies that mandatory MCP bootstrap and request-selection guidance remains published with stable identities.")]
+    public void RequiredGuidance_ShouldRemainInThePublishedInventory()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        using JsonDocument source = ReadJson(repositoryRoot, "bundle-source.json");
+        JsonElement root = source.RootElement;
+        Dictionary<string, JsonElement> resources = root.GetProperty("resources")
+            .EnumerateArray()
+            .ToDictionary(resource => resource.GetProperty("itemId").GetString()!, StringComparer.Ordinal);
+        HashSet<string> requiredItemIds = root.GetProperty("requirements")
+            .GetProperty("itemIds")
+            .EnumerateArray()
+            .Select(item => item.GetString()!)
+            .ToHashSet(StringComparer.Ordinal);
+        (string ItemId, string SourcePath)[] mandatoryGuidance =
+        [
+            ("core-rules", "guidance/mcp/guides/core-rules.md"),
+            ("routing", "guidance/mcp/guides/routing.md"),
+            ("when-to-use-requests", "guidance/mcp/guides/pages/when-to-use-requests.md")
+        ];
+
+        // Act
+        string[] missingResources = mandatoryGuidance
+            .Where(item => !resources.ContainsKey(item.ItemId))
+            .Select(item => item.ItemId)
+            .ToArray();
+        string[] missingRequirements = mandatoryGuidance
+            .Where(item => !requiredItemIds.Contains(item.ItemId))
+            .Select(item => item.ItemId)
+            .ToArray();
+        string[] invalidContracts = mandatoryGuidance
+            .Where(item => resources.TryGetValue(item.ItemId, out JsonElement resource)
+                && (!string.Equals(resource.GetProperty("topicId").GetString(), $"creatio.{item.ItemId}", StringComparison.Ordinal)
+                    || !string.Equals(resource.GetProperty("role").GetString(), "guidance", StringComparison.Ordinal)
+                    || !string.Equals(resource.GetProperty("uri").GetString(),
+                        $"docs://knowledge/com.creatio.clio/{item.ItemId}", StringComparison.Ordinal)
+                    || resource.GetProperty("legacyUris").GetArrayLength() != 1
+                    || !string.Equals(resource.GetProperty("legacyUris")[0].GetString(),
+                        $"docs://mcp/guides/{item.ItemId}", StringComparison.Ordinal)
+                    || !string.Equals(resource.GetProperty("sourcePath").GetString(), item.SourcePath,
+                        StringComparison.Ordinal)
+                    || !File.Exists(Path.Combine(repositoryRoot,
+                        item.SourcePath.Replace('/', Path.DirectorySeparatorChar)))))
+            .Select(item => item.ItemId)
+            .ToArray();
+
+        // Assert
+        missingResources.Should().BeEmpty(
+            because: "Clio's mandatory startup and request-selection instructions must always resolve to published articles");
+        missingRequirements.Should().BeEmpty(
+            because: "activation must reject a bundle that silently omits mandatory guidance");
+        invalidContracts.Should().BeEmpty(
+            because: "mandatory guide IDs, routes, legacy aliases, and canonical source paths are stable contracts");
+    }
+
+    [Test]
     [Description("Verifies that the earlier ESQ oracle is an exact subset of the complete MIG0 oracle.")]
     public void CompleteOracle_ShouldRetainThePreviouslyFrozenEsqBytes()
     {

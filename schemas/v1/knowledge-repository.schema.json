@@ -133,6 +133,10 @@
           "then": { "properties": { "sourcePath": { "pattern": "^guidance/(?!.*\\.\\.)[^\\\\]+$" } } }
         },
         {
+          "if": { "properties": { "role": { "const": "reference" } }, "required": ["role"] },
+          "then": { "properties": { "sourcePath": { "pattern": "^references/(?!.*\\.\\.)[^\\\\]+$" } } }
+        },
+        {
           "if": { "properties": { "role": { "const": "advisory" } }, "required": ["role"] },
           "then": { "properties": { "sourcePath": { "pattern": "^advisories/(?!.*\\.\\.)[^\\\\]+$" } } }
         },
@@ -147,6 +151,8 @@
       ],
       "required": [
         "itemId",
+        "title",
+        "description",
         "topicId",
         "role",
         "uri",
@@ -158,12 +164,31 @@
         "itemId": {
           "$ref": "#/$defs/stableId"
         },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F])\\S(?:.*\\S)?$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": "^(?!.*[\\u0000-\\u001F\\u007F-\\u009F])\\S(?:.*\\S)?$"
+        },
         "topicId": {
           "$ref": "#/$defs/stableId"
         },
         "role": {
           "type": "string",
-          "enum": ["guidance", "advisory", "capability", "reference-example"]
+          "enum": ["guidance", "reference", "advisory", "capability", "reference-example"]
+        },
+        "requiredFeatures": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
         },
         "uri": {
           "type": "string",
@@ -181,7 +206,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 512,
-          "pattern": "^(guidance|catalog|advisories|capabilities)/(?!.*\\.\\.)[^\\\\]+$"
+          "pattern": "^(guidance|references|catalog|advisories|capabilities)/(?!.*\\.\\.)[^\\\\]+$"
         },
         "bundlePath": {
           "type": "string",

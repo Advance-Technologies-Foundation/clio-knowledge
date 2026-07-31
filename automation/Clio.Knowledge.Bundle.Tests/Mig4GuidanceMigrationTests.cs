@@ -71,7 +71,7 @@ public sealed class Mig4GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Verifies that every canonical MIG4 article exactly matches the frozen Clio guidance bytes.")]
+    [Description("Verifies that every MIG4 article differs from its frozen Clio oracle only by canonicalized reference links.")]
     public void CanonicalGuidance_ShouldMatchFrozenClioOracle_ByteForByte()
     {
         // Arrange
@@ -79,16 +79,20 @@ public sealed class Mig4GuidanceMigrationTests
 
         // Act
         string[] differences = MigratedArticles
-            .Where(article => !File.ReadAllBytes(ToFullPath(repositoryRoot, article.CanonicalPath))
-                .SequenceEqual(File.ReadAllBytes(ToFullPath(
+            .Where(article => !string.Equals(
+                ReferenceLinkMigration.NormalizeToFrozenLinkText(File.ReadAllText(ToFullPath(
                     repositoryRoot,
-                    $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md"))))
+                    article.CanonicalPath))),
+                File.ReadAllText(ToFullPath(
+                    repositoryRoot,
+                    $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md")),
+                StringComparison.Ordinal))
             .Select(article => article.Id)
             .ToArray();
 
         // Assert
         differences.Should().BeEmpty(
-            because: "the initial MIG4 migration must preserve the oracle's exact UTF-8 and LF bytes");
+            because: "the reference migration changes only links that now target independently published articles");
     }
 
     [Test]

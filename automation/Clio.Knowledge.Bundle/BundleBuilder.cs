@@ -28,10 +28,14 @@ public sealed class BundleBuilder
     private static readonly Regex StableIdPattern = new(
         "^[a-z0-9]+(?:[.-][a-z0-9]+)*$",
         RegexOptions.CultureInvariant);
+    private static readonly Regex RolePattern = new(
+        "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+        RegexOptions.CultureInvariant);
     private static readonly IReadOnlyDictionary<string, string> SourceRootByRole =
         new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["guidance"] = "guidance/",
+        ["reference"] = "references/",
         ["advisory"] = "advisories/",
         ["capability"] = "capabilities/",
         ["reference-example"] = "catalog/"
@@ -205,10 +209,24 @@ public sealed class BundleBuilder
         {
             ValidateStableId(resource.ItemId, "item ID");
             ValidateStableId(resource.TopicId, "topic ID");
-            if (string.IsNullOrWhiteSpace(resource.Role) || !SourceRootByRole.ContainsKey(resource.Role))
+            ValidateDiscoveryText(resource.Title, "title", resource.ItemId, 160);
+            ValidateDiscoveryText(resource.Description, "description", resource.ItemId, 1000);
+            IReadOnlyList<string> requiredFeatures = resource.RequiredFeatures ?? [];
+            EnsureUnique(requiredFeatures, $"required feature for resource '{resource.ItemId}'");
+            foreach (string requiredFeature in requiredFeatures)
+            {
+                ValidateStableId(requiredFeature, $"required feature for resource '{resource.ItemId}'");
+            }
+            if (string.IsNullOrWhiteSpace(resource.SourcePath))
+            {
+                throw new InvalidDataException($"Resource '{resource.ItemId}' must declare a source path.");
+            }
+            if (string.IsNullOrWhiteSpace(resource.Role)
+                || !RolePattern.IsMatch(resource.Role)
+                || !SourceRootByRole.ContainsKey(resource.Role))
             {
                 throw new InvalidDataException(
-                    $"Resource '{resource.ItemId}' role must be guidance, advisory, capability, or reference-example.");
+                    $"Resource '{resource.ItemId}' role is not supported by the v1 repository contract.");
             }
             ValidateSourcePath(resource.SourcePath, resource.ItemId, resource.Role);
             string expectedUri = CreateCanonicalUri(source.LibraryId, resource.ItemId);
@@ -271,6 +289,23 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException(
                 $"Every resource {label} must be a lowercase dot-or-hyphen separated stable identifier.");
+        }
+    }
+
+    private static void ValidateDiscoveryText(
+        string value,
+        string label,
+        string itemId,
+        int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value)
+            || value.Length > maxLength
+            || !string.Equals(value, value.Trim(), StringComparison.Ordinal)
+            || value.Any(char.IsControl))
+        {
+            throw new InvalidDataException(
+                $"Resource '{itemId}' {label} must be non-empty, trimmed, free of control characters, "
+                + $"and at most {maxLength} characters.");
         }
     }
 
@@ -432,8 +467,13 @@ public sealed class BundleBuilder
         publication.Signature,
         resources.Select(resource => new BundleResource(
             resource.Descriptor.ItemId,
+            resource.Descriptor.Title,
+            resource.Descriptor.Description,
             resource.Descriptor.TopicId,
             resource.Descriptor.Role,
+            resource.Descriptor.RequiredFeatures is { Count: > 0 }
+                ? resource.Descriptor.RequiredFeatures.OrderBy(value => value, StringComparer.Ordinal).ToArray()
+                : null,
             resource.Descriptor.Uri,
             resource.Descriptor.LegacyUris is { Count: > 0 }
                 ? resource.Descriptor.LegacyUris.OrderBy(value => value, StringComparer.Ordinal).ToArray()

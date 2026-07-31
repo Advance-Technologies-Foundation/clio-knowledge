@@ -81,9 +81,9 @@ Delete flow:
 
 ## Read These References
 
-- `references/listener-patterns.md`: class structure, naming, event selection, and thin-listener patterns
-- `references/validation-patterns.md`: validation subscription and `EntityValidationMessage` examples
-- `references/review-checklist.md`: review points and common defects
+- `docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.listener-patterns`: class structure, naming, event selection, and thin-listener patterns
+- `docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.validation-patterns`: validation subscription and `EntityValidationMessage` examples
+- `docs://knowledge/com.creatio.clio/reference.configuration-entity-event-listener.review-checklist`: review points and common defects
 
 ## What To Report Back
 

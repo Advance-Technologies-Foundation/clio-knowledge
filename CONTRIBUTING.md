@@ -9,6 +9,7 @@ independently released knowledge system trustworthy while the v1 multi-source pu
 2. Review [Clio discussion #924](https://github.com/Advance-Technologies-Foundation/clio/discussions/924).
 3. Decide which knowledge type owns the change:
    - canonical guidance;
+   - a supporting reference linked from canonical guidance;
    - safety advisory or limitation;
    - capability or pattern identity;
    - reference-example catalog metadata;

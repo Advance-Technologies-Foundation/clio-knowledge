@@ -33,8 +33,11 @@ public sealed record SignatureDescriptor(string Algorithm, string KeyId);
 
 public sealed record SourceResource(
     string ItemId,
+    string Title,
+    string Description,
     string TopicId,
     string Role,
+    IReadOnlyList<string>? RequiredFeatures,
     string Uri,
     IReadOnlyList<string>? LegacyUris,
     string SourcePath,
@@ -56,8 +59,12 @@ public sealed record KnowledgeBundleManifest(
 
 public sealed record BundleResource(
     string ItemId,
+    string Title,
+    string Description,
     string TopicId,
     string Role,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<string>? RequiredFeatures,
     string Uri,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     IReadOnlyList<string>? LegacyUris,

@@ -75,9 +75,9 @@ Rules:
 ## References
 
 Read only what you need:
-- `references/constants-pattern.md`: where to keep sys-setting code constants
-- `references/access-patterns.md`: exact `TryGetValue(...)`, `GetValue(...)`, and `GetDefValue(...)` usage
-- `references/review-checklist.md`: implementation and review reminders for sys-setting reads
+- `docs://knowledge/com.creatio.clio/reference.sys-setting.constants-pattern`: where to keep sys-setting code constants
+- `docs://knowledge/com.creatio.clio/reference.sys-setting.access-patterns`: exact `TryGetValue(...)`, `GetValue(...)`, and `GetDefValue(...)` usage
+- `docs://knowledge/com.creatio.clio/reference.sys-setting.review-checklist`: implementation and review reminders for sys-setting reads
 
 ## Build And Verify
 

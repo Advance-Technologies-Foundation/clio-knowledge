@@ -8,7 +8,7 @@ Use this skill for source-level Creatio work, especially when the task involves 
 - Treat Creatio artifacts as package-scoped. Identify the package, schema, and object ownership before editing.
 - Prefer existing workspace conventions over generic samples. If the repository already has naming, packaging, or schema patterns, follow them.
 - Use CLIO command names exactly when you mention them. The local command set in this environment includes `new-pkg`, `push-pkg`, and `pull-pkg`.
-- For niche Creatio APIs or Freedom UI patterns, consult [references/official-docs.md](references/official-docs.md) before inventing a structure.
+- For niche Creatio APIs or Freedom UI patterns, consult [docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs](docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs) before inventing a structure.
 
 ## Workflow
 
@@ -69,7 +69,7 @@ Use package lifecycle commands when the user is creating a new customization pac
 
 ## Reference Set
 
-Read [references/official-docs.md](references/official-docs.md) when you need:
+Read [docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs](docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs) when you need:
 
 - Official Creatio documentation links for app architecture, Freedom UI pages, and custom components
 - Local CLIO command references for package lifecycle commands

@@ -22,9 +22,9 @@ Workflow
 
 References
 Read only what you need:
-- docs://mcp/references/configuration-webservice-tests/test-fixture-pattern: local fixture shape, composition-root reset, and dependency-injection mocking pattern
-- docs://mcp/references/configuration-webservice-tests/assertion-style: AAA layout, [Description], and because assertion rules
-- docs://mcp/references/configuration-webservice-tests/endpoint-test-patterns: what to assert for DTO, void, and Stream endpoints
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.test-fixture-pattern: local fixture shape, composition-root reset, and dependency-injection mocking pattern
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.assertion-style: AAA layout, [Description], and because assertion rules
+- docs://knowledge/com.creatio.clio/reference.configuration-webservice-tests.endpoint-test-patterns: what to assert for DTO, void, and Stream endpoints
 
 Build And Verify
 Typical commands:

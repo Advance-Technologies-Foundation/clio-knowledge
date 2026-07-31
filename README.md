@@ -8,8 +8,10 @@ The intended result is that correcting an article, publishing a safety advisory,
 
 ## Status
 
-Content migration is active. Canonical articles live under `guidance/mcp/guides/` and the root
-`bundle-source.json` publishes the complete direct-source catalog consumed by Git installations.
+The initial Clio guidance migration is complete. Canonical articles live under
+`guidance/mcp/guides/` and the root `bundle-source.json` publishes the complete direct-source
+catalog consumed by Git installations. The required inventory includes `core-rules`, `routing`,
+and `when-to-use-requests`, which Clio instructions depend on before ordinary tool execution.
 
 The remote publication, production signing, and automatic Clio update path remain under review for
 the Monday architecture decision. Do not treat content as released Clio guidance until it is included
@@ -39,6 +41,7 @@ It is not intended to contain:
 | Path | Purpose |
 |---|---|
 | [`guidance/`](guidance/README.md) | Canonical human-readable guidance articles. |
+| [`references/`](references/README.md) | Supporting articles linked by primary guidance without becoming bare `get-guidance` topics. |
 | [`advisories/`](advisories/README.md) | High-visibility safety rules, limitations, and urgent corrections. |
 | [`capabilities/`](capabilities/README.md) | Controlled identifiers for features, patterns, and architectural choices. |
 | [`catalog/`](catalog/README.md) | Trusted metadata pointing to independently versioned reference repositories. |
@@ -76,17 +79,19 @@ articles through exact namespaced resource URIs and logical topic resolution. Th
 is `(libraryId, sequence, bundleDigest)`; NuGet versions and Git branches, tags, and commits describe
 retrieval and provenance rather than identity.
 
-The ESQ family is the first real migration slice. Additional guidance families will move from Clio
-incrementally. Its canonical routes are
-`docs://knowledge/com.creatio.clio/<item-id>`. `legacyUris` preserve the former
-`docs://mcp/guides/...` routes during the POC transition without making them canonical v1 identity.
+All Clio MCP guidance articles now live in this repository. Their canonical routes are
+`docs://knowledge/com.creatio.clio/<item-id>`. Publisher-owned `title` and `description` fields drive
+live MCP resource discovery, while `legacyUris` preserve former `docs://mcp/guides/...` routes
+without making those aliases part of Clio's compiled source or canonical v1 identity.
 
 ## Multi-source bundle identity
 
 Every v1 bundle declares a reverse-DNS `libraryId`, publisher-facing `libraryVersion`, and positive
 monotonic `sequence`. Every item declares a stable `itemId`, cross-library `topicId`, `role`, and
-exact route. The builder derives the expected route from the library and item IDs and rejects a
-mismatch, duplicate item, duplicate route or alias, and duplicate topic/role pair within a library.
+exact route. An item may also declare optional `requiredFeatures` stable IDs; Clio must hide that
+item unless every named feature is enabled. The builder derives the expected route from the library
+and item IDs and rejects a mismatch, duplicate item, duplicate route or alias, duplicate feature ID,
+and duplicate topic/role pair within a library.
 
 Logical selection policy belongs to Clio and operator configuration. A library publishes identity,
 content, compatibility, and provenance; it does not publish its own priority or override rights.

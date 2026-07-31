@@ -48,9 +48,9 @@ Use `true` for enabled coverage and `false` for disabled coverage.
 ## References
 
 Read only what you need:
-- `references/feature-stub-pattern.md`: exact `FeatureRequest` and `FeatureStub.Setup(...)` usage
-- `references/constants-and-fixture-pattern.md`: how to keep constants shared across production code and tests
-- `references/test-coverage-checklist.md`: minimum coverage expectations for feature-gated logic
+- `docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.feature-stub-pattern`: exact `FeatureRequest` and `FeatureStub.Setup(...)` usage
+- `docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.constants-and-fixture-pattern`: how to keep constants shared across production code and tests
+- `docs://knowledge/com.creatio.clio/reference.feature-toggle-tests.test-coverage-checklist`: minimum coverage expectations for feature-gated logic
 
 ## Build And Verify
 
