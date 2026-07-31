@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.6.0",
-  "sequence": 8,
+  "libraryVersion": "1.7.0",
+  "sequence": 9,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -299,7 +299,7 @@
     {
       "itemId": "atf-repository-model-management",
       "title": "ATF.Repository model management",
-      "description": "Explains how to generate, organize, validate, and update ATF.Repository models for the exact Creatio schemas and members an implementation needs.",
+      "description": "Explains how to generate, organize, validate, and update ATF.Repository models for the exact Creatio schemas and members an implementation needs. Use it whenever a task creates, extends, merges, or selects ATF.Repository models or their members — for example `Add models Account (Name, Owner, Owner.DecisionRole)` or `Add Account model (Name, Owner), Order (Number, Account)`.",
       "topicId": "creatio.atf-repository-model-management",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-model-management",
@@ -313,7 +313,7 @@
     {
       "itemId": "atf-repository-tests",
       "title": "ATF.Repository tests",
-      "description": "Guides unit and integration testing for code that uses ATF.Repository models, relations, providers, and data contexts.",
+      "description": "Guides unit and integration testing for code that uses ATF.Repository models, relations, providers, and data contexts, including `MemoryDataProviderMock` and `IDataStore` setup, `AppDataContextFactory.GetAppDataContext(...)`, model-schema registration, seeded in-memory data, and repository assertions after query or save operations.",
       "topicId": "creatio.atf-repository-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -489,7 +489,7 @@
     {
       "itemId": "core-rules",
       "title": "Core rules",
-      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
+      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
       "topicId": "creatio.core-rules",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/core-rules",

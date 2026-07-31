@@ -43,11 +43,14 @@ internal static class KnowledgeOracle
             "feature-toggle-tests",
             "sys-setting",
             "sys-setting-tests",
-            // Expanded here after the snapshot; Clio never carried the added material.
-            "page-schema-handlers",
-            // Carry both an edit made here and an edit made in Clio, reconciled by a three-way merge.
+            // Carry both an edit made here and an edit made in Clio, reconciled by a three-way merge:
+            // each keeps the Clio-side revision plus a pointer to run-process-button, an article this
+            // repository still publishes and Clio retired.
             "mobile-page-modification",
-            "page-modification"
+            "page-modification",
+            // Points at the reference articles extracted into references/ and additionally names the
+            // run-process-button guide alongside the request catalog Clio's revision introduced.
+            "page-schema-handlers"
         };
 
     /// <summary>
