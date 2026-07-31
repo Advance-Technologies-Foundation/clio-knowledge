@@ -20,23 +20,24 @@ public sealed class Mig1PagesMigrationTests
     ];
 
     [Test]
-    [Description("Verifies that every MIG1 canonical page article exactly matches its frozen Clio oracle.")]
-    public void CanonicalPageGuidance_ShouldMatchFrozenClioOracle()
+    [Description("Verifies that every mirrored MIG1 canonical page article exactly matches the current Clio oracle.")]
+    public void CanonicalPageGuidance_ShouldMatchCurrentClioOracle()
     {
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
 
         // Act
         string[] differences = Articles
+            .Where(article => KnowledgeOracle.MirrorsClio(article.Id))
             .Where(article => !CanonicalBytes(repositoryRoot, article.CanonicalPath)
                 .SequenceEqual(CanonicalBytes(repositoryRoot,
-                    $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md")))
+                    KnowledgeOracle.CurrentResourcePath(article.Id))))
             .Select(article => article.Id)
             .ToArray();
 
         // Assert
         differences.Should().BeEmpty(
-            because: "the initial MIG1 migration must preserve the exact guidance bytes served by Clio");
+            because: "a MIG1 article this repository has not taken ownership of must still serve the exact bytes Clio serves");
     }
 
     [Test]

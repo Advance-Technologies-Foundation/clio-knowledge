@@ -52,24 +52,25 @@ public sealed class Mig2PageSchemaMigrationTests
     ];
 
     [Test]
-    [Description("Verifies that every MIG2 canonical article differs from its frozen Clio oracle only by canonicalized reference links.")]
-    public void CanonicalPageSchemaGuidance_ShouldMatchFrozenClioOracleByteForByte()
+    [Description("Verifies that every mirrored MIG2 canonical article differs from the current Clio oracle only by canonicalized reference links.")]
+    public void CanonicalPageSchemaGuidance_ShouldMatchCurrentClioOracleByteForByte()
     {
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
 
         // Act
         string[] differences = Articles
+            .Where(article => KnowledgeOracle.MirrorsClio(article.Id))
             .Where(article => !string.Equals(
                 ReferenceLinkMigration.NormalizeToFrozenLinkText(ReadText(repositoryRoot, article.CanonicalPath)),
-                ReadText(repositoryRoot, $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md"),
+                ReadText(repositoryRoot, KnowledgeOracle.CurrentResourcePath(article.Id)),
                 StringComparison.Ordinal))
             .Select(article => article.Id)
             .ToArray();
 
         // Assert
         differences.Should().BeEmpty(
-            because: "the reference migration changes only links that now target independently published articles");
+            because: "an article this repository has not taken ownership of may differ from Clio only by links that now target independently published articles");
     }
 
     [Test]
