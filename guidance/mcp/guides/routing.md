@@ -5,7 +5,8 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
 
 - Pages (Freedom UI): create/edit -> get-component-info (read resolvedFrom) + name=page-modification
   - page-modification is the entry; after its GATE read the ONE matching sub-guide: name=page-modification-overview (save lifecycle), name=page-modification-field-contract (insert a data-bound field), name=page-modification-containers (parentName / bundle.json), name=page-modification-components (button/handler/viewConfigDiff rules)
-  - dashboards (create a dashboard page, or lay out / size / style analytics widgets) -> name=dashboards (routes onward to dashboard-creation / dashboard-design)
+  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
+  - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
   - page business rules (create/change/remove; visibility/required/value) -> name=business-rules
   - wire a button/menu action to a platform request (crt.*Request: print, close, cancel, ...) -> get-request-info + name=when-to-use-requests
@@ -23,4 +24,6 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
-- Theming & branding: brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
+- Branding & theming: product logos / shell background image -> name=branding
+  - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
+- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access -> name=record-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights

@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.5.0",
-  "sequence": 7,
+  "libraryVersion": "1.6.0",
+  "sequence": 8,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -28,6 +28,7 @@
       "atf-repository-tests",
       "atf.creatio.google-pubsub-reference",
       "atf.creatio.kafka-reference",
+      "branding",
       "business-rule-filters",
       "business-rules",
       "chart-widget",
@@ -40,8 +41,10 @@
       "core-rules",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
+      "dashboard-and-home-page-layout",
       "dashboard-creation",
       "dashboard-design",
+      "dashboard-rights",
       "dashboards",
       "data-bindings",
       "dataforge-orchestration",
@@ -56,6 +59,8 @@
       "existing-app-maintenance",
       "feature-toggle",
       "feature-toggle-tests",
+      "freedom-page-web-to-mobile-conversion",
+      "home-page",
       "identity-assertion",
       "indicator-widget",
       "integration-testing",
@@ -73,6 +78,7 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
       "reference.atf-repository-dev.provider-and-context",
@@ -138,6 +144,7 @@
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
       "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "docs://knowledge/com.creatio.clio/branding",
       "docs://knowledge/com.creatio.clio/business-rule-filters",
       "docs://knowledge/com.creatio.clio/business-rules",
       "docs://knowledge/com.creatio.clio/chart-widget",
@@ -150,8 +157,10 @@
       "docs://knowledge/com.creatio.clio/core-rules",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
+      "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
       "docs://knowledge/com.creatio.clio/dashboard-creation",
       "docs://knowledge/com.creatio.clio/dashboard-design",
+      "docs://knowledge/com.creatio.clio/dashboard-rights",
       "docs://knowledge/com.creatio.clio/dashboards",
       "docs://knowledge/com.creatio.clio/data-bindings",
       "docs://knowledge/com.creatio.clio/dataforge-orchestration",
@@ -166,6 +175,8 @@
       "docs://knowledge/com.creatio.clio/existing-app-maintenance",
       "docs://knowledge/com.creatio.clio/feature-toggle",
       "docs://knowledge/com.creatio.clio/feature-toggle-tests",
+      "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
+      "docs://knowledge/com.creatio.clio/home-page",
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
       "docs://knowledge/com.creatio.clio/integration-testing",
@@ -183,6 +194,7 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
@@ -333,6 +345,20 @@
       "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
       "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
       "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "branding",
+      "title": "Branding",
+      "description": "Guides Creatio environment branding: product logos, the shell background image, and the browser-tab favicon, including the license check and the settings each asset is written to.",
+      "topicId": "creatio.branding",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/branding",
+      "legacyUris": [
+        "docs://mcp/guides/branding"
+      ],
+      "sourcePath": "guidance/mcp/guides/theming/branding.md",
+      "bundlePath": "resources/branding.md",
+      "mediaType": "text/plain"
     },
     {
       "itemId": "business-rule-filters",
@@ -503,6 +529,20 @@
       "mediaType": "text/markdown"
     },
     {
+      "itemId": "dashboard-and-home-page-layout",
+      "title": "Dashboard and home page layout",
+      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages, including the 12-column grid, the metric-band-then-chart-grid skeleton, and the card style.",
+      "topicId": "creatio.dashboard-and-home-page-layout",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
+      "legacyUris": [
+        "docs://mcp/guides/dashboard-and-home-page-layout"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/layout.md",
+      "bundlePath": "resources/dashboard-and-home-page-layout.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "dashboard-creation",
       "title": "Dashboard creation",
       "description": "Guides creation of Freedom UI dashboard pages with the supported dashboard template and correct dashboard metadata bindings.",
@@ -528,6 +568,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/dashboards/design.md",
       "bundlePath": "resources/dashboard-design.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "dashboard-rights",
+      "title": "Dashboard rights",
+      "description": "Guides access rights for dashboard pages, including who may view or edit a dashboard and how the rights are granted.",
+      "topicId": "creatio.dashboard-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dashboard-rights",
+      "legacyUris": [
+        "docs://mcp/guides/dashboard-rights"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/rights.md",
+      "bundlePath": "resources/dashboard-rights.md",
       "mediaType": "text/plain"
     },
     {
@@ -725,6 +779,34 @@
       "sourcePath": "guidance/mcp/guides/composable-app/feature-toggle-tests.md",
       "bundlePath": "resources/feature-toggle-tests.md",
       "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "freedom-page-web-to-mobile-conversion",
+      "title": "Freedom UI web to mobile page conversion",
+      "description": "Guides the model-driven conversion of an existing Freedom UI web page into a Freedom UI mobile page, including the advisory tool flow and the supported component mapping.",
+      "topicId": "creatio.freedom-page-web-to-mobile-conversion",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
+      "legacyUris": [
+        "docs://mcp/guides/freedom-page-web-to-mobile-conversion"
+      ],
+      "sourcePath": "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md",
+      "bundlePath": "resources/freedom-page-web-to-mobile-conversion.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "home-page",
+      "title": "Home page",
+      "description": "Guides Freedom UI home page creation and modification, including how it differs from a dashboard page and which layout rules it shares.",
+      "topicId": "creatio.home-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/home-page",
+      "legacyUris": [
+        "docs://mcp/guides/home-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/dashboards/home-page.md",
+      "bundlePath": "resources/home-page.md",
+      "mediaType": "text/plain"
     },
     {
       "itemId": "identity-assertion",
@@ -965,6 +1047,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "record-rights",
+      "title": "Record rights",
+      "description": "Guides record-level access rights in Creatio, including how to enable them for an entity and how they interact with object operation permissions.",
+      "topicId": "creatio.record-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/record-rights",
+      "legacyUris": [
+        "docs://mcp/guides/record-rights"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/record-rights.md",
+      "bundlePath": "resources/record-rights.md",
       "mediaType": "text/plain"
     },
     {
