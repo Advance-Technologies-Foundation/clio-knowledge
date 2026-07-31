@@ -786,6 +786,9 @@
       "description": "Guides the model-driven conversion of an existing Freedom UI web page into a Freedom UI mobile page, including the advisory tool flow and the supported component mapping.",
       "topicId": "creatio.freedom-page-web-to-mobile-conversion",
       "role": "guidance",
+      "requiredFeatures": [
+        "mobile-page-converter"
+      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-web-to-mobile-conversion"
