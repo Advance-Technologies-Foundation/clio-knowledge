@@ -24,17 +24,18 @@ public sealed class Mig5GuidanceMigrationTests
     ];
 
     [Test]
-    [Description("Verifies that every canonical MIG5 article is byte-identical to its frozen Clio oracle.")]
-    public void CanonicalArticles_ShouldMatchFrozenOracleByteForByte()
+    [Description("Verifies that every mirrored canonical MIG5 article is byte-identical to the current Clio oracle.")]
+    public void CanonicalArticles_ShouldMatchCurrentOracleByteForByte()
     {
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
 
         // Act
         string[] differences = Articles
+            .Where(article => KnowledgeOracle.MirrorsClio(article.Id))
             .Where(article => !ReadBytes(repositoryRoot, article.CanonicalPath)
                 .SequenceEqual(ReadBytes(repositoryRoot,
-                    $"fixtures/oracles/clio-guidance-v0/resources/{article.Id}.md")))
+                    KnowledgeOracle.CurrentResourcePath(article.Id))))
             .Select(article => article.Id)
             .ToArray();
 
@@ -42,7 +43,7 @@ public sealed class Mig5GuidanceMigrationTests
         Articles.Should().HaveCount(12,
             because: "MIG5 owns exactly the twelve application, business-rule, process, and operational articles");
         differences.Should().BeEmpty(
-            because: "the initial migration must preserve the frozen Clio guidance bytes without normalization");
+            because: "a MIG5 article this repository has not taken ownership of must still serve the exact bytes Clio serves");
     }
 
     [Test]

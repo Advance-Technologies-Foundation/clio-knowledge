@@ -48,8 +48,8 @@ if (!copied)
 
 packageBytes.Position = 0;
 using ZipArchive package = new(packageBytes, ZipArchiveMode.Read, leaveOpen: true);
-ZipArchiveEntry payload = package.GetEntry("knowledge/knowledge.bundle.zip")
-    ?? throw new InvalidDataException("NuGet package does not contain knowledge/knowledge.bundle.zip.");
+ZipArchiveEntry payload = package.GetEntry("content/knowledge-bundle.zip")
+    ?? throw new InvalidDataException("NuGet package does not contain content/knowledge-bundle.zip.");
 Directory.CreateDirectory(Path.GetDirectoryName(outputPath)
     ?? throw new InvalidOperationException("Output bundle path must have a parent directory."));
 await using (Stream input = payload.Open())

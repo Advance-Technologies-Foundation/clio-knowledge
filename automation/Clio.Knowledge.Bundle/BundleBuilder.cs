@@ -16,6 +16,7 @@ public sealed class BundleBuilder
     private const int MaxArchiveEntries = 1024;
     private const int MaxResourceBytes = 4 * 1024 * 1024;
     private const int MaxBundleResourceBytes = 32 * 1024 * 1024;
+    private const int MaxRepositoryPathLength = 512;
     private static readonly DateTimeOffset ZipEpoch = new(1980, 1, 1, 0, 0, 0, TimeSpan.Zero);
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
     private static readonly Regex CompatibilityVersionPattern = new(
@@ -30,9 +31,14 @@ public sealed class BundleBuilder
     private static readonly Regex RolePattern = new(
         "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
         RegexOptions.CultureInvariant);
-    private static readonly HashSet<string> AllowedRoles = new(StringComparer.Ordinal)
+    private static readonly IReadOnlyDictionary<string, string> SourceRootByRole =
+        new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        "guidance", "reference", "advisory", "capability", "reference-example"
+        ["guidance"] = "guidance/",
+        ["reference"] = "references/",
+        ["advisory"] = "advisories/",
+        ["capability"] = "capabilities/",
+        ["reference-example"] = "catalog/"
     };
     private static readonly Regex CompleteCommitPattern = new(
         "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$",
@@ -217,11 +223,12 @@ public sealed class BundleBuilder
             }
             if (string.IsNullOrWhiteSpace(resource.Role)
                 || !RolePattern.IsMatch(resource.Role)
-                || !AllowedRoles.Contains(resource.Role))
+                || !SourceRootByRole.ContainsKey(resource.Role))
             {
                 throw new InvalidDataException(
                     $"Resource '{resource.ItemId}' role is not supported by the v1 repository contract.");
             }
+            ValidateSourcePath(resource.SourcePath, resource.ItemId, resource.Role);
             string expectedUri = CreateCanonicalUri(source.LibraryId, resource.ItemId);
             if (!string.Equals(resource.Uri, expectedUri, StringComparison.Ordinal))
             {
@@ -365,6 +372,21 @@ public sealed class BundleBuilder
             || !path.StartsWith("resources/", StringComparison.Ordinal))
         {
             throw new InvalidDataException($"Bundle resource path '{path}' must be a safe resources/ path.");
+        }
+    }
+
+    private static void ValidateSourcePath(string path, string itemId, string role)
+    {
+        string expectedRoot = SourceRootByRole[role];
+        if (string.IsNullOrWhiteSpace(path)
+            || path.Length > MaxRepositoryPathLength
+            || Path.IsPathRooted(path)
+            || path.Contains("..", StringComparison.Ordinal)
+            || path.Contains('\\')
+            || !path.StartsWith(expectedRoot, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException(
+                $"Resource '{itemId}' with role '{role}' must use a safe source path under '{expectedRoot}'.");
         }
     }
 

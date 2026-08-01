@@ -301,6 +301,60 @@ public sealed class BundleBuilderTests
                 because: "logical selection must yield at most one eligible item per role from a library");
     }
 
+    [TestCase("guidance", "catalog/sample.md")]
+    [TestCase("advisory", "guidance/sample.md")]
+    [TestCase("capability", "advisories/sample.md")]
+    [TestCase("reference-example", "capabilities/sample.md")]
+    [Description("Rejects a resource whose source directory does not match its semantic role.")]
+    public void Build_ShouldRejectSourcePath_WhenRoleUsesAnotherCanonicalRoot(string role, string sourcePath)
+    {
+        // Arrange
+        string manifestPath = WriteSource($$"""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "{{role}}", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "{{sourcePath}}", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            manifestPath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*must use a safe source path under*",
+                because: "a role must only publish content from its canonical repository directory");
+    }
+
+    [Test]
+    [Description("Rejects a source path longer than the public repository schema allows.")]
+    public void Build_ShouldRejectSourcePath_WhenPathExceedsSchemaLengthLimit()
+    {
+        // Arrange
+        string overlongPath = "guidance/" + new string('a', 504);
+        string manifestPath = WriteSource($$"""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "{{overlongPath}}", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(
+            manifestPath,
+            Path.Combine(_directory, "bundle.zip"),
+            key,
+            Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*must use a safe source path under*",
+                because: "the producer must enforce the same 512-character bound as its public schema");
+    }
+
     [Test]
     [Description("Accepts the dedicated reference role so supporting articles stay outside bare guidance discovery.")]
     public void Build_ShouldAcceptReferenceRole_WhenSupportingArticleIsValid()
@@ -309,7 +363,7 @@ public sealed class BundleBuilderTests
         File.WriteAllText(Path.Combine(_directory, "a.md"), "supporting reference\n", Encoding.UTF8);
         string sourcePath = WriteSource("""
 			[
-			  { "itemId": "reference.guide-a.detail", "title": "Guide A detail", "description": "Supporting detail for guide A.", "topicId": "creatio.reference.guide-a.detail", "role": "reference", "uri": "docs://knowledge/com.example.knowledge/reference.guide-a.detail", "legacyUris": ["docs://mcp/references/guide-a/detail"], "sourcePath": "a.md", "bundlePath": "resources/reference.guide-a.detail.md", "mediaType": "text/markdown" }
+			  { "itemId": "reference.guide-a.detail", "title": "Guide A detail", "description": "Supporting detail for guide A.", "topicId": "creatio.reference.guide-a.detail", "role": "reference", "uri": "docs://knowledge/com.example.knowledge/reference.guide-a.detail", "legacyUris": ["docs://mcp/references/guide-a/detail"], "sourcePath": "references/a.md", "bundlePath": "resources/reference.guide-a.detail.md", "mediaType": "text/markdown" }
 			]
 			""",
             "[\"reference.guide-a.detail\"]",
@@ -649,6 +703,18 @@ public sealed class BundleBuilderTests
         string resourceUrisJson = "[\"docs://knowledge/com.example.knowledge/guide-a\"]",
         string clioMax = "8.1.999")
     {
+        foreach (string canonicalRoot in new[] { "guidance", "references", "advisories", "capabilities", "catalog" })
+        {
+            string rootDirectory = Path.Combine(_directory, canonicalRoot);
+            Directory.CreateDirectory(rootDirectory);
+            foreach (string file in Directory.EnumerateFiles(_directory))
+            {
+                File.Copy(file, Path.Combine(rootDirectory, Path.GetFileName(file)), overwrite: true);
+            }
+        }
+        resourcesJson = resourcesJson
+            .Replace("\"sourcePath\": \"a.md\"", "\"sourcePath\": \"guidance/a.md\"", StringComparison.Ordinal)
+            .Replace("\"sourcePath\": \"b.md\"", "\"sourcePath\": \"guidance/b.md\"", StringComparison.Ordinal);
         string sourcePath = Path.Combine(_directory, "bundle-source.json");
         File.WriteAllText(sourcePath, $$"""
 			{
@@ -681,6 +747,9 @@ public sealed class BundleBuilderTests
     private static (string ResourcesJson, string ItemIdsJson, string ResourceUrisJson)
         CreateResourceDeclarations(int count, string sourcePath)
     {
+        sourcePath = sourcePath.Contains('/')
+            ? sourcePath
+            : $"guidance/{sourcePath}";
         var resources = Enumerable.Range(0, count).Select(index => new
         {
             itemId = $"guide-{index}",

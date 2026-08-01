@@ -81,7 +81,7 @@ Instead, report the limitation explicitly to the user. Use this shape:
   - What was requested.
   - Why mobile cannot do it (cite the rule: e.g. "validators are not supported
     on mobile", "crt.DataGrid is web-only", "page body must not declare
-    handlers", "only one data source per page").
+    handlers").
   - The closest supported alternative, if any (e.g. entity-level business rule
     via `create-entity-business-rules`, an OOTB converter from the allowed list,
     a remote handler the user must implement separately and reference by name).
@@ -165,10 +165,12 @@ To add content inside the Scaffold:
 - Patch it:  { "operation": "merge", "name": "Scaffold", "values": { ... } }
 - Add child: { "operation": "insert", ..., "parentName": "Scaffold", "propertyName": "items" }
 
+viewConfigDiff INSERTS ADDRESS THE SLOT BY propertyName ONLY — never use "path" in a
+viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is
+the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
+insert that uses "path" is silently dropped by the differ.
+
 ─────────────────────────────────────────────────────────────
-ONE DATA SOURCE PER PAGE (designer constraint)
-─────────────────────────────────────────────────────────────
-The mobile designer disables multi-data-source. Define only one data source in modelConfigDiff.
 
 ─────────────────────────────────────────────────────────────
 COMPONENT REGISTRY — MOBILE COMPONENTS ONLY (CRITICAL)
@@ -209,8 +211,10 @@ has no specialized match.
 ─────────────────────────────────────────────────────────────
 ADAPTIVE BREAKPOINTS
 ─────────────────────────────────────────────────────────────
-Apply this section only when the user explicitly asks for adaptive / responsive layout.
-Otherwise rely on the static `columns` / `layoutConfig` values.
+The web→mobile conversion PROPOSES an adaptive layout for containers that group 2+ fields
+(stack on phone, 2 columns on tablet) — present it to the user, who can adjust or decline.
+Apply this section whenever you want per-screen placement; otherwise rely on the static
+`columns` / `layoutConfig` values.
 
 Breakpoints: "small" (phone portrait), "medium" (landscape / tablet portrait), "large" (tablet landscape).
 The mobile designer "Tablet portrait" / "Tablet landscape" preview switcher maps to `medium` / `large`.
@@ -290,8 +294,10 @@ line up 1×3 on tablet landscape (see UsrMobilePage_07zg9nr for a live reference
 Rules of thumb:
   - Define `adaptive` on the GridContainer AND `layoutConfig.adaptive` on every child
     that needs to move between breakpoints. Skipping either side breaks the layout.
-  - Use 1-based `row` and `column`. `colSpan` / `rowSpan` default to 1; include them
-    explicitly to match the format produced by the mobile designer.
+  - Use 1-based `row` and `column` — the runtime reflows children by these per breakpoint
+    (one item per cell). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
+    designer's format, but are NOT honored per-item by the runtime; do not rely on them to
+    span cells. To make an item wider, give the container fewer columns at that breakpoint.
   - Keep all three breakpoints (`small`, `medium`, `large`) populated even when two
     share the same cell — the designer always serialises the full set and partial maps
     may render as empty cells on the missing breakpoint.
@@ -385,6 +391,30 @@ crt.LoadDataRequest
   Reloads data from a data source.
   params: dataSourceName? (string), updateCache? (boolean)
 
+crt.QuickFilterRequest
+  Applies a quick filter to a list/value attribute.
+  params: filterValue? (depends on the filter attribute)
+
+── List items ──────────────────────────────────────────────
+
+crt.CreateListItemRequest
+  Creates an item in a list/collection.
+  params: defaultValues? ([{attributeName, value}])
+
+crt.UpdateListItemRequest
+  Updates an item in a list/collection.
+  params: recordId? (string)
+
+crt.DeleteListItemRequest
+  Deletes an item from a list/collection.
+  params: recordId? (string)
+
+── Advanced ────────────────────────────────────────────────
+
+crt.ExecuteExpressionRequest
+  Evaluates an expression via the mobile expression engine.
+  params: expression (string, required)
+
 ── Business process ────────────────────────────────────────
 
 crt.RunBusinessProcessRequest
@@ -392,23 +422,23 @@ crt.RunBusinessProcessRequest
   (e.g. 'ForTheSelectedPage' for the current record; 'RegardlessOfThePage' for none).
   "For the selected page" maps to processRunType: 'ForTheSelectedPage' — setting
   recordIdProcessParameterName alone does NOT select the run type.
-  FULL parameter contract is the run-process-button guide (single source of truth):
-  call get-guidance run-process-button and resolve the process with get-process-signature
-  FIRST. Keys in processParameters / parameterMappings / recordIdProcessParameterName are
-  process parameter CODES, NOT captions — a wrong code is silently dropped.
+  FULL parameter contract is the request catalog (single source of truth): call
+  get-request-info request-type=crt.RunBusinessProcessRequest schema-type=mobile and resolve
+  the process with get-process-signature FIRST. On mobile pages ALWAYS pass
+  schema-type=mobile — the mobile request catalog is a separate registry scoped to the
+  requests available on Freedom UI mobile, and their parameters can differ from desktop
+  (e.g. crt.RunBusinessProcessRequest adds mobile-only activeRow / activeRowAttributeName).
+  Keys in processParameters / parameterMappings /
+  recordIdProcessParameterName are process parameter CODES, NOT captions — a wrong code
+  is silently dropped. The run-process-button guide (get-guidance run-process-button)
+  carries the authoring recipe around that contract.
 
 ── Files ───────────────────────────────────────────────────
 
 crt.UploadFileRequest
-  Uploads a file. On mobile supports camera, gallery, and file picker.
-  params: viewElementName? (string),
-          itemsAttributeName? (string),
-          maximumAllowedFileSize? (number, MB),
-          allowedFileTypes? (string, comma-separated extensions),
-          fileEntitySchemaName? (string),
-          recordEntitySchemaName? (string),
-          recordColumnName? (string),
-          recordId? (string)
+  Uploads files into a crt.FileList on the page and attaches them to its record; the
+  file-source picker is always used. FULL parameter contract is the request catalog
+  (single source of truth): get-request-info request-type=crt.UploadFileRequest schema-type=mobile.
 
 crt.DeleteFileRequest
   Deletes an uploaded file.
