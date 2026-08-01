@@ -19,16 +19,17 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class PublishedGenerationTests
 {
-    // ASCII unit separator: cannot occur inside an identifier, URI, or path, so no field value can
-    // impersonate a field boundary and mask a change.
+    // ASCII unit separator: cannot occur inside an identifier, URI, or path, and BundleBuilder
+    // refuses to publish a title or description carrying any control character, so no hashed field
+    // value can impersonate a field boundary and mask a change.
     private const char Separator = '\u001F';
 
     // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever
     // published content or resource metadata changes. A failure here is not a broken test: it means
     // the working tree publishes different bytes than the recorded generation claims.
-    private const ulong PublishedSequence = 9;
+    private const ulong PublishedSequence = 10;
     private const string PublishedContentDigest =
-        "447FCED98A7EA33D1F42561B161F648661F5AF2AD0F9CC9BB5C18308746FDE61";
+        "F4928784AD66711F432539FE322E205727FFB2189CEF50968AD4ADB796D16D5B";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]
@@ -53,9 +54,19 @@ public sealed class PublishedGenerationTests
                 + "then record the new digest here");
     }
 
-    // Hashes exactly what a consumer sees: every resource's identity, routing, gating, and body
-    // bytes, in a stable order. Deliberately independent of the signed artifact, whose ECDSA
-    // signature is not reproducible across runs.
+    // Hashes exactly what a consumer sees: every resource's identity, selection metadata, routing,
+    // gating, and body bytes, in a stable order.
+    //
+    // Covered: itemId, title, description, topicId, role, uri, legacyUris, requiredFeatures,
+    // mediaType, sourcePath, and the SHA-256 of the body at that path. Title and description are in
+    // scope because they are the resources/list selection signal — an agent chooses an article from
+    // them, so rewriting one changes what a consumer gets even when the body is byte-identical.
+    //
+    // Not covered: bundlePath, a packaging detail no consumer reads; the manifest-level
+    // contractVersion, bundleSchemaVersion, libraryId, compatibility, and requirements fields; and
+    // the signed artifact, whose ECDSA signature is not reproducible across runs. sequence and
+    // libraryVersion are excluded by design — sequence is the generation label this digest is
+    // compared against, so hashing it would let a version bump mask a content change.
     private static string ComputeContentDigest(string repositoryRoot, JsonElement root)
     {
         StringBuilder canonical = new();
@@ -65,6 +76,8 @@ public sealed class PublishedGenerationTests
         foreach (JsonElement resource in resources)
         {
             canonical.Append(resource.GetProperty("itemId").GetString()).Append(Separator);
+            canonical.Append(resource.GetProperty("title").GetString()).Append(Separator);
+            canonical.Append(resource.GetProperty("description").GetString()).Append(Separator);
             canonical.Append(resource.GetProperty("topicId").GetString()).Append(Separator);
             canonical.Append(resource.GetProperty("role").GetString()).Append(Separator);
             canonical.Append(resource.GetProperty("uri").GetString()).Append(Separator);

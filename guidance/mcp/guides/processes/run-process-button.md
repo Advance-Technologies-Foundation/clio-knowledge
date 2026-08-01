@@ -115,8 +115,11 @@ reading the parameters inside the started process:
   - Date:     "2026-12-31" — works;  Time: "18:45:00" — works
 
 
-FULL PARAMETER CONTRACT (this guide is the single source of truth — the page-schema-handlers
-and mobile-page guides only point here; keep this list in sync with the platform contract)
+FULL PARAMETER CONTRACT (the request catalog is the single source of truth — call
+get-request-info request-type=crt.RunBusinessProcessRequest for the authoritative parameter
+list, and on a mobile page pass schema-type=mobile. This guide carries the authoring recipe
+around that contract; the list below is a convenience copy, so prefer the catalog whenever
+the two disagree)
 - processName                  (string, REQUIRED) — the process CODE from get-process-signature.
 - processRunType               (string, REQUIRED) — see the reference below.
 - processParameters            (object) — { "<ParameterCODE>": value }; keys are CODES, not captions.

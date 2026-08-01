@@ -24,32 +24,26 @@ internal static class KnowledgeOracle
     /// re-linked without a Clio release; listing the ID here is how that decision is recorded and
     /// reviewed. Every article absent from this set must still match the current oracle exactly.
     /// </summary>
+    /// <remarks>
+    /// Each entry permanently un-guards one article, so an ID belongs here only while the byte
+    /// comparison actually fails for it. Reference links canonicalized into <c>references/</c> are
+    /// already reconciled by <see cref="ReferenceLinkMigration.NormalizeToFrozenLinkText"/> and are
+    /// not a reason to list an ID. Before adding one, delete it and run the suite: if nothing goes
+    /// red, the entry buys nothing and costs a guard.
+    /// </remarks>
     internal static readonly IReadOnlySet<string> IndependentlyEditedArticles =
         new HashSet<string>(StringComparer.Ordinal)
         {
-            // Supporting reference articles were extracted into references/, so the parent guide
-            // links to independently published content instead of restating it.
-            "atf-repository-dev",
-            "atf-repository-model-management",
-            "atf-repository-tests",
-            "composable-app-e2e-test-implementation",
-            "configuration-entity-event-listener",
-            "configuration-entity-event-listener-tests",
-            "configuration-webservice",
-            "configuration-webservice-tests",
-            "creatio-composable-app-development",
-            "creatio-freedom-iframe-section",
-            "feature-toggle",
-            "feature-toggle-tests",
-            "sys-setting",
-            "sys-setting-tests",
-            // Carry both an edit made here and an edit made in Clio, reconciled by a three-way merge:
-            // each keeps the Clio-side revision plus a pointer to run-process-button, an article this
-            // repository still publishes and Clio retired.
+            // Clio's revision made the request catalog (get-request-info
+            // crt.RunBusinessProcessRequest) authoritative for the run-process parameter contract
+            // and retired run-process-button, an article this repository still publishes. Each of
+            // the three below keeps Clio's revision verbatim and adds one pointer to
+            // run-process-button as the authoring recipe around that contract; that pointer is the
+            // entire divergence, and it is the only reason these IDs are listed.
             "mobile-page-modification",
+            // Same pointer, added to the run-a-business-process row of the pre-edit GATE table.
             "page-modification",
-            // Points at the reference articles extracted into references/ and additionally names the
-            // run-process-button guide alongside the request catalog Clio's revision introduced.
+            // Same pointer, added to the crt.RunBusinessProcessRequest row of the request table.
             "page-schema-handlers"
         };
 

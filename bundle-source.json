@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.7.0",
-  "sequence": 9,
+  "libraryVersion": "1.8.0",
+  "sequence": 10,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -285,7 +285,7 @@
     {
       "itemId": "atf-repository-dev",
       "title": "ATF.Repository development",
-      "description": "Shows how to read and write Creatio data with ATF.Repository models, providers, data contexts, relation mapping, and supported query patterns.",
+      "description": "Shows how to read and write Creatio data with ATF.Repository models, providers, data contexts, relation mapping, and supported query patterns. Use when configuring `IDataProvider` or writing CRUD logic through `IAppDataContext`. If the task creates or changes repository models or their members, also use `atf-repository-model-management`.",
       "topicId": "creatio.atf-repository-dev",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-dev",
@@ -299,7 +299,7 @@
     {
       "itemId": "atf-repository-model-management",
       "title": "ATF.Repository model management",
-      "description": "Explains how to generate, organize, validate, and update ATF.Repository models for the exact Creatio schemas and members an implementation needs. Use it whenever a task creates, extends, merges, or selects ATF.Repository models or their members — for example `Add models Account (Name, Owner, Owner.DecisionRole)` or `Add Account model (Name, Owner), Order (Number, Account)`.",
+      "description": "Explains how to generate, organize, validate, and update ATF.Repository models for the exact Creatio schemas and members an implementation needs. This skill must be used whenever a task creates, extends, merges, or selects ATF.Repository models or their members. Use for requests like `Add models Account (Name, Owner, Owner.DecisionRole, Owner.DecisionRole.Name)` or `Add Account model (Name, Owner, Owner.DecisionRole, Owner.DecisionRole.Name), Order (Number, Account, Opportunity.Title)`.",
       "topicId": "creatio.atf-repository-model-management",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-model-management",
@@ -313,7 +313,7 @@
     {
       "itemId": "atf-repository-tests",
       "title": "ATF.Repository tests",
-      "description": "Guides unit and integration testing for code that uses ATF.Repository models, relations, providers, and data contexts, including `MemoryDataProviderMock` and `IDataStore` setup, `AppDataContextFactory.GetAppDataContext(...)`, model-schema registration, seeded in-memory data, and repository assertions after query or save operations.",
+      "description": "Guides unit and integration testing for code that uses ATF.Repository models, relations, providers, and data contexts, including `MemoryDataProviderMock` and `IDataStore` setup, `AppDataContextFactory.GetAppDataContext(...)`, model-schema registration, seeded in-memory data, and repository assertions after query or save operations. If the task creates or changes repository models or their members, also use `atf-repository-model-management`.",
       "topicId": "creatio.atf-repository-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -363,7 +363,7 @@
     {
       "itemId": "business-rule-filters",
       "title": "Business rule filters",
-      "description": "Defines the static-filter contract for Freedom UI business rules, including comparisons, nested groups, lookup values, macros, backward references, and aggregations.",
+      "description": "Defines the apply-static-filter friendly filter contract for Freedom UI business rules: leaf comparisons, lookup values, forward paths, nested groups, backward EXISTS/NOT_EXISTS and COUNT/SUM/AVG/MIN/MAX aggregations, relative-date and current-user macros, age/birthday translation, multilingual handling, and the discovery flow.",
       "topicId": "creatio.business-rule-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/business-rule-filters",
@@ -433,7 +433,7 @@
     {
       "itemId": "configuration-entity-event-listener",
       "title": "Configuration entity event listeners",
-      "description": "Guides implementation of Creatio configuration EntityEventListener classes, dependency resolution, event selection, and listener behavior.",
+      "description": "Create or review Creatio configuration entity event listeners implemented as `Terrasoft.Core.Entities.Events.BaseEntityEventListener` with `[EntityEventListener(SchemaName = \"...\")]`. Use when adding or changing entity lifecycle handling such as `OnSaving`, `OnSaved`, `OnInserting`, `OnInserted`, `OnUpdating`, `OnUpdated`, `OnDeleting`, `OnDeleted`, or direct event subscriptions like `entity.Validating` for a specific schema.",
       "topicId": "creatio.configuration-entity-event-listener",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/configuration-entity-event-listener",
@@ -447,7 +447,7 @@
     {
       "itemId": "configuration-entity-event-listener-tests",
       "title": "Configuration entity event listener tests",
-      "description": "Guides focused tests for Creatio configuration EntityEventListener implementations, including listener construction, event contexts, and assertions.",
+      "description": "Write, update, or review tests for Creatio configuration entity event listeners built on `BaseEntityEventListener`. Use when creating tests that instantiate the listened entity schema, prepare minimal entity data, create a fresh listener instance, invoke the required lifecycle methods such as `OnSaving`, `OnSaved`, `OnInserting`, `OnUpdating`, `OnDeleting`, or validation hooks in the correct order, and verify helper calls or validation results.",
       "topicId": "creatio.configuration-entity-event-listener-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/configuration-entity-event-listener-tests",
@@ -531,7 +531,7 @@
     {
       "itemId": "dashboard-and-home-page-layout",
       "title": "Dashboard and home page layout",
-      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages, including the 12-column grid, the metric-band-then-chart-grid skeleton, and the card style.",
+      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages, including the 12-column grid, the metric-band-then-chart-grid skeleton, per-widget-type default sizes, and the plain-white (without-fill) card theme.",
       "topicId": "creatio.dashboard-and-home-page-layout",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
@@ -545,7 +545,7 @@
     {
       "itemId": "dashboard-creation",
       "title": "Dashboard creation",
-      "description": "Guides creation of Freedom UI dashboard pages with the supported dashboard template and correct dashboard metadata bindings.",
+      "description": "Canonical MCP guidance for creating a Freedom UI dashboard page via create-page with BaseDashboardTemplate, and resolving the DashboardsEntitySchemaName / DashboardsElementName / DashboardsClientUnitSchemaUId optional properties (including the root-schema UId rule).",
       "topicId": "creatio.dashboard-creation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-creation",
@@ -559,7 +559,7 @@
     {
       "itemId": "dashboard-design",
       "title": "Dashboard design",
-      "description": "Guides layout, sizing, grouping, styling, and data-source decisions for Freedom UI analytical widgets on dashboards.",
+      "description": "Canonical MCP guidance for the dashboard-specific DashboardDS hidden page data source that a dashboard's widgets filter by via a dependencies entry; general widget layout/sizing/styling lives in the dashboard-and-home-page-layout guide.",
       "topicId": "creatio.dashboard-design",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-design",
@@ -573,7 +573,7 @@
     {
       "itemId": "dashboard-rights",
       "title": "Dashboard rights",
-      "description": "Guides access rights for dashboard pages, including who may view or edit a dashboard and how the rights are granted.",
+      "description": "Canonical MCP guidance for reading and changing a dashboard's record-level access rights (new or existing dashboard) via get-record-rights / set-record-rights, and shipping those grants with the dashboard's package as a SysSchemaAdminUnitRight data binding so they survive a transfer.",
       "topicId": "creatio.dashboard-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-rights",
@@ -587,7 +587,7 @@
     {
       "itemId": "dashboards",
       "title": "Dashboards",
-      "description": "Routes dashboard work to the dashboard creation, design, indicator widget, and chart widget guidance articles.",
+      "description": "The clio MCP dashboards router: a names-only index that routes dashboard work to dashboard-creation (create the page), dashboard-and-home-page-layout (widget layout/sizing/styling), dashboard-design (the DashboardDS filter-by-page-data binding), and indicator-widget / chart-widget (per-widget payload).",
       "topicId": "creatio.dashboards",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboards",
@@ -629,7 +629,7 @@
     {
       "itemId": "deploy-lifecycle",
       "title": "Deployment lifecycle",
-      "description": "Guides the Creatio provisioning lifecycle from infrastructure checks and port selection through deployment, registration, and ClioGate installation.",
+      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> find-empty-iis-port -> deploy-creatio/deploy-identity, plus build discovery, registration, IdentityService, and cliogate installation.",
       "topicId": "creatio.deploy-lifecycle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
@@ -643,7 +643,7 @@
     {
       "itemId": "describe-environment",
       "title": "Describe environment",
-      "description": "Explains the describe-environment report, the source of each field, and the permissions and ClioGate prerequisites needed to collect it.",
+      "description": "Canonical MCP guidance for describe-environment: classified base-probe failures, the single source-independent environment report (coreVersion, db engine, framework, productName, licenseInfo, locale/workspace metadata), which source supplies each field, and the cliogate / CanManageSolution prerequisites.",
       "topicId": "creatio.describe-environment",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/describe-environment",
@@ -657,7 +657,7 @@
     {
       "itemId": "desktop-page",
       "title": "Desktop pages",
-      "description": "Guides Creatio desktop page creation, template and Desktop-group invariants, container placement, selector registration, and visibility by record rights.",
+      "description": "Canonical MCP guidance for Creatio desktop pages (desktop-selector workspaces): create-page with template CentralAreaDesktopTemplate, the Desktop schema-group invariant, automatic Desktop-entity registration by the platform, the FixedGridSlot_qwe4asds editable-slot rule, and record-rights-based selector visibility.",
       "topicId": "creatio.desktop-page",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/desktop-page",
@@ -671,7 +671,7 @@
     {
       "itemId": "esq",
       "title": "EntitySchemaQuery",
-      "description": "Guides EntitySchemaQuery authoring and routes filter construction and parsing work to the appropriate frontend or backend article.",
+      "description": "Canonical MCP guidance for EntitySchemaQuery authoring: the DataService SelectQuery envelope, columns/select, expression building blocks, forward/backward reference column-path grammar, aggregations, and master enum tables. Filter construction and parsing are routed through `esq-filters`.",
       "topicId": "creatio.esq",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq",
@@ -685,7 +685,7 @@
     {
       "itemId": "esq-filter-parsing",
       "title": "Backend ESQ filter parsing",
-      "description": "Explains how backend C# code inspects and parses EntitySchemaQuery filter groups, leaf filters, operands, disabled nodes, and negation.",
+      "description": "Explains how backend C# code inspects and recursively parses `EntitySchemaQuery.Filters`: filter groups, leaf filters, operands, disabled nodes, and negation.",
       "topicId": "creatio.esq.filter-parsing",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filter-parsing",
@@ -699,7 +699,7 @@
     {
       "itemId": "esq-filters",
       "title": "ESQ filters",
-      "description": "Routes ESQ filter work to frontend filter construction, backend C# construction, or backend filter parsing guidance.",
+      "description": "Routes ESQ filter work to frontend/DataService filter construction, native backend C# construction, or backend filter parsing guidance.",
       "topicId": "creatio.esq.filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filters",
@@ -727,7 +727,7 @@
     {
       "itemId": "esq-filters-frontend",
       "title": "Frontend ESQ filter construction",
-      "description": "Guides creation and serialization of EntitySchemaQuery filters in Freedom UI and DataService JavaScript code.",
+      "description": "Guides creation and serialization of EntitySchemaQuery filters in JavaScript: Freedom UI, page JSON, and DataService SelectQuery payloads.",
       "topicId": "creatio.esq.filters.frontend",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/esq-filters-frontend",
@@ -755,7 +755,7 @@
     {
       "itemId": "feature-toggle",
       "title": "Feature toggles",
-      "description": "Explains how to implement package-level feature toggles through Creatio system settings and injected access abstractions.",
+      "description": "Implement or review Creatio feature-toggle checks in C# package code such as packages/PkgOne/Files/src/cs or packages/PkgOne/src/cs. Use when gating behavior on a Creatio feature flag, adding `Creatio.FeatureToggling.Features.GetIsEnabled(...)`, or moving feature names into `Constants.cs`. If the task includes unit tests, also use feature-toggle-tests.",
       "topicId": "creatio.feature-toggle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/feature-toggle",
@@ -769,7 +769,7 @@
     {
       "itemId": "feature-toggle-tests",
       "title": "Feature toggle tests",
-      "description": "Guides tests for enabled, disabled, missing, and malformed feature-toggle settings without coupling tests to live Creatio state.",
+      "description": "Write, update, or review unit tests for Creatio feature-toggle behavior in package test projects such as tests/PkgOne or package-local test folders. Use when mocking a feature state with `FeatureRequest` and `Creatio.FeatureToggling.TestKit.FeatureStub.Setup(...)`, adding enabled and disabled coverage, or moving feature names into `Constants.cs`. Pair with feature-toggle when production code changes.",
       "topicId": "creatio.feature-toggle-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/feature-toggle-tests",
@@ -783,7 +783,7 @@
     {
       "itemId": "freedom-page-web-to-mobile-conversion",
       "title": "Freedom UI web to mobile page conversion",
-      "description": "Guides the model-driven conversion of an existing Freedom UI web page into a Freedom UI mobile page, including the advisory tool flow and the supported component mapping.",
+      "description": "Canonical MCP guidance for converting a source page into a Freedom UI MOBILE page via get-mobile-page-conversion-guide: advisory guide (detected sourceType, recommended template, container map, component suggestions, inline mobile contracts), the model-driven flow where you build the body with create-page/update-page/validate-page, the five component categories, the Freedom-UI-only precondition (Classic UI must be converted to Freedom UI web first), mobile constraints, and how to finish in Freedom UI Mobile Designer.",
       "topicId": "creatio.freedom-page-web-to-mobile-conversion",
       "role": "guidance",
       "requiredFeatures": [
@@ -800,7 +800,7 @@
     {
       "itemId": "home-page",
       "title": "Home page",
-      "description": "Guides Freedom UI home page creation and modification, including how it differs from a dashboard page and which layout rules it shares.",
+      "description": "Canonical MCP guidance for creating a Freedom UI home page (BaseHomePage) and making it a workplace's home page by binding SysWorkplace.HomePageUId as a package data binding.",
       "topicId": "creatio.home-page",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/home-page",
@@ -814,7 +814,7 @@
     {
       "itemId": "identity-assertion",
       "title": "Identity assertion and token exchange",
-      "description": "Guides Creatio Identity Service V3 identity assertion and token exchange for AI chat scenarios, including setup, claims, verification, and troubleshooting.",
+      "description": "Canonical MCP guidance for the Creatio identity-assertion / Identity Service V3 token-exchange flow used by the embedded AI chat: onboarding sequence (regenerate key, export public JWK, register with V3, issue assertion, exchange), the EnableIdentityAssertionIssuer feature and CanManageIdentityAssertionIssuer permission prerequisites, the four clio tools, and troubleshooting.",
       "topicId": "creatio.identity-assertion",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/identity-assertion",
@@ -842,7 +842,7 @@
     {
       "itemId": "integration-testing",
       "title": "Integration testing",
-      "description": "Guides portable Creatio integration tests, process scenarios, CI authentication, Allure reporting, and optional browser-based validation.",
+      "description": "Guides portable Creatio integration tests, ATF.Repository data access, process scenarios, CI authentication, Allure reporting, and optional browser-based validation.",
       "topicId": "creatio.integration-testing",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/integration-testing",
@@ -856,7 +856,7 @@
     {
       "itemId": "mobile-page-modification",
       "title": "Mobile page modification",
-      "description": "Guides mobile Freedom UI page editing, including plain JSON bodies, validators, converters, scaffold merges, components, and supported requests.",
+      "description": "Mobile-specific differences from the base page-modification guidance: plain JSON body format (no AMD), crt.Scaffold root element rules, the mobile component registry, naming conventions, template hierarchy, and the supported request catalogue.",
       "topicId": "creatio.mobile-page-modification",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/mobile-page-modification",
@@ -870,7 +870,7 @@
     {
       "itemId": "package-dependencies",
       "title": "Package dependencies",
-      "description": "Guides adding and removing Creatio package dependencies through clio, including managed-package boundaries, recovery, and prohibited direct database writes.",
+      "description": "Canonical MCP guidance for managing Creatio package dependencies: the schema-designer 'GetSchemaDesignItem returned an HTML error page' recovery via add-package-dependency (missing dependency on the owner of the extended object's upper layer), the symmetric remove-package-dependency cleanup, and the anti-patterns (no writes into the owning managed package, no raw SQL/OData/DataService dependency edits).",
       "topicId": "creatio.package-dependencies",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/package-dependencies",
@@ -884,7 +884,7 @@
     {
       "itemId": "page-creation",
       "title": "Page creation",
-      "description": "Guides creation of Freedom UI pages from supported templates through the clio create-page workflow.",
+      "description": "Canonical MCP guidance for creating Freedom UI pages from supported templates via create-page: the list-page-templates -> create-page -> get-page flow, the supported web/mobile template catalog, required and optional inputs, validation/failure modes, and designer-type mapping.",
       "topicId": "creatio.page-creation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-creation",
@@ -898,7 +898,7 @@
     {
       "itemId": "page-modification",
       "title": "Page modification",
-      "description": "Defines the mandatory pre-edit checks and routes Freedom UI page changes to lifecycle, field, container, and component guidance.",
+      "description": "Entry guidance for Freedom UI page modification: the mandatory pre-edit GATE checklist and canonical flow, routing the detailed mechanics to the page-modification-overview / -field-contract / -containers / -components sub-guides (each kept small so one get-guidance response fits the agent token limit).",
       "topicId": "creatio.page-modification",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification",
@@ -912,7 +912,7 @@
     {
       "itemId": "page-modification-components",
       "title": "Page modification components",
-      "description": "Guides Freedom UI viewConfigDiff composition, component insertion, button handlers, control selection, and component metadata inspection.",
+      "description": "viewConfigDiff-composition sub-guide of the page-modification family: adding a button with a click handler, the handlers/viewConfigDiff section rules, the column-type-to-control mapping, the canonical add-button flow, and how to read a get-component-info detail response.",
       "topicId": "creatio.page-modification-components",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-components",
@@ -926,7 +926,7 @@
     {
       "itemId": "page-modification-containers",
       "title": "Page modification containers",
-      "description": "Explains how to inspect page bundles and select valid parent containers before inserting Freedom UI components.",
+      "description": "Container-discovery sub-guide of the page-modification family: bundle.json top-level shape, jq recipes for walking viewConfig/containers, and how to pick a valid parentName from bundle.containers for a new component.",
       "topicId": "creatio.page-modification-containers",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-containers",
@@ -940,7 +940,7 @@
     {
       "itemId": "page-modification-field-contract",
       "title": "Page modification field contract",
-      "description": "Defines the Freedom UI inserted-field contract, including attribute binding, labels, controls, data sources, body forms, and validation diagnostics.",
+      "description": "Inserted-field contract sub-guide of the page-modification family: viewModelConfigDiff attribute binding, the label/resource rule, static-vs-diff body forms, the canonical NumberInput payload, data-source declaration, and the validation diagnostics emitted on contract violation.",
       "topicId": "creatio.page-modification-field-contract",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-field-contract",
@@ -954,7 +954,7 @@
     {
       "itemId": "page-modification-overview",
       "title": "Page modification lifecycle",
-      "description": "Guides the Freedom UI page read, edit, update, synchronization, conflict detection, formatting, and verification lifecycle.",
+      "description": "Page-body save-lifecycle sub-guide of the page-modification family: canonical get-page/update-page/sync-pages flow, replacing-schema concept, design-package resolution, write modes (replace/append/diff), do-not-resend-full-body, external-modification conflicts, body formatting, and known limitations.",
       "topicId": "creatio.page-modification-overview",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-overview",
@@ -1010,7 +1010,7 @@
     {
       "itemId": "page-schema-resources",
       "title": "Page schema resources",
-      "description": "Guides Freedom UI localizable strings, resource expressions, key naming, parameter usage, and data-bound label conventions.",
+      "description": "Canonical MCP guidance for Freedom UI page localizable strings: $Resources.Strings.* as the recommended binding, #ResourceString()# required for validator params (and conventional for grid captions), resources parameter usage, and common mistakes.",
       "topicId": "creatio.page-schema-resources",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-resources",
@@ -1055,7 +1055,7 @@
     {
       "itemId": "record-rights",
       "title": "Record rights",
-      "description": "Guides record-level access rights in Creatio, including how to enable them for an entity and how they interact with object operation permissions.",
+      "description": "Canonical MCP guidance for record-level access rights: read/change who can access a record or dashboard with get-record-rights / set-record-rights, addressing a dashboard as SysSchemaAdminUnit + schema UId, and the record-level (SysSchemaAdminUnitRight) vs operation-level (SysSchemaOperationRight) distinction.",
       "topicId": "creatio.record-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/record-rights",
@@ -1671,7 +1671,7 @@
     {
       "itemId": "related-list",
       "title": "Related lists",
-      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies.",
+      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies. Fetch the 'Expanded list' composite structure via get-component-info.",
       "topicId": "creatio.related-list",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-list",
@@ -1685,7 +1685,7 @@
     {
       "itemId": "related-page-binding",
       "title": "Page-to-object binding",
-      "description": "Guides binding Freedom UI record and add pages to an object, including role and type variants, replacement semantics, discovery, and errors.",
+      "description": "Canonical MCP guidance for binding Freedom UI pages to an object via create-related-page-addon: choosing the default record page and the add-record page (optionally per role and type), name discovery, the replace-not-merge semantics, and error handling.",
       "topicId": "creatio.related-page-binding",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-page-binding",
@@ -1727,7 +1727,7 @@
     {
       "itemId": "server-to-server-oauth",
       "title": "Server-to-server OAuth",
-      "description": "Guides use of Creatio server-to-server OAuth clients, token acquisition, API calls, secret handling, verification, and troubleshooting.",
+      "description": "Guides use of Creatio server-to-server OAuth client credentials: minting `client_credentials` tokens, handling expiry without refresh tokens, calling Creatio APIs with an `Authorization: Bearer` token, secret handling, verification, and troubleshooting.",
       "topicId": "creatio.server-to-server-oauth",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/server-to-server-oauth",
@@ -1755,7 +1755,7 @@
     {
       "itemId": "sys-setting",
       "title": "System settings",
-      "description": "Guides package code that reads and writes Creatio system settings through focused abstractions and dependency injection.",
+      "description": "Implement or review Creatio system-setting access in C# package code such as packages/PkgOne/Files/src/cs or packages/PkgOne/src/cs. Use when reading a system setting with `Terrasoft.Core.Configuration.SysSettings.TryGetValue(...)`, `GetValue(...)`, or `GetDefValue(...)`, introducing or reusing `Constants.SysSettingCodes.<SettingName>`, or replacing inline sys-setting code strings with package constants. If the task includes unit tests, also use sys-setting-tests.",
       "topicId": "creatio.sys-setting",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-setting",
@@ -1769,7 +1769,7 @@
     {
       "itemId": "sys-setting-tests",
       "title": "System setting tests",
-      "description": "Guides tests for package code that consumes Creatio system settings through mocked access abstractions.",
+      "description": "Write, update, or review unit tests for Creatio system-setting behavior in package test projects such as tests/PkgOne or package-local test folders. Use when decorating a test class with `[MockSettings(RequireMock.All)]`, overriding `SetupSysSettings()`, configuring `FakeSysSettings`, mocking `FakeSysSettingsEngine` for `GetValue`, `GetDefValue`, or `TryGetValue`, or replacing inline sys-setting code strings with `Constants.SysSettingCodes`. Pair with sys-setting when production code changes.",
       "topicId": "creatio.sys-setting-tests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-setting-tests",
@@ -1783,7 +1783,7 @@
     {
       "itemId": "sys-settings",
       "title": "System settings MCP operations",
-      "description": "Guides the Creatio system-settings create, read, and update tool flow, supported value types, lookup resolution, secure values, dates, and binary uploads.",
+      "description": "Canonical MCP guidance for the Creatio sys-settings CRU surface: tool order, supported value-type-names and aliases, Lookup resolution, SecureText masking, Date/Time TZ caveat, and Binary (write-only, via value-file-path) upload.",
       "topicId": "creatio.sys-settings",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-settings",
@@ -1811,7 +1811,7 @@
     {
       "itemId": "ui-project",
       "title": "Freedom UI projects",
-      "description": "Guides scaffolding a Freedom UI Angular remote-module project inside an existing clio workspace, including arguments, names, paths, and prerequisites.",
+      "description": "Canonical MCP guidance for scaffolding a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, and the create-workspace prerequisite.",
       "topicId": "creatio.ui-project",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/ui-project",
