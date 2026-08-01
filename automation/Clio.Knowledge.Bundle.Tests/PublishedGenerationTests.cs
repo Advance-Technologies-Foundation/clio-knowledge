@@ -1,5 +1,5 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
@@ -19,17 +19,12 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class PublishedGenerationTests
 {
-    // ASCII unit separator: cannot occur inside an identifier, URI, or path, and BundleBuilder
-    // refuses to publish a title or description carrying any control character, so no hashed field
-    // value can impersonate a field boundary and mask a change.
-    private const char Separator = '\u001F';
-
-    // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever
-    // published content or resource metadata changes. A failure here is not a broken test: it means
-    // the working tree publishes different bytes than the recorded generation claims.
-    private const ulong PublishedSequence = 10;
+    // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever any
+    // manifest byte or any published body changes. A failure here is not a broken test: it means the
+    // working tree publishes different bytes than the recorded generation claims.
+    private const ulong PublishedSequence = 11;
     private const string PublishedContentDigest =
-        "F4928784AD66711F432539FE322E205727FFB2189CEF50968AD4ADB796D16D5B";
+        "89F42CD6E137F084D721697552E67847A0271E72B0387868E937D25E04F82749";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]
@@ -37,13 +32,12 @@ public sealed class PublishedGenerationTests
     {
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
-        using JsonDocument source = JsonDocument.Parse(
-            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
-        JsonElement root = source.RootElement;
+        byte[] manifestBytes = File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json"));
+        using JsonDocument source = JsonDocument.Parse(manifestBytes);
 
         // Act
-        ulong declaredSequence = root.GetProperty("sequence").GetUInt64();
-        string digest = ComputeContentDigest(repositoryRoot, root);
+        ulong declaredSequence = source.RootElement.GetProperty("sequence").GetUInt64();
+        string digest = ComputeContentDigest(repositoryRoot, manifestBytes, source.RootElement);
 
         // Assert
         declaredSequence.Should().Be(PublishedSequence,
@@ -54,50 +48,46 @@ public sealed class PublishedGenerationTests
                 + "then record the new digest here");
     }
 
-    // Hashes exactly what a consumer sees: every resource's identity, selection metadata, routing,
-    // gating, and body bytes, in a stable order.
+    // Recomputes the value Clio itself derives in KnowledgeGitRepositoryReader.TryRead and keeps as
+    // KnowledgeGitRepositorySnapshot.ContentDigest: one SHA-256 over the framed raw bytes of
+    // bundle-source.json, then the framed bytes of every resource body in manifest DECLARATION
+    // order. Reproducing the consumer's formula instead of projecting selected fields is the whole
+    // point of the guard — a projection stays green for any manifest edit it does not happen to read
+    // (key order, formatting, compatibility ranges, requirements, libraryId, or a reordered resource
+    // array), while the consumer computes a different digest and refuses the entire library.
     //
-    // Covered: itemId, title, description, topicId, role, uri, legacyUris, requiredFeatures,
-    // mediaType, sourcePath, and the SHA-256 of the body at that path. Title and description are in
-    // scope because they are the resources/list selection signal — an agent chooses an article from
-    // them, so rewriting one changes what a consumer gets even when the body is byte-identical.
+    // Covered: every byte of the manifest, so contractVersion, bundleSchemaVersion, libraryId,
+    // libraryVersion, sequence, compatibility, requirements, and each resource descriptor — itemId,
+    // title, description, topicId, role, uri, legacyUris, requiredFeatures, sourcePath, bundlePath,
+    // mediaType — along with their declaration order and the surrounding JSON formatting; plus the
+    // body bytes behind every declared sourcePath.
     //
-    // Not covered: bundlePath, a packaging detail no consumer reads; the manifest-level
-    // contractVersion, bundleSchemaVersion, libraryId, compatibility, and requirements fields; and
-    // the signed artifact, whose ECDSA signature is not reproducible across runs. sequence and
-    // libraryVersion are excluded by design — sequence is the generation label this digest is
-    // compared against, so hashing it would let a version bump mask a content change.
-    private static string ComputeContentDigest(string repositoryRoot, JsonElement root)
+    // Not covered: repository files no manifest resource declares, and the signed distribution
+    // artifact, whose ECDSA signature is not reproducible across runs.
+    private static string ComputeContentDigest(string repositoryRoot, byte[] manifestBytes, JsonElement root)
     {
-        StringBuilder canonical = new();
-        IOrderedEnumerable<JsonElement> resources = root.GetProperty("resources")
-            .EnumerateArray()
-            .OrderBy(resource => resource.GetProperty("itemId").GetString(), StringComparer.Ordinal);
-        foreach (JsonElement resource in resources)
+        using IncrementalHash digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        AppendFramed(digest, manifestBytes);
+        foreach (JsonElement resource in root.GetProperty("resources").EnumerateArray())
         {
-            canonical.Append(resource.GetProperty("itemId").GetString()).Append(Separator);
-            canonical.Append(resource.GetProperty("title").GetString()).Append(Separator);
-            canonical.Append(resource.GetProperty("description").GetString()).Append(Separator);
-            canonical.Append(resource.GetProperty("topicId").GetString()).Append(Separator);
-            canonical.Append(resource.GetProperty("role").GetString()).Append(Separator);
-            canonical.Append(resource.GetProperty("uri").GetString()).Append(Separator);
-            canonical.Append(Join(resource, "legacyUris")).Append(Separator);
-            canonical.Append(Join(resource, "requiredFeatures")).Append(Separator);
-            canonical.Append(resource.GetProperty("mediaType").GetString()).Append(Separator);
             string sourcePath = resource.GetProperty("sourcePath").GetString()!;
-            canonical.Append(sourcePath).Append(Separator);
-            byte[] body = File.ReadAllBytes(Path.Combine(
+            AppendFramed(digest, File.ReadAllBytes(Path.Combine(
                 repositoryRoot,
-                sourcePath.Replace('/', Path.DirectorySeparatorChar)));
-            canonical.Append(Convert.ToHexString(SHA256.HashData(body))).Append(Separator);
+                sourcePath.Replace('/', Path.DirectorySeparatorChar))));
         }
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(canonical.ToString())));
+        return Convert.ToHexString(digest.GetHashAndReset());
     }
 
-    private static string Join(JsonElement resource, string property) =>
-        resource.TryGetProperty(property, out JsonElement value)
-            ? string.Join(',', value.EnumerateArray().Select(item => item.GetString()))
-            : string.Empty;
+    // The framing is part of the hashed value, so it mirrors KnowledgeGitRepositoryReader.AppendFramed
+    // byte for byte: an eight-byte little-endian length ahead of the content, which stops the boundary
+    // between two adjoining bodies from being forged by moving bytes across it.
+    private static void AppendFramed(IncrementalHash digest, ReadOnlySpan<byte> content)
+    {
+        Span<byte> length = stackalloc byte[sizeof(long)];
+        BinaryPrimitives.WriteInt64LittleEndian(length, content.Length);
+        digest.AppendData(length);
+        digest.AppendData(content);
+    }
 
     private static string FindRepositoryRoot()
     {
