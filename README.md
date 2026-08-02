@@ -47,6 +47,7 @@ It is not intended to contain:
 | [`catalog/`](catalog/README.md) | Trusted metadata pointing to independently versioned reference repositories. |
 | [`schemas/`](schemas/README.md) | Machine-readable contracts for articles, advisories, and catalog entries. |
 | [`automation/`](automation/README.md) | Validation, deterministic packaging, and publication. |
+| [`distribution/`](distribution/RELEASING.md) | Release delivery: how a signed bundle reaches Clio, and the trusted public keys. |
 | [`bundle-source.json`](bundle-source.json) | Canonical library, generation, item/topic, URI, compatibility, and source mapping. |
 
 Complete examples remain in independent repositories. This repository records their immutable source revision, compatibility, validation evidence, and relationship to guidance.
@@ -55,7 +56,7 @@ Complete examples remain in independent repositories. This repository records th
 
 1. **One source contract.** Git reads the human-readable repository directly; packaging transports may generate delivery artifacts without committing them. Clio contains no embedded knowledge content.
 2. **Stable identifiers.** Article, capability, advisory, and example IDs remain stable while their content evolves.
-3. **Transport-specific provenance.** Git is a direct checkout of a configured branch, tag, or commit and records the resolved commit. NuGet delivers an immutable package containing a signed bundle.
+3. **Transport-specific provenance.** A GitHub Release delivers one immutable, digest-verified asset containing a signed bundle and records the release tag. Git is a direct checkout of a configured branch, tag, or commit and records the resolved commit. NuGet delivers an immutable package containing a signed bundle.
 4. **Evidence over assertion.** Prescriptive behavioral claims identify the source, test, lab, or version boundary that supports them.
 5. **Clear authority.** Canonical guidance, tested reference patterns, observed implementations, and experimental ideas are labeled distinctly.
 6. **Safe failure.** An invalid or incompatible bundle must never replace Clio's active verified guidance.
@@ -64,20 +65,25 @@ Complete examples remain in independent repositories. This repository records th
 
 ## Publication model
 
-The source files in this repository will eventually produce independently versioned artifacts such as:
-
-```text
-clio-guidance-2026.07.18.1.zip
-clio-reference-catalog-2026.07.18.1.json
-```
+Clio's built-in `creatio-curated` source is delivered as a **signed GitHub Release asset**:
+`clio-knowledge-bundle.zip`, one per release, on a tag equal to `libraryVersion`. Clio discovers the
+current generation through `releases/latest`, verifies the SHA-256 digest GitHub publishes for the
+asset, verifies the detached publisher signature against a public key pinned inside Clio, and only
+then activates it. **No Git CLI is involved, and no mutable branch is read at runtime.** The full
+procedure, identity rules, and key-rotation order are in
+[distribution/RELEASING.md](distribution/RELEASING.md).
 
 Clio obtains compatible knowledge from independently configured transports and caches each library
-locally. For Git, it clones or updates the configured repository and records the resolved commit. For
-NuGet, it retrieves an immutable package and verifies the signed bundle before activation. If a new
-candidate is invalid or incompatible, Clio retains the last-known-good active content. It serves
-articles through exact namespaced resource URIs and logical topic resolution. The canonical identity
-is `(libraryId, sequence, bundleDigest)`; NuGet versions and Git branches, tags, and commits describe
-retrieval and provenance rather than identity.
+locally. For a GitHub Release, it downloads exactly the declared asset and verifies its digest,
+signature, and contract before activation. For Git, it clones or updates the configured repository
+and records the resolved commit — that transport remains available for partner and customer sources
+and still requires a Git CLI. For NuGet, it retrieves an immutable package and verifies the signed
+bundle; that transport remains available for private or separately signed libraries. If a new
+candidate is invalid or incompatible, Clio retains the last-known-good active content, and a warm
+start serves the verified local cache with no network access at all. It serves articles through exact
+namespaced resource URIs and logical topic resolution. The canonical identity is
+`(libraryId, sequence, bundleDigest)`; release tags, NuGet versions, and Git branches, tags, and
+commits describe retrieval and provenance rather than identity.
 
 All Clio MCP guidance articles now live in this repository. Their canonical routes are
 `docs://knowledge/com.creatio.clio/<item-id>`. Publisher-owned `title` and `description` fields drive
@@ -96,9 +102,12 @@ and duplicate topic/role pair within a library.
 Logical selection policy belongs to Clio and operator configuration. A library publishes identity,
 content, compatibility, and provenance; it does not publish its own priority or override rights.
 
-Git transport clones or fast-forward-updates this repository and reads `bundle-source.json` plus each
-declared `sourcePath` directly. It does not execute repository scripts. NuGet may generate a signed
-delivery archive during packaging, but generated ZIP files are never committed to this repository.
+The GitHub Release transport consumes the deterministic archive built by
+`automation/Clio.Knowledge.Bundle`: `manifest.json`, `manifest.sig`, and one `resources/*` entry per
+declared resource, and nothing else. Git transport clones or fast-forward-updates this repository and
+reads `bundle-source.json` plus each declared `sourcePath` directly. It does not execute repository
+scripts. NuGet may generate a signed delivery archive during packaging. Generated ZIP files are build
+artifacts and are never committed to this repository.
 
 ## Contributing
 

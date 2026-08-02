@@ -34,7 +34,7 @@ hash.
 Build the current canonical guidance bundle from the repository root with:
 
 ```powershell
-dotnet run --project automation/Clio.Knowledge.Bundle -- `
+dotnet run --project automation/Clio.Knowledge.Bundle -- build `
   bundle-source.json `
   fixtures/keys/p1-test-private.pem `
   artifacts/knowledge-bundle.zip `
@@ -43,7 +43,26 @@ dotnet run --project automation/Clio.Knowledge.Bundle -- `
   (git rev-parse HEAD)
 ```
 
-The P1 key is disposable test material and must not be reused for production publication.
+The `build` verb may be omitted for backward compatibility. The P1 key is disposable test material
+and must not be reused for production publication; production releases are signed in CI with the key
+described in [distribution/RELEASING.md](../distribution/RELEASING.md).
+
+Check a built or downloaded artifact the way the consumer will, before publishing or after
+downloading it:
+
+```powershell
+dotnet run --project automation/Clio.Knowledge.Bundle -- verify `
+  artifacts/knowledge-bundle.zip `
+  distribution/keys/clio-knowledge-2026-08-public.pem `
+  clio-knowledge-2026-08 `
+  1.9.0
+```
+
+`verify` confirms the manifest signature against the trusted public key, the declared key ID, the
+optional expected library version, that every declared resource is present exactly once with its
+declared length and digest, and that the archive contains no entry the manifest does not declare.
+The release workflow runs it twice: on the artifact it built, and on the artifact downloaded back
+from the draft release.
 `bundle-source.json` must reference canonical files under `guidance/` or `catalog/`. Files under
 `fixtures/oracles/` are immutable migration evidence and must never become the publication source.
 
