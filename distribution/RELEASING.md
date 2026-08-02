@@ -34,6 +34,20 @@ publisher label and the release tag; it never substitutes for the monotonic `seq
 
 Every content change therefore needs **both** a new `libraryVersion` and a new `sequence`.
 
+## Who can publish, and from where
+
+Anyone with **write access to this repository** can cut a release, and everything runs on GitHub —
+no local .NET, no local clone, and no access to the signing key. The key lives only in the
+`KNOWLEDGE_SIGNING_PRIVATE_KEY` repository secret and is read by the runner, never by a person.
+
+Two entry points, both of which start the same **Release knowledge bundle** workflow:
+
+- **From the GitHub UI** — Actions → *Release knowledge bundle* → *Run workflow*, branch `master`,
+  and type the `libraryVersion` from `bundle-source.json` into the confirmation box. The run fails
+  fast if it does not match, so a mistyped version cannot publish the wrong generation. This path
+  needs nothing installed at all.
+- **By pushing a version tag** — for anyone already at a terminal.
+
 ## How to publish
 
 1. Land the content change on `master` and make sure `PublishedGenerationTests` records the new
@@ -44,8 +58,8 @@ Every content change therefore needs **both** a new `libraryVersion` and a new `
 git tag 1.10.0 && git push origin 1.10.0
 ```
 
-   or by dispatching **Release knowledge bundle** and typing the same version into the confirmation
-   input.
+   or by dispatching **Release knowledge bundle** from the Actions tab and typing the same version
+   into the confirmation input.
 
 The workflow then, in order: runs the producer contract suite, checks the tag against
 `bundle-source.json`, refuses to continue if a **published** release for that tag already exists,
