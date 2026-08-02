@@ -48,11 +48,18 @@ git tag 1.10.0 && git push origin 1.10.0
    input.
 
 The workflow then, in order: runs the producer contract suite, checks the tag against
-`bundle-source.json`, refuses to continue if a release for that tag already exists, builds and signs
-the bundle, verifies the artifact against the committed public key, creates a **draft** release,
-uploads the asset, downloads it back and verifies both the signature and the digest GitHub published
-for it, and only then publishes. A failure at any step leaves the release a draft, so a consumer never
-observes a half-published generation.
+`bundle-source.json`, refuses to continue if a **published** release for that tag already exists,
+builds and signs the bundle, verifies the artifact against the committed public key, creates a
+**draft** release, uploads the asset, downloads it back and verifies both the signature and the
+digest GitHub published for it, and only then publishes. A failure at any step leaves the release a
+draft, so a consumer never observes a half-published generation.
+
+Re-running after a failure is safe: a leftover draft for the same tag was never visible to a
+consumer, so the run clears it and starts over. A published release is never touched.
+
+Note that the artifact's SHA-256 differs between builds of the same commit — the detached ECDSA
+signature embeds a random nonce. The digest that matters is the one GitHub publishes for the single
+uploaded asset, which the workflow compares against the bytes it downloads back.
 
 ## Signing key
 

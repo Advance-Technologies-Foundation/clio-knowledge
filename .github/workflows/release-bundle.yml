@@ -66,16 +66,29 @@ jobs:
           echo "Publishing ${library_version} (sequence ${sequence}) from ${GITHUB_SHA}."
 
       # A published release is immutable and a sequence may never be reused with different content,
-      # so an existing release for this tag is a stop, never something to overwrite.
-      - name: Refuse to overwrite an existing release
+      # so an existing published release for this tag is a stop, never something to overwrite. A
+      # leftover DRAFT is different: it was never visible to a consumer and can only be this
+      # workflow's own failed attempt, so it is cleared rather than requiring a manual cleanup
+      # before every retry.
+      - name: Refuse to overwrite a published release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.identity.outputs.tag }}
         run: |
           set -euo pipefail
-          if gh release view "${{ steps.identity.outputs.tag }}" >/dev/null 2>&1; then
-            echo "Release ${{ steps.identity.outputs.tag }} already exists; bump libraryVersion and sequence." >&2
+          existing="$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
+            --jq ".[] | select(.tag_name == \"${TAG}\") | \"\(.id) \(.draft)\"")"
+          if [ -z "${existing}" ]; then
+            exit 0
+          fi
+          release_id="${existing%% *}"
+          is_draft="${existing##* }"
+          if [ "${is_draft}" != "true" ]; then
+            echo "Release ${TAG} is already published; bump libraryVersion and sequence." >&2
             exit 1
           fi
+          echo "Clearing leftover draft release ${TAG} (id ${release_id}) from a previous failed run."
+          gh api --method DELETE "repos/${GITHUB_REPOSITORY}/releases/${release_id}"
 
       - name: Build and sign the bundle
         env:
@@ -113,15 +126,26 @@ jobs:
       # Draft first: a release only becomes visible after its asset is uploaded and re-verified, so a
       # consumer can never observe a release whose asset is missing or still uploading.
       - name: Create the draft release
+        id: draft
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.identity.outputs.tag }}
         run: |
           set -euo pipefail
-          gh release create "${{ steps.identity.outputs.tag }}" \
+          gh release create "${TAG}" \
             --draft \
             --target "${GITHUB_SHA}" \
-            --title "clio-knowledge ${{ steps.identity.outputs.tag }}" \
+            --title "clio-knowledge ${TAG}" \
             --notes "Signed runtime knowledge bundle, sequence ${{ steps.identity.outputs.sequence }}, built from ${GITHUB_SHA}."
+          # The release ID has to be captured while the release is a draft: a draft has no published
+          # tag, so `GET /releases/tags/{tag}` answers 404 and only the ID can address it.
+          release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
+            --jq ".[] | select(.tag_name == \"${TAG}\" and .draft) | .id" | head -1)"
+          if [ -z "${release_id}" ]; then
+            echo "Draft release ${TAG} was created but could not be addressed by ID." >&2
+            exit 1
+          fi
+          echo "release-id=${release_id}" >> "$GITHUB_OUTPUT"
 
       - name: Upload the bundle asset
         env:
@@ -146,7 +170,7 @@ jobs:
             "${PUBLIC_KEY_PATH}" \
             "${SIGNING_KEY_ID}" \
             "${{ steps.identity.outputs.tag }}"
-          published_digest="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${{ steps.identity.outputs.tag }}" \
+          published_digest="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${{ steps.draft.outputs.release-id }}" \
             --jq ".assets[] | select(.name == \"${ASSET_NAME}\") | .digest")"
           local_digest="sha256:$(sha256sum "verification/${ASSET_NAME}" | cut -d' ' -f1)"
           if [ "${published_digest}" != "${local_digest}" ]; then
