@@ -59,7 +59,23 @@ While the repository is experimental:
 5. Explain whether the change is experimental, candidate, validated, or canonical.
 6. Request review from the relevant capability or content owner.
 
-Publication automation and required checks will be added after the initial contract is agreed upon.
+## Publishing a change to consumers
+
+Merging to `master` does not reach a Clio user. Clio's built-in source installs a signed GitHub
+Release asset, so content only ships when a release is published — deliberately, on a version tag or
+an explicit workflow dispatch.
+
+Every content change needs both a new `libraryVersion` and a new `sequence` in `bundle-source.json`,
+and the release tag must equal that `libraryVersion`. Reusing a `sequence` with different content
+makes Clio reject the whole library, so it is a breaking mistake rather than a cosmetic one. The full
+procedure, the identity rules, the signing-key handling, and the consumer-first key-rotation order
+are in [distribution/RELEASING.md](distribution/RELEASING.md).
+
+Before opening a release-affecting pull request, run the producer contract suite:
+
+```bash
+dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj
+```
 
 ## Guidance changes
 
@@ -100,6 +116,9 @@ Guidance can materially influence agent behavior. Treat changes with the same ca
 
 - do not publish unsigned or unreviewed content as stable;
 - do not allow arbitrary download locations;
+- never commit a production signing key; the release private key belongs only in the
+  `KNOWLEDGE_SIGNING_PRIVATE_KEY` repository secret, and `fixtures/keys/` holds disposable test
+  material that must never sign a public release;
 - do not add secrets or customer data;
 - do not replace hard safety enforcement with prose;
 - report suspected instruction-injection or artifact-integrity issues privately to the maintainers.

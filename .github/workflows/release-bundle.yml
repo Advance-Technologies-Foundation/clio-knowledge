@@ -1,0 +1,164 @@
+name: Release knowledge bundle
+
+# Publishes the signed runtime bundle as an immutable GitHub Release asset, which is how Clio's
+# built-in `creatio-curated` source is delivered. Deliberately manual: it runs on a version tag or
+# an explicit dispatch, never on a push to master, so publishing is always a decision.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      library_version:
+        description: >-
+          The libraryVersion in bundle-source.json, repeated here as a confirmation. The run fails if
+          it does not match, so a dispatch cannot publish a generation the operator did not intend.
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  ASSET_NAME: clio-knowledge-bundle.zip
+  # The key ID stamped into the manifest signature block. Clio pins the matching public key in its
+  # own binary; rotating means shipping the successor key in Clio first, then switching here.
+  SIGNING_KEY_ID: clio-knowledge-2026-08
+  PUBLIC_KEY_PATH: distribution/keys/clio-knowledge-2026-08-public.pem
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the exact commit being published
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run the producer contract suite
+        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release
+
+      # The tag is what a consumer records as the installed revision, and Clio refuses a bundle whose
+      # libraryVersion differs from it. Resolving and comparing here turns that into a build failure
+      # instead of a release nobody can install.
+      - name: Resolve and check the generation identity
+        id: identity
+        run: |
+          set -euo pipefail
+          library_version="$(jq -er '.libraryVersion' bundle-source.json)"
+          sequence="$(jq -er '.sequence' bundle-source.json)"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="${{ inputs.library_version }}"
+          fi
+          if [ "${tag}" != "${library_version}" ]; then
+            echo "Tag '${tag}' does not match bundle-source.json libraryVersion '${library_version}'." >&2
+            exit 1
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "sequence=${sequence}" >> "$GITHUB_OUTPUT"
+          echo "Publishing ${library_version} (sequence ${sequence}) from ${GITHUB_SHA}."
+
+      # A published release is immutable and a sequence may never be reused with different content,
+      # so an existing release for this tag is a stop, never something to overwrite.
+      - name: Refuse to overwrite an existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "${{ steps.identity.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Release ${{ steps.identity.outputs.tag }} already exists; bump libraryVersion and sequence." >&2
+            exit 1
+          fi
+
+      - name: Build and sign the bundle
+        env:
+          SIGNING_PRIVATE_KEY: ${{ secrets.KNOWLEDGE_SIGNING_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SIGNING_PRIVATE_KEY}" ]; then
+            echo "KNOWLEDGE_SIGNING_PRIVATE_KEY is not configured for this repository." >&2
+            exit 1
+          fi
+          mkdir -p artifacts
+          key_file="$(mktemp)"
+          # The key never reaches the workspace, the logs, or the uploaded artifact.
+          umask 077
+          printf '%s\n' "${SIGNING_PRIVATE_KEY}" > "${key_file}"
+          trap 'shred -u "${key_file}" 2>/dev/null || rm -f "${key_file}"' EXIT
+          dotnet run --project automation/Clio.Knowledge.Bundle -c Release -- build \
+            bundle-source.json \
+            "${key_file}" \
+            "artifacts/${ASSET_NAME}" \
+            "${SIGNING_KEY_ID}" \
+            "${GITHUB_REPOSITORY}" \
+            "${GITHUB_SHA}"
+
+      - name: Verify the artifact before publication
+        run: |
+          set -euo pipefail
+          dotnet run --project automation/Clio.Knowledge.Bundle -c Release -- verify \
+            "artifacts/${ASSET_NAME}" \
+            "${PUBLIC_KEY_PATH}" \
+            "${SIGNING_KEY_ID}" \
+            "${{ steps.identity.outputs.tag }}"
+          sha256sum "artifacts/${ASSET_NAME}" | tee artifacts/checksum.txt
+
+      # Draft first: a release only becomes visible after its asset is uploaded and re-verified, so a
+      # consumer can never observe a release whose asset is missing or still uploading.
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "${{ steps.identity.outputs.tag }}" \
+            --draft \
+            --target "${GITHUB_SHA}" \
+            --title "clio-knowledge ${{ steps.identity.outputs.tag }}" \
+            --notes "Signed runtime knowledge bundle, sequence ${{ steps.identity.outputs.sequence }}, built from ${GITHUB_SHA}."
+
+      - name: Upload the bundle asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload "${{ steps.identity.outputs.tag }}" "artifacts/${ASSET_NAME}" --clobber
+
+      # Proves the transfer, not just the build: the bytes GitHub will serve are downloaded back and
+      # verified against the publisher key, and the digest GitHub advertises is compared with them.
+      - name: Verify the uploaded asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p verification
+          gh release download "${{ steps.identity.outputs.tag }}" \
+            --pattern "${ASSET_NAME}" \
+            --dir verification
+          dotnet run --project automation/Clio.Knowledge.Bundle -c Release -- verify \
+            "verification/${ASSET_NAME}" \
+            "${PUBLIC_KEY_PATH}" \
+            "${SIGNING_KEY_ID}" \
+            "${{ steps.identity.outputs.tag }}"
+          published_digest="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${{ steps.identity.outputs.tag }}" \
+            --jq ".assets[] | select(.name == \"${ASSET_NAME}\") | .digest")"
+          local_digest="sha256:$(sha256sum "verification/${ASSET_NAME}" | cut -d' ' -f1)"
+          if [ "${published_digest}" != "${local_digest}" ]; then
+            echo "GitHub published digest '${published_digest}' does not match the uploaded bytes." >&2
+            exit 1
+          fi
+          echo "Asset digest verified: ${published_digest}"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release edit "${{ steps.identity.outputs.tag }}" --draft=false --latest
+          echo "Published ${{ steps.identity.outputs.tag }}; Clio discovers it through releases/latest."

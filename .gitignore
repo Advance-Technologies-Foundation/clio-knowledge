@@ -8,3 +8,4 @@ artifacts/
 dist/
 **/bin/
 **/obj/
+.worktrees/
