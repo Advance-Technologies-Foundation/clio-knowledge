@@ -132,19 +132,23 @@ jobs:
           TAG: ${{ steps.identity.outputs.tag }}
         run: |
           set -euo pipefail
-          gh release create "${TAG}" \
-            --draft \
-            --target "${GITHUB_SHA}" \
-            --title "clio-knowledge ${TAG}" \
-            --notes "Signed runtime knowledge bundle, sequence ${{ steps.identity.outputs.sequence }}, built from ${GITHUB_SHA}."
-          # The release ID has to be captured while the release is a draft: a draft has no published
-          # tag, so `GET /releases/tags/{tag}` answers 404 and only the ID can address it.
-          release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
-            --jq ".[] | select(.tag_name == \"${TAG}\" and .draft) | .id" | head -1)"
+          # Created through the API rather than `gh release create` so the response itself carries the
+          # release ID. A draft has no published tag, so `GET /releases/tags/{tag}` answers 404 and
+          # only the ID can address it later — and reading the ID back from the release LIST is
+          # unreliable, because that endpoint lags creation by a few hundred milliseconds.
+          release_id="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+            -f tag_name="${TAG}" \
+            -f target_commitish="${GITHUB_SHA}" \
+            -f name="clio-knowledge ${TAG}" \
+            -f body="Signed runtime knowledge bundle, sequence ${{ steps.identity.outputs.sequence }}, built from ${GITHUB_SHA}." \
+            -F draft=true \
+            -F prerelease=false \
+            --jq '.id')"
           if [ -z "${release_id}" ]; then
-            echo "Draft release ${TAG} was created but could not be addressed by ID." >&2
+            echo "Draft release ${TAG} could not be created." >&2
             exit 1
           fi
+          echo "Created draft release ${TAG} (id ${release_id})."
           echo "release-id=${release_id}" >> "$GITHUB_OUTPUT"
 
       - name: Upload the bundle asset
@@ -184,5 +188,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release edit "${{ steps.identity.outputs.tag }}" --draft=false --latest
+          gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${{ steps.draft.outputs.release-id }}" \
+            -F draft=false \
+            -F make_latest=true >/dev/null
           echo "Published ${{ steps.identity.outputs.tag }}; Clio discovers it through releases/latest."
