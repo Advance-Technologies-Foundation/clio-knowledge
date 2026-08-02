@@ -78,9 +78,10 @@ unusable while leaving the old one active — a silent freeze rather than a visi
 ## Immutable releases
 
 GitHub's immutable-releases repository setting prevents a published release's tag and assets from
-being replaced. Clio records whether a release reports `immutable` and surfaces an advisory when it
-does not, so enabling the setting is strongly recommended for this repository. Changing repository
-settings is an owner decision and is deliberately not automated here.
+being replaced. Clio reads the `immutable` flag on the release it installs and, when it is not set,
+appends an advisory to the `install-knowledge` / `update-knowledge` result for that source, so
+enabling the setting is strongly recommended for this repository. Changing repository settings is an
+owner decision and is deliberately not automated here.
 
 ## Verifying a release by hand
 
