@@ -1,7 +1,7 @@
 # Clio guidance oracle v1
 
 This directory contains the exact UTF-8/LF guidance bytes returned by compiled Clio commit
-`49783ca4b5c99030645737a170fe25229fa5b786` through its internal `GuidanceCatalog`.
+`35cbe574bb0b9135ea73e9c4fc9d5df6fa8b4a3b` through its internal `GuidanceCatalog`.
 
 - `provenance.json` is the complete stable-ID, URI, source, routing, feature-gate, length, and digest
   inventory.
@@ -17,6 +17,14 @@ Clio then advanced 329 commits: it edited existing articles, added six new ones,
 `run-process-button` into `when-to-use-requests`. This oracle re-captures that later state so the
 migration tests can keep verifying published articles against real compiled Clio bytes instead of
 against a snapshot the source has moved past.
+
+Unlike `clio-guidance-v0`, this capture is not frozen: it tracks the newest Clio master that still
+compiles guidance into the assembly, and it is re-captured whenever Clio edits an article published
+here. The capture at `49783ca4…` was superseded by `35cbe574…`, which added buildable tracked-change
+columns and element-level `useBackgroundMode` to `process-modeling` and the `crt.LoadDataRequest`
+refresh contract to `page-schema-handlers` and `mobile-page-modification`. Re-capture, then port the
+change into `guidance/` in the same commit — a re-capture on its own turns the parity test red, which
+is exactly its job.
 
 ## Articles that intentionally differ from this oracle
 
