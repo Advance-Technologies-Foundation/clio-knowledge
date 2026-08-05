@@ -1,7 +1,7 @@
 # Clio guidance oracle v1
 
 This directory contains the exact UTF-8/LF guidance bytes returned by compiled Clio commit
-`35cbe574bb0b9135ea73e9c4fc9d5df6fa8b4a3b` through its internal `GuidanceCatalog`.
+`5905e007f6b1358c85e51734aed23f9a603562a7` through its internal `GuidanceCatalog`.
 
 - `provenance.json` is the complete stable-ID, URI, source, routing, feature-gate, length, and digest
   inventory.
@@ -22,7 +22,12 @@ Unlike `clio-guidance-v0`, this capture is not frozen: it tracks the newest Clio
 compiles guidance into the assembly, and it is re-captured whenever Clio edits an article published
 here. The capture at `49783ca4…` was superseded by `35cbe574…`, which added buildable tracked-change
 columns and element-level `useBackgroundMode` to `process-modeling` and the `crt.LoadDataRequest`
-refresh contract to `page-schema-handlers` and `mobile-page-modification`. Re-capture, then port the
+refresh contract to `page-schema-handlers` and `mobile-page-modification`. That capture was in turn
+superseded by `5905e007…`, which rewrote the logo flow in `branding` onto `set-logo` plus the
+`get-target-package` resolution, the `warnings` delivery channel and the `UsePanelIconBackground`
+off-state, added the branding-package note to `create-theme` in `theming`, and added the
+`crt.CreateRecordRequest` `entityPageName` decision rule and typed-page menu caveat to
+`page-schema-handlers`. Re-capture, then port the
 change into `guidance/` in the same commit — a re-capture on its own turns the parity test red, which
 is exactly its job.
 
