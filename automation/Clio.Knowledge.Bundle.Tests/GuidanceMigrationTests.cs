@@ -166,8 +166,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(13,
-                because: "porting the second round of guidance Clio master wrote after the previous oracle capture — the branding package-data delivery (set-logo slots, get-target-package resolution, the warnings channel and the UsePanelIconBackground off-state), the create-theme package note in theming, and the crt.CreateRecordRequest entityPageName decision rule plus the typed-page menu caveat in page-schema-handlers — changed published content, so it is a new immutable knowledge generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(14,
+                because: "porting the Google Fonts availability contract Clio master added to theming — the family-name rules build-theme enforces, the up-front catalogue check, the confirmation gate for an unpublished family and the fail-open on an unverifiable one — changed published content, so it is a new immutable knowledge generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>

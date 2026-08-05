@@ -1,7 +1,7 @@
 # Clio guidance oracle v1
 
 This directory contains the exact UTF-8/LF guidance bytes returned by compiled Clio commit
-`5905e007f6b1358c85e51734aed23f9a603562a7` through its internal `GuidanceCatalog`.
+`afebcc56dc807673f11b725b0d3d8755c1e9ced7` through its internal `GuidanceCatalog`.
 
 - `provenance.json` is the complete stable-ID, URI, source, routing, feature-gate, length, and digest
   inventory.
