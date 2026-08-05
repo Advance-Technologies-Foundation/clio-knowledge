@@ -166,8 +166,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(11,
-                because: "restoring the process-modeling buildable-slice limitation and the related-list no-handler rule the previous restoration round missed changed published content, so it is a new immutable knowledge generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(14,
+                because: "porting the Google Fonts availability contract Clio master added to theming — the family-name rules build-theme enforces, the up-front catalogue check, the confirmation gate for an unpublished family and the fail-open on an unverifiable one — changed published content, so it is a new immutable knowledge generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>
