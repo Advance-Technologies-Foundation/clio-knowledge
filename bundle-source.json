@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.0",
-  "sequence": 15,
+  "libraryVersion": "1.13.4",
+  "sequence": 19,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -23,6 +23,7 @@
     "itemIds": [
       "agent-execution",
       "app-modeling",
+      "workplaces",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
@@ -47,6 +48,7 @@
       "dashboard-rights",
       "dashboards",
       "data-bindings",
+      "dataservice-upsert",
       "dataforge-orchestration",
       "deploy-lifecycle",
       "describe-environment",
@@ -139,6 +141,7 @@
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/agent-execution",
       "docs://knowledge/com.creatio.clio/app-modeling",
+      "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -163,6 +166,7 @@
       "docs://knowledge/com.creatio.clio/dashboard-rights",
       "docs://knowledge/com.creatio.clio/dashboards",
       "docs://knowledge/com.creatio.clio/data-bindings",
+      "docs://knowledge/com.creatio.clio/dataservice-upsert",
       "docs://knowledge/com.creatio.clio/dataforge-orchestration",
       "docs://knowledge/com.creatio.clio/deploy-lifecycle",
       "docs://knowledge/com.creatio.clio/describe-environment",
@@ -280,6 +284,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/applications/app-modeling.md",
       "bundlePath": "resources/app-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "workplaces",
+      "title": "Workplaces",
+      "description": "Guides Creatio navigation workplace management: creating, updating and deleting a workplace, granting or removing role visibility, adding, removing and moving sections, and shipping every change as a package data binding.",
+      "topicId": "creatio.workplaces",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/workplaces",
+      "legacyUris": [
+        "docs://mcp/guides/workplaces"
+      ],
+      "sourcePath": "guidance/mcp/guides/applications/workplaces.md",
+      "bundlePath": "resources/workplaces.md",
       "mediaType": "text/plain"
     },
     {
@@ -652,6 +670,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/operations/describe-environment.md",
       "bundlePath": "resources/describe-environment.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "dataservice-upsert",
+      "title": "DataService UPSERT",
+      "description": "Canonical MCP guidance for Creatio DataService UpdateQuery IsUpsert: query-then-update-or-insert semantics, match-key and insert-value discipline, multi-match risk, response handling, and uniqueness-backed concurrency safety.",
+      "topicId": "creatio.dataservice.upsert",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/dataservice-upsert",
+      "legacyUris": [
+        "docs://mcp/guides/dataservice-upsert"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/dataservice-upsert.md",
+      "bundlePath": "resources/dataservice-upsert.md",
       "mediaType": "text/plain"
     },
     {
