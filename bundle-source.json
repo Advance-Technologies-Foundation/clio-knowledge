@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.12.0",
-  "sequence": 14,
+  "libraryVersion": "1.13.1",
+  "sequence": 16,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -23,6 +23,7 @@
     "itemIds": [
       "agent-execution",
       "app-modeling",
+      "workplaces",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
@@ -139,6 +140,7 @@
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/agent-execution",
       "docs://knowledge/com.creatio.clio/app-modeling",
+      "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -280,6 +282,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/applications/app-modeling.md",
       "bundlePath": "resources/app-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "workplaces",
+      "title": "Workplaces",
+      "description": "Guides Creatio navigation workplace management: creating, updating and deleting a workplace, granting or removing role visibility, adding, removing and moving sections, and shipping every change as a package data binding.",
+      "topicId": "creatio.workplaces",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/workplaces",
+      "legacyUris": [
+        "docs://mcp/guides/workplaces"
+      ],
+      "sourcePath": "guidance/mcp/guides/applications/workplaces.md",
+      "bundlePath": "resources/workplaces.md",
       "mediaType": "text/plain"
     },
     {
