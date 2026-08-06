@@ -98,6 +98,13 @@ Body formatting
 - Single-line or dense JSON/JS in newly authored content is unacceptable: it blocks human review and produces unreadable diffs.
 - If the page body is empty or brand-new (no existing style to match), default to tab indentation.
 
+Predefined / named list-page filter (Items_PredefinedFilter)
+- A NAMED or PREDEFINED filter that a section/list page ALWAYS applies (e.g. an "Active Requests" list) is a PAGE edit, not a data write. It lives in the `Items_PredefinedFilter` view-model attribute on the `*_ListPage` schema: a `viewModelConfigDiff` `merge` on `["attributes"]` setting `Items_PredefinedFilter.value` to a serialized filter GROUP, saved via `update-page`.
+- ADDING a first predefined filter: append mode is fine — `viewModelConfigDiff` is plain-concat, so a fresh `["attributes"]` merge leaves config intact.
+- UPDATING an existing predefined filter: edit the existing `Items_PredefinedFilter` op in place per "Modifying an existing component" and the CRITICAL rules above. Do NOT blindly append a second `["attributes"]` merge (viewModelConfigDiff is plain-concat/no-dedupe → stacks a duplicate) and do NOT blindly resend the full body via `mode:"replace"` (on a customized `*_ListPage` it re-applies the page's own `viewConfigDiff` merges → the CRITICAL Object/Array failure). Gate on `ownBodySummary.viewConfigDiffOperations`; not verified live.
+- Do NOT reverse-engineer a `SysFolder` row with a `FilterData` blob and do NOT INSERT it through DataService — `FilterData` is a `System.IO.Stream`, so a DataService InsertQuery fails with `Attempt to set the value of "System.String" type into the "FilterData" field of the "System.IO.Stream" type`. A `SysFolder` folder-tree entry (left-panel folders) is USER data — a DIFFERENT concept; do not conflate them or hunt through `SysSchema` / `FolderTree` / `BaseFolder`.
+- Build the filter GROUP value per `esq-filters-frontend` — it owns the serialized filter shape. This guide owns only the placement (the `Items_PredefinedFilter.value` slot), not the filter shape.
+
 Known limitations
 - `update-page` fail-closed on design-package resolution: if `GetDesignPackageUId` fails for a write, the call returns an error instead of silently falling back to the original package.
 - `get-page` uses a best-effort fallback to the original package if design-package resolution fails, because reads are non-destructive.
