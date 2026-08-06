@@ -44,19 +44,22 @@ workplace, STOP and ask before any NAVIGATION write — `SysWorkplace`, `SysModu
 `SysAdminUnitInWorkplace`, or their bindings. `create-app` performs such a write itself (it creates
 `My applications` and the section placement), so for a NEW app the decision is due BEFORE
 `create-app` — ask it in the same turn you confirm the environment, and at the latest immediately
-after `create-app` and before anything further. Asking once the pages are built is a defect, not a
-late-but-equivalent order: it makes the user re-decide work you already finished. Offer these
-options:
-- a NEW workplace named for the app (recommend this when scaffolding a new app — it keeps the
-  app's navigation self-contained);
+after `create-app` and before anything further. Offer these options:
+- a NEW workplace named for the app — recommend this when SCAFFOLDING a new app, because it keeps
+  the app's navigation self-contained. Do NOT lead with it when adding a section to an app that
+  already has its own workplace: `SysWorkplace`.`Name` is not unique, so a second workplace named
+  after the app is created silently and then competes with the first for every binding (see Create a
+  workplace). Read `SysModuleInWorkplace` for the app's existing sections first;
+- the workplace the app's sections ALREADY live in — recommend this one when adding a section to an
+  existing app, and name it so the choice is concrete;
 - the `My applications` workplace — note it may not exist yet, and leaving the app there restricts
   it to administrators (see New apps start in a default workplace);
 - an existing workplace the user names (list the available `Name` values so the choice is real).
 When the app is being SCAFFOLDED, its SECTION and its HOME PAGE go in the SAME workplace and that is
-ONE question — ask it once for both, then apply both. Reproduced failure mode: asking only about the
-home page bound it to one workplace while the section stayed in `My applications`, so no single
-workplace showed a working app. `home-page` owns the home-page half of the write; this guide owns
-the section half; neither is finished alone.
+ONE question — ask it once for both, then apply both. Asking only about the home page binds it to one
+workplace while the section stays in `My applications`, so no single workplace shows a working app.
+`home-page` owns the home-page half of the write and this guide owns the section half —
+neither is finished alone.
 Then ask WHO SHOULD SEE IT, because placement alone does not answer that. A new workplace has no
 `SysAdminUnitInWorkplace` row and is invisible to everyone, so choosing one obliges you to grant an
 audience. Do NOT offer this as free text and do NOT reduce it to the two extremes
@@ -82,15 +85,14 @@ appears in the Creatio Mobile app and vice versa. Resolve the intended client ty
 pass it in BOTH writes — the `odata-create` payload AND the binding row. For the mobile flow read
 `mobile-page-modification`. The two writes fail differently, so do not generalise from one to the
 other:
-- LIVE row: omitting `SysApplicationClientTypeId` is survivable. The platform's live write path fills
-  in the WEB client, identical to passing it explicitly (observed on the stand tested: the omitted
-  row read back with the same client type, loader, and type as a product workplace — treat that as
-  an observation, not a contract). Pass it anyway; it is the wrong value for mobile.
+- LIVE row: omitting `SysApplicationClientTypeId` is survivable — the platform's live write path
+  fills in the WEB client. Treat that as an observation rather than a contract, and pass the value
+  anyway; WEB is the wrong one for mobile.
 - BINDING row: omitting it is NOT survivable, and it fails silently. A binding ships only the columns
   you passed and install supplies no defaults, so the workplace arrives on the target environment
-  with EMPTY `SysApplicationClientType`, `Type`, and `LoaderId`. That much is reproduced end to end
-  on a real cross-environment transfer. An empty client type matches no client, so do not expect the
-  workplace to render — but the verified fact is the empty columns, not the rendering failure.
+  with EMPTY `SysApplicationClientType`, `Type`, and `LoaderId` — verified on a cross-environment
+  transfer. An empty client type matches no client, so do not expect the workplace to render; the
+  verified fact is the empty columns, not the rendering failure.
 `SysApplicationClientType` is not alone in this trap: `Type` and `LoaderId` are also platform-set
 on a live insert and silently absent from a hand-built binding. Ship all three — see Ship every
 change as a data binding for the full per-table column set.
@@ -102,10 +104,9 @@ it into the target package so it transfers — `create-data-binding-db` for the 
 binding that already exists. Read `data-bindings` for those tool contracts and for how to inspect a
 package's existing bindings first.
 
-`remove-data-binding-row-db` is the exception and it is dangerous: it DELETES THE LIVE RECORD and
-then unbinds it, and it has no `confirm` gate. `data-bindings` owns that contract — read it. What
-matters here: there is no way to un-ship a workplace row without deleting the workplace, which is
-why New apps start in a default workplace tells you to leave the `My applications` bindings alone.
+`remove-data-binding-row-db` is the exception (see Confirmation gates). The consequence here: there
+is no way to un-ship a workplace row without deleting the workplace, which is why New apps start in
+a default workplace tells you to leave the `My applications` bindings alone.
 
 A binding ships ONLY the columns you passed (`data-bindings` owns the projection rule and the
 `IsForceUpdate: false` first-install-only consequence). For the three workplace tables that means:
@@ -115,10 +116,10 @@ A binding ships ONLY the columns you passed (`data-bindings` owns the projection
   assigns it on insert and a shipped value is discarded (see Rules that bite). This applies to a
   binding you CREATE. When you MOVE a section, you are upserting over the binding `create-app`
   already shipped, and an upsert rewrites the columns you pass without dropping the ones already
-  there — so `Position` stays in that binding and you cannot remove it with these tools. Verified
-  and harmless: the target gets a possibly-meaningless order value, not an empty column. Do not
-  chase it, and do not delete the binding to "clean" the column set — `remove-data-binding-row-db`
-  would take the live placement row with it.
+  there — so `Position` stays in that binding and you cannot remove it with these tools. That is
+  harmless: the target gets a possibly-meaningless order value, not an empty column. Do not delete
+  the binding to "clean" the column set — `remove-data-binding-row-db` would take the live
+  placement row with it.
 - `SysAdminUnitInWorkplace` — `Id`, `SysWorkplace`, `SysAdminUnit`.
 `Type`, `LoaderId`, and the client-type GUID are set for you on the LIVE write, so you will not have
 them to hand — get them by READ-BACK: right after `odata-create`, `odata-read` `SysWorkplace` for the
@@ -240,9 +241,8 @@ Once the target workplace is agreed (see Ask where things belong), MOVE the app 
   workplace's binding;
 - CHECK `My applications`.`HomePageUId` and clear it when it points at THIS app's home page. The
   `AppFreedomUI` template creates no home page and leaves it empty, but `AppWithHomePage` creates one
-  AND points `My applications` at it — verified on a live stand, where the shared `My applications`
-  was still opening a custom app's home page long after that app was built, and its
-  `SysWorkplace_MyApps` binding shipped 7 columns carrying that `HomePageUId`. So the package
+  AND points `My applications` at it, and its `SysWorkplace_MyApps` binding carries that
+  `HomePageUId` — verified on a live stand. So the package
   EXPORTS a mutation of a workplace it does not own: installing it repoints `My applications` on
   every target environment. To clear it, `odata-update` `HomePageUId` to
   `00000000-0000-0000-0000-000000000000` and then `upsert-data-binding-row-db` the
@@ -281,8 +281,8 @@ two places at once and is not what the user asked for.
   `odata-create` value is NORMALISED (verified: sent 91, stored 24 — the next free slot), while an
   `odata-update` value is stored exactly as sent (verified: 24 changed to 7). `Position` is also NOT
   unique — several workplaces routinely share one number — and the platform renumbers every
-  workplace's `Position` whenever workplaces are added or removed: one install that created two
-  workplaces renumbered all 22 pre-existing rows. So to place a workplace at a chosen position,
+  workplace's `Position` whenever workplaces are added or removed. So to place a workplace at a
+  chosen position,
   create it and then update it; always read back for the actual order, and never treat `Position` as
   an identifier.
 - A junction row whose `SysModuleId` or `SysWorkplaceId` is the zero GUID
@@ -291,24 +291,16 @@ two places at once and is not what the user asked for.
   replacement row with a new `Id` rather than patching the broken one.
 
 ## When changes appear
-Workplace, section, and edit-page lists are cached PER SESSION, so a signed-in user keeps seeing the old
-navigation and a browser refresh alone shows nothing. Do not claim a restart is required; it is not.
-Finish every navigation change by publishing it:
-- `reload-workplaces` (requires cliogate) invokes the platform's own workplace-cache reload — the same
-  contract Creatio itself runs when a role membership changes. Call it as the LAST step, after the
-  final write: run it earlier and the writes that follow are stale again. What is VERIFIED is that the
-  call reaches that contract and succeeds; whether a given session then needs only F5 is the
-  platform's behaviour, not something clio can guarantee, and the section and edit-page caches are
-  separate from the workplace cache. So tell the user to refresh FIRST, and to re-login if the change
-  still is not visible — do not state the refresh is sufficient as a fact.
-- If it fails or cliogate is not installed, say the change is applied but that F5 is not enough and
-  users must log out and back in. Never promise a refresh you did not publish.
-Why this is needed even though the platform self-heals sometimes: Creatio invalidates those caches from
-an entity event listener on `SysUserInRole` / `SysAdminUnitInWorkplace` INSERT and DELETE only. So a
-role grant made through `odata-create` may publish itself, while creating a workplace, moving a section,
-or pointing `HomePageUId` at a home page invalidates nothing — and a row written by the binding tools
-goes straight through the database engine, which raises no entity events at all. Do not rely on the
-listener: ordering it correctly is fragile and it does not cover the section or home-page cases.
+Workplace, section, and edit-page lists are cached PER SESSION. A signed-in user keeps seeing the old
+navigation, and a browser refresh alone does NOT show the change. So the LAST step of every navigation
+change is to tell the user, in the result, to LOG OUT AND BACK IN. Do not report the change as done
+without that; do not tell them to press F5; and do not claim a restart is required, because it is not.
+Do not expect the platform to publish the change for you. Creatio invalidates those caches from an
+entity event listener on `SysUserInRole` / `SysAdminUnitInWorkplace` INSERT and DELETE only, so a role
+grant made through `odata-create` may publish itself while creating a workplace, moving a section, or
+pointing `HomePageUId` at a home page invalidates nothing — and a row written by the binding tools goes
+straight through the database engine, which raises no entity events at all. A re-login is the one
+instruction that covers every case.
 
 ## Verify
 Read back after every mutation with `odata-read` (filter junctions by `SysWorkplace/Id`); do not
@@ -322,6 +314,6 @@ binding. It lists a localizable column such as `Name` inline; the package export
 `Localization` folder, so `read-data-binding-db` shows one more column than `data.json` for the same
 binding — that is the same binding, not a discrepancy. Fall back to `download-application` plus
 extracting `Data/<Schema>_<Suffix>/data.json` only when you need the raw archive; it is several steps
-for the same answer. That is how the missing columns were found. Reading the workplace back after
-install (assert `SysApplicationClientTypeId`, `TypeId`, `LoaderId` are non-empty) CONFIRMS the
-result but does not protect you, because a wrong first install cannot be repaired by re-installing.
+for the same answer. Reading the workplace back after install (assert
+`SysApplicationClientTypeId`, `TypeId`, `LoaderId` are non-empty) CONFIRMS the result but does not
+protect you, because a wrong first install cannot be repaired by re-installing.
