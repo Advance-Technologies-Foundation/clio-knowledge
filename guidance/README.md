@@ -23,9 +23,11 @@ guidance/
 An `index.md` file owns the topic router for a directory and sibling files own focused items. The
 layout intentionally remains readable and does not encode publisher selection rules.
 
-Developers edit these files. Files under `fixtures/oracles/` are immutable migration snapshots used
-to prove that the first external bundle preserves the previous Clio output; they are not the
-authoring source.
+Developers edit these files. Files under `fixtures/oracles/` are immutable migration snapshots that
+proved the first external bundle preserved the previous Clio output. That comparison is finished and
+retired — Clio no longer compiles guidance, so the snapshots can never change and nothing asserts
+against them. They are historical evidence, never the authoring source, and no new assertion should
+be built on them.
 
 `bundle-source.json` at the repository root maps stable item IDs, logical topic IDs, roles, exact
 `docs://knowledge/com.creatio.clio/<item-id>` routes, and transitional legacy routes to these

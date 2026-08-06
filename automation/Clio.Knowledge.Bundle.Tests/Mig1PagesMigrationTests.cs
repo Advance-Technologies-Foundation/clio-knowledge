@@ -18,28 +18,6 @@ public sealed class Mig1PagesMigrationTests
         new("page-modification-field-contract", "docs://mcp/guides/page-modification-field-contract", "guidance/mcp/guides/pages/modification/field-contract.md"),
         new("page-modification-overview", "docs://mcp/guides/page-modification-overview", "guidance/mcp/guides/pages/modification/overview.md")
     ];
-
-    [Test]
-    [Description("Verifies that every mirrored MIG1 canonical page article exactly matches the current Clio oracle.")]
-    public void CanonicalPageGuidance_ShouldMatchCurrentClioOracle()
-    {
-        // Arrange
-        string repositoryRoot = FindRepositoryRoot();
-
-        // Act
-        string[] differences = Articles
-            .Where(article => KnowledgeOracle.MirrorsClio(article.Id))
-            .Where(article => !CanonicalBytes(repositoryRoot, article.CanonicalPath)
-                .SequenceEqual(CanonicalBytes(repositoryRoot,
-                    KnowledgeOracle.CurrentResourcePath(article.Id))))
-            .Select(article => article.Id)
-            .ToArray();
-
-        // Assert
-        differences.Should().BeEmpty(
-            because: "a MIG1 article this repository has not taken ownership of must still serve the exact bytes Clio serves");
-    }
-
     [Test]
     [Description("Verifies that MIG1 ownership and stable resource URIs match the frozen inventory.")]
     public void Mig1Ownership_ShouldMatchPartitionAndStableUris()

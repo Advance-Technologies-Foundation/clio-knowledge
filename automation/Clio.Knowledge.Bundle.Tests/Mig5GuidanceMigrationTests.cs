@@ -22,30 +22,6 @@ public sealed class Mig5GuidanceMigrationTests
         ("support-mode", "docs://mcp/guides/support-mode", "guidance/mcp/guides/operations/support-mode.md"),
         ("ui-project", "docs://mcp/guides/ui-project", "guidance/mcp/guides/applications/ui-project.md")
     ];
-
-    [Test]
-    [Description("Verifies that every mirrored canonical MIG5 article is byte-identical to the current Clio oracle.")]
-    public void CanonicalArticles_ShouldMatchCurrentOracleByteForByte()
-    {
-        // Arrange
-        string repositoryRoot = FindRepositoryRoot();
-
-        // Act
-        string[] differences = Articles
-            .Where(article => KnowledgeOracle.MirrorsClio(article.Id))
-            .Where(article => !ReadBytes(repositoryRoot, article.CanonicalPath)
-                .SequenceEqual(ReadBytes(repositoryRoot,
-                    KnowledgeOracle.CurrentResourcePath(article.Id))))
-            .Select(article => article.Id)
-            .ToArray();
-
-        // Assert
-        Articles.Should().HaveCount(12,
-            because: "MIG5 owns exactly the twelve application, business-rule, process, and operational articles");
-        differences.Should().BeEmpty(
-            because: "a MIG5 article this repository has not taken ownership of must still serve the exact bytes Clio serves");
-    }
-
     [Test]
     [Description("Verifies that MIG5 exclusively owns the mapped articles and excludes deferred safety guidance.")]
     public void MigrationPartition_ShouldOwnExactlyTheCanonicalMig5Articles()
