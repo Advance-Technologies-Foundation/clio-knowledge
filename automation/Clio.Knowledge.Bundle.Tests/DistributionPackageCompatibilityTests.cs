@@ -133,7 +133,11 @@ public sealed class DistributionPackageCompatibilityTests
             XDocument metadata = XDocument.Load(nuspecStream);
             XNamespace ns = metadata.Root!.Name.Namespace;
             string packageVersion = metadata.Root.Element(ns + "metadata")!.Element(ns + "version")!.Value;
-            packageVersion.Should().Be("1.12.0",
+            // Restating the number here pinned it in a third place and had to be edited on every
+            // generation. The assertion below already binds the packed version to the manifest's
+            // libraryVersion, which is the only declaration of it, so what is left to check is the
+            // property that number must have.
+            packageVersion.Should().NotContain("-",
                 because: "Clio deliberately ignores prerelease knowledge transport versions");
             using MemoryStream payloadStream = new(payloadBytes);
             using ZipArchive bundle = new(payloadStream, ZipArchiveMode.Read);

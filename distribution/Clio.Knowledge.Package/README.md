@@ -10,8 +10,10 @@ while immutable knowledge identity remains `(libraryId, sequence, bundleDigest)`
 key is deliberately not shipped in this package.
 
 The packed payload is generated into the package project's intermediate output directory. Git
-transport reads repository source files directly and does not consume this archive. The stable
-`1.12.0` transport version and exact inner path match Clio's NuGet discovery and extraction contract.
+transport reads repository source files directly and does not consume this archive. The transport
+version is stable rather than prerelease — Clio ignores prerelease knowledge versions — and equals the
+manifest's `libraryVersion`; that version and the exact inner path match Clio's NuGet discovery and
+extraction contract.
 
 This POC artifact is signed by a publicly committed disposable test key. Packing is blocked by
 default to prevent accidental publication. An explicitly approved internal experiment must opt in
