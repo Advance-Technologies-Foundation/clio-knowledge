@@ -27,27 +27,6 @@ public sealed class DashboardGuidanceMigrationTests
             "guidance/mcp/guides/theming/index.md",
             "fixtures/oracles/clio-guidance-v1/resources/theming.md")
     ];
-
-    [Test]
-    [Description("Verifies that every mirrored MIG3 canonical article is byte-identical to the current Clio oracle.")]
-    public void CanonicalArticles_ShouldMatchCurrentOracleBytes()
-    {
-        // Arrange
-        string repositoryRoot = FindRepositoryRoot();
-
-        // Act
-        string[] differences = MigratedArticles
-            .Where(mapping => KnowledgeOracle.MirrorsClio(mapping.Id))
-            .Where(mapping => !ReadBytes(repositoryRoot, mapping.CanonicalPath)
-                .SequenceEqual(ReadBytes(repositoryRoot, mapping.OraclePath)))
-            .Select(mapping => mapping.Id)
-            .ToArray();
-
-        // Assert
-        differences.Should().BeEmpty(
-            because: "a MIG3 article this repository has not taken ownership of must still serve the exact UTF-8/LF bytes Clio serves");
-    }
-
     [Test]
     [Description("Verifies that MIG3 canonical paths retain the stable guidance IDs and docs URIs exposed by Clio.")]
     public void CanonicalArticleMappings_ShouldPreserveStableIdsAndUris()

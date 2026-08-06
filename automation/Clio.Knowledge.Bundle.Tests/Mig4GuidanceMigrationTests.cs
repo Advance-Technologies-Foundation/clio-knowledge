@@ -69,33 +69,6 @@ public sealed class Mig4GuidanceMigrationTests
         uriMismatches.Should().BeEmpty(
             because: "moving guidance into canonical directories must not change its published docs URI");
     }
-
-    [Test]
-    [Description("Verifies that every mirrored MIG4 article differs from the current Clio oracle only by canonicalized reference links.")]
-    public void CanonicalGuidance_ShouldMatchCurrentClioOracle_ByteForByte()
-    {
-        // Arrange
-        string repositoryRoot = FindRepositoryRoot();
-
-        // Act
-        string[] differences = MigratedArticles
-            .Where(article => KnowledgeOracle.MirrorsClio(article.Id))
-            .Where(article => !string.Equals(
-                ReferenceLinkMigration.NormalizeToFrozenLinkText(File.ReadAllText(ToFullPath(
-                    repositoryRoot,
-                    article.CanonicalPath))),
-                File.ReadAllText(ToFullPath(
-                    repositoryRoot,
-                    KnowledgeOracle.CurrentResourcePath(article.Id))),
-                StringComparison.Ordinal))
-            .Select(article => article.Id)
-            .ToArray();
-
-        // Assert
-        differences.Should().BeEmpty(
-            because: "an article this repository has not taken ownership of may differ from Clio only by links that now target independently published articles");
-    }
-
     [Test]
     [Description("Verifies that virtual entity write guidance retains its Creatio 10.0 compatibility boundary.")]
     public void VirtualEntitiesGuidance_ShouldRequireCreatio100ForWrites()

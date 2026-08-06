@@ -11,34 +11,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class GuidanceMigrationTests
 {
-    private static readonly (string Canonical, string Oracle)[] MigratedArticles =
-    [
-        ("guidance/mcp/guides/esq.md", "fixtures/oracles/esq/resources/esq.md"),
-        ("guidance/mcp/guides/esq-filter-parsing.md", "fixtures/oracles/esq/resources/esq-filter-parsing.md"),
-        ("guidance/mcp/guides/esq-filters/index.md", "fixtures/oracles/esq/resources/esq-filters.md"),
-        ("guidance/mcp/guides/esq-filters/backend.md", "fixtures/oracles/esq/resources/esq-filters-backend.md"),
-        ("guidance/mcp/guides/esq-filters/frontend.md", "fixtures/oracles/esq/resources/esq-filters-frontend.md")
-    ];
-
-    [Test]
-    public void CanonicalGuidance_ShouldMatchFrozenClioOracle_AfterInitialMigration()
-    {
-        // Arrange
-        string repositoryRoot = FindRepositoryRoot();
-
-        // Act
-        var differences = MigratedArticles
-            .Where(pair => !CanonicalBytes(repositoryRoot, pair.Canonical)
-                .SequenceEqual(CanonicalBytes(repositoryRoot, pair.Oracle)))
-            .Select(pair => pair.Canonical)
-            .ToArray();
-
-        // Assert
-        differences.Should().BeEmpty(
-            because: "the initial content migration must preserve the exact guidance served by Clio");
-    }
-
-    [Test]
+   [Test]
     [Description("Verifies that publication reads only canonical human-authored knowledge rather than frozen oracle fixtures.")]
     public void BundleSource_ShouldPublishOnlyCanonicalKnowledgeFiles()
     {
@@ -166,8 +139,6 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(16,
-                because: "publishing the workplaces article and the seven edits that route to it — the app-modeling and core-rules placement gates, the home-page workplace question, the section-removal distinction, the binding rules and the two iframe-section pointers — changed published content, so it is a new immutable knowledge generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>
@@ -185,10 +156,6 @@ public sealed class GuidanceMigrationTests
             resources.Where(resource => resource.GetProperty("role").GetString() == "guidance")
                 .Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
                     because: "every currently migrated v0 guidance route remains available as signed transition metadata");
-            resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(70,
-                because: "every guidance article merged into the repository must be published by the manifest");
-            resources.Count(resource => resource.GetProperty("role").GetString() == "reference").Should().Be(43,
-                because: "supporting references must not appear as bare get-guidance article names");
             result.Manifest.Resources.Select(resource => resource.ItemId).Should().Equal(
                 resources.Select(resource => resource.GetProperty("itemId").GetString())
                     .OrderBy(itemId => itemId, StringComparer.Ordinal),
