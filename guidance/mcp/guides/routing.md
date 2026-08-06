@@ -19,9 +19,11 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
+  - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
+  - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
