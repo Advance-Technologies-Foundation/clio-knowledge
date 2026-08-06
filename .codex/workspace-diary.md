@@ -44,3 +44,10 @@ Decision: Kept UPSERT as its own focused guide and registered it in the bundle c
 Discovery: `IsUpsert` is a query-then-update-or-insert path, not an atomic database merge. Creatio Core revision `e0d0f98b80c8fd26e305804c7cb3242b76baf072` establishes the request contract and zero-match insert branch.
 Files: guidance/mcp/guides/backend/dataservice-upsert.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/PublishedGenerationTests.cs, distribution/Clio.Knowledge.Package/Clio.Knowledge.Package.csproj
 Impact: Agents can discover the UPSERT safety rules by the stable `dataservice-upsert` item and route.
+
+## 2026-08-06 20:30 – Entity listener changed-column guard
+Context: A Forester lab exposed that the canonical entity-listener guide lacked a supported way to prevent a listener from repeating its own same-entity calculated-field update.
+Decision: Make `configuration-entity-event-listener` the sole owner of the changed-column / self-triggering rule and add the `Entity.GetChangedColumnValues()` guard pattern. Bump the direct-source library generation.
+Discovery: Core yields values with `IsChanged` through `GetChangedColumnValues()` in before and after hooks. The after-event changed collection also contained `ModifiedOn` and `ModifiedById`, so audit values must not be used as business triggers.
+Files: guidance/mcp/guides/composable-app/configuration-entity-event-listener.md, bundle-source.json
+Impact: agents can now distinguish a business-input update from their own output write and avoid unnecessary recursive listener work.
