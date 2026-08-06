@@ -80,7 +80,7 @@ public sealed class PublishedGuidanceOracleParityTests
             .Select(article => article.ItemId)
             .ToArray();
         string[] staleExclusions = KnowledgeOracle.IndependentlyEditedArticles
-            .Concat(KnowledgeOracle.ArticlesRetiredInClio)
+            .Concat(KnowledgeOracle.ArticlesWithoutClioBytes)
             .Where(id => !publishedIds.Contains(id))
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToArray();
@@ -99,8 +99,8 @@ public sealed class PublishedGuidanceOracleParityTests
     }
 
     [Test]
-    [Description("Verifies that a published article absent from the current Clio oracle is declared retired rather than silently uncovered.")]
-    public void ArticlesAbsentFromTheOracle_ShouldBeDeclaredRetiredInClio()
+    [Description("Verifies that a published article absent from the current Clio oracle is declared either retired in Clio or authored here, rather than silently uncovered.")]
+    public void ArticlesAbsentFromTheOracle_ShouldBeDeclaredAsCarryingNoClioBytes()
     {
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
@@ -116,11 +116,11 @@ public sealed class PublishedGuidanceOracleParityTests
         // Act
         string[] undeclaredNewArticles = published
             .Where(article => !oracleIds.Contains(article.ItemId))
-            .Where(article => !KnowledgeOracle.ArticlesRetiredInClio.Contains(article.ItemId))
+            .Where(article => !KnowledgeOracle.ArticlesWithoutClioBytes.Contains(article.ItemId, StringComparer.Ordinal))
             .Select(article => article.ItemId)
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToArray();
-        string[] retiredArticlesStillServedByClio = KnowledgeOracle.ArticlesRetiredInClio
+        string[] retiredArticlesStillServedByClio = KnowledgeOracle.ArticlesWithoutClioBytes
             .Where(id => oracleIds.Contains(id))
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToArray();
@@ -129,10 +129,11 @@ public sealed class PublishedGuidanceOracleParityTests
         oracleIds.Should().NotBeEmpty(
             because: "the current oracle must carry the Clio bytes the parity assertions read");
         undeclaredNewArticles.Should().BeEmpty(
-            because: "an article Clio does not serve must be recorded as retired, so the parity assertion "
-                + "reports a deliberate exemption instead of a missing oracle file");
+            because: "an article Clio does not serve must be recorded as retired there or authored here, so "
+                + "the parity assertion reports a deliberate exemption instead of a missing oracle file");
         retiredArticlesStillServedByClio.Should().BeEmpty(
-            because: "an article Clio serves again must return to byte-parity coverage rather than stay exempt");
+            because: "an article the oracle carries bytes for must return to byte-parity coverage rather "
+                + "than stay exempt for having none");
     }
 
     private static PublishedArticle[] ReadPublishedGuidance(string repositoryRoot)

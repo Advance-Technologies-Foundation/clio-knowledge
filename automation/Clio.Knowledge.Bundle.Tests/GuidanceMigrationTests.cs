@@ -166,8 +166,8 @@ public sealed class GuidanceMigrationTests
                 because: "multi-source identity is the canonical v1 publication contract");
             libraryId.Should().Be("com.creatio.clio",
                 because: "the migrated Clio guidance library needs one stable reverse-DNS publisher identity");
-            root.GetProperty("sequence").GetUInt64().Should().Be(11,
-                because: "restoring the process-modeling buildable-slice limitation and the related-list no-handler rule the previous restoration round missed changed published content, so it is a new immutable knowledge generation");
+            root.GetProperty("sequence").GetUInt64().Should().Be(16,
+                because: "publishing the workplaces article and the seven edits that route to it — the app-modeling and core-rules placement gates, the home-page workplace question, the section-removal distinction, the binding rules and the two iframe-section pointers — changed published content, so it is a new immutable knowledge generation");
             resources.Select(resource => resource.GetProperty("itemId").GetString()).Should().OnlyHaveUniqueItems(
                 because: "item identities are immutable within a library");
             resources.Should().OnlyContain(resource =>
@@ -185,7 +185,7 @@ public sealed class GuidanceMigrationTests
             resources.Where(resource => resource.GetProperty("role").GetString() == "guidance")
                 .Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
                     because: "every currently migrated v0 guidance route remains available as signed transition metadata");
-            resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(69,
+            resources.Count(resource => resource.GetProperty("role").GetString() == "guidance").Should().Be(70,
                 because: "every guidance article merged into the repository must be published by the manifest");
             resources.Count(resource => resource.GetProperty("role").GetString() == "reference").Should().Be(43,
                 because: "supporting references must not appear as bare get-guidance article names");

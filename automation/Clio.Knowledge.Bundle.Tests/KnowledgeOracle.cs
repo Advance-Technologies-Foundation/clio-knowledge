@@ -13,8 +13,9 @@ internal static class KnowledgeOracle
     internal const string InitialMigrationDirectory = "fixtures/oracles/clio-guidance-v0";
 
     /// <summary>
-    /// Clio bytes captured at commit <c>49783ca4</c>, after Clio advanced 329 commits past the
-    /// initial migration. Migration tests compare published articles against this capture.
+    /// Clio bytes captured at commit <c>afebcc56</c>, the latest Clio master that still compiles
+    /// guidance into the assembly. Migration tests compare published articles against this capture,
+    /// so it is re-captured whenever Clio master edits an article this repository mirrors.
     /// </summary>
     internal const string CurrentDirectory = "fixtures/oracles/clio-guidance-v1";
 
@@ -44,8 +45,52 @@ internal static class KnowledgeOracle
             // Same pointer, added to the run-a-business-process row of the pre-edit GATE table.
             "page-modification",
             // Same pointer, added to the crt.RunBusinessProcessRequest row of the request table.
-            "page-schema-handlers"
+            "page-schema-handlers",
+            // The seven edits below all exist to route an agent to workplaces, an article authored
+            // here that Clio never served (see ArticlesAuthoredHere). Each keeps Clio's revision and
+            // adds the navigation-placement decision Clio's text leaves implicit, so the pointer —
+            // and, where the decision has to happen before a mutation, the gate around it — is the
+            // whole divergence.
+            //
+            // Gate before create-app: the section lands in My applications, which most users cannot
+            // see, so WHERE it belongs and WHO sees it must be asked first.
+            "app-modeling",
+            // Same gate, stated as a core rule so it applies outside the app-modeling flow.
+            "core-rules",
+            // Adds the workplaces row to the routing table.
+            "routing",
+            // Asks for the target workplace in the same turn as the widget set.
+            "home-page",
+            // Distinguishes deleting a section itself from taking it out of one workplace.
+            "existing-app-maintenance",
+            // Points at workplaces for the workplace model before WORKPLACE_ID is chosen.
+            "creatio-freedom-iframe-section",
+            // Independently authored binding rules this repository owns: how to inspect what a
+            // package already ships, why the first install is the only chance, the seed-data
+            // binding-name trap, and that remove-data-binding-row-db deletes the live record.
+            "data-bindings"
         };
+
+    /// <summary>
+    /// Stable IDs first authored in this repository, so Clio never served them and the current
+    /// oracle has no bytes to compare against. Distinct from
+    /// <see cref="ArticlesRetiredInClio"/>: nothing was withdrawn, the content simply originates
+    /// here.
+    /// </summary>
+    internal static readonly IReadOnlySet<string> ArticlesAuthoredHere =
+        new HashSet<string>(StringComparer.Ordinal)
+        {
+            // Owns the navigation workplace model: creating, updating and deleting a workplace,
+            // role visibility, adding, removing and moving sections, and shipping each change as a
+            // package data binding. Clio has no workplaces guide to mirror.
+            "workplaces"
+        };
+
+    /// <summary>
+    /// Stable IDs the current oracle cannot carry bytes for, whichever reason applies.
+    /// </summary>
+    internal static IEnumerable<string> ArticlesWithoutClioBytes =>
+        ArticlesRetiredInClio.Concat(ArticlesAuthoredHere);
 
     /// <summary>
     /// Stable IDs Clio no longer publishes, so the current oracle carries no bytes to compare
@@ -63,5 +108,7 @@ internal static class KnowledgeOracle
 
     /// <summary>Whether a published article must still be byte-identical to the current oracle.</summary>
     internal static bool MirrorsClio(string id) =>
-        !IndependentlyEditedArticles.Contains(id) && !ArticlesRetiredInClio.Contains(id);
+        !IndependentlyEditedArticles.Contains(id)
+        && !ArticlesRetiredInClio.Contains(id)
+        && !ArticlesAuthoredHere.Contains(id);
 }
