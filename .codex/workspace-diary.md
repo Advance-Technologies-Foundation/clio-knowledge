@@ -37,3 +37,10 @@ release. Every content change needs BOTH a new `libraryVersion` and a new
 whole library. Key rotation is consumer-first: ship the successor public key in
 a Clio release before signing with it, or every new release becomes unusable
 while the old one silently stays active.
+
+## 2026-08-06 20:30 – Entity listener changed-column guard
+Context: A Forester lab exposed that the canonical entity-listener guide lacked a supported way to prevent a listener from repeating its own same-entity calculated-field update.
+Decision: Make `configuration-entity-event-listener` the sole owner of the changed-column / self-triggering rule and add the `Entity.GetChangedColumnValues()` guard pattern. Bump the direct-source library generation.
+Discovery: Core yields values with `IsChanged` through `GetChangedColumnValues()` in before and after hooks. The after-event changed collection also contained `ModifiedOn` and `ModifiedById`, so audit values must not be used as business triggers.
+Files: guidance/mcp/guides/composable-app/configuration-entity-event-listener.md, bundle-source.json
+Impact: agents can now distinguish a business-input update from their own output write and avoid unnecessary recursive listener work.

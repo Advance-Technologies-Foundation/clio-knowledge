@@ -72,6 +72,35 @@ Delete flow:
 - Initialize lazily when helper construction depends on `UserConnection`.
 - Do not let the listener become a service locator for unrelated logic.
 
+## Prevent A Listener From Reacting To Its Own Write
+
+When a listener writes back to the same entity, it MUST react only to the business-input columns that require its work. Do not run the same work for every update: the listener's own output save invokes the entity update pipeline again.
+
+Use `Entity.GetChangedColumnValues()` to guard the hook. It yields only `EntityColumnValue` values whose `IsChanged` flag is set and is available in both before and after hooks.
+
+```csharp
+using System.Linq;
+
+public override void OnUpdated(object sender, EntityAfterEventArgs e) {
+	base.OnUpdated(sender, e);
+	Entity entity = (Entity)sender;
+	bool inputChanged = entity.GetChangedColumnValues()
+		.Any(value => value.Name == "UsrSourceValue");
+	if (!inputChanged) {
+		return;
+	}
+
+	_helper.RecalculateDerivedValue(entity.UserConnection, entity.PrimaryColumnValue);
+}
+```
+
+- Replace `UsrSourceValue` with the business input that should trigger the reaction.
+- Do not use the listener's own derived/output column as the trigger.
+- Do not treat audit-only changes such as `ModifiedOn` or `ModifiedById` as business input.
+- In an after hook, `EntityAfterEventArgs.ModifiedColumnValues` provides the corresponding changed-value collection directly. Prefer `entity.GetChangedColumnValues()` when the same guard must work in both before and after hooks.
+
+Verified boundary: this pattern was observed in Creatio 8.1.0.6716 on .NET Framework. A focused integration scenario updated one input column, wrote a calculated column from the listener, and confirmed that the nested calculated-column update returned immediately instead of repeating the business work.
+
 ## Validation Pattern
 
 - Subscribe to `entity.Validating` from `OnSaving` when entity validation must happen in the save pipeline.
@@ -89,5 +118,6 @@ Delete flow:
 
 - Which entity schema and event hooks were used
 - Whether logic stayed inside the listener or moved into a helper, and why
+- For same-entity writes, which business-input columns guard against self-triggering
 - Tests added or updated, or the reason tests were not changed
 - Build and test commands run, or the exact blocker if they were not run
