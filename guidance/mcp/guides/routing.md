@@ -12,15 +12,18 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - wire a button/menu action to a platform request (crt.*Request: print, close, cancel, ...) -> get-request-info + name=when-to-use-requests
   - add a button/menu item that runs a business process -> get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
+  - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
+  - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
+  - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
