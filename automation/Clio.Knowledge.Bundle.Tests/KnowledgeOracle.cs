@@ -13,8 +13,9 @@ internal static class KnowledgeOracle
     internal const string InitialMigrationDirectory = "fixtures/oracles/clio-guidance-v0";
 
     /// <summary>
-    /// Clio bytes captured at commit <c>49783ca4</c>, after Clio advanced 329 commits past the
-    /// initial migration. Migration tests compare published articles against this capture.
+    /// Clio bytes captured at commit <c>afebcc56</c>, the latest Clio master that still compiles
+    /// guidance into the assembly. Migration tests compare published articles against this capture,
+    /// so it is re-captured whenever Clio master edits an article this repository mirrors.
     /// </summary>
     internal const string CurrentDirectory = "fixtures/oracles/clio-guidance-v1";
 

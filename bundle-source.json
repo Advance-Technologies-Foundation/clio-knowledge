@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.10.0",
-  "sequence": 12,
+  "libraryVersion": "1.13.0",
+  "sequence": 15,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
