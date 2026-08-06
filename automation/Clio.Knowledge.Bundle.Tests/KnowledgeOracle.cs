@@ -35,6 +35,13 @@ internal static class KnowledgeOracle
     internal static readonly IReadOnlySet<string> IndependentlyEditedArticles =
         new HashSet<string>(StringComparer.Ordinal)
         {
+            // The mobile tab body + Area structure, the normalized container spacing, and the
+            // deterministic empty-container drops were authored on a Clio feature branch and
+            // reach consumers through this repository rather than a Clio release. They cannot
+            // return to byte-parity: Clio has stopped compiling guidance into the assembly, so
+            // the v1 capture is the last oracle this article will ever have and re-capturing it
+            // is no longer possible. Ownership of the text sits here from now on.
+            "freedom-page-web-to-mobile-conversion",
             // Clio's revision made the request catalog (get-request-info
             // crt.RunBusinessProcessRequest) authoritative for the run-process parameter contract
             // and retired run-process-button, an article this repository still publishes. Each of
