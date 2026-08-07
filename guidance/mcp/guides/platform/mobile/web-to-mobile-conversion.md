@@ -42,6 +42,29 @@ Creatio or disk. The guide contains:
     mobileValues (the container's adaptive columns into its own values, each child's placement into
     elementMap[].mobileValues.layoutConfig.adaptive) — nothing separate to apply. Present it at the
     gate so the user can adjust or decline. Null when there is no multi-column grid container.
+  - normalizations — ONE SECTION PER STANDARD the converter applied, keyed by a group derived from the
+    component type ("spacing" for containers, "metricStyle" for a metric; a type with no curated group
+    keys its own section by name). A standard is a property value the converter STAMPS onto the
+    elements it inserts, discarding the web page's own value for that property. Each section carries:
+      • note — a one-line summary composed by clio from the actual counts;
+      • normalized[] — {name, type, properties}: the elements normalized and the EXACT dotted paths
+        written on each. This is the authoritative list. Never assume a fixed set of properties and
+        never assume a value from this article: a replacing standard reports the top-level key it
+        replaced (e.g. ["gap"]), a merging one the leaves it actually changed (e.g.
+        ["config.layout.border.hidden"]), and a leaf already at the standard is NOT reported;
+      • skipped[] — {name, type, properties, reason}: elements the standard could NOT be applied to,
+        because the element carries a non-object (typically a whole-value binding) where the standard
+        needed to merge. The converter never overwrites one, at any depth. These keep the WEB values
+        and may need a manual pass in the designer — mention them SEPARATELY.
+    A merge preserves the sibling subtrees of what it stamps — for a metric that means config.data
+    (the aggregation subtree, without which the widget renders nothing) and config.title survive, so
+    never reconstruct config from the normalized keys alone.
+    Every normalization is SILENT — never a gate question: state each section as ONE aggregated line
+    in the plan and the final report, and never restore the web values. Null when nothing was
+    normalized. Merge twins the mobile template provides are untouched.
+  - spacingNormalization — BACK-COMPAT ALIAS of the "spacing" section, unchanged in shape for callers
+    that already read it. Prefer normalizations, which also carries the standards this one cannot
+    express. Null when no container spacing was normalized.
   - resourceStrings — every localized string the converted body references (top-level captions AND
     nested tokens like config.title / text.template), keyed by resource name and resolved to its
     en-US text. Register this whole map via update-page `resources` so every #ResourceString token renders.
@@ -239,6 +262,18 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   placement). A single-column grid gets NO adaptive — the mobile client renders the plain config. Just
   paste mobileValues verbatim; do not hand-build adaptive. The mobile runtime reflows children by
   `row` / `column`. adaptiveLayout is a PROPOSAL — let the user adjust or decline it at the gate.
+- NORMALIZATION IS NOT CONVERSION: the converter stamps the mobile design standards the conversion
+  RULES declare onto the elements it inserts, and the web page's own value for those properties is
+  deliberately IGNORED (discarded, never translated). It is ALREADY baked into
+  elementMap[].mobileValues; there is nothing separate to apply. WHICH properties were written is
+  reported per element in guide.normalizations.<group>.normalized[] — read it there rather than
+  assuming a fixed set, since the rules are resolved at runtime and this article cannot know their
+  current values. Merge twins the mobile template provides are untouched, and a branch that is a
+  whole-value binding is NEVER overwritten: it appears under .skipped[] and keeps the web value, so
+  call those elements out separately. A merge preserves the sibling subtrees of what it stamps, so
+  never reconstruct config from the normalized keys alone. This is NOT a proposal — SILENT, never a
+  gate question: state each standard as ONE aggregated line in the plan and the final report, and do
+  NOT treat the difference from the web page as a defect.
 - NEVER drop a property the mobile component supports. The guide already prebuilds each insert's
   values (elementMap[].mobileValues) by carrying every source property valid on mobile (per the
   registry) — paste it verbatim and add only the value binding. validate-page is the backstop and
