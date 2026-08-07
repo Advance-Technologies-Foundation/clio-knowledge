@@ -1,0 +1,62 @@
+name: Auto-release on merge
+
+# Ships whatever generation `master` now declares, as soon as a pull request lands. Content only
+# reaches a Clio user through a published release, so a merged version bump that nobody released
+# stays invisible to every consumer.
+#
+# This workflow never decides a version and never commits anything. The version is whatever the
+# merged pull request wrote into `bundle-source.json`, and `PublishedGenerationTests` already refuses
+# to pass unless the recorded sequence and content digest match those bytes. A merge that changed no
+# published content therefore has nothing to release, and this run skips instead of failing.
+on:
+  push:
+    branches:
+      - master
+  # For re-running the check by hand after an infrastructure failure, without another merge.
+  workflow_dispatch:
+
+permissions:
+  # Starting another workflow through `workflow_dispatch` is an Actions API call, so `actions: write`
+  # is the permission that gates it. `contents: write` does not, and granting it here would hand this
+  # job the ability to write to the branch it exists to keep protected.
+  actions: write
+  contents: read
+
+# Publishing a generation is not something to cancel halfway. Two merges landing seconds apart would
+# otherwise start two release runs for the same version, and the second would fail red on the release
+# workflow's "refuse to overwrite a published release" guard, so runs queue instead.
+concurrency:
+  group: auto-release-on-merge
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the merged commit
+        uses: actions/checkout@v4
+
+      - name: Release the declared generation unless it already shipped
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          library_version="$(jq -er '.libraryVersion' bundle-source.json)"
+          # Only a PUBLISHED release means this generation already reached consumers. A leftover draft
+          # is a previous failed attempt that was never visible, and the release workflow clears it.
+          published="$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
+            --jq ".[] | select(.tag_name == \"${library_version}\" and .draft == false) | .id")"
+          if [ -n "${published}" ]; then
+            echo "Release ${library_version} is already published; this merge bumped no version, so nothing ships."
+            exit 0
+          fi
+          # Dispatched rather than published by pushing the tag from here: a tag pushed with the
+          # default GITHUB_TOKEN does not start another workflow run, so the release job would never
+          # fire and no error would be reported anywhere. `workflow_dispatch` is the documented
+          # exception to that rule.
+          #
+          # The dispatched run builds `master` HEAD, which can differ from this merge commit when
+          # another merge lands in the same few seconds. Its own tag-versus-`libraryVersion` check
+          # still guarantees it never publishes a generation whose manifest disagrees with the tag.
+          gh workflow run release-bundle.yml --ref master -f library_version="${library_version}"
+          echo "Requested release ${library_version}; follow it in the Release knowledge bundle workflow."
