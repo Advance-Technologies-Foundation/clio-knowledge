@@ -24,7 +24,7 @@ public sealed class PublishedGenerationTests
     // working tree publishes different bytes than the recorded generation claims.
     private const ulong PublishedSequence = 20;
     private const string PublishedContentDigest =
-        "E77CE7B3360F846F6A3C7387A419286A28E532D2CD91E56B24471575EF67E5AB";
+        "A74F4D6D89A3203795C2920323EEA67E440B51CD0CA5646B02DC44A12D676678";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]

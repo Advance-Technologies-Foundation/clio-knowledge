@@ -51,18 +51,25 @@ Creatio or disk. The guide contains:
     it at the gate so the user knows what the tab bodies look like, but never offer to skip or
     replace it. Null when the converter creates no tab, or every converted tab is empty (an empty tab
     gets no layers, so an empty Area is never created in the first place).
-  - spacingNormalization — the spacing the converter NORMALIZED to the mobile standard: a caller-facing
-    `note` plus `normalized[]`, one entry per container with its `name`, its `type` and the exact
-    `properties` written. For these the converter WRITES the mobile standard instead of translating the
-    web page's own value — the web value is discarded, even when the web container carried none — and
-    the result is already baked into elementMap[].mobileValues, so there is nothing separate to apply.
-    WHICH container types are covered and WHICH properties are written is converter configuration
-    resolved at RUN TIME: read the entries the response carries instead of assuming a fixed set, and
-    treat a type or property you do not recognize as one more normalized value rather than folding it
-    into a known one. Merge twins the mobile template provides are untouched. SILENT — never a gate
-    question: state it in the plan and the final report as ONE aggregated line ("spacing of N containers
-    normalized to the mobile standard; web spacing ignored"). Never restore the web value. Null when
-    nothing was normalized.
+  - normalizations — ONE SECTION PER STANDARD the converter NORMALIZED to, keyed by the standard's
+    group. Each section carries a caller-facing `note`, `normalized[]` — one entry per element with its
+    `name`, its `type` and the EXACT `properties` written — and `skipped[]` when the standard could not
+    be applied somewhere, with the `properties` paths refused and the `reason`. For a normalized element
+    the converter WRITES the mobile standard instead of translating the web page's own value — the web
+    value is discarded, even when the web element carried none — and the result is already baked into
+    elementMap[].mobileValues, so there is nothing separate to apply. A SKIPPED element is the opposite:
+    it keeps its WEB values and may need a manual pass in the designer, so never read an empty
+    `normalized[]` as "nothing to normalize" without checking `skipped[]`. WHICH sections exist, WHICH
+    element types each covers and WHICH properties it writes is converter configuration resolved at RUN
+    TIME: read the sections and entries the response carries instead of assuming a fixed set, and treat a
+    section, type or property you do not recognize as one more standard rather than folding it into a
+    known one. Merge twins the mobile template provides are untouched. SILENT — never a gate question:
+    state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
+    value. Null only when no standard normalized or skipped anything at all.
+  - spacingNormalization — BACK-COMPAT ALIAS of the "spacing" section, shape unchanged for callers that
+    already read it, and it mirrors that section's `normalized[]` ONLY. Prefer normalizations, which also
+    carries `skipped[]` and the standards this one cannot express. Read it only when the clio you are
+    talking to returns no normalizations.
   - resourceStrings — every localized string the converted body references (top-level captions AND
     nested tokens like config.title / text.template), keyed by resource name and resolved to its
     en-US text. Register this whole map via update-page `resources` so every #ResourceString token renders.
@@ -290,12 +297,13 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
   apply the map as it is. What the layers are is described once in the tabAreaLayers field entry
   above; what to do with them, in FLOW step 5c.
-- SOME PROPERTIES ARE NORMALIZED, NOT CONVERTED: for certain container types the converter writes the
+- SOME PROPERTIES ARE NORMALIZED, NOT CONVERTED: for certain element types the converter writes the
   mobile standard instead of translating the web page's own value. Do NOT restore the web value and do
   NOT treat the difference from the web page as a defect. Like tabAreaLayers this is NOT a proposal —
-  SILENT, never a gate question: state it as ONE aggregated line in the plan and the final report.
-  WHICH containers and WHICH properties took part is converter configuration, read per conversion from
-  guide.spacingNormalization — described once in the spacingNormalization field entry above.
+  SILENT, never a gate question: state EACH standard as ONE aggregated line in the plan and the final
+  report, and call out separately anything the standard could NOT be applied to, which keeps its web
+  values. WHICH standards ran, WHICH elements and WHICH properties took part is converter configuration,
+  read per conversion from guide.normalizations — described once in the normalizations field entry above.
 - NEVER drop a property the mobile component supports. The guide already prebuilds each insert's
   values (elementMap[].mobileValues) by carrying every source property valid on mobile (per the
   registry) — paste it verbatim and add only the value binding. validate-page is the backstop and
