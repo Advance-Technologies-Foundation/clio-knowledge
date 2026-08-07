@@ -1,0 +1,38 @@
+name: Validate pull request
+
+# The required check behind the `master` lock. Merging now publishes, so this is the last point at
+# which a generation mismatch can still be caught cheaply: `PublishedGenerationTests` fails when the
+# working tree would publish different bytes than the recorded sequence and digest claim, which is
+# exactly the mistake that makes Clio reject the whole library.
+#
+# Deliberately without a `paths:` filter. A required check that does not run on some pull requests
+# never reports a conclusion for them, and those pull requests stay unmergeable forever.
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-pull-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  contract-suite:
+    # This name is the status-check context named by the `master` ruleset. Renaming the job renames
+    # the check, and the ruleset then waits for a context nothing reports.
+    name: Producer contract suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the pull request merge result
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run the producer contract suite
+        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release
