@@ -61,15 +61,29 @@ While the repository is experimental:
 
 ## Publishing a change to consumers
 
-Merging to `master` does not reach a Clio user. Clio's built-in source installs a signed GitHub
-Release asset, so content only ships when a release is published — deliberately, on a version tag or
-an explicit workflow dispatch.
+`master` is protected. It accepts no direct push and no force push, so every change lands through a
+pull request whose **Producer contract suite** check passed. Repository administrators can bypass the
+protection; nothing else can.
+
+If a pull request shows **no checks at all** and still reports that merging is blocked, the branch
+predates the **Validate pull request** workflow. That workflow runs from the pull request's own head,
+so a branch without the file reports the required check never — and a required check that is never
+reported waits indefinitely instead of failing. Merge `master` into the branch; the workflow comes
+with it and the check starts running.
+
+Merging to `master` publishes. The **Auto-release on merge** workflow reads `libraryVersion` from
+`bundle-source.json` and starts **Release knowledge bundle** for it, unless a release for that version
+is already published — in which case the merge ships nothing and the run reports the skip. So the
+publishing decision is made in the pull request, by what it writes into `bundle-source.json`.
 
 Every content change needs both a new `libraryVersion` and a new `sequence` in `bundle-source.json`,
 and the release tag must equal that `libraryVersion`. Reusing a `sequence` with different content
-makes Clio reject the whole library, so it is a breaking mistake rather than a cosmetic one. The full
-procedure, the identity rules, the signing-key handling, and the consumer-first key-rotation order
-are in [distribution/RELEASING.md](distribution/RELEASING.md).
+makes Clio reject the whole library, so it is a breaking mistake rather than a cosmetic one.
+`PublishedGenerationTests` records the published sequence and content digest, and the required check
+fails while the working tree would publish different bytes than they claim — which is what stops an
+unversioned content change from merging at all. The full procedure, the identity rules, the
+signing-key handling, and the consumer-first key-rotation order are in
+[distribution/RELEASING.md](distribution/RELEASING.md).
 
 Before opening a release-affecting pull request, run the producer contract suite:
 
