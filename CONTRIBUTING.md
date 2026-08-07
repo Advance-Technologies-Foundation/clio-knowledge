@@ -65,6 +65,12 @@ While the repository is experimental:
 pull request whose **Producer contract suite** check passed. Repository administrators can bypass the
 protection; nothing else can.
 
+If a pull request shows **no checks at all** and still reports that merging is blocked, the branch
+predates the **Validate pull request** workflow. That workflow runs from the pull request's own head,
+so a branch without the file reports the required check never — and a required check that is never
+reported waits indefinitely instead of failing. Merge `master` into the branch; the workflow comes
+with it and the check starts running.
+
 Merging to `master` publishes. The **Auto-release on merge** workflow reads `libraryVersion` from
 `bundle-source.json` and starts **Release knowledge bundle** for it, unless a release for that version
 is already published — in which case the merge ships nothing and the run reports the skip. So the
