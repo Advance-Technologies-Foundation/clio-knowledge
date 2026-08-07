@@ -42,6 +42,34 @@ Creatio or disk. The guide contains:
     mobileValues (the container's adaptive columns into its own values, each child's placement into
     elementMap[].mobileValues.layoutConfig.adaptive) — nothing separate to apply. Present it at the
     gate so the user can adjust or decline. Null when there is no multi-column grid container.
+  - tabAreaLayers — the mobile designer's two-layer body synthesized inside every tab the CONVERTER
+    creates: a tab-body grid holding the tab's Area card (the guide gives you both names — take them
+    from here, never build them from a name pattern), with ALL of the tab's top-level content
+    (expansion panels included) already retargeted into the Area and stacked in web order. Both
+    layers are ORDINARY elementMap inserts placed right after the tab's own entry —
+    nothing separate to apply. This structure is MANDATORY (a team standard), NOT a proposal: report
+    it at the gate so the user knows what the tab bodies look like, but never offer to skip or
+    replace it. Null when the converter creates no tab, or every converted tab is empty (an empty tab
+    gets no layers, so an empty Area is never created in the first place).
+  - normalizations — ONE SECTION PER STANDARD the converter NORMALIZED to, keyed by the standard's
+    group. Each section carries a caller-facing `note`, `normalized[]` — one entry per element with its
+    `name`, its `type` and the EXACT `properties` written — and `skipped[]` when the standard could not
+    be applied somewhere, with the `properties` paths refused and the `reason`. For a normalized element
+    the converter WRITES the mobile standard instead of translating the web page's own value — the web
+    value is discarded, even when the web element carried none — and the result is already baked into
+    elementMap[].mobileValues, so there is nothing separate to apply. A SKIPPED element is the opposite:
+    it keeps its WEB values and may need a manual pass in the designer, so never read an empty
+    `normalized[]` as "nothing to normalize" without checking `skipped[]`. WHICH sections exist, WHICH
+    element types each covers and WHICH properties it writes is converter configuration resolved at RUN
+    TIME: read the sections and entries the response carries instead of assuming a fixed set, and treat a
+    section, type or property you do not recognize as one more standard rather than folding it into a
+    known one. Merge twins the mobile template provides are untouched. SILENT — never a gate question:
+    state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
+    value. Null only when no standard normalized or skipped anything at all.
+  - spacingNormalization — BACK-COMPAT ALIAS of the "spacing" section, shape unchanged for callers that
+    already read it, and it mirrors that section's `normalized[]` ONLY. Prefer normalizations, which also
+    carries `skipped[]` and the standards this one cannot express. Read it only when the clio you are
+    talking to returns no normalizations.
   - resourceStrings — every localized string the converted body references (top-level captions AND
     nested tokens like config.title / text.template), keyed by resource name and resolved to its
     en-US text. Register this whole map via update-page `resources` so every #ResourceString token renders.
@@ -102,14 +130,20 @@ FLOW
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
    - insert — add mobileType under parentName/propertyName (propertyName defaults to "items").
-     When elementMap[].index is present, add it to the insert op at that 0-based position (a
-     positional element mapped above/below an anchor, e.g. above the mobile Tabs); otherwise omit
-     index and append. On a tabbed record page EVERY web tab inserts as its OWN new mobile tab under
-     Tabs (no general-tab collapse); the web wrapper's non-tab content merges into the mobile general
-     tab's grid (e.g. CardContentWrapper→GeneralTabContainer). The mobile template's Feed and
-     Attachments tabs (FeedTab, AttachmentsTab) MUST stay last: insert each converted web tab BEFORE
-     them (index it after the general tab) so the order is general tab, converted web tabs, Feed,
-     Attachments.
+     When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
+     (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
+     web tab, below); otherwise omit index and append. On a tabbed record page EVERY web tab inserts
+     as its OWN new mobile tab under Tabs (no general-tab collapse); the web wrapper's non-tab
+     (side/profile) content fills the mobile general tab's grid, EXCEPT the profile island itself:
+     it merges into the template's profile Area card rather than landing in that grid — its children
+     go INSIDE that Area card, never directly into the general tab's grid, and it must NOT be left
+     empty. Take both container names from guide.containerMap, which already carries the pair for the
+     chosen template (e.g. SideAreaProfileContainer→AreaProfileContainer); do not assume a fixed
+     pair. Tab ORDER is already deterministic: every converted web tab arrives with
+     an explicit index (1, 2, … — right after the template's general tab), so applying the inserts
+     verbatim yields general tab, converted web tabs, Feed, Attachments, with the template's
+     FeedTab/AttachmentsTab staying last automatically — do NOT reorder tabs or invent indexes
+     yourself.
      START from elementMap[].mobileValues: paste it as the component's values VERBATIM. It already
      carries the type and EVERY source property the mobile component supports — never drop any of
      them. It also already carries the CONVERTED event-binding requests (a button's `clicked`, a
@@ -134,8 +168,14 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type or multi-data-source).
-     Tell the user what was dropped. (Empty containers are still inserted — the user can delete them.)
+   - drop — skip the element entirely (reason explains why: unsupported type, multi-data-source, or
+     "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+     a converter-created layout container whose every child dropped was removed deterministically by
+     the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
+     removed with header buttons says its tools were discarded). WHICH container types are eligible
+     is converter configuration, not a fixed list — read the drop entries rather than assuming one.
+     Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
+     about it — just report it with the other drops.
    For many→one suggestions (primaryWebMerge set, e.g. crt.FolderTree + crt.FolderTreeActions
    -> crt.FolderTreeActions), emit a SINGLE mobile component and merge in the secondary
    component's properties; do not emit the secondary as a separate component.
@@ -150,6 +190,19 @@ FLOW
    container's adaptive (it is already inside the container's inserted mobileValues; a separate merge
    would duplicate the operation). Just PRESENT it to the user in plain language ("fields in <container>
    stack on the phone, keep <n> columns on a tablet — adjust?"); they may change it or decline.
+5c. Tab body + Area (when guide.tabAreaLayers is present): every tab the CONVERTER creates already carries
+   its synthesized inserts in the element map — the tab-body grid, then its Area card — because on
+   mobile a tab's content lives in an Area card, not directly in the tab body. Each of that tab's
+   top-level components (expansion panels included — a panel is an ordinary component here) already has
+   parentName = the Area and a sequential single-column layoutConfig
+   (a component the adaptive pass placed per breakpoint keeps that adaptive placement instead).
+   Apply the inserts in element-map order (a parent always precedes its children) and do NOT reparent,
+   reorder or re-place anything yourself, do NOT add an Area of your own, and do NOT touch a tab the mobile
+   template provides (it arrives as a merge twin and gets no layers). The synthesized entries have no
+   webName — they have no web counterpart. This structure is MANDATORY — do NOT ask whether to apply it,
+   do NOT offer to keep the web structure instead, and do NOT treat it as a decision at the gate. STATE it
+   in the plain-language plan as a fact ("the content of <tab> goes into one Area card, stacked in the web
+   order"), the way you state which components transfer.
 6. Validate the body with validate-page; resolve any findings (e.g. a binding whose attribute
    is not declared) before treating the page as done.
 7. Persist with update-page — pass target-schema-uid=<create-page schemaUId> so the body lands in the
@@ -239,6 +292,18 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   placement). A single-column grid gets NO adaptive — the mobile client renders the plain config. Just
   paste mobileValues verbatim; do not hand-build adaptive. The mobile runtime reflows children by
   `row` / `column`. adaptiveLayout is a PROPOSAL — let the user adjust or decline it at the gate.
+- TAB BODY + AREA for every tab the CONVERTER creates is baked into the element map the same way, and
+  unlike adaptiveLayout it is NOT a proposal: the tab body + Area card are the REQUIRED mobile
+  structure for a converted tab — report it at the gate, never put it up for the user's approval, and
+  apply the map as it is. What the layers are is described once in the tabAreaLayers field entry
+  above; what to do with them, in FLOW step 5c.
+- SOME PROPERTIES ARE NORMALIZED, NOT CONVERTED: for certain element types the converter writes the
+  mobile standard instead of translating the web page's own value. Do NOT restore the web value and do
+  NOT treat the difference from the web page as a defect. Like tabAreaLayers this is NOT a proposal —
+  SILENT, never a gate question: state EACH standard as ONE aggregated line in the plan and the final
+  report, and call out separately anything the standard could NOT be applied to, which keeps its web
+  values. WHICH standards ran, WHICH elements and WHICH properties took part is converter configuration,
+  read per conversion from guide.normalizations — described once in the normalizations field entry above.
 - NEVER drop a property the mobile component supports. The guide already prebuilds each insert's
   values (elementMap[].mobileValues) by carrying every source property valid on mobile (per the
   registry) — paste it verbatim and add only the value binding. validate-page is the backstop and
