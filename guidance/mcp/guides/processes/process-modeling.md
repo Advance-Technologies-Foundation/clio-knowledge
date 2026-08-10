@@ -17,10 +17,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 == What you can build today (create-business-process) ==
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `performTask`->ActivityUserTask). CAVEAT: `readData` (and the
-  other data-operation tasks) PLACES an UNCONFIGURED element — its source object, filters, and columns
-  cannot be set yet, so the step does nothing useful until a human configures it in the designer. Say so
-  when you use it; do not present the result as a working data operation.
+  (aliases `readData`->ReadDataUserTask, `performTask`->ActivityUserTask). A `readData` element is
+  CONFIGURABLE via its `readData` block — source object, first-record mode, result columns, sort, plus a
+  record `filter` (see the "Read data element" section below). CAVEAT: the OTHER data-operation tasks
+  (Add / Modify / Delete data) still place an UNCONFIGURED element — their target object and values cannot
+  be set yet, so those steps do nothing useful until a human configures them in the designer. Say so when
+  you use one; do not present such a result as a working data operation.
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
@@ -36,10 +38,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section below).
 - NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
-  sub-process, the Read/Add/Modify/Delete-data target object + read config (so a `filter` on a data
-  task is serialized but not end-to-end usable yet — only the `signalStart` filter is). Use the catalog
-  below to reason about a solution and to READ existing processes (`describe-business-process`); don't
-  expect to build those types in this increment.
+  sub-process, the Add/Modify/Delete-data target object + values (a `filter` on THOSE tasks is serialized
+  but not end-to-end usable — the buildable filters are `signalStart` and `readData`), and the Read data
+  collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
+  Use the catalog below to reason about a solution and to READ existing processes
+  (`describe-business-process`); don't expect to build those types in this increment.
 
 == Descriptor (create-business-process) ==
 {
@@ -99,10 +102,46 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   current change type, and include `entity` only to retarget the trigger object (retargeting clears any
   filter bound to the old entity).
 
-== Data source filters (signalStart trigger condition) ==
+== Read data element (readData) — first-record mode ==
+- A `readData` element reads the FIRST record of a sorted selection and exposes its columns as output
+  parameters for downstream mappings. Configure it with the element's `readData` block:
+    { "name": "ReadContact1", "type": "readData", "caption": "Read newest contact",
+      "readData": {
+        "source": "Contact",                                  // REQUIRED at create: the entity to read
+        "mode": "first",                                      // optional; "first" is the only buildable mode
+        "columns": ["Name", "Email"],                         // optional; omit or [] = read ALL columns
+        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"
+      },
+      "filter": { "object": "Contact",
+        "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
+- `mode`: only `first` (first record of the sorted selection). The designer's other read modes —
+  collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. Updating an
+  element a human configured in a different mode requires an explicit `"mode": "first"` (the server refuses
+  to silently convert it).
+- `columns` are entity COLUMN names (not captions); an unknown name is rejected at build. Omit the list (or
+  pass `[]`) to read all columns. `sort` makes "the first record" deterministic — without it the platform
+  reads an arbitrary first record; single column only (multi-column ordering is designer-only).
+- WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
+  below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
+  `elementParameter` — the element runs inside a live process instance.
+- Feed the result downstream with `mappings`: the element's output parameters include the read record's
+  columns (outputs have `isResult:true` — see describe). Example: map the read contact's Email into a
+  send-email task parameter, or expose it as a process output via `targetProcessParameter`.
+- Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
+  and its flows):
+    { "op": "setElement", "elementName": "ReadContact1",
+      "elementUpdate": { "readData": { "sort": { "column": "ModifiedOn", "direction": "desc" } } } }
+  Partial update: omit `source` to keep the current source object, omit `columns`/`sort` to keep the
+  current selection/order, pass `columns: []` to reset to ALL columns. RETARGETING `source` to a different
+  object clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
+  `setFilter`) in the same operations array. `describe-business-process` reads the whole block back
+  (`source`, `mode`, `columns` as names, `sort`), so it round-trips into create/modify.
+
+== Data source filters (signalStart trigger condition / readData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
   the platform Terrasoft.FilterGroup — you NEVER hand-write the escaped filter JSON.
-- Usable today on a `signalStart` (restrict the record trigger). Shape:
+- Usable today on a `signalStart` (restrict the record trigger) and on a `readData` element (restrict
+  which records the read selects from). Shape:
     "filter": {
       "object": "<EntityName>",        // root object; defaults to the signal entity if omitted
       "logicalOperation": "and",       // "and" (default) | "or"
@@ -137,9 +176,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
   instance exists, so a parameter / element output / meta-path reference has no value yet. The server
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
-  parameter" option for signal starts). Parameter references are valid only on a data-operation element
-  filter (Read/Add/Modify/Delete data) — which is not end-to-end buildable yet (see below), so in practice a
-  buildable filter today uses value / macro / datePart only.
+  parameter" option for signal starts). Parameter references ARE valid on a data-operation element filter —
+  the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
+  (e.g. filter the read by a process parameter's value); on Add/Modify/Delete data they serialize but the
+  task itself is not buildable yet (see below).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
   `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value` (a signalStart filter
@@ -152,9 +192,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   a `macro`).
 - Groups nest to any depth: A AND (B OR C) = conditions:[A] + groups:[{ "logicalOperation":"or",
   conditions:[B, C] }].
-- A `filter` on a data task (Read/Add/Modify/Delete data) is serialized too, but those tasks' target
-  object / read config is not buildable yet, so data-task filters are NOT end-to-end usable in this
-  increment — use the signalStart filter.
+- A `filter` on a `readData` element is end-to-end usable (pair it with the element's `readData` block —
+  see the "Read data element" section). A `filter` on an Add/Modify/Delete-data task is serialized too, but
+  those tasks' target object / values are not buildable yet, so THEIR filters are not end-to-end usable in
+  this increment.
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
   `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,
@@ -176,9 +217,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
    `execute-esq` (VwProcessLib by caption).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement — same parameter/mapping/filter/signal shapes as a build; setSignal reconfigures an existing
-   signalStart's record trigger + tracked columns in place, setElement changes element-level fields
-   (useBackgroundMode) in place on any element kind).
+   setElement — same parameter/mapping/filter/signal/readData shapes as a build; setSignal reconfigures an
+   existing signalStart's record trigger + tracked columns in place, setElement changes element-level fields
+   in place: `useBackgroundMode` on any element kind, `readData` on a Read data element only — see the
+   "Read data element" section for its partial-update and source-retarget rules).
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
@@ -209,8 +251,9 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `readData`/ReadDataUserTask.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    Setup fields: DataReadMode, EntitySchemaSelect (object), filters, SortByColumn_N, ColumnSelectMode
-    (designer-only for now — the builder cannot set them; a built Read data lands unconfigured).
+    FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
+    a `filter` — see the "Read data element" section. The other read modes (collection / count /
+    aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all).
 - `deleteDataUserTask` Delete data — delete matched records.
