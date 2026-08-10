@@ -150,7 +150,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
         "values": [                                            // REQUIRED at create: one entry per column
           { "column": "JobTitle", "value": "Manager" },        // constant (typed by the column; lookup = record Id)
           { "column": "Notes", "processParameter": "MyText" }, // a process parameter's value
-          { "column": "AccountId", "sourceElement": "ReadAccount1", "sourceElementParameter": "Id" }
+          { "column": "AccountId", "sourceElement": "SignalStart1", "sourceElementParameter": "RecordId" }
         ] },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
@@ -158,11 +158,14 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `sourceElement` + `sourceElementParameter` | `expression` — the mapping source vocabulary. One entry per
   column (duplicates rejected); unknown columns/parameters rejected at build.
 - The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean
-  "update every record of the object"). To update the record read by a preceding `readData` element, filter
-  on `Id` with an `elementParameter` reference:
+  "update every record of the object"). To target ONE record, filter on `Id` against a process parameter
+  or a trigger output such as a `signalStart` element's `RecordId`:
     "filter": { "object": "Contact",
       "conditions": [ { "column": "Id", "comparison": "equal",
-        "elementParameter": { "elementName": "ReadContact1", "parameter": "Id" } } ] }
+        "elementParameter": { "elementName": "SignalStart1", "parameter": "RecordId" } } ] }
+  LIMITATION: the record read by a preceding `readData` element is NOT referenceable here — its column
+  values (including `Id`) live inside the `ResultEntity` output, not as element parameters (see the
+  readData LIMITATION above; ENG-91844).
 - Change an EXISTING element in place with the `setElement` op's `changeData` field: omit `source` to keep
   the current target; a supplied `values` array REPLACES the whole assignment set. Retargeting `source`
   clears the values AND record filter bound to the old entity — re-supply them (and `setFilter`) in the same
