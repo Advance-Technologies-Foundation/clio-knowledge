@@ -46,13 +46,14 @@ public sealed class BundleBuilder
         RegexOptions.CultureInvariant);
 
     // One to four dot-separated numeric groups, so both `1.13.9` and a date-style `2026.07.19.1`
-    // qualify. Leading zeros are accepted because a date component is conventionally padded. The
-    // first group is wider than the rest to leave room for a year; the widths are what makes
-    // DeriveSequence monotonic, so they belong to the same contract as the pattern.
+    // qualify. Leading zeros are accepted because a date component is conventionally padded.
+    //
+    // The digit widths are the whole ordering contract, not input hygiene: DeriveSequence gives each
+    // component a fixed decimal slot, so a trailing component of four digits would carry into its
+    // neighbour's slot and the derived sequence would stop rising with the version. Three digits per
+    // trailing slot is therefore the bound, and the leading group is widened to seven so a year fits.
     private const int SequenceComponentSlots = 4;
     private const ulong SequenceComponentScale = 1_000;
-    private const ulong MaxLeadingVersionComponent = 9_999_999;
-    private const ulong MaxTrailingVersionComponent = 999;
     private static readonly Regex LibraryVersionPattern = new(
         "^[0-9]{1,7}(?:\\.[0-9]{1,3}){0,3}$",
         RegexOptions.CultureInvariant);
@@ -156,9 +157,13 @@ public sealed class BundleBuilder
     /// Each component occupies a fixed decimal slot and omitted trailing components count as zero, so
     /// <c>1.13</c> precedes <c>1.13.9</c>. Ordering across two different versioning styles is not
     /// meaningful and is not claimed; what matters is that one library's own labels stay ordered.
+    ///
+    /// A date-style label derives a value above <see cref="int.MaxValue"/> — <c>2026.07.19.1</c> gives
+    /// 2026007019001 — so a consumer must carry the sequence as a 64-bit value. Clio does, and the
+    /// bundle schema places no upper bound on it. The largest derivable sequence is 9999999999999999.
     /// </remarks>
     /// <exception cref="InvalidDataException">
-    /// The version is not a numeric label, a component exceeds its slot, or the label derives zero.
+    /// The version is not one to four numeric components within their digit widths, or it derives zero.
     /// </exception>
     public static ulong DeriveSequence(string libraryVersion)
     {
@@ -173,17 +178,12 @@ public sealed class BundleBuilder
         ulong sequence = 0;
         for (int index = 0; index < SequenceComponentSlots; index++)
         {
+            // The pattern already bounds every component to its slot, so no component can carry into
+            // the next one here.
             ulong component = index < components.Length
                 ? ulong.Parse(components[index], CultureInfo.InvariantCulture)
                 : 0;
-            ulong limit = index == 0 ? MaxLeadingVersionComponent : MaxTrailingVersionComponent;
-            if (component > limit)
-            {
-                throw new InvalidDataException(
-                    $"Library version '{libraryVersion}' component '{components[index]}' exceeds {limit}, "
-                    + "so the derived sequence would stop increasing with the version.");
-            }
-            sequence = checked(sequence * SequenceComponentScale + component);
+            sequence = sequence * SequenceComponentScale + component;
         }
         // The pattern admits `0` and `0.0.0.0`; a consumer treats a zero sequence as an invalid
         // generation pointer, so the label cannot be published.

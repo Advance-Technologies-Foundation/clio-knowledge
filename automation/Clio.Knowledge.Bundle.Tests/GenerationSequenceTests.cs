@@ -83,8 +83,8 @@ public sealed class GenerationSequenceTests
     [TestCase("1.13.9-beta", TestName = "DeriveSequence_ShouldReject_PrereleaseSuffix")]
     [TestCase("1.13.9+build.4", TestName = "DeriveSequence_ShouldReject_BuildMetadata")]
     [TestCase("1.13.9.1.2", TestName = "DeriveSequence_ShouldReject_FifthComponent")]
-    [TestCase("1.1000.0", TestName = "DeriveSequence_ShouldReject_TrailingComponentOverflowingItsSlot")]
-    [TestCase("10000000.1.1", TestName = "DeriveSequence_ShouldReject_LeadingComponentOverflowingItsSlot")]
+    [TestCase("1.1000.0", TestName = "DeriveSequence_ShouldReject_TrailingComponentWiderThanItsSlot")]
+    [TestCase("10000000.1.1", TestName = "DeriveSequence_ShouldReject_LeadingComponentWiderThanItsSlot")]
     [TestCase("v1.13.9", TestName = "DeriveSequence_ShouldReject_TagPrefix")]
     [TestCase("1..9", TestName = "DeriveSequence_ShouldReject_EmptyComponent")]
     [TestCase("0", TestName = "DeriveSequence_ShouldReject_LabelDerivingZero")]
@@ -98,7 +98,9 @@ public sealed class GenerationSequenceTests
         // Assert
         act.Should().Throw<InvalidDataException>(
             because: "an unorderable or zero sequence is rejected by the consumer as an invalid "
-                + "generation, so the build must fail while the mistake is still cheap");
+                + "generation, so the build must fail while the mistake is still cheap. A component "
+                + "wider than its slot is refused for the same reason: its digits would carry into the "
+                + "neighbouring slot and the derived sequence would stop rising with the version");
     }
 
     [Test]
