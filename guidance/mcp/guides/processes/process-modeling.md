@@ -21,6 +21,13 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   other data-operation tasks) PLACES an UNCONFIGURED element — its source object, filters, and columns
   cannot be set yet, so the step does nothing useful until a human configures it in the designer. Say so
   when you use it; do not present the result as a working data operation.
+- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) with a CUSTOM-MESSAGE HTML body —
+  `{ "name": "SendEmail1", "type": "sendEmail", "email": { "body": "<html>…</html>", "bodyFormat": "html" } }`.
+  The HTML is stored verbatim; `bodyFormat` accepts ONLY `"html"`. Process macros in the body are the platform's
+  `<img data-value="[#…#]">` image tokens — author them inside the HTML and they pass through unchanged (there is
+  no symbolic macro authoring for the body yet). NOT set by this element yet: email TEMPLATES (custom message only),
+  and the sender / recipients (To/Cc/Bcc) / subject / send-mode / importance / options — say so when you use it.
+  Works in `create-business-process` and via `modify-business-process` `addElement` (attach the same `email` block).
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
@@ -206,7 +213,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask.)
+`readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
+`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — custom-message HTML body only, see
+"What you can build today".)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     Setup fields: DataReadMode, EntitySchemaSelect (object), filters, SortByColumn_N, ColumnSelectMode
