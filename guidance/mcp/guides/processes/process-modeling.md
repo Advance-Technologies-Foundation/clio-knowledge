@@ -103,8 +103,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   filter bound to the old entity).
 
 == Read data element (readData) — first-record mode ==
-- A `readData` element reads the FIRST record of a sorted selection and exposes its columns as output
-  parameters for downstream mappings. Configure it with the element's `readData` block:
+- A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
+  parameter (the whole record). Configure it with the element's `readData` block:
     { "name": "ReadContact1", "type": "readData", "caption": "Read newest contact",
       "readData": {
         "source": "Contact",                                  // REQUIRED at create: the entity to read
@@ -124,9 +124,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- Feed the result downstream with `mappings`: the element's output parameters include the read record's
-  columns (outputs have `isResult:true` — see describe). Example: map the read contact's Email into a
-  send-email task parameter, or expose it as a process output via `targetProcessParameter`.
+- LIMITATION — the read record's individual COLUMN values are NOT referenceable downstream yet. The
+  element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
+  the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
+  that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
+  "element has no parameter". Entity-column access needs meta-path support (planned; ENG-91844). To key
+  work off a specific record today, use a `signalStart` trigger output (`RecordId`) or a process parameter.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadContact1",
