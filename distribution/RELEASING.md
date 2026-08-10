@@ -36,30 +36,50 @@ Every content change therefore needs **both** a new `libraryVersion` and a new `
 
 ## Who can publish, and from where
 
-Anyone with **write access to this repository** can cut a release, and everything runs on GitHub —
-no local .NET, no local clone, and no access to the signing key. The key lives only in the
-`KNOWLEDGE_SIGNING_PRIVATE_KEY` repository secret and is read by the runner, never by a person.
+Merging a pull request into `master` publishes. `master` is protected — no direct push, no force
+push, no branch deletion — so a release always follows a pull request whose **Producer contract
+suite** check passed. Repository administrators can bypass that protection; nothing else can.
 
-Two entry points, both of which start the same **Release knowledge bundle** workflow:
+**Auto-release on merge** runs on every push to `master`, reads `libraryVersion` from
+`bundle-source.json`, and starts **Release knowledge bundle** for that version. When a published
+release for the version already exists it skips and says so, so a merge that bumped no version ships
+nothing. It never chooses a version and never commits: the version comes from the merged pull request,
+where `PublishedGenerationTests` already forced it to agree with the content.
+
+It starts the release through `workflow_dispatch` rather than by pushing the tag itself, because a tag
+pushed with the default `GITHUB_TOKEN` does not start another workflow — the release would silently
+never run.
+
+Two manual entry points remain, for re-publishing after an infrastructure failure or for a generation
+that landed before this automation existed:
 
 - **From the GitHub UI** — Actions → *Release knowledge bundle* → *Run workflow*, branch `master`,
   and type the `libraryVersion` from `bundle-source.json` into the confirmation box. The run fails
   fast if it does not match, so a mistyped version cannot publish the wrong generation. This path
   needs nothing installed at all.
-- **By pushing a version tag** — for anyone already at a terminal.
+- **By pushing a version tag** — for anyone already at a terminal. The branch protection targets
+  `master`, so it does not block a tag push.
+
+Everything runs on GitHub — no local .NET, no local clone, and no access to the signing key. The key
+lives only in the `KNOWLEDGE_SIGNING_PRIVATE_KEY` repository secret and is read by the runner, never
+by a person.
 
 ## How to publish
 
-1. Land the content change on `master` and make sure `PublishedGenerationTests` records the new
-   sequence and content digest.
-2. Run the release workflow, either by pushing the version tag:
+1. In the pull request, bump `libraryVersion` and `sequence` in `bundle-source.json` and record the
+   new sequence and content digest in `PublishedGenerationTests`. The **Producer contract suite**
+   check stays red until the recorded generation and the published bytes agree.
+2. Merge the pull request. **Auto-release on merge** starts **Release knowledge bundle** for the new
+   `libraryVersion`, and publishing the release creates the tag.
+
+To publish without a merge — a retry, or a version already on `master` — push the tag:
 
 ```bash
 git tag 1.10.0 && git push origin 1.10.0
 ```
 
-   or by dispatching **Release knowledge bundle** from the Actions tab and typing the same version
-   into the confirmation input.
+or dispatch **Release knowledge bundle** from the Actions tab and type the same version into the
+confirmation input.
 
 The workflow then, in order: runs the producer contract suite, checks the tag against
 `bundle-source.json`, refuses to continue if a **published** release for that tag already exists,

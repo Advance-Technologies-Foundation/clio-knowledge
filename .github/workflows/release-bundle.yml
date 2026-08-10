@@ -1,8 +1,10 @@
 name: Release knowledge bundle
 
 # Publishes the signed runtime bundle as an immutable GitHub Release asset, which is how Clio's
-# built-in `creatio-curated` source is delivered. Deliberately manual: it runs on a version tag or
-# an explicit dispatch, never on a push to master, so publishing is always a decision.
+# built-in `creatio-curated` source is delivered. It never triggers on a push itself: it runs on a
+# version tag or an explicit dispatch. `auto-release-on-merge.yml` dispatches it after a merge to
+# master, and only when the `libraryVersion` in bundle-source.json has no published release yet — so
+# the publishing decision is still made deliberately, in the pull request that bumps that version.
 on:
   push:
     tags:
