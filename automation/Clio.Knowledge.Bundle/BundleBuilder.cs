@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
@@ -42,6 +43,18 @@ public sealed class BundleBuilder
     };
     private static readonly Regex CompleteCommitPattern = new(
         "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$",
+        RegexOptions.CultureInvariant);
+
+    // One to four dot-separated numeric groups, so both `1.13.9` and a date-style `2026.07.19.1`
+    // qualify. Leading zeros are accepted because a date component is conventionally padded. The
+    // first group is wider than the rest to leave room for a year; the widths are what makes
+    // DeriveSequence monotonic, so they belong to the same contract as the pattern.
+    private const int SequenceComponentSlots = 4;
+    private const ulong SequenceComponentScale = 1_000;
+    private const ulong MaxLeadingVersionComponent = 9_999_999;
+    private const ulong MaxTrailingVersionComponent = 999;
+    private static readonly Regex LibraryVersionPattern = new(
+        "^[0-9]{1,7}(?:\\.[0-9]{1,3}){0,3}$",
         RegexOptions.CultureInvariant);
 
     public BundleBuildResult Build(
@@ -126,6 +139,62 @@ public sealed class BundleBuilder
         }
     }
 
+    /// <summary>
+    /// Derives the monotonic generation sequence a consumer orders publications by from the publisher
+    /// version label.
+    /// </summary>
+    /// <param name="libraryVersion">One to four dot-separated numeric components.</param>
+    /// <returns>A sequence that increases strictly with the version.</returns>
+    /// <remarks>
+    /// The sequence is not authored. A consumer refuses a sequence that moves backwards, and refuses a
+    /// repeated sequence carrying different content by rejecting the library outright — so a
+    /// hand-maintained number is a class of publishing mistake with no upside. Deriving it from the
+    /// version label removes that class: the release tag must equal <c>libraryVersion</c> and a
+    /// published tag can never be reused, so different content cannot reach a consumer under a
+    /// sequence it already accepted.
+    ///
+    /// Each component occupies a fixed decimal slot and omitted trailing components count as zero, so
+    /// <c>1.13</c> precedes <c>1.13.9</c>. Ordering across two different versioning styles is not
+    /// meaningful and is not claimed; what matters is that one library's own labels stay ordered.
+    /// </remarks>
+    /// <exception cref="InvalidDataException">
+    /// The version is not a numeric label, a component exceeds its slot, or the label derives zero.
+    /// </exception>
+    public static ulong DeriveSequence(string libraryVersion)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(libraryVersion);
+        if (!LibraryVersionPattern.IsMatch(libraryVersion))
+        {
+            throw new InvalidDataException(
+                $"Library version '{libraryVersion}' must be one to four dot-separated numeric components, "
+                + "such as '1.13.9' or '2026.07.19.1', because the generation sequence is derived from it.");
+        }
+        string[] components = libraryVersion.Split('.');
+        ulong sequence = 0;
+        for (int index = 0; index < SequenceComponentSlots; index++)
+        {
+            ulong component = index < components.Length
+                ? ulong.Parse(components[index], CultureInfo.InvariantCulture)
+                : 0;
+            ulong limit = index == 0 ? MaxLeadingVersionComponent : MaxTrailingVersionComponent;
+            if (component > limit)
+            {
+                throw new InvalidDataException(
+                    $"Library version '{libraryVersion}' component '{components[index]}' exceeds {limit}, "
+                    + "so the derived sequence would stop increasing with the version.");
+            }
+            sequence = checked(sequence * SequenceComponentScale + component);
+        }
+        // The pattern admits `0` and `0.0.0.0`; a consumer treats a zero sequence as an invalid
+        // generation pointer, so the label cannot be published.
+        if (sequence == 0)
+        {
+            throw new InvalidDataException(
+                $"Library version '{libraryVersion}' derives sequence zero, which is not a publishable generation.");
+        }
+        return sequence;
+    }
+
     public static string CanonicalizeText(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -161,10 +230,9 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException("Library version must be a non-empty publisher generation label.");
         }
-        if (source.Sequence == 0)
-        {
-            throw new InvalidDataException("Bundle sequence must be greater than zero.");
-        }
+        // Throws on a version the sequence cannot be derived from, so a malformed label is reported
+        // here rather than at manifest time.
+        DeriveSequence(source.LibraryVersion);
         if (source.Compatibility is null
             || source.Compatibility.Clio is null
             || source.Compatibility.McpToolContract is null
@@ -456,7 +524,7 @@ public sealed class BundleBuilder
         source.BundleSchemaVersion,
         source.LibraryId,
         source.LibraryVersion,
-        source.Sequence,
+        DeriveSequence(source.LibraryVersion),
         publication.Source,
         source.Compatibility,
         new BundleRequirements(

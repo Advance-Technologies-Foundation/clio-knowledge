@@ -1,9 +1,10 @@
 name: Validate pull request
 
 # The required check behind the `master` lock. Merging now publishes, so this is the last point at
-# which a generation mismatch can still be caught cheaply: `PublishedGenerationTests` fails when the
-# working tree would publish different bytes than the recorded sequence and digest claim, which is
-# exactly the mistake that makes Clio reject the whole library.
+# which a malformed generation can still be caught cheaply: the suite fails when `libraryVersion` is
+# not a label the monotonic sequence can be derived from, or when the repository declares a sequence
+# of its own instead of deriving one — the two ways a publication could still reach a consumer with a
+# sequence it cannot order.
 #
 # Deliberately without a `paths:` filter. A required check that does not run on some pull requests
 # never reports a conclusion for them, and those pull requests stay unmergeable forever.
