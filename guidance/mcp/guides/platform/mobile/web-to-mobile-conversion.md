@@ -53,8 +53,9 @@ Creatio or disk. The guide contains:
     gets no layers, so an empty Area is never created in the first place).
   - normalizations — ONE SECTION PER STANDARD the converter NORMALIZED to, keyed by the standard's
     group. Each section carries a caller-facing `note`, `normalized[]` — one entry per element with its
-    `name`, its `type` and the EXACT `properties` written — and `skipped[]` when the standard could not
-    be applied somewhere, with the `properties` paths refused and the `reason`. For a normalized element
+    `name`, its `type` and the EXACT `properties` written, a leaf ALREADY at the standard being left out
+    of that list — and `skipped[]` when the standard could not be applied somewhere, with the
+    `properties` paths refused and the `reason`. For a normalized element
     the converter WRITES the mobile standard instead of translating the web page's own value — the web
     value is discarded, even when the web element carried none — and the result is already baked into
     elementMap[].mobileValues, so there is nothing separate to apply. A SKIPPED element is the opposite:
@@ -63,7 +64,10 @@ Creatio or disk. The guide contains:
     element types each covers and WHICH properties it writes is converter configuration resolved at RUN
     TIME: read the sections and entries the response carries instead of assuming a fixed set, and treat a
     section, type or property you do not recognize as one more standard rather than folding it into a
-    known one. Merge twins the mobile template provides are untouched. SILENT — never a gate question:
+    known one. A merging standard rewrites ONLY the leaves it reports and leaves the sibling subtrees of
+    what it stamps in place, so never rebuild a stamped object from its reported keys alone — doing that
+    to a metric drops config.data, the aggregation subtree without which the widget renders nothing.
+    Merge twins the mobile template provides are untouched. SILENT — never a gate question:
     state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
     value. Null only when no standard normalized or skipped anything at all.
   - spacingNormalization — BACK-COMPAT ALIAS of the "spacing" section, shape unchanged for callers that
