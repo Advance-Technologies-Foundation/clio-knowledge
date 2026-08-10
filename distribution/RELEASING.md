@@ -40,8 +40,11 @@ onto fixed decimal slots — `1.13.9` becomes `1013009000`, a date-style `2026.0
 
 That leaves **one** number to maintain: `libraryVersion`. Because the release tag must equal it and a
 published tag is never overwritten, different content cannot reach a consumer under a sequence it
-already accepted. Bumping the version is therefore the whole obligation; forgetting it makes the merge
-release nothing, which the workflow run reports, instead of breaking installed consumers.
+already accepted. Bumping the version is therefore the whole obligation, and the **Producer contract
+suite** enforces it: a pull request that changes `bundle-source.json` or any body it declares fails
+while the derived sequence matches the base branch, or moves backwards from it. Two labels can derive
+the same sequence — `1.13` and `1.13.0.0` both give 1013000000 — so that check compares derived
+sequences rather than version strings.
 
 ## Who can publish, and from where
 

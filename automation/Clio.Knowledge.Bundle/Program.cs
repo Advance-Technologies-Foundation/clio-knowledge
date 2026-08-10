@@ -6,9 +6,11 @@ const string buildUsage =
     "Usage: Clio.Knowledge.Bundle build <bundle-source.json> <signing-key.pem> <output.zip> <key-id> <repository> <commit>";
 const string verifyUsage =
     "Usage: Clio.Knowledge.Bundle verify <bundle.zip> <public-key.pem> <key-id> [expected-library-version]";
+const string sequenceUsage =
+    "Usage: Clio.Knowledge.Bundle sequence <bundle-source.json>";
 
 // The original verb-less form is still accepted so existing docs and local scripts keep working.
-string[] arguments = args is ["build" or "verify", ..] ? args : ["build", .. args];
+string[] arguments = args is ["build" or "verify" or "sequence", ..] ? args : ["build", .. args];
 
 try
 {
@@ -16,6 +18,7 @@ try
     {
         "build" => Build(arguments),
         "verify" => Verify(arguments),
+        "sequence" => Sequence(arguments),
         _ => Usage()
     };
 }
@@ -69,9 +72,28 @@ int Verify(string[] parts)
     return 0;
 }
 
+// Prints nothing but the derived sequence, so a caller comparing two revisions of a manifest can do it
+// without restating the derivation. The pull-request check uses this; restating the formula in shell
+// would let the gate drift away from what the builder actually publishes.
+int Sequence(string[] parts)
+{
+    if (parts.Length != 2)
+    {
+        Console.Error.WriteLine(sequenceUsage);
+        return 2;
+    }
+    using FileStream manifest = File.OpenRead(parts[1]);
+    string libraryVersion = JsonDocument.Parse(manifest).RootElement
+        .GetProperty("libraryVersion").GetString()
+        ?? throw new InvalidDataException($"'{parts[1]}' declares no libraryVersion.");
+    Console.WriteLine(BundleBuilder.DeriveSequence(libraryVersion));
+    return 0;
+}
+
 int Usage()
 {
     Console.Error.WriteLine(buildUsage);
     Console.Error.WriteLine(verifyUsage);
+    Console.Error.WriteLine(sequenceUsage);
     return 2;
 }

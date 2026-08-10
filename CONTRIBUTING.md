@@ -83,10 +83,19 @@ is read out of the same field, so the three can never disagree. Reusing a `seque
 content is what makes Clio refuse an update and keep serving the older generation — deriving it is
 what removes that possibility rather than guarding against it.
 
-Forgetting the version bump therefore no longer breaks a consumer: **Auto-release on merge** finds the
-version already published, ships nothing, and says so in its run. The full procedure, the identity
-rules, the signing-key handling, and the consumer-first key-rotation order are in
+Forgetting the version bump cannot break a consumer, and no longer silently ships nothing either: the
+**Producer contract suite** compares the published bytes — `bundle-source.json` plus every body it
+declares — against the base branch, and fails while they differ and the derived sequence does not move.
+The comparison is a workflow step rather than a test, because it is a question about history; the test
+project stays runnable on a shallow clone. The full procedure, the identity rules, the signing-key
+handling, and the consumer-first key-rotation order are in
 [distribution/RELEASING.md](distribution/RELEASING.md).
+
+To see the sequence a version derives:
+
+```bash
+dotnet run --project automation/Clio.Knowledge.Bundle -- sequence bundle-source.json
+```
 
 Before opening a release-affecting pull request, run the producer contract suite:
 
