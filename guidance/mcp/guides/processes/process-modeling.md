@@ -21,13 +21,29 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   other data-operation tasks) PLACES an UNCONFIGURED element — its source object, filters, and columns
   cannot be set yet, so the step does nothing useful until a human configures it in the designer. Say so
   when you use it; do not present the result as a working data operation.
-- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) with a CUSTOM-MESSAGE HTML body —
-  `{ "name": "SendEmail1", "type": "sendEmail", "email": { "body": "<html>…</html>", "bodyFormat": "html" } }`.
-  The HTML is stored verbatim; `bodyFormat` accepts ONLY `"html"`. Process macros in the body are the platform's
-  `<img data-value="[#…#]">` image tokens — author them inside the HTML and they pass through unchanged (there is
-  no symbolic macro authoring for the body yet). NOT set by this element yet: email TEMPLATES (custom message only),
-  and the sender / recipients (To/Cc/Bcc) / subject / send-mode / importance / options — say so when you use it.
-  Works in `create-business-process` and via `modify-business-process` `addElement` (attach the same `email` block).
+- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
+  TEMPLATES are not supported — say so if the user asks for one). The `email` block configures everything:
+  `{ "name": "SendEmail1", "type": "sendEmail", "email": {
+     "mode": "auto"|"manual", "sender": "<MailboxSyncSettings record id OR a sender email address configured
+     on the environment>", "subject": "plain text", "body": "<html>…</html>", "bodyFormat": "html",
+     "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |
+       {"expression": "[#…#]", "referenceSchema": "Contact"} , … ],
+     "importance": "none"|"normal"|"high"|"low", "ignoreErrors": true|false,
+     "performer": { "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's
+       contact>", "role"?: "<SysAdminUnit role name or record id>", "showPage"?: true|false } } }`.
+  Rules: `mode:"auto"` sends automatically and the designer requires a `sender` for it (the server saves
+  without one, but the process cannot start); `mode:"manual"` creates an email activity for the `performer`
+  (manual-only; `type:"role"` requires `role`). A `processParameter` recipient mirrors that parameter's type —
+  a Contact-lookup parameter is resolved to the contact's email at send time; an entity-COLUMN recipient is
+  only possible today as a raw `expression` formula. The HTML body is stored verbatim; `bodyFormat` accepts
+  ONLY `"html"`; process macros in the body are the platform's `<img data-value="[#…#]">` image tokens —
+  author them inside the HTML and they pass through unchanged (no symbolic macro authoring yet). A formula
+  SUBJECT goes through `mappings` against the element's `Subject` parameter instead of `email.subject`.
+  Works in `create-business-process`, `modify-business-process` `addElement` (same block) and `setElement`
+  (`elementUpdate.email` — in-place partial update, but `to`/`cc`/`bcc` APPEND to the existing recipients;
+  a wrong recipient cannot be replaced/removed through modify yet — say so).
+  `describe-business-process` reads the configuration back as the element's `email` block (`hasBody` flags
+  the body instead of echoing the HTML).
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
@@ -183,9 +199,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
    `execute-esq` (VwProcessLib by caption).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement — same parameter/mapping/filter/signal shapes as a build; setSignal reconfigures an existing
-   signalStart's record trigger + tracked columns in place, setElement changes element-level fields
-   (useBackgroundMode) in place on any element kind).
+   setElement — same parameter/mapping/filter/signal/email shapes as a build; setSignal reconfigures an existing
+   signalStart's record trigger + tracked columns in place, setElement changes element-level fields in place:
+   useBackgroundMode on any element kind, and a sendEmail element's `email` block — partial update, but
+   to/cc/bcc recipients APPEND to the existing lines).
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
@@ -214,8 +231,8 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
-`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — custom-message HTML body only, see
-"What you can build today".)
+`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
+(mode/sender/recipients/subject/body/options/performer; no email templates), see "What you can build today".)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     Setup fields: DataReadMode, EntitySchemaSelect (object), filters, SortByColumn_N, ColumnSelectMode

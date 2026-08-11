@@ -3,8 +3,8 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.9",
-  "sequence": 24,
+  "libraryVersion": "1.13.10",
+  "sequence": 25,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1070,7 +1070,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks, the Send email element (custom-message HTML body), and sequence flows; gateways, conditional/default flows and timers are not buildable yet.",
+      "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks, the fully configurable Send email element (custom message: mode, sender, recipients, subject, HTML body, options, manual-mode performer; no email templates), and sequence flows; gateways, conditional/default flows and timers are not buildable yet.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "requiredFeatures": [

@@ -22,7 +22,9 @@ public sealed class PublishedGenerationTests
     // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever any
     // manifest byte or any published body changes. A failure here is not a broken test: it means the
     // working tree publishes different bytes than the recorded generation claims.
-    private const ulong PublishedSequence = 24;
+    private const ulong PublishedSequence = 25;
+    // TODO(ENG-92706): STALE — regenerate on a .NET 10 SDK machine: run this test project; the failure message
+    // reports the actual digest for sequence 25 (this machine had only SDK 8, which cannot build the bundle).
     private const string PublishedContentDigest =
         "EE2075A5273902539AA2D75DEF9E7AFBF204CE2B3A31A9F49102A9FD99DC1C57";
 
