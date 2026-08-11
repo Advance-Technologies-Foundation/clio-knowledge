@@ -9,12 +9,22 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   overlap) — do not set positions.
 - Tools:
   * list-user-tasks         — the user-task palette (name + uid); pass a name as `userTaskName`.
+    CAVEAT: it lists RETIRED schemas as equal peers with no marker — `CallUserTask`, `EmailUserTask` and
+    `SendEmailUserTask` are all still returned. And TWO shipped schemas share the caption "Send email":
+    `EmailTemplateUserTask` is the live one (17 connections, creates an Activity), `SendEmailUserTask` has
+    none and creates nothing. Always key on the schema NAME the tool returns, never on a caption.
   * create-business-process — build a NEW process from a JSON descriptor, and save it.
   * modify-business-process — edit an EXISTING process by an ordered list of operations.
   * describe-business-process        — read a process back as a structured graph (verify / explain).
+    Also returns, per element: `connections[]` (bound "Connected to" links, raw + decoded), `deprecated`
+    (the user-task schema is retired), and `writesConnectionsAtRuntime` — where FALSE is the answer that
+    matters: it marks a process whose connections persist and compile while writing nothing. `null` there
+    means not established, not false.
   * validate-process-graph  — pre-check a planned graph against the connection rules R1-R17.
 
 == What you can build today (create-business-process) ==
+- NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
+  first, then bind them with `modify-business-process` → `setConnections` (see "Activity connections").
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `performTask`->ActivityUserTask). CAVEAT: `readData` (and the
@@ -176,9 +186,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
    `execute-esq` (VwProcessLib by caption).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement — same parameter/mapping/filter/signal shapes as a build; setSignal reconfigures an existing
-   signalStart's record trigger + tracked columns in place, setElement changes element-level fields
-   (useBackgroundMode) in place on any element kind).
+   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal shapes as a
+   build; setSignal reconfigures an existing signalStart's record trigger + tracked columns in place,
+   setElement changes element-level fields (useBackgroundMode) in place on any element kind,
+   setConnections/clearConnections bind and unbind an Activity's "Connected to" links (see below)).
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
@@ -287,8 +298,57 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   Date → `[#DateValue.dd.MM.yyyy#]` (e.g. `[#DateValue.03.07.2026#]`);
   Date-time → `[#DateTimeValue.dd.MM.yyyy HH:mm#]` (e.g. `[#DateTimeValue.03.07.2026 02:15#]`);
   Time → `[#TimeValue.HH:mm#]` (e.g. `[#TimeValue.12:20#]`). A LOOKUP default is the same kind of macro — set via `expression` as `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` (both are GUIDs: the referenced OBJECT's schema UId, NOT its name, and the chosen RECORD's Id, e.g. `[#Lookup.5ca90b6a-…(City object).1548d3d2-…(a City record)#]`). You cannot guess these ids — copy the token from an existing process (`describe-business-process`) or resolve the object/record ids first; a bare record id as `value` will NOT work.
+  EXCEPTION — an Activity CONNECTION: there you send a bare `recordId` to `setConnections` and the server
+  composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
 - To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —
   in the saved metadata it is a server-generated UId meta-path (`[#...[Element:{uid}].[Parameter:{uid}].[EntityColumn:{uid}]#]`), NOT a friendly `Element.Property` path, so you cannot author it — ALWAYS use `sourceElement`. Formulas are strictly typed (convert with `.ToString()` etc.).
+
+== Activity connections ("Connected to") ==
+- WHAT: which records the Activity a task creates is attached to — Account, Contact, Opportunity, Case, ...
+  It is functional, not decorative: set, the task appears on the connected record's Activities detail and
+  its Timeline and the page fields are pre-filled; unset, none of that happens. An email counts as
+  "processed" only with Account or Contact PLUS one further connection.
+- HOW: `modify-business-process` → `setConnections` with `elementName` and
+  `connections:[{ column, <exactly ONE source> }]`. Sources: `recordId` (a fixed record) |
+  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro, e.g.
+  `[#SysVariable.CurrentUserContact#]`). `referenceSchema` is optional and is a CHECK, not a source.
+- `recordId` NEEDS NO SCHEMA UId. The server composes `[#Lookup.{schemaUId}.{recordId}#]` from the target
+  column's own reference entity, so send the bare record id. This is the one place the "you cannot guess
+  these ids" warning below does not apply — for a connection, do NOT hand-write the Lookup token.
+- UPSERT, keyed on `column`. The columns you list are set or re-set; every column you do NOT list is left
+  alone. There is no collection-replace and no implicit clearing — so changing one connection can never
+  disturb another, and clearing is only ever explicit via `clearConnections`.
+- Changing a connection, INCLUDING across dialects (a process parameter → a fixed record), is the same
+  `setConnections` call with a new source. Re-sending an unchanged request is idempotent.
+- `clearConnections` takes `connections:[{ column }]` and UNBINDS — the element parameter stays. A source
+  on a clear entry is rejected. Clearing an already-unbound column is a no-op, not an error. It REPORTS
+  what it cleared, and you need that: a cleared connection disappears from describe, so afterwards
+  "cleared" and "never bound" are indistinguishable from the read-back alone.
+- READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
+  both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
+  can feed it straight back. Only BOUND connections appear — absence does NOT mean the column cannot be
+  connected. A macro this build does not recognise degrades to `expression` rather than breaking the read.
+- WHEN IT IS REFUSED, and why each refusal is worth reading rather than retrying:
+  * the user task's runtime never writes connections (`CallUserTask` builds its Activity directly;
+    `EmailUserTask` and `SendEmailUserTask` have none) — model a call as `performTask` with the Call
+    activity category instead;
+  * they would not TAKE EFFECT on this element — almost always `CreateActivity` left at its `false`
+    default, which produces a process that saves, compiles, runs green and writes nothing. The refusal
+    quotes the exact operation to PREPEND to your own array, so the fix costs one array element, not
+    another round trip. `performTask` never hits this: it has no such parameter. A manual-send
+    `EmailTemplateUserTask` does not either — the manual sender has no gate;
+  * the column is not one this element can carry, or the host entity has no such column at all. Those are
+    DIFFERENT diagnoses: the second needs a data-model change (add the lookup column to Activity and
+    register it), which `setConnections` deliberately does not make;
+  * an `expression` whose macro family cannot hold a record reference (a date, time or boolean constant).
+- SUCCEEDS WITH A WARNING: a column that exists but has no connection-registry row IS written at run time,
+  yet the connection is invisible in the designer's "Connected to" and ignored by the record page's
+  connections detail, Next Steps, email auto-relation rules and quick-add. Read `warnings` on the
+  response — a successful edit can still carry them.
+- `addMapping` still works for the same target and is NOT deprecated; prefer `setConnections`, which adds
+  the validation, the `recordId` ergonomics and the read-back.
+- Connections are NOT graph edges. `validate-process-graph` neither checks nor is affected by them; R1-R17
+  below are about sequence flows only.
 
 == Connection rules R1–R17 (validate-process-graph enforces the structural subset: R1–R3, R7,
    R9–R15, R17; R4–R6, R8 and R16 are semantic or not yet enforced — verify those yourself.
