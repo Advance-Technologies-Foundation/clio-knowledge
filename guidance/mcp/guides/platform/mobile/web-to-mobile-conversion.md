@@ -172,8 +172,11 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type, multi-data-source, or
-     "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+   - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
+     request, or "empty container"). An element is NEVER dropped for the data source it is bound to: a
+     mobile page carries the same multi-data-source structure as web, so a detail list on a non-primary
+     page data source converts like any other element.
+     Tell the user what was dropped. Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
      the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
      removed with header buttons says its tools were discarded). WHICH container types are eligible
