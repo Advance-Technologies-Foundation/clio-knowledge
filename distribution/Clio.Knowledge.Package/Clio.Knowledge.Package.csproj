@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <PackageId>ATF.Clio.Knowledge</PackageId>
-    <Version>1.13.9</Version>
+    <Version>1.13.12</Version>
     <Authors>Advance Technologies Foundation</Authors>
     <Description>Signed com.creatio.clio knowledge library for the Clio MCP server.</Description>
     <PackageTags>clio;knowledge;com.creatio.clio</PackageTags>
