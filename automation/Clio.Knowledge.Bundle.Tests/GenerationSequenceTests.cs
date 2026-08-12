@@ -23,11 +23,11 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class GenerationSequenceTests
 {
-    // The highest generation published from a hand-maintained `sequence` field, shipped as 1.13.14. It
+    // The highest generation published from a hand-maintained `sequence` field, shipped as 1.13.15. It
     // is a closed historical fact, not a value to keep current: every derived sequence is far above it,
     // and the assertion below only proves the switch to derivation moved the sequence forward rather
     // than backwards for consumers that already accepted it.
-    private const ulong LastAuthoredSequence = 29;
+    private const ulong LastAuthoredSequence = 30;
 
     [Test]
     [Description("Verifies that the derived sequence increases strictly with the publisher version label, which is what lets a consumer order generations.")]
