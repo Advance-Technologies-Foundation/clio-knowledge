@@ -23,11 +23,11 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class GenerationSequenceTests
 {
-    // The last generation published from a hand-maintained `sequence` field, shipped as 1.13.8. It is
-    // a closed historical fact, not a value to keep current: every derived sequence is far above it,
+    // The highest generation published from a hand-maintained `sequence` field, shipped as 1.13.14. It
+    // is a closed historical fact, not a value to keep current: every derived sequence is far above it,
     // and the assertion below only proves the switch to derivation moved the sequence forward rather
     // than backwards for consumers that already accepted it.
-    private const ulong LastAuthoredSequence = 23;
+    private const ulong LastAuthoredSequence = 29;
 
     [Test]
     [Description("Verifies that the derived sequence increases strictly with the publisher version label, which is what lets a consumer order generations.")]
@@ -136,8 +136,8 @@ public sealed class GenerationSequenceTests
 
         // Assert
         sequence.Should().BeGreaterThan(LastAuthoredSequence,
-            because: "a consumer that already accepted sequence 23 refuses anything below it, and would "
-                + "keep serving the older generation instead of this one");
+            because: "a consumer that already accepted the last authored sequence refuses anything below "
+                + "it, and would keep serving the older generation instead of this one");
     }
 
     private static string FindRepositoryRoot()

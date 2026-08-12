@@ -83,9 +83,17 @@ int Sequence(string[] parts)
         return 2;
     }
     using FileStream manifest = File.OpenRead(parts[1]);
-    string libraryVersion = JsonDocument.Parse(manifest).RootElement
-        .GetProperty("libraryVersion").GetString()
-        ?? throw new InvalidDataException($"'{parts[1]}' declares no libraryVersion.");
+    using JsonDocument source = JsonDocument.Parse(manifest);
+    // TryGetProperty rather than GetProperty: a missing property throws KeyNotFoundException, which the
+    // top-level handler does not catch, so the caller would get a stack trace where the diagnostic below
+    // is what it needs. A manifest the gate cannot read has to say so and exit 1.
+    string? libraryVersion = source.RootElement.TryGetProperty("libraryVersion", out JsonElement declared)
+        ? declared.GetString()
+        : null;
+    if (string.IsNullOrWhiteSpace(libraryVersion))
+    {
+        throw new InvalidDataException($"'{parts[1]}' declares no libraryVersion.");
+    }
     Console.WriteLine(BundleBuilder.DeriveSequence(libraryVersion));
     return 0;
 }
