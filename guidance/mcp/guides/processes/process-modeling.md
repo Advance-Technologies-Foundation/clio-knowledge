@@ -384,19 +384,24 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   it: the connections Creatio ships cover Account, Contact, Opportunity, Case and so on, and a custom entity
   has none, so the call is refused with "has no '<column>' column". Three steps, in order; the first two are a
   DATA-MODEL change that `setConnections` deliberately does not make for you:
-  1. add a Lookup column to `Activity` in YOUR package — `update-entity-schema --package <yours>
-     --schema-name Activity` with one `add` operation: `type: Lookup`, `reference-schema-name: <your entity>`,
-     `indexed: true`. Measured: the column lands and the schema republishes in ~13 s, and reads back as
-     `source: own`. CAVEAT — measured only where that package ALREADY had a replacing `Activity` layer; with
-     no layer yet this step takes a path nothing has exercised. If the package does not depend on the one
-     owning `Activity`, add that dependency first.
-  2. register the column as a connection — ONE bound row in `EntityConnection`: `create-data-binding-db
-     --package <yours> --schema EntityConnection --binding-name EntityConnection<Column> --rows
-     '[{"values":{"SysEntitySchemaUId":"c449d832-a4cc-4b01-b9d5-8a12c42a9f89","ColumnUId":"<u-id>"}}]'`.
+  1. add a Lookup column to `Activity` in YOUR package — the `update-entity-schema` tool, which is
+     NON-RESIDENT, so send it through `clio-run`. Args: `environment-name`, `package-name` (yours),
+     `schema-name: "Activity"`, and `operations` — an ARRAY of operation objects, one here:
+     `{"action":"add","column-name":"Usr<YourEntity>","type":"Lookup","reference-schema-name":"<your entity>","indexed":true}`.
+     The first four keys are all required — omitting `column-name` is the easy mistake, since the column being
+     added is named nowhere else; `indexed` is optional and worth setting on a column you will filter by.
+     Measured: the column lands and the schema republishes in ~13 s, and reads back as `source: own`.
+     CAVEAT — measured only where that package ALREADY had a replacing `Activity` layer; with no layer yet
+     this step takes a path nothing has exercised. If the package does not depend on the one owning
+     `Activity`, add that dependency first.
+  2. register the column as a connection — ONE bound row in `EntityConnection`, through the
+     `create-data-binding-db` tool (also non-resident, also via `clio-run`). Args: `package-name` (yours),
+     `schema-name: "EntityConnection"`, `binding-name` (e.g. `"EntityConnectionUsr<YourEntity>"`), and
+     `rows`: `[{"values":{"SysEntitySchemaUId":"c449d832-a4cc-4b01-b9d5-8a12c42a9f89","ColumnUId":"<u-id>"}}]`.
      `SysEntitySchemaUId` is Activity's ROOT schema UId — that literal. The column's `u-id` comes from
-     `get-entity-schema-properties`, NOT from `get-entity-schema-column-properties`, which does not return
-     it. `--rows` is load-bearing: without it the command creates an EMPTY binding and nothing is registered.
-     The package must be non-foreign.
+     `get-entity-schema-properties` (resident, call it natively), NOT from
+     `get-entity-schema-column-properties`, whose response carries no `u-id` at all. `rows` is load-bearing:
+     without it the tool creates an EMPTY binding and nothing is registered. The package must be non-foreign.
   3. `setConnections` on the element. The element may predate the column by any amount — the operation
      creates the element parameter when the user task declares none.
   Skipping step 2 is not fatal: the value still WRITES at run time, but the connection stays invisible to
