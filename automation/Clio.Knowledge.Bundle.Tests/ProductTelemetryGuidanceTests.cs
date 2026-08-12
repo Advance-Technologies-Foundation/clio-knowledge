@@ -74,6 +74,13 @@ public sealed class ProductTelemetryGuidanceTests
         article.Should().Contain("withdraw-telemetry-consent");
         article.Should().Contain("withdrawn at any time",
             because: "withdrawal must be as easy as granting (GDPR Art. 7(3))");
+        // An unattended run has nobody to prompt, and the decision is stored per installation — so a
+        // fabricated answer there would settle the consent question for every future session on the
+        // machine. This is the one place where emitting nothing is unambiguously the right outcome.
+        article.Should().Contain("do NOT invent the answer",
+            because: "consent asserted on a developer's behalf is not consent");
+        article.Should().Contain("Leave consent `unknown`",
+            because: "the recovery has to be named, or an agent will pick a value to get unblocked");
     }
 
     [Test]

@@ -82,6 +82,12 @@ Consent
   cue to ask the developer and retry carrying the decision, not to give up on telemetry for the run.
   Once the decision is denied, a send answers success with status `consent-denied` and stores nothing,
   which is final: do not ask again, do not retry.
+- **When there is no developer to ask, do NOT invent the answer.** A subagent, a headless or scheduled
+  run, and CI have nobody to prompt. Leave consent `unknown`: emit nothing and carry on with the task.
+  Sending `telemetry_consent=granted` or `=denied` in that situation records a decision the developer
+  never made, and it is stored per installation — so one unattended run silently answers the consent
+  question for every future session on that machine. Missing telemetry is recoverable; a fabricated
+  consent decision is not.
 - `withdraw-telemetry-consent` stops collection and discards the local outbox. Honor a withdrawal
   request immediately and confirm it plainly.
 - Treat an event as recorded only when the MCP result reports success. If the host shows an invocation
