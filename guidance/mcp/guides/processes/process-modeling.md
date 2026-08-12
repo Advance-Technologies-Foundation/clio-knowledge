@@ -132,9 +132,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. Updating an
   element a human configured in a different mode requires an explicit `"mode": "first"` (the server refuses
   to silently convert it).
-- `columns` are entity COLUMN names (not captions); an unknown name is rejected at build. Omit the list (or
-  pass `[]`) to read all columns. `sort` makes "the first record" deterministic — without it the platform
-  reads an arbitrary first record; single column only (multi-column ordering is designer-only).
+- `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
+  list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
+  supported and is rejected — the designer can pick such columns, the builder cannot; read the whole record
+  (omit `columns`) if you need them. `sort` makes "the first record" deterministic — without it the platform
+  reads an arbitrary first record; single column only (multi-column ordering is designer-only), and the sort
+  column must be top-level too.
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
@@ -152,7 +155,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   current selection/order, pass `columns: []` to reset to ALL columns. RETARGETING `source` to a different
   object clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
   `setFilter`) in the same operations array. `describe-business-process` reads the whole block back
-  (`source`, `mode`, `columns` as names, `sort`), so it round-trips into create/modify.
+  (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
+  create/modify. One read-back limit on a HUMAN-made element: a linked-object column picked in the designer
+  cannot be expressed here and is omitted from `columns`, so for such an element the described list is
+  narrower than what it really reads — do not feed that describe back as a full replacement.
 
 == Data source filters (signalStart trigger condition / readData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
