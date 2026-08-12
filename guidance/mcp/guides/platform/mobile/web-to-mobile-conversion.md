@@ -161,10 +161,14 @@ FLOW
      hand-edit these bindings — paste mobileValues as-is. Then add ONLY
      what mobileValues deliberately leaves out:
        • the value binding (control, or value for lookups) — type-specific, so it is not prebuilt;
-       • for a structural mapping (grid → crt.List + crt.ListItem), build the row: add a crt.ListItem
-         into the crt.List's itemLayout (title = first column, body = the rest); see the
-         componentSuggestions note and the mobileContracts example. If the template already provides
-         the List/ListItem, configure them by merge-by-name instead of inserting (see the merge branch).
+         (the row of a grid → crt.List insert is NOT one of these — see the next paragraph.)
+     A grid → crt.List INSERT arrives with its row ALREADY BUILT: mobileValues carries the
+     crt.ListItem under itemLayout, its title bound to the first grid column and one body entry per
+     remaining column, and the grid-only properties (columns, primaryColumnName, selectionState,
+     features, fitContent) already left out because mobile crt.List has no equivalent. Paste it; do NOT
+     rebuild the row and do NOT re-add the grid properties. This is prebuilt only for an INSERT — when
+     the mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
+     configure by merge-by-name (see the merge branch).
      The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens — both a
      top-level caption AND nested ones (e.g. config.title, text.template). Register them ALL: pass
      guide.resourceStrings (a { key: en-US text } map covering the whole converted body) to update-page
@@ -270,10 +274,13 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
   dropped by the differ.
 - LIST ROW (grid → crt.List + crt.ListItem): the row layout lives on a crt.ListItem placed in the
-  crt.List's itemLayout (title = first grid column, body = the rest). If the mobile list template
-  already provides the List/ListItem elements, configure them by MERGE-BY-NAME (the row goes on the
-  ListItem element) — NEVER insert a second crt.List and NEVER put itemLayout inside a merge of the
-  parent List (silent no-op; ListItem is a separate named element).
+  crt.List's itemLayout (title = first grid column, body = the rest). For an INSERT the converter has
+  already built it into mobileValues — paste it rather than rebuilding it. If the mobile list template
+  already provides the List/ListItem elements, the row is NOT prebuilt: configure them by
+  MERGE-BY-NAME (the row goes on the ListItem element) — NEVER insert a second crt.List and NEVER put
+  itemLayout inside a merge of the parent List (silent no-op; ListItem is a separate named element).
+  A row's title is a plain "$Binding" STRING; the { "value": "$Binding" } shape belongs to body
+  entries only, and using it for the title renders an empty Title column while the body looks correct.
 - PAGE-level business rules ARE converted for you in guide.pageBusinessRules: each rule keeps
   its condition and only the actions that survive on mobile. Page rules carry ONLY element
   actions — hide / show / make-editable / read-only / required / optional — and an action
