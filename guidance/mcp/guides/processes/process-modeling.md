@@ -385,9 +385,17 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   "cleared" and "never bound" are indistinguishable from the read-back alone.
 - READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
   both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
-  can feed it straight back — with two exceptions that refuse on re-apply: a legacy fixed-record connection
-  whose stored macro names a different entity than its column (drop `referenceSchema` and re-apply), and a
-  stored value that is not a `[#...#]` macro at all (check `source`), which comes back as `expression`.
+  can feed it straight back — with THREE exceptions that refuse on re-apply, all of them values a designer or
+  an older build stored:
+  (1) a fixed-record connection whose stored macro names a different entity than its column. TWO remedies,
+      and they are not interchangeable: re-send the raw `value` as `expression` to keep the stored macro
+      exactly as it is, or omit `referenceSchema` to re-point the connection at the column's OWN entity —
+      which rewrites the macro and is a repair, not a re-apply. Choose deliberately;
+  (2) a stored value with no macro shape at all (check `source`; it comes back as `expression`) — refused as
+      "not a platform macro", because a bare value cannot be a source. Use `recordId`;
+  (3) a stored value that IS macro-shaped but from a family that cannot hold a record id — `DateValue`,
+      `DateTimeValue`, `TimeValue`, `BooleanValue`. `[#SysSettings...#]` is the one family accepted instead
+      of refused, with a warning (below), precisely so designer-authored processes stay re-appliable.
   Each entry also carries `registered` — `false` means the value IS written at run time but the connection
   is invisible to every registry-reading feature, the same caveat as the write warning below — and `source`,
   the platform value source. Only BOUND connections appear, so absence does NOT mean the column cannot be
@@ -424,6 +432,37 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   * a malformed `recordId`, a column that references no entity, or a `processParameter` / `sourceElement`
     of an incompatible type (same type group, and for a lookup the same reference entity — a `Guid` or a
     same-entity Lookup parameter is what works).
+- WHEN THE CONNECTION DOES NOT EXIST YET — linking an activity to a record of YOUR OWN entity. This is the
+  common ask ("add a button that creates a task linked to this record") and `setConnections` alone cannot do
+  it: the connections Creatio ships cover Account, Contact, Opportunity, Case and so on, and a custom entity
+  has none, so the call is refused with "has no '<column>' column". Three steps, in order; the first two are a
+  DATA-MODEL change that `setConnections` deliberately does not make for you:
+  1. add a Lookup column to `Activity` in YOUR package — the `update-entity-schema` tool, which is
+     NON-RESIDENT, so send it through `clio-run`. Args: `environment-name`, `package-name` (yours),
+     `schema-name: "Activity"`, and `operations` — an ARRAY of operation objects, one here:
+     `{"action":"add","column-name":"Usr<YourEntity>","type":"Lookup","reference-schema-name":"<your entity>","indexed":true}`.
+     The first four keys are all required — omitting `column-name` is the easy mistake, since the column being
+     added is named nowhere else; `indexed` is optional and worth setting on a column you will filter by.
+     Measured: the column lands and the schema republishes in ~13 s, and reads back as `source: own`.
+     CAVEAT — measured only where that package ALREADY had a replacing `Activity` layer; with no layer yet
+     this step takes a path nothing has exercised. If the package does not depend on the one owning
+     `Activity`, add that dependency first.
+  2. register the column as a connection — ONE bound row in `EntityConnection`, through the
+     `create-data-binding-db` tool (also non-resident, also via `clio-run`). Args: `package-name` (yours),
+     `schema-name: "EntityConnection"`, `binding-name` (e.g. `"EntityConnectionUsr<YourEntity>"`), and
+     `rows`: `[{"values":{"SysEntitySchemaUId":"c449d832-a4cc-4b01-b9d5-8a12c42a9f89","ColumnUId":"<u-id>"}}]`.
+     `SysEntitySchemaUId` is Activity's ROOT schema UId — that literal. The column's `u-id` comes from
+     `get-entity-schema-properties` (resident, call it natively), NOT from
+     `get-entity-schema-column-properties`, whose response carries no `u-id` at all. `rows` is load-bearing:
+     without it the tool creates an EMPTY binding and nothing is registered. The package must be non-foreign.
+  3. `setConnections` on the element. The element may predate the column by any amount — the operation
+     creates the element parameter when the user task declares none.
+  Skipping step 2 is not fatal: the value still WRITES at run time, but the connection stays invisible to
+  every registry-reading feature (see the warning below), and registering is what makes the column available
+  to EVERY element instead of only to a task that happens to declare a parameter for it. After step 2 the
+  designer may keep showing the old set until its caches refresh; the run-time write is unaffected.
+  Do NOT offer, as a lighter alternative, writing the record's NAME into the activity's title or description.
+  That produces no link — no Activities detail, no Timeline, no pre-filled fields — and the ask was a link.
 - SUCCEEDS WITH A WARNING, two cases. A column that exists but has no connection-registry row IS written at
   run time, yet the connection is ignored by the record page's connections detail, Next Steps, email
   auto-relation rules and quick-add, and is normally absent from the designer's "Connected to" as well —
