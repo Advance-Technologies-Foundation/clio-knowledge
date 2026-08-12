@@ -104,6 +104,25 @@ public sealed class ProductTelemetryGuidanceTests
     }
 
     [Test]
+    [Description("Verifies a terminal stage must report the verified outcome, so an unverified write cannot be counted as a completed run.")]
+    public void Article_ShouldRequireTerminalStagesToReportVerifiedOutcomes()
+    {
+        // Arrange
+        string article = ReadArticle();
+
+        // Assert
+        // Measured failure, not a hypothetical: a probe run emitted workflow_completed for a theme
+        // whose prescribed read-back never showed it, because create-theme had answered success.
+        article.Should().Contain("is NOT that evidence",
+            because: "a write tool's success response is the exact signal that produced a false completion");
+        article.Should().Contain("emit `workflow_failed`",
+            because: "an unverifiable result is a failed run, whatever the write call returned");
+        article.Should().Contain("inflates the completion rate",
+            because: "the asymmetry is the reason this rule exists — a wrong terminal stage corrupts the "
+                + "funnel while a missing one only lowers coverage");
+    }
+
+    [Test]
     [Description("Verifies the article keeps telemetry subordinate to the developer's task, including on a rejected event.")]
     public void Article_ShouldKeepTelemetryNonBlocking()
     {

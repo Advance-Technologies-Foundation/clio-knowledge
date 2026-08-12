@@ -41,6 +41,19 @@ A flow being exempt from a gate is not being exempt from telemetry
 - Emit each stage once per run unless the consumer contract says otherwise, reusing one `session_id`.
   Stages fire as the run reaches them; not every run reaches every stage.
 
+Terminal stages report the VERIFIED outcome
+- `workflow_completed` means the run's result was confirmed by evidence — the read-back the guide for
+  that task prescribes actually shows the change. `work_item_completed` carries the same requirement
+  per unit.
+- A write tool answering `success: true` is NOT that evidence. When the prescribed read-back
+  contradicts it, or no read-back was possible, the run did NOT complete: emit `workflow_failed`
+  (or `plan_blocked` if it never reached execution), whatever the write call returned.
+- This is the one place where a wrong stage is worse than a missing one. A funnel counts
+  `workflow_completed`, so an unverified success inflates the completion rate and hides exactly the
+  blocked runs the funnel exists to surface — a missing event only lowers coverage.
+- The same applies when an environment blocks the work (a missing licence, denied rights, a disabled
+  feature): that is a real terminal failure of the run, not a reason to skip the terminal stage.
+
 Consent
 - Call `get-telemetry-consent` at workflow start, BEFORE sending any event. It is a read-only check
   and never writes.
