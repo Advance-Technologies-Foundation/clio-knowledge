@@ -27,6 +27,6 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
-- Branding & theming: product logos / shell background image -> name=branding
+- Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
   - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access -> name=record-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
