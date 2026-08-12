@@ -98,8 +98,12 @@ separate response AFTER you show a plain-language plan:
   separate explicit go-ahead.
 - Headless / autonomous mode: never self-approve. Produce the plan, ask for confirmation, and END
   THE TURN without writing or registering anything.
-These gate rules are authoritative on their own — the plan, the approval handshake, and the
-conversion report are all described in this guide; do not depend on any external document.
+These gate rules are SELF-SUFFICIENT and mandatory on their own: running the guide and presenting the
+plan write nothing, and every persistence or registration step needs the developer's explicit approval
+first — never do less than this. A higher-level workflow that invoked the conversion MAY layer a richer
+approval process on top (for example a structured, plan-first review with an explicit approve step
+before any write); follow that when it is present. This article does not depend on any such workflow —
+it stays focused on the conversion itself, and the body-building mechanics are the rest of it below.
 
 ─────────────────────────────────────────────────────────────
 FLOW
