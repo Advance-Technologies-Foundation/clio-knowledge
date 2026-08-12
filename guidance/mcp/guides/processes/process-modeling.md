@@ -308,7 +308,8 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   in the saved metadata it is a server-generated UId meta-path (`[#...[Element:{uid}].[Parameter:{uid}].[EntityColumn:{uid}]#]`), NOT a friendly `Element.Property` path, so you cannot author it — ALWAYS use `sourceElement`. Formulas are strictly typed (convert with `.ToString()` etc.).
 
 == Activity connections ("Connected to") ==
-- WHAT: which records the Activity a task creates is attached to — Account, Contact, Opportunity, Case, ...
+- WHAT: which records the Activity a task creates is attached to — a contact, an account, and whatever else
+  the environment registers as a connection; the set is per-environment, never a fixed list.
   It is functional, not decorative: set, the task appears on the connected record's Activities detail and
   its Timeline and the page fields are pre-filled; unset, none of that happens. An email counts as
   "processed" only with Account or Contact PLUS one further connection.
@@ -383,18 +384,21 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   common ask ("add a button that creates a task linked to this record"), and it is the ONE case that needs a
   DATA-MODEL change, which `setConnections` deliberately does not make for you.
   Do NOT decide whether you are in that case by inspecting the object first — let the OPERATION tell you,
-  because the surfaces disagree with each other. Measured on one environment: the physical `Activity` table
-  carried `OpportunityId`, `get-entity-schema-properties` listed the column, the object designer did not show
-  it, and a process wrote the value successfully. Any fixed list of "the connections Creatio ships" is wrong
-  for the same reason — on that environment `Case`, `Order`, `Document`, `Invoice`, `Project` and `Contract`
-  were physical columns absent from the schema. The refusals ARE the check, and they distinguish three states:
+  because the surfaces disagree with each other. Measured for ONE lookup column on one environment: the
+  physical `Activity` table carried it, `get-entity-schema-properties` listed it, the object designer did not
+  show it, and a process wrote its value successfully. In the other direction, several connection columns
+  existed physically while being ABSENT from the schema. WHICH columns those are is a property of the product
+  and the installed package chain, not of Creatio — so no list belongs here, including a list of "the
+  connections Creatio ships": whatever it named would be wrong on some environment. The refusals ARE the
+  check, and they distinguish three states:
   * `<host> has no '<column>' column` — the data-model change below is required;
   * `the column exists on <host> but no connection-registry row registers it and this element's user task
     declares no parameter for it` — only step 2 is required;
   * anything else, including success — there was nothing to add.
   1. add a Lookup column to `Activity` IN THE PACKAGE THAT OWNS THE REFERENCED ENTITY — not in `Custom`, and
      not as a matter of taste. `Custom` is the LAST package: it depends on the others and nothing depends on it
-     (measured — `Custom` -> CrtCore, the app package, CrtOpportunity; no edge points back). So a schema in the
+     (measured — `Custom` depends on the platform core, the app package and a product package; no edge points
+     back). So a schema in the
      entity's own package cannot reference a column placed in `Custom` without adding the REVERSE edge, and that
      inverts an existing one: the save is refused with "Cyclic dependencies detected", naming
      `EntityColumnValues.Column.<yours>`. Placed in the referenced entity's own package the column needs NO new
