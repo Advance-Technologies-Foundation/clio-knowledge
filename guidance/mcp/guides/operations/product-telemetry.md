@@ -1,0 +1,95 @@
+clio MCP product telemetry guide
+
+Scope
+- This guide owns WHICH telemetry stages exist, WHAT identifies the flow that emitted one, and the
+  consent mechanics around them. It is the authoritative source for the event vocabulary.
+- It does NOT own the per-flow emission points. Which gate of which workflow a stage hangs off is
+  business policy and stays in the consumer repository's own telemetry contract.
+- Telemetry covers AI-assisted Creatio work run through clio MCP. Skip it only for non-agent use — a
+  plain script or a CI job. An agent working on a developer's behalf is IN scope EVEN WHEN NO SKILL
+  FILE IS LOADED; treating that as ad-hoc use is what left whole workflows unreported.
+- Telemetry MUST NEVER gate, delay, or alter the developer's task. Every rule below is subordinate to
+  that one.
+
+One stage vocabulary, plus a workflow field
+- `event_name` is a STAGE that means the same thing in every flow. WHICH flow it was travels in the
+  `workflow` field. A migration and a branding run emit the SAME `plan_approved` and are told apart by
+  `workflow`.
+- Stages: `workflow_started`, `clarification_requested`, `user_input_received`, `plan_presented`,
+  `plan_skipped`, `plan_blocked`, `plan_changes_requested`, `plan_approved`, `build_started`,
+  `work_item_completed`, `workflow_completed`, `workflow_failed`, `changes_requested`,
+  `changes_applied`.
+- Do NOT invent a per-flow event name such as `migration_plan_approved` or `branding_approved`. clio
+  validates `event_name` against a closed allow-list and rejects anything else. A name per flow per
+  stage would also encode the flow dimension into the enum: names multiply by flows, every new
+  consumer skill needs a clio release, and "what is our plan-approval rate" becomes a UNION over a
+  hand-maintained list of names instead of one GROUP BY.
+- `workflow` and `variant` are short lowercase tokens (letters, digits, `.`, `_`, `-`). There is no
+  field for free text: if a distinction matters for analysis it becomes a bounded `variant` value the
+  flow defines, never the name or identifier of the thing being changed.
+- The app-creation-specific names (`session_started`, `business_plan_*`, `implementation_*`) are
+  DEPRECATED. clio still accepts them so an already-installed consumer keeps reporting, but a new
+  emission MUST use a stage plus `workflow=app-creation`.
+
+A flow being exempt from a gate is not being exempt from telemetry
+- A consumer workflow that skips another workflow's approval gates still emits the same stages — its
+  emission points are its OWN gates. This is the failure mode the vocabulary exists to fix: when the
+  stage names were app-creation-specific and hung off app-creation gates, every flow exempt from those
+  gates reported nothing at all, no matter how the instructions were worded.
+- Emit a stage AT the point it describes, not batched at the end of the run. A stage recorded after
+  the fact cannot show where a run stopped, which is the entire purpose of a funnel.
+- Emit each stage once per run unless the consumer contract says otherwise, reusing one `session_id`.
+  Stages fire as the run reaches them; not every run reaches every stage.
+
+Consent
+- Call `get-telemetry-consent` at workflow start, BEFORE sending any event. It is a read-only check
+  and never writes.
+- Ask the developer only when it returns `telemetry_consent=unknown`, as a single-purpose interaction
+  before requirements gathering, migration planning, brand intake, or implementation planning. Do NOT
+  combine it with discovery questions.
+- The prompt MUST disclose that enabling telemetry uploads events to Creatio servers (not only local
+  storage) and retains them for up to one year; that the data is diagnostic product metadata only —
+  a random pseudonymous installation identifier, never prompts, generated content, credentials, or
+  directly identifying personal data; that declining collects and sends nothing; and that consent can
+  be withdrawn at any time, as easily as it was granted.
+- Persisting the first-run decision is a DIFFERENT action from emitting the session-start event. On a
+  grant they are the same call; on a denial that call persists the decision and stores no event. Skip
+  it and consent stays `unknown`, re-prompting the developer on every future run.
+  - `unknown` + grants: one `send-telemetry` with `event_name=workflow_started` AND
+    `telemetry_consent=granted`. That call IS the session-start emission — do not send a second one.
+  - `unknown` + denies: one `send-telemetry` with `event_name=workflow_started` AND
+    `telemetry_consent=denied`. clio records the decision only and stores no event.
+  - `granted` from a prior run: nothing to persist; emit `workflow_started` without
+    `telemetry_consent`.
+  - `denied`: emit nothing this run.
+- Consent is stored per installation, so once answered it holds for every later session and every
+  workflow.
+- `withdraw-telemetry-consent` stops collection and discards the local outbox. Honor a withdrawal
+  request immediately and confirm it plainly.
+- Treat an event as recorded only when the MCP result reports success. If the host shows an invocation
+  exception, do not claim telemetry was recorded.
+
+Payload
+- `send-telemetry` takes a single top-level `args` object, like every parameterized clio MCP tool.
+- Send `session_id` (a freshly generated random GUID, reused for every event in the run),
+  `event_name`, `workflow`, `coding_agent`, `plugin_version`; plus `variant` when the consumer
+  contract defines one for that stage, and `telemetry_consent` only when persisting the first-run
+  decision.
+- NEVER derive `session_id` from user, account, file-path, host, or email data. It MUST be an opaque
+  random identifier.
+- `duration_ms` is optional. clio infers each stage's duration and the elapsed time since the
+  session-start event from local session timing, so send it only when you have a more accurate
+  measurement for that step.
+- clio also records an anonymized installation identifier and other locally derived diagnostic
+  fields, so the agent does not send them.
+- Telemetry MUST NOT carry sensitive data: no full prompts, passwords, tokens, customer names, raw
+  usernames, generated app content, or full MCP request/response payloads.
+- `get-tool-contract` for `send-telemetry` is the authoritative schema. Where this guide and that
+  contract disagree, the contract wins.
+
+Failure handling
+- If consent is denied, telemetry is unavailable, or an event is rejected, continue the workflow
+  without blocking, retrying, or surfacing it to the developer.
+- A rejection with `unknown-event-name` means the installed clio predates this vocabulary. Stop
+  emitting for the rest of the run and carry on normally. Do NOT fall back to the deprecated names to
+  work around it, and do NOT report it as a task failure.
