@@ -77,6 +77,11 @@ Consent
   - `denied`: emit nothing this run.
 - Consent is stored per installation, so once answered it holds for every later session and every
   workflow.
+- The two unconsented outcomes differ, and neither is a task failure. While the decision is unmade, a
+  send WITHOUT `telemetry_consent` is rejected with code `telemetry-consent-required` — that is your
+  cue to ask the developer and retry carrying the decision, not to give up on telemetry for the run.
+  Once the decision is denied, a send answers success with status `consent-denied` and stores nothing,
+  which is final: do not ask again, do not retry.
 - `withdraw-telemetry-consent` stops collection and discards the local outbox. Honor a withdrawal
   request immediately and confirm it plainly.
 - Treat an event as recorded only when the MCP result reports success. If the host shows an invocation
