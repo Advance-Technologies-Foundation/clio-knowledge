@@ -393,12 +393,13 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
     declares no parameter for it` — only step 2 is required;
   * anything else, including success — there was nothing to add.
   1. add a Lookup column to `Activity` IN THE PACKAGE THAT OWNS THE REFERENCED ENTITY — not in `Custom`, and
-     not as a matter of taste. `Custom` is a package others depend ON: a process living in the entity's own
-     package that references a column placed in `Custom` closes a loop, and the save is then refused with
-     "Cyclic dependencies detected", naming `EntityColumnValues.Column.<yours>` (measured, after the
-     `Custom` -> entity-package dependency that placement makes necessary). Placed in the referenced entity's
-     own package the column needs NO new dependency at all, and the environment's existing custom sections
-     show the same shape — each carries its own replacing `Activity` layer.
+     not as a matter of taste. `Custom` is the LAST package: it depends on the others and nothing depends on it
+     (measured — `Custom` -> CrtCore, the app package, CrtOpportunity; no edge points back). So a schema in the
+     entity's own package cannot reference a column placed in `Custom` without adding the REVERSE edge, and that
+     inverts an existing one: the save is refused with "Cyclic dependencies detected", naming
+     `EntityColumnValues.Column.<yours>`. Placed in the referenced entity's own package the column needs NO new
+     dependency at all, and the environment's existing custom sections show the same shape — each carries its
+     own replacing `Activity` layer.
      The call is `update-entity-schema`, which is NON-RESIDENT, so send it through `clio-run`. Args:
      `environment-name`, `package-name` (the REFERENCED entity's), `schema-name: "Activity"`, and
      `operations` — an ARRAY of operation objects, one here:
