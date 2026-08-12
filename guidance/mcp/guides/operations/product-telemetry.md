@@ -104,6 +104,22 @@ Payload
 - `duration_ms` is optional. clio infers each stage's duration and the elapsed time since the
   session-start event from local session timing, so send it only when you have a more accurate
   measurement for that step.
+- `model` is optional and should be sent on every stage you emit: your own model id, lowercased
+  (`claude-opus-5`, `gpt-5`), not a display name and not a guessed version. It is the first thing
+  asked of any change in the funnel, and it shares the bounded-token shape of `workflow`.
+- `input_tokens`, `output_tokens` and `cached_input_tokens` are optional non-negative counters, and
+  they are RUNNING SESSION TOTALS at the moment the stage was reached, not per-stage deltas. So the
+  series across a session is monotonic: real consumption is the maximum, and the differences show
+  which stage of which flow cost the tokens. Send them when you can actually see them, and omit them
+  when you cannot — a guessed or zeroed count is worse than a missing one, because it is
+  indistinguishable from a session that genuinely spent nothing.
+
+Some hosts record the session start from a hook, before any skill or guidance is read, so that a run
+is countable even if nothing else reports. If something tells you the start is already recorded for a
+given `session_id`, reuse that id and do NOT emit `workflow_started` again: clio keeps the session
+anchor in a map keyed by event name, so a second one overwrites it and shifts every elapsed-time
+measurement in the session. Such a floor event is attributed to `workflow=unattributed`, because a
+hook sees a tool name and cannot know the flow; your own stages carry the real `workflow` from there.
 - clio also records an anonymized installation identifier and other locally derived diagnostic
   fields, so the agent does not send them.
 - Telemetry MUST NOT carry sensitive data: no full prompts, passwords, tokens, customer names, raw
