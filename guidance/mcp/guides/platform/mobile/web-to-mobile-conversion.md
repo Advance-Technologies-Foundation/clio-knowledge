@@ -176,8 +176,8 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type, multi-data-source, or
-     "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+   - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
+     request, or "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
      the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
      removed with header buttons says its tools were discarded). WHICH container types are eligible
