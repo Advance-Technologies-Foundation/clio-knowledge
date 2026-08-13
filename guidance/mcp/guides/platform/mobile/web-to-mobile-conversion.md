@@ -25,7 +25,9 @@ Creatio or disk. The guide contains:
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
     merge / insert / drop / relocate-children). Iterate this to build the body; it already
     encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
-    re-derive placement from containerMap + componentSuggestions.
+    re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
+    parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
+    IS AUTHORITATIVE in HARD MOBILE RULES.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED
@@ -137,7 +139,9 @@ FLOW
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
-   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items").
+   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items"). Use the
+     entry's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
+     get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
      When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
      web tab, below); otherwise omit index and append. On a tabbed record page EVERY web tab inserts
@@ -294,6 +298,19 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   guide.requestConversions is the advisory summary (convertedRequests / flaggedRequests); dropped
   components appear in elementMap as `drop`. Tell the user which action components were removed.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
+- ELEMENT PLACEMENT IS AUTHORITATIVE — apply each elementMap entry's `parentName` + `propertyName`
+  EXACTLY as the guide gives them, for EVERY component type. The guide already resolved the correct
+  mobile parent for THIS page; that decision is final. NEVER relocate a component to a different parent
+  because of its type, because get-component-info calls some other component its "typical parent" /
+  "container" / lists it under "parent types", or because a component "usually" lives somewhere else.
+  get-component-info describes a component in ISOLATION — it is generic and does NOT override the
+  per-page placement in elementMap. When the two disagree, elementMap wins, always. Overriding the
+  guide's placement (improvising a "better" parent) is the #1 cause of a component that renders but does
+  not work. Worked example: the guide returns a quick filter as `parentName: HeaderContainer,
+  propertyName: items` — insert it THERE verbatim. Do NOT move it into crt.QuickFilterGroup just because
+  get-component-info (mobile) names crt.QuickFilterGroup the container for crt.QuickFilter; that catalog
+  advice is generic and, for a converted page, wrong — a filter placed against the guide is left out of
+  the page's filter wiring and does not work.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web
   columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web
