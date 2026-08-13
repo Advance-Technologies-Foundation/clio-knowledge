@@ -64,6 +64,14 @@ public enum ArithmeticOperation {
 	Divide = 4
 }
 
+internal sealed class ArithmeticResult {
+	public ArithmeticResult(double value) {
+		Value = value;
+	}
+
+	public double Value { get; private set; }
+}
+
 internal interface IArithmeticHandler {
 	ErrorOr<ArithmeticResult> Calculate(
 		ArithmeticOperation operation,
@@ -90,6 +98,22 @@ public sealed class ArithmeticMcpTool : BaseExecutableCodeAction {
 				Description = new LocalizableString(
 					"ArithmeticOperation value: Add = 1, Subtract = 2, Multiply = 3, Divide = 4."),
 				DataValueTypeUId = DataValueType.IntegerDataValueTypeUId,
+				Direction = ParameterDirection.Input,
+				IsRequired = true
+			},
+			new SourceCodeActionParameter {
+				Name = "leftOperand",
+				Caption = new LocalizableString("Left operand"),
+				Description = new LocalizableString("The first number."),
+				DataValueTypeUId = DataValueType.FloatDataValueTypeUId,
+				Direction = ParameterDirection.Input,
+				IsRequired = true
+			},
+			new SourceCodeActionParameter {
+				Name = "rightOperand",
+				Caption = new LocalizableString("Right operand"),
+				Description = new LocalizableString("The second number."),
+				DataValueTypeUId = DataValueType.FloatDataValueTypeUId,
 				Direction = ParameterDirection.Input,
 				IsRequired = true
 			}
