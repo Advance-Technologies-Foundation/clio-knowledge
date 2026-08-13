@@ -173,13 +173,11 @@ FLOW
        • the value binding (control, or value for lookups) — type-specific, so it is not prebuilt;
          (the row of a grid → crt.List insert is NOT one of these — see the next paragraph.)
      A grid → crt.List INSERT arrives with its row ALREADY BUILT: mobileValues carries the
-     crt.ListItem under itemLayout, its title bound to the first grid column and one body entry per
+     crt.ListItem under itemLayout, its title bound to the first grid column a row title ACCEPTS (a
+     text column — see the LIST ROW rule) and one body entry per
      remaining column, and the grid-only properties (columns, primaryColumnName, selectionState,
-     _selectionOptions, features, fitContent, activeRow, bulkActions) already left out because mobile
-     crt.List has no equivalent. Paste it; do NOT rebuild the row and do NOT re-add the grid properties
-     — bulkActions in particular is the web toolbar for selected rows, and the requests inside it
-     (export, delete) would reach the mobile page without passing the request conversion that decides
-     whether the mobile app supports them at all. This is prebuilt only for an INSERT — when
+     _selectionOptions, features, fitContent) already left out because mobile crt.List has no
+     equivalent. Paste it; do NOT rebuild the row and do NOT re-add the grid properties. This is prebuilt only for an INSERT — when
      the mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
      configure by merge-by-name (see the merge branch).
      The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens — both a
@@ -287,7 +285,8 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
   dropped by the differ.
 - LIST ROW (grid → crt.List + crt.ListItem): the row layout lives on a crt.ListItem placed in the
-  crt.List's itemLayout (title = first grid column, body = the rest). For an INSERT the converter has
+  crt.List's itemLayout (title = the first grid column a title ACCEPTS, body = every other column in
+  source order). For an INSERT the converter has
   already built it into mobileValues — paste it rather than rebuilding it. If the mobile list template
   already provides the List/ListItem elements, the row is NOT prebuilt: configure them by
   MERGE-BY-NAME (the row goes on the ListItem element) — NEVER insert a second crt.List and NEVER put
