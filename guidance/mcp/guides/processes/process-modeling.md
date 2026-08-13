@@ -315,13 +315,28 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   "processed" only with Account or Contact PLUS one further connection.
 - HOW: `modify-business-process` → `setConnections` with `elementName` and
   `connections:[{ column, <exactly ONE source> }]`. Sources: `recordId` (a fixed record) |
-  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro, e.g.
-  `[#SysVariable.CurrentUserContact#]`). `referenceSchema` is optional, belongs to `recordId` ALONE, and is a
+  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro — for the
+  CURRENT USER see the dedicated rule below, it is the one macro you may author here).
+  `referenceSchema` is optional, belongs to `recordId` ALONE, and is a
   CHECK rather than a source — sending it with any other source is refused, because the entity of those is
   whatever the source resolves to.
 - `recordId` NEEDS NO SCHEMA UId. The server composes `[#Lookup.{schemaUId}.{recordId}#]` from the target
   column's own reference entity, so send the bare record id. This is the one place the "you cannot guess
   these ids" warning ABOVE does not apply — for a connection, do NOT hand-write the Lookup token.
+- CURRENT USER — "link it to me / to my contact / to my account". This is the ONE macro you may author on a
+  connection, because the set is CLOSED and named here. Send it as `expression`, chosen by the target
+  column's own entity: a Contact column -> `[#SysVariable.CurrentUserContact#]`; an Account column ->
+  `[#SysVariable.CurrentUserAccount#]`; a SysAdminUnit (user) column -> `[#SysVariable.CurrentUser#]`.
+  Those three are the WHOLE set usable as a connection. Do not invent a fourth (`CurrentUserAccountId`,
+  `CurrentAccount`, …), and do not go looking one up: system variables are neither an entity nor an entity
+  schema, so `odata-read` answers 404 and `find-entity-schema` answers empty for them — that is those tools
+  being right, not the variable being absent. Spell them EXACTLY as above: a name outside the set is not
+  refused on write, it is stored, and the process then fails to COMPILE later with nothing pointing back at
+  the connection.
+  One caveat that is data rather than syntax: `CurrentUserAccount` writes EMPTY when the running user's
+  contact has no account — where `CurrentUserContact` raises an error in the same situation, the Account
+  side stays silent. If the Account link comes back unset, check the user's contact before suspecting the
+  macro.
 - UPSERT, keyed on `column`. The columns you list are set or re-set; every column you do NOT list is left
   alone. There is no collection-replace and no implicit clearing — so changing one connection can never
   disturb another, and clearing is only ever explicit via `clearConnections`.
