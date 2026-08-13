@@ -53,6 +53,19 @@ Terminal stages report the VERIFIED outcome
   blocked runs the funnel exists to surface — a missing event only lowers coverage.
 - The same applies when an environment blocks the work (a missing licence, denied rights, a disabled
   feature): that is a real terminal failure of the run, not a reason to skip the terminal stage.
+- A run blocked BEFORE it changed anything still reports. Emit `workflow_started` and then
+  `plan_blocked` (or `workflow_failed`) even when the block lands on the first check — an unregistered
+  environment, a missing artifact, absent credentials. "Nothing happened, so there is nothing to
+  report" is precisely backwards: a request the product could not even begin is the most actionable
+  thing the funnel can show, and a silent run is indistinguishable from one that was never made.
+
+An approval stage means a person approved
+- `plan_approved` records that the DEVELOPER approved the plan. Do not emit it for an approval you
+  granted yourself because the run was autonomous, pre-authorized, or told not to ask questions.
+- When no human approved, emit `plan_skipped` — the run really did proceed without an approval, and
+  that is a fact worth measuring, not a gap to paper over.
+- The reason is the same as for terminal stages: a funnel reads `plan_approved` as evidence that plans
+  are worth presenting. Self-approvals inflate that rate and make an unreviewed run look reviewed.
 
 Consent
 - Call `get-telemetry-consent` at workflow start, BEFORE sending any event. It is a read-only check
@@ -101,6 +114,12 @@ Payload
   decision.
 - NEVER derive `session_id` from user, account, file-path, host, or email data. It MUST be an opaque
   random identifier.
+- `coding_agent` and `plugin_version` describe the toolkit you are running under, so send the values
+  its Analytics Context gives you VERBATIM. If nothing supplies them, OMIT them — do not guess a
+  version, do not send a placeholder such as `unknown` or `0.1.0`, and do not shorten the agent name.
+  These fields exist to compare adoption across toolkit versions and hosts; an invented value does not
+  merely miss a data point, it lands in a cohort that never existed and moves numbers there. Measured
+  runs in one session reported three different versions for the same install, two of them fabricated.
 - `duration_ms` is optional. clio infers each stage's duration and the elapsed time since the
   session-start event from local session timing, so send it only when you have a more accurate
   measurement for that step.
@@ -115,11 +134,13 @@ Payload
   indistinguishable from a session that genuinely spent nothing.
 
 Some hosts record the session start from a hook, before any skill or guidance is read, so that a run
-is countable even if nothing else reports. If something tells you the start is already recorded for a
-given `session_id`, reuse that id and do NOT emit `workflow_started` again: clio keeps the session
-anchor in a map keyed by event name, so a second one overwrites it and shifts every elapsed-time
-measurement in the session. Such a floor event is attributed to `workflow=unattributed`, because a
-hook sees a tool name and cannot know the flow; your own stages carry the real `workflow` from there.
+is countable even if nothing else reports. Such a floor event is attributed to
+`workflow=unattributed`, because a hook sees a tool name and cannot know the flow. If something tells
+you the start is already recorded for a given `session_id`, reuse that id AND still emit your own
+`workflow_started` under your real `workflow`. That is not a duplicate: clio keys session state by the
+(`session_id`, `workflow`) PAIR, so each flow keeps its own start and its own elapsed-time
+measurements, and one host session can carry several flows. Skipping your own start records the run as
+a build with no beginning, which no funnel can read.
 - clio also records an anonymized installation identifier and other locally derived diagnostic
   fields, so the agent does not send them.
 - Telemetry MUST NOT carry sensitive data: no full prompts, passwords, tokens, customer names, raw
