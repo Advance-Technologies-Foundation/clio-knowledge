@@ -10,6 +10,11 @@ public sealed class ReferenceExampleBundleTests
     private static readonly ReferenceExampleExpectation[] RegisteredExamples =
     [
         new(
+            "atf.creatio.custom-mcp-tool-reference",
+            "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-custom-mcp-tool-reference",
+            "30aa4d7349f91c50ee207362a2618f49f1c64a2f"),
+        new(
             "atf.creatio.google-pubsub-reference",
             "catalog/reference-examples/creatio-google-pubsub.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-google-pubsub-reference",
