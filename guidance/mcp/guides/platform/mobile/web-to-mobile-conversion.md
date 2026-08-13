@@ -281,6 +281,17 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   itemLayout inside a merge of the parent List (silent no-op; ListItem is a separate named element).
   A row's title is a plain "$Binding" STRING; the { "value": "$Binding" } shape belongs to body
   entries only, and using it for the title renders an empty Title column while the body looks correct.
+  For an INSERT, never emit the row as its OWN operation (parentName the list + propertyName
+  "itemLayout"): crt.List is not a container and itemLayout is an input, so the client answers "is not
+  a container for other items" and the WHOLE schema fails to build — the page then does not open at
+  all. The row belongs inside the list element's own values. (A get-page read will NOT catch this: the
+  bundle resolver applies diffs softly, so a body built the wrong way still reads back fine; the strict
+  applier runs only in the browser.)
+  A title binds only a DIRECT TEXT column of the collection's entity. A lookup column does not work,
+  and neither does a ForwardReference projection of that lookup's display column — both leave the Title
+  column empty. When the source grid has no text column at all the converter ships the row WITHOUT a
+  title and says so in that element's elementMap reason; report it and ask the user which value the row
+  should lead with. The row still renders: body entries show as labeled value rows, lookups included.
 - PAGE-level business rules ARE converted for you in guide.pageBusinessRules: each rule keeps
   its condition and only the actions that survive on mobile. Page rules carry ONLY element
   actions — hide / show / make-editable / read-only / required / optional — and an action
