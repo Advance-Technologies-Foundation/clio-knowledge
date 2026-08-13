@@ -1,0 +1,40 @@
+schemaVersion: 0
+id: atf.creatio.custom-mcp-tool-reference
+title: Creatio custom MCP tool reference
+status: published
+primaryUseCase:
+  id: creatio-custom-mcp-tool
+  summary: Implement, publish, discover, authenticate to, and invoke a custom C# MCP tool directly in Creatio.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-custom-mcp-tool-reference
+  revision: 26430a23b1713feff145446027afc6b2a2926957
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/CustomMcpTool
+  unitTests: tests/CustomMcpTool
+  endToEndTests: tests/CustomMcpTool.IntegrationTests
+supportingCapabilities:
+  - creatio-application-lifecycle
+  - creatio-source-code-actions
+  - creatio-mcp-publishing
+  - mcp-catalogue-discovery
+  - mcp-tool-execution
+  - server-to-server-oauth
+  - forms-authentication
+  - creatio-rest-web-services
+  - dependency-injection
+  - erroror-validation
+  - unit-testing
+  - end-to-end-testing
+  - allure-reporting
+compatibility:
+  status: example-declared
+  details: Requires Creatio 10.1.0 or later and CrtMCPPublishingApp with source-code action publishing support.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - This is an educational agent reference example, not a production package or universal policy.
+  - The pinned revision contains 21 unit tests and 5 direct Creatio MCP E2E scenarios covering OAuth and Forms authentication.
+  - Registration does not promote every implementation choice to canonical Clio guidance.
