@@ -16,13 +16,26 @@ tests.
 - If the same application behavior is also exposed through a configuration web service, follow
   `configuration-webservice` for that adapter. Keep both entry points over one application handler.
 
-## Non-negotiable rules
+## Platform requirements
 
-- Put the MCP entry point under
-  `packages/<PACKAGE_NAME>/Files/src/cs/EntryPoints/McpTool/<ToolName>.cs`.
 - Derive the entry point from `Creatio.Copilot.Actions.BaseExecutableCodeAction`.
 - Make it a public, concrete class with a usable parameterless constructor; the publisher resolves the
   stored type and instantiates it at runtime.
+- Declare only source-code action parameters whose data types the publishing schema builder supports.
+- Keep the stored `SourceCodeAction` assembly-qualified type synchronized with namespace, class, and
+  assembly renames.
+- Give callers the required Creatio operation permission; source-code actions are gated by
+  `CanRunBusinessProcesses` in the verified publishing app.
+- Never put credentials, tokens, cookies, or tenant-specific values in package data, tool results,
+  logs, tests, or Allure attachments.
+
+## Reference conventions
+
+The executable reference uses these reusable application conventions. They are not Creatio platform
+requirements:
+
+- Put the MCP entry point under
+  `packages/<PACKAGE_NAME>/Files/src/cs/EntryPoints/McpTool/<ToolName>.cs`.
 - Keep the entry point thin: parse transport values, resolve an application handler from package DI,
   and map its result to `CopilotActionExecutionResult`.
 - Use a shared enum or another closed application contract for finite choices. Do not dispatch on
@@ -31,12 +44,8 @@ tests.
   is not validation.
 - Represent expected validation and business failures as values, for example with `ErrorOr<T>`, rather
   than throwing exceptions.
-- Never put credentials, tokens, cookies, or tenant-specific values in package data, tool results,
-  logs, tests, or Allure attachments.
-- Keep the stored `SourceCodeAction` assembly-qualified type synchronized with namespace, class, and
-  assembly renames.
-- Add unit tests for the handler and entry point, and direct E2E tests for catalogue discovery and
-  execution.
+- Test the handler and entry point with NUnit and FluentAssertions, and use direct E2E tests for
+  catalogue discovery and execution.
 
 ## Required implementation shape
 
@@ -87,7 +96,7 @@ public sealed class ArithmeticMcpTool : BaseExecutableCodeAction {
 
 	public override CopilotActionExecutionResult Execute(ActionExecutionOptions options) {
 		Dictionary<string, string> values = options?.ParameterValues;
-		if (!TryGetDefinedOperation(values, out ArithmeticOperation operation)) {
+		if (!TryGetOperation(values, out ArithmeticOperation operation)) {
 			return Failed("The operation parameter must be a defined ArithmeticOperation value.");
 		}
 		if (!TryGetNumber(values, "leftOperand", out double left)
@@ -95,13 +104,13 @@ public sealed class ArithmeticMcpTool : BaseExecutableCodeAction {
 			return Failed("Both operands must be numbers.");
 		}
 
-		using (IServiceScope scope = MyPackageApp.Instance.CreateScope()) {
+		using (IServiceScope scope = CustomMcpToolApp.Instance.CreateScope()) {
 			IArithmeticHandler handler = scope.ServiceProvider
 				.GetRequiredService<IArithmeticHandler>();
 			ErrorOr<ArithmeticResult> result = handler.Calculate(operation, left, right);
 			return result.IsError
 				? Failed(result.FirstError.Description)
-				: Completed(result.Value);
+				: Completed(result.Value.Value);
 		}
 	}
 }
@@ -109,7 +118,7 @@ public sealed class ArithmeticMcpTool : BaseExecutableCodeAction {
 
 `BaseExecutableCodeAction` supplies values as strings. Parse numbers with invariant culture. For
 finite integer choices, parse the integer, cast it to the shared enum, and then call `Enum.IsDefined`.
-Keep helpers such as `TryGetDefinedOperation`, `TryGetNumber`, `Failed`, and `Completed` private to the
+Keep helpers such as `TryGetOperation`, `TryGetNumber`, `Failed`, and `Completed` private to the
 transport adapter; the pinned reference shows their complete implementations.
 
 The action caption and description come from `GetCaption()` and `GetDescription()`. Set
@@ -120,8 +129,10 @@ details in server diagnostics without leaking secrets.
 ### 3. Register application services in package DI
 
 Register handlers in the package composition root and resolve them from a scope inside the action.
-Do not duplicate business calculations or validation in the MCP entry point. Prefer stateless scoped
-or transient services unless the application behavior requires another lifetime.
+Do not duplicate business calculations or validation in the MCP entry point. The reference registers
+its stateless handler with `AddScoped<IArithmeticHandler, ArithmeticHandler>()`; both the MCP action
+and web-service adapter create and dispose one scope per execution. Use another lifetime only when the
+application behavior requires it.
 
 ## Publish the server and tool through package data
 
@@ -151,9 +162,18 @@ Example action binding:
 CustomMcpToolApp.EntryPoints.McpTool.ArithmeticMcpTool, CustomMcpTool
 ```
 
-The runtime still resolves the action and derives its parameter schema even when `InputSchema` is
-overridden. An override cannot make an unsupported or unresolvable action runnable. Prefer closed
-object schemas with required parameters and `additionalProperties: false`.
+The stored `InputSchema` override is advertisement-only: it controls the schema returned by
+`tools/list`. During `tools/call`, the publisher resolves the action and validates arguments against a
+separate runtime schema derived from its `SourceCodeActionParameter` declarations. Therefore:
+
+- an override cannot make an unsupported or unresolvable action runnable;
+- a constraint present only in the override, such as `enum`, is not enforced by the call validator;
+- a property advertised only by the override is rejected because the runtime action did not declare
+  it.
+
+Keep the override aligned with the runtime parameters. Prefer a closed advertised object schema with
+required parameters and `additionalProperties: false` so the catalogue clearly communicates the same
+contract the C# action enforces.
 
 Current verified limitation: the publishing-app input-schema wire DTO does not emit a stored JSON
 Schema `enum` keyword. Preserve the integer type and value mapping in the parameter description, but
@@ -169,6 +189,9 @@ The package data row is executable configuration. Decide ownership explicitly:
 
 - If the package owns the complete `McpTool` definition, set `IsForceUpdate: true` on its mutable
   non-key columns so upgrades converge across environments.
+- For the reference `McpServer` row, `Code`, `Name`, and `Description` are package-owned and use force
+  update. `IsOnline` is administrator-owned and does not, so reinstalling the package does not
+  silently reverse an operational decision to take the server offline.
 - Advance the binding descriptor's `ModifiedOnUtc` whenever its row or column policy changes. Changing
   only `data.json` or only `IsForceUpdate` under an unchanged descriptor timestamp may not reinstall
   the binding.
@@ -297,6 +320,12 @@ messages in SSE `data:` records.
 - source-code action resolution is cached only inside that request;
 - a direct client can send `tools/list` again in the same MCP session and receive current persisted
   metadata.
+
+This does not mean every publisher discovery surface is uncached. The administration action picker
+uses `McpSourceCodeActionQueryExecutor`, whose reflected source-code action inventory is cached for the
+application process lifetime. Adding a brand-new action class can therefore require an application
+restart before that class appears in the administration picker. This is separate from refreshing
+persisted `McpTool` metadata through `tools/list`.
 
 Therefore:
 
