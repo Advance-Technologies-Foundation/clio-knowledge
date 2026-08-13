@@ -51,6 +51,25 @@ Creatio or disk. The guide contains:
     it at the gate so the user knows what the tab bodies look like, but never offer to skip or
     replace it. Null when the converter creates no tab, or every converted tab is empty (an empty tab
     gets no layers, so an empty Area is never created in the first place).
+  - excludedComponents — components living inside the web template's NON-CONVERTING container(s)
+    (e.g. the whole MainHeader): the mobile template already provides the equivalent header/scaffold
+    chrome, so NOTHING inside such a container converts into the mobile markup. The list mixes
+    template chrome (page title, back button) with page-added components — split on isContainer /
+    container and present the chrome as replaced-by-template, not as a loss; report the page-added
+    rest as "the Creatio Mobile app does not support this layout" and do NOT re-add any of it.
+    Page-added crt.Button components are the ONE exception — they leave this list and convert into
+    FAB menu items instead (see fabConversion). Null when the matched template declares no
+    non-converting containers, or none of their descendants were present on the source page.
+  - fabConversion — the header-buttons → FAB advisory summary: `note`, `scaffoldName`, `items[]`
+    (name, caption, sourceButton, sourceMenuItem when the item was flattened out of a button's own
+    menu, webRequest → mobileRequest) and `droppedItems[]` (sourceButton, sourceMenuItem, reason).
+    The ACTIONABLE payload is NOT here — it is the synthesized entries (no webName) in elementMap:
+    normally one INSERT per converted item into the template FAB's menuItems (parentName =
+    FloatingActionButton, propertyName = menuItems), so the template's own items are inherited and
+    come first; only when the mobile template provides no floatAction at all does the map instead
+    carry ONE Scaffold merge with the complete FAB (its first definition). Semantics
+    in FLOW step 5d. Null when the pass did not run (no fabConversion rules section, the template
+    excludes no header, or the web-template baseline was unavailable) or no header button was found.
   - normalizations — ONE SECTION PER STANDARD the converter NORMALIZED to, keyed by the standard's
     group. Each section carries a caller-facing `note`, `normalized[]` — one entry per element with its
     `name`, its `type` and the EXACT `properties` written, a leaf ALREADY at the standard being left out
@@ -211,6 +230,32 @@ FLOW
    do NOT offer to keep the web structure instead, and do NOT treat it as a decision at the gate. STATE it
    in the plain-language plan as a fact ("the content of <tab> goes into one Area card, stacked in the web
    order"), the way you state which components transfer.
+5d. Header buttons → FAB (when guide.fabConversion is present): the web template's non-converting
+   header (e.g. MainHeader) never converts into mobile markup — the page-added crt.Button components
+   found anywhere inside it (recursively) become Floating Action Button menu items instead. The
+   element map already carries the synthesized entries (no webName): normally one INSERT per
+   converted item into the template FAB's menuItems (parentName = FloatingActionButton,
+   propertyName = menuItems, appended in web document order AFTER the template's own items, e.g.
+   Copy, Delete — those are inherited, NEVER re-emitted); only when the mobile template provides no
+   floatAction at all does the map instead carry ONE Scaffold merge with the complete FAB (its
+   first definition). Apply exactly the shape the map contains, VERBATIM, as part of step 4 — do
+   NOT hand-build floatAction, and NEVER author a Scaffold merge that carries floatAction yourself:
+   when the template already owns floatAction, the platform diff applier SILENTLY DROPS that merged
+   property, so the converted items never reach the compiled page (the classic symptom is orphaned
+   *FabMenuItem_caption resource strings with no menu items). Do NOT re-add the buttons (or
+   anything else from the header) into the markup, and do NOT touch the FAB's own visible (neither
+   the template's nor the default one). A button that carries its own menuItems is discarded and its
+   entries are flattened into FAB items RECURSIVELY, each keeping its own caption (no parent-button
+   prefix); a bound visible on a source button is carried onto its menu item verbatim (style/color/
+   icon are ignored — a FAB menu item has no such inputs). Item captions are #ResourceString tokens
+   already collected into guide.resourceStrings and registered with the rest in step 4. The FAB
+   lives in page METADATA only (floatAction is a Scaffold property, not a named element), so it is
+   NOT visible in the Freedom UI Mobile Designer — expected platform behavior, never a conversion
+   defect; it renders in the Mobile app at runtime. This is a FACT, not a gate decision: state it in
+   the plain-language plan as "MainHeader buttons → FAB menu items (N); the rest of the header is
+   not supported by the mobile layout", ALWAYS list guide.fabConversion.droppedItems with their
+   reasons (a menu item whose request the mobile app does not support is not shipped — a dead item),
+   and never offer to skip the pass or keep the web header instead.
 6. Validate the body with validate-page; resolve any findings (e.g. a binding whose attribute
    is not declared) before treating the page as done.
 7. Persist with update-page — pass target-schema-uid=<create-page schemaUId> so the body lands in the
@@ -305,6 +350,21 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
   apply the map as it is. What the layers are is described once in the tabAreaLayers field entry
   above; what to do with them, in FLOW step 5c.
+- MAINHEADER → FAB: nothing inside the web template's non-converting header container(s) lands in
+  the mobile markup. Page-added crt.Button components convert into FAB menu items appended after the
+  mobile template's own floatAction items, delivered as synthesized INSERTS into the template FAB's
+  menuItems in the element map (or ONE Scaffold merge only when the template has no floatAction) —
+  apply the map's shape verbatim, never hand-build floatAction, never author a Scaffold merge that
+  carries floatAction (the diff applier silently drops it when the template owns floatAction),
+  never re-add header content to the
+  markup, and never touch the FAB's own visible. Everything else in the header is excluded
+  (guide.excludedComponents) — report it as "the Creatio Mobile app does not support this layout".
+  Dropped FAB candidates (unsupported request, no caption, no action) are in
+  guide.fabConversion.droppedItems — ALWAYS list them to the user. The FAB is metadata-only
+  (Scaffold.floatAction) and is NOT visible in Mobile Designer — expected, not a defect. Like
+  tabAreaLayers this is NOT a proposal — report it at the gate, never put it up for approval. What
+  the fields are is described once in the fabConversion field entry above; what to do with them, in
+  FLOW step 5d.
 - SOME PROPERTIES ARE NORMALIZED, NOT CONVERTED: for certain element types the converter writes the
   mobile standard instead of translating the web page's own value. Do NOT restore the web value and do
   NOT treat the difference from the web page as a defect. Like tabAreaLayers this is NOT a proposal —
