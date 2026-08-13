@@ -65,6 +65,7 @@ public sealed class GuidanceInventoryTests
         (string ItemId, string SourcePath)[] mandatoryGuidance =
         [
             ("core-rules", "guidance/mcp/guides/core-rules.md"),
+			("knowledge-feedback", "guidance/mcp/guides/operations/knowledge-feedback.md"),
             ("routing", "guidance/mcp/guides/routing.md"),
             ("when-to-use-requests", "guidance/mcp/guides/pages/when-to-use-requests.md")
         ];
