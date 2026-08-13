@@ -349,8 +349,8 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   "cleared" and "never bound" are indistinguishable from the read-back alone.
 - READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
   both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
-  can feed it straight back — with FOUR exceptions that refuse on re-apply, all of them values a designer, an
-  older build or another environment stored:
+  can feed it straight back — with FOUR exceptions that refuse on re-apply, none of them values you wrote:
+  they are what a designer, an older build, a hand edit or another environment left behind.
   (1) a fixed-record connection whose stored macro names a different entity than its column. TWO remedies,
       and they are not interchangeable: re-send the raw `value` as `expression` to keep the stored macro
       exactly as it is, or omit `referenceSchema` to re-point the connection at the column's OWN entity —
