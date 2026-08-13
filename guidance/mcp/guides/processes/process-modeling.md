@@ -361,7 +361,8 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   in the saved metadata it is a server-generated UId meta-path (`[#...[Element:{uid}].[Parameter:{uid}].[EntityColumn:{uid}]#]`), NOT a friendly `Element.Property` path, so you cannot author it — ALWAYS use `sourceElement`. Formulas are strictly typed (convert with `.ToString()` etc.).
 
 == Activity connections ("Connected to") ==
-- WHAT: which records the Activity a task creates is attached to — Account, Contact, Opportunity, Case, ...
+- WHAT: which records the Activity a task creates is attached to — a contact, an account, and whatever else
+  the environment registers as a connection; the set is per-environment, never a fixed list.
   It is functional, not decorative: set, the task appears on the connected record's Activities detail and
   its Timeline and the page fields are pre-filled; unset, none of that happens. An email counts as
   "processed" only with Account or Contact PLUS one further connection.
@@ -433,20 +434,41 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
     of an incompatible type (same type group, and for a lookup the same reference entity — a `Guid` or a
     same-entity Lookup parameter is what works).
 - WHEN THE CONNECTION DOES NOT EXIST YET — linking an activity to a record of YOUR OWN entity. This is the
-  common ask ("add a button that creates a task linked to this record") and `setConnections` alone cannot do
-  it: the connections Creatio ships cover Account, Contact, Opportunity, Case and so on, and a custom entity
-  has none, so the call is refused with "has no '<column>' column". Three steps, in order; the first two are a
-  DATA-MODEL change that `setConnections` deliberately does not make for you:
-  1. add a Lookup column to `Activity` in YOUR package — the `update-entity-schema` tool, which is
-     NON-RESIDENT, so send it through `clio-run`. Args: `environment-name`, `package-name` (yours),
-     `schema-name: "Activity"`, and `operations` — an ARRAY of operation objects, one here:
+  common ask ("add a button that creates a task linked to this record"), and it is the ONE case that needs a
+  DATA-MODEL change, which `setConnections` deliberately does not make for you.
+  Do NOT decide whether you are in that case by inspecting the object first — let the OPERATION tell you,
+  because the surfaces disagree with each other. Measured for ONE lookup column on one environment: the
+  physical `Activity` table carried it, `get-entity-schema-properties` listed it, the object designer did not
+  show it, and a process wrote its value successfully. In the other direction, several connection columns
+  existed physically while being ABSENT from the schema. WHICH columns those are is a property of the product
+  and the installed package chain, not of Creatio — so no list belongs here, including a list of "the
+  connections Creatio ships": whatever it named would be wrong on some environment. The refusals ARE the
+  check, and they distinguish three states:
+  * `<host> has no '<column>' column` — the data-model change below is required;
+  * `the column exists on <host> but no connection-registry row registers it and this element's user task
+    declares no parameter for it` — only step 2 is required;
+  * anything else, including success — there was nothing to add.
+  1. add a Lookup column to `Activity` IN THE PACKAGE THAT OWNS THE REFERENCED ENTITY — not in `Custom`, and
+     not as a matter of taste. `Custom` is the LAST package: it depends on the others and nothing depends on it
+     (measured — `Custom` depends on the platform core, the app package and a product package; no edge points
+     back). So a schema in the
+     entity's own package cannot reference a column placed in `Custom` without adding the REVERSE edge, and that
+     inverts an existing one: the save is refused with "Cyclic dependencies detected", naming
+     `EntityColumnValues.Column.<yours>`. Placed in the referenced entity's own package the column needs NO new
+     dependency at all, and the environment's existing custom sections show the same shape — each carries its
+     own replacing `Activity` layer.
+     The call is `update-entity-schema`, which is NON-RESIDENT, so send it through `clio-run`. Args:
+     `environment-name`, `package-name` (the REFERENCED entity's), `schema-name: "Activity"`, and
+     `operations` — an ARRAY of operation objects, one here:
      `{"action":"add","column-name":"Usr<YourEntity>","type":"Lookup","reference-schema-name":"<your entity>","indexed":true}`.
      The first four keys are all required — omitting `column-name` is the easy mistake, since the column being
      added is named nowhere else; `indexed` is optional and worth setting on a column you will filter by.
      Measured: the column lands and the schema republishes in ~13 s, and reads back as `source: own`.
+     A `Reference schema '<your entity>' was not found` refusal means the TARGET package cannot see the
+     REFERENCED entity — that, not the `Activity` side, is the dependency that blocks, and the placement above
+     is what makes it a non-issue.
      CAVEAT — measured only where that package ALREADY had a replacing `Activity` layer; with no layer yet
-     this step takes a path nothing has exercised. If the package does not depend on the one owning
-     `Activity`, add that dependency first.
+     this step takes a path nothing has exercised.
   2. register the column as a connection — ONE bound row in `EntityConnection`, through the
      `create-data-binding-db` tool (also non-resident, also via `clio-run`). Args: `package-name` (yours),
      `schema-name: "EntityConnection"`, `binding-name` (e.g. `"EntityConnectionUsr<YourEntity>"`), and
@@ -457,10 +479,14 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
      without it the tool creates an EMPTY binding and nothing is registered. The package must be non-foreign.
   3. `setConnections` on the element. The element may predate the column by any amount — the operation
      creates the element parameter when the user task declares none.
-  Skipping step 2 is not fatal: the value still WRITES at run time, but the connection stays invisible to
-  every registry-reading feature (see the warning below), and registering is what makes the column available
-  to EVERY element instead of only to a task that happens to declare a parameter for it. After step 2 the
-  designer may keep showing the old set until its caches refresh; the run-time write is unaffected.
+  Skipping step 2 is not fatal, and the mechanism is worth knowing rather than guessing: the binder resolves a
+  column through the registry OR through a parameter the user task already DECLARES, so a declared connection
+  binds and writes — with a caveat in the log — even with no registry row. Measured: an `Opportunity`
+  connection written by a process on an environment whose registry carried 17 rows, with a Next Steps
+  component then displaying the activity. What registration buys is availability to EVERY element rather than
+  only to a task that happens to declare that parameter, plus visibility to the surfaces that read the
+  registry. After step 2 the designer may keep showing the old set until its caches refresh; the run-time
+  write is unaffected.
   Do NOT offer, as a lighter alternative, writing the record's NAME into the activity's title or description.
   That produces no link — no Activities detail, no Timeline, no pre-filled fields — and the ask was a link.
 - SUCCEEDS WITH A WARNING, two cases. A column that exists but has no connection-registry row IS written at
