@@ -129,11 +129,21 @@ FLOW
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
      FeedTabContainer→FeedContainer). REUSE the existing mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
-     also carry a prebuilt mobileValues (for component twins whose rule declares carryProperties,
-     e.g. FolderTree->FolderTreeActions carrying sourceSchemaName/rootSchemaName) — paste it onto
-     the merged element verbatim, deterministically, as part of this same step. This does NOT
-     require a separate confirmation beyond Gate M — it is a mechanical property fill-in, not a new
-     decision. If the mobile list template already provides the List / ListItem elements, configure
+     also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
+     as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
+     not a new decision). A merge carries prebuilt mobileValues in two twin shapes:
+       • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
+         sourceSchemaName/rootSchemaName): only those keys are carried.
+       • same-component twin — the mobile template provides the SAME component the page changed, either
+         under a DIFFERENT name via a components mapping (AttachmentList→AttachmentFileList) or,
+         AUTOMATICALLY, under the SAME name with no mapping needed (Feed→Feed). Its mobileValues carry
+         ONLY what the page CHANGED from the web template — e.g. the attachments detail's recordColumnName
+         (the object-specific link column), or Feed's dataSourceName/entitySchemaName. A property the page
+         left at the web-template default is deliberately OMITTED so the mobile element keeps its OWN
+         default (an unset attachments recordColumnName stays the mobile default RecordId); a template
+         component the page did not change gets no elementMap entry at all. Paste the carried mobileValues
+         as-is — never add the omitted defaults yourself; the mobile element already supplies them.
+     If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
