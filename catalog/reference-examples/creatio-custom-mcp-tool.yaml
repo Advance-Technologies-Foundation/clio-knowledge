@@ -7,7 +7,7 @@ primaryUseCase:
   summary: Implement, publish, discover, authenticate to, and invoke a custom C# MCP tool directly in Creatio.
 source:
   repository: https://github.com/Advance-Technologies-Foundation/creatio-custom-mcp-tool-reference
-  revision: fa1c39e84bccb3ed340cb7e1378fc9c59116dee2
+  revision: 30aa4d7349f91c50ee207362a2618f49f1c64a2f
   defaultBranch: main
 entryPoints:
   overview: README.md

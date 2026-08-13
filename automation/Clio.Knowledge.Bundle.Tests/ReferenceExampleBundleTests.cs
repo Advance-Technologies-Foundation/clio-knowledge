@@ -13,7 +13,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.custom-mcp-tool-reference",
             "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-custom-mcp-tool-reference",
-            "fa1c39e84bccb3ed340cb7e1378fc9c59116dee2"),
+            "30aa4d7349f91c50ee207362a2618f49f1c64a2f"),
         new(
             "atf.creatio.google-pubsub-reference",
             "catalog/reference-examples/creatio-google-pubsub.yaml",

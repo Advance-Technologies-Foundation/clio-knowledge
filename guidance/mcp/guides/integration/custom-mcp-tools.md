@@ -21,6 +21,7 @@ tests.
 - Derive the entry point from `Creatio.Copilot.Actions.BaseExecutableCodeAction`.
 - Make it a public, concrete class with a usable parameterless constructor; the publisher resolves the
   stored type and instantiates it at runtime.
+- Implement its three abstract members: `Execute`, `GetCaption`, and `GetDescription`.
 - Declare only source-code action parameters whose data types the publishing schema builder supports.
 - Keep the stored `SourceCodeAction` assembly-qualified type synchronized with namespace, class, and
   assembly renames.
@@ -41,7 +42,8 @@ requirements:
 - Use a shared enum or another closed application contract for finite choices. Do not dispatch on
   open-ended strings such as `"add"`, `"subtract"`, or `"multiply"`.
 - Validate every enum integer at the MCP boundary with `Enum.IsDefined`; casting an undefined integer
-  is not validation.
+  is not validation, and the platform does not enforce enum membership (see the current verified
+  limitation below).
 - Represent expected validation and business failures as values, for example with `ErrorOr<T>`, rather
   than throwing exceptions.
 - Test the handler and entry point with NUnit and FluentAssertions, and use direct E2E tests for
@@ -62,7 +64,7 @@ public enum ArithmeticOperation {
 	Divide = 4
 }
 
-public interface IArithmeticHandler {
+internal interface IArithmeticHandler {
 	ErrorOr<ArithmeticResult> Calculate(
 		ArithmeticOperation operation,
 		double leftOperand,
@@ -92,6 +94,15 @@ public sealed class ArithmeticMcpTool : BaseExecutableCodeAction {
 				IsRequired = true
 			}
 		};
+	}
+
+	public override LocalizableString GetCaption() {
+		return new LocalizableString("Arithmetic calculator");
+	}
+
+	public override LocalizableString GetDescription() {
+		return new LocalizableString(
+			"Performs Add, Subtract, Multiply, and Divide operations on two numbers.");
 	}
 
 	public override CopilotActionExecutionResult Execute(ActionExecutionOptions options) {
@@ -355,10 +366,10 @@ Check in this order:
 9. Inspect publishing-app warning logs. A configured tool that cannot resolve or authorize its action
    is intentionally omitted from `tools/list`.
 
-## Test and evidence requirements
+## Test and evidence conventions
 
-Use NUnit and FluentAssertions in Creatio package workspaces unless the repository specifies another
-standard.
+The reference uses NUnit and FluentAssertions. Follow the target repository's established test
+framework and assertion conventions when they differ.
 
 Unit coverage should include:
 
