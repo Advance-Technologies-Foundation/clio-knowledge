@@ -165,8 +165,11 @@ FLOW
      A grid → crt.List INSERT arrives with its row ALREADY BUILT: mobileValues carries the
      crt.ListItem under itemLayout, its title bound to the first grid column and one body entry per
      remaining column, and the grid-only properties (columns, primaryColumnName, selectionState,
-     features, fitContent) already left out because mobile crt.List has no equivalent. Paste it; do NOT
-     rebuild the row and do NOT re-add the grid properties. This is prebuilt only for an INSERT — when
+     _selectionOptions, features, fitContent, activeRow, bulkActions) already left out because mobile
+     crt.List has no equivalent. Paste it; do NOT rebuild the row and do NOT re-add the grid properties
+     — bulkActions in particular is the web toolbar for selected rows, and the requests inside it
+     (export, delete) would reach the mobile page without passing the request conversion that decides
+     whether the mobile app supports them at all. This is prebuilt only for an INSERT — when
      the mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
      configure by merge-by-name (see the merge branch).
      The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens — both a
