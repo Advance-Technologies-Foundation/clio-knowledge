@@ -22,11 +22,11 @@ public sealed class PublishedGenerationTests
     // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever any
     // manifest byte or any published body changes. A failure here is not a broken test: it means the
     // working tree publishes different bytes than the recorded generation claims.
-    private const ulong PublishedSequence = 25;
+    private const ulong PublishedSequence = 32;
     // Digest of the LF bytes this repository declares (.gitattributes pins eol=lf, so a compliant
     // checkout and CI hash exactly the stored bytes; a CRLF working tree would hash differently).
     private const string PublishedContentDigest =
-        "980A03660A48F87D9306419FED46D1D43E58209BF36CC85C25801D4DDBFB2D55";
+        "1D0EABFA44A1C4E03CEF4753F0FA05FA07F60C537A52936D82FF904BFE854544";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]

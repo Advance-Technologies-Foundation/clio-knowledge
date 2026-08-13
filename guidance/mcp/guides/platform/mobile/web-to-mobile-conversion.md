@@ -98,8 +98,12 @@ separate response AFTER you show a plain-language plan:
   separate explicit go-ahead.
 - Headless / autonomous mode: never self-approve. Produce the plan, ask for confirmation, and END
   THE TURN without writing or registering anything.
-These gate rules are authoritative on their own — the plan, the approval handshake, and the
-conversion report are all described in this guide; do not depend on any external document.
+These gate rules are SELF-SUFFICIENT and mandatory on their own: running the guide and presenting the
+plan write nothing, and every persistence or registration step needs the developer's explicit approval
+first — never do less than this. A higher-level workflow that invoked the conversion MAY layer a richer
+approval process on top (for example a structured, plan-first review with an explicit approve step
+before any write); follow that when it is present. This article does not depend on any such workflow —
+it stays focused on the conversion itself, and the body-building mechanics are the rest of it below.
 
 ─────────────────────────────────────────────────────────────
 FLOW
@@ -125,11 +129,21 @@ FLOW
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
      FeedTabContainer→FeedContainer). REUSE the existing mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
-     also carry a prebuilt mobileValues (for component twins whose rule declares carryProperties,
-     e.g. FolderTree->FolderTreeActions carrying sourceSchemaName/rootSchemaName) — paste it onto
-     the merged element verbatim, deterministically, as part of this same step. This does NOT
-     require a separate confirmation beyond Gate M — it is a mechanical property fill-in, not a new
-     decision. If the mobile list template already provides the List / ListItem elements, configure
+     also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
+     as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
+     not a new decision). A merge carries prebuilt mobileValues in two twin shapes:
+       • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
+         sourceSchemaName/rootSchemaName): only those keys are carried.
+       • same-component twin — the mobile template provides the SAME component the page changed, either
+         under a DIFFERENT name via a components mapping (AttachmentList→AttachmentFileList) or,
+         AUTOMATICALLY, under the SAME name with no mapping needed (Feed→Feed). Its mobileValues carry
+         ONLY what the page CHANGED from the web template — e.g. the attachments detail's recordColumnName
+         (the object-specific link column), or Feed's dataSourceName/entitySchemaName. A property the page
+         left at the web-template default is deliberately OMITTED so the mobile element keeps its OWN
+         default (an unset attachments recordColumnName stays the mobile default RecordId); a template
+         component the page did not change gets no elementMap entry at all. Paste the carried mobileValues
+         as-is — never add the omitted defaults yourself; the mobile element already supplies them.
+     If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
@@ -172,8 +186,8 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type, multi-data-source, or
-     "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+   - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
+     request, or "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
      the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
      removed with header buttons says its tools were discarded). WHICH container types are eligible
