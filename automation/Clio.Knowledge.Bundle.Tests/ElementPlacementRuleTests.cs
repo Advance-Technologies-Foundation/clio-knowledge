@@ -19,14 +19,10 @@ public sealed class ElementPlacementRuleTests
     private const string SectionHeading = "HARD MOBILE RULES";
     private const string NextSectionHeading = "LIMITATIONS (be transparent)";
 
-    // Placement guide that must carry a reciprocal pointer to the rule (AGENTS.md: one authoritative
-    // owner per rule, referenced from elsewhere). Only the container-placement guide points back here —
-    // the general mobile page-modification guide must NOT reference the conversion path, so it carries a
-    // converter-free model-driven caveat on crt.QuickFilterGroup instead of a pointer to this rule.
-    private static readonly string[] ReciprocalPointerGuides =
-    [
-        "guidance/mcp/guides/pages/modification/containers.md"
-    ];
+    // The ELEMENT PLACEMENT rule is deliberately SELF-CONTAINED in the conversion guide (the only place
+    // an elementMap is consumed). General mobile-editing guides — page-modification.md, containers.md —
+    // stay converter-free, so there are no reciprocal pointers to guard here; the citation scan below runs
+    // over the owner guide alone.
 
     // The clauses added by the ENG-94937 review rounds that each carry weight: dropping any one leaves
     // the rule green but wrong, so each is pinned with the reason it protects.
@@ -62,17 +58,15 @@ public sealed class ElementPlacementRuleTests
     }
 
     [Test]
-    [Description("Every 'see <RULE NAME> in HARD MOBILE RULES' citation across the mobile guides exists (both anchors) and resolves to a bullet with that exact name in the owner guide.")]
+    [Description("Both 'see <RULE NAME> in HARD MOBILE RULES' anchor citations in the owner guide exist and resolve to a bullet with that exact name.")]
     public void RuleCitations_ShouldExistAndResolveToABullet()
     {
         string ownerNormalized = Normalize(ReadGuide(OwnerGuide));
 
         // Widened capture (up to the " in " delimiter) so a cited name carrying a hyphen, backtick, slash or
-        // parenthesis is validated instead of silently skipped. Scans the owner guide AND the reciprocal-pointer
-        // guides, so a future "see X in HARD MOBILE RULES" added to any of them is guarded too.
-        string[] citedRules = (new[] { OwnerGuide }).Concat(ReciprocalPointerGuides)
-            .SelectMany(guide => Regex.Matches(Normalize(ReadGuide(guide)), @"see ([A-Za-z0-9 '`/().-]+?) in HARD MOBILE RULES")
-                .Select(match => match.Groups[1].Value.Trim()))
+        // parenthesis is validated instead of silently skipped.
+        string[] citedRules = Regex.Matches(ownerNormalized, @"see ([A-Za-z0-9 '`/().-]+?) in HARD MOBILE RULES")
+            .Select(match => match.Groups[1].Value.Trim())
             .ToArray();
 
         citedRules.Length.Should().BeGreaterThanOrEqualTo(2,
@@ -86,19 +80,6 @@ public sealed class ElementPlacementRuleTests
 
         unresolved.Should().BeEmpty(
             because: "a citation naming a rule that no bullet defines is a dangling pointer");
-    }
-
-    [Test]
-    [Description("The reciprocal pointers in the container and mobile page-modification guides still name the rule, so catalog-vs-placement authority does not silently split.")]
-    public void ReciprocalPointers_ShouldNameTheRule()
-    {
-        string[] missing = ReciprocalPointerGuides
-            .Where(guide => !ReadGuide(guide).Contains(RuleName))
-            .ToArray();
-
-        missing.Should().BeEmpty(
-            because: "each entry-point guide must point per-page placement back at the one owner rule "
-                + "(AGENTS.md: absence of contradictory sources of truth)");
     }
 
     private static string HardMobileRulesSection(string guide)
