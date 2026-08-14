@@ -22,9 +22,9 @@ public sealed class PublishedGenerationTests
     // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever any
     // manifest byte or any published body changes. A failure here is not a broken test: it means the
     // working tree publishes different bytes than the recorded generation claims.
-    private const ulong PublishedSequence = 26;
+    private const ulong PublishedSequence = 27;
     private const string PublishedContentDigest =
-        "1686A5A86EF8E3465160A264EEC0CAB17BCA8D747B11A1407ED13094266DC608";
+        "C93B6B0117A50586F687F585C99F0583E20BF41A7B124495B7CABFD18DE69055";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]

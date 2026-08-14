@@ -60,14 +60,19 @@ Creatio or disk. The guide contains:
     Page-added crt.Button components are the ONE exception — they leave this list and convert into
     FAB menu items instead (see fabConversion). Null when the matched template declares no
     non-converting containers, or none of their descendants were present on the source page.
-  - fabConversion — the header-buttons → FAB advisory summary: `note`, `scaffoldName`, `items[]`
+  - fabConversion — the header-buttons → FAB advisory summary: `note`, `emission` / `targetName` /
+    `targetAssumed` (WHERE the payload landed — read these, never parse the note), `items[]`
     (name, caption, sourceButton, sourceMenuItem when the item was flattened out of a button's own
     menu, webRequest → mobileRequest) and `droppedItems[]` (sourceButton, sourceMenuItem, reason).
     The ACTIONABLE payload is NOT here — it is the synthesized entries (no webName) in elementMap:
-    normally one INSERT per converted item into the template FAB's menuItems (parentName =
-    FloatingActionButton, propertyName = menuItems), so the template's own items are inherited and
-    come first; only when the mobile template provides no floatAction at all does the map instead
-    carry ONE Scaffold merge with the complete FAB (its first definition). Semantics
+    `emission` "insert" (the normal case) is one INSERT per converted item into the template FAB's
+    menuItems (parentName = `targetName`, propertyName = menuItems), so the template's own items are
+    inherited and come first; `emission` "merge" — only when the mobile template provides no
+    targetable floatAction at all — is ONE Scaffold merge (mobileName = `targetName`) with the
+    complete FAB (its first definition). `targetAssumed` true means the template's own FAB could not
+    be resolved and the inserts target the rules' standard FAB name: still additive (nothing of the
+    template's can be erased), but say so and verify the menu at runtime. `emission` null means NO
+    payload was emitted — every candidate was dropped, so there is nothing to apply. Semantics
     in FLOW step 5d. Null when the pass did not run (no fabConversion rules section, the template
     excludes no header, or the web-template baseline was unavailable) or no header button was found.
   - normalizations — ONE SECTION PER STANDARD the converter NORMALIZED to, keyed by the standard's
@@ -246,8 +251,11 @@ FLOW
    anything else from the header) into the markup, and do NOT touch the FAB's own visible (neither
    the template's nor the default one). A button that carries its own menuItems is discarded and its
    entries are flattened into FAB items RECURSIVELY, each keeping its own caption (no parent-button
-   prefix); a bound visible on a source button is carried onto its menu item verbatim (style/color/
-   icon are ignored — a FAB menu item has no such inputs). Item captions are #ResourceString tokens
+   prefix); a bound visible is carried onto the menu item verbatim — the entry's own, or the one the
+   discarded button/submenu gated it with, so an item is never visible on mobile where the web menu
+   was hidden (an entry subject to TWO conditions at once cannot be composed into one mobile visible
+   and is reported in droppedItems instead, to be recreated manually). Style, color and icon are
+   ignored — a FAB menu item has no such inputs. Item captions are #ResourceString tokens
    already collected into guide.resourceStrings and registered with the rest in step 4. The FAB
    lives in page METADATA only (floatAction is a Scaffold property, not a named element), so it is
    NOT visible in the Freedom UI Mobile Designer — expected platform behavior, never a conversion
@@ -359,8 +367,9 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   never re-add header content to the
   markup, and never touch the FAB's own visible. Everything else in the header is excluded
   (guide.excludedComponents) — report it as "the Creatio Mobile app does not support this layout".
-  Dropped FAB candidates (unsupported request, no caption, no action) are in
-  guide.fabConversion.droppedItems — ALWAYS list them to the user. The FAB is metadata-only
+  Dropped FAB candidates (unsupported request, no caption, no action, or a visibility condition that
+  cannot be reproduced on one mobile item) are in guide.fabConversion.droppedItems — ALWAYS list them
+  to the user. The FAB is metadata-only
   (Scaffold.floatAction) and is NOT visible in Mobile Designer — expected, not a defect. Like
   tabAreaLayers this is NOT a proposal — report it at the gate, never put it up for approval. What
   the fields are is described once in the fabConversion field entry above; what to do with them, in
