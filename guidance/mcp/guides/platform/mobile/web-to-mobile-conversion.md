@@ -249,11 +249,12 @@ FLOW
    header (e.g. MainHeader) never converts into mobile markup — the page-added crt.Button components
    found anywhere inside it (recursively) become Floating Action Button menu items instead. The
    element map already carries the synthesized entries (no webName): normally one INSERT per
-   converted item into the template FAB's menuItems (parentName = FloatingActionButton,
+   converted item into the template FAB's menuItems (parentName = guide.fabConversion.targetName,
    propertyName = menuItems, appended in web document order AFTER the template's own items, e.g.
    Copy, Delete — those are inherited, NEVER re-emitted); only when the mobile template provides no
-   floatAction at all does the map instead carry ONE Scaffold merge with the complete FAB (its
-   first definition). Apply exactly the shape the map contains, VERBATIM, as part of step 4 — do
+   floatAction at all does the map instead carry ONE Scaffold merge (mobileName =
+   guide.fabConversion.targetName) with the complete FAB (its first definition). Apply exactly the
+   shape the map contains, VERBATIM, as part of step 4 — do
    NOT hand-build floatAction, and NEVER author a Scaffold merge that carries floatAction yourself:
    when the template already owns floatAction, the platform diff applier SILENTLY DROPS that merged
    property, so the converted items never reach the compiled page (the classic symptom is orphaned
@@ -272,8 +273,11 @@ FLOW
    defect; it renders in the Mobile app at runtime. This is a FACT, not a gate decision: state it in
    the plain-language plan as "MainHeader buttons → FAB menu items (N); the rest of the header is
    not supported by the mobile layout", ALWAYS list guide.fabConversion.droppedItems with their
-   reasons (a menu item whose request the mobile app does not support is not shipped — a dead item),
-   and never offer to skip the pass or keep the web header instead.
+   reasons (a menu item whose request the mobile app does not support is not shipped — a dead item);
+   when guide.fabConversion.targetAssumed is true, ALSO state that the mobile template's own FAB
+   could not be positively identified, that the items above were inserted/merged under the assumed
+   name guide.fabConversion.targetName, and that the user must verify the FAB menu in the Mobile app
+   at runtime; and never offer to skip the pass or keep the web header instead.
 6. Validate the body with validate-page; resolve any findings (e.g. a binding whose attribute
    is not declared) before treating the page as done.
 7. Persist with update-page — pass target-schema-uid=<create-page schemaUId> so the body lands in the
