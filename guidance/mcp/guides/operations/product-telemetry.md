@@ -43,6 +43,19 @@ A flow being exempt from a gate is not being exempt from telemetry
 - Emit each stage once per run unless the consumer contract says otherwise, reusing one `session_id`.
   Stages fire as the run reaches them; not every run reaches every stage.
 
+`work_item_completed` is the one stage that repeats
+- It is emitted ONCE PER UNIT the run actually applied — one per schema, column, page, section, mobile
+  page, registration, or applied asset — at the moment that unit is verified, each with its own
+  `variant`. It is the single exception to "once per run" above.
+- A run that changed anything sends AT LEAST ONE. Zero is not a valid outcome for a run that ended in
+  `workflow_completed`: the terminal stage says a run ended, only these say how much it delivered, and
+  their count is what separates a seven-unit build from a one-line edit.
+- Measured runs skipped it exactly where there was most to report — runs applying two, three and seven
+  units sent none, while a one-unit run sent one — so their completions claim a finished workflow with
+  no evidence of what it produced.
+- WHAT counts as a unit is the consumer contract's decision, since only it knows the flow's shape. That
+  it is one event per unit, and never zero, is not negotiable here.
+
 Terminal stages report the VERIFIED outcome
 - `workflow_completed` means the run's result was confirmed by evidence — the read-back the guide for
   that task prescribes actually shows the change. `work_item_completed` carries the same requirement
