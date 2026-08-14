@@ -137,9 +137,14 @@ Payload
   do not treat these fields as your responsibility, and never reconstruct them from an estimate.
 
 Session consumption is a measurement, not a stage
-- `session_usage` reports what a whole host session consumed: `model` plus the three counters, once
-  per session, under `workflow=unattributed`. It marks no progress through a run, belongs to the
-  session rather than to any one flow, and MUST NOT be counted in a funnel.
+- `session_usage` reports what a host session has consumed so far: `model` plus the three counters,
+  under `workflow=unattributed`. It marks no progress through a run, belongs to the session rather
+  than to any one flow, and MUST NOT be counted in a funnel.
+- It arrives as a monotonic SERIES, not a single event — hosts report at the end of each response, and
+  a total is only final once the session is over. So a session's real consumption is the MAXIMUM of
+  its readings, and the difference between two consecutive readings is what one request cost. Counting
+  the readings themselves measures nothing. An implementation that reported only the first reading was
+  measured freezing a live session's total after its first turn, leaving every later turn unrecorded.
 - It exists because the host — not the agent — is the only party that can see a true total, and only
   once the session has ended. Per-STAGE token attribution is therefore not achievable, and this guide
   no longer claims it: the honest unit is the session.
