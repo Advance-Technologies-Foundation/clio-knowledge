@@ -192,12 +192,10 @@ Key mobile-specific types:
   crt.BarcodeScanner  — Barcode/QR scanner; mobile-only
   crt.FloatingActionButton — Floating action button (set on Scaffold.floatAction)
   crt.Sort            — Sort control for list pages; mobile-only
-  crt.QuickFilterGroup — Group of quick filter chips; mobile-only. Model-driven: chips are built at
+  crt.QuickFilterGroup — Group of quick filter chips; mobile-only. Model-driven: the chips are built at
                          runtime from the QuickFilterGroup_Value attribute (via
-                         crt.QuickFilterGroupAttributeConverter), NOT authored as static crt.QuickFilter
-                         children of its `items`. On a CONVERTED page, place quick filters where the
-                         elementMap says (ELEMENT PLACEMENT IS AUTHORITATIVE — get-guidance
-                         freedom-page-web-to-mobile-conversion), never by moving them into this group.
+                         crt.QuickFilterGroupAttributeConverter), so do NOT author them as static
+                         crt.QuickFilter children of its `items`.
                          TODO(ENG-91859): stopgap — get-component-info stays authoritative for mobile
                          components; this caveat exists only because the mobile component registry
                          currently mis-documents crt.QuickFilterGroup as the static container for

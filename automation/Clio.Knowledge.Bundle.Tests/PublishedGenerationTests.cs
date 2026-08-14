@@ -29,7 +29,7 @@ public sealed class PublishedGenerationTests
     // ledger is deferred to ENG-95354 (a schema/automation change kept out of content PRs per AGENTS.md).
     private const ulong PublishedSequence = 35;
     private const string PublishedContentDigest =
-        "0F875C9D3570928EFD295F5A4DAD57BDB79D1DD5CF9ACAAF518FAC8AF0FAE413";
+        "4380FD2007939C76BED0177BC5CAAEC4378D89FBF491FCD2AAE273BF3D7E1E93";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]

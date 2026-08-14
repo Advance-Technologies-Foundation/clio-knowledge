@@ -19,12 +19,13 @@ public sealed class ElementPlacementRuleTests
     private const string SectionHeading = "HARD MOBILE RULES";
     private const string NextSectionHeading = "LIMITATIONS (be transparent)";
 
-    // Entry-point guides that must carry a reciprocal pointer to the rule (AGENTS.md: one authoritative
-    // owner per rule, referenced from elsewhere — get-component-info stays authoritative for SHAPE).
+    // Placement guide that must carry a reciprocal pointer to the rule (AGENTS.md: one authoritative
+    // owner per rule, referenced from elsewhere). Only the container-placement guide points back here —
+    // the general mobile page-modification guide must NOT reference the conversion path, so it carries a
+    // converter-free model-driven caveat on crt.QuickFilterGroup instead of a pointer to this rule.
     private static readonly string[] ReciprocalPointerGuides =
     [
-        "guidance/mcp/guides/pages/modification/containers.md",
-        "guidance/mcp/guides/platform/mobile/page-modification.md"
+        "guidance/mcp/guides/pages/modification/containers.md"
     ];
 
     // The clauses added by the ENG-94937 review rounds that each carry weight: dropping any one leaves
