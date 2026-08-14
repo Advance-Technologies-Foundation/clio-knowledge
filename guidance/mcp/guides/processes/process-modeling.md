@@ -63,7 +63,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot". The HTML body is stored verbatim;
   `bodyFormat` accepts ONLY `"html"` — any other value is REJECTED at build even when no `body` is sent (the
-  applier validates the format first, so it is a contract guarantee, not a convention); process macros in the
+  applier validates the format first, so it is a contract guarantee, not a convention). VERIFIED on a stand
+  (2026-08-13, a `CrtProcessBuilder` that supports `sendEmail`): `bodyFormat:"text"` and `bodyFormat:"markdown"`
+  both FAIL the build with `Send email element '<name>': 'bodyFormat' must be 'html' (only HTML custom-message
+  bodies are supported). Got '<value>'.` — and the `markdown` case carried NO `body` at all, which is the half
+  that proves the format is checked on its own rather than only alongside a body. Process macros in the
   body are the platform's `<img data-value="[#…#]">` image tokens — author them inside the HTML and they pass
   through unchanged (no symbolic macro authoring yet). `importance` has NO `medium` token: the designer LABELS
   `normal` as "Medium" (its caption in the element's card — the product's acceptance tests assert `EN=Medium`),
@@ -73,16 +77,28 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   descriptor's `mappings` are applied BEFORE the elements' `email` blocks, so `email.subject` overwrites the
   mapped formula whatever order you wrote them in; in a MODIFY the operations run strictly in the order you
   list them, so the LATER of `addMapping` / `setElement`(`email.subject`) wins. Deterministic on each path but
-  opposite by default, so send exactly ONE of the two rather than relying on it (established from the server:
-  the build applies mappings then the sendEmail applier, modify applies operations in array order, and both
-  assign a fresh parameter SourceValue). The contract SHOULD state this precedence explicitly; until it does,
-  treat it as an implementation order, not a promise.
+  opposite by default, so send exactly ONE of the two rather than relying on it. This is now a STATED CONTRACT
+  rather than an observed implementation order: the server's `email.subject` member documents both paths, and
+  two tests pin them — a build asserting the mapping phase runs before the email block, and a modify asserting
+  operations dispatch in array order — so reordering either phase is a breaking change that fails the suite
+  instead of silently inverting this guide.
   Works in `create-business-process`, `modify-business-process` `addElement` (same block) and `setElement`
   (`elementUpdate.email` — an in-place partial update). Recipients are MATCH-OR-APPEND: an entry whose
   resolved source and value already match an existing line under the same prefix is a NO-OP (re-application
-  is idempotent now — older builds appended a duplicate), a genuinely new address APPENDS, and there is still
-  NO removal path — a wrong recipient cannot be replaced or removed through modify, and the designer has no
-  removal path either (an unfilled recipient row persists there as a valueless parameter). Say so.
+  is idempotent now — older builds appended a duplicate), a genuinely new address APPENDS, and there is NO
+  removal path THROUGH THIS TOOL — a wrong recipient cannot be replaced or removed through `modify`.
+  The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
+  recipient's value and saving DELETES the parameter (`saveRecipients` calls `removeRecipient` on an emptied
+  row, which calls `removeParameter`, which removes it from the element). Two exceptions persist as valueless
+  parameters instead — the LAST `To` row (the guard keeps one To row alive), and a parameter something else
+  still references (`canRemoveParameter`). That last-`To` case is why a designer capture can show an unfilled
+  recipient row surviving; it is a special case, NOT evidence that removal is impossible.
+  VERIFIED on a stand (2026-08-13): the SAME `to:[{"value":"…"}]` entry applied three times over `setElement`
+  left exactly ONE recipient parameter, and a different address then appended as a second — so "idempotent" is
+  measured behaviour here, not an inference from the applier's source. The tool's no-removal half is a
+  limitation of the operation set (there is no removeRecipient op), not a platform limit — the designer
+  behaviour above is read from `EmailTemplateUserTaskPropertiesPage.js` in `CrtProcessDesigner` 7.8.0
+  (`saveRecipients` :645, `removeRecipient` :1410, `removeParameter` :1390).
   `describe-business-process` reads the configuration back as the element's `email` block (`hasBody` flags
   the body instead of echoing the HTML).
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
