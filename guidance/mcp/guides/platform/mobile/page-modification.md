@@ -192,7 +192,10 @@ Key mobile-specific types:
   crt.BarcodeScanner  — Barcode/QR scanner; mobile-only
   crt.FloatingActionButton — Floating action button (set on Scaffold.floatAction)
   crt.Sort            — Sort control for list pages; mobile-only
-  crt.QuickFilterGroup — Group of quick filter chips; mobile-only
+  crt.QuickFilterGroup — Group of quick filter chips; mobile-only. Model-driven: the chips are built at
+                         runtime from the QuickFilterGroup_Value attribute (via
+                         crt.QuickFilterGroupAttributeConverter), so do NOT author them as static
+                         crt.QuickFilter children of its `items`.
 
 NOT available in mobile (web-only):
   crt.DataGrid, crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
