@@ -385,13 +385,29 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   "processed" only with Account or Contact PLUS one further connection.
 - HOW: `modify-business-process` → `setConnections` with `elementName` and
   `connections:[{ column, <exactly ONE source> }]`. Sources: `recordId` (a fixed record) |
-  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro, e.g.
-  `[#SysVariable.CurrentUserContact#]`). `referenceSchema` is optional, belongs to `recordId` ALONE, and is a
+  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro — for the
+  CURRENT USER see the dedicated rule below, it is the one macro you may author here).
+  `referenceSchema` is optional, belongs to `recordId` ALONE, and is a
   CHECK rather than a source — sending it with any other source is refused, because the entity of those is
   whatever the source resolves to.
 - `recordId` NEEDS NO SCHEMA UId. The server composes `[#Lookup.{schemaUId}.{recordId}#]` from the target
   column's own reference entity, so send the bare record id. This is the one place the "you cannot guess
   these ids" warning ABOVE does not apply — for a connection, do NOT hand-write the Lookup token.
+- CURRENT USER — "link it to me / to my contact / to my account". This is the ONE macro you may author on a
+  connection, because the set is CLOSED and named here. Send it as `expression`, chosen by the target
+  column's own entity: a Contact column -> `[#SysVariable.CurrentUserContact#]`; an Account column ->
+  `[#SysVariable.CurrentUserAccount#]`; a SysAdminUnit (user) column -> `[#SysVariable.CurrentUser#]`.
+  Those three are the WHOLE set usable as a connection. Do not invent a fourth (`CurrentUserAccountId`,
+  `CurrentAccount`, …), and do not go looking one up: system variables are neither an entity nor an entity
+  schema, so `odata-read` answers 404 and `find-entity-schema` answers empty for them — that is those tools
+  being right, not the variable being absent. Spell them EXACTLY as above, because what a wrong name costs
+  depends on the environment's CrtProcessBuilder and BOTH outcomes are bad: a current build refuses it at the
+  write, naming the valid alternatives; an older one stores it unchecked, and the process then fails to
+  COMPILE later, far from the edit and with nothing pointing back at the connection.
+  One caveat that is data rather than syntax: `CurrentUserAccount` writes EMPTY when the running user's
+  contact has no account — where `CurrentUserContact` raises an error in the same situation, the Account
+  side stays silent. If the Account link comes back unset, check the user's contact before suspecting the
+  macro.
 - UPSERT, keyed on `column`. The columns you list are set or re-set; every column you do NOT list is left
   alone. There is no collection-replace and no implicit clearing — so changing one connection can never
   disturb another, and clearing is only ever explicit via `clearConnections`.
@@ -403,8 +419,8 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   "cleared" and "never bound" are indistinguishable from the read-back alone.
 - READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
   both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
-  can feed it straight back — with THREE exceptions that refuse on re-apply, all of them values a designer or
-  an older build stored:
+  can feed it straight back — with FOUR exceptions that refuse on re-apply, none of them values you wrote:
+  they are what a designer, an older build, a hand edit or another environment left behind.
   (1) a fixed-record connection whose stored macro names a different entity than its column. TWO remedies,
       and they are not interchangeable: re-send the raw `value` as `expression` to keep the stored macro
       exactly as it is, or omit `referenceSchema` to re-point the connection at the column's OWN entity —
@@ -413,7 +429,13 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
       "not a platform macro", because a bare value cannot be a source. Use `recordId`;
   (3) a stored value that IS macro-shaped but from a family that cannot hold a record id — `DateValue`,
       `DateTimeValue`, `TimeValue`, `BooleanValue`. `[#SysSettings...#]` is the one family accepted instead
-      of refused, with a warning (below), precisely so designer-authored processes stay re-appliable.
+      of refused, with a warning (below), precisely so designer-authored processes stay re-appliable;
+  (4) a `[#SysVariable...#]` whose name does not resolve on THIS environment, or resolves to a variable that
+      cannot hold a record id (`CurrentDate`, `CurrentUserRoles`, …). Unlike (1)-(3) this one depends on where
+      you are: a current `CrtProcessBuilder` checks the name against the platform's own vocabulary, an older
+      one does not, so the same read-back re-applies on one environment and is refused on another. It appears
+      when process metadata travelled from a different platform version, or when a connection was hand-edited
+      — a designer cannot produce it. Re-point the connection rather than forcing the stored value through.
   Each entry also carries `registered` — `false` means the value IS written at run time but the connection
   is invisible to every registry-reading feature, the same caveat as the write warning below — and `source`,
   the platform value source. Only BOUND connections appear, so absence does NOT mean the column cannot be

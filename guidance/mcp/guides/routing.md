@@ -3,6 +3,8 @@ clio MCP routing map
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
 Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
 
+- Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
+
 - Pages (Freedom UI): create/edit -> get-component-info (read resolvedFrom) + name=page-modification
   - page-modification is the entry; after its GATE read the ONE matching sub-guide: name=page-modification-overview (save lifecycle), name=page-modification-field-contract (insert a data-bound field), name=page-modification-containers (parentName / bundle.json), name=page-modification-components (button/handler/viewConfigDiff rules)
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
@@ -27,6 +29,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - lookup seeding / data bindings -> name=data-bindings
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
+  - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution

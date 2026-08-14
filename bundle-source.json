@@ -17,8 +17,10 @@
   },
   "requirements": {
     "tools": [
+      "configure-knowledge-feedback-policy",
       "get-guidance",
-      "list-knowledge-examples"
+      "get-knowledge-feedback-policy",
+	  "list-knowledge-examples"
     ],
     "itemIds": [
       "agent-execution",
@@ -27,6 +29,7 @@
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
+      "atf.creatio.custom-mcp-tool-reference",
       "atf.creatio.google-pubsub-reference",
       "atf.creatio.kafka-reference",
       "branding",
@@ -42,6 +45,7 @@
       "core-rules",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
+      "custom-mcp-tools",
       "dashboard-and-home-page-layout",
       "dashboard-creation",
       "dashboard-design",
@@ -66,6 +70,7 @@
       "identity-assertion",
       "indicator-widget",
       "integration-testing",
+      "knowledge-feedback",
       "mobile-page-modification",
       "package-dependencies",
       "page-creation",
@@ -145,6 +150,7 @@
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
+      "docs://knowledge/com.creatio.clio/atf.creatio.custom-mcp-tool-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
       "docs://knowledge/com.creatio.clio/branding",
@@ -160,6 +166,7 @@
       "docs://knowledge/com.creatio.clio/core-rules",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
+      "docs://knowledge/com.creatio.clio/custom-mcp-tools",
       "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
       "docs://knowledge/com.creatio.clio/dashboard-creation",
       "docs://knowledge/com.creatio.clio/dashboard-design",
@@ -184,6 +191,7 @@
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
       "docs://knowledge/com.creatio.clio/integration-testing",
+      "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
       "docs://knowledge/com.creatio.clio/page-creation",
@@ -341,6 +349,17 @@
       "sourcePath": "guidance/mcp/guides/composable-app/atf-repository-tests.md",
       "bundlePath": "resources/atf-repository-tests.md",
       "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "atf.creatio.custom-mcp-tool-reference",
+      "title": "Creatio custom MCP tool reference",
+      "description": "Educational reference workspace for implementing, publishing, discovering, authenticating to, and invoking a custom C# MCP tool directly in Creatio.",
+      "topicId": "atf.creatio.custom-mcp-tool-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.custom-mcp-tool-reference",
+      "sourcePath": "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
+      "bundlePath": "resources/atf.creatio.custom-mcp-tool-reference.yaml",
+      "mediaType": "text/yaml"
     },
     {
       "itemId": "atf.creatio.google-pubsub-reference",
@@ -544,6 +563,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/platform/freedom-ui/iframe-section.md",
       "bundlePath": "resources/creatio-freedom-iframe-section.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "custom-mcp-tools",
+      "title": "Creatio custom C# MCP tools",
+      "description": "Guides implementation, package-data publication, direct authentication and invocation, catalogue refresh, troubleshooting, and testing of custom C# MCP source-code actions hosted by Creatio.",
+      "topicId": "creatio.custom-mcp-tools",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/custom-mcp-tools",
+      "legacyUris": [
+        "docs://mcp/guides/custom-mcp-tools"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/custom-mcp-tools.md",
+      "bundlePath": "resources/custom-mcp-tools.md",
       "mediaType": "text/markdown"
     },
     {
@@ -884,6 +917,20 @@
       "sourcePath": "guidance/mcp/guides/integration/integration-testing.md",
       "bundlePath": "resources/integration-testing.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "knowledge-feedback",
+      "title": "Knowledge feedback",
+      "description": "Defines task-end reconciliation when observed behavior contradicts guidance, including standing approval, report scope, evidence, privacy, deduplication, and agent-owned GitHub submission.",
+      "topicId": "creatio.knowledge-feedback",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/knowledge-feedback",
+      "legacyUris": [
+        "docs://mcp/guides/knowledge-feedback"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/knowledge-feedback.md",
+      "bundlePath": "resources/knowledge-feedback.md",
+      "mediaType": "text/markdown"
     },
     {
       "itemId": "mobile-page-modification",

@@ -22,15 +22,21 @@ public sealed class PublishedGenerationTests
     // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever any
     // manifest byte or any published body changes. A failure here is not a broken test: it means the
     // working tree publishes different bytes than the recorded generation claims.
+    //
+    // KNOWN GAP (tracked by ENG-95354): these constants are hand-edited in the same commit they police,
+    // so this guard proves only internal self-consistency — it does NOT detect a libraryVersion/sequence
+    // already published with different bytes. Anchoring the declared generation to a committed publication
+    // ledger is deferred to ENG-95354 (a schema/automation change kept out of content PRs per AGENTS.md).
     private const ulong PublishedSequence = 36;
     // Digest of the LF bytes this repository declares (.gitattributes pins eol=lf, so a compliant
     // checkout and CI hash exactly the stored bytes; a CRLF working tree would hash differently).
-    // Provenance: regenerated and CONFIRMED by RUNNING this test on a .NET 10 toolchain (SDK 10.0.400)
-    // on 2026-08-13 — not hand-typed and carried through review unexecuted. Cross-checked independently
-    // by recomputing the same framing over the index bytes, a method first validated by reproducing the
-    // recorded digests of sequences 23, 24, 31 and 32 exactly.
+    // Provenance: regenerated and CONFIRMED by RUNNING this test on a .NET 10 toolchain (SDK 10.0.400),
+    // recomputed here over the tree MERGED with master rather than carried across the merge — not
+    // hand-typed and never taken through review unexecuted. That run is also what proves the four values
+    // move together: the pack test fails when libraryVersion moves without the csproj transport Version.
+    // It does not close the ENG-95354 gap above, which is about a ledger this repository does not have.
     private const string PublishedContentDigest =
-        "1915BF1215998FEF62B1AE014AC3B6870CF35CE65A167CFE38D4BA7E2EC76F01";
+        "E4ACAC515951E2DF17FAA47275FC2CCF40C918479413BDA6068826C9D8FB8D54";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]
