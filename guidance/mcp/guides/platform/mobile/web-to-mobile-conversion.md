@@ -328,9 +328,12 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   the `FilterGroupButton` in HeaderContainer); a crt.QuickFilter inserted as a static child of its `items` is
   never bound. Placement alone is necessary but NOT sufficient here: a working page ALSO needs that model side
   (the `QuickFilterGroup_Value` attribute + the converter's `target.items`). Confirm the guide's data-section
-  diffs (guide.modelConfigDiff / guide.viewModelConfigDiff — apply VERBATIM, see DATA SECTIONS) carry it; if
-  they do not, configure it before treating the filters as done. "Do NOT move the chip into
-  crt.QuickFilterGroup" is about the VIEW tree — it is not a ban on the model-side wiring the OOTB page carries.
+  diffs (guide.modelConfigDiff / guide.viewModelConfigDiff — apply VERBATIM, see DATA SECTIONS) carry that
+  model side. If they do NOT, STOP and report it as an incomplete guide output (a converter gap) — do NOT
+  hand-author modelConfigDiff / viewModelConfigDiff for it: inventing the `QuickFilterGroup_Value` attribute
+  and the converter's `target.items` by hand is the deviation-from-tool-output this rule forbids, and their
+  shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
+  tree — it is not a ban on the model-side wiring the OOTB page carries.
   TODO(ENG-91859): the crt.QuickFilterGroup specifics in this example are a STOPGAP. get-component-info
   stays the authoritative source for components in general — this is a documented EXCEPTION, present only
   because the mobile component registry currently mis-documents crt.QuickFilterGroup as the static

@@ -22,9 +22,14 @@ public sealed class PublishedGenerationTests
     // Bump both of these together with libraryVersion/sequence in bundle-source.json whenever any
     // manifest byte or any published body changes. A failure here is not a broken test: it means the
     // working tree publishes different bytes than the recorded generation claims.
-    private const ulong PublishedSequence = 34;
+    //
+    // KNOWN GAP (tracked by ENG-95354): these constants are hand-edited in the same commit they police,
+    // so this guard proves only internal self-consistency — it does NOT detect a libraryVersion/sequence
+    // already published with different bytes. Anchoring the declared generation to a committed publication
+    // ledger is deferred to ENG-95354 (a schema/automation change kept out of content PRs per AGENTS.md).
+    private const ulong PublishedSequence = 35;
     private const string PublishedContentDigest =
-        "332DE9AAE3093ECA33F563B3ADFA9C5504E8DDB11167EA18F48F5E5B0A2D89BD";
+        "0F875C9D3570928EFD295F5A4DAD57BDB79D1DD5CF9ACAAF518FAC8AF0FAE413";
 
     [Test]
     [Description("Verifies that the published content digest still matches the generation the repository declares, so edited content can never ship under a reused sequence.")]

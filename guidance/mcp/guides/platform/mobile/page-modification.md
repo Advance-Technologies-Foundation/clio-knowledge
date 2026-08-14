@@ -196,8 +196,8 @@ Key mobile-specific types:
                          runtime from the QuickFilterGroup_Value attribute (via
                          crt.QuickFilterGroupAttributeConverter), NOT authored as static crt.QuickFilter
                          children of its `items`. On a CONVERTED page, place quick filters where the
-                         elementMap says (see ELEMENT PLACEMENT IS AUTHORITATIVE in
-                         web-to-mobile-conversion), never by moving them into this group.
+                         elementMap says (ELEMENT PLACEMENT IS AUTHORITATIVE — get-guidance
+                         freedom-page-web-to-mobile-conversion), never by moving them into this group.
                          TODO(ENG-91859): stopgap — get-component-info stays authoritative for mobile
                          components; this caveat exists only because the mobile component registry
                          currently mis-documents crt.QuickFilterGroup as the static container for
