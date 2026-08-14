@@ -198,6 +198,11 @@ Key mobile-specific types:
                          children of its `items`. On a CONVERTED page, place quick filters where the
                          elementMap says (see ELEMENT PLACEMENT IS AUTHORITATIVE in
                          web-to-mobile-conversion), never by moving them into this group.
+                         TODO(ENG-91859): stopgap — get-component-info stays authoritative for mobile
+                         components; this caveat exists only because the mobile component registry
+                         currently mis-documents crt.QuickFilterGroup as the static container for
+                         crt.QuickFilter. Remove it once ENG-91859 corrects the registry entry
+                         (MobileComponentRegistry.json, docs "mobile-docs/quick-filter-group.component.md").
 
 NOT available in mobile (web-only):
   crt.DataGrid, crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
