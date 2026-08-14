@@ -308,19 +308,36 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   in the saved metadata it is a server-generated UId meta-path (`[#...[Element:{uid}].[Parameter:{uid}].[EntityColumn:{uid}]#]`), NOT a friendly `Element.Property` path, so you cannot author it — ALWAYS use `sourceElement`. Formulas are strictly typed (convert with `.ToString()` etc.).
 
 == Activity connections ("Connected to") ==
-- WHAT: which records the Activity a task creates is attached to — Account, Contact, Opportunity, Case, ...
+- WHAT: which records the Activity a task creates is attached to — a contact, an account, and whatever else
+  the environment registers as a connection; the set is per-environment, never a fixed list.
   It is functional, not decorative: set, the task appears on the connected record's Activities detail and
   its Timeline and the page fields are pre-filled; unset, none of that happens. An email counts as
   "processed" only with Account or Contact PLUS one further connection.
 - HOW: `modify-business-process` → `setConnections` with `elementName` and
   `connections:[{ column, <exactly ONE source> }]`. Sources: `recordId` (a fixed record) |
-  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro, e.g.
-  `[#SysVariable.CurrentUserContact#]`). `referenceSchema` is optional, belongs to `recordId` ALONE, and is a
+  `processParameter` | `sourceElement` + `sourceElementParameter` | `expression` (a raw macro — for the
+  CURRENT USER see the dedicated rule below, it is the one macro you may author here).
+  `referenceSchema` is optional, belongs to `recordId` ALONE, and is a
   CHECK rather than a source — sending it with any other source is refused, because the entity of those is
   whatever the source resolves to.
 - `recordId` NEEDS NO SCHEMA UId. The server composes `[#Lookup.{schemaUId}.{recordId}#]` from the target
   column's own reference entity, so send the bare record id. This is the one place the "you cannot guess
   these ids" warning ABOVE does not apply — for a connection, do NOT hand-write the Lookup token.
+- CURRENT USER — "link it to me / to my contact / to my account". This is the ONE macro you may author on a
+  connection, because the set is CLOSED and named here. Send it as `expression`, chosen by the target
+  column's own entity: a Contact column -> `[#SysVariable.CurrentUserContact#]`; an Account column ->
+  `[#SysVariable.CurrentUserAccount#]`; a SysAdminUnit (user) column -> `[#SysVariable.CurrentUser#]`.
+  Those three are the WHOLE set usable as a connection. Do not invent a fourth (`CurrentUserAccountId`,
+  `CurrentAccount`, …), and do not go looking one up: system variables are neither an entity nor an entity
+  schema, so `odata-read` answers 404 and `find-entity-schema` answers empty for them — that is those tools
+  being right, not the variable being absent. Spell them EXACTLY as above, because what a wrong name costs
+  depends on the environment's CrtProcessBuilder and BOTH outcomes are bad: a current build refuses it at the
+  write, naming the valid alternatives; an older one stores it unchecked, and the process then fails to
+  COMPILE later, far from the edit and with nothing pointing back at the connection.
+  One caveat that is data rather than syntax: `CurrentUserAccount` writes EMPTY when the running user's
+  contact has no account — where `CurrentUserContact` raises an error in the same situation, the Account
+  side stays silent. If the Account link comes back unset, check the user's contact before suspecting the
+  macro.
 - UPSERT, keyed on `column`. The columns you list are set or re-set; every column you do NOT list is left
   alone. There is no collection-replace and no implicit clearing — so changing one connection can never
   disturb another, and clearing is only ever explicit via `clearConnections`.
@@ -332,9 +349,23 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   "cleared" and "never bound" are indistinguishable from the read-back alone.
 - READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
   both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
-  can feed it straight back — with two exceptions that refuse on re-apply: a legacy fixed-record connection
-  whose stored macro names a different entity than its column (drop `referenceSchema` and re-apply), and a
-  stored value that is not a `[#...#]` macro at all (check `source`), which comes back as `expression`.
+  can feed it straight back — with FOUR exceptions that refuse on re-apply, none of them values you wrote:
+  they are what a designer, an older build, a hand edit or another environment left behind.
+  (1) a fixed-record connection whose stored macro names a different entity than its column. TWO remedies,
+      and they are not interchangeable: re-send the raw `value` as `expression` to keep the stored macro
+      exactly as it is, or omit `referenceSchema` to re-point the connection at the column's OWN entity —
+      which rewrites the macro and is a repair, not a re-apply. Choose deliberately;
+  (2) a stored value with no macro shape at all (check `source`; it comes back as `expression`) — refused as
+      "not a platform macro", because a bare value cannot be a source. Use `recordId`;
+  (3) a stored value that IS macro-shaped but from a family that cannot hold a record id — `DateValue`,
+      `DateTimeValue`, `TimeValue`, `BooleanValue`. `[#SysSettings...#]` is the one family accepted instead
+      of refused, with a warning (below), precisely so designer-authored processes stay re-appliable;
+  (4) a `[#SysVariable...#]` whose name does not resolve on THIS environment, or resolves to a variable that
+      cannot hold a record id (`CurrentDate`, `CurrentUserRoles`, …). Unlike (1)-(3) this one depends on where
+      you are: a current `CrtProcessBuilder` checks the name against the platform's own vocabulary, an older
+      one does not, so the same read-back re-applies on one environment and is refused on another. It appears
+      when process metadata travelled from a different platform version, or when a connection was hand-edited
+      — a designer cannot produce it. Re-point the connection rather than forcing the stored value through.
   Each entry also carries `registered` — `false` means the value IS written at run time but the connection
   is invisible to every registry-reading feature, the same caveat as the write warning below — and `source`,
   the platform value source. Only BOUND connections appear, so absence does NOT mean the column cannot be
@@ -371,6 +402,62 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   * a malformed `recordId`, a column that references no entity, or a `processParameter` / `sourceElement`
     of an incompatible type (same type group, and for a lookup the same reference entity — a `Guid` or a
     same-entity Lookup parameter is what works).
+- WHEN THE CONNECTION DOES NOT EXIST YET — linking an activity to a record of YOUR OWN entity. This is the
+  common ask ("add a button that creates a task linked to this record"), and it is the ONE case that needs a
+  DATA-MODEL change, which `setConnections` deliberately does not make for you.
+  Do NOT decide whether you are in that case by inspecting the object first — let the OPERATION tell you,
+  because the surfaces disagree with each other. Measured for ONE lookup column on one environment: the
+  physical `Activity` table carried it, `get-entity-schema-properties` listed it, the object designer did not
+  show it, and a process wrote its value successfully. In the other direction, several connection columns
+  existed physically while being ABSENT from the schema. WHICH columns those are is a property of the product
+  and the installed package chain, not of Creatio — so no list belongs here, including a list of "the
+  connections Creatio ships": whatever it named would be wrong on some environment. The refusals ARE the
+  check, and they distinguish three states:
+  * `<host> has no '<column>' column` — the data-model change below is required;
+  * `the column exists on <host> but no connection-registry row registers it and this element's user task
+    declares no parameter for it` — only step 2 is required;
+  * anything else, including success — there was nothing to add.
+  1. add a Lookup column to `Activity` IN THE PACKAGE THAT OWNS THE REFERENCED ENTITY — not in `Custom`, and
+     not as a matter of taste. `Custom` is the LAST package: it depends on the others and nothing depends on it
+     (measured — `Custom` depends on the platform core, the app package and a product package; no edge points
+     back). So a schema in the
+     entity's own package cannot reference a column placed in `Custom` without adding the REVERSE edge, and that
+     inverts an existing one: the save is refused with "Cyclic dependencies detected", naming
+     `EntityColumnValues.Column.<yours>`. Placed in the referenced entity's own package the column needs NO new
+     dependency at all, and the environment's existing custom sections show the same shape — each carries its
+     own replacing `Activity` layer.
+     The call is `update-entity-schema`, which is NON-RESIDENT, so send it through `clio-run`. Args:
+     `environment-name`, `package-name` (the REFERENCED entity's), `schema-name: "Activity"`, and
+     `operations` — an ARRAY of operation objects, one here:
+     `{"action":"add","column-name":"Usr<YourEntity>","type":"Lookup","reference-schema-name":"<your entity>","indexed":true}`.
+     The first four keys are all required — omitting `column-name` is the easy mistake, since the column being
+     added is named nowhere else; `indexed` is optional and worth setting on a column you will filter by.
+     Measured: the column lands and the schema republishes in ~13 s, and reads back as `source: own`.
+     A `Reference schema '<your entity>' was not found` refusal means the TARGET package cannot see the
+     REFERENCED entity — that, not the `Activity` side, is the dependency that blocks, and the placement above
+     is what makes it a non-issue.
+     CAVEAT — measured only where that package ALREADY had a replacing `Activity` layer; with no layer yet
+     this step takes a path nothing has exercised.
+  2. register the column as a connection — ONE bound row in `EntityConnection`, through the
+     `create-data-binding-db` tool (also non-resident, also via `clio-run`). Args: `package-name` (yours),
+     `schema-name: "EntityConnection"`, `binding-name` (e.g. `"EntityConnectionUsr<YourEntity>"`), and
+     `rows`: `[{"values":{"SysEntitySchemaUId":"c449d832-a4cc-4b01-b9d5-8a12c42a9f89","ColumnUId":"<u-id>"}}]`.
+     `SysEntitySchemaUId` is Activity's ROOT schema UId — that literal. The column's `u-id` comes from
+     `get-entity-schema-properties` (resident, call it natively), NOT from
+     `get-entity-schema-column-properties`, whose response carries no `u-id` at all. `rows` is load-bearing:
+     without it the tool creates an EMPTY binding and nothing is registered. The package must be non-foreign.
+  3. `setConnections` on the element. The element may predate the column by any amount — the operation
+     creates the element parameter when the user task declares none.
+  Skipping step 2 is not fatal, and the mechanism is worth knowing rather than guessing: the binder resolves a
+  column through the registry OR through a parameter the user task already DECLARES, so a declared connection
+  binds and writes — with a caveat in the log — even with no registry row. Measured: an `Opportunity`
+  connection written by a process on an environment whose registry carried 17 rows, with a Next Steps
+  component then displaying the activity. What registration buys is availability to EVERY element rather than
+  only to a task that happens to declare that parameter, plus visibility to the surfaces that read the
+  registry. After step 2 the designer may keep showing the old set until its caches refresh; the run-time
+  write is unaffected.
+  Do NOT offer, as a lighter alternative, writing the record's NAME into the activity's title or description.
+  That produces no link — no Activities detail, no Timeline, no pre-filled fields — and the ask was a link.
 - SUCCEEDS WITH A WARNING, two cases. A column that exists but has no connection-registry row IS written at
   run time, yet the connection is ignored by the record page's connections detail, Next Steps, email
   auto-relation rules and quick-add, and is normally absent from the designer's "Connected to" as well —

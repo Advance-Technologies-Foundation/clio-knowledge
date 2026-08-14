@@ -10,6 +10,7 @@ Registration makes an example discoverable. Validation, vetting, and recommendat
 
 | Example | Primary use case | Status |
 |---|---|---|
+| [Creatio custom MCP tool reference](reference-examples/creatio-custom-mcp-tool.yaml) | Custom C# MCP tool publishing and consumption | Published |
 | [Creatio Kafka reference](reference-examples/creatio-kafka.yaml) | Kafka integration with Creatio | Published |
 | [Creatio Google Pub/Sub reference](reference-examples/creatio-google-pubsub.yaml) | Google Pub/Sub integration with Creatio | Published |
 
