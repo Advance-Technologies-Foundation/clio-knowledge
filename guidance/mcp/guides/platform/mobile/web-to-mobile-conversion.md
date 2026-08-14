@@ -334,14 +334,6 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   and the converter's `target.items` by hand is the deviation-from-tool-output this rule forbids, and their
   shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
   tree — it is not a ban on the model-side wiring the OOTB page carries.
-  TODO(ENG-91859): the crt.QuickFilterGroup specifics in this example are a STOPGAP. get-component-info
-  stays the authoritative source for components in general — this is a documented EXCEPTION, present only
-  because the mobile component registry currently mis-documents crt.QuickFilterGroup as the static
-  container for crt.QuickFilter. ENG-91859 corrects the registry
-  (https://academy.creatio.com/api/mcp/latest/MobileComponentRegistry.json and its
-  `docs: ["mobile-docs/quick-filter-group.component.md"]`); once it does, read the model-driven contract
-  from get-component-info and delete this component-specific note. The component-agnostic ELEMENT
-  PLACEMENT rule above stays regardless.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web
   columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web

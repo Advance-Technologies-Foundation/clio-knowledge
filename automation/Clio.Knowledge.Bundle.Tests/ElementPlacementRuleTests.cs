@@ -24,6 +24,16 @@ public sealed class ElementPlacementRuleTests
     // stay converter-free, so there are no reciprocal pointers to guard here; the citation scan below runs
     // over the owner guide alone.
 
+    // STOPGAP / REFACTOR REMINDER (ENG-91859): the crt.QuickFilterGroup-specific clauses below
+    // (QuickFilterGroup_Value, crt.QuickFilterGroupAttributeConverter, the model-side / not-sufficient /
+    // incomplete-guide-output sentences) are a temporary workaround. They exist only because the mobile
+    // component registry currently mis-documents crt.QuickFilterGroup as the static container for
+    // crt.QuickFilter. When ENG-91859 corrects the registry (MobileComponentRegistry.json +
+    // docs/mobile-docs/quick-filter-group.component.md), the model-driven contract should be read from
+    // get-component-info instead, and both these component-specific clauses in the guide AND these pins
+    // should be removed. Kept here — not in the shipped guide text — so the reminder never reaches a
+    // consuming model.
+    //
     // The clauses added by the ENG-94937 review rounds that each carry weight: dropping any one leaves
     // the rule green but wrong, so each is pinned with the reason it protects.
     private static readonly (string Fragment, string Because)[] LoadBearingClauses =

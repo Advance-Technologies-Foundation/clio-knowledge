@@ -196,11 +196,6 @@ Key mobile-specific types:
                          runtime from the QuickFilterGroup_Value attribute (via
                          crt.QuickFilterGroupAttributeConverter), so do NOT author them as static
                          crt.QuickFilter children of its `items`.
-                         TODO(ENG-91859): stopgap — get-component-info stays authoritative for mobile
-                         components; this caveat exists only because the mobile component registry
-                         currently mis-documents crt.QuickFilterGroup as the static container for
-                         crt.QuickFilter. Remove it once ENG-91859 corrects the registry entry
-                         (MobileComponentRegistry.json, docs "mobile-docs/quick-filter-group.component.md").
 
 NOT available in mobile (web-only):
   crt.DataGrid, crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
