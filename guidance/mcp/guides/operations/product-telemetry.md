@@ -19,6 +19,8 @@ One stage vocabulary, plus a workflow field
   `plan_skipped`, `plan_blocked`, `plan_changes_requested`, `plan_approved`, `build_started`,
   `work_item_completed`, `workflow_completed`, `workflow_failed`, `changes_requested`,
   `changes_applied`.
+- `session_usage` is also accepted but is NOT one of these stages: it is a session-scoped consumption
+  measurement, described at the end of this guide. Do not emit it as part of a run.
 - Do NOT invent a per-flow event name such as `migration_plan_approved` or `branding_approved`. clio
   validates `event_name` against a closed allow-list and rejects anything else. A name per flow per
   stage would also encode the flow dimension into the enum: names multiply by flows, every new
@@ -127,11 +129,22 @@ Payload
   (`claude-opus-5`, `gpt-5`), not a display name and not a guessed version. It is the first thing
   asked of any change in the funnel, and it shares the bounded-token shape of `workflow`.
 - `input_tokens`, `output_tokens` and `cached_input_tokens` are optional non-negative counters, and
-  they are RUNNING SESSION TOTALS at the moment the stage was reached, not per-stage deltas. So the
-  series across a session is monotonic: real consumption is the maximum, and the differences show
-  which stage of which flow cost the tokens. Send them when you can actually see them, and omit them
-  when you cannot — a guessed or zeroed count is worse than a missing one, because it is
-  indistinguishable from a session that genuinely spent nothing.
+  they are RUNNING SESSION TOTALS at the moment the stage was reached, not per-stage deltas. Send them
+  only when you can actually SEE them, and omit them otherwise — a guessed or zeroed count is worse
+  than a missing one, because it is indistinguishable from a session that genuinely spent nothing.
+  In practice you usually cannot see them: nothing in this tool surface reports an agent its own
+  consumption, and a measurement across 52 agent-emitted events found not one carrying a counter. So
+  do not treat these fields as your responsibility, and never reconstruct them from an estimate.
+
+Session consumption is a measurement, not a stage
+- `session_usage` reports what a whole host session consumed: `model` plus the three counters, once
+  per session, under `workflow=unattributed`. It marks no progress through a run, belongs to the
+  session rather than to any one flow, and MUST NOT be counted in a funnel.
+- It exists because the host — not the agent — is the only party that can see a true total, and only
+  once the session has ended. Per-STAGE token attribution is therefore not achievable, and this guide
+  no longer claims it: the honest unit is the session.
+- Emitted by the host-side hook where one is installed. An agent SHOULD NOT send `session_usage`
+  itself: it would be reporting a total it cannot observe.
 
 Some hosts record the session start from a hook, before any skill or guidance is read, so that a run
 is countable even if nothing else reports. Such a floor event is attributed to
