@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.19",
+  "libraryVersion": "1.13.21",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -16,8 +16,10 @@
   },
   "requirements": {
     "tools": [
+      "configure-knowledge-feedback-policy",
       "get-guidance",
-      "list-knowledge-examples"
+      "get-knowledge-feedback-policy",
+	  "list-knowledge-examples"
     ],
     "itemIds": [
       "agent-execution",
@@ -67,6 +69,7 @@
       "identity-assertion",
       "indicator-widget",
       "integration-testing",
+      "knowledge-feedback",
       "mobile-page-modification",
       "package-dependencies",
       "page-creation",
@@ -187,6 +190,7 @@
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
       "docs://knowledge/com.creatio.clio/integration-testing",
+      "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
       "docs://knowledge/com.creatio.clio/page-creation",
@@ -912,6 +916,20 @@
       "sourcePath": "guidance/mcp/guides/integration/integration-testing.md",
       "bundlePath": "resources/integration-testing.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "knowledge-feedback",
+      "title": "Knowledge feedback",
+      "description": "Defines task-end reconciliation when observed behavior contradicts guidance, including standing approval, report scope, evidence, privacy, deduplication, and agent-owned GitHub submission.",
+      "topicId": "creatio.knowledge-feedback",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/knowledge-feedback",
+      "legacyUris": [
+        "docs://mcp/guides/knowledge-feedback"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/knowledge-feedback.md",
+      "bundlePath": "resources/knowledge-feedback.md",
+      "mediaType": "text/markdown"
     },
     {
       "itemId": "mobile-page-modification",

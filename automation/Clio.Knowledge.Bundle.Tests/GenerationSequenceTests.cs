@@ -23,11 +23,13 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class GenerationSequenceTests
 {
-    // The highest generation published from a hand-maintained `sequence` field, shipped as 1.13.15. It
-    // is a closed historical fact, not a value to keep current: every derived sequence is far above it,
-    // and the assertion below only proves the switch to derivation moved the sequence forward rather
-    // than backwards for consumers that already accepted it.
-    private const ulong LastAuthoredSequence = 30;
+    // The highest generation published from a hand-maintained `sequence` field — the value the deleted
+    // PublishedGenerationTests recorded, and the one `bundle-source.json` carried before derivation.
+    // It is a closed historical fact, not a value to keep current: every derived sequence is far above
+    // it, and the assertion below only proves the switch to derivation moved the sequence forward
+    // rather than backwards for consumers that already accepted it. It is the FULL floor on purpose —
+    // sequences 31-33 are in consumer hands, so guarding only against 30 would leave a gap.
+    private const ulong LastAuthoredSequence = 33;
 
     [Test]
     [Description("Verifies that the derived sequence increases strictly with the publisher version label, which is what lets a consumer order generations.")]
@@ -68,6 +70,12 @@ public sealed class GenerationSequenceTests
     [TestCase("1.13", 1_013_000_000UL)]
     [TestCase("1", 1_000_000_000UL)]
     [TestCase("2026.07.19.1", 2_026_007_019_001UL)]
+    // The upper boundary of every trailing slot, adjacent to the rejected "1.1000.0": 999 must fill its
+    // own slot exactly and never carry into its neighbour's.
+    [TestCase("1.999.999.999", 1_999_999_999UL)]
+    // Leading zeros alias to the unpadded form — documented in DeriveSequence's remarks, and pinned here
+    // so the aliasing is a decision rather than an accident.
+    [TestCase("2026.7.19.1", 2_026_007_019_001UL)]
     [Description("Verifies that each version component occupies its own fixed decimal slot, so an omitted trailing component reads as zero.")]
     public void DeriveSequence_ShouldPlaceEachComponent_InItsOwnSlot(string libraryVersion, ulong expected)
     {

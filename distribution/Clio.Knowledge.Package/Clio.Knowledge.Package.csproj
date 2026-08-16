@@ -24,6 +24,14 @@
     <KnowledgeRepositoryId>Advance-Technologies-Foundation/clio-knowledge</KnowledgeRepositoryId>
     <GenerateNuspecDependsOn>RejectAccidentalTestSignedPackage;BuildKnowledgeBundle;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
   </PropertyGroup>
+  <!-- Regex::Match yields an EMPTY STRING on no match rather than failing, so a missing libraryVersion,
+       a renamed key or a mis-edited pattern would silently leave Version blank and surface far away as
+       "Package version '' is invalid" from the SDK. Fail at the extraction site instead, naming the
+       source file the number is supposed to come from. -->
+  <Target Name="RequireDerivedPackageVersion" BeforeTargets="Build;Pack;GenerateNuspec">
+    <Error Condition="'$(Version)' == ''"
+           Text="Could not extract libraryVersion from bundle-source.json; verify the key exists and matches the expected pattern." />
+  </Target>
   <ItemGroup>
     <None Include="$(GeneratedBundlePath)"
           Pack="true"
