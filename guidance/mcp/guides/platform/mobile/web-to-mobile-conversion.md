@@ -177,8 +177,8 @@ FLOW
        • the value binding (control, or value for lookups) — type-specific, so it is not prebuilt;
          (the row of a grid → crt.List insert is NOT one of these — see the next paragraph.)
      A grid → crt.List INSERT arrives with its row ALREADY BUILT: mobileValues carries the
-     crt.ListItem under itemLayout, its title bound to the first grid column a row title ACCEPTS (a
-     text column — see the LIST ROW rule) and one body entry per
+     crt.ListItem under itemLayout, its title bound to the FIRST grid column (see the LIST ROW rule)
+     and one body entry per
      remaining column. Paste it; do NOT rebuild the row. The values ALSO still carry the web grid's own
      properties, including ones mobile crt.List does not declare — reconcile those against the crt.List
      and crt.ListItem entries in mobileContracts, which is the authority on what the mobile component
@@ -290,7 +290,7 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
   dropped by the differ.
 - LIST ROW (grid → crt.List + crt.ListItem): the row layout lives on a crt.ListItem placed in the
-  crt.List's itemLayout (title = the first grid column a title ACCEPTS, body = every other column in
+  crt.List's itemLayout (title = the FIRST grid column, body = every other column in
   source order). For an INSERT the converter has
   already built it into mobileValues — paste it rather than rebuilding it. If the mobile list template
   already provides the List/ListItem elements, the row is NOT prebuilt: configure them by
@@ -306,9 +306,11 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   applier runs only in the browser.)
   A title binds only a DIRECT TEXT column of the collection's entity. A lookup column does not work,
   and neither does a ForwardReference projection of that lookup's display column — both leave the Title
-  column empty. When the source grid has no text column at all the converter ships the row WITHOUT a
-  title and says so in that element's elementMap reason; report it and ask the user which value the row
-  should lead with. The row still renders: body entries show as labeled value rows, lookups included.
+  column empty. The converter does NOT select around this: the row leads with the first column
+  whatever its type, so a grid whose first column is a lookup ships a title that renders as an empty
+  Title column, and nothing reports it. Tell the user when you see one, and set the row's leading value
+  in the designer. The row still renders otherwise: body entries show as labeled value rows, lookups
+  included.
 - PAGE-level business rules ARE converted for you in guide.pageBusinessRules: each rule keeps
   its condition and only the actions that survive on mobile. Page rules carry ONLY element
   actions — hide / show / make-editable / read-only / required / optional — and an action

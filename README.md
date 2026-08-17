@@ -93,7 +93,7 @@ without making those aliases part of Clio's compiled source or canonical v1 iden
 ## Multi-source bundle identity
 
 Every v1 bundle declares a reverse-DNS `libraryId`, publisher-facing `libraryVersion`, and positive
-monotonic `sequence`. Every item declares a stable `itemId`, cross-library `topicId`, `role`, and
+monotonic `sequence` derived from that version rather than authored beside it. Every item declares a stable `itemId`, cross-library `topicId`, `role`, and
 exact route. An item may also declare optional `requiredFeatures` stable IDs; Clio must hide that
 item unless every named feature is enabled. The builder derives the expected route from the library
 and item IDs and rejects a mismatch, duplicate item, duplicate route or alias, duplicate feature ID,
