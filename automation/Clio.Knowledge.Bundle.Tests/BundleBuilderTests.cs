@@ -723,7 +723,6 @@ public sealed class BundleBuilderTests
 			  "bundleSchemaVersion": "1.0.0",
 			  "libraryId": "com.example.knowledge",
 			  "libraryVersion": "2026.07.19.1",
-			  "sequence": 1,
 			  "compatibility": {
 			    "clio": { "min": "8.1.0", "max": "{{clioMax}}" },
 			    "mcpToolContract": { "min": "1.0.0", "max": "1.999.999" }

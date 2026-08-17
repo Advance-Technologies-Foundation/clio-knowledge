@@ -53,7 +53,6 @@ jobs:
         run: |
           set -euo pipefail
           library_version="$(jq -er '.libraryVersion' bundle-source.json)"
-          sequence="$(jq -er '.sequence' bundle-source.json)"
           if [ "${{ github.event_name }}" = "push" ]; then
             tag="${GITHUB_REF_NAME}"
           else
@@ -64,8 +63,7 @@ jobs:
             exit 1
           fi
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "sequence=${sequence}" >> "$GITHUB_OUTPUT"
-          echo "Publishing ${library_version} (sequence ${sequence}) from ${GITHUB_SHA}."
+          echo "Publishing ${library_version} from ${GITHUB_SHA}."
 
       # A published release is immutable and a sequence may never be reused with different content,
       # so an existing published release for this tag is a stop, never something to overwrite. A
@@ -86,13 +84,14 @@ jobs:
           release_id="${existing%% *}"
           is_draft="${existing##* }"
           if [ "${is_draft}" != "true" ]; then
-            echo "Release ${TAG} is already published; bump libraryVersion and sequence." >&2
+            echo "Release ${TAG} is already published; bump libraryVersion, which moves the sequence with it." >&2
             exit 1
           fi
           echo "Clearing leftover draft release ${TAG} (id ${release_id}) from a previous failed run."
           gh api --method DELETE "repos/${GITHUB_REPOSITORY}/releases/${release_id}"
 
       - name: Build and sign the bundle
+        id: build
         env:
           SIGNING_PRIVATE_KEY: ${{ secrets.KNOWLEDGE_SIGNING_PRIVATE_KEY }}
         run: |
@@ -114,6 +113,12 @@ jobs:
             "${SIGNING_KEY_ID}" \
             "${GITHUB_REPOSITORY}" \
             "${GITHUB_SHA}"
+          # The sequence is derived from libraryVersion by the builder, so the signed manifest is its
+          # only authority. Reading it back here keeps the release note truthful without restating the
+          # derivation in shell, where it could drift from the builder.
+          sequence="$(unzip -p "artifacts/${ASSET_NAME}" manifest.json | jq -er '.sequence')"
+          echo "sequence=${sequence}" >> "$GITHUB_OUTPUT"
+          echo "Built generation sequence ${sequence}."
 
       - name: Verify the artifact before publication
         run: |
@@ -142,7 +147,7 @@ jobs:
             -f tag_name="${TAG}" \
             -f target_commitish="${GITHUB_SHA}" \
             -f name="clio-knowledge ${TAG}" \
-            -f body="Signed runtime knowledge bundle, sequence ${{ steps.identity.outputs.sequence }}, built from ${GITHUB_SHA}." \
+            -f body="Signed runtime knowledge bundle, sequence ${{ steps.build.outputs.sequence }}, built from ${GITHUB_SHA}." \
             -F draft=true \
             -F prerelease=false \
             --jq '.id')"
