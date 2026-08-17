@@ -9,7 +9,6 @@ public sealed record BundleSource(
     string BundleSchemaVersion,
     string LibraryId,
     string LibraryVersion,
-    ulong Sequence,
     CompatibilityRange Compatibility,
     BundleRequirements Requirements,
     IReadOnlyList<SourceResource> Resources);

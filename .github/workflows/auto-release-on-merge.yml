@@ -5,9 +5,10 @@ name: Auto-release on merge
 # stays invisible to every consumer.
 #
 # This workflow never decides a version and never commits anything. The version is whatever the
-# merged pull request wrote into `bundle-source.json`, and `PublishedGenerationTests` already refuses
-# to pass unless the recorded sequence and content digest match those bytes. A merge that changed no
-# published content therefore has nothing to release, and this run skips instead of failing.
+# merged pull request wrote into `bundle-source.json`, and it is the only number anyone maintains: the
+# monotonic generation `sequence` is derived from it at build time, so edited content can never ship
+# under a sequence a consumer already accepted. A merge that left `libraryVersion` alone has an
+# already published release, so it releases nothing and this run skips instead of failing.
 on:
   push:
     branches:

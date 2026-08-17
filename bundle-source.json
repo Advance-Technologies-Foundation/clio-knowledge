@@ -4,7 +4,6 @@
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
   "libraryVersion": "1.13.22",
-  "sequence": 37,
   "compatibility": {
     "clio": {
       "min": "8.1.0",
