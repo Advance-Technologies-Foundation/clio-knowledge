@@ -76,14 +76,26 @@ Merging to `master` publishes. The **Auto-release on merge** workflow reads `lib
 is already published — in which case the merge ships nothing and the run reports the skip. So the
 publishing decision is made in the pull request, by what it writes into `bundle-source.json`.
 
-Every content change needs both a new `libraryVersion` and a new `sequence` in `bundle-source.json`,
-and the release tag must equal that `libraryVersion`. Reusing a `sequence` with different content
-makes Clio reject the whole library, so it is a breaking mistake rather than a cosmetic one.
-`PublishedGenerationTests` records the published sequence and content digest, and the required check
-fails while the working tree would publish different bytes than they claim — which is what stops an
-unversioned content change from merging at all. The full procedure, the identity rules, the
-signing-key handling, and the consumer-first key-rotation order are in
+Every content change needs a new `libraryVersion` in `bundle-source.json`, and the release tag must
+equal it. That is the only generation number anyone maintains: the monotonic `sequence` a consumer
+orders publications by is derived from `libraryVersion` at build time, and the NuGet transport version
+is read out of the same field, so the three can never disagree. Reusing a `sequence` with different
+content is what makes Clio refuse an update and keep serving the older generation — deriving it is
+what removes that possibility rather than guarding against it.
+
+Forgetting the version bump cannot break a consumer, and no longer silently ships nothing either: the
+**Producer contract suite** compares the published bytes — `bundle-source.json` plus every body it
+declares — against the base branch, and fails while they differ and the derived sequence does not move.
+The comparison is a workflow step rather than a test, because it is a question about history; the test
+project stays runnable on a shallow clone. The full procedure, the identity rules, the signing-key
+handling, and the consumer-first key-rotation order are in
 [distribution/RELEASING.md](distribution/RELEASING.md).
+
+To see the sequence a version derives:
+
+```bash
+dotnet run --project automation/Clio.Knowledge.Bundle -- sequence bundle-source.json
+```
 
 Before opening a release-affecting pull request, run the producer contract suite:
 
