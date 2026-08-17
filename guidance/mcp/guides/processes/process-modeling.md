@@ -129,15 +129,16 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
 - `mode`: only `first` (first record of the sorted selection). The designer's other read modes —
-  collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. Updating an
-  element a human configured in a different mode requires an explicit `"mode": "first"` (the server refuses
-  to silently convert it).
+  collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. An element a
+  human configured in one of those modes CANNOT be converted to first-record through this API at all — an
+  explicit `"mode": "first"` is refused too, because the conversion would leave the element's collection
+  item parameters behind. Remove the element (`removeElement`) and add a new `readData` one instead.
 - `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
   list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
-  supported and is rejected — the designer can pick such columns, the builder cannot; read the whole record
-  (omit `columns`) if you need them. `sort` makes "the first record" deterministic — without it the platform
-  reads an arbitrary first record; single column only (multi-column ordering is designer-only), and the sort
-  column must be top-level too.
+  supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own
+  picker lists top-level columns only); read the whole record (omit `columns`) if you need them. `sort`
+  makes "the first record" deterministic — without it the platform reads an arbitrary first record; single
+  column only (multi-column ordering is designer-only), and the sort column must be top-level too.
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
@@ -153,12 +154,22 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       "elementUpdate": { "readData": { "sort": { "column": "ModifiedOn", "direction": "desc" } } } }
   Partial update: omit `source` to keep the current source object, omit `columns`/`sort` to keep the
   current selection/order, pass `columns: []` to reset to ALL columns. RETARGETING `source` to a different
-  object clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
+  object is REFUSED while any other parameter still maps from the element (the refusal names each
+  dependent — re-map or remove them first, the same block the designer applies); a retarget that proceeds
+  clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
   `setFilter`) in the same operations array. `describe-business-process` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
-  create/modify. One read-back limit on a HUMAN-made element: a linked-object column picked in the designer
-  cannot be expressed here and is omitted from `columns`, so for such an element the described list is
-  narrower than what it really reads — do not feed that describe back as a full replacement.
+  create/modify. Read-back limits on a HUMAN-made element: a linked-object column is omitted from
+  `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
+  runtime's ORDER BY actually ranks first — while any further ACTIVE secondary sort entries are not
+  reported, and a `sort` write replaces the whole stored order. So for such an element the described
+  block is narrower than what it really does — do not feed it back as a full replacement.
+- A HUMAN SAVE quietly changes a builder-made element's plumbing: opening the element card and clicking OK
+  always writes `ReadSomeTopRecords = true` + `NumberOfRecords`, which a builder-made element leaves unset
+  (row count stays 1 — what "first record" means). Under the `FeatureReadDataUserTaskEntityReadOldMode`
+  feature that flag changes how many rows the element reads, and the drift is INVISIBLE to
+  `describe-business-process` (unset parameters are omitted) — a builder-made and a human-touched element
+  look identical there. Nothing to do about it at build time; know it when diagnosing a stand.
 
 == Data source filters (signalStart trigger condition / readData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
