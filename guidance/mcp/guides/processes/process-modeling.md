@@ -35,6 +35,72 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   other data-operation tasks) PLACES an UNCONFIGURED element — its source object, filters, and columns
   cannot be set yet, so the step does nothing useful until a human configures it in the designer. Say so
   when you use it; do not present the result as a working data operation.
+- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
+  TEMPLATES are not supported — say so if the user asks for one). The `email` block configures everything:
+  `{ "name": "SendEmail1", "type": "sendEmail", "email": {
+     "mode": "auto"|"manual", "sender": "<MailboxSyncSettings record id OR a sender email address configured
+     on the environment>", "subject": "plain text", "body": "<html>…</html>", "bodyFormat": "html",
+     "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |
+       {"expression": "[#…#]", "referenceSchema": "Contact"} , … ],
+     "importance": "none"|"normal"|"high"|"low", "ignoreErrors": true|false,
+     "performer": { "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's
+       contact>", "role"?: "<SysAdminUnit role name or record id>", "showPage"?: true|false } } }`.
+  Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
+  a design-time required field: the server saves without one, the designer's card validates `Sender` only
+  while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a
+  Send email element is `BodyTemplateType`, not `Sender`. With no resolvable sender the RUN fails with
+  `Terrasoft.Mail.Sender.EmailException: Sender is not specified` — UNLESS the `SkipSenderValidation` feature
+  flag is on, where the identical setup completes. So configure a `sender` for `auto`, but do NOT report a
+  missing one as a save-time error. Verified against the platform's own acceptance tests —
+  `process_elements_validation.feature` (the element's validation field is `BodyTemplateType`) and
+  `exchange_process_send_error_v2.feature` (RND-T26743: auto mode with `Sender` = a `Guid.Empty` formula
+  SAVES with no validation dialog and fails only at run time; RND-T26744 `@ft_SkipSenderValidation`: the same
+  setup completes) — plus the card's auto-mode-only `senderValidator`.
+  `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
+  A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
+  the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
+  `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
+  Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
+  capture), so say "not through this tool yet", never "Creatio cannot". The HTML body is stored verbatim;
+  `bodyFormat` accepts ONLY `"html"` — any other value is REJECTED at build even when no `body` is sent (the
+  applier validates the format first, so it is a contract guarantee, not a convention). VERIFIED on a stand
+  (2026-08-13, a `CrtProcessBuilder` that supports `sendEmail`): `bodyFormat:"text"` and `bodyFormat:"markdown"`
+  both FAIL the build with `Send email element '<name>': 'bodyFormat' must be 'html' (only HTML custom-message
+  bodies are supported). Got '<value>'.` — and the `markdown` case carried NO `body` at all, which is the half
+  that proves the format is checked on its own rather than only alongside a body. Process macros in the
+  body are the platform's `<img data-value="[#…#]">` image tokens — author them inside the HTML and they pass
+  through unchanged (no symbolic macro authoring yet). `importance` has NO `medium` token: the designer LABELS
+  `normal` as "Medium" (its caption in the element's card — the product's acceptance tests assert `EN=Medium`),
+  so a user's "medium importance" is `normal`. A formula SUBJECT goes through `mappings` against the element's
+  `Subject` parameter instead of `email.subject`. Sending BOTH is accepted and does NOT merge — they write the
+  same parameter, so the LAST write wins, and which one that is depends on the PATH: in a BUILD the
+  descriptor's `mappings` are applied BEFORE the elements' `email` blocks, so `email.subject` overwrites the
+  mapped formula whatever order you wrote them in; in a MODIFY the operations run strictly in the order you
+  list them, so the LATER of `addMapping` / `setElement`(`email.subject`) wins. Deterministic on each path but
+  opposite by default, so send exactly ONE of the two rather than relying on it. This is now a STATED CONTRACT
+  rather than an observed implementation order: the server's `email.subject` member documents both paths, and
+  two tests pin them — a build asserting the mapping phase runs before the email block, and a modify asserting
+  operations dispatch in array order — so reordering either phase is a breaking change that fails the suite
+  instead of silently inverting this guide.
+  Works in `create-business-process`, `modify-business-process` `addElement` (same block) and `setElement`
+  (`elementUpdate.email` — an in-place partial update). Recipients are MATCH-OR-APPEND: an entry whose
+  resolved source and value already match an existing line under the same prefix is a NO-OP (re-application
+  is idempotent now — older builds appended a duplicate), a genuinely new address APPENDS, and there is NO
+  removal path THROUGH THIS TOOL — a wrong recipient cannot be replaced or removed through `modify`.
+  The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
+  recipient's value and saving DELETES the parameter (`saveRecipients` calls `removeRecipient` on an emptied
+  row, which calls `removeParameter`, which removes it from the element). Two exceptions persist as valueless
+  parameters instead — the LAST `To` row (the guard keeps one To row alive), and a parameter something else
+  still references (`canRemoveParameter`). That last-`To` case is why a designer capture can show an unfilled
+  recipient row surviving; it is a special case, NOT evidence that removal is impossible.
+  VERIFIED on a stand (2026-08-13): the SAME `to:[{"value":"…"}]` entry applied three times over `setElement`
+  left exactly ONE recipient parameter, and a different address then appended as a second — so "idempotent" is
+  measured behaviour here, not an inference from the applier's source. The tool's no-removal half is a
+  limitation of the operation set (there is no removeRecipient op), not a platform limit — the designer
+  behaviour above is read from `EmailTemplateUserTaskPropertiesPage.js` in `CrtProcessDesigner` 7.8.0
+  (`saveRecipients` :645, `removeRecipient` :1410, `removeParameter` :1390).
+  `describe-business-process` reads the configuration back as the element's `email` block (`hasBody` flags
+  the body instead of echoing the HTML).
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
@@ -190,9 +256,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
    `execute-esq` (VwProcessLib by caption).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal shapes as a
+   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/email shapes as a
    build; setSignal reconfigures an existing signalStart's record trigger + tracked columns in place,
-   setElement changes element-level fields (useBackgroundMode) in place on any element kind,
+   setElement changes element-level fields in place on any element kind — useBackgroundMode, and a sendEmail
+   element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
+   an identical one is a no-op, and none can be removed);
    setConnections/clearConnections bind and unbind an Activity's "Connected to" links (see below)).
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
@@ -221,7 +289,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask.)
+`readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
+`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
+(mode/sender/recipients/subject/body/options/performer; no email templates), see "What you can build today".)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     Setup fields: DataReadMode, EntitySchemaSelect (object), filters, SortByColumn_N, ColumnSelectMode
