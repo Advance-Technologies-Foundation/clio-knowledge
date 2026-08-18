@@ -264,8 +264,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   values (including `Id`) live inside the `ResultEntity` output, not as element parameters (see the
   readData LIMITATION above; ENG-91844).
 - Change an EXISTING element in place with the `setElement` op's `changeData` field: omit `source` to keep
-  the current target; a supplied `values` array REPLACES the whole assignment set. Retargeting `source`
-  clears the values AND record filter bound to the old entity — re-supply them (and `setFilter`) in the same
+  the current target; a supplied `values` array REPLACES the whole assignment set. Retargeting `source` to a
+  different object REQUIRES `values` for the new entity in the same update — the server REFUSES a values-less
+  retarget, because the cleared element would be silently skipped by the runtime (the same fact that makes
+  `values` mandatory at create) — and clears the old-entity record filter, so issue a `setFilter` in the same
   operations array. `describe-business-process` reads the block back (constants in `value`, any
   parameter/formula source as its raw `[#…#]` in `expression`).
 
