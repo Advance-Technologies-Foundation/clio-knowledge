@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.26",
+  "libraryVersion": "1.13.27",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -934,7 +934,7 @@
     {
       "itemId": "mobile-page-modification",
       "title": "Mobile page modification",
-      "description": "Mobile-specific differences from the base page-modification guidance: plain JSON body format (no AMD), the operation shape rule (a component type outside \"values\" is discarded), crt.Scaffold root element rules, button placement away from the Scaffold action slots, the mobile component registry, naming conventions, template hierarchy, and the supported request catalogue.",
+      "description": "Mobile-specific differences from the base page-modification guidance: plain JSON body format (no AMD), crt.Scaffold root element rules, the mobile component registry, naming conventions, template hierarchy, and the supported request catalogue.",
       "topicId": "creatio.mobile-page-modification",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/mobile-page-modification",
