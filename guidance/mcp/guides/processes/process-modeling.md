@@ -69,9 +69,20 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   (2026-08-13, a `CrtProcessBuilder` that supports `sendEmail`): `bodyFormat:"text"` and `bodyFormat:"markdown"`
   both FAIL the build with `Send email element '<name>': 'bodyFormat' must be 'html' (only HTML custom-message
   bodies are supported). Got '<value>'.` — and the `markdown` case carried NO `body` at all, which is the half
-  that proves the format is checked on its own rather than only alongside a body. Process macros in the
-  body are the platform's `<img data-value="[#…#]">` image tokens — author them inside the HTML and they pass
-  through unchanged (no symbolic macro authoring yet). `importance` has NO `medium` token: the designer LABELS
+  that proves the format is checked on its own rather than only alongside a body. To put PROCESS DATA in the
+  body, author BY NAME with friendly macros the server resolves into the platform's
+  `<img data-value="[#…#]">` image tokens — NO UID needed: `[[param:<Name>]]` (a whole process parameter),
+  `[[element:<ElementName>.<OutputParameter>]]` (a whole element output, e.g. a `readData` element's
+  `ResultEntity`), and `[[element:<ElementName>.<OutputParameter>.<Column>]]` (ONE direct column of that
+  output record). A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
+  parameter (verified: zero specimens of `[Parameter].[EntityColumn]` without an `[Element]`; the designer
+  offers column drill only on the Elements tab), so to email a record's column read it with a data element
+  FIRST and drill THAT output. An unknown parameter/element/column is REJECTED naming what was missing, so
+  DISCOVER exact names with `describe-business-process` (or define the parameter) first — do not guess; column
+  names are matched case-sensitively. A whole raw `<img data-value="[#…#]">` token (or a bare `[#…#]` formula)
+  written by hand passes through unchanged (the escape hatch). NOTE `{{…}}` is NOT clio macro syntax — that is
+  the content designer's editable template fields (`{{#index::Title#}}`, New String/Text/Picture/Color), a
+  different, design-time feature that is not process data. `importance` has NO `medium` token: the designer LABELS
   `normal` as "Medium" (its caption in the element's card — the product's acceptance tests assert `EN=Medium`),
   so a user's "medium importance" is `normal`. A formula SUBJECT goes through `mappings` against the element's
   `Subject` parameter instead of `email.subject`. Sending BOTH is accepted and does NOT merge — they write the
@@ -101,8 +112,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   limitation of the operation set (there is no removeRecipient op), not a platform limit — the designer
   behaviour above is read from `EmailTemplateUserTaskPropertiesPage.js` in `CrtProcessDesigner` 7.8.0
   (`saveRecipients` :645, `removeRecipient` :1410, `removeParameter` :1390).
-  `describe-business-process` reads the configuration back as the element's `email` block (`hasBody` flags
-  the body instead of echoing the HTML).
+  `describe-business-process` reads the configuration back as the element's `email` block: `hasBody` is a
+  presence flag, and `body` echoes the HTML with the process-macro tokens DECODED back into the same
+  `[[param:…]]` / `[[element:…]]` author form — so on a MODIFY you can read the current body and edit it in
+  place. A macro whose UIds no longer resolve to names is left as the raw `<img>` token (best-effort decode).
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
