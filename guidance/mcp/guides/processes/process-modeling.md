@@ -245,7 +245,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       "changeData": {
         "source": "Contact",                                   // REQUIRED at create: the entity to update
         "values": [                                            // REQUIRED at create: one entry per column
-          { "column": "JobTitle", "value": "Manager" },        // constant (typed by the column; lookup = record Id)
+          { "column": "JobTitle", "value": "Manager" },        // plain constant — TEXT columns ONLY (see below)
           { "column": "Notes", "processParameter": "MyText" }, // a process parameter's value
           { "column": "AccountId", "sourceElement": "SignalStart1", "sourceElementParameter": "RecordId" }
         ] },
@@ -254,6 +254,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - Each `values` entry sets `column` (entity COLUMN name) + exactly ONE source: `value` | `processParameter` |
   `sourceElement` + `sourceElementParameter` | `expression` — the mapping source vocabulary. One entry per
   column (duplicates rejected); unknown columns/parameters rejected at build.
+- `value` is a plain constant for TEXT columns ONLY, and non-empty. The platform stores it as the raw string
+  and the runtime reads every non-text column TYPED — a date/lookup/numeric constant would save green and
+  fail at run time, so the server REFUSES it at build. Assign non-text columns via `processParameter`,
+  `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` / `[#Lookup.…#]` —
+  same macro grammar as parameter defaults, see "DEFAULT-value macro rules"). An empty `value` is refused
+  for every type: the runtime silently discards an empty assignment.
 - The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean
   "update every record of the object"). To target ONE record, filter on `Id` against a process parameter
   or a trigger output such as a `signalStart` element's `RecordId`:
@@ -269,8 +275,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   retarget, because the cleared element would be silently skipped by the runtime (the same fact that makes
   `values` mandatory at create); the same refusal covers a values-less update on an element with no stored
   values yet, and a retarget is refused while another parameter still maps from the element. A retarget also
-  clears the old-entity record filter, so issue a `setFilter` in the same operations array. `describe-business-process` reads the block back (constants in `value`, any
-  parameter/formula source as its raw `[#…#]` in `expression`).
+  clears the old-entity record filter, so issue a `setFilter` in the same operations array. `describe-business-process` reads the block back (constants in `value`; a
+  `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies safely in
+  another process; only a formula that is not one resolvable binding comes back as its raw `[#…#]` in
+  `expression`).
 
 == Data source filters (signalStart trigger condition / readData + changeData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
@@ -297,7 +305,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - The right-hand value of a condition is exactly ONE of: `value` (a constant as a string — the server
   types it by the column; for a Date/DateTime/Time column pass ISO-8601, e.g. `2026-05-01` or
   `2026-05-01T12:00:00Z`), `processParameter` (a process parameter by name), `elementParameter`
-  ({ elementName, parameter } — another element's output), `expression` (a raw token), or `macro` (a
+  ({ elementName, parameter } — another element's output; the parameter must EXIST on that element — a
+  `readData` element exposes only `ResultEntity`, so `{ "elementName": "read1", "parameter": "Id" }` is
+  refused, see the readData LIMITATION), `expression` (a raw token), or `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
