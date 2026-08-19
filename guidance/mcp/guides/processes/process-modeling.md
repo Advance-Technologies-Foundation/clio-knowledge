@@ -277,7 +277,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   values yet, and a retarget is refused while another parameter still maps from the element. On ANY target change
   (FIRST configuration included) the stored record filter clears UNLESS its root already targets the incoming
   object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
-  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (constants in `value`; a
+  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
   process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
   `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.
