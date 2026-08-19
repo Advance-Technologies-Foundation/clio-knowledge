@@ -274,8 +274,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   different object REQUIRES `values` for the new entity in the same update — the server REFUSES a values-less
   retarget, because the cleared element would be silently skipped by the runtime (the same fact that makes
   `values` mandatory at create); the same refusal covers a values-less update on an element with no stored
-  values yet, and a retarget is refused while another parameter still maps from the element. A retarget also
-  clears the old-entity record filter, so issue a `setFilter` in the same operations array. `describe-business-process` reads the block back (constants in `value`; a
+  values yet, and a retarget is refused while another parameter still maps from the element. On ANY target change
+  (FIRST configuration included) the stored record filter clears UNLESS its root already targets the incoming
+  object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
+  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies safely in
   another process; only a formula that is not one resolvable binding comes back as its raw `[#…#]` in
   `expression`).
