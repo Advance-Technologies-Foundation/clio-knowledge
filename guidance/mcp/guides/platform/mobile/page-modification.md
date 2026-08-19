@@ -170,6 +170,65 @@ viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools").
 the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
 insert that uses "path" is silently dropped by the differ.
 
+DO NOT put a BUTTON in the Scaffold "actions" or "leading" slots. Those slots are real and the
+platform fills them itself (the template's own Save / Cancel / Close buttons live there), but a
+button YOU insert into them does not appear on the mobile designer canvas — nobody can see or
+edit it there afterwards. Put your buttons in the page body instead: a container's "items", with
+a "layoutConfig". That is what the mobile designer itself emits when a person drags a button onto
+the page. clio's validate-page / update-page / sync-pages warn when they see a crt.Button inserted
+into Scaffold/actions.
+
+  // NOT this — saves, but is invisible in the designer
+  { "operation": "insert", "name": "RunProcessButton",
+    "parentName": "Scaffold", "propertyName": "actions",
+    "values": { "type": "crt.Button", ... } }
+
+  // this — the shape the designer produces
+  { "operation": "insert", "name": "RunProcessButton",
+    "parentName": "AreaProfileContainer", "propertyName": "items", "index": 0,
+    "values": { "type": "crt.Button", ...,
+                "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
+
+Use a container the page or its template actually declares — read the names from get-page. An
+insert whose parentName does not exist is silently dropped by the differ, which fails the same
+invisible way.
+
+─────────────────────────────────────────────────────────────
+OPERATION SHAPE — the component "type" MUST be inside "values"
+─────────────────────────────────────────────────────────────
+The differ builds the element from "values" ALONE and then stamps "name" onto it. Every other key
+on the operation object — "operation", "parentName", "propertyName", "index" and "type" — is
+addressing metadata that never reaches the page. A "type" written next to "values" instead of
+inside it is DISCARDED: the save reports success and the page keeps an element with no type, which
+the runtime cannot render. The request bindings survive, so the button looks correctly wired while
+being invisible — which is why this misreads as a placement problem.
+
+  // WRONG — type is a sibling of values; it is dropped
+  { "operation": "insert", "name": "RunProcessButton",
+    "type": "crt.Button",
+    "parentName": "AreaProfileContainer", "propertyName": "items",
+    "values": { "clicked": { "request": "crt.RunBusinessProcessRequest", ... } } }
+
+  // RIGHT
+  { "operation": "insert", "name": "RunProcessButton",
+    "parentName": "AreaProfileContainer", "propertyName": "items",
+    "values": { "type": "crt.Button",
+                "clicked": { "request": "crt.RunBusinessProcessRequest", ... } } }
+
+This holds for "set" as well as "insert" — "set" is a remove followed by an insert on the same
+payload, so it drops the type identically AND destroys the element that did carry a valid one. An
+"insert" that carries a type at operation level with NO "values" object at all is the same defect:
+"insert" declares no required parameters, so the differ does not refuse it — it persists an
+element with nothing but a name.
+
+clio REJECTS both shapes on validate-page / update-page / sync-pages, and warns when an operation
+declares no type anywhere, declares two different types, or spells the operation in the wrong
+letter case (the differ dispatches case-sensitively, so "Insert" is discarded whole).
+
+Evidence: verified on Creatio 8.2 by writing the wrong shape to a mobile page and re-reading the
+server-merged viewConfig — the element came back with no "type", while a neighbouring template
+button kept its own. clio ships the same rule as a validator (ENG-95429).
+
 ─────────────────────────────────────────────────────────────
 
 ─────────────────────────────────────────────────────────────
