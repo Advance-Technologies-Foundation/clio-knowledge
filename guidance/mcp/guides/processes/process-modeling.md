@@ -142,6 +142,64 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   element auto-carries the task's parameters; map values into them with `mappings`. For a record trigger
   use `signalStart` (next section).
 
+== Naming and codes (N1-N11) ==
+(AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
+pre-checks them — `validate-process-graph` enforces a subset of the R1-R17 connection rules and enforces
+none of these. The reader they are written for is a no-code team opening the result in the Process
+Designer, so a generated process has to read as though a person named it.)
+Field map — each rule below names the descriptor field it governs:
+  process title    -> `caption` (top level)
+  process code     -> `name` (top level)
+  element label    -> `elements[].caption`
+  element code     -> `elements[].name` — also the flow `source`/`target` and the mapping `elementName` handle
+  parameter code   -> `parameters[].name`
+  parameter label  -> `parameters[].caption`
+N1  Process `caption`: SENTENCE CASE — first word capitalized, the rest lower case except proper nouns.
+    "Corporate customer onboarding", NOT "Corporate Customer Onboarding".
+N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrAccount_Onboard`,
+    `UsrOrder_Approve`. The prefix is NOT optional and is NOT applied for you: the server REFUSES an
+    unprefixed code, with `The "Account_Onboard" code of the "<caption>" object must start with the
+    "Usr" prefix` (ENG-94378, observed 2026-08-19 on a 7.8.0 stand). WHICH prefix to apply is owned by
+    `app-modeling` — read its `schema-name-prefix` rule and follow whatever it yields, including the
+    case where it yields none. After the prefix use two `_`-separated PascalCase segments, the object then the action; add a
+    further `_<Qualifier>` segment only when the action genuinely needs one, and add the package name
+    only to break a real collision, never as blanket disambiguation. NO autonumber, NO random suffix, NO
+    GUID fragment — the designer's own `Process_3d0825b` shape is exactly what this rule prevents.
+N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
+    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone.
+N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never leave it to a default.
+    Sentence case, verb first, <= 60 characters, short enough to read inside the diagram box: "Read
+    primary contact", NOT "Read the account's primary contact". This is the only text a no-code reviewer
+    sees on the diagram, so an unset or padded caption is what makes a generated process unreviewable.
+N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO autonumber and NO random
+    suffix — `StartSignal1` and `Task2` are the failure this rule names. Do not pad a code with the
+    element's type name either. Events: a start event is `<Trigger>Signal` or `<Reason>Start`
+    (`AccountAddedSignal`, `ManualStart`); an end event is `End<Reason>` (`EndOnboardingStarted`).
+N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
+    `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
+    code tells about the element (ENG-94378: the baseline run produced exactly that). Read the runtime
+    type back with `describe-business-process` (`type`) and name the element after what it IS.
+N7  The `UserTask` postfix belongs to a user-task SCHEMA you author, NEVER to an element code. At runtime
+    Read data, Perform task, Send email and Modify data are all user tasks, so applying the postfix to
+    element codes would put it on nearly every element. `CallTask` is right, `CallTaskUserTask` is wrong.
+N8  `parameters[].name`: PascalCase plus a `Parameter` suffix — `TargetAccountParameter`,
+    `CallDueDaysParameter`. The `caption` carries NO suffix ("Target account"). EXCLUSION: the parameters
+    the platform auto-creates on an ELEMENT (`Duration`, `ShowInScheduler`, `RemindBefore`,
+    `ResultEntity`, ...) belong to the task, not to you — never rename them, never expect the suffix on
+    them. The rule governs `parameters[]`, the process-level list you author.
+N9  Codes are STABLE: regenerating from the same request must yield the same codes. Never derive a code
+    from the clock, a GUID, a counter, or anything else that varies between runs — stability is what
+    makes two generations diffable and a review repeatable.
+N10 Leave NO scratch behind: a probe or throwaway process built while working a descriptor out is deleted
+    from the environment before you report the task done.
+N11 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows are outside the buildable
+    slice; ENG-91853 is the ticket that extends it). Recorded here so the catalog is complete, the same
+    way the R1-R17 header separates the full catalog from the buildable slice. When they land: label a
+    conditional flow with the decision outcome it represents (`Budget > 10 000`), and label the default
+    flow explicitly rather than leaving it blank.
+    "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
+    different feature with its own section below ("Activity connections") and no naming surface at all.
+
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
 - When the goal is "run a process when a record is saved / added / changed / deleted" (e.g. on a page
   like UsrXxx_FormPage), that is a PROCESS trigger, NOT page logic. Make the process START with a
@@ -308,7 +366,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 == Build recipe (intent -> running process) ==
 1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
-   more end events; plus process parameters and the value mappings between them.
+   more end events; plus process parameters and the value mappings between them — and name them per
+   N1-N11 in "Naming and codes", which is what makes the result reviewable in the Process Designer.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
@@ -384,7 +443,7 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   element's own parameters come from the task. The same shape is
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
   Boolean, Date, Date-time, Time, Guid, and Lookup — other types (composite / entity / file / ...) are not
-  supported yet.
+  supported yet. Name a process parameter per N8 in "Naming and codes".
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.
