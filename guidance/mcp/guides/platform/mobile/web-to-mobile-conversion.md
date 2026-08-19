@@ -196,10 +196,9 @@ FLOW
    - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
      request, or "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
-     the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
-     removed with header buttons says its tools were discarded). WHICH container types are eligible
-     is converter configuration, not a fixed list — read the drop entries rather than assuming one.
-     Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
+     the converter and arrives as a drop entry with reason "empty container". WHICH container types are
+     eligible is converter configuration, not a fixed list — read the drop entries rather than assuming
+     one. Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
      about it — just report it with the other drops.
    For many→one suggestions (primaryWebMerge set, e.g. crt.FolderTree + crt.FolderTreeActions
    -> crt.FolderTreeActions), emit a SINGLE mobile component and merge in the secondary
