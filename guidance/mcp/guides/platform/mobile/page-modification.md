@@ -105,6 +105,67 @@ DO NOT add any AMD marker pairs (SCHEMA_DEPS, SCHEMA_VIEW_CONFIG_DIFF, etc.).
 For append mode, send a fragment containing only the `*Diff` arrays you want to merge; missing keys are skipped.
 
 ─────────────────────────────────────────────────────────────
+OPERATION SHAPE — the component "type" MUST be inside "values"
+─────────────────────────────────────────────────────────────
+The differ builds the element from "values" ALONE and then stamps "name" onto it. Every other key
+on the operation object — "operation", "parentName", "propertyName", "index" and "type" — is
+addressing metadata that is never copied into the element. A "type" written NEXT TO "values"
+instead of inside it is DISCARDED: the save reports success and the page keeps an element with no
+type, which the runtime cannot render. The request bindings survive, so the button looks correctly
+wired while being invisible — which is why this misreads as a placement problem.
+
+  // WRONG — type is a sibling of values; it is dropped
+  { "operation": "insert", "name": "RunProcessButton",
+    "type": "crt.Button",
+    "parentName": "AreaProfileContainer", "propertyName": "items",
+    "values": { "clicked": { "request": "crt.RunBusinessProcessRequest",
+                             "params": { "processName": "UsrProcess_e629820",
+                                         "processRunType": "ForTheSelectedPage" } } } }
+
+  // RIGHT — type inside values
+  { "operation": "insert", "name": "RunProcessButton",
+    "parentName": "AreaProfileContainer", "propertyName": "items",
+    "values": { "type": "crt.Button",
+                "clicked": { "request": "crt.RunBusinessProcessRequest",
+                             "params": { "processName": "UsrProcess_e629820",
+                                         "processRunType": "ForTheSelectedPage" } } } }
+
+processName / processRunType appear in both examples because update-page REJECTS a
+crt.RunBusinessProcessRequest button that omits them (see the run-process-button guide for how to
+resolve the code). validate-page does not reach that check on a mobile body, so a body can pass
+validate-page and still be refused by update-page — do not treat validate-page green as sufficient.
+
+The same defect applies to "set": "set" is a remove followed by an insert on the same payload, so
+it drops the type identically AND destroys the element that did carry a valid one. An "insert"
+carrying a type at operation level with NO "values" object at all is the same defect too — "insert"
+declares no required parameters, so the differ does not refuse it; it persists an element with
+nothing but a name. A flat "set" is the exception: "set" requires "values", so the differ refuses
+the whole operation and nothing is written.
+
+What clio does with each shape — mobile bodies only, on validate-page / update-page / sync-pages:
+
+  REJECTED  a "values" object carrying no usable type, while a type sits on the operation object
+  REJECTED  a flat "insert" — type at operation level, no "values" object at all
+  WARNED    an insert/set whose "values" carries element properties but declares no type anywhere
+  WARNED    two DIFFERENT types (the element takes the copy inside "values")
+  WARNED    an operation spelled in the wrong letter case — the differ dispatches case-sensitively,
+            so "Insert" matches nothing and the operation is discarded whole
+  SILENT    two IDENTICAL types; an empty or absent "values"; "merge" (not checked)
+
+If a REJECTED entry came back from get-page, the page already carries the defect — correct it in
+the body you send back. Not every surface enforces this: the CLI `update-page` verb does not run
+these checks, and sync-pages with validate:false skips them.
+
+Scope: the differ is shared with the web client, so the same shape defect breaks web pages
+identically — but clio enforces this rule on MOBILE bodies only.
+
+Evidence: verified on a live stand for ENG-95429 — writing the wrong shape to a real mobile page
+and re-reading the server-merged viewConfig returned the element with NO "type", while a
+neighbouring template button kept its own. Platform build not pinned; verify against your target
+platform version.
+
+
+─────────────────────────────────────────────────────────────
 VALIDATORS, CONVERTERS, HANDLERS — mobile constraints
 ─────────────────────────────────────────────────────────────
 
@@ -170,13 +231,17 @@ viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools").
 the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
 insert that uses "path" is silently dropped by the differ.
 
-DO NOT put a BUTTON in the Scaffold "actions" or "leading" slots. Those slots are real and the
-platform fills them itself (the template's own Save / Cancel / Close buttons live there), but a
-button YOU insert into them does not appear on the mobile designer canvas — nobody can see or
-edit it there afterwards. Put your buttons in the page body instead: a container's "items", with
-a "layoutConfig". That is what the mobile designer itself emits when a person drags a button onto
-the page. clio's validate-page / update-page / sync-pages warn when they see a crt.Button inserted
-into Scaffold/actions.
+────────────────────────────────────────────────────────
+BUTTON PLACEMENT — not the Scaffold "actions" / "leading" slots
+────────────────────────────────────────────────────────
+DO NOT insert a button into the Scaffold "actions" or "leading" slots. Those slots are real and
+the platform fills them itself — the merged Scaffold of a mobile form page carries the template's
+own Save button in "actions" and Close / Cancel in "leading". The problem is narrower: a button
+YOU insert there does not appear on the mobile designer canvas, so nobody can see or edit it
+afterwards.
+
+Put your buttons in the page body instead: a container's "items", with a "layoutConfig". That is
+what the mobile designer itself emits when a person drags a button onto the page.
 
   // NOT this — saves, but is invisible in the designer
   { "operation": "insert", "name": "RunProcessButton",
@@ -190,46 +255,23 @@ into Scaffold/actions.
                 "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
 
 Use a container the page or its template actually declares — read the names from get-page. An
-insert whose parentName does not exist is silently dropped by the differ, which fails the same
-invisible way.
+insert whose parentName does not resolve is NOT refused: the differ falls back to the root of
+viewConfig and the element lands THERE, outside every container. It is saved, just not where you
+asked, so get-page will show it and the designer will not.
 
-─────────────────────────────────────────────────────────────
-OPERATION SHAPE — the component "type" MUST be inside "values"
-─────────────────────────────────────────────────────────────
-The differ builds the element from "values" ALONE and then stamps "name" onto it. Every other key
-on the operation object — "operation", "parentName", "propertyName", "index" and "type" — is
-addressing metadata that never reaches the page. A "type" written next to "values" instead of
-inside it is DISCARDED: the save reports success and the page keeps an element with no type, which
-the runtime cannot render. The request bindings survive, so the button looks correctly wired while
-being invisible — which is why this misreads as a placement problem.
-
-  // WRONG — type is a sibling of values; it is dropped
-  { "operation": "insert", "name": "RunProcessButton",
-    "type": "crt.Button",
-    "parentName": "AreaProfileContainer", "propertyName": "items",
-    "values": { "clicked": { "request": "crt.RunBusinessProcessRequest", ... } } }
-
-  // RIGHT
-  { "operation": "insert", "name": "RunProcessButton",
-    "parentName": "AreaProfileContainer", "propertyName": "items",
-    "values": { "type": "crt.Button",
-                "clicked": { "request": "crt.RunBusinessProcessRequest", ... } } }
-
-This holds for "set" as well as "insert" — "set" is a remove followed by an insert on the same
-payload, so it drops the type identically AND destroys the element that did carry a valid one. An
-"insert" that carries a type at operation level with NO "values" object at all is the same defect:
-"insert" declares no required parameters, so the differ does not refuse it — it persists an
-element with nothing but a name.
-
-clio REJECTS both shapes on validate-page / update-page / sync-pages, and warns when an operation
-declares no type anywhere, declares two different types, or spells the operation in the wrong
-letter case (the differ dispatches case-sensitively, so "Insert" is discarded whole).
-
-Evidence: verified on Creatio 8.2 by writing the wrong shape to a mobile page and re-reading the
-server-merged viewConfig — the element came back with no "type", while a neighbouring template
-button kept its own. clio ships the same rule as a validator (ENG-95429).
-
-─────────────────────────────────────────────────────────────
+Scope and limits of this rule:
+- It is about an INSERT of your own button. A "merge"/"set" that patches an element the template
+  already owns in that slot is a different case; nothing here applies to it.
+- It governs a body YOU author. A page produced by web-to-mobile conversion follows the elementMap
+  placement of that guide instead.
+- clio warns — never blocks — on exactly one shape: an insert of crt.Button into Scaffold/"actions".
+  "leading" is advice; no validator checks it.
+- Verified for "actions" (ENG-95429, live stand): a button inserted there is absent from the
+  designer canvas. "leading" is an extrapolation from the same observation — the designer omits
+  that entire navigation bar, the template's own buttons included — and was not tested separately.
+- NOT claimed: that either slot fails to render in the Creatio Mobile app. That was never tested.
+- crt.FloatingActionButton on Scaffold "floatAction" (see the component list below) was not tested
+  either way; this rule says nothing about it.
 
 ─────────────────────────────────────────────────────────────
 COMPONENT REGISTRY — MOBILE COMPONENTS ONLY (CRITICAL)
