@@ -25,7 +25,9 @@ Creatio or disk. The guide contains:
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
     merge / insert / drop / relocate-children). Iterate this to build the body; it already
     encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
-    re-derive placement from containerMap + componentSuggestions.
+    re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
+    parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
+    IS AUTHORITATIVE in HARD MOBILE RULES.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED
@@ -98,8 +100,12 @@ separate response AFTER you show a plain-language plan:
   separate explicit go-ahead.
 - Headless / autonomous mode: never self-approve. Produce the plan, ask for confirmation, and END
   THE TURN without writing or registering anything.
-These gate rules are authoritative on their own — the plan, the approval handshake, and the
-conversion report are all described in this guide; do not depend on any external document.
+These gate rules are SELF-SUFFICIENT and mandatory on their own: running the guide and presenting the
+plan write nothing, and every persistence or registration step needs the developer's explicit approval
+first — never do less than this. A higher-level workflow that invoked the conversion MAY layer a richer
+approval process on top (for example a structured, plan-first review with an explicit approve step
+before any write); follow that when it is present. This article does not depend on any such workflow —
+it stays focused on the conversion itself, and the body-building mechanics are the rest of it below.
 
 ─────────────────────────────────────────────────────────────
 FLOW
@@ -125,15 +131,27 @@ FLOW
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
      FeedTabContainer→FeedContainer). REUSE the existing mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
-     also carry a prebuilt mobileValues (for component twins whose rule declares carryProperties,
-     e.g. FolderTree->FolderTreeActions carrying sourceSchemaName/rootSchemaName) — paste it onto
-     the merged element verbatim, deterministically, as part of this same step. This does NOT
-     require a separate confirmation beyond Gate M — it is a mechanical property fill-in, not a new
-     decision. If the mobile list template already provides the List / ListItem elements, configure
+     also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
+     as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
+     not a new decision). A merge carries prebuilt mobileValues in two twin shapes:
+       • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
+         sourceSchemaName/rootSchemaName): only those keys are carried.
+       • same-component twin — the mobile template provides the SAME component the page changed, either
+         under a DIFFERENT name via a components mapping (AttachmentList→AttachmentFileList) or,
+         AUTOMATICALLY, under the SAME name with no mapping needed (Feed→Feed). Its mobileValues carry
+         ONLY what the page CHANGED from the web template — e.g. the attachments detail's recordColumnName
+         (the object-specific link column), or Feed's dataSourceName/entitySchemaName. A property the page
+         left at the web-template default is deliberately OMITTED so the mobile element keeps its OWN
+         default (an unset attachments recordColumnName stays the mobile default RecordId); a template
+         component the page did not change gets no elementMap entry at all. Paste the carried mobileValues
+         as-is — never add the omitted defaults yourself; the mobile element already supplies them.
+     If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
-   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items").
+   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items"). Use the
+     entry's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
+     get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
      When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
      web tab, below); otherwise omit index and append. On a tabbed record page EVERY web tab inserts
@@ -172,8 +190,8 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type, multi-data-source, or
-     "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+   - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
+     request, or "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
      the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
      removed with header buttons says its tools were discarded). WHICH container types are eligible
@@ -290,6 +308,32 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   guide.requestConversions is the advisory summary (convertedRequests / flaggedRequests); dropped
   components appear in elementMap as `drop`. Tell the user which action components were removed.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
+- ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing elementMap entries when building a page from
+  get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info
+  stays authoritative for component SHAPE) — apply each elementMap entry's `parentName` + `propertyName`
+  EXACTLY as the guide gives them, for EVERY component type. The guide already resolved the correct
+  mobile parent for THIS page; that decision is final. NEVER relocate a component to a different parent
+  because of its type, because get-component-info calls some other component its "typical parent" /
+  "container" / lists it under "parent types", or because a component "usually" lives somewhere else.
+  get-component-info describes a component's SHAPE in ISOLATION — it is generic and does NOT override the
+  per-page placement in elementMap; when the two disagree, elementMap wins, always. Overriding the
+  guide's placement (improvising a "better" parent) is the #1 cause of a component that renders but does
+  not work. Worked example (illustration only — the parent is whatever the ENTRY names, never a fixed
+  value): when the guide returns a quick filter with `parentName: HeaderContainer, propertyName: items`,
+  insert it under exactly that parent — and under whatever parent the entry names in any other conversion.
+  Do NOT relocate it into crt.QuickFilterGroup because get-component-info (mobile) calls crt.QuickFilterGroup
+  the container for crt.QuickFilter. Mechanism (per the ENG-94937 investigation on Creatio Mobile — verify
+  against your target platform version): crt.QuickFilterGroup is model-driven, so it builds its chips at
+  RUNTIME from the `QuickFilterGroup_Value` attribute via `crt.QuickFilterGroupAttributeConverter` (driven by
+  the `FilterGroupButton` in HeaderContainer); a crt.QuickFilter inserted as a static child of its `items` is
+  never bound. Placement alone is necessary but NOT sufficient here: a working page ALSO needs that model side
+  (the `QuickFilterGroup_Value` attribute + the converter's `target.items`). Confirm the guide's data-section
+  diffs (guide.modelConfigDiff / guide.viewModelConfigDiff — apply VERBATIM, see DATA SECTIONS) carry that
+  model side. If they do NOT, STOP and report it as an incomplete guide output (a converter gap) — do NOT
+  hand-author modelConfigDiff / viewModelConfigDiff for it: inventing the `QuickFilterGroup_Value` attribute
+  and the converter's `target.items` by hand is the deviation-from-tool-output this rule forbids, and their
+  shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
+  tree — it is not a ban on the model-side wiring the OOTB page carries.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web
   columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web

@@ -1,9 +1,12 @@
 name: Validate pull request
 
 # The required check behind the `master` lock. Merging now publishes, so this is the last point at
-# which a generation mismatch can still be caught cheaply: `PublishedGenerationTests` fails when the
-# working tree would publish different bytes than the recorded sequence and digest claim, which is
-# exactly the mistake that makes Clio reject the whole library.
+# which a malformed generation can still be caught cheaply: the suite fails when `libraryVersion` is
+# not a label the monotonic sequence can be derived from, or when the repository declares a sequence
+# of its own instead of deriving one — the two ways a publication could still reach a consumer with a
+# sequence it cannot order. It also refuses a pull request that edits published content without moving
+# the generation forward — that merge would release nothing at all, because the auto-release run finds
+# the version already published and skips.
 #
 # Deliberately without a `paths:` filter. A required check that does not run on some pull requests
 # never reports a conclusion for them, and those pull requests stay unmergeable forever.
@@ -28,6 +31,10 @@ jobs:
     steps:
       - name: Check out the pull request merge result
         uses: actions/checkout@v4
+        with:
+          # The generation check below compares this merge result against the base branch, so the base
+          # has to be in the checkout. The default single-commit fetch does not contain it.
+          fetch-depth: 0
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -36,3 +43,68 @@ jobs:
 
       - name: Run the producer contract suite
         run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release
+
+      # Everything above is hermetic: it judges this revision alone. This step is the one thing that
+      # cannot be a test, because the question is about history — whether the published bytes moved
+      # since the base branch. It lives here rather than in the suite so `dotnet test` stays runnable
+      # on a shallow clone and in a fork.
+      - name: Require a new libraryVersion when published content changed
+        env:
+          # Through the environment rather than inlined into the script: an expression expanded into
+          # `run` is substituted before the shell ever sees it, so a branch name is not shell-quotable
+          # at that point.
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          base="origin/${BASE_REF}"
+          # Built ahead of time so the runs below print the derived sequence and nothing else. A
+          # `dotnet run` that has to build first writes build output to the same stream.
+          dotnet build automation/Clio.Knowledge.Bundle -c Release --nologo -v quiet
+          # The published byte set is the manifest plus every body it declares — on both sides, so a
+          # resource this pull request adds or drops is compared too. Nothing else in the repository
+          # reaches a consumer, so nothing else has to move the generation.
+          {
+            echo bundle-source.json
+            jq -r '.resources[].sourcePath' bundle-source.json
+            git show "${base}:bundle-source.json" | jq -r '.resources[].sourcePath'
+          } | sort -u > published-paths.txt
+          # Read with a loop rather than `mapfile`, which needs bash 4 and is absent on some
+          # developer machines that run this script by hand.
+          published_paths=()
+          while IFS= read -r published_path; do
+            published_paths+=("${published_path}")
+          done < published-paths.txt
+          # `git diff --quiet` answers 0 for no change and 1 for a change, but anything else is a
+          # failure of the check itself. Reading it as "changed" would turn a broken invocation into a
+          # gate that always demands a version bump, so the third case is separated out explicitly.
+          set +e
+          git diff --quiet "${base}" HEAD -- "${published_paths[@]}"
+          diff_status=$?
+          set -e
+          case "${diff_status}" in
+            0)
+              echo "No published content changed, so this pull request ships nothing and needs no version bump."
+              exit 0
+              ;;
+            1) ;;
+            *)
+              echo "::error::Comparing published content against ${BASE_REF} failed with status ${diff_status}."
+              exit 1
+              ;;
+          esac
+          git show "${base}:bundle-source.json" > base-bundle-source.json
+          # Derived by the builder on both revisions rather than compared as version strings: two
+          # different labels can derive the same sequence (`1.13` and `1.13.0.0` both give 1013000000),
+          # and it is the sequence a consumer orders generations by.
+          base_sequence="$(dotnet run --project automation/Clio.Knowledge.Bundle -c Release --no-build -- sequence base-bundle-source.json)"
+          head_sequence="$(dotnet run --project automation/Clio.Knowledge.Bundle -c Release --no-build -- sequence bundle-source.json)"
+          rm -f published-paths.txt base-bundle-source.json
+          if [ "${head_sequence}" = "${base_sequence}" ]; then
+            echo "::error file=bundle-source.json::This pull request changes published content but derives the same generation sequence ${head_sequence} as ${BASE_REF}. Bump libraryVersion, or the merge will release nothing because that version is already published."
+            exit 1
+          fi
+          if [ "${head_sequence}" -lt "${base_sequence}" ]; then
+            echo "::error file=bundle-source.json::Derived sequence ${head_sequence} is lower than ${BASE_REF}'s ${base_sequence}. A consumer refuses a sequence that moves backwards, so this generation could never be installed."
+            exit 1
+          fi
+          echo "Published content changed and the generation moves ${base_sequence} -> ${head_sequence}."

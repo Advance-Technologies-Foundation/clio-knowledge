@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
@@ -44,6 +45,26 @@ public sealed class BundleBuilder
         "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$",
         RegexOptions.CultureInvariant);
 
+    // One to four dot-separated numeric groups, so both `1.13.9` and a date-style `2026.07.19.1`
+    // qualify. Leading zeros are accepted because a date component is conventionally padded.
+    //
+    // The digit widths are the whole ordering contract, not input hygiene: DeriveSequence gives each
+    // component a fixed decimal slot, so a trailing component of four digits would carry into its
+    // neighbour's slot and the derived sequence would stop rising with the version. Three digits per
+    // trailing slot is therefore the bound, and the leading group is widened to seven so a year fits.
+    //
+    // COUPLED CONSTANTS — change these together or the ordering guarantee breaks silently. The `{1,3}`
+    // bound on the trailing groups is what makes each component strictly less than
+    // SequenceComponentScale, which is what makes the encoding injective. Widening the pattern to
+    // `{1,4}` without raising the scale to 10_000 (or lowering the scale without narrowing the pattern)
+    // lets one component carry into its neighbour's slot: nothing throws, the derived sequences simply
+    // stop rising with the version, and a consumer silently refuses the next generation.
+    private const int SequenceComponentSlots = 4;
+    private const ulong SequenceComponentScale = 1_000;
+    private static readonly Regex LibraryVersionPattern = new(
+        "^[0-9]{1,7}(?:\\.[0-9]{1,3}){0,3}$",
+        RegexOptions.CultureInvariant);
+
     public BundleBuildResult Build(
         string sourceFilePath,
         string outputPath,
@@ -58,7 +79,7 @@ public sealed class BundleBuilder
         string sourceDirectory = Path.GetDirectoryName(Path.GetFullPath(sourceFilePath))
             ?? throw new InvalidOperationException("Bundle source file must have a parent directory.");
         BundleSource source = ReadSource(sourceFilePath);
-        ValidateSource(source);
+        ulong derivedSequence = ValidateSource(source);
         ValidatePublication(publication, signingKey);
 
         List<PreparedResource> resources = [];
@@ -76,7 +97,7 @@ public sealed class BundleBuilder
             }
             resources.Add(resource);
         }
-        KnowledgeBundleManifest manifest = CreateManifest(source, publication, resources);
+        KnowledgeBundleManifest manifest = CreateManifest(source, publication, resources, derivedSequence);
         byte[] manifestBytes = JsonSerializer.SerializeToUtf8Bytes(manifest, BundleJsonContext.Default.KnowledgeBundleManifest);
         byte[] signatureBytes = signingKey.SignData(manifestBytes, HashAlgorithmName.SHA256);
 
@@ -126,6 +147,69 @@ public sealed class BundleBuilder
         }
     }
 
+    /// <summary>
+    /// Derives the monotonic generation sequence a consumer orders publications by from the publisher
+    /// version label.
+    /// </summary>
+    /// <param name="libraryVersion">One to four dot-separated numeric components.</param>
+    /// <returns>A sequence that increases strictly with the version.</returns>
+    /// <remarks>
+    /// The sequence is not authored. A consumer refuses a sequence that moves backwards, and refuses a
+    /// repeated sequence carrying different content by rejecting the library outright — so a
+    /// hand-maintained number is a class of publishing mistake with no upside. Deriving it from the
+    /// version label removes that class: the release tag must equal <c>libraryVersion</c> and a
+    /// published tag can never be reused, so different content cannot reach a consumer under a
+    /// sequence it already accepted.
+    ///
+    /// Each component occupies a fixed decimal slot and omitted trailing components count as zero, so
+    /// <c>1.13</c> precedes <c>1.13.9</c>. Ordering across two different versioning styles is not
+    /// meaningful and is not claimed; what matters is that one library's own labels stay ordered.
+    ///
+    /// A date-style label derives a value above <see cref="int.MaxValue"/> — <c>2026.07.19.1</c> gives
+    /// 2026007019001 — so a consumer must carry the sequence as a 64-bit value. Clio does, and the
+    /// bundle schema places no upper bound on it. The largest derivable sequence is 9999999999999999.
+    ///
+    /// LEADING ZEROS ALIAS, deliberately. A padded component parses to the same number as its unpadded
+    /// form, so <c>2026.07.19.1</c> and <c>2026.7.19.1</c> derive one and the same sequence — exactly as
+    /// <c>1.13</c> and <c>1.13.0.0</c> do. Padding is accepted because a date component is conventionally
+    /// written that way, and aliasing is harmless here: the release tag must equal
+    /// <c>libraryVersion</c> and the release workflow refuses to overwrite a published tag, so two
+    /// aliasing labels cannot both reach a consumer. Two aliasing labels in the SAME repository would
+    /// mean the second publishes nothing rather than shipping different bytes under a reused sequence.
+    /// </remarks>
+    /// <exception cref="InvalidDataException">
+    /// The version is not one to four numeric components within their digit widths, or it derives zero.
+    /// </exception>
+    public static ulong DeriveSequence(string libraryVersion)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(libraryVersion);
+        if (!LibraryVersionPattern.IsMatch(libraryVersion))
+        {
+            throw new InvalidDataException(
+                $"Library version '{libraryVersion}' must be one to four dot-separated numeric components, "
+                + "such as '1.13.9' or '2026.07.19.1', because the generation sequence is derived from it.");
+        }
+        string[] components = libraryVersion.Split('.');
+        ulong sequence = 0;
+        for (int index = 0; index < SequenceComponentSlots; index++)
+        {
+            // The pattern already bounds every component to its slot, so no component can carry into
+            // the next one here.
+            ulong component = index < components.Length
+                ? ulong.Parse(components[index], CultureInfo.InvariantCulture)
+                : 0;
+            sequence = sequence * SequenceComponentScale + component;
+        }
+        // The pattern admits `0` and `0.0.0.0`; a consumer treats a zero sequence as an invalid
+        // generation pointer, so the label cannot be published.
+        if (sequence == 0)
+        {
+            throw new InvalidDataException(
+                $"Library version '{libraryVersion}' derives sequence zero, which is not a publishable generation.");
+        }
+        return sequence;
+    }
+
     public static string CanonicalizeText(string value)
     {
         ArgumentNullException.ThrowIfNull(value);
@@ -139,7 +223,11 @@ public sealed class BundleBuilder
             ?? throw new InvalidDataException("Bundle source JSON is empty.");
     }
 
-    private static void ValidateSource(BundleSource source)
+    /// <summary>
+    /// Validates the source and returns the generation sequence derived from its
+    /// <c>libraryVersion</c>, so the manifest reuses this derivation rather than repeating it.
+    /// </summary>
+    private static ulong ValidateSource(BundleSource source)
     {
         if (!string.Equals(source.Schema, RepositorySchemaPath, StringComparison.Ordinal))
         {
@@ -161,10 +249,10 @@ public sealed class BundleBuilder
         {
             throw new InvalidDataException("Library version must be a non-empty publisher generation label.");
         }
-        if (source.Sequence == 0)
-        {
-            throw new InvalidDataException("Bundle sequence must be greater than zero.");
-        }
+        // Throws on a version the sequence cannot be derived from, so a malformed label is reported
+        // here rather than at manifest time. The value is returned rather than discarded so the
+        // manifest reuses this one derivation instead of implicitly relying on the call being pure.
+        ulong derivedSequence = DeriveSequence(source.LibraryVersion);
         if (source.Compatibility is null
             || source.Compatibility.Clio is null
             || source.Compatibility.McpToolContract is null
@@ -249,6 +337,7 @@ public sealed class BundleBuilder
             }
         }
         EnsureUnique(allRoutes, "canonical or legacy resource route");
+        return derivedSequence;
     }
 
     private static void ValidatePublication(BundlePublicationMetadata publication, ECDsa signingKey)
@@ -451,12 +540,13 @@ public sealed class BundleBuilder
     private static KnowledgeBundleManifest CreateManifest(
         BundleSource source,
         BundlePublicationMetadata publication,
-        IReadOnlyList<PreparedResource> resources) => new(
+        IReadOnlyList<PreparedResource> resources,
+        ulong derivedSequence) => new(
         source.ContractVersion,
         source.BundleSchemaVersion,
         source.LibraryId,
         source.LibraryVersion,
-        source.Sequence,
+        derivedSequence,
         publication.Source,
         source.Compatibility,
         new BundleRequirements(

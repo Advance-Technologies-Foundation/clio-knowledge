@@ -21,18 +21,30 @@ material are never part of it, and `ReleaseArtifactTests` fails the build if any
 
 ## Identity rules
 
-Generation identity is the triple `(libraryId, sequence, bundleDigest)`. `libraryVersion` is a
-publisher label and the release tag; it never substitutes for the monotonic `sequence`.
+Generation identity is the triple `(libraryId, sequence, bundleDigest)`.
 
 - A consumer refuses a lower sequence, so a release can never downgrade active content.
-- A consumer refuses the same sequence carrying a different digest, and rejects the whole library
-  when it sees one. Reusing a sequence is therefore a breaking mistake, not a cosmetic one.
+- A consumer refuses the same sequence carrying a different digest. The refusal keeps the generation
+  it already installed active, so the edit reaches nobody who synced the earlier bytes until the
+  sequence moves forward. That decision is a high-water mark on the consumer's disk and survives a
+  restart, which is why reusing a sequence is a breaking mistake rather than a cosmetic one.
 - The same identity and digest is an idempotent no-op.
 - The release tag must equal `libraryVersion`. Clio records the tag as the installed revision and
   refuses a bundle whose manifest declares a different version, so the pipeline checks this before it
   builds anything.
 
-Every content change therefore needs **both** a new `libraryVersion` and a new `sequence`.
+`sequence` is **derived from `libraryVersion`, never authored**. `bundle-source.json` declares no
+`sequence` field, and the schema rejects one. The builder maps one to four numeric version components
+onto fixed decimal slots — `1.13.9` becomes `1013009000`, a date-style `2026.07.19.1` becomes
+`2026007019001` — so the sequence rises with the version and omitted trailing components read as zero.
+
+That leaves **one** number to maintain: `libraryVersion`. Because the release tag must equal it and a
+published tag is never overwritten, different content cannot reach a consumer under a sequence it
+already accepted. Bumping the version is therefore the whole obligation, and the **Producer contract
+suite** enforces it: a pull request that changes `bundle-source.json` or any body it declares fails
+while the derived sequence matches the base branch, or moves backwards from it. Two labels can derive
+the same sequence — `1.13` and `1.13.0.0` both give 1013000000 — so that check compares derived
+sequences rather than version strings.
 
 ## Who can publish, and from where
 
@@ -44,7 +56,8 @@ suite** check passed. Repository administrators can bypass that protection; noth
 `bundle-source.json`, and starts **Release knowledge bundle** for that version. When a published
 release for the version already exists it skips and says so, so a merge that bumped no version ships
 nothing. It never chooses a version and never commits: the version comes from the merged pull request,
-where `PublishedGenerationTests` already forced it to agree with the content.
+and everything else about the generation — the sequence, the packed transport version — is derived
+from it.
 
 It starts the release through `workflow_dispatch` rather than by pushing the tag itself, because a tag
 pushed with the default `GITHUB_TOKEN` does not start another workflow — the release would silently
@@ -66,9 +79,9 @@ by a person.
 
 ## How to publish
 
-1. In the pull request, bump `libraryVersion` and `sequence` in `bundle-source.json` and record the
-   new sequence and content digest in `PublishedGenerationTests`. The **Producer contract suite**
-   check stays red until the recorded generation and the published bytes agree.
+1. In the pull request, bump `libraryVersion` in `bundle-source.json`. Nothing else carries the
+   generation number: the `sequence` is derived from that label, and the NuGet transport version is
+   read out of the same field at pack time.
 2. Merge the pull request. **Auto-release on merge** starts **Release knowledge bundle** for the new
    `libraryVersion`, and publishing the release creates the tag.
 
