@@ -278,9 +278,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   (FIRST configuration included) the stored record filter clears UNLESS its root already targets the incoming
   object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
   target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (constants in `value`; a
-  `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies safely in
-  another process; only a formula that is not one resolvable binding comes back as its raw `[#…#]` in
-  `expression`).
+  `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
+  process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
+  `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.
+  A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
+  check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
+  comes back as its raw `[#…#]` in `expression`).
 
 == Data source filters (signalStart trigger condition / readData + changeData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
