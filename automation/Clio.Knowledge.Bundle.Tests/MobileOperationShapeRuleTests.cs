@@ -20,7 +20,7 @@ public sealed class MobileOperationShapeRuleTests
     private const string OperationShapeHeading = "OPERATION SHAPE — the component \"type\" MUST be inside \"values\"";
     private const string OperationShapeEnd = "VALIDATORS, CONVERTERS, HANDLERS";
 
-    private const string ButtonPlacementHeading = "BUTTON PLACEMENT — not the Scaffold \"actions\" / \"leading\" slots";
+    private const string ButtonPlacementHeading = "BUTTON PLACEMENT — not the Scaffold \"actions\"/\"leading\" slots";
     private const string ButtonPlacementEnd = "COMPONENT REGISTRY";
 
     private static readonly (string Fragment, string Because)[] OperationShapeClauses =
@@ -85,8 +85,9 @@ public sealed class MobileOperationShapeRuleTests
         string guide = ReadGuide();
 
         // Act
-        int shapeIndex = guide.IndexOf(OperationShapeHeading, StringComparison.Ordinal);
-        int scaffoldIndex = guide.IndexOf("crt.Scaffold — do NOT re-insert", StringComparison.Ordinal);
+        string normalized = Normalize(guide);
+        int shapeIndex = normalized.IndexOf(Normalize(OperationShapeHeading), StringComparison.Ordinal);
+        int scaffoldIndex = normalized.IndexOf("crt.Scaffold — do NOT re-insert", StringComparison.Ordinal);
 
         // Assert
         shapeIndex.Should().BeGreaterThanOrEqualTo(0, because: "the rule must exist under its own heading");
@@ -107,12 +108,15 @@ public sealed class MobileOperationShapeRuleTests
 
     private static string Section(string guide, string heading, string endHeading)
     {
-        int start = guide.IndexOf(heading, StringComparison.Ordinal);
+        // Both sides are normalized so a hand-rewrapped heading reports as a reflowed line through the
+        // clause assertions, not as a missing section.
+        string normalized = Normalize(guide);
+        int start = normalized.IndexOf(Normalize(heading), StringComparison.Ordinal);
         start.Should().BeGreaterThanOrEqualTo(0, because: $"the guide must still carry the '{heading}' section");
-        int end = guide.IndexOf(endHeading, start, StringComparison.Ordinal);
+        int end = normalized.IndexOf(Normalize(endHeading), start, StringComparison.Ordinal);
         end.Should().BeGreaterThan(start,
             because: $"the section must be bounded by '{endHeading}' so clauses are asserted INSIDE it");
-        return guide[start..end];
+        return normalized[start..end];
     }
 
     private static string ReadGuide() =>

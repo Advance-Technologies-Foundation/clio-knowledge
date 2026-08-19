@@ -120,7 +120,8 @@ wired while being invisible — which is why this misreads as a placement proble
     "parentName": "AreaProfileContainer", "propertyName": "items",
     "values": { "clicked": { "request": "crt.RunBusinessProcessRequest",
                              "params": { "processName": "UsrProcess_e629820",
-                                         "processRunType": "ForTheSelectedPage" } } } }
+                                         "processRunType": "ForTheSelectedPage" } },
+                "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
 
   // RIGHT — type inside values
   { "operation": "insert", "name": "RunProcessButton",
@@ -128,7 +129,11 @@ wired while being invisible — which is why this misreads as a placement proble
     "values": { "type": "crt.Button",
                 "clicked": { "request": "crt.RunBusinessProcessRequest",
                              "params": { "processName": "UsrProcess_e629820",
-                                         "processRunType": "ForTheSelectedPage" } } } }
+                                         "processRunType": "ForTheSelectedPage" } },
+                "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
+
+The "layoutConfig" is not optional decoration: a grid container positions its children with it. See
+BUTTON PLACEMENT below for where a button may go and the full shape it needs.
 
 processName / processRunType appear in both examples because update-page REJECTS a
 crt.RunBusinessProcessRequest button that omits them (see the run-process-button guide for how to
@@ -163,7 +168,6 @@ Evidence: verified on a live stand for ENG-95429 — writing the wrong shape to 
 and re-reading the server-merged viewConfig returned the element with NO "type", while a
 neighbouring template button kept its own. Platform build not pinned; verify against your target
 platform version.
-
 
 ─────────────────────────────────────────────────────────────
 VALIDATORS, CONVERTERS, HANDLERS — mobile constraints
@@ -229,11 +233,13 @@ To add content inside the Scaffold:
 viewConfigDiff INSERTS ADDRESS THE SLOT BY propertyName ONLY — never use "path" in a
 viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is
 the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
-insert that uses "path" is silently dropped by the differ.
+insert that uses "path" does not place the element. (The exact mechanism here is unverified and is
+DISTINCT from an unresolved "parentName", which is described under BUTTON PLACEMENT below and does
+persist the element at the root.)
 
-────────────────────────────────────────────────────────
-BUTTON PLACEMENT — not the Scaffold "actions" / "leading" slots
-────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────
+BUTTON PLACEMENT — not the Scaffold "actions"/"leading" slots
+─────────────────────────────────────────────────────────────
 DO NOT insert a button into the Scaffold "actions" or "leading" slots. Those slots are real and
 the platform fills them itself — the merged Scaffold of a mobile form page carries the template's
 own Save button in "actions" and Close / Cancel in "leading". The problem is narrower: a button
