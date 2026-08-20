@@ -170,11 +170,11 @@ neighbouring template button kept its own. Platform build not pinned; verify aga
 platform version.
 
 ─────────────────────────────────────────────────────────────
-AUTHORING CHILDREN — a "merge" does not create child elements
+AUTHORING CHILDREN — a "merge" is not a reliable way to create them
 ─────────────────────────────────────────────────────────────
-A "merge" carries PROPERTY values onto an element that already exists. It is not a way to create
-child elements. Putting them in its "values" — an array, or a lone object, of configs that carry a
-"name" — fails, and how it fails depends on something the body cannot tell you:
+A "merge" carries PROPERTY values onto an element that already exists. Reaching for it to CREATE
+child elements — putting an array, or a lone object, of configs that carry a "name" into its
+"values" — works or silently fails depending on something the body cannot tell you:
 
   Target slot already holds ELEMENTS  -> the differ STRIPS the whole property out of the merge
                                          before copying anything. The save reports success, the
@@ -202,19 +202,29 @@ is two operations, and the merge group runs before inserts, so one body does it:
 
   { "operation": "merge",  "name": "UsrActionsButton", "values": { "menuItems": [] } },
   { "operation": "insert", "name": "UsrExport", "parentName": "UsrActionsButton",
-    "propertyName": "menuItems", "values": { "type": "crt.MenuItem", ... } }
+    "propertyName": "menuItems", "values": { "type": "...", ... } }
+
+Take the child's "type" from get-component-info schema-type: "mobile" — the NO INVENTION rule above
+applies here too, and the registry is the only authority for what a slot may hold.
 
 A merge whose slot value is an EMPTY array is exactly that first step and is never flagged.
 
 SINGLE-ELEMENT SLOTS: THE TWO-STEP IDIOM DOES NOT APPLY. A slot that holds one element rather than
-a collection — Scaffold "floatAction" — is not a container, so an insert cannot address it and a
-merge is the only route. Keep it an object; do not convert it to an array to follow the idiom
-above. This is NOT a safe harbour: the strip rule above still applies, so the merge is discarded
-when the target already holds an element there, and applies only when the slot is null or absent.
-(Do not generalise this to every input that happens to hold an object. A list's "itemLayout" in
-particular must NOT be merged onto the parent crt.List — see the web-to-mobile-conversion guide,
-which records that the client then reports "is not a container for other items" and the whole
-schema fails to build.)
+a collection — Scaffold "floatAction" is the clearest case — is not an array, so there is nothing
+to create as an empty array and nothing to append to. Keep it an object. Which operation works
+depends on what the target already has, and the two cases are opposites:
+
+  Slot already holds an element  -> the MERGE is stripped (same rule as above). Use an "insert":
+                                    it REPLACES the element rather than appending to it.
+  Slot is null or absent         -> the "insert" throws (the property is not a container yet).
+                                    Use a "merge"; it is the only route.
+
+So a single-element slot is NOT a carve-out from the strip rule — it just has a different remedy
+on each side of it.
+
+This is a viewConfigDiff rule. A path-addressed merge in viewModelConfigDiff or modelConfigDiff
+addresses config nodes, not view elements, and legitimately carries named things inline; neither
+this rule nor the strip mechanism applies there.
 
 What clio does — mobile bodies only, on validate-page / update-page / sync-pages:
 
@@ -222,7 +232,9 @@ What clio does — mobile bodies only, on validate-page / update-page / sync-pag
             shipped form template fills the first two (Save in "actions", Close/Cancel in
             "leading") and every non-blank template fills "items" with a MainContainer, so on the
             Scaffold these are the strip case. The same slot names on ANY OTHER element are not
-            affected — the check only applies when the merge targets the Scaffold itself.
+            BLOCKED — they stay advisory. Only the merge target decides that, never the slot name
+            on its own. A LIST page's Scaffold is blocked on the same three slots even though its
+            template is not a form template; that boundary is not separately verified.
   WARNED    the same authoring in any other slot. clio applies viewConfigDiff against an EMPTY
             base and cannot tell the two outcomes apart, so it steers instead of refusing: the
             slot may be one the target legitimately lacks (menuItems on crt.Button or

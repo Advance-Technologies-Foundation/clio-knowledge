@@ -26,7 +26,7 @@ public sealed class MobileOperationShapeRuleTests
     private const string ButtonPlacementHeading = "BUTTON PLACEMENT — not the Scaffold \"actions\"/\"leading\" slots";
     private const string ButtonPlacementEnd = "COMPONENT REGISTRY";
 
-    private const string AuthoringChildrenHeading = "AUTHORING CHILDREN — a \"merge\" does not create child elements";
+    private const string AuthoringChildrenHeading = "AUTHORING CHILDREN — a \"merge\" is not a reliable way to create them";
     private const string AuthoringChildrenEnd = "VALIDATORS, CONVERTERS, HANDLERS";
 
     private static readonly (string Fragment, string Because)[] AuthoringChildrenClauses =
@@ -38,12 +38,14 @@ public sealed class MobileOperationShapeRuleTests
         ("READ FROM THE APPLIER", "the claims that were reasoned rather than observed must stay labelled as such"),
         ("merge group runs before inserts", "the two-step idiom only works because of the ordering; dropping it leaves the remedy unexplained"),
         ("an insert into a property the element does not carry throws", "this is why one insert is not enough, and why the single-element slot has no alternative"),
-        ("NOT a safe harbour", "the single-element exception must not read as exempt from the strip rule"),
+        ("NOT a carve-out from the strip rule", "the single-element case must not read as exempt from the mechanism the section documents"),
+        ("it REPLACES the element", "an insert into a POPULATED single-element slot is the working route; saying only that a merge is the only route leaves that case with no answer"),
         ("EMPTY base", "the reason clio warns rather than refuses outside the Scaffold slots must stay visible"),
         ("two operations", "an insert into a slot the element lacks throws, so the two-step idiom is the only route and must not be dropped"),
         ("EMPTY array is exactly that first step", "the escape hatch must stay stated, or the rule reads as blocking the idiom it recommends"),
-        ("do not convert it to an array", "following the collection idiom on a single-element slot such as floatAction corrupts the shape"),
-        ("is not a container for other items", "itemLayout on a crt.List is the counter-example the sibling conversion guide owns; dropping the pointer re-opens a contradiction between the two guides"),
+        ("Keep it an object", "following the collection idiom on a single-element slot such as floatAction would corrupt the shape"),
+        ("they stay advisory", "outside the Scaffold the rule warns rather than blocking, and 'not affected' would read as silent"),
+        ("viewConfigDiff rule", "the path diffs carry named config nodes inline by design, and over-applying the rule there would refuse clio's own converter output"),
         ("ANY OTHER element are not", "the blocking set is consulted only for a merge on the Scaffold; readers must not generalise it to every items slot"),
         ("BlankMobilePageTemplate", "the false positive the split accepts must be named, not discovered by whoever hits it"),
         ("BECOMES the element", "insert/set are out of scope and children declared in their values ARE created")
