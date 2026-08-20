@@ -43,7 +43,8 @@ admin permission) — it is NOT an error. Only productName and licenseInfo stric
    If CanManageSolution is not granted or the operation is absent, these are skipped silently
    (and may instead be backfilled from cliogate in step 3).
 
-3) cliogate ONLY — GET /rest/CreatioApiGateway/GetSysInfo (cliogate >= 2.0.0.32 installed):
+3) cliogate ONLY — GET /rest/CreatioApiGateway/GetSysInfo (normally supplied by cliogate
+   >= 2.0.0.32):
    - productName           Creatio product/edition name (e.g. "studio"). NO core web service
                            exposes this — it is the one field that always needs cliogate.
    - licenseInfo           License metadata object: CustomerId, IsDemoMode (and related fields).
@@ -51,6 +52,9 @@ admin permission) — it is NOT an error. Only productName and licenseInfo stric
                            sensitive; do not echo or paste it outside this environment context.
    cliogate also BACKFILLS dbEngineType / frameworkKind / frameworkDescription when step 2 did
    not provide them (older Creatio without GetSystemEnvironmentInfo), keeping the shape consistent.
+   clio probes GetSysInfo as the authoritative capability check. Installed-package metadata is
+   consulted only after that probe fails, so a stale inactive cliogate alias cannot veto a working
+   endpoint.
 
 WHEN TO USE
 - Verify the platform version (coreVersion) before planning page/component work — pair with the
@@ -60,8 +64,24 @@ WHEN TO USE
 - Confirm productName / license status before applying edition-specific features.
 
 INTERPRETING A SPARSE REPORT
-- Missing dbEngineType/framework AND missing productName/licenseInfo  -> cliogate absent and the
-  caller lacks CanManageSolution (or the env is old): grant CanManageSolution, or install cliogate
-  (install-gate) for the full report.
-- Present db/framework but missing productName/licenseInfo            -> cliogate not installed;
-  everything except product and license is still reported.
+- Do NOT infer cliogate installation state from missing fields alone. A sparse report can also mean
+  GetSysInfo was denied, unavailable, or returned no usable data.
+- When get-info emits a warning with the sparse report, follow its reason:
+  - "not installed" -> install cliogate 2.0.0.32+ only if product/license fields are required.
+  - "lowest detected cliogate alias version <version> is below required 2.0.0.32" -> update that
+    alias when it is used by the target runtime; otherwise verify GetSysInfo access before changing
+    a working package.
+  - "<version> is installed, but GetSysInfo returned no data" -> do NOT reinstall merely because
+    the fields are missing; verify CanManageSolution and GetSysInfo access for the caller.
+  - installation/version could not be determined -> inspect the safe --debug classification and
+    run list-packages; do not claim cliogate is absent without evidence.
+- No warning with missing productName/licenseInfo -> GetSysInfo returned a usable but partial
+  SysInfo object. Missing optional fields alone do not imply an installation or compatibility
+  failure; do not reinstall cliogate without another failure signal.
+
+EVIDENCE AND VERSION BOUNDARY
+- GitHub issue Advance-Technologies-Foundation/clio#1138 captured a real false-positive warning:
+  package listing reported cliogate 2.0.0.45 and gate-dependent commands worked, while get-info
+  claimed cliogate 2.0.0.32+ was absent or incompatible.
+- The capability-first warning rules apply to clio builds containing the #1138 fix. Older clio
+  8.1 builds can emit the former generic warning; verify with list-packages before acting on it.
