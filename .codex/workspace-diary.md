@@ -122,3 +122,10 @@ Decision: Limit the no-spec/Jest rule to the current default Angular 19 template
 Discovery: A correct leaf rule can still mislead when its applicability boundary and discovery metadata lag behind it; content tests now pin all three surfaces.
 Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
 Impact: agents reach the guide for testing requests without applying Jest-specific advice to supported Karma scaffolds.
+
+## 2026-08-21 00:31 – GH #78 review: cover pre-fix generated projects
+Context: Corrected-base review found that the published library supports older Clio 8.1 releases whose Jest scaffolds still contain the duplicate Angular test-environment initializer.
+Decision: Select testing advice from the generated `angular.json` builder, define builder-owned initialization for `@angular-builders/jest:run`, and give existing pre-fix projects an explicit remove-or-regenerate path.
+Discovery: Creatio template version alone does not identify whether a generated Jest setup contains the Clio-side repair; the emitted configuration is the durable applicability boundary.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: current and previously generated projects receive sound runner-specific guidance across the published Clio 8.1 compatibility range.
