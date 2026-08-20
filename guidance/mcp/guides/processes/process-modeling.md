@@ -199,13 +199,14 @@ N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never l
     Sentence case, verb first, <= 60 characters, short enough to read inside the diagram box: "Read
     primary contact", NOT "Read the account's primary contact". This is the only text a no-code reviewer
     sees on the diagram, so an unset or padded caption is what makes a generated process unreviewable.
-    EVENTS TOO, and that is verified: `caption` is a SHARED element field (the create-business-process
-    contract declares it on the element object next to `name`/`type` and type-gates only `readData?` and
-    `email?`), and a `startEvent` + `endEvent` built WITH captions saved and read back verbatim through
-    `describe-business-process` (ENG-94378, probed 2026-08-20 on a 7.8.0 stand). OMIT one and the
-    platform falls back to THE ELEMENT CODE as the caption — the same probe built without captions read
-    back `"caption": "ProbeStart"` on the start event — so an unset caption is not a friendly default: it
-    puts a raw code on the diagram, which is how `Start1` reaches a no-code reviewer's screen.
+    EVERY element type accepts one — verified across the whole buildable slice, events included:
+    `startEvent`, `signalStart`, `endEvent`, `userTask` (incl. `performTask` / `readData`) and `sendEmail`
+    were each built WITH a caption and each read the caption back verbatim through
+    `describe-business-process` (ENG-94378, probed 2026-08-20 on a 7.8.0 stand). So there is no element
+    on which this rule is dead text. OMIT a caption and the platform falls back to THE ELEMENT CODE as the
+    caption — the same graph built without captions read back `"caption": "ProbeStart"` on its start event
+    — so an unset caption is not a friendly default: it puts a raw code on the diagram, which is exactly
+    how `Start1` reaches a no-code reviewer's screen.
 N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO autonumber and NO random
     suffix — `StartSignal1` and `Task2` are the failure this rule names. Do not pad a code with the
     element's type name either. Events: a start event is `<Trigger>Signal` or `<Reason>Start`

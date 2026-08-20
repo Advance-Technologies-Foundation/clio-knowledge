@@ -36,9 +36,10 @@ namespace Clio.Knowledge.Bundle.Tests;
 ///    process schemas on that stand 90 carry exactly one '_' and ZERO carry two or more. The house shape
 ///    is the reason for the preference; a platform refusal is not, and N2 no longer implies one.
 ///
-/// Two review outcomes also shape what is pinned here. N4 covers events on probed ground: a startEvent and
-/// an endEvent built WITH captions saved and read back verbatim, and the same graph built WITHOUT them read
-/// back the element CODE as each caption — so omitting one puts a raw Start1 on the diagram rather than
+/// Two review outcomes also shape what is pinned here. N4 covers every element on probed ground: all five
+/// buildable types — startEvent, signalStart, endEvent, userTask (performTask / readData) and sendEmail —
+/// were built WITH a caption and read it back verbatim, and the same graph built WITHOUT captions read back
+/// the element CODE as each one. Omitting a caption therefore puts a raw Start1 on the diagram rather than
 /// producing a friendly default, which is why the omission consequence is pinned and not just the MUST.
 /// And the scratch-cleanup rule that first shipped as N10 governs no name or code; it moved to core-rules,
 /// which is why this suite asserts it lives there and NOT in the naming section.
