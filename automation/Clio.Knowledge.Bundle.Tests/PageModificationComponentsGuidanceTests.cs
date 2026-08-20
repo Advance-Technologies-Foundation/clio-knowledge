@@ -31,6 +31,8 @@ public sealed class PageModificationComponentsGuidanceTests
                 because: "the prescriptive payload rule needs an immutable Creatio source evidence boundary");
         guidance.Should().NotContain("request.$initialEvent.detail",
             because: "Freedom UI deprecates direct handler access to the raw initial event");
+        guidance.Should().NotContain("if (!recordId)",
+            because: "the source evidence does not justify a generic missing-payload guard or dispatch workaround");
     }
 
     [Test]

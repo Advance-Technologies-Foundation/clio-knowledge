@@ -80,17 +80,13 @@ If `cardOpened` emits the record ID as a string, bind `CustomEvent.detail` like 
 }
 ```
 
-Read the named parameter in the matching handler and fail closed when the component emits no usable
-value:
+Read the named parameter in the matching handler:
 
 ```js
 {
     request: "usr.OpenOpportunityFromKanbanRequest",
     handler: async (request) => {
         const recordId = request.recordId;
-        if (!recordId) {
-            return request.next?.handle(request);
-        }
         // Perform the side effect with recordId.
         return request.next?.handle(request);
     }
