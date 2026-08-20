@@ -18,24 +18,32 @@ public sealed class MobileOperationShapeRuleTests
     private const string Guide = "guidance/mcp/guides/platform/mobile/page-modification.md";
 
     private const string OperationShapeHeading = "OPERATION SHAPE — the component \"type\" MUST be inside \"values\"";
-    private const string OperationShapeEnd = "VALIDATORS, CONVERTERS, HANDLERS";
+    // Ends at the section that follows it in the guide, NOT at VALIDATORS: AUTHORING CHILDREN was
+    // inserted between the two, and using the later marker silently widened this section to include it,
+    // which let four of the pins below match text they do not own (raised in review of clio-knowledge#74).
+    private const string OperationShapeEnd = "AUTHORING CHILDREN";
 
     private const string ButtonPlacementHeading = "BUTTON PLACEMENT — not the Scaffold \"actions\"/\"leading\" slots";
     private const string ButtonPlacementEnd = "COMPONENT REGISTRY";
 
-    private const string AuthoringChildrenHeading = "AUTHORING CHILDREN — one \"insert\" per child, never inside a \"merge\"";
+    private const string AuthoringChildrenHeading = "AUTHORING CHILDREN — a \"merge\" does not create child elements";
     private const string AuthoringChildrenEnd = "VALIDATORS, CONVERTERS, HANDLERS";
 
     private static readonly (string Fragment, string Because)[] AuthoringChildrenClauses =
     [
         ("STRIPS the whole property", "the mechanism — the property is removed before anything is copied — is what makes the rule true"),
         ("Target slot absent or empty", "the other outcome is NOT a failure, and hiding it would make the rule read as universal when it is not"),
-        ("ENG-95429", "AGENTS.md requires an evidence pointer for a prescriptive runtime claim"),
+        ("verified on a live stand for ENG-95429", "AGENTS.md requires an evidence pointer, and the bare ticket id also appears in the prose above, so only the full sentence pins it"),
         ("target platform version", "AGENTS.md requires a version boundary for a prescriptive runtime claim"),
+        ("READ FROM THE APPLIER", "the claims that were reasoned rather than observed must stay labelled as such"),
+        ("merge group runs before inserts", "the two-step idiom only works because of the ordering; dropping it leaves the remedy unexplained"),
+        ("an insert into a property the element does not carry throws", "this is why one insert is not enough, and why the single-element slot has no alternative"),
+        ("NOT a safe harbour", "the single-element exception must not read as exempt from the strip rule"),
         ("EMPTY base", "the reason clio warns rather than refuses outside the Scaffold slots must stay visible"),
         ("two operations", "an insert into a slot the element lacks throws, so the two-step idiom is the only route and must not be dropped"),
         ("EMPTY array is exactly that first step", "the escape hatch must stay stated, or the rule reads as blocking the idiom it recommends"),
         ("do not convert it to an array", "following the collection idiom on a single-element slot such as floatAction corrupts the shape"),
+        ("is not a container for other items", "itemLayout on a crt.List is the counter-example the sibling conversion guide owns; dropping the pointer re-opens a contradiction between the two guides"),
         ("ANY OTHER element are not", "the blocking set is consulted only for a merge on the Scaffold; readers must not generalise it to every items slot"),
         ("BlankMobilePageTemplate", "the false positive the split accepts must be named, not discovered by whoever hits it"),
         ("BECOMES the element", "insert/set are out of scope and children declared in their values ARE created")
@@ -126,6 +134,8 @@ public sealed class MobileOperationShapeRuleTests
             because: "an insert-scoped rule must say what a merge does, or a reader treats merge as the way around it");
         section.Should().Contain("AUTHORING CHILDREN",
             because: "the pointer to the owning rule is what keeps the two sections from contradicting each other");
+        section.Should().NotContain(Normalize("A \"merge\"/\"set\" that patches an element the template already owns in that slot is a different case; nothing here applies to it."),
+            because: "that exact carve-out is the hole this change closed, and re-adding it alongside the pointer would restore it");
     }
 
     [Test]
