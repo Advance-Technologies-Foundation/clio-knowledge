@@ -340,13 +340,18 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
-- Do NOT run `compile-creatio` to "make a process runnable". A business process is INTERPRETED; it runs
-  without any compilation. A process record showing `NeedInstall = true` is its NORMAL pre-publish state,
-  NOT a compile trigger — that column is a raw platform field you would only see by reading the process
-  table directly (`odata-read`/`execute-esq`), and it must not drive a compile. Do not read the raw
-  process record to check readiness — use `describe-business-process`. The ONLY process that needs
-  compilation is one carrying a `scriptTask` (custom C#, see the element list); everything else — user
-  tasks, add/read/modify data, formulas, connections, signals — is applied and runs with no compile.
+- Do NOT run `compile-creatio` to "make a process runnable", and do NOT read a raw system record
+  (`odata-read`/`execute-esq`) to decide readiness — read status back with `describe-business-process`.
+  Inferring "needs a compile" from a raw column NAME is the trap here: e.g. `NeedInstall` is a package
+  DB-install marker (it lives on bound data / SQL-script records, NOT on a process), it means "finish
+  installing this data into the DB", never "compile", and the same caution applies to any `NeedXxx` /
+  `IsXxx` column reached through a raw read.
+  WITHIN A PROCESS exactly two things pull a compile in, and both are C# YOU authored: a `scriptTask`,
+  and a `userTask` carrying an after-activity-save script. Everything else — add/read/modify data,
+  formulas, connections, signals, and USING an already-compiled user task — is applied and runs with no
+  compile. This bullet scopes compilation to the PROCESS; other configuration schemas (source code,
+  business objects, DCM, value lists, and a CUSTOM user-task schema — see the user-task note below) carry
+  their own compile obligations and are NOT covered here.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
@@ -384,6 +389,8 @@ System actions (palette group "System actions"):
 - `deleteDataUserTask` Delete data — delete matched records.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
+  - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
+    IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
 - `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance over a collection.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
@@ -395,6 +402,11 @@ Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/m
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate.
 Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
+- Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
+  its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
+  exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
+  it. Merely REFERENCING an already-compiled user task by `userTaskName` needs nothing. (This is a
+  user-task-schema obligation, separate from the in-process compile note under `scriptTask` above.)
 
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup),
