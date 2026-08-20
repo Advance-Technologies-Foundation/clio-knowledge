@@ -141,7 +141,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 {
   "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "Custom",
   "elements": [
-    { "name": "ManualStart",  "type": "startEvent",  "caption": "Start onboarding" },
+    { "name": "ManualStart",  "type": "startEvent",  "caption": "Onboarding requested" },
     { "name": "NotifyOwner",  "type": "performTask", "caption": "Notify the account owner" },
     { "name": "EndOnboarded", "type": "endEvent",    "caption": "Onboarding handed off" }
   ],
@@ -196,9 +196,17 @@ N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrA
 N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
     (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone.
 N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never leave it to a default.
-    Sentence case, verb first, <= 60 characters, short enough to read inside the diagram box: "Read
-    primary contact", NOT "Read the account's primary contact". This is the only text a no-code reviewer
-    sees on the diagram, so an unset or padded caption is what makes a generated process unreviewable.
+    Sentence case, <= 60 characters, short enough to read inside the diagram box. The SHAPE follows what
+    the element IS:
+    * ACTIVITIES (`userTask` / `performTask` / `readData`, `sendEmail`) — VERB FIRST, the action the
+      process performs: "Read primary contact", NOT "Read the account's primary contact" (padded) and
+      NOT "Primary contact reading" (nominalized).
+    * EVENTS (`startEvent`, `signalStart`, `endEvent`) — the TRIGGER or the OUTCOME, a noun phrase:
+      "Record is modified", "Order amount or status changed", "Onboarding handed off". Verb-first
+      MISDESCRIBES an event: "Modify record" reads as an action the process performs rather than the
+      condition that starts it, and a Terminate end performs no action at all.
+    This is the only text a no-code reviewer sees on the diagram, so an unset or padded caption is what
+    makes a generated process unreviewable.
     EVERY element type accepts one — verified across the whole buildable slice, events included:
     `startEvent`, `signalStart`, `endEvent`, `userTask` (incl. `performTask` / `readData`) and `sendEmail`
     were each built WITH a caption and each read the caption back verbatim through

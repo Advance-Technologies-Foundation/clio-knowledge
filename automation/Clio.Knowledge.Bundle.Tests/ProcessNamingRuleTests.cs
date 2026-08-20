@@ -125,7 +125,29 @@ public sealed class ProcessNamingRuleTests
     /// it as <c>source</c>/<c>target</c>, an operation as <c>elementName</c> — so scanning <c>name</c>
     /// alone would pass an example whose flows still point at a retired code.
     /// </summary>
-    private const string CodeValuedKeys = @"""(?:name|elementName|source|target|processParameter)"":\s*""([^""]+)""";
+    private const string ElementHandleKeys = @"""(?:name|elementName|source|target)"":\s*""([^""]+)""";
+
+    /// <summary>
+    /// Parameter codes need their own scan because N8 asks for something the element-handle predicate
+    /// cannot see: <c>AccountName</c> is PascalCase with no trailing digit, so it passes as a handle while
+    /// breaking N8's suffix. A parameter code is also the field a model is likeliest to invent from the
+    /// request text rather than copy, which makes it the rule most exposed to a bad example.
+    /// </summary>
+    private const string ParameterCodeKeys = @"""processParameter"":\s*""([^""]+)""";
+
+    /// <summary>
+    /// The verbs the guide's activity captions open with. A curated list is the only way to check
+    /// "verb first" statically; it doubles as the check that an EVENT caption is NOT verb-led. A new
+    /// example needing a verb outside this list should add it here — the failure says so.
+    /// </summary>
+    private static readonly string[] ActivityVerbs =
+    [
+        "Add", "Approve", "Ask", "Assign", "Call", "Check", "Compute", "Create", "Delete", "Modify",
+        "Notify", "Open", "Publish", "Read", "Send", "Set", "Show", "Start", "Update", "Wait"
+    ];
+
+    private const string ActivityTypes = "userTask|sendEmail|readData|performTask";
+    private const string EventTypes = "startEvent|signalStart|endEvent";
 
     [Test]
     [Description("The Naming and codes section exists in the process-modeling guide and still carries every rule.")]
@@ -201,7 +223,7 @@ public sealed class ProcessNamingRuleTests
     {
         string guide = ReadGuide(OwnerGuide);
 
-        string[] offenders = Regex.Matches(guide, CodeValuedKeys)
+        string[] offenders = Regex.Matches(guide, ElementHandleKeys)
             .Select(match => match.Groups[1].Value)
             .Where(code => Regex.IsMatch(code, @"\d$") || char.IsLower(code[0]))
             .Distinct()
@@ -217,6 +239,55 @@ public sealed class ProcessNamingRuleTests
 
         resurrected.Should().BeEmpty(
             because: "these are the pre-ENG-94378 example codes; each one breaks a rule stated 40 lines below it");
+    }
+
+    [Test]
+    [Description("Every parameter code in a guide example carries N8's Parameter suffix.")]
+    public void GuideExamples_ShouldSuffixEveryParameterCode()
+    {
+        string guide = ReadGuide(OwnerGuide);
+
+        string[] parameterCodes = Regex.Matches(guide, ParameterCodeKeys)
+            .Select(match => match.Groups[1].Value)
+            .Concat(ParameterBlocks(guide)
+                .SelectMany(block => Regex.Matches(block, @"""name"":\s*""([^""]+)""")
+                    .Select(match => match.Groups[1].Value)))
+            .Where(code => !code.StartsWith('<'))
+            .Distinct()
+            .ToArray();
+
+        parameterCodes.Should().NotBeEmpty(
+            because: "a scan that matches nothing would pass this test while guarding nothing");
+
+        parameterCodes.Should().OnlyContain(code => code.EndsWith("Parameter", StringComparison.Ordinal),
+            because: "N8 is the rule an example is likeliest to undercut: a code like AccountName is PascalCase "
+                + "with no trailing digit, so the N5 predicate passes it, and MyText only ever failed because it "
+                + "was blocklisted by name rather than because the suffix was checked");
+    }
+
+    [Test]
+    [Description("Activity captions in the examples open with a verb; event captions name a trigger or an outcome instead.")]
+    public void GuideExamples_ShouldShapeCaptionsByElementKind()
+    {
+        string guide = ReadGuide(OwnerGuide);
+
+        string[] activitiesNotVerbFirst = CaptionsOf(guide, ActivityTypes)
+            .Where(caption => !ActivityVerbs.Contains(FirstWord(caption), StringComparer.Ordinal))
+            .ToArray();
+
+        activitiesNotVerbFirst.Should().BeEmpty(
+            because: "N4 asks an activity caption to name the action the process performs. If the verb is right and "
+                + "simply missing from ActivityVerbs, add it there — the list is the static stand-in for 'is a verb'");
+
+        string[] eventsVerbFirst = CaptionsOf(guide, EventTypes)
+            .Where(caption => ActivityVerbs.Contains(FirstWord(caption), StringComparer.Ordinal))
+            .ToArray();
+
+        eventsVerbFirst.Should().BeEmpty(
+            because: "N4 scopes verb-first to activities: an imperative on an event misdescribes it — 'Modify record' "
+                + "reads as an action the process performs rather than the condition that starts it, and a Terminate "
+                + "end performs no action at all. With the clause scoped, the examples are the only statement of the "
+                + "event shape, so both halves need pinning");
     }
 
     [Test]
@@ -283,6 +354,38 @@ public sealed class ProcessNamingRuleTests
 
     private static string DescriptorExample(string guide) =>
         Section(guide, "== Descriptor (create-business-process) ==", "- `name` is the local element handle");
+
+    private static string[] CaptionsOf(string guide, string elementTypes) =>
+        Regex.Matches(guide, $@"""type"":\s*""(?:{elementTypes})""")
+            .Select(match => EnclosingObject(guide, match.Index))
+            .Select(element => Regex.Match(element, @"""caption"":\s*""([^""]+)""").Groups[1].Value)
+            .Where(caption => caption.Length > 0)
+            .Distinct()
+            .ToArray();
+
+    private static string FirstWord(string caption) => caption.Split(' ')[0];
+
+    /// <summary>
+    /// A parameter code hides under the same <c>name</c> key an element uses, so only its position inside a
+    /// <c>parameters</c> array distinguishes the two. Walking the brackets is what keeps N8's check off
+    /// element handles and N5's off parameter codes.
+    /// </summary>
+    private static string[] ParameterBlocks(string guide)
+    {
+        List<string> blocks = [];
+        foreach (Match match in Regex.Matches(guide, @"""parameters""\s*:\s*\["))
+        {
+            int index = match.Index + match.Length - 1;
+            int end = index;
+            for (int depth = 0; end < guide.Length; end++)
+            {
+                if (guide[end] == '[') { depth++; }
+                else if (guide[end] == ']' && --depth == 0) { break; }
+            }
+            blocks.Add(guide[index..Math.Min(end + 1, guide.Length)]);
+        }
+        return [.. blocks];
+    }
 
     /// <summary>
     /// An element declaration is a JSON object inside a prose snippet, so it has no line discipline to key
