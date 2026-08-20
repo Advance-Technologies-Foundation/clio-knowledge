@@ -115,3 +115,10 @@ Decision: Teach `npm test` / `ng test` as the project-spec workflow and state th
 Discovery: The executable repair remains in Clio. clio-knowledge owns only the agent decision and honest zero-spec boundary. Current publication derives sequence from `libraryVersion`, so the content release requires only the 1.13.35 version bump rather than a hand-authored sequence.
 Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs, bundle-source.json
 Impact: agents can distinguish normal Jest `No tests found` from a broken Angular test environment and require a real spec as acceptance evidence.
+
+## 2026-08-21 00:24 – GH #78 review: qualify and route the Jest rule
+Context: Agentic review found that `creatioVersion` can select older Karma templates and that the expanded testing scope was absent from resource discovery and routing.
+Decision: Limit the no-spec/Jest rule to the current default Angular 19 template, require runner inspection for version-specific templates, and route create/build/test requests to `ui-project`.
+Discovery: A correct leaf rule can still mislead when its applicability boundary and discovery metadata lag behind it; content tests now pin all three surfaces.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: agents reach the guide for testing requests without applying Jest-specific advice to supported Karma scaffolds.

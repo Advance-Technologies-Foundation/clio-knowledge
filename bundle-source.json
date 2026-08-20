@@ -1904,7 +1904,7 @@
     {
       "itemId": "ui-project",
       "title": "Freedom UI projects",
-      "description": "Canonical MCP guidance for scaffolding a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, and the create-workspace prerequisite.",
+      "description": "Canonical MCP guidance for scaffolding, building, and testing a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, runner selection, and the create-workspace prerequisite.",
       "topicId": "creatio.ui-project",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/ui-project",
