@@ -23,7 +23,12 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.kafka-reference",
             "catalog/reference-examples/creatio-kafka.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-kafka-reference",
-            "a1770613923ed48bea547a67be466e663feea1ef")
+            "a1770613923ed48bea547a67be466e663feea1ef"),
+        new(
+            "atf.creatio.websocket-reference",
+            "catalog/reference-examples/creatio-websocket.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-websocket-reference",
+            "d04dec860ca47bfbee695ebdb7ed3272e6c1c4c1")
     ];
 
     [Test]

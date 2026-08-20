@@ -3,6 +3,7 @@ clio MCP page-schema sdk common guide
 Scope
 - Use this guide only for deployed page schema code: `SCHEMA_DEPS`, `SCHEMA_ARGS`, `SCHEMA_HANDLERS`, and `SCHEMA_VALIDATORS`.
 - Read this guide together with `page-schema-handlers` when the task adds SDK services, model helpers, channel subscriptions, dialog helpers, data access, process execution, system settings access, or backend service calls inside `SCHEMA_HANDLERS`.
+- When a Creatio backend sends a message to the page through the platform WebSocket channel, you MUST also read `websocket-messaging`; that guide owns sender/body routing, backend publication, lifecycle selection, and transient-delivery rules.
 - Read this guide together with `page-schema-validators` when the task adds SDK-backed async validation inside `SCHEMA_VALIDATORS`.
 - Do NOT use this guide for remote modules or frontend-source classes.
 - Keep page-body authoring on public `@creatio-devkit/common` API only. Do NOT invent services or rely on internal `ɵ*` exports.
@@ -103,35 +104,6 @@ Page-body templates
           "async": true
         }
       }/**SCHEMA_VALIDATORS*/
-    };
-  });
-
-- MessageChannelService lifecycle:
-  define("UsrSome_FormPage", /**SCHEMA_DEPS*/["@creatio-devkit/common"]/**SCHEMA_DEPS*/, function/**SCHEMA_ARGS*/(sdk)/**SCHEMA_ARGS*/ {
-    return {
-      handlers: /**SCHEMA_HANDLERS*/[
-        {
-          request: "crt.HandleViewModelInitRequest",
-          handler: async (request, next) => {
-            const result = await next?.handle(request);
-            const messageChannelService = new sdk.MessageChannelService();
-            // transient runtime handles may live on $context
-            request.$context.subscription = await messageChannelService.subscribe("TestPTP", async event => { // transient runtime handle, not a page attribute
-              await request.$context.set("UsrIncomingMessage", event.body);
-            });
-            await messageChannelService.sendMessage("TestPTP", "Hello", sdk.MessageChannelType.PTP); // `PTP` is an example; keep the local channel type pattern already used by the schema.
-            return result;
-          }
-        },
-        {
-          request: "crt.HandleViewModelDestroyRequest",
-          handler: async (request, next) => {
-            request.$context.subscription?.unsubscribe();
-            request.$context.subscription = null; // clear transient runtime handle
-            return next?.handle(request);
-          }
-        }
-      ]/**SCHEMA_HANDLERS*/
     };
   });
 

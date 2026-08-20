@@ -30,6 +30,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
+  - send a Creatio backend C# message to a Freedom UI page through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution

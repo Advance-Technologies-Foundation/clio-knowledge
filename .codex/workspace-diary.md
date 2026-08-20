@@ -69,3 +69,10 @@ Discovery: only `libraryVersion` moves on a content change. The 2026-08-10 entry
 Discovery: `validate-page` does not reach `ValidateRunProcessButtonStructure` on a mobile body, so an example body can be validate-green and still be refused by `update-page`. Any button example in guidance must carry `params.processName` and `params.processRunType` or it teaches a false green.
 Files: guidance/mcp/guides/platform/mobile/page-modification.md, guidance/mcp/guides/processes/run-process-button.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/MobileOperationShapeRuleTests.cs
 Impact: the two rules are now reachable from the entry point that the reported scenario actually takes, and a regression in their wording fails a test instead of silently re-recording the content digest.
+
+## 2026-08-20 - Creatio backend-to-Freedom-UI WebSocket guidance
+Context: Turn a live vbg lab into canonical agent guidance and publish the executable example through the ATF reference catalog.
+Decision: Make `websocket-messaging` the sole owner of user targeting, `SimpleMessage` routing, transient delivery, disconnect handling, and lifecycle-safe `MessageChannelService` subscriptions.
+Discovery: The modern .NET runtime did not expose `IMsgChannelManager` through legacy `ClassFactory`; the guarded `MsgChannelManager.Instance` path worked live. Freedom UI can issue concurrent resume requests before subscription resolution, so the page must guard the pending promise as well as the resolved handle.
+Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests
+Impact: Future agents can discover one evidence-backed workflow and clone the exact live-verified package revision when implementation detail is needed.
