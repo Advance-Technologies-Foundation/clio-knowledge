@@ -39,7 +39,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   you use one; do not present such a result as a working data operation.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
   TEMPLATES are not supported — say so if the user asks for one). The `email` block configures everything:
-  `{ "name": "SendWelcomeEmail", "type": "sendEmail", "email": {
+  `{ "name": "SendWelcomeEmail", "type": "sendEmail", "caption": "Send the welcome email", "email": {
      "mode": "auto"|"manual", "sender": "<MailboxSyncSettings record id OR a sender email address configured
      on the environment>", "subject": "plain text", "body": "<html>…</html>", "bodyFormat": "html",
      "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |

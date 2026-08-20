@@ -219,8 +219,8 @@ public sealed class ProcessNamingRuleTests
     }
 
     [Test]
-    [Description("The canonical descriptor example carries an N2-shaped process code and a caption on every element, events included.")]
-    public void CanonicalDescriptorExample_ShouldBeFullyNamed()
+    [Description("The canonical descriptor example carries an N2-shaped process code.")]
+    public void CanonicalDescriptorExample_ShouldCarryAnN2ShapedProcessCode()
     {
         string descriptor = DescriptorExample(ReadGuide(OwnerGuide));
 
@@ -228,16 +228,26 @@ public sealed class ProcessNamingRuleTests
             .MatchRegex(@"^[A-Z][A-Za-z]*[A-Z][A-Za-z]*(_[A-Z][A-Za-z]*)+$",
                 because: "the process code an example hands the reader must itself be <prefix><Object>_<Action> (N2); "
                     + "the baseline run's unsegmented UsrAccountOnboarding is the shape UsrSchemaCode modelled");
+    }
 
-        string[] elementsWithoutCaption = Section(descriptor, "\"elements\": [", "],")
-            .Split('\n')
-            .Where(line => line.Contains("\"type\":") && !line.Contains("\"caption\":"))
-            .Select(line => line.Trim())
+    [Test]
+    [Description("Every element declared in a guide example carries a caption, events included.")]
+    public void GuideExamples_ShouldCaptionEveryElement()
+    {
+        string guide = ReadGuide(OwnerGuide);
+
+        string[] elementsWithoutCaption = Regex
+            .Matches(guide, @"""type"":\s*""(?:startEvent|signalStart|endEvent|userTask|sendEmail|readData|performTask)""")
+            .Select(match => EnclosingObject(guide, match.Index))
+            .Where(element => !element.Contains("\"caption\"", StringComparison.Ordinal))
+            .Select(Normalize)
+            .Distinct()
             .ToArray();
 
         elementsWithoutCaption.Should().BeEmpty(
-            because: "N4 requires a caption on EVERY element; the events in this example are where a no-code "
-                + "reviewer has no other label, and an example that omits one teaches omitting one");
+            because: "N4 requires a caption on EVERY element, and the probe showed an omitted one falls back to the "
+                + "element CODE — so an example that omits one teaches putting a raw code on the diagram. Events are "
+                + "where this bites hardest, and the sendEmail example shipped without a caption until it was caught");
     }
 
     [Test]
@@ -272,6 +282,31 @@ public sealed class ProcessNamingRuleTests
 
     private static string DescriptorExample(string guide) =>
         Section(guide, "== Descriptor (create-business-process) ==", "- `name` is the local element handle");
+
+    /// <summary>
+    /// An element declaration is a JSON object inside a prose snippet, so it has no line discipline to key
+    /// off — a <c>sendEmail</c> element spans eleven lines while three <c>startEvent</c>s share one. Walking
+    /// the braces is what lets the caption assertion apply to every element rather than to whichever ones
+    /// happen to be formatted like the descriptor.
+    /// </summary>
+    private static string EnclosingObject(string text, int indexInside)
+    {
+        int start = indexInside;
+        for (int depth = 0; start > 0; start--)
+        {
+            if (text[start] == '}') { depth++; }
+            else if (text[start] == '{' && depth-- == 0) { break; }
+        }
+
+        int end = start;
+        for (int depth = 0; end < text.Length - 1; end++)
+        {
+            if (text[end] == '{') { depth++; }
+            else if (text[end] == '}' && --depth == 0) { break; }
+        }
+
+        return text[start..(end + 1)];
+    }
 
     private static string Section(string guide, string heading, string terminator)
     {
