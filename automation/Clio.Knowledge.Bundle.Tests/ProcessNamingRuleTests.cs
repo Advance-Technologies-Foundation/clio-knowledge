@@ -31,18 +31,17 @@ namespace Clio.Knowledge.Bundle.Tests;
 ///    unprobed; app-modeling's enumeration was extended to name business-process codes, so a reader
 ///    following the pointer can confirm the ownership claim instead of having to infer it.
 /// 3. SEGMENT COUNT. The findings' acceptance regex allowed exactly one '_', but the NCD example
-///    Application_Disburse_Loan carries two. N2 therefore permits a further qualifier segment. NOT
-///    VERIFIED against the platform: the build probe for a two-underscore code was blocked before it
-///    ran, and of 427 process schemas on the probe stand, 90 carry exactly one '_' and ZERO carry two or
-///    more — observational evidence that the two-segment shape is the norm, not proof that a third
-///    segment is refused. N2 is worded to prefer two segments accordingly.
+///    Application_Disburse_Loan carries two. A third segment is ACCEPTED — UsrProbe_Check_Naming saved on
+///    a 7.8.0 stand, probed 2026-08-20 — so N2 permits one while still preferring two, because of 427
+///    process schemas on that stand 90 carry exactly one '_' and ZERO carry two or more. The house shape
+///    is the reason for the preference; a platform refusal is not, and N2 no longer implies one.
 ///
-/// Two review outcomes also shape what is pinned here. N4's applicability rests on the
-/// create-business-process tool contract, which declares <c>caption</c> on the shared element object and
-/// type-gates only <c>readData?</c> and <c>email?</c> — so a caption is not gated away on an event, while
-/// what the designer DISPLAYS for an event caption stays unprobed and is marked so. And the scratch-cleanup
-/// rule that first shipped as N10 governs no name or code; it moved to core-rules, which is why this suite
-/// asserts it lives there and NOT in the naming section.
+/// Two review outcomes also shape what is pinned here. N4 covers events on probed ground: a startEvent and
+/// an endEvent built WITH captions saved and read back verbatim, and the same graph built WITHOUT them read
+/// back the element CODE as each caption — so omitting one puts a raw Start1 on the diagram rather than
+/// producing a friendly default, which is why the omission consequence is pinned and not just the MUST.
+/// And the scratch-cleanup rule that first shipped as N10 governs no name or code; it moved to core-rules,
+/// which is why this suite asserts it lives there and NOT in the naming section.
 /// </summary>
 [TestFixture]
 public sealed class ProcessNamingRuleTests
@@ -98,9 +97,9 @@ public sealed class ProcessNamingRuleTests
             + "state the empty-prefix branch instead of reading as 'the platform always demands a prefix'"),
         ("app-modeling",
             "AGENTS.md gives every rule one owner: N2 must CITE the prefix authority, never restate it"),
-        ("two things are NOT verified",
-            "N4 is a hard MUST-set whose event half rests on the tool contract, not on a build; the boundary has "
-            + "to be visible to a reader who would otherwise take the whole rule as probed"),
+        ("falls back to THE ELEMENT CODE as the caption",
+            "N4 is a hard MUST-set, and this is the probed consequence of ignoring it: the omitted caption is not "
+            + "a friendly default but the raw code on the diagram, which is how Start1 reaches a reviewer"),
         ("NOT YET BUILDABLE",
             $"{RuleNumbers[^1]} documents flow labels ahead of the buildable slice; without the marker it reads "
             + "as available now"),

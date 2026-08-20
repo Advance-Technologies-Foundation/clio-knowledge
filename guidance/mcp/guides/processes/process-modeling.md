@@ -187,25 +187,25 @@ N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrA
     * The environment declares an EMPTY prefix -> add none, as `app-modeling` states outright. The
       refusal above is evidence about a prefix-declaring environment only; an empty-prefix stand was not
       probed, so do not read it as "the platform always demands a prefix".
-    After the prefix use two `_`-separated PascalCase segments, the object then the action; add a further
-    `_<Qualifier>` segment only when the action genuinely needs one, and add the package name only to
-    break a real collision, never as blanket disambiguation. NO autonumber, NO random suffix, NO GUID
-    fragment — the designer's own `Process_3d0825b` shape is exactly what this rule prevents.
+    After the prefix use two `_`-separated PascalCase segments, the object then the action. A further
+    `_<Qualifier>` segment IS accepted — `UsrProbe_Check_Naming` saved on a 7.8.0 stand (ENG-94378,
+    probed 2026-08-20) — but add one only when the action genuinely needs it: of 427 process schemas on
+    that stand, 90 carry exactly one `_` and NONE carry two, so two segments is the house shape. Add the
+    package name only to break a real collision, never as blanket disambiguation. NO autonumber, NO
+    random suffix, NO GUID fragment — the designer's own `Process_3d0825b` shape is what this prevents.
 N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
     (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone.
 N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never leave it to a default.
     Sentence case, verb first, <= 60 characters, short enough to read inside the diagram box: "Read
     primary contact", NOT "Read the account's primary contact". This is the only text a no-code reviewer
     sees on the diagram, so an unset or padded caption is what makes a generated process unreviewable.
-    APPLICABILITY: `caption` is a SHARED element field — the create-business-process contract declares it
-    on the element object next to `name`/`type` and type-gates only `readData?` ("readData elements
-    only") and `email?` ("sendEmail elements only"), so it is not gated away on an event, and the
-    examples above set one on every event. For ACTIVITIES the rule is established by build. For EVENTS
-    two things are NOT verified (ENG-94378, the probe did not run): what the designer displays for an
-    event whose caption is omitted, and whether it surfaces an event's caption the way it does a task's.
-    Set it anyway — it is the only label an event could carry, and leaving it unset is a guess about the
-    default. If a build ever refuses a caption on an event, report that refusal; do not answer it by
-    dropping captions elsewhere.
+    EVENTS TOO, and that is verified: `caption` is a SHARED element field (the create-business-process
+    contract declares it on the element object next to `name`/`type` and type-gates only `readData?` and
+    `email?`), and a `startEvent` + `endEvent` built WITH captions saved and read back verbatim through
+    `describe-business-process` (ENG-94378, probed 2026-08-20 on a 7.8.0 stand). OMIT one and the
+    platform falls back to THE ELEMENT CODE as the caption — the same probe built without captions read
+    back `"caption": "ProbeStart"` on the start event — so an unset caption is not a friendly default: it
+    puts a raw code on the diagram, which is how `Start1` reaches a no-code reviewer's screen.
 N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO autonumber and NO random
     suffix — `StartSignal1` and `Task2` are the failure this rule names. Do not pad a code with the
     element's type name either. Events: a start event is `<Trigger>Signal` or `<Reason>Start`
