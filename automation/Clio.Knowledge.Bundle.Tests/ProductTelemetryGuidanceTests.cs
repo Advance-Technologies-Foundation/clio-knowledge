@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -108,6 +109,38 @@ public sealed class ProductTelemetryGuidanceTests
         article.Should().Contain("directly identifying personal data");
         article.Should().Contain("NEVER derive `session_id`",
             because: "a session id derived from user or host data would re-identify the run");
+    }
+
+    [Test]
+    [Description("Verifies the payload-wide rules sit under Payload rather than inside the session-consumption section, so their scope reads as the whole payload.")]
+    public void Article_ShouldKeepPayloadWideRulesUnderPayload()
+    {
+        // Arrange
+        string article = ReadArticle();
+        // Anchored on the first sentence of each section rather than the heading text, so the
+        // assertion does not depend on how a heading is punctuated.
+        int payload = article.IndexOf(
+            "`send-telemetry` takes a single top-level `args` object", StringComparison.Ordinal);
+        int sessionConsumption = article.IndexOf(
+            "`session_usage` reports what a host session has consumed", StringComparison.Ordinal);
+
+        // Assert
+        payload.Should().BeGreaterThan(-1);
+        sessionConsumption.Should().BeGreaterThan(payload);
+        // A rule reads as scoped to the section that contains it. These three are payload-wide, so
+        // sitting under `session_usage` narrows the data-minimization guarantee to one event — which
+        // is what happened once, and no whole-file substring assertion could see it.
+        foreach (string payloadWideRule in new[]
+        {
+            "MUST NOT carry sensitive data",
+            "anonymized installation identifier",
+            "is the authoritative schema"
+        })
+        {
+            int position = article.IndexOf(payloadWideRule, StringComparison.Ordinal);
+            position.Should().BeInRange(payload, sessionConsumption,
+                because: $"'{payloadWideRule}' governs every event, not only session consumption");
+        }
     }
 
     [Test]

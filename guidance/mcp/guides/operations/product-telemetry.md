@@ -10,6 +10,12 @@ Scope
   FILE IS LOADED; treating that as ad-hoc use is what left whole workflows unreported.
 - Telemetry MUST NEVER gate, delay, or alter the developer's task. Every rule below is subordinate to
   that one.
+- Requires a clio that accepts the flow-agnostic vocabulary: the stages and the
+  `workflow`/`variant`/`model` fields landed in ENG-92551 and ship in the first clio release that
+  follows it. Check capability, not a version string — `get-tool-contract` for `send-telemetry` is
+  authoritative, and if its `event_name` enumerates the stages below, the installed clio accepts them.
+  An older clio rejects every stage here with `unknown-event-name`, which Failure handling covers:
+  nothing breaks, the run simply reports nothing.
 
 One stage vocabulary, plus a workflow field
 - `event_name` is a STAGE that means the same thing in every flow. WHICH flow it was travels in the
@@ -32,6 +38,16 @@ One stage vocabulary, plus a workflow field
 - The app-creation-specific names (`session_started`, `business_plan_*`, `implementation_*`) are
   DEPRECATED. clio still accepts them so an already-installed consumer keeps reporting, but a new
   emission MUST use a stage plus `workflow=app-creation`.
+
+A hook-recorded session start does not replace your own
+- Some hosts record the session start from a hook, before any skill or guidance is read, so that a
+  run is countable even if nothing else reports. Such a floor event is attributed to
+  `workflow=unattributed`, because a hook sees a tool name and cannot know the flow.
+- If something tells you the start is already recorded for a given `session_id`, reuse that id AND
+  still emit your own `workflow_started` under your real `workflow`. That is not a duplicate: clio
+  keys session state by the (`session_id`, `workflow`) PAIR, so each flow keeps its own start and its
+  own elapsed-time measurements, and one host session can carry several flows. Skipping your own
+  start records the run as a build with no beginning, which no funnel can read.
 
 A flow being exempt from a gate is not being exempt from telemetry
 - A consumer workflow that skips another workflow's approval gates still emits the same stages — its
@@ -148,6 +164,12 @@ Payload
   In practice you usually cannot see them: nothing in this tool surface reports an agent its own
   consumption, and a measurement across 52 agent-emitted events found not one carrying a counter. So
   do not treat these fields as your responsibility, and never reconstruct them from an estimate.
+- clio also records an anonymized installation identifier and other locally derived diagnostic
+  fields, so the agent does not send them.
+- Telemetry MUST NOT carry sensitive data: no full prompts, passwords, tokens, customer names, raw
+  usernames, generated app content, or full MCP request/response payloads.
+- `get-tool-contract` for `send-telemetry` is the authoritative schema. Where this guide and that
+  contract disagree, the contract wins.
 
 Session consumption is a measurement, not a stage
 - `session_usage` reports what a host session has consumed so far: `model` plus the three counters,
@@ -163,21 +185,6 @@ Session consumption is a measurement, not a stage
   no longer claims it: the honest unit is the session.
 - Emitted by the host-side hook where one is installed. An agent SHOULD NOT send `session_usage`
   itself: it would be reporting a total it cannot observe.
-
-Some hosts record the session start from a hook, before any skill or guidance is read, so that a run
-is countable even if nothing else reports. Such a floor event is attributed to
-`workflow=unattributed`, because a hook sees a tool name and cannot know the flow. If something tells
-you the start is already recorded for a given `session_id`, reuse that id AND still emit your own
-`workflow_started` under your real `workflow`. That is not a duplicate: clio keys session state by the
-(`session_id`, `workflow`) PAIR, so each flow keeps its own start and its own elapsed-time
-measurements, and one host session can carry several flows. Skipping your own start records the run as
-a build with no beginning, which no funnel can read.
-- clio also records an anonymized installation identifier and other locally derived diagnostic
-  fields, so the agent does not send them.
-- Telemetry MUST NOT carry sensitive data: no full prompts, passwords, tokens, customer names, raw
-  usernames, generated app content, or full MCP request/response payloads.
-- `get-tool-contract` for `send-telemetry` is the authoritative schema. Where this guide and that
-  contract disagree, the contract wins.
 
 Failure handling
 - If consent is denied, telemetry is unavailable, or an event is rejected, continue the workflow
