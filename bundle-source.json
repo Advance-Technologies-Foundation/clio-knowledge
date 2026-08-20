@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.31",
+  "libraryVersion": "1.13.33",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -31,6 +31,7 @@
       "atf.creatio.custom-mcp-tool-reference",
       "atf.creatio.google-pubsub-reference",
       "atf.creatio.kafka-reference",
+      "atf.creatio.websocket-reference",
       "branding",
       "business-rule-filters",
       "business-rules",
@@ -140,6 +141,7 @@
       "theming",
       "ui-project",
       "virtual-entities",
+      "websocket-messaging",
       "when-to-use-requests"
     ],
     "resourceUris": [
@@ -152,6 +154,7 @@
       "docs://knowledge/com.creatio.clio/atf.creatio.custom-mcp-tool-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
       "docs://knowledge/com.creatio.clio/branding",
       "docs://knowledge/com.creatio.clio/business-rule-filters",
       "docs://knowledge/com.creatio.clio/business-rules",
@@ -261,6 +264,7 @@
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
+      "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/when-to-use-requests"
     ]
   },
@@ -380,6 +384,17 @@
       "uri": "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
       "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
       "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "atf.creatio.websocket-reference",
+      "title": "Creatio WebSocket reference",
+      "description": "Live-verified reference workspace for backend-to-frontend push, same-user frontend PTP bridging, low-trust frontend BROADCAST fan-out, and the internal SERVER receive boundary.",
+      "topicId": "atf.creatio.websocket-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
+      "sourcePath": "catalog/reference-examples/creatio-websocket.yaml",
+      "bundlePath": "resources/atf.creatio.websocket-reference.yaml",
       "mediaType": "text/yaml"
     },
     {
@@ -1912,6 +1927,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "websocket-messaging",
+      "title": "Creatio WebSocket messaging",
+      "description": "Canonical Creatio guidance for backend-to-frontend push, frontend PTP and BROADCAST routes, lifecycle-safe MessageChannelService subscriptions, transient delivery, and the internal-only SERVER receive boundary.",
+      "topicId": "creatio.websocket-messaging",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/websocket-messaging",
+      "legacyUris": [
+        "docs://mcp/guides/websocket-messaging"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/websocket-messaging.md",
+      "bundlePath": "resources/websocket-messaging.md",
       "mediaType": "text/plain"
     },
     {

@@ -1,0 +1,35 @@
+schemaVersion: 0
+id: atf.creatio.websocket-reference
+title: Creatio WebSocket reference
+status: published
+primaryUseCase:
+  id: creatio-backend-to-freedom-ui-websocket
+  summary: Demonstrate supported transient backend push, same-user frontend PTP bridging, and low-trust frontend BROADCAST fan-out through Creatio's platform message channel.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-websocket-reference
+  revision: 2d650b03c58553c934b71479c095fff669ad1049
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/WebsocketLab
+  unitTests: tests/WebsocketLab
+  evidence: docs/lab-record.md
+supportingCapabilities:
+  - creatio-message-channel
+  - backend-to-frontend-notification
+  - frontend-same-user-ptp-bridge
+  - frontend-broadcast-announcement
+  - freedom-ui-message-subscription
+  - configuration-web-service
+  - unit-testing
+  - live-browser-acceptance
+compatibility:
+  status: example-declared
+  details: Live-verified on Creatio 10.0.0.858 with .NET 8; see the pinned repository lab record.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - This is an agent reference example, not a production package or a durable messaging system.
+  - Frontend SERVER messages are internal-only because the verified runtime exposes no supported package-level backend receive hook.
+  - Registration does not promote every implementation choice to canonical Clio guidance.
