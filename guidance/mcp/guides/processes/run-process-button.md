@@ -65,6 +65,11 @@ The handler reads the primary data source record Id and injects it into the name
     }
 }
 - `recordIdProcessParameterName` must be a parameter CODE from the signature.
+- NOTE on the codes in these examples: `UsrProcess_e629820` and `ProcessSchemaParameter1/2` are READ
+  from an existing, human-made process — the autonumbered shapes are what the visual designer generates
+  when nobody names things. They are NOT a naming model. A process YOU generate is named per N1-N10 in
+  `process-modeling` ("Naming and codes"), which forbids exactly these shapes; here you copy whatever
+  `get-process-signature` echoes back, however it was named.
 - For a Lookup parameter, prefer one whose reference schema matches the page's primary entity.
 
 Variant V2 — bind a parameter to a view-model attribute
