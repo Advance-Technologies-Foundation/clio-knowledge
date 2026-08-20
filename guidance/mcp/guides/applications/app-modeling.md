@@ -48,7 +48,7 @@ Preferred workflow
 - Treat single-tool entity or page mutations as compatibility fallbacks. Keep the preferred workflow in the current MCP contract unless the task is truly limited to one column, one lookup, or one page save.
 
 Application modeling guardrails
-- Use the `schema-name-prefix` value from `create-app` (or from `get-schema-name-prefix`) as the prefix for ALL custom schema codes in the session (lookups, entity columns, supporting entities, page names). An empty `schema-name-prefix` means no prefix — do not add one. Default Creatio environments return `Usr`.
+- Use the `schema-name-prefix` value from `create-app` (or from `get-schema-name-prefix`) as the prefix for ALL custom schema codes in the session (lookups, entity columns, supporting entities, page names, business-process codes). An empty `schema-name-prefix` means no prefix — do not add one. Default Creatio environments return `Usr`.
 - For a new app with one primary record type, `create-app` usually returns the canonical main entity. Extend that entity instead of creating a synonym entity for the same records.
 - Apply the same anti-duplication rule to supporting entities: when refreshed app context already exposes a supporting or link schema with the same business purpose and relation pair, reuse it instead of creating a synonym schema.
 - Business captions are not naming authority for new schema codes. If refreshed runtime context already maps a caption or title to an existing technical schema code, reuse that code instead of synthesizing a new one.

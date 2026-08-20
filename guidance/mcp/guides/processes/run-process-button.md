@@ -30,14 +30,17 @@ Button skeleton (insert into a container via update-page, mode append)
     from `bundle.containers` (a `crt.FlexContainer` with `childCount` > 0 in the header region,
     commonly `MainHeaderTop` on list pages).
   Always confirm the chosen name actually exists in `bundle.containers` before writing.
+  * MOBILE page (schemaType 10): none of the above applies. `ActionButtonsContainer` is a web
+    container, and mobile has its own operation-shape, child-authoring and button-placement rules —
+    read `mobile-page-modification` BEFORE writing a mobile body.
 - The `clicked` config is `{ request: 'crt.RunBusinessProcessRequest', params: {...} }`.
 - Caption must be a localizable binding — pass the key via the `resources` parameter.
 
 Build the button from `get-component-info crt.Button`; wire the run-process request into its
 `clicked` binding using one of the variants below. Insert it with `update-page` (mode `append`)
 into the chosen `parentName`,
-leaving `handlers: []` — no custom handler. See `page-modification` for the body envelope and
-the insert op (`operation` / `name` / `parentName` / `propertyName` / `index`).
+leaving `handlers: []` — no custom handler. See `page-modification` (or `mobile-page-modification`
+for a mobile page) for the body envelope and the insert op (`operation` / `name` / `parentName` / `propertyName` / `index`).
 
 Behavior flags (defaults to emit, change only when the user asks)
 By default include both, set to true:
@@ -62,6 +65,11 @@ The handler reads the primary data source record Id and injects it into the name
     }
 }
 - `recordIdProcessParameterName` must be a parameter CODE from the signature.
+- NOTE on the codes in these examples: `UsrProcess_e629820` and `ProcessSchemaParameter1/2` are READ
+  from an existing, human-made process — the autonumbered shapes are what the visual designer generates
+  when nobody names things. They are NOT a naming model. A process YOU generate is named per N1-N10 in
+  `process-modeling` ("Naming and codes"), which forbids exactly these shapes; here you copy whatever
+  `get-process-signature` echoes back, however it was named.
 - For a Lookup parameter, prefer one whose reference schema matches the page's primary entity.
 
 Variant V2 — bind a parameter to a view-model attribute
