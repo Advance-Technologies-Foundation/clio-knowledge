@@ -32,7 +32,8 @@ Typical workflow
 1. Confirm or pick the workspace directory. If it does not already exist as a clio workspace, call `create-workspace` first.
 2. Decide on a snake_case `projectName`, a PascalCase `packageName`, and a lowercase `vendorPrefix`. Translate any user input that does not match these shapes (e.g., user says "RssReader" → `projectName: rss_reader`).
 3. Call `new-ui-project` with the resolved values. Treat a non-zero `exit-code` as failure and surface `execution-log-messages[*].value` to the user.
-4. (Optional) After the project is scaffolded, normal Angular workflows apply inside `projects/<projectName>` — install dependencies, run `ng build`, etc.; clio does not manage Node tooling.
+4. (Optional) After the project is scaffolded, normal Angular workflows apply inside `projects/<projectName>` — install dependencies, run `ng build`, and run project specs with `npm test` or `ng test`; clio does not manage Node tooling.
+5. The scaffold contains no `*.spec.ts` files, so Jest reports `No tests found` until a spec is added. Do not enable `passWithNoTests` merely to make an empty scaffold green; a real spec proves the generated Angular test environment works.
 
 Common mistakes to avoid
 - Do NOT call `new-ui-project` against an arbitrary current working directory. The MCP wrapper pins `workspaceDirectory` precisely to avoid scaffolding files in unexpected locations.

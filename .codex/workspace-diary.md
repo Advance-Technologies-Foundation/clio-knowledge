@@ -108,3 +108,10 @@ Decision: Expand `websocket-messaging` to own backend push, same-user PTP, low-t
 Discovery: Browser BROADCAST has no package-owned permission check, and `ClassFactory.Get<IMsgServiceLayer>()` has no binding on the tested Creatio 10.0.0.858 .NET 8 runtime. Claude review also required partial-subscription cleanup and declarative Freedom UI metadata in the pinned reference.
 Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs, bundle-source.json
 Impact: Agents can use the two verified frontend routes without mistaking SERVER for a public package extension point or client BROADCAST for an enforceably privileged announcement.
+
+## 2026-08-21 00:11 – GH #78 ui-project Angular test boundary
+Context: Clio #1136 corrected a generated Jest setup that prevented every Angular spec from executing, while the canonical guide only named build workflows.
+Decision: Teach `npm test` / `ng test` as the project-spec workflow and state that the scaffold intentionally contains no specs; do not recommend `passWithNoTests` as false-green proof.
+Discovery: The executable repair remains in Clio. clio-knowledge owns only the agent decision and honest zero-spec boundary. Current publication derives sequence from `libraryVersion`, so the content release requires only the 1.13.35 version bump rather than a hand-authored sequence.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs, bundle-source.json
+Impact: agents can distinguish normal Jest `No tests found` from a broken Angular test environment and require a real spec as acceptance evidence.
