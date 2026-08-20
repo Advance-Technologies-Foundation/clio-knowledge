@@ -108,3 +108,38 @@ Decision: Expand `websocket-messaging` to own backend push, same-user PTP, low-t
 Discovery: Browser BROADCAST has no package-owned permission check, and `ClassFactory.Get<IMsgServiceLayer>()` has no binding on the tested Creatio 10.0.0.858 .NET 8 runtime. Claude review also required partial-subscription cleanup and declarative Freedom UI metadata in the pinned reference.
 Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs, bundle-source.json
 Impact: Agents can use the two verified frontend routes without mistaking SERVER for a public package extension point or client BROADCAST for an enforceably privileged announcement.
+
+## 2026-08-21 00:11 – GH #78 ui-project Angular test boundary
+Context: Clio #1136 corrected a generated Jest setup that prevented every Angular spec from executing, while the canonical guide only named build workflows.
+Decision: Teach `npm test` / `ng test` as the project-spec workflow and state that the scaffold intentionally contains no specs; do not recommend `passWithNoTests` as false-green proof.
+Discovery: The executable repair remains in Clio. clio-knowledge owns only the agent decision and honest zero-spec boundary. Current publication derives sequence from `libraryVersion`, so the content release requires only the 1.13.35 version bump rather than a hand-authored sequence.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs, bundle-source.json
+Impact: agents can distinguish normal Jest `No tests found` from a broken Angular test environment and require a real spec as acceptance evidence.
+
+## 2026-08-21 00:24 – GH #78 review: qualify and route the Jest rule
+Context: Agentic review found that `creatioVersion` can select older Karma templates and that the expanded testing scope was absent from resource discovery and routing.
+Decision: Limit the no-spec/Jest rule to the current default Angular 19 template, require runner inspection for version-specific templates, and route create/build/test requests to `ui-project`.
+Discovery: A correct leaf rule can still mislead when its applicability boundary and discovery metadata lag behind it; content tests now pin all three surfaces.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: agents reach the guide for testing requests without applying Jest-specific advice to supported Karma scaffolds.
+
+## 2026-08-21 00:31 – GH #78 review: cover pre-fix generated projects
+Context: Corrected-base review found that the published library supports older Clio 8.1 releases whose Jest scaffolds still contain the duplicate Angular test-environment initializer.
+Decision: Select testing advice from the generated `angular.json` builder, define builder-owned initialization for `@angular-builders/jest:run`, and give existing pre-fix projects an explicit remove-or-regenerate path.
+Discovery: Creatio template version alone does not identify whether a generated Jest setup contains the Clio-side repair; the emitted configuration is the durable applicability boundary.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: current and previously generated projects receive sound runner-specific guidance across the published Clio 8.1 compatibility range.
+
+## 2026-08-21 00:38 – GH #78 Claude review: pin the supported Jest entry point
+Context: Claude confirmed builder-owned initialization but noted that invoking Jest directly bypasses the Angular builder and therefore its test-environment setup.
+Decision: Require Jest-backed generated projects to run specs through `npm test` or `ng test`, matching the generated package script and builder contract.
+Discovery: The project-level Jest configuration extends the Angular builder path; it is not a standalone supported runner contract.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: guidance no longer leaves IDE or CI users to infer that direct Jest execution is equivalent to the supported Angular test command.
+
+## 2026-08-21 00:43 – GH #78 Claude review: bind remediation to evidence
+Context: Claude found that the stable builder id alone does not prove initialization ownership across the library's full Clio 8.1 compatibility range, and the unreleased "repaired version" wording was unactionable.
+Decision: Bind the workaround to the reported Angular 19 / builder 19.x / preset 14.x stack plus its duplicate-provider error, require inspection for other combinations, remove regeneration advice, and narrow discovery from build/test to create/test.
+Discovery: The emitted dependency versions and failure signature are durable evidence; a builder name shared across versions is not.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: the guide repairs the proven failure without deleting required initialization in an unverified historical runner.
