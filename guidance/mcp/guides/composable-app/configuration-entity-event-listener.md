@@ -105,6 +105,7 @@ Verified boundary: this pattern was observed in Creatio 8.1.0.6716 on .NET Frame
 
 - Subscribe to `entity.Validating` from `OnSaving` when entity validation must happen in the save pipeline.
 - Add one or more `EntityValidationMessage` items to `entity.ValidationMessages`.
+- Before initializing the message type, read `reference.configuration-entity-event-listener.validation-patterns` and preserve the exact property spelling exposed by the selected Creatio reference assembly. Do not silently correct platform API identifiers.
 - Point the message to the failing column when possible.
 - Keep validation text user-facing and specific.
 
