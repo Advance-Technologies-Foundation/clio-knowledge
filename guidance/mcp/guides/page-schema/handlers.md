@@ -283,48 +283,7 @@ Minimal canonical templates
     }
   ]/**SCHEMA_HANDLERS*/
 
-- Subscription lifecycle across init/resume/pause/destroy.
-  This template requires `@creatio-devkit/common` and a live `sdk` alias from `SCHEMA_DEPS` / `SCHEMA_ARGS`; do NOT invent placeholder subscription services.
-  handlers: /**SCHEMA_HANDLERS*/[
-    {
-      request: "crt.HandleViewModelInitRequest",
-      handler: async (request, next) => {
-        await next?.handle(request);
-        const messageChannelService = new sdk.MessageChannelService();
-        request.$context.subscription = await messageChannelService.subscribe("<Channel>", async event => { // transient runtime handle, not a page attribute
-          await request.$context.set("<TargetAttribute>", event.body);
-        });
-      }
-    },
-    {
-      request: "crt.HandleViewModelResumeRequest",
-      handler: async (request, next) => {
-        await next?.handle(request);
-        if (!request.$context.subscription) {
-          const messageChannelService = new sdk.MessageChannelService();
-          request.$context.subscription = await messageChannelService.subscribe("<Channel>", async event => { // transient runtime handle, not a page attribute
-            await request.$context.set("<TargetAttribute>", event.body);
-          });
-        }
-      }
-    },
-    {
-      request: "crt.HandleViewModelPauseRequest",
-      handler: async (request, next) => {
-        request.$context.subscription?.unsubscribe();
-        request.$context.subscription = null; // clear transient runtime handle
-        return next?.handle(request);
-      }
-    },
-    {
-      request: "crt.HandleViewModelDestroyRequest",
-      handler: async (request, next) => {
-        request.$context.subscription?.unsubscribe();
-        request.$context.subscription = null; // clear transient runtime handle
-        return next?.handle(request);
-      }
-    }
-  ]/**SCHEMA_HANDLERS*/
+- For `MessageChannelService` subscription lifecycle, MUST read `websocket-messaging`. It owns the resolved-handle and pending-promise guards, rejected-subscription recovery, sender/body routing, and paired teardown pattern. Do not copy a second lifecycle template into this guide.
 
 - Multiple handlers in one page-body array:
   handlers: /**SCHEMA_HANDLERS*/[
