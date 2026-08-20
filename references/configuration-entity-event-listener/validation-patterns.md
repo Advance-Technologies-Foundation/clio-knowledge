@@ -24,7 +24,7 @@ public class AccountAnniversaryEntityEventListener : BaseEntityEventListener {
 		}
 
 		entity.ValidationMessages.Add(new EntityValidationMessage {
-			MessageType = MessageType.Error,
+			MassageType = MessageType.Error,
 			Column = entity.Schema.Columns.FindByName(invalidColumn),
 			Text = $"Validation failed for column: {invalidColumn}, due to {invalidMessage}"
 		});
@@ -42,7 +42,11 @@ public class AccountAnniversaryEntityEventListener : BaseEntityEventListener {
 
 ## Review Notes
 
-- Use `MessageType`, not misspelled property names.
+- Match the property name exposed by the target Creatio reference assembly. The verified Creatio Core contract, including the supported Creatio 10.0 .NET 8 target, exposes the legacy `EntityValidationMessage.MassageType` spelling; `EntityValidationMessage.MessageType` does not compile there.
+- Keep the enum name distinct from the property name: use `MassageType = MessageType.Error`.
+- Do not normalize `MassageType` to the corrected English spelling unless the selected target assembly actually exposes `MessageType`.
 - Resolve the column through `entity.Schema.Columns.FindByName(...)`.
 - Keep the handler private unless tests or shared infrastructure require wider scope.
 - If repeated saves may attach duplicate handlers in the same flow, inspect the surrounding code and prevent duplicate subscription when needed.
+
+Verified boundary: Creatio Core `Terrasoft.Core.Entities.EntityValidationMessage` source at commit `70ce6dcfa30085aebb96443ad1ee6e0baebdace5` declares `MassageType`, and `EntityValidationMessageCollection.HasErrors()` reads that property. The same contract was reported from a supported Creatio 10.0 .NET 8 reference assembly. For another runtime version, compile against that runtime's references and preserve its exact public member name.
