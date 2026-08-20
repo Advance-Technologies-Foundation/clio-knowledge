@@ -340,6 +340,13 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
+- Do NOT run `compile-creatio` to "make a process runnable". A business process is INTERPRETED; it runs
+  without any compilation. A process record showing `NeedInstall = true` is its NORMAL pre-publish state,
+  NOT a compile trigger — that column is a raw platform field you would only see by reading the process
+  table directly (`odata-read`/`execute-esq`), and it must not drive a compile. Do not read the raw
+  process record to check readiness — use `describe-business-process`. The ONLY process that needs
+  compilation is one carrying a `scriptTask` (custom C#, see the element list); everything else — user
+  tasks, add/read/modify data, formulas, connections, signals — is applied and runs with no compile.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
