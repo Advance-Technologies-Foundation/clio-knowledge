@@ -31,8 +31,8 @@ Button skeleton (insert into a container via update-page, mode append)
     commonly `MainHeaderTop` on list pages).
   Always confirm the chosen name actually exists in `bundle.containers` before writing.
   * MOBILE page (schemaType 10): none of the above applies. `ActionButtonsContainer` is a web
-    container, and mobile has its own operation-shape and button-placement rules — read
-    `mobile-page-modification` BEFORE writing a mobile body.
+    container, and mobile has its own operation-shape, child-authoring and button-placement rules —
+    read `mobile-page-modification` BEFORE writing a mobile body.
 - The `clicked` config is `{ request: 'crt.RunBusinessProcessRequest', params: {...} }`.
 - Caption must be a localizable binding — pass the key via the `resources` parameter.
 
