@@ -170,6 +170,68 @@ neighbouring template button kept its own. Platform build not pinned; verify aga
 platform version.
 
 ─────────────────────────────────────────────────────────────
+AUTHORING CHILDREN — one "insert" per child, never inside a "merge"
+─────────────────────────────────────────────────────────────
+A "merge" carries PROPERTY values onto an element that already exists. It is not a way to create
+child elements. Putting them in its "values" — an array, or a lone object, of configs that carry a
+"name" — fails, and how it fails depends on something the body cannot tell you:
+
+  Target slot already holds elements  -> the differ STRIPS the whole property out of the merge
+                                         before copying anything. The save reports success, the
+                                         operation stays in the page body, and the children reach
+                                         NOTHING. This is the ENG-95429 report.
+  Target slot absent or empty         -> the merge applies and you get what you asked for.
+
+  // NOT this — the button reaches nothing on any page whose Scaffold already has actions
+  { "operation": "merge", "name": "Scaffold",
+    "values": { "actions": [ { "type": "crt.Button", "name": "RunProcessButton", ... } ] } }
+
+  // this — one insert per child, into a container the page declares
+  { "operation": "insert", "name": "RunProcessButton",
+    "parentName": "AreaProfileContainer", "propertyName": "items", "index": 0,
+    "values": { "type": "crt.Button", ...,
+                "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
+
+If the target genuinely has no such slot, ONE insert is not enough: an insert into a property the
+element does not carry throws, because the parent is not a container yet. The platform's own idiom
+is two operations, and the merge group runs before inserts, so one body does it:
+
+  { "operation": "merge",  "name": "UsrActionsButton", "values": { "menuItems": [] } },
+  { "operation": "insert", "name": "UsrExport", "parentName": "UsrActionsButton",
+    "propertyName": "menuItems", "values": { "type": "crt.MenuItem", ... } }
+
+A merge whose slot value is an EMPTY array is exactly that first step and is never flagged.
+
+SINGLE-ELEMENT SLOTS ARE THE EXCEPTION. A slot that holds one element rather than a collection —
+Scaffold "floatAction", a list's "itemLayout" — can ONLY be reached by a merge, since an insert
+needs a container. Keep it an object; do not convert it to an array to follow the idiom above.
+
+What clio does — mobile bodies only, on validate-page / update-page / sync-pages:
+
+  REJECTED  a merge authoring children on Scaffold's "actions", "leading" or "items". Every
+            shipped form template fills the first two (Save in "actions", Close/Cancel in
+            "leading") and every non-blank template fills "items" with a MainContainer, so on the
+            Scaffold these are the strip case. The same slot names on ANY OTHER element are not
+            affected — the check only applies when the merge targets the Scaffold itself.
+  WARNED    the same authoring in any other slot. clio applies viewConfigDiff against an EMPTY
+            base and cannot tell the two outcomes apart, so it steers instead of refusing: the
+            slot may be one the target legitimately lacks (menuItems on crt.Button or
+            crt.FloatingActionButton; items on crt.QuickFilterGroup, crt.Sort, crt.Timeline).
+  SILENT    an empty array; an array of plain data rows carrying no "name" (a file list's column
+            descriptors, for example); and "insert"/"set", where the values object BECOMES the
+            element so children declared inside it ARE created — that is the documented container
+            pattern, see FIELD GROUPING below.
+
+Because clio cannot see the target, a page built from BlankMobilePageTemplate — a bare Scaffold
+whose slots may be empty — is refused too, even though the merge would have applied there. Author
+the child with an insert rather than reaching for sync-pages validate:false.
+
+Evidence: verified on a live stand for ENG-95429 — a merge on Scaffold carrying a crt.Button in
+values.actions saved successfully, stayed in the page's own body, and appeared ZERO times in the
+server-merged viewConfig, which still held only the template's own buttons. Platform build not
+pinned; verify against your target platform version.
+
+─────────────────────────────────────────────────────────────
 VALIDATORS, CONVERTERS, HANDLERS — mobile constraints
 ─────────────────────────────────────────────────────────────
 
@@ -266,8 +328,10 @@ viewConfig and the element lands THERE, outside every container. It is saved, ju
 asked, so get-page will show it and the designer will not.
 
 Scope and limits of this rule:
-- It is about an INSERT of your own button. A "merge"/"set" that patches an element the template
-  already owns in that slot is a different case; nothing here applies to it.
+- It is about an INSERT of your own button. Do NOT read that as "use a merge instead": a merge
+  carrying the button inside values.actions is a WORSE failure and has its own rule above
+  (AUTHORING CHILDREN). A merge that patches PROPERTIES of an element the template already owns
+  in that slot is a different case again, and nothing here applies to it.
 - It governs a body YOU author. A page produced by web-to-mobile conversion follows the elementMap
   placement of that guide instead.
 - clio warns — never blocks — on exactly one shape: an insert of crt.Button into Scaffold/"actions".

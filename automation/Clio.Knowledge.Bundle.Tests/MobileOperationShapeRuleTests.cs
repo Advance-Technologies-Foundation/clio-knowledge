@@ -23,6 +23,24 @@ public sealed class MobileOperationShapeRuleTests
     private const string ButtonPlacementHeading = "BUTTON PLACEMENT — not the Scaffold \"actions\"/\"leading\" slots";
     private const string ButtonPlacementEnd = "COMPONENT REGISTRY";
 
+    private const string AuthoringChildrenHeading = "AUTHORING CHILDREN — one \"insert\" per child, never inside a \"merge\"";
+    private const string AuthoringChildrenEnd = "VALIDATORS, CONVERTERS, HANDLERS";
+
+    private static readonly (string Fragment, string Because)[] AuthoringChildrenClauses =
+    [
+        ("STRIPS the whole property", "the mechanism — the property is removed before anything is copied — is what makes the rule true"),
+        ("Target slot absent or empty", "the other outcome is NOT a failure, and hiding it would make the rule read as universal when it is not"),
+        ("ENG-95429", "AGENTS.md requires an evidence pointer for a prescriptive runtime claim"),
+        ("target platform version", "AGENTS.md requires a version boundary for a prescriptive runtime claim"),
+        ("EMPTY base", "the reason clio warns rather than refuses outside the Scaffold slots must stay visible"),
+        ("two operations", "an insert into a slot the element lacks throws, so the two-step idiom is the only route and must not be dropped"),
+        ("EMPTY array is exactly that first step", "the escape hatch must stay stated, or the rule reads as blocking the idiom it recommends"),
+        ("do not convert it to an array", "following the collection idiom on a single-element slot such as floatAction corrupts the shape"),
+        ("ANY OTHER element are not", "the blocking set is consulted only for a merge on the Scaffold; readers must not generalise it to every items slot"),
+        ("BlankMobilePageTemplate", "the false positive the split accepts must be named, not discovered by whoever hits it"),
+        ("BECOMES the element", "insert/set are out of scope and children declared in their values ARE created")
+    ];
+
     private static readonly (string Fragment, string Because)[] OperationShapeClauses =
     [
         ("from \"values\" ALONE", "the mechanism — the element is built from values and nothing else — is what makes the rule true"),
@@ -41,7 +59,7 @@ public sealed class MobileOperationShapeRuleTests
         ("falls back to the root", "an unresolved parentName PERSISTS the element at the root; describing it as dropped is wrong and was corrected once already"),
         ("extrapolation", "only the actions slot was tested — the leading slot must stay labelled as an extension of that observation"),
         ("NOT claimed", "the guide must keep disclaiming any statement about runtime rendering, which was never tested"),
-        ("merge\"/\"set\"", "the rule is about an insert of your own button and must not be read as blocking a legitimate patch"),
+        ("patches PROPERTIES", "the rule is about an insert of your own button; a merge that patches an existing element PROPERTIES is a different case and must not be read as blocked"),
         ("elementMap", "a converted page follows its elementMap placement, so the two guides cannot be read as contradicting")
     ];
 
@@ -75,6 +93,39 @@ public sealed class MobileOperationShapeRuleTests
         DroppedClauses(section, ButtonPlacementClauses).Should().BeEmpty(
             because: "each clause was added to make the rule correct or to bound it honestly; "
                 + "dropping one re-records the content digest silently");
+    }
+
+    [Test]
+    [Description("The AUTHORING CHILDREN rule still exists as a section of the mobile guide with every load-bearing clause intact.")]
+    public void AuthoringChildrenRule_ShouldExistWithLoadBearingClauses()
+    {
+        // Arrange
+        string guide = ReadGuide();
+
+        // Act
+        string section = Section(guide, AuthoringChildrenHeading, AuthoringChildrenEnd);
+
+        // Assert
+        DroppedClauses(section, AuthoringChildrenClauses).Should().BeEmpty(
+            because: "each clause was added to make the rule correct or to bound it honestly; "
+                + "dropping one re-records the content digest silently");
+    }
+
+    [Test]
+    [Description("The button-placement rule must not send a reader towards a merge: the carve-out it used to carry was the hole this guide now closes.")]
+    public void ButtonPlacementRule_ShouldNotCarveOutMerge()
+    {
+        // Arrange
+        string guide = ReadGuide();
+
+        // Act
+        string section = Normalize(Section(guide, ButtonPlacementHeading, ButtonPlacementEnd));
+
+        // Assert
+        section.Should().Contain(Normalize("a merge carrying the button inside values.actions is a WORSE failure"),
+            because: "an insert-scoped rule must say what a merge does, or a reader treats merge as the way around it");
+        section.Should().Contain("AUTHORING CHILDREN",
+            because: "the pointer to the owning rule is what keeps the two sections from contradicting each other");
     }
 
     [Test]
