@@ -346,13 +346,13 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
-    { "name": "UpdateContact1", "type": "changeData", "caption": "Update the contact",
+    { "name": "UpdateContact", "type": "changeData", "caption": "Update the contact",
       "changeData": {
         "source": "Contact",                                   // REQUIRED at create: the entity to update
         "values": [                                            // REQUIRED at create: one entry per column
           { "column": "JobTitle", "value": "Manager" },        // plain constant — TEXT columns ONLY (see below)
-          { "column": "Notes", "processParameter": "MyText" }, // a process parameter's value
-          { "column": "AccountId", "sourceElement": "SignalStart1", "sourceElementParameter": "RecordId" }
+          { "column": "Notes", "processParameter": "NoteTextParameter" }, // a process parameter's value
+          { "column": "AccountId", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
         ] },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
@@ -370,7 +370,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   or a trigger output such as a `signalStart` element's `RecordId`:
     "filter": { "object": "Contact",
       "conditions": [ { "column": "Id", "comparison": "equal",
-        "elementParameter": { "elementName": "SignalStart1", "parameter": "RecordId" } } ] }
+        "elementParameter": { "elementName": "RecordModifiedSignal", "parameter": "RecordId" } } ] }
   LIMITATION: the record read by a preceding `readData` element is NOT referenceable here — its column
   values (including `Id`) live inside the `ResultEntity` output, not as element parameters (see the
   readData LIMITATION above; ENG-91844).
@@ -416,7 +416,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   types it by the column; for a Date/DateTime/Time column pass ISO-8601, e.g. `2026-05-01` or
   `2026-05-01T12:00:00Z`), `processParameter` (a process parameter by name), `elementParameter`
   ({ elementName, parameter } — another element's output; the parameter must EXIST on that element — a
-  `readData` element exposes only `ResultEntity`, so `{ "elementName": "read1", "parameter": "Id" }` is
+  `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }` is
   refused, see the readData LIMITATION), `expression` (a raw token), or `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
