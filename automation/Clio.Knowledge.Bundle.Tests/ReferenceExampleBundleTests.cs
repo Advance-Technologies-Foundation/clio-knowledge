@@ -28,7 +28,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.websocket-reference",
             "catalog/reference-examples/creatio-websocket.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-websocket-reference",
-            "6aeb2356bb7e6e0abb72d38308f701b9525bdb8b")
+            "2d650b03c58553c934b71479c095fff669ad1049")
     ];
 
     [Test]

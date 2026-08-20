@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.31",
+  "libraryVersion": "1.13.32",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -389,7 +389,7 @@
     {
       "itemId": "atf.creatio.websocket-reference",
       "title": "Creatio WebSocket reference",
-      "description": "Live-verified reference workspace for transient current-user messages from Creatio backend C# to Freedom UI through the platform message channel.",
+      "description": "Live-verified reference workspace for backend-to-frontend push, same-user frontend PTP bridging, low-trust frontend BROADCAST fan-out, and the internal SERVER receive boundary.",
       "topicId": "atf.creatio.websocket-reference",
       "role": "reference-example",
       "uri": "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
@@ -1931,8 +1931,8 @@
     },
     {
       "itemId": "websocket-messaging",
-      "title": "Backend-to-frontend WebSocket messaging",
-      "description": "Canonical Creatio guidance for posting a transient JSON SimpleMessage from backend C# to the authenticated user's active channel and consuming it from a Freedom UI page with MessageChannelService and paired lifecycle cleanup.",
+      "title": "Creatio WebSocket messaging",
+      "description": "Canonical Creatio guidance for backend-to-frontend push, frontend PTP and BROADCAST routes, lifecycle-safe MessageChannelService subscriptions, transient delivery, and the internal-only SERVER receive boundary.",
       "topicId": "creatio.websocket-messaging",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/websocket-messaging",

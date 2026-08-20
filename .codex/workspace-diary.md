@@ -76,6 +76,7 @@ Decision: Make `websocket-messaging` the sole owner of user targeting, `SimpleMe
 Discovery: The modern .NET runtime did not expose `IMsgChannelManager` through legacy `ClassFactory`; the guarded `MsgChannelManager.Instance` path worked live. Freedom UI can issue concurrent resume requests before subscription resolution, so the page must guard the pending promise as well as the resolved handle.
 Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests
 Impact: Future agents can discover one evidence-backed workflow and clone the exact live-verified package revision when implementation detail is needed.
+
 ## 2026-08-20 – ENG-95429 follow-up: a merge never authors child elements
 Context: the rule published in 1.13.25 was insert-scoped, and a tester found the body the agent actually produced used `merge` on Scaffold with the button nested in `values.actions[]`. clio#1124 adds the matching validator; this teaches it.
 Decision: new AUTHORING CHILDREN section next to OPERATION SHAPE (it is a body-shape rule, not a Scaffold rule). The BUTTON PLACEMENT carve-out — "a merge/set that patches an element the template already owns in that slot is a different case; nothing here applies to it" — was the hole itself: it read as "use a merge instead". Replaced with a pointer to the owning rule, keeping the genuine property-patch carve-out.
@@ -93,3 +94,17 @@ Discovery: the "ENG-95429" pin never could bite — the bare ticket id also appe
 Decision: label what was READ FROM THE APPLIER versus observed on a stand. Only the strip outcome was stand-verified; the throw, the merge-group ordering and the single-element claim are source-derived, and clio agreeing with them is agreement by construction, not independent confirmation.
 Files: guidance/mcp/guides/platform/mobile/page-modification.md, guidance/mcp/guides/processes/run-process-button.md, automation/Clio.Knowledge.Bundle.Tests/MobileOperationShapeRuleTests.cs
 Impact: a guard test that inserting a neighbouring section can silently defeat is a repo-wide trap, not a one-off — bound a section by its actual successor, never by a distant landmark.
+
+## 2026-08-20 14:11 - Frontend-originated WebSocket routing and disconnect logging
+Context: Alex's PR review requested actionable disconnect logging, and the reference-example scope raised whether a Freedom UI message can be consumed by Creatio backend code.
+Decision: Add payload-free event/user/exception logging to the existing backend publication pattern. Keep frontend-originated behavior out of the published guide until the reference lab exercises it end to end.
+Discovery: `MessageChannelType.PTP` is routed back to the authenticated user's browser channels, while `MessageChannelType.SERVER` (`ServerMsg`) is intended for backend delivery. Client messages surface through `IMsgChannel.OnMessage`; the singleton `IWebSocketServer.OnChannelMessage` aggregates them and uses the platform cluster transport. Package-level handler lifecycle and multi-node processing still need live acceptance before becoming guidance.
+Files: guidance/mcp/guides/integration/websocket-messaging.md, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs
+Impact: The current PR fixes diagnostic context without leaking payloads, and the next lab increment can distinguish PTP client bridging from a true frontend-to-backend SERVER flow.
+
+## 2026-08-20 15:48 – Publish proven frontend WebSocket routes
+Context: The reference lab proved frontend PTP and BROADCAST behavior and disproved a package-level SERVER receiver through the available public boundary.
+Decision: Expand `websocket-messaging` to own backend push, same-user PTP, low-trust BROADCAST, and the internal/unsupported SERVER receive boundary; retain REST-in plus WebSocket-out as the supported bidirectional package flow.
+Discovery: Browser BROADCAST has no package-owned permission check, and `ClassFactory.Get<IMsgServiceLayer>()` has no binding on the tested Creatio 10.0.0.858 .NET 8 runtime. Claude review also required partial-subscription cleanup and declarative Freedom UI metadata in the pinned reference.
+Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs, bundle-source.json
+Impact: Agents can use the two verified frontend routes without mistaking SERVER for a public package extension point or client BROADCAST for an enforceably privileged announcement.

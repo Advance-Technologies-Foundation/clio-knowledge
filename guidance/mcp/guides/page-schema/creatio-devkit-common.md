@@ -3,7 +3,7 @@ clio MCP page-schema sdk common guide
 Scope
 - Use this guide only for deployed page schema code: `SCHEMA_DEPS`, `SCHEMA_ARGS`, `SCHEMA_HANDLERS`, and `SCHEMA_VALIDATORS`.
 - Read this guide together with `page-schema-handlers` when the task adds SDK services, model helpers, channel subscriptions, dialog helpers, data access, process execution, system settings access, or backend service calls inside `SCHEMA_HANDLERS`.
-- When a Creatio backend sends a message to the page through the platform WebSocket channel, you MUST also read `websocket-messaging`; that guide owns sender/body routing, backend publication, lifecycle selection, and transient-delivery rules.
+- When a page sends or receives a message through the platform WebSocket channel, you MUST also read `websocket-messaging`; that guide owns sender/body routing, backend publication, supported frontend routes, lifecycle selection, and transient-delivery rules.
 - Read this guide together with `page-schema-validators` when the task adds SDK-backed async validation inside `SCHEMA_VALIDATORS`.
 - Do NOT use this guide for remote modules or frontend-source classes.
 - Keep page-body authoring on public `@creatio-devkit/common` API only. Do NOT invent services or rely on internal `ɵ*` exports.
