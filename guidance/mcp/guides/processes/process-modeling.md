@@ -342,10 +342,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   physically fire yet.
 - Do NOT run `compile-creatio` to "make a process runnable", and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness — read status back with `describe-business-process`.
-  Inferring "needs a compile" from a raw column NAME is the trap here: e.g. `NeedInstall` is a package
-  DB-install marker (it lives on bound data / SQL-script records, NOT on a process), it means "finish
-  installing this data into the DB", never "compile", and the same caution applies to any `NeedXxx` /
-  `IsXxx` column reached through a raw read.
+  Inferring "needs a compile" from a raw column NAME is the trap here: a raw read of `VwSysProcess` (what
+  `odata-read`/`execute-esq` returns for a process — verified: run_20260820_133837) surfaces per-process
+  DIRTY flags — `NeedInstall`, `NeedUpdateSourceCode`, `NeedUpdateStructure` — that are ALL `true` on a
+  freshly-saved process. None of them is a `compile-creatio` instruction (`NeedInstall` in particular is a
+  DB-install marker meaning "finish installing this into the DB", never "compile"), and the same caution
+  applies to any `NeedXxx` / `IsXxx` column reached through a raw read.
   WITHIN A PROCESS exactly two things pull a compile in, and both are C# YOU authored: a `scriptTask`,
   and a `userTask` carrying an after-activity-save script. Everything else — add/read/modify data,
   formulas, connections, signals, and USING an already-compiled user task — is applied and runs with no
