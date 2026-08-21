@@ -219,6 +219,15 @@ N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO auton
     suffix — `StartSignal1` and `Task2` are the failure this rule names. Do not pad a code with the
     element's type name either. Events: a start event is `<Trigger>Signal` or `<Reason>Start`
     (`AccountAddedSignal`, `ManualStart`); an end event is `End<Reason>` (`EndOnboardingStarted`).
+    DERIVE the code from the element's own `caption`, do not compose it separately: take the caption's
+    words in order, drop articles and copulas (`a`, `an`, `the`, `is`, `are`, `was`) and all
+    punctuation, PascalCase what remains, then add only the prefix or suffix the event shapes above
+    require. "Account is added" -> `AccountAddedSignal`; "Create the follow-up task" ->
+    `CreateFollowUpTask`; "Follow-up task created" -> `EndFollowUpTaskCreated`. Do NOT paraphrase,
+    abbreviate, or drop a content word on the way. Two independent runs of one request wrote the SAME
+    caption "Follow-up task created" and produced `EndFollowUpTaskCreated` and `EndFollowUpCreated`
+    (ENG-94378, clean-room re-run 2026-08-21) — the drift came from shortening, and it is what makes
+    two generations of the same request undiffable.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
     `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
     code tells about the element (ENG-94378: the baseline run produced exactly that). The catalog below
@@ -238,6 +247,16 @@ N8  `parameters[].name`: PascalCase plus a `Parameter` suffix — `TargetAccount
 N9  Codes are STABLE: regenerating from the same request must yield the same codes. Never derive a code
     from the clock, a GUID, a counter, or anything else that varies between runs — stability is what
     makes two generations diffable and a review repeatable.
+    Stability is not a hope, it FOLLOWS from N5's derivation rule: a code that is a function of the
+    caption cannot drift unless the caption does. Measured on one request across two independent runs,
+    every code backed by a formula was byte-identical — the process code (N2's `Object_Action`) and the
+    start-event code (N5's `<Trigger>Signal`) — while the one rule that gives a shape and leaves the
+    wording free, `End<Reason>`, drifted (ENG-94378, 2026-08-21). So the caption wording is part of
+    what this rule constrains: a drifting caption drags its derived code with it. Prefer the plainest
+    statement of the action or the outcome over a stylistic variant.
+    SCOPE: N9 governs the codes of elements and parameters PRESENT IN BOTH runs. Two runs may
+    legitimately model one request with different process parameters — that is a modelling choice, not
+    naming drift, as long as each code obeys N8.
 N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows are outside the buildable
     slice; ENG-91853 is the ticket that extends it). Recorded here so the catalog is complete, the same
     way the R1–R17 header separates the full catalog from the buildable slice. When they land: label a

@@ -108,7 +108,20 @@ public sealed class ProcessNamingRuleTests
             $"{RuleNumbers[^1]}'s not-yet-buildable marker must name the dependency that would make it buildable"),
         ("SEQUENCE FLOWS",
             "the disambiguation: \"connections\" in the E2E stories' \"names, codes and connections\" means "
-            + "sequence flows, NOT the Activity \"Connected to\" links, which are a different feature")
+            + "sequence flows, NOT the Activity \"Connected to\" links, which are a different feature"),
+        ("DERIVE the code from the element's own `caption`, do not compose it separately",
+            $"{RuleNumbers[4]}'s derivation formula: the event shapes above it fix a prefix and leave the wording "
+            + "free, and a code composed independently of the caption is what drifted — two clean-room runs wrote "
+            + "the same caption \"Follow-up task created\" and produced EndFollowUpTaskCreated and EndFollowUpCreated"),
+        ("Do NOT paraphrase, abbreviate, or drop a content word",
+            $"without the prohibition {RuleNumbers[4]}'s formula reads as advisory; shortening on the way from "
+            + "caption to code is the exact mechanism of the observed drift, so it has to be named as forbidden"),
+        ("the caption wording is part of what this rule constrains",
+            $"{RuleNumbers[8]} has to reach past codes: a code that is a function of the caption drifts when the "
+            + "caption does, so a stability rule governing codes alone would leave the drift's own source free"),
+        ($"{RuleNumbers[8]} governs the codes of elements and parameters PRESENT IN BOTH runs",
+            $"{RuleNumbers[8]}'s scope carve-out: two runs may legitimately model one request with different "
+            + "process parameters, and without the boundary that modelling choice reads as naming drift")
     ];
 
     /// <summary>
