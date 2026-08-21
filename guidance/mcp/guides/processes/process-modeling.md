@@ -326,8 +326,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
 5. Verify: `describe-business-process` (element types, user-task names, parameter sources + direction + isResult
-   — an output you can map FROM has `isResult:true` or `direction:"Out"`; the signal trigger) /
-   `execute-esq` (VwProcessLib by caption).
+   — an output you can map FROM has `isResult:true` or `direction:"Out"`; the signal trigger). Verify through
+   `describe-business-process`, not a raw `execute-esq`/`odata-read` of the process record (see the readiness
+   bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/email
