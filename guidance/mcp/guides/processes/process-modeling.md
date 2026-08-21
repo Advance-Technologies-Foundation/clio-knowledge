@@ -419,8 +419,9 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
 5. Verify: `describe-business-process` (element types, user-task names, parameter sources + direction + isResult
-   — an output you can map FROM has `isResult:true` or `direction:"Out"`; the signal trigger) /
-   `execute-esq` (VwProcessLib by caption).
+   — an output you can map FROM has `isResult:true` or `direction:"Out"`; the signal trigger). Verify through
+   `describe-business-process`, not a raw `execute-esq`/`odata-read` of the process record (see the readiness
+   bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/email
@@ -433,6 +434,20 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
+- Do NOT run `compile-creatio` to "make a process runnable", and do NOT read a raw system record
+  (`odata-read`/`execute-esq`) to decide readiness — read status back with `describe-business-process`.
+  Inferring "needs a compile" from a raw column NAME is the trap here: a raw read of `VwSysProcess` (what
+  `odata-read`/`execute-esq` returns for a process — verified: run_20260820_133837) surfaces per-process
+  DIRTY flags — `NeedInstall`, `NeedUpdateSourceCode`, `NeedUpdateStructure` — that are ALL `true` on a
+  freshly-saved process. None of them is a `compile-creatio` instruction (`NeedInstall` in particular is a
+  DB-install marker meaning "finish installing this into the DB", never "compile"), and the same caution
+  applies to any `NeedXxx` / `IsXxx` column reached through a raw read.
+  WITHIN A PROCESS exactly two things pull a compile in, and both are C# YOU authored: a `scriptTask`,
+  and a `userTask` carrying an after-activity-save script. Everything else — add/read/modify data,
+  formulas, connections, signals, and USING an already-compiled user task — is applied and runs with no
+  compile. This bullet scopes compilation to the PROCESS; other configuration schemas (source code,
+  business objects, DCM, value lists, and a CUSTOM user-task schema — see the user-task note below) carry
+  their own compile obligations and are NOT covered here.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
@@ -470,6 +485,8 @@ System actions (palette group "System actions"):
 - `deleteDataUserTask` Delete data — delete matched records.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
+  - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
+    IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
 - `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance over a collection.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
@@ -482,6 +499,11 @@ Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/m
   BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6).
 Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
+- Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
+  its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
+  exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
+  it. Merely REFERENCING an already-compiled user task by `userTaskName` needs nothing. (This is a
+  user-task-schema obligation, separate from the in-process compile note under `scriptTask` above.)
 
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup),
