@@ -15,6 +15,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
+  - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
@@ -28,8 +29,10 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
+  - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
+  - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution

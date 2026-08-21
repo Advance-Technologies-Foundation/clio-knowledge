@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.31",
+  "libraryVersion": "1.13.37",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -31,6 +31,7 @@
       "atf.creatio.custom-mcp-tool-reference",
       "atf.creatio.google-pubsub-reference",
       "atf.creatio.kafka-reference",
+      "atf.creatio.websocket-reference",
       "branding",
       "business-rule-filters",
       "business-rules",
@@ -140,6 +141,7 @@
       "theming",
       "ui-project",
       "virtual-entities",
+      "websocket-messaging",
       "when-to-use-requests"
     ],
     "resourceUris": [
@@ -152,6 +154,7 @@
       "docs://knowledge/com.creatio.clio/atf.creatio.custom-mcp-tool-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
       "docs://knowledge/com.creatio.clio/branding",
       "docs://knowledge/com.creatio.clio/business-rule-filters",
       "docs://knowledge/com.creatio.clio/business-rules",
@@ -261,6 +264,7 @@
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
+      "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/when-to-use-requests"
     ]
   },
@@ -380,6 +384,17 @@
       "uri": "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
       "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
       "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "atf.creatio.websocket-reference",
+      "title": "Creatio WebSocket reference",
+      "description": "Live-verified reference workspace for backend-to-frontend push, same-user frontend PTP bridging, low-trust frontend BROADCAST fan-out, and the internal SERVER receive boundary.",
+      "topicId": "atf.creatio.websocket-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
+      "sourcePath": "catalog/reference-examples/creatio-websocket.yaml",
+      "bundlePath": "resources/atf.creatio.websocket-reference.yaml",
       "mediaType": "text/yaml"
     },
     {
@@ -525,7 +540,7 @@
     {
       "itemId": "core-rules",
       "title": "Core rules",
-      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
+      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, scratch cleanup, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
       "topicId": "creatio.core-rules",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/core-rules",
@@ -1116,7 +1131,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks, the fully configurable Send email element (custom message: mode, sender, recipients, subject, HTML body, options, manual-mode performer; no email templates), and sequence flows; gateways, conditional/default flows and timers are not buildable yet.",
+      "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks, the fully configurable Send email element (custom message: mode, sender, recipients, subject, HTML body, options, manual-mode performer; no email templates), and sequence flows; gateways, conditional/default flows and timers are not buildable yet. Also owns the N1-N10 naming rules for the process caption and code, element captions and codes, and process parameter codes.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "requiredFeatures": [
@@ -1889,7 +1904,7 @@
     {
       "itemId": "ui-project",
       "title": "Freedom UI projects",
-      "description": "Canonical MCP guidance for scaffolding a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, and the create-workspace prerequisite.",
+      "description": "Canonical MCP guidance for scaffolding and testing a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, runner selection, and the create-workspace prerequisite.",
       "topicId": "creatio.ui-project",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/ui-project",
@@ -1912,6 +1927,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "websocket-messaging",
+      "title": "Creatio WebSocket messaging",
+      "description": "Canonical Creatio guidance for backend-to-frontend push, frontend PTP and BROADCAST routes, lifecycle-safe MessageChannelService subscriptions, transient delivery, and the internal-only SERVER receive boundary.",
+      "topicId": "creatio.websocket-messaging",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/websocket-messaging",
+      "legacyUris": [
+        "docs://mcp/guides/websocket-messaging"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/websocket-messaging.md",
+      "bundlePath": "resources/websocket-messaging.md",
       "mediaType": "text/plain"
     },
     {

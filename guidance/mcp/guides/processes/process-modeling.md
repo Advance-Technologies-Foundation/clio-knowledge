@@ -39,7 +39,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   you use one; do not present such a result as a working data operation.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
   TEMPLATES are not supported — say so if the user asks for one). The `email` block configures everything:
-  `{ "name": "SendEmail1", "type": "sendEmail", "email": {
+  `{ "name": "SendWelcomeEmail", "type": "sendEmail", "caption": "Send the welcome email", "email": {
      "mode": "auto"|"manual", "sender": "<MailboxSyncSettings record id OR a sender email address configured
      on the environment>", "subject": "plain text", "body": "<html>…</html>", "bodyFormat": "html",
      "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |
@@ -119,7 +119,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
-  (`{ "op": "setElement", "elementName": "task1", "elementUpdate": { "useBackgroundMode": false } }`):
+  (`{ "op": "setElement", "elementName": "NotifyOwner", "elementUpdate": { "useBackgroundMode": false } }`):
   `true` runs it asynchronously via the background scheduler, `false` inline. OMIT it to keep the element
   kind's own default, which mirrors the visual designer's palette — a `signalStart` defaults to background
   mode, so a signal-started process runs asynchronously and its effects appear a moment after the record is
@@ -139,21 +139,112 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 == Descriptor (create-business-process) ==
 {
-  "name": "UsrSchemaCode", "caption": "Title", "packageName": "Custom",
+  "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "Custom",
   "elements": [
-    { "name": "Start1", "type": "startEvent" },
-    { "name": "task1",  "type": "performTask", "caption": "..." },
-    { "name": "End1",   "type": "endEvent" }
+    { "name": "ManualStart",  "type": "startEvent",  "caption": "Onboarding requested" },
+    { "name": "NotifyOwner",  "type": "performTask", "caption": "Notify the account owner" },
+    { "name": "EndOnboarded", "type": "endEvent",    "caption": "Onboarding handed off" }
   ],
-  "flows":      [ { "source": "Start1", "target": "task1" }, { "source": "task1", "target": "End1" } ],
-  "parameters": [ { "name": "MyText", "type": "Text", "direction": "In", "caption": "..." } ],
-  "mappings":   [ { "elementName": "task1", "elementParameter": "<ParamName>", "processParameter": "MyText" } ]
+  "flows":      [ { "source": "ManualStart", "target": "NotifyOwner" },
+                  { "source": "NotifyOwner", "target": "EndOnboarded" } ],
+  "parameters": [ { "name": "AccountNameParameter", "type": "Text", "direction": "In",
+                    "caption": "Account name" } ],
+  "mappings":   [ { "elementName": "NotifyOwner", "elementParameter": "<ParamName>",
+                    "processParameter": "AccountNameParameter" } ]
 }
 - `name` is the local element handle (the schema element Name, a string code) used by flows
   (`source`/`target`) and mappings (`elementName`). Creatio identifies an element by this Name plus a
   UId GUID; the platform reserves "Id" for the GUID, so the handle is `name`, not `id`. A `userTask`
   element auto-carries the task's parameters; map values into them with `mappings`. For a record trigger
   use `signalStart` (next section).
+- EVERY code and caption in the examples of this guide is N1-N10 compliant on purpose (see "Naming and
+  codes" below): copy their SHAPE, not just their fields. A generated `Start1` / `task1` / `End1` is the
+  failure those rules exist to prevent, and an example is what a model copies first.
+
+== Naming and codes (N1-N10) ==
+(AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
+pre-checks them — `validate-process-graph` enforces a subset of the R1–R17 connection rules and enforces
+none of these. The reader they are written for is a no-code team opening the result in the Process
+Designer, so a generated process has to read as though a person named it.)
+Field map — each rule below names the descriptor field it governs:
+  process title    -> `caption` (top level)
+  process code     -> `name` (top level)
+  element label    -> `elements[].caption`
+  element code     -> `elements[].name` — also the flow `source`/`target` and the mapping `elementName` handle
+  parameter code   -> `parameters[].name`
+  parameter label  -> `parameters[].caption`
+N1  Process `caption`: SENTENCE CASE — first word capitalized, the rest lower case except proper nouns.
+    "Corporate customer onboarding", NOT "Corporate Customer Onboarding".
+N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrAccount_Onboard`,
+    `UsrOrder_Approve`. The prefix is NOT applied for you, and WHICH prefix to apply is not this guide's
+    to decide: `app-modeling` owns it, in the bullet that reads "use the `schema-name-prefix` value from
+    `create-app` (or from `get-schema-name-prefix`) as the prefix for ALL custom schema codes" — whose
+    enumeration names business-process codes. Read the prefix from there and apply what it yields:
+    * The environment DECLARES a prefix -> the server REFUSES a code without it, with `The
+      "Account_Onboard" code of the "<caption>" object must start with the "Usr" prefix` (ENG-94378,
+      observed 2026-08-19 on a 7.8.0 stand whose `SchemaNamePrefix` is `Usr`; the refusal names whatever
+      prefix THAT environment declares, so never hard-code `Usr`).
+    * The environment declares an EMPTY prefix -> add none, as `app-modeling` states outright. The
+      refusal above is evidence about a prefix-declaring environment only; an empty-prefix stand was not
+      probed, so do not read it as "the platform always demands a prefix".
+    After the prefix use two `_`-separated PascalCase segments, the object then the action. A further
+    `_<Qualifier>` segment IS accepted — `UsrProbe_Check_Naming` saved on a 7.8.0 stand (ENG-94378,
+    probed 2026-08-20) — but add one only when the action genuinely needs it: of 427 process schemas on
+    that stand, 90 carry exactly one `_` and NONE carry two, so two segments is the house shape. Add the
+    package name only to break a real collision, never as blanket disambiguation. NO autonumber, NO
+    random suffix, NO GUID fragment — the designer's own `Process_3d0825b` shape is what this prevents.
+N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
+    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone.
+N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never leave it to a default.
+    Sentence case, <= 60 characters, short enough to read inside the diagram box. The SHAPE follows what
+    the element IS:
+    * ACTIVITIES (`userTask` / `performTask` / `readData`, `sendEmail`) — VERB FIRST, the action the
+      process performs: "Read primary contact", NOT "Read the account's primary contact" (padded) and
+      NOT "Primary contact reading" (nominalized).
+    * EVENTS (`startEvent`, `signalStart`, `endEvent`) — the TRIGGER or the OUTCOME, a noun phrase:
+      "Record is modified", "Order amount or status changed", "Onboarding handed off". Verb-first
+      MISDESCRIBES an event: "Modify record" reads as an action the process performs rather than the
+      condition that starts it, and a Terminate end performs no action at all.
+    This is the only text a no-code reviewer sees on the diagram, so an unset or padded caption is what
+    makes a generated process unreviewable.
+    EVERY element type accepts one — verified across the whole buildable slice, events included:
+    `startEvent`, `signalStart`, `endEvent`, `userTask` (incl. `performTask` / `readData`) and `sendEmail`
+    were each built WITH a caption and each read the caption back verbatim through
+    `describe-business-process` (ENG-94378, probed 2026-08-20 on a 7.8.0 stand). So there is no element
+    on which this rule is dead text. OMIT a caption and the platform falls back to THE ELEMENT CODE as the
+    caption — the same graph built without captions read back `"caption": "ProbeStart"` on its start event
+    — so an unset caption is not a friendly default: it puts a raw code on the diagram, which is exactly
+    how `Start1` reaches a no-code reviewer's screen.
+N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO autonumber and NO random
+    suffix — `StartSignal1` and `Task2` are the failure this rule names. Do not pad a code with the
+    element's type name either. Events: a start event is `<Trigger>Signal` or `<Reason>Start`
+    (`AccountAddedSignal`, `ManualStart`); an end event is `End<Reason>` (`EndOnboardingStarted`).
+N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
+    `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
+    code tells about the element (ENG-94378: the baseline run produced exactly that). The catalog below
+    lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API builds today is Terminate.
+    SCOPE: the rule forbids only a code that ASSERTS a type — `EndNormal` on a Terminate end, or
+    `Terminate…` on an element that is not one. It does NOT ban the `End<Reason>` shape N5 prescribes:
+    `EndOnboardingStarted` names the REASON, not the type, and is correct on a Terminate end. Read the
+    runtime type back with `describe-business-process` (`type`) and name the element after what it IS.
+N7  The `UserTask` postfix belongs to a user-task SCHEMA you author, NEVER to an element code. At runtime
+    Read data, Perform task, Send email and Modify data are all user tasks, so applying the postfix to
+    element codes would put it on nearly every element. `CallTask` is right, `CallTaskUserTask` is wrong.
+N8  `parameters[].name`: PascalCase plus a `Parameter` suffix — `TargetAccountParameter`,
+    `CallDueDaysParameter`. The `caption` carries NO suffix ("Target account"). EXCLUSION: the parameters
+    the platform auto-creates on an ELEMENT (`Duration`, `ShowInScheduler`, `RemindBefore`,
+    `ResultEntity`, ...) belong to the task, not to you — never rename them, never expect the suffix on
+    them. The rule governs `parameters[]`, the process-level list you author.
+N9  Codes are STABLE: regenerating from the same request must yield the same codes. Never derive a code
+    from the clock, a GUID, a counter, or anything else that varies between runs — stability is what
+    makes two generations diffable and a review repeatable.
+N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows are outside the buildable
+    slice; ENG-91853 is the ticket that extends it). Recorded here so the catalog is complete, the same
+    way the R1–R17 header separates the full catalog from the buildable slice. When they land: label a
+    conditional flow with the decision outcome it represents (`Budget > 10 000`), and label the default
+    flow explicitly rather than leaving it blank.
+    "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
+    different feature with its own section below ("Activity connections") and no naming surface at all.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
 - When the goal is "run a process when a record is saved / added / changed / deleted" (e.g. on a page
@@ -162,14 +253,15 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   (`crt.SaveRecordRequest` / any page handler) to launch a process on save — that is the wrong tool and
   a fragile workaround. The signal start is the platform-native, declarative trigger.
 - Build it with `create-business-process`. The start element is:
-    { "name": "Start1", "type": "signalStart", "signal": { "entity": "<EntityName>", "on": "modified" } }
+    { "name": "RecordModifiedSignal", "type": "signalStart", "caption": "Record is modified",
+      "signal": { "entity": "<EntityName>", "on": "modified" } }
   then the activity (e.g. a Perform task / `performTask` that shows a Task), then an `endEvent`,
-  wired Start1 -> activity -> end. (`entity` is the page's object, e.g. UsrTestRunButton.)
+  wired RecordModifiedSignal -> activity -> end. (`entity` is the page's object, e.g. UsrTestRunButton.)
 - `on` is a SINGLE event: "added" | "modified" | "deleted" (the designer has no combined
   "added or modified"). "On save" of a record edited on a page = "modified"; a brand-new record = "added".
 - A "modified" trigger fires on ANY field change by default. To restrict it to fire ONLY when specific
   columns change, add `changedColumns` (an array of column NAMES on the trigger entity) to the signal:
-    { "name": "Start1", "type": "signalStart",
+    { "name": "OrderChangedSignal", "type": "signalStart", "caption": "Order amount or status changed",
       "signal": { "entity": "Order", "on": "modified", "changedColumns": ["Amount", "StatusId"] } }
   `changedColumns` is valid ONLY for `on: "modified"` (the designer's "expect changes" case) — the server
   rejects it for "added"/"deleted", and rejects a name that is not a column on the entity. Use entity COLUMN
@@ -180,7 +272,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   records qualify — combine them freely.
 - To fire the trigger ONLY for records matching a condition (e.g. only when Name = "Start"), add a
   `filter` to the signalStart element (full shape in "Data source filters" below):
-    { "name": "Start1", "type": "signalStart",
+    { "name": "RunButtonModifiedSignal", "type": "signalStart", "caption": "Run button is pressed",
       "signal": { "entity": "UsrTestRunButton", "on": "modified" },
       "filter": { "object": "UsrTestRunButton",
         "conditions": [ { "column": "UsrName", "comparison": "equal", "value": "Start" } ] } }
@@ -189,7 +281,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
 - To change an EXISTING signal's trigger or tracked columns IN PLACE (without re-adding it), use the
   `setSignal` op — it preserves the element and its flows:
-    { "op": "setSignal", "elementName": "Start1",
+    { "op": "setSignal", "elementName": "OrderChangedSignal",
       "signal": { "on": "modified", "changedColumns": ["Amount"] } }
   Partial update: omit `changedColumns` to clear column tracking (fire on any change), omit `on` to keep the
   current change type, and include `entity` only to retarget the trigger object (retargeting clears any
@@ -198,7 +290,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 == Read data element (readData) — first-record mode ==
 - A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
   parameter (the whole record). Configure it with the element's `readData` block:
-    { "name": "ReadContact1", "type": "readData", "caption": "Read newest contact",
+    { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
       "readData": {
         "source": "Contact",                                  // REQUIRED at create: the entity to read
         "mode": "first",                                      // optional; "first" is the only buildable mode
@@ -229,7 +321,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   work off a specific record today, use a `signalStart` trigger output (`RecordId`) or a process parameter.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
-    { "op": "setElement", "elementName": "ReadContact1",
+    { "op": "setElement", "elementName": "ReadNewestContact",
       "elementUpdate": { "readData": { "sort": { "column": "ModifiedOn", "direction": "desc" } } } }
   Partial update: omit `source` to keep the current source object, omit `columns`/`sort` to keep the
   current selection/order, pass `columns: []` to reset to ALL columns. RETARGETING `source` to a different
@@ -321,7 +413,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 == Build recipe (intent -> running process) ==
 1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
-   more end events; plus process parameters and the value mappings between them.
+   more end events; plus process parameters and the value mappings between them — and name them per
+   N1-N10 in "Naming and codes", which is what makes the result reviewable in the Process Designer.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
@@ -402,7 +495,8 @@ User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialo
   `preconfiguredPageUserTask` Pre-configured page, `emailTemplateUserTask` Send email, `approvalUserTask` Approval.
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
   signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
-  catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate.
+  catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
+  BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6).
 Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
@@ -419,7 +513,7 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   element's own parameters come from the task. The same shape is
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
   Boolean, Date, Date-time, Time, Guid, and Lookup — other types (composite / entity / file / ...) are not
-  supported yet.
+  supported yet. Name a process parameter per N8 in "Naming and codes".
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.

@@ -70,6 +70,12 @@ Discovery: `validate-page` does not reach `ValidateRunProcessButtonStructure` on
 Files: guidance/mcp/guides/platform/mobile/page-modification.md, guidance/mcp/guides/processes/run-process-button.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/MobileOperationShapeRuleTests.cs
 Impact: the two rules are now reachable from the entry point that the reported scenario actually takes, and a regression in their wording fails a test instead of silently re-recording the content digest.
 
+## 2026-08-20 - Creatio backend-to-Freedom-UI WebSocket guidance
+Context: Turn a live vbg lab into canonical agent guidance and publish the executable example through the ATF reference catalog.
+Decision: Make `websocket-messaging` the sole owner of user targeting, `SimpleMessage` routing, transient delivery, disconnect handling, and lifecycle-safe `MessageChannelService` subscriptions.
+Discovery: The modern .NET runtime did not expose `IMsgChannelManager` through legacy `ClassFactory`; the guarded `MsgChannelManager.Instance` path worked live. Freedom UI can issue concurrent resume requests before subscription resolution, so the page must guard the pending promise as well as the resolved handle.
+Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests
+Impact: Future agents can discover one evidence-backed workflow and clone the exact live-verified package revision when implementation detail is needed.
 
 ## 2026-08-20 – ENG-95429 follow-up: a merge never authors child elements
 Context: the rule published in 1.13.25 was insert-scoped, and a tester found the body the agent actually produced used `merge` on Scaffold with the button nested in `values.actions[]`. clio#1124 adds the matching validator; this teaches it.
@@ -104,3 +110,51 @@ Open: which entity the agent actually read (the incident log for run_20260820_13
 Files: guidance/mcp/guides/processes/process-modeling.md
 Impact: the rule is scoped, source-accurate, and split across the two authoritative owners (process compile trigger in-article; the raw-column caution mirrored on the clio compile-creatio contract).
 Evidence pin (run_20260820_133837 copilot transcript): the agent read `VwSysProcess` via odata-read and the created process row carried `NeedInstall`, `NeedUpdateSourceCode`, `NeedUpdateStructure` ALL = true. So `NeedInstall` IS surfaced on the VwSysProcess VIEW — d-krestov's §1 ("no process entity has it") missed that view. Article wording now names VwSysProcess + the three dirty flags instead of "bound-data records". The rule is unchanged: none of those flags is a compile trigger; use describe-business-process; compile only for authored C#.
+## 2026-08-20 14:11 - Frontend-originated WebSocket routing and disconnect logging
+Context: Alex's PR review requested actionable disconnect logging, and the reference-example scope raised whether a Freedom UI message can be consumed by Creatio backend code.
+Decision: Add payload-free event/user/exception logging to the existing backend publication pattern. Keep frontend-originated behavior out of the published guide until the reference lab exercises it end to end.
+Discovery: `MessageChannelType.PTP` is routed back to the authenticated user's browser channels, while `MessageChannelType.SERVER` (`ServerMsg`) is intended for backend delivery. Client messages surface through `IMsgChannel.OnMessage`; the singleton `IWebSocketServer.OnChannelMessage` aggregates them and uses the platform cluster transport. Package-level handler lifecycle and multi-node processing still need live acceptance before becoming guidance.
+Files: guidance/mcp/guides/integration/websocket-messaging.md, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs
+Impact: The current PR fixes diagnostic context without leaking payloads, and the next lab increment can distinguish PTP client bridging from a true frontend-to-backend SERVER flow.
+
+## 2026-08-20 15:48 – Publish proven frontend WebSocket routes
+Context: The reference lab proved frontend PTP and BROADCAST behavior and disproved a package-level SERVER receiver through the available public boundary.
+Decision: Expand `websocket-messaging` to own backend push, same-user PTP, low-trust BROADCAST, and the internal/unsupported SERVER receive boundary; retain REST-in plus WebSocket-out as the supported bidirectional package flow.
+Discovery: Browser BROADCAST has no package-owned permission check, and `ClassFactory.Get<IMsgServiceLayer>()` has no binding on the tested Creatio 10.0.0.858 .NET 8 runtime. Claude review also required partial-subscription cleanup and declarative Freedom UI metadata in the pinned reference.
+Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs, bundle-source.json
+Impact: Agents can use the two verified frontend routes without mistaking SERVER for a public package extension point or client BROADCAST for an enforceably privileged announcement.
+
+## 2026-08-21 00:11 – GH #78 ui-project Angular test boundary
+Context: Clio #1136 corrected a generated Jest setup that prevented every Angular spec from executing, while the canonical guide only named build workflows.
+Decision: Teach `npm test` / `ng test` as the project-spec workflow and state that the scaffold intentionally contains no specs; do not recommend `passWithNoTests` as false-green proof.
+Discovery: The executable repair remains in Clio. clio-knowledge owns only the agent decision and honest zero-spec boundary. Current publication derives sequence from `libraryVersion`, so the content release requires only the 1.13.35 version bump rather than a hand-authored sequence.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs, bundle-source.json
+Impact: agents can distinguish normal Jest `No tests found` from a broken Angular test environment and require a real spec as acceptance evidence.
+
+## 2026-08-21 00:24 – GH #78 review: qualify and route the Jest rule
+Context: Agentic review found that `creatioVersion` can select older Karma templates and that the expanded testing scope was absent from resource discovery and routing.
+Decision: Limit the no-spec/Jest rule to the current default Angular 19 template, require runner inspection for version-specific templates, and route create/build/test requests to `ui-project`.
+Discovery: A correct leaf rule can still mislead when its applicability boundary and discovery metadata lag behind it; content tests now pin all three surfaces.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: agents reach the guide for testing requests without applying Jest-specific advice to supported Karma scaffolds.
+
+## 2026-08-21 00:31 – GH #78 review: cover pre-fix generated projects
+Context: Corrected-base review found that the published library supports older Clio 8.1 releases whose Jest scaffolds still contain the duplicate Angular test-environment initializer.
+Decision: Select testing advice from the generated `angular.json` builder, define builder-owned initialization for `@angular-builders/jest:run`, and give existing pre-fix projects an explicit remove-or-regenerate path.
+Discovery: Creatio template version alone does not identify whether a generated Jest setup contains the Clio-side repair; the emitted configuration is the durable applicability boundary.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: current and previously generated projects receive sound runner-specific guidance across the published Clio 8.1 compatibility range.
+
+## 2026-08-21 00:38 – GH #78 Claude review: pin the supported Jest entry point
+Context: Claude confirmed builder-owned initialization but noted that invoking Jest directly bypasses the Angular builder and therefore its test-environment setup.
+Decision: Require Jest-backed generated projects to run specs through `npm test` or `ng test`, matching the generated package script and builder contract.
+Discovery: The project-level Jest configuration extends the Angular builder path; it is not a standalone supported runner contract.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: guidance no longer leaves IDE or CI users to infer that direct Jest execution is equivalent to the supported Angular test command.
+
+## 2026-08-21 00:43 – GH #78 Claude review: bind remediation to evidence
+Context: Claude found that the stable builder id alone does not prove initialization ownership across the library's full Clio 8.1 compatibility range, and the unreleased "repaired version" wording was unactionable.
+Decision: Bind the workaround to the reported Angular 19 / builder 19.x / preset 14.x stack plus its duplicate-provider error, require inspection for other combinations, remove regeneration advice, and narrow discovery from build/test to create/test.
+Discovery: The emitted dependency versions and failure signature are durable evidence; a builder name shared across versions is not.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: the guide repairs the proven failure without deleting required initialization in an unverified historical runner.
