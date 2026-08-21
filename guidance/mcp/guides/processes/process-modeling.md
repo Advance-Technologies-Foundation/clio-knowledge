@@ -63,7 +63,17 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
   `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
-  capture), so say "not through this tool yet", never "Creatio cannot". The HTML body is stored verbatim;
+  capture), so say "not through this tool yet", never "Creatio cannot".
+  A SYSTEM SETTING is reachable today and is the RIGHT default for an address that belongs to a team rather
+  than a person (an HR inbox, a support alias): send the recipient as an `expression` whose formula is
+  `[#SysSettings.<Code>#]` — e.g. `[#SysSettings.UsrHrNotificationEmail#]`. Prefer it over a literal address
+  and over a named Contact: the setting is what an administrator can change afterwards without reopening the
+  process, while a hard-coded address silently keeps mailing the old destination. Discover the code with
+  `list-sys-settings` (pass `search-pattern` — the unfiltered catalog is hundreds of rows), and create the
+  setting with `create-sys-setting` when it does not exist yet rather than falling back to a literal. When a
+  request names a recipient by ROLE rather than by address ("notify HR", "tell support"), treat a system
+  setting as the expected answer and offer it explicitly — an option set of literal / contact / parameter
+  omits the one source that survives a change of staff. The HTML body is stored verbatim;
   `bodyFormat` accepts ONLY `"html"` — any other value is REJECTED at build even when no `body` is sent (the
   applier validates the format first, so it is a contract guarantee, not a convention). VERIFIED on a stand
   (2026-08-13, a `CrtProcessBuilder` that supports `sendEmail`): `bodyFormat:"text"` and `bodyFormat:"markdown"`
@@ -74,7 +84,19 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `<img data-value="[#…#]">` image tokens — NO UID needed: `[[param:<Name>]]` (a whole process parameter),
   `[[element:<ElementName>.<OutputParameter>]]` (a whole element output, e.g. a `readData` element's
   `ResultEntity`), and `[[element:<ElementName>.<OutputParameter>.<Column>]]` (ONE direct column of that
-  output record). A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
+  output record). A LOOKUP column in a body macro renders the referenced record's **Id**, not its display
+  value: `[[element:Read.ResultEntity.Job]]` mails `11d68189-…`, and an EMPTY lookup mails
+  `00000000-0000-0000-0000-000000000000` rather than a blank. This is a PLATFORM limit, not a contract one, and
+  it cannot be worked around by drilling deeper — the token is one column deep by construction and BOTH deeper
+  routes are refused by core, verified 2026-08-21: a chained `[EntityColumn:{…}].[EntityColumn:{…}]` is read
+  only to its LAST segment and resolved against the ROOT schema, and a chained meta path in a `readData`
+  element's `EntityColumnMetaPathes` is REJECTED on save (`Column with identifier "<uid>" not found in the
+  entity schema "<root>"`). So do NOT put a lookup column in a body a human reads. Email a TEXT column that
+  carries the same information instead — on `Employee`, `FullJobTitle` mails `Developer` while `Job` mails a
+  GUID — and when only the lookup exists, say the value cannot be rendered rather than shipping an Id.
+  Reviewing this needs a SENT message: the schema validates, the process runs green, and no macro is left
+  unresolved, so every check short of reading the delivered email passes. A process parameter can only be
+  inserted WHOLE — Creatio has NO column drill on a bare
   parameter (verified: zero specimens of `[Parameter].[EntityColumn]` without an `[Element]`; the designer
   offers column drill only on the Elements tab), so to email a record's column read it with a data element
   FIRST and drill THAT output. An unknown parameter/element/column is REJECTED naming what was missing, so
@@ -117,7 +139,18 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `[[param:…]]` / `[[element:…]]` author form — so on a MODIFY you can read the current body and edit it in
   place. A macro whose UIds no longer resolve to names is left as the raw `<img>` token (best-effort decode).
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
-- `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
+- `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
+  four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
+  impossible requirement). Verified against the designer's own property pages (`CrtProcessDesigner`,
+  2026-08-21): `ProcessTerminateEventPropertiesPage`, `ProcessTimerStartEventPropertiesPage`,
+  `IntermediateThrowMessagePropertiesPage` and `SendEmailUserTaskPropertiesPage` each apply a schema-diff
+  `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
+  background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
+  element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
+  which does not. For a SIGNAL-STARTED process set the flag on every element that offers it: nobody is waiting
+  at a screen, and leaving the work inline holds the saving user's request. The designer gates the control on
+  `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
+  so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op
   (`{ "op": "setElement", "elementName": "NotifyOwner", "elementUpdate": { "useBackgroundMode": false } }`):
   `true` runs it asynchronously via the background scheduler, `false` inline. OMIT it to keep the element
