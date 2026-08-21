@@ -444,7 +444,10 @@ REACHABILITY FIRST — a section reaches the mobile app only when BOTH a `SysMod
   exist for it. `create-app` sets both up itself, so a scaffolded app is already reachable; the check
   matters for apps whose package was built without mobile pages. Without them the page and its widget
   exist in the Mobile Designer only. Registering a mobile section is separate work, not part of adding a
-  widget.
+  widget. Workplace-driven registration is the 8.3.3+ mechanism and is gated by the feature
+  `Mobile.UseSysWorkplaceForModuleRegistration`; with that feature OFF the section list comes from the
+  legacy `MobileApplicationManifest`, so check the feature before trusting the workplace query. A widget
+  insert never touches the manifest.
 
 DIFF THE BODY AROUND AN APPEND WRITE — `viewConfigDiff` dedupes by element name and keeps the last entry,
   so an append can silently drop a PRE-EXISTING operation your fragment never names (observed three
@@ -498,7 +501,9 @@ ORPHANED RESOURCE KEYS — the resources payload only adds/updates. Replacing a 
 
 VERIFY IN THE APP — a mobile widget cannot be verified in a browser. Check the saved body with
   `get-page`, the layout on the Mobile Designer canvas, and the rendered result in the mobile
-  application. `/0/ClientApp/` is the designer app and `/0/Shell/` the runtime shell; the mobile client
+  application (device or emulator). The app is offline-first: it serves the local cache first, so
+  synchronize after a schema change and re-login before checking workplace or section lists. An emulator
+  also exposes the page metadata, business-rule metadata and merged manifest the client actually received. `/0/ClientApp/` is the designer app and `/0/Shell/` the runtime shell; the mobile client
   may be Flutter-first (`UseMobileFlutterFirst`) and `/0/Nui/mobile.aspx` may be absent — that says
   nothing about the widget. A `success: true` save proves persistence only: re-read with `get-page` and
   check `willCreateReplacingInDesignPackage`.
