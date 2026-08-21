@@ -15,6 +15,16 @@ the `get-component-info` documentation and its references first.
 
 ----
 
+## Mobile pages
+
+On a mobile page (`schemaType = 10`) this is the same `crt.ChartWidget` with the same `config`
+contract, but the type must be resolved from the MOBILE registry
+(`get-component-info schema-type: "mobile"`), and placement, sizing, theming and record scoping all
+differ. Read `mobile-page-modification` → ANALYTICS WIDGETS ON MOBILE first; the Placement,
+Style, Display-settings size floors and "Filter by page data" sections below are web/desktop only.
+Mobile has no dashboard or home-page template — a chart goes onto an existing mobile record or
+section page.
+
 ## Routing — is a chart the right widget?
 
 - A single aggregated value (one number) -> Metric tile (`crt.IndicatorWidget`); see `indicator-widget`.
