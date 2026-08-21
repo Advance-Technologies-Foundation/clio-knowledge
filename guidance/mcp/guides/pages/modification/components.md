@@ -53,6 +53,58 @@ Rules for the handlers block
 - To show a user-facing message (confirmation/info/success/error) from a handler, dispatch `crt.ShowDialogRequest` (message/actions under `dialogConfig.data`); this needs `@creatio-devkit/common` in `SCHEMA_DEPS` and the `sdk` alias in `SCHEMA_ARGS` (see `page-schema-handlers`). NEVER use `alert(...)`, `window.alert(...)`, `confirm(...)`, or `prompt(...)`.
 (For non-trivial handler logic — business orchestration, SDK service calls, attribute-change handling — read `page-schema-handlers`.)
 
+Binding a custom remote-module output payload
+For an Angular remote-module component registered as a web component, Angular Elements dispatches an
+`@Output()` / `@CrtOutput()` emission as a `CustomEvent`. Map the emitted value into a named request
+parameter with an `@event` binding expression; do not read the deprecated `$initialEvent` field in the
+handler.
+
+If `cardOpened` emits the record ID as a string, bind `CustomEvent.detail` like this:
+
+```jsonc
+{
+    "operation": "insert",
+    "name": "UsrOpportunityKanban",
+    "values": {
+        "type": "usr.OpportunityKanban",
+        "cardOpened": {
+            "request": "usr.OpenOpportunityFromKanbanRequest",
+            "params": {
+                "recordId": "@event.detail"
+            }
+        }
+    },
+    "parentName": "MainContainer",
+    "propertyName": "items",
+    "index": 0
+}
+```
+
+Read the named parameter in the matching handler:
+
+```js
+{
+    request: "usr.OpenOpportunityFromKanbanRequest",
+    handler: async (request) => {
+        const recordId = request.recordId;
+        // Perform the side effect with recordId.
+        return request.next?.handle(request);
+    }
+}
+```
+
+Use `"@event.detail.<field>"` when the component emits an object and the request needs one field from
+that object. Use bare `"@event"` only when the platform binding receives the emitted value directly
+rather than a web-component `CustomEvent`. One configured output creates one request binding; duplicate
+handler invocation is not a supported contract. If one emission appears to invoke a handler twice,
+capture the component emission, page body, and Creatio version as a platform-defect reproduction instead
+of publishing a generic duplicate-dispatch workaround.
+
+Evidence boundary: verified against Creatio Freedom UI source snapshot
+`e8c0882bea89923e493c8476f1ecc177c7c22bd1`. The request interpreter resolves nested `@event` paths,
+the output binder supplies the raw event to that interpreter, and `BaseRequest.$initialEvent` is marked
+deprecated in favor of an event binding expression.
+
 Rules for viewConfigDiff
 - `operation` must be one of: `insert`, `remove`, `merge`, `move`.
 - `type` (the component type inside `values`) MUST be a type you confirmed exists via `get-component-info` for the target environment — see the mandatory COMPONENT-TYPE VERIFICATION STOP in `page-modification`. Never invent or guess a `crt.*` type; an unknown type saves successfully but renders as a broken placeholder. If no catalog component matches the requirement, stop and ask the user (use an existing component, or build a custom one).
@@ -84,7 +136,7 @@ Interpreting get-component-info response metadata
 
 Detail-response payload shape (read once before composing `update-page` bodies; same on web and mobile flavors — pass `schema-type: "mobile"` to query the mobile catalog through the same pipeline)
 - `inputs` — the curated input bindings for the component (e.g. `caption`, `disabled`, `color` on `crt.Button`). Each value carries `type` and may carry `default`, `description`, `values` (enum constraints), `items` (array element type), `keyType`/`valueType` (record shape). Map these directly onto the `values` object of a `viewConfigDiff` insert.
-- `outputs` — the curated output bindings (events) for the component (e.g. `clicked`, `blurred`, `focused`). Output bindings are bound through `request` descriptors in the body — match each `outputs.<name>` to a `viewConfigDiff` entry's `values.<name>.request` and add a matching `handlers` entry with the same `request` string.
+- `outputs` — the curated output bindings (events) for the component (e.g. `clicked`, `blurred`, `focused`). Output bindings are bound through `request` descriptors in the body — match each `outputs.<name>` to a `viewConfigDiff` entry's `values.<name>.request` and add a matching `handlers` entry with the same `request` string. For a custom remote-module web component, map emitted payload data through `values.<name>.params` with `@event.detail` (or a nested `@event.detail.<field>`) rather than reading deprecated `$initialEvent` in the handler.
 - `references.typeDefinitions` — the producer's named-type schemas referenced by `inputs`/`outputs` `type` strings (e.g. `"string | ButtonIcon | ButtonAnimatedIcon"`). When a `type` token is not a primitive (`string`/`number`/`boolean`/`array`/`object`/`Record`), look it up here to learn the allowed values (enum) or the nested `fields` shape. Without this, you cannot construct a valid `icon`, `columns`, `bulkActions`, etc.
 - `properties` — present only for legacy catalog entries that did not migrate to the `inputs`/`outputs` split. Today the mobile catalog still ships in the legacy shape, so mobile detail responses carry `properties` and omit `inputs`/`outputs`/`references.typeDefinitions`; web responses carry the wrapped fields. Treat whichever is present as authoritative for that component — both describe the same surface, just different schema generations.
 - `documentation` — opt-in long-form markdown for complex components (e.g. `crt.DataGrid`); concatenated from every file listed in the producer's `references.docs[]`. Use it as the source of truth for non-trivial composition rules (e.g. data-grid features matrix). Absent on simple components and on mobile entries today — do not interpret its absence as missing data.

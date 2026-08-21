@@ -95,6 +95,21 @@ Decision: label what was READ FROM THE APPLIER versus observed on a stand. Only 
 Files: guidance/mcp/guides/platform/mobile/page-modification.md, guidance/mcp/guides/processes/run-process-button.md, automation/Clio.Knowledge.Bundle.Tests/MobileOperationShapeRuleTests.cs
 Impact: a guard test that inserting a neighbouring section can silently defeat is a repo-wide trap, not a one-off — bound a section by its actual successor, never by a distant landmark.
 
+## 2026-08-20 – process-modeling: NeedInstall is not a compile trigger (ENG-95706)
+Context: a CAADT run hung ~45 min because the agent, after creating a business process, read the raw process record (odata/esq), saw the native column `NeedInstall = true`, and forced a full `compile-creatio`. Companion to clio's tool-description/contract fix (ENG-95706).
+Decision: add an explicit rule to process-modeling.md (Verify section, right after the FSD caveat): a process is INTERPRETED and needs no compilation; `NeedInstall = true` is its normal pre-publish state, NOT a compile trigger; do not read the raw process record for readiness — use `describe-business-process`; the ONLY process that needs a compile is one carrying a `scriptTask` (custom C#). Bumped libraryVersion 1.13.30 -> 1.13.31 (sequence is build-derived, so the version bump is the whole obligation).
+Discovery: the article already said "scriptTask ... needs publication" (element list), but never stated the inverse — that a non-scriptTask process must NOT be compiled, and that NeedInstall is a false signal an agent can pick up from a raw process read. That gap let the agent escalate a normal flag into a heavy `--all` compile.
+Files: guidance/mcp/guides/processes/process-modeling.md, bundle-source.json
+Impact: agents building processes are now told, at the guidance layer, to leave compilation alone unless a Script Task is present — matching clio's compile-creatio [Description] and the new create-business-process -> compile-creatio anti-pattern.
+
+## 2026-08-20 – process-modeling NeedInstall rule: review rework (ENG-95706)
+Context: d-krestov's CHANGES_REQUESTED, source-backed from core @ builds-windows/8.3.3.1722.
+Decision: the first cut mislocated and overreached. Reworked per the review: (1) `NeedInstall` is NOT a process column — it is a package DB-install marker on bound-data / SQL-script records; it means "finish installing this data into the DB", never "compile" (source-code regeneration is a separate `NeedUpdateSourceCode` flag). (2) The headline is now the durable rule — do not read a raw system record to judge readiness, use `describe-business-process`; inferring meaning from a `NeedXxx`/`IsXxx` column name is the trap that recurs. (3) The in-process compile trigger is C# YOU authored — a `scriptTask` OR a `userTask` with an after-activity-save script — not the `scriptTask` element alone. (4) Scoped the rule to WITHIN A PROCESS (other schemas — source code, business objects, DCM, value lists — compile independently), so the unqualified "ONLY … needs compilation" no longer reads as a global rule. (5) Added a separate owner for the CUSTOM user-task SCHEMA compile obligation in the element catalog.
+Discovery: the real defect class is not "the agent didn't know processes are interpreted" but "the agent read a raw system column and inferred its meaning from the field name". The generalizable NeedInstall-is-a-DB-install-flag statement also lands on the clio side (compile-creatio [Description] + anti-pattern), which reaches every caller regardless of loaded guide.
+Open: which entity the agent actually read (the incident log for run_20260820_133837) is unconfirmed from available artifacts; wording now avoids asserting "process table" and states the package-flag fact instead.
+Files: guidance/mcp/guides/processes/process-modeling.md
+Impact: the rule is scoped, source-accurate, and split across the two authoritative owners (process compile trigger in-article; the raw-column caution mirrored on the clio compile-creatio contract).
+Evidence pin (run_20260820_133837 copilot transcript): the agent read `VwSysProcess` via odata-read and the created process row carried `NeedInstall`, `NeedUpdateSourceCode`, `NeedUpdateStructure` ALL = true. So `NeedInstall` IS surfaced on the VwSysProcess VIEW — d-krestov's §1 ("no process entity has it") missed that view. Article wording now names VwSysProcess + the three dirty flags instead of "bound-data records". The rule is unchanged: none of those flags is a compile trigger; use describe-business-process; compile only for authored C#.
 ## 2026-08-20 14:11 - Frontend-originated WebSocket routing and disconnect logging
 Context: Alex's PR review requested actionable disconnect logging, and the reference-example scope raised whether a Freedom UI message can be consumed by Creatio backend code.
 Decision: Add payload-free event/user/exception logging to the existing backend publication pattern. Keep frontend-originated behavior out of the published guide until the reference lab exercises it end to end.
@@ -108,3 +123,38 @@ Decision: Expand `websocket-messaging` to own backend push, same-user PTP, low-t
 Discovery: Browser BROADCAST has no package-owned permission check, and `ClassFactory.Get<IMsgServiceLayer>()` has no binding on the tested Creatio 10.0.0.858 .NET 8 runtime. Claude review also required partial-subscription cleanup and declarative Freedom UI metadata in the pinned reference.
 Files: guidance/mcp/guides/integration/websocket-messaging.md, guidance/mcp/guides/routing.md, guidance/mcp/guides/page-schema/creatio-devkit-common.md, catalog/reference-examples/creatio-websocket.yaml, automation/Clio.Knowledge.Bundle.Tests/WebSocketGuidanceTests.cs, bundle-source.json
 Impact: Agents can use the two verified frontend routes without mistaking SERVER for a public package extension point or client BROADCAST for an enforceably privileged announcement.
+
+## 2026-08-21 00:11 – GH #78 ui-project Angular test boundary
+Context: Clio #1136 corrected a generated Jest setup that prevented every Angular spec from executing, while the canonical guide only named build workflows.
+Decision: Teach `npm test` / `ng test` as the project-spec workflow and state that the scaffold intentionally contains no specs; do not recommend `passWithNoTests` as false-green proof.
+Discovery: The executable repair remains in Clio. clio-knowledge owns only the agent decision and honest zero-spec boundary. Current publication derives sequence from `libraryVersion`, so the content release requires only the 1.13.35 version bump rather than a hand-authored sequence.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs, bundle-source.json
+Impact: agents can distinguish normal Jest `No tests found` from a broken Angular test environment and require a real spec as acceptance evidence.
+
+## 2026-08-21 00:24 – GH #78 review: qualify and route the Jest rule
+Context: Agentic review found that `creatioVersion` can select older Karma templates and that the expanded testing scope was absent from resource discovery and routing.
+Decision: Limit the no-spec/Jest rule to the current default Angular 19 template, require runner inspection for version-specific templates, and route create/build/test requests to `ui-project`.
+Discovery: A correct leaf rule can still mislead when its applicability boundary and discovery metadata lag behind it; content tests now pin all three surfaces.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: agents reach the guide for testing requests without applying Jest-specific advice to supported Karma scaffolds.
+
+## 2026-08-21 00:31 – GH #78 review: cover pre-fix generated projects
+Context: Corrected-base review found that the published library supports older Clio 8.1 releases whose Jest scaffolds still contain the duplicate Angular test-environment initializer.
+Decision: Select testing advice from the generated `angular.json` builder, define builder-owned initialization for `@angular-builders/jest:run`, and give existing pre-fix projects an explicit remove-or-regenerate path.
+Discovery: Creatio template version alone does not identify whether a generated Jest setup contains the Clio-side repair; the emitted configuration is the durable applicability boundary.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: current and previously generated projects receive sound runner-specific guidance across the published Clio 8.1 compatibility range.
+
+## 2026-08-21 00:38 – GH #78 Claude review: pin the supported Jest entry point
+Context: Claude confirmed builder-owned initialization but noted that invoking Jest directly bypasses the Angular builder and therefore its test-environment setup.
+Decision: Require Jest-backed generated projects to run specs through `npm test` or `ng test`, matching the generated package script and builder contract.
+Discovery: The project-level Jest configuration extends the Angular builder path; it is not a standalone supported runner contract.
+Files: guidance/mcp/guides/applications/ui-project.md, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: guidance no longer leaves IDE or CI users to infer that direct Jest execution is equivalent to the supported Angular test command.
+
+## 2026-08-21 00:43 – GH #78 Claude review: bind remediation to evidence
+Context: Claude found that the stable builder id alone does not prove initialization ownership across the library's full Clio 8.1 compatibility range, and the unreleased "repaired version" wording was unactionable.
+Decision: Bind the workaround to the reported Angular 19 / builder 19.x / preset 14.x stack plus its duplicate-provider error, require inspection for other combinations, remove regeneration advice, and narrow discovery from build/test to create/test.
+Discovery: The emitted dependency versions and failure signature are durable evidence; a builder name shared across versions is not.
+Files: guidance/mcp/guides/applications/ui-project.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/UiProjectGuidanceTests.cs
+Impact: the guide repairs the proven failure without deleting required initialization in an unverified historical runner.
