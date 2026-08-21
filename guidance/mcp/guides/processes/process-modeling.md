@@ -147,8 +147,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
   background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
-  which does not. For a SIGNAL-STARTED process set the flag on every element that offers it: nobody is waiting
-  at a screen, and leaving the work inline holds the saving user's request. The designer gates the control on
+  which does not. For a SIGNAL-STARTED process set the flag on every element that offers it — the trigger fires
+  with no one waiting at a screen, so there is nothing for inline execution to return to. The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op
