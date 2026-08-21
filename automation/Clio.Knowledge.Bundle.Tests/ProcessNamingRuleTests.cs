@@ -10,7 +10,10 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// copies in preference to the prose), and the two intra-guide citations that point at the section. The
 /// content digest cannot guard a rule's wording — it is re-recorded on every edit — so a renumbered rule,
 /// a dropped carve-out, an example drifted back to <c>Start1</c>, or a citation left pointing at a section
-/// that no longer exists would otherwise ship green.
+/// that no longer exists would otherwise ship green. Since N5 makes an element code a FUNCTION of its
+/// caption, the examples are also checked against the derivation itself rather than against a shape
+/// predicate: five of them contradicted the rule while the handle scan, which sees only a trailing digit or
+/// a camelCase head, reported green (d-krestov, PR #82).
 ///
 /// Three conflicts were resolved while writing the section; the resolutions are recorded here rather than
 /// in the shipped guide, which states each rule without re-litigating it:
@@ -121,7 +124,20 @@ public sealed class ProcessNamingRuleTests
             + "caption does, so a stability rule governing codes alone would leave the drift's own source free"),
         ($"{RuleNumbers[8]} governs the codes of elements and parameters PRESENT IN BOTH runs",
             $"{RuleNumbers[8]}'s scope carve-out: two runs may legitimately model one request with different "
-            + "process parameters, and without the boundary that modelling choice reads as naming drift")
+            + "process parameters, and without the boundary that modelling choice reads as naming drift"),
+        ("treat every punctuation mark as a WORD BOUNDARY",
+            "the first cut said \"drop all punctuation\", which yields EndFollowUpTaskCreated's rival "
+            + "EndFollowupTaskCreated on the incident's own caption — a rule that contradicts its own worked "
+            + "example opens a second drift axis instead of closing the first"),
+        ("That list is EXHAUSTIVE — KEEP every other word",
+            $"a derivation is only a formula if it is total: without the closure, \"Contact has been created\" "
+            + $"admits two conforming codes and {RuleNumbers[4]} stops deciding anything on an ordinary caption"),
+        ("Prefer the plainest statement of the action or the outcome",
+            $"{RuleNumbers[3]} owns caption wording ({RuleNumbers[8]} cites it), and this is the sentence that "
+            + "makes a derived code stable — a reader looking up how to word a caption must find it there"),
+        ($"nothing in {RuleRange} constrains that structural choice",
+            $"{RuleNumbers[8]}'s carve-out lifts the naming constraint from a structural difference, and no other "
+            + "rule picks it up; saying so keeps the exclusion from reading as approval")
     ];
 
     /// <summary>
@@ -255,6 +271,30 @@ public sealed class ProcessNamingRuleTests
     }
 
     [Test]
+    [Description("Every element code in a guide example is what N5's derivation produces from that element's own caption.")]
+    public void GuideExamples_ShouldDeriveEveryElementCodeFromItsCaption()
+    {
+        (string Type, string Name, string Caption)[] elements = CaptionedElements(ReadGuide(OwnerGuide));
+
+        elements.Should().HaveCountGreaterThanOrEqualTo(8,
+            because: "the scan has to reach every caption-bearing example — a predicate that matches nothing, or "
+                + "only the descriptor, would pass this test while guarding the drift it exists to catch");
+
+        string[] undeliverable = elements
+            .Where(element => element.Name != DeriveCode(element.Caption, element.Type))
+            .Select(element => $"{element.Type} \"{element.Caption}\" declares {element.Name}, "
+                + $"derivation yields {DeriveCode(element.Caption, element.Type)}")
+            .ToArray();
+
+        undeliverable.Should().BeEmpty(
+            because: "N5 makes the code a FUNCTION of the caption, and the prose alone cannot hold the examples to "
+                + "it: the handle predicate above only rejects a trailing digit or a camelCase head, so EndOnboarded "
+                + "on \"Onboarding handed off\" and OrderChangedSignal on \"Order amount or status changed\" both "
+                + "passed while contradicting the rule 80 lines below them. An example is what a generating model "
+                + "copies in preference to the prose, so the examples are where the derivation has to be enforced");
+    }
+
+    [Test]
     [Description("Every parameter code in a guide example carries N8's Parameter suffix.")]
     public void GuideExamples_ShouldSuffixEveryParameterCode()
     {
@@ -367,6 +407,63 @@ public sealed class ProcessNamingRuleTests
 
     private static string DescriptorExample(string guide) =>
         Section(guide, "== Descriptor (create-business-process) ==", "- `name` is the local element handle");
+
+    /// <summary>
+    /// N5's stop list, verbatim and EXHAUSTIVE by the rule's own words: every other word of the caption
+    /// survives into the code. Keeping it closed is the point — an open-ended "drop the small words" leaves
+    /// two runs free to disagree on <c>has been</c>, which is how a formula stops being one.
+    /// </summary>
+    private static readonly string[] DerivationStopWords =
+        ["a", "an", "the", "is", "are", "was", "were", "be", "been", "has", "have", "had"];
+
+    /// <summary>
+    /// An activity's shape is empty on purpose: for the elements a model names most often the derivation IS
+    /// the whole code, so nothing about the type can excuse a divergence from the caption.
+    /// </summary>
+    private static readonly (string Type, string Prefix, string Suffix)[] ElementShapes =
+    [
+        ("signalStart", "", "Signal"),
+        ("startEvent", "", "Start"),
+        ("endEvent", "End", ""),
+        ("userTask", "", ""),
+        ("performTask", "", ""),
+        ("readData", "", ""),
+        ("sendEmail", "", "")
+    ];
+
+    /// <summary>
+    /// Two details of N5 that a looser implementation would get wrong in opposite directions: punctuation is
+    /// a WORD BOUNDARY, so "Follow-up" must reach `FollowUp` and never `Followup` (the contradiction the
+    /// first cut of the rule shipped with); and only the first letter of a surviving word is forced, so an
+    /// acronym a caption carries is not flattened into title case by the check itself.
+    /// </summary>
+    private static string DeriveCode(string caption, string elementType)
+    {
+        string stem = string.Concat(Regex.Split(caption, "[^A-Za-z0-9]+")
+            .Where(word => word.Length > 0)
+            .Where(word => !DerivationStopWords.Contains(word.ToLowerInvariant(), StringComparer.Ordinal))
+            .Select(word => char.ToUpperInvariant(word[0]) + word[1..]));
+
+        (string Type, string Prefix, string Suffix) shape = ElementShapes
+            .FirstOrDefault(candidate => candidate.Type == elementType,
+                (Type: elementType, Prefix: string.Empty, Suffix: string.Empty));
+        return shape.Prefix + stem + shape.Suffix;
+    }
+
+    /// <summary>
+    /// Element declarations paired with their own caption. The pairing is what the older scans lack: they
+    /// read codes and captions through separate predicates, so neither can see that a code contradicts the
+    /// caption sitting three characters away from it.
+    /// </summary>
+    private static (string Type, string Name, string Caption)[] CaptionedElements(string guide) =>
+        [.. Regex.Matches(guide, $@"""type"":\s*""(?:{ActivityTypes}|{EventTypes})""")
+            .Select(match => (Type: match.Groups[0].Value, Element: EnclosingObject(guide, match.Index)))
+            .Select(found => (
+                Type: Regex.Match(found.Type, @"""type"":\s*""([^""]+)""").Groups[1].Value,
+                Name: Regex.Match(found.Element, @"""name"":\s*""([^""]+)""").Groups[1].Value,
+                Caption: Regex.Match(found.Element, @"""caption"":\s*""([^""]+)""").Groups[1].Value))
+            .Where(element => element.Name.Length > 0 && element.Caption.Length > 0)
+            .Distinct()];
 
     private static string[] CaptionsOf(string guide, string elementTypes) =>
         Regex.Matches(guide, $@"""type"":\s*""(?:{elementTypes})""")
