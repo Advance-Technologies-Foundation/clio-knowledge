@@ -31,12 +31,14 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   first, then bind them with `modify-business-process` → `setConnections` (see "Activity connections").
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `performTask`->ActivityUserTask). A `readData` element is
-  CONFIGURABLE via its `readData` block — source object, first-record mode, result columns, sort, plus a
-  record `filter` (see the "Read data element" section below). CAVEAT: the OTHER data-operation tasks
-  (Add / Modify / Delete data) still place an UNCONFIGURED element — their target object and values cannot
-  be set yet, so those steps do nothing useful until a human configures them in the designer. Say so when
-  you use one; do not present such a result as a working data operation.
+  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
+  A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
+  columns, sort, plus a record `filter` (see the "Read data element" section below). A `changeData` element
+  is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter` (see
+  the "Modify data element" section below). CAVEAT: Add data and Delete data still place an UNCONFIGURED
+  element — their target object and values cannot be set yet, so those steps do nothing useful until a
+  human configures them in the designer. Say so when you use one; do not present such a result as a working
+  data operation.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
   TEMPLATES are not supported — say so if the user asks for one). The `email` block configures everything:
   `{ "name": "SendWelcomeEmail", "type": "sendEmail", "caption": "Send the welcome email", "email": {
@@ -131,8 +133,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section below).
 - NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
-  sub-process, the Add/Modify/Delete-data target object + values (a `filter` on THOSE tasks is serialized
-  but not end-to-end usable — the buildable filters are `signalStart` and `readData`), and the Read data
+  sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
+  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
@@ -378,11 +380,58 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   `describe-business-process` (unset parameters are omitted) — a builder-made and a human-touched element
   look identical there. Nothing to do about it at build time; know it when diagnosing a stand.
 
-== Data source filters (signalStart trigger condition / readData record filter) ==
+== Modify data element (changeData) ==
+- A `changeData` element updates every record matching its `filter` with the declared column values:
+    { "name": "UpdateContact", "type": "changeData", "caption": "Update the contact",
+      "changeData": {
+        "source": "Contact",                                   // REQUIRED at create: the entity to update
+        "values": [                                            // REQUIRED at create: one entry per column
+          { "column": "JobTitle", "value": "Manager" },        // plain constant — TEXT columns ONLY (see below)
+          { "column": "Notes", "processParameter": "NoteTextParameter" }, // a process parameter's value
+          { "column": "AccountId", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
+        ] },
+      "filter": { "object": "Contact",
+        "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
+- Each `values` entry sets `column` (entity COLUMN name) + exactly ONE source: `value` | `processParameter` |
+  `sourceElement` + `sourceElementParameter` | `expression` — the mapping source vocabulary. One entry per
+  column (duplicates rejected); unknown columns/parameters rejected at build.
+- `value` is a plain constant for TEXT columns ONLY, and non-empty. The platform stores it as the raw string
+  and the runtime reads every non-text column TYPED — a date/lookup/numeric constant would save green and
+  fail at run time, so the server REFUSES it at build. Assign non-text columns via `processParameter`,
+  `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` / `[#Lookup.…#]` —
+  same macro grammar as parameter defaults, see "DEFAULT-value macro rules"). An empty `value` is refused
+  for every type: the runtime silently discards an empty assignment.
+- The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean
+  "update every record of the object"). To target ONE record, filter on `Id` against a process parameter
+  or a trigger output such as a `signalStart` element's `RecordId`:
+    "filter": { "object": "Contact",
+      "conditions": [ { "column": "Id", "comparison": "equal",
+        "elementParameter": { "elementName": "RecordModifiedSignal", "parameter": "RecordId" } } ] }
+  LIMITATION: the record read by a preceding `readData` element is NOT referenceable here — its column
+  values (including `Id`) live inside the `ResultEntity` output, not as element parameters (see the
+  readData LIMITATION above; ENG-91844).
+- Change an EXISTING element in place with the `setElement` op's `changeData` field: omit `source` to keep
+  the current target; a supplied `values` array REPLACES the whole assignment set. Retargeting `source` to a
+  different object REQUIRES `values` for the new entity in the same update — the server REFUSES a values-less
+  retarget, because the cleared element would be silently skipped by the runtime (the same fact that makes
+  `values` mandatory at create); the same refusal covers a values-less update on an element with no stored
+  values yet, and a retarget is refused while another parameter still maps from the element. On ANY target change
+  (FIRST configuration included) the stored record filter clears UNLESS its root already targets the incoming
+  object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
+  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
+  `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
+  process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
+  `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.
+  A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
+  check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
+  comes back as its raw `[#…#]` in `expression`).
+
+== Data source filters (signalStart trigger condition / readData + changeData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
   the platform Terrasoft.FilterGroup — you NEVER hand-write the escaped filter JSON.
-- Usable today on a `signalStart` (restrict the record trigger) and on a `readData` element (restrict
-  which records the read selects from). Shape:
+- Usable today on a `signalStart` (restrict the record trigger), on a `readData` element (restrict which
+  records the read selects from) and on a `changeData` element (restrict which records are updated —
+  effectively mandatory there). Shape:
     "filter": {
       "object": "<EntityName>",        // root object; defaults to the signal entity if omitted
       "logicalOperation": "and",       // "and" (default) | "or"
@@ -402,7 +451,9 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
 - The right-hand value of a condition is exactly ONE of: `value` (a constant as a string — the server
   types it by the column; for a Date/DateTime/Time column pass ISO-8601, e.g. `2026-05-01` or
   `2026-05-01T12:00:00Z`), `processParameter` (a process parameter by name), `elementParameter`
-  ({ elementName, parameter } — another element's output), `expression` (a raw token), or `macro` (a
+  ({ elementName, parameter } — another element's output; the parameter must EXIST on that element — a
+  `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }` is
+  refused, see the readData LIMITATION), `expression` (a raw token), or `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
@@ -419,8 +470,9 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
   parameter" option for signal starts). Parameter references ARE valid on a data-operation element filter —
   the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
-  (e.g. filter the read by a process parameter's value); on Add/Modify/Delete data they serialize but the
-  task itself is not buildable yet (see below).
+  (e.g. filter the read by a process parameter's value) and on a `changeData` element, where the filter is
+  effectively MANDATORY (the runtime refuses to update with an empty one); on Add/Delete data they serialize
+  but the task itself is not buildable yet (see below).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
   `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value` (a signalStart filter
@@ -434,9 +486,10 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
 - Groups nest to any depth: A AND (B OR C) = conditions:[A] + groups:[{ "logicalOperation":"or",
   conditions:[B, C] }].
 - A `filter` on a `readData` element is end-to-end usable (pair it with the element's `readData` block —
-  see the "Read data element" section). A `filter` on an Add/Modify/Delete-data task is serialized too, but
-  those tasks' target object / values are not buildable yet, so THEIR filters are not end-to-end usable in
-  this increment.
+  see the "Read data element" section), and on a `changeData` element it is effectively MANDATORY — the
+  runtime refuses to update with an empty filter (see the "Modify data element" section). A `filter` on an
+  Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet, so
+  THEIR filters are not end-to-end usable in this increment.
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
   `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,
@@ -460,13 +513,14 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/email
-   shapes as a build; setSignal reconfigures an existing signalStart's record trigger + tracked columns in
-   place, setElement changes element-level fields in place: `useBackgroundMode` on any element kind,
-   `readData` on a Read data element only (see the "Read data element" section for its partial-update and
-   source-retarget rules), and a sendEmail element's `email` block (a partial update; to/cc/bcc recipients
-   MATCH-OR-APPEND — a new address is added, an identical one is a no-op, and none can be removed);
-   setConnections/clearConnections bind and unbind an Activity's "Connected to" links (see below)).
+   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/
+   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
+   element kind, `readData` / `changeData` on the matching data element only (see the "Read data element" /
+   "Modify data element" sections for their partial-update and source-retarget rules), and a sendEmail
+   element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
+   an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
+   Activity's "Connected to" links (see below)).
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
@@ -517,7 +571,9 @@ System actions (palette group "System actions"):
     a `filter` — see the "Read data element" section. The other read modes (collection / count /
     aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
-- `changeDataUserTask` Modify data — bulk-update matched records (same values to all).
+- `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
+    element's `changeData` block (target object + column values) plus a `filter` — see the "Modify data
+    element" section.
 - `deleteDataUserTask` Delete data — delete matched records.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
