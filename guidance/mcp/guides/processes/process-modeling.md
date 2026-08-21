@@ -119,7 +119,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on ANY element (it is a platform property of every process element, not signal-specific);
   change it later on an EXISTING element with the `setElement` op
-  (`{ "op": "setElement", "elementName": "NotifyOwner", "elementUpdate": { "useBackgroundMode": false } }`):
+  (`{ "op": "setElement", "elementName": "NotifyAccountOwner", "elementUpdate": { "useBackgroundMode": false } }`):
   `true` runs it asynchronously via the background scheduler, `false` inline. OMIT it to keep the element
   kind's own default, which mirrors the visual designer's palette — a `signalStart` defaults to background
   mode, so a signal-started process runs asynchronously and its effects appear a moment after the record is
@@ -141,15 +141,15 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 {
   "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "Custom",
   "elements": [
-    { "name": "ManualStart",  "type": "startEvent",  "caption": "Onboarding requested" },
-    { "name": "NotifyOwner",  "type": "performTask", "caption": "Notify the account owner" },
-    { "name": "EndOnboarded", "type": "endEvent",    "caption": "Onboarding handed off" }
+    { "name": "OnboardingRequestedStart", "type": "startEvent",  "caption": "Onboarding requested" },
+    { "name": "NotifyAccountOwner",       "type": "performTask", "caption": "Notify the account owner" },
+    { "name": "EndOnboardingHandedOff",   "type": "endEvent",    "caption": "Onboarding handed off" }
   ],
-  "flows":      [ { "source": "ManualStart", "target": "NotifyOwner" },
-                  { "source": "NotifyOwner", "target": "EndOnboarded" } ],
+  "flows":      [ { "source": "OnboardingRequestedStart", "target": "NotifyAccountOwner" },
+                  { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
   "parameters": [ { "name": "AccountNameParameter", "type": "Text", "direction": "In",
                     "caption": "Account name" } ],
-  "mappings":   [ { "elementName": "NotifyOwner", "elementParameter": "<ParamName>",
+  "mappings":   [ { "elementName": "NotifyAccountOwner", "elementParameter": "<ParamName>",
                     "processParameter": "AccountNameParameter" } ]
 }
 - `name` is the local element handle (the schema element Name, a string code) used by flows
@@ -205,6 +205,9 @@ N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never l
       "Record is modified", "Order amount or status changed", "Onboarding handed off". Verb-first
       MISDESCRIBES an event: "Modify record" reads as an action the process performs rather than the
       condition that starts it, and a Terminate end performs no action at all.
+    Prefer the plainest statement of the action or the outcome over a stylistic variant. The element CODE
+    is derived from this caption (N5), so the caption is the only free choice in the pair and a reworded
+    caption drags its code with it — which is why N9's stability rule reaches back to this one.
     This is the only text a no-code reviewer sees on the diagram, so an unset or padded caption is what
     makes a generated process unreviewable.
     EVERY element type accepts one — verified across the whole buildable slice, events included:
@@ -217,8 +220,28 @@ N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never l
     how `Start1` reaches a no-code reviewer's screen.
 N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO autonumber and NO random
     suffix — `StartSignal1` and `Task2` are the failure this rule names. Do not pad a code with the
-    element's type name either. Events: a start event is `<Trigger>Signal` or `<Reason>Start`
-    (`AccountAddedSignal`, `ManualStart`); an end event is `End<Reason>` (`EndOnboardingStarted`).
+    element's type name either. Events: a `signalStart` is `<Trigger>Signal` (`AccountAddedSignal`), a
+    `startEvent` is `<Reason>Start` (`OnboardingRequestedStart`), an end event is `End<Reason>`
+    (`EndOnboardingStarted`). A shape is a prefix or a suffix, NOT a licence to reword: it is added to
+    what the derivation below produces, and never replaces it.
+    DERIVE the code from the element's own `caption`, do not compose it separately. The derivation, in
+    order:
+    (1) take the caption's words in order;
+    (2) drop ONLY these words: `a`, `an`, `the`, `is`, `are`, `was`, `were`, `be`, `been`, `has`,
+        `have`, `had`. That list is EXHAUSTIVE — KEEP every other word, including `and`, `or`, `to`,
+        `of`, `for` and numerals, so "Contact has been created" is `EndContactCreated` and "Order
+        amount or status changed" is `OrderAmountOrStatusChangedSignal`;
+    (3) treat every punctuation mark as a WORD BOUNDARY: the mark itself is removed, but the words on
+        BOTH sides of it are capitalized separately — "Follow-up" is `FollowUp`, never `Followup`;
+    (4) PascalCase what remains, then add only the prefix or suffix the shape above requires.
+    "Account is added" -> `AccountAddedSignal`; "Create the follow-up task" -> `CreateFollowUpTask`;
+    "Follow-up task created" -> `EndFollowUpTaskCreated`. Do NOT paraphrase, abbreviate, or drop a
+    content word on the way. Two independent runs of one request wrote the SAME caption "Follow-up task
+    created" and produced `EndFollowUpTaskCreated` and `EndFollowUpCreated`
+    (ENG-94378, clean-room re-run 2026-08-21) — the drift came from shortening, and it is what makes
+    two generations of the same request undiffable. Every element example in this guide is derivable
+    this way, and `GuideExamples_ShouldDeriveEveryElementCodeFromItsCaption` holds them to it — where a
+    caption and a code disagree, the caption is the input and the code is what is wrong.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
     `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
     code tells about the element (ENG-94378: the baseline run produced exactly that). The catalog below
@@ -238,6 +261,19 @@ N8  `parameters[].name`: PascalCase plus a `Parameter` suffix — `TargetAccount
 N9  Codes are STABLE: regenerating from the same request must yield the same codes. Never derive a code
     from the clock, a GUID, a counter, or anything else that varies between runs — stability is what
     makes two generations diffable and a review repeatable.
+    Stability is not a hope, it FOLLOWS from N5's derivation rule: a code that is a function of the
+    caption cannot drift unless the caption does. Measured on one request across two independent runs,
+    every code backed by a formula was byte-identical — the process code (N2's `Object_Action`) and the
+    start-event code (N5's `<Trigger>Signal`) — while the one rule that gives a shape and leaves the
+    wording free, `End<Reason>`, drifted (ENG-94378, 2026-08-21). So the caption wording is part of
+    what this rule constrains: a drifting caption drags its derived code with it, and N4 owns the rule
+    that keeps it still (prefer the plainest statement of the action or the outcome).
+    SCOPE: N9 governs the codes of elements and parameters PRESENT IN BOTH runs. Two runs may
+    legitimately model one request with different process parameters — that is a modelling choice, not
+    naming drift, as long as each code obeys N8. But nothing in N1-N10 constrains that structural
+    choice: this catalog governs NAMES, so a structural difference between two runs is OUT OF SCOPE
+    here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
+    reason no naming rule can fix.
 N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows are outside the buildable
     slice; ENG-91853 is the ticket that extends it). Recorded here so the catalog is complete, the same
     way the R1–R17 header separates the full catalog from the buildable slice. When they land: label a
@@ -261,7 +297,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   "added or modified"). "On save" of a record edited on a page = "modified"; a brand-new record = "added".
 - A "modified" trigger fires on ANY field change by default. To restrict it to fire ONLY when specific
   columns change, add `changedColumns` (an array of column NAMES on the trigger entity) to the signal:
-    { "name": "OrderChangedSignal", "type": "signalStart", "caption": "Order amount or status changed",
+    { "name": "OrderAmountOrStatusChangedSignal", "type": "signalStart", "caption": "Order amount or status changed",
       "signal": { "entity": "Order", "on": "modified", "changedColumns": ["Amount", "StatusId"] } }
   `changedColumns` is valid ONLY for `on: "modified"` (the designer's "expect changes" case) — the server
   rejects it for "added"/"deleted", and rejects a name that is not a column on the entity. Use entity COLUMN
@@ -272,7 +308,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   records qualify — combine them freely.
 - To fire the trigger ONLY for records matching a condition (e.g. only when Name = "Start"), add a
   `filter` to the signalStart element (full shape in "Data source filters" below):
-    { "name": "RunButtonModifiedSignal", "type": "signalStart", "caption": "Run button is pressed",
+    { "name": "RunButtonPressedSignal", "type": "signalStart", "caption": "Run button is pressed",
       "signal": { "entity": "UsrTestRunButton", "on": "modified" },
       "filter": { "object": "UsrTestRunButton",
         "conditions": [ { "column": "UsrName", "comparison": "equal", "value": "Start" } ] } }
@@ -281,7 +317,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
 - To change an EXISTING signal's trigger or tracked columns IN PLACE (without re-adding it), use the
   `setSignal` op — it preserves the element and its flows:
-    { "op": "setSignal", "elementName": "OrderChangedSignal",
+    { "op": "setSignal", "elementName": "OrderAmountOrStatusChangedSignal",
       "signal": { "on": "modified", "changedColumns": ["Amount"] } }
   Partial update: omit `changedColumns` to clear column tracking (fire on any change), omit `on` to keep the
   current change type, and include `entity` only to retarget the trigger object (retargeting clears any
