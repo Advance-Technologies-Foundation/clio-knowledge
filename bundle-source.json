@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.42",
+  "libraryVersion": "1.13.43",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -23,6 +23,7 @@
     ],
     "itemIds": [
       "agent-execution",
+      "application-listener",
       "app-modeling",
       "workplaces",
       "atf-repository-dev",
@@ -148,6 +149,7 @@
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/agent-execution",
+      "docs://knowledge/com.creatio.clio/application-listener",
       "docs://knowledge/com.creatio.clio/app-modeling",
       "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
@@ -300,6 +302,20 @@
       "sourcePath": "guidance/mcp/guides/applications/app-modeling.md",
       "bundlePath": "resources/app-modeling.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "application-listener",
+      "title": "Creatio application and session lifecycle listeners",
+      "description": "Canonical guidance for all four IAppEventListener and AppEventListenerBase hooks: reflection activation, stateless delegation to package singletons, application start/end, session start/end, cross-runtime limits, failure handling, and tests.",
+      "topicId": "creatio.application-listener",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/application-listener",
+      "legacyUris": [
+        "docs://mcp/guides/application-listener"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/application-listener.md",
+      "bundlePath": "resources/application-listener.md",
+      "mediaType": "text/markdown"
     },
     {
       "itemId": "workplaces",
