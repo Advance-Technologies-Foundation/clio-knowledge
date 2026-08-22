@@ -68,6 +68,7 @@ Delete flow:
 ## State Across Events
 
 - Treat one listener instance as reusable during the same entity operation.
+- This rule belongs only to `BaseEntityEventListener`. You MUST NOT apply that rule to `AppEventListenerBase`; read `application-listener` because Creatio creates a fresh application-listener instance for every dispatched hook.
 - Store only operation-scoped state in private fields, for example `UserConnection`, flags, or values captured before save and used after save.
 - Initialize lazily when helper construction depends on `UserConnection`.
 - Do not let the listener become a service locator for unrelated logic.

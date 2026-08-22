@@ -29,6 +29,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
+  - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
