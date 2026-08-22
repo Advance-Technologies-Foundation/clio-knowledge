@@ -2,6 +2,9 @@ clio MCP page-schema resources guide
 
 Scope: use when a Freedom UI page change adds, references, or modifies localizable strings (captions, labels, titles, validator messages).
 
+For schema ownership, culture-file setup, backend strict/fallback lookup, and localization testing,
+MUST also read `localizable-values`. This guide remains the owner of Freedom UI binding and registration rules.
+
 ─────────────────────────────────────────────────────────────
 WHEN TO USE A LOCALIZABLE STRING
 ─────────────────────────────────────────────────────────────
