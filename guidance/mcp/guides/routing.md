@@ -30,6 +30,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - lookup seeding / data bindings -> name=data-bindings
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
+  - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
