@@ -41,11 +41,14 @@ public sealed class ApplicationListenerGuidanceTests
             "not guaranteed to run on the same node or form an exactly-once pair",
             "Session callbacks can overlap across sessions",
             "Session hooks MUST NOT wait for synchronous network or database I/O",
+            "return without waiting for network, database, or broker connectivity",
+            "Release that lock before waiting, joining, or disposing",
             "Shutdown MUST be bounded",
             "consumes the same host shutdown deadline",
             "atomically clear that same owner exactly once",
             "creates a fresh listener instance for each dispatched event",
             "constructor or static-initializer failure is outside that hook exception boundary",
+            "continues dispatching other listeners",
             "Construct separate listener instances for start and end calls",
             "atf.creatio.kafka-reference"
         ];
@@ -61,6 +64,8 @@ public sealed class ApplicationListenerGuidanceTests
             because: "entity-listener instance state is the opposite of the application-listener contract");
         kafkaCatalog.Should().Contain("id: atf.creatio.kafka-reference",
             because: "the published Kafka example is the pinned evidence for the application-to-singleton boundary");
+        kafkaCatalog.Should().Contain("creatio-application-lifecycle",
+            because: "the pinned Kafka example must continue advertising application-lifecycle support");
     }
 
     [Test]

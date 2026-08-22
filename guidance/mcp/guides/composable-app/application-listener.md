@@ -5,7 +5,7 @@
 - Use this guide when package C# must react to Creatio application start/end or web-session start/end.
 - `IAppEventListener` is the platform interface. `AppEventListenerBase` is its no-op base implementation and is the preferred extension point when only selected hooks are needed.
 - This guide owns listener discovery, instance lifetime, all four lifecycle hooks, delegation to package-owned state, failure behavior, and tests.
-- Also read `creatio-composable-app-development` for package ownership and the package application/DI root.
+- Also read `creatio-composable-app-development` for package ownership and placement. The package must supply the application/service root represented by the placeholders below.
 - Do not transfer the private-field state rule from `configuration-entity-event-listener`: application listeners have a different activation lifetime.
 
 ## Platform Contract
@@ -75,6 +75,8 @@ namespace UsrPackage.EntryPoints {
 
 - Register `IApplicationRuntime` and `ISessionLifecycleObserver` as package singletons, or delegate both concerns to one cohesive singleton when the package is small.
 - The application runtime MUST guard duplicate `Start`/`Stop` calls and shared transitions with synchronization.
+- `OnAppStart` and `Start()` MUST establish ownership, schedule the worker, and return without waiting for network, database, or broker connectivity. Connect and retry inside the owned worker, with observable readiness and failure state.
+- During stop, mark the owner as stopping, capture it, and signal cancellation under the transition lock. Release that lock before waiting, joining, or disposing; reacquire it only for conditional finalization.
 - Do not clear runtime state until workers have actually stopped. If bounded shutdown times out, retain the live state and log an actionable warning so a second runtime cannot start over it. When the worker later exits, its completion path MUST dispose resources and atomically clear that same owner exactly once so a future start can recover.
 - Session callbacks can overlap across sessions. Any shared observer state MUST be thread-safe.
 - Session hooks MUST NOT wait for synchronous network or database I/O. For external observation, perform only a non-blocking enqueue into a bounded queue with an explicit overload/drop policy, then process it outside the hook.
@@ -92,10 +94,12 @@ namespace UsrPackage.EntryPoints {
    - application end calls the same singleton runtime `Stop` once;
    - session start and end call the singleton observer once each and pass the exact `AppEventContext`.
 4. Assert that repeated runtime `Start` does not create duplicate workers and repeated `Stop` is safe.
-5. Exercise concurrent session notifications when the observer mutates shared state.
-6. Verify each session callback returns within the package's small latency budget without waiting for downstream processing, including when its bounded queue is full.
-7. Exercise a shutdown timeout in the runtime owner and verify it preserves live state, prevents a duplicate start, and emits a warning. Then complete the worker and verify cleanup happens exactly once and one later start succeeds.
-8. Exercise the package's small application-end wait alongside other listeners' waits and verify the cumulative time remains within the shared host shutdown budget.
+5. Verify application start returns within the package's small latency budget while its external dependency is unavailable; readiness and retries belong to the worker.
+6. Exercise concurrent session notifications when the observer mutates shared state.
+7. Verify each session callback returns within the package's small latency budget without waiting for downstream processing, including when its bounded queue is full.
+8. Exercise a normal cooperative stop and verify completion does not consume the timeout when worker cleanup uses the transition lock.
+9. Exercise a shutdown timeout in the runtime owner and verify it preserves live state, prevents a duplicate start, and emits a warning. Then complete the worker and verify cleanup happens exactly once and one later start succeeds.
+10. Exercise the package's small application-end wait alongside other listeners' waits and verify the cumulative time remains within the shared host shutdown budget.
 
 Test the listener only as a delegation boundary. Test worker loops, cancellation, joins, resource disposal, and failure recovery on the singleton runtime that owns them.
 
@@ -129,5 +133,5 @@ Do not use a shared or production environment merely to prove lifecycle dispatch
 ## Evidence And Applicability
 
 - The public four-hook surface is documented by Creatio's [`AppEventListenerBase` API](https://academy.creatio.com/api/netcoreapi/7.18.0/api/Terrasoft.Web.Common.AppEventListenerBase.html).
-- Discovery, fresh-instance activation, hook exception isolation, application/session host ordering, and the application-only event context were verified in the private `engineering/core` repository at commit `e0d0f98b80c8fd26e305804c7cb3242b76baf072`, tagged `builds-linux/10.1.83`, for both .NET Framework and .NET Core hosts. Apply these observations to platform builds containing that revision; reverify them against Core source before relying on them in an older or materially different version.
+- Discovery, fresh-instance activation, hook exception isolation, application/session host ordering, and the application-only event context were verified in the private `engineering/core` repository at commit `e0d0f98b80c8fd26e305804c7cb3242b76baf072`, first contained by checked tags `builds-linux/10.1.84` and `builds-windows/10.1.83`, for both .NET Framework and .NET Core hosts. Apply these observations to platform builds containing that revision; reverify them against Core source before relying on them in an older or materially different version.
 - Use the published `atf.creatio.kafka-reference` catalog item for a pinned example of the verified application-listener-to-singleton boundary. That example covers `OnAppStart` and `OnAppEnd`; it is not evidence for session identity or session ordering.
