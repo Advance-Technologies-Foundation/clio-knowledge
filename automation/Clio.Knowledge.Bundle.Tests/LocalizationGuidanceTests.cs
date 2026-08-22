@@ -44,8 +44,10 @@ public sealed class LocalizationGuidanceTests
             because: "strict and fallback lookup are different observable contracts");
         guide.Should().Contain("throwIfNoManager: false",
             because: "the generated adapter must make the platform boolean's meaning explicit");
-        guide.Should().Contain("string? greeting = _strings.GetCultureValueWithFallback",
-            because: "the teaching example must keep nullable returned values inspectable at a breakpoint");
+        guide.Should().Contain("string greeting = _strings.GetCultureValueWithFallback",
+            because: "the C# 7.3 teaching example must keep returned values inspectable at a breakpoint");
+        guide.Should().Contain("The resolver can still return `null`",
+            because: "C# 7.3 syntax must not hide the runtime null contract");
         guide.Should().Contain("substituted `IResourceStorage`",
             because: "developers need an executable seam for unit-testing the concrete generated adapter");
         guide.Should().Contain("add `resource.<culture>.xml`",

@@ -41,8 +41,8 @@ public sealed class GreetingService {
         _strings = strings;
     }
 
-    public string? GetSpanishGreeting() {
-        string? greeting = _strings.GetCultureValueWithFallback(
+    public string GetSpanishGreeting() {
+        string greeting = _strings.GetCultureValueWithFallback(
             "<OwningSchemaName>",
             "LocalizableStrings.<Key>.Value",
             CultureInfo.GetCultureInfo("es-ES"));
@@ -50,6 +50,9 @@ public sealed class GreetingService {
     }
 }
 ```
+
+The generated package targets C# 7.3, so the sample uses `string` rather than nullable-reference syntax.
+The resolver can still return `null`; check the value before dereferencing it.
 
 `LocalizableStringResolver` is the infrastructure adapter. It is the only generated class that constructs `LocalizableString`, and the package application composition root registers it as `ILocalizableStringResolver`. In this small primitive, keep the interface and implementation together in `LocalizableStringResolver.cs`. Keep that boundary injectable so domain and web-service tests can replace it.
 
