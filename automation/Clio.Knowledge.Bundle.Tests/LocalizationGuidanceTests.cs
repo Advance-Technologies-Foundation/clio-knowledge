@@ -29,7 +29,8 @@ public sealed class LocalizationGuidanceTests
         JsonElement resource = source.RootElement.GetProperty("resources")
             .EnumerateArray()
             .Single(item => item.GetProperty("itemId").GetString() == "localizable-values");
-        Match revisionMatch = Regex.Match(catalog, "(?m)^[ \\t]*revision:[ \\t]*([0-9a-f]{40})[ \\t]*\\r?$");
+        MatchCollection revisionMatches = Regex.Matches(catalog,
+            "(?m)^[ \\t]*revision:[ \\t]*(\\S+)[ \\t]*\\r?$");
 
         // Assert
         guide.Should().Contain("A dedicated source-code schema MAY own package-level backend values",
@@ -64,15 +65,23 @@ public sealed class LocalizationGuidanceTests
             because: "the reference lab must fail when production behavior loses unit coverage");
         guide.Should().Contain("bundle.resources.strings.<Key>",
             because: "a rendered Freedom UI page needs a platform-oracle assertion beyond resource files");
+        guide.Should().Contain("For an explicitly registered custom page resource",
+            because: "the runtime bundle oracle must not be generalized to every Freedom UI resource type");
+        guide.Should().Contain("absence from this node is not by itself proof of a defect",
+            because: "the primary Freedom UI boundary must reject absence-only registration diagnoses");
+        guide.Should().Contain("Do not add or change page resource metadata based only on absence",
+            because: "recovery guidance must defer resource registration decisions to their canonical owner");
         guide.Should().Contain("also read `page-schema-resources`",
             because: "Freedom UI authoring rules already have one canonical owner");
         guide.Should().Contain("https://github.com/Advance-Technologies-Foundation/creatio-localization-lab",
             because: "agents need the independent executable reference after it is published");
         catalog.Should().Contain("revision: 273eb7531a8284b6072730b097769b95df56a02e",
             because: "the catalog must pin the exact reviewed reference revision");
-        revisionMatch.Success.Should().BeTrue(
-            because: "the reference catalog must expose one immutable forty-character revision");
-        guide.Should().Contain($"/tree/{revisionMatch.Groups[1].Value}",
+        revisionMatches.Should().ContainSingle(
+            because: "the reference catalog must expose exactly one revision pointer");
+        revisionMatches[0].Groups[1].Value.Should().MatchRegex("^[0-9a-f]{40}$",
+            because: "the sole reference revision must be an immutable lowercase commit SHA");
+        guide.Should().Contain($"/tree/{revisionMatches[0].Groups[1].Value}",
             because: "the guide and catalog must point agents at the same reviewed lab revision");
         catalog.Should().Contain("status: published",
             because: "the merged reference is now publicly consumable");

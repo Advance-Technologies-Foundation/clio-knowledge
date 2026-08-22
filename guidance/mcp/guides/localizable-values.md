@@ -107,7 +107,7 @@ Keep `Implementation` assertions behavioral:
 
 Run both stand-free categories with coverage enabled and enforce 100% line, branch, and method coverage for the production package assembly. Keep the threshold in the test project so a regression fails the coverage command.
 
-Run Creatio-backed tests after synchronizing and compiling the package. Assert strict and fallback results independently. For a Freedom UI page, also assert each `bundle.resources.strings.<Key>` object from `get-page` exposes the expected culture properties, then render the page once in each culture. The default-only value must remain visible in the secondary culture to prove fallback.
+Run Creatio-backed tests after synchronizing and compiling the package. Assert strict and fallback results independently. For an explicitly registered custom page resource, also assert each `bundle.resources.strings.<Key>` object from `get-page` exposes the expected culture properties, then render the page once in each culture. For data-source-bound captions and other resource types, follow `page-schema-resources`. The default-only value must remain visible in the secondary culture to prove fallback.
 
 ## Failure signals and recovery
 
