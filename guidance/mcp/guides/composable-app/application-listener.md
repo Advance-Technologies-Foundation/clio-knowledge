@@ -75,8 +75,8 @@ namespace UsrPackage.EntryPoints {
 
 - Register `IApplicationRuntime` and `ISessionLifecycleObserver` as package singletons, or delegate both concerns to one cohesive singleton when the package is small.
 - The application runtime MUST guard duplicate `Start`/`Stop` calls and shared transitions with synchronization.
-- `OnAppStart` and `Start()` MUST establish ownership, schedule the worker, and return without waiting for network, database, or broker connectivity. Connect and retry inside the owned worker, with observable readiness and failure state.
-- During stop, mark the owner as stopping, capture it, and signal cancellation under the transition lock. Release that lock before waiting, joining, or disposing; reacquire it only for conditional finalization.
+- `OnAppStart` and `Start()` MUST establish ownership, schedule the worker, and return without waiting for network, database, or broker connectivity. Connect and retry inside the owned worker, with observable readiness and failure state. Allow one in-flight attempt and use cancellation-aware capped exponential backoff with jitter plus rate-limited failure logs.
+- During stop, only mark the owner as stopping and capture it under the transition lock. Release that lock before signaling cancellation because cancellation callbacks run synchronously, and keep it released while waiting, joining, or disposing; reacquire it only for conditional finalization.
 - Do not clear runtime state until workers have actually stopped. If bounded shutdown times out, retain the live state and log an actionable warning so a second runtime cannot start over it. When the worker later exits, its completion path MUST dispose resources and atomically clear that same owner exactly once so a future start can recover.
 - Session callbacks can overlap across sessions. Any shared observer state MUST be thread-safe.
 - Session hooks MUST NOT wait for synchronous network or database I/O. For external observation, perform only a non-blocking enqueue into a bounded queue with an explicit overload/drop policy, then process it outside the hook.
@@ -95,11 +95,12 @@ namespace UsrPackage.EntryPoints {
    - session start and end call the singleton observer once each and pass the exact `AppEventContext`.
 4. Assert that repeated runtime `Start` does not create duplicate workers and repeated `Stop` is safe.
 5. Verify application start returns within the package's small latency budget while its external dependency is unavailable; readiness and retries belong to the worker.
-6. Exercise concurrent session notifications when the observer mutates shared state.
-7. Verify each session callback returns within the package's small latency budget without waiting for downstream processing, including when its bounded queue is full.
-8. Exercise a normal cooperative stop and verify completion does not consume the timeout when worker cleanup uses the transition lock.
-9. Exercise a shutdown timeout in the runtime owner and verify it preserves live state, prevents a duplicate start, and emits a warning. Then complete the worker and verify cleanup happens exactly once and one later start succeeds.
-10. Exercise the package's small application-end wait alongside other listeners' waits and verify the cumulative time remains within the shared host shutdown budget.
+6. With the dependency unavailable, verify retry cadence is bounded, only one attempt is in flight, failure logging is rate-limited, and cancellation stops retry promptly.
+7. Exercise concurrent session notifications when the observer mutates shared state.
+8. Verify each session callback returns within the package's small latency budget without waiting for downstream processing, including when its bounded queue is full.
+9. Exercise a normal cooperative stop where cancellation and worker completion use the transition lock; verify it does not deadlock or consume the timeout.
+10. Exercise a shutdown timeout in the runtime owner and verify it preserves live state, prevents a duplicate start, and emits a warning. Then complete the worker and verify cleanup happens exactly once and one later start succeeds.
+11. Exercise the package's small application-end wait alongside other listeners' waits and verify the cumulative time remains within the shared host shutdown budget.
 
 Test the listener only as a delegation boundary. Test worker loops, cancellation, joins, resource disposal, and failure recovery on the singleton runtime that owns them.
 
