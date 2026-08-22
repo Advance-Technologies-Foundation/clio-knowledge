@@ -8,7 +8,7 @@ Scope: use when backend C# code needs user-visible text, when deciding which Cre
 - Put a schema-specific value on the schema that renders or consumes it. Page captions belong to the page; process text belongs to the process; object captions belong to the object.
 - A dedicated source-code schema MAY own package-level backend values only when no more specific schema is a natural owner.
 - Do not use one source-code schema as a package-wide registry for unrelated page, process, object, and backend values.
-- `clio add-package <PackageName> --as-app` (`clio ap <PackageName> -a`) creates a small package-level source-code owner and an injectable `ILocalizableStringResolver` adapter as starting points in localization-ready Clio releases. Keep the schema narrow; the resolver does not change resource ownership.
+- Starting with Clio 8.1.0.111, `clio add-package <PackageName> --as-app` (`clio ap <PackageName> -a`) creates a small package-level source-code owner and an injectable `ILocalizableStringResolver` adapter. On an older Clio version, add the interface and adapter using `packages/AtfLocalizationLab/Files/src/cs/LocalizableStrings/LocalizableStringResolver.cs` from the pinned reference lab, or upgrade. Keep the schema narrow; the resolver does not change resource ownership.
 
 ## Backend resource and lookup contract
 
@@ -18,7 +18,18 @@ Persist a string item under the owning schema's resource folder using this exact
 LocalizableStrings.<Key>.Value
 ```
 
-Application and transport code MUST depend on the generated `ILocalizableStringResolver`, not construct Creatio Core's concrete `LocalizableString` directly. Inject the abstraction into the domain service that needs localized text:
+To add a secondary culture:
+
+1. In the same owning schema resource folder, add `resource.<culture>.xml`, for example
+   `resource.es-ES.xml` beside `resource.en-US.xml`.
+2. Keep each translated item's `Name` identical across culture files and change only its `Value`.
+   Deliberately omit a key from the secondary file only when testing default-culture fallback.
+3. Add or activate that culture in Creatio's Languages section, then synchronize the package and compile
+   the configuration so the resource manager sees the new culture file.
+4. Set the test user's language to the secondary culture and sign in again before checking current-culture
+   UI behavior. Use explicit-culture resolver calls for deterministic backend tests.
+
+Domain and application services that perform localization MUST depend on the generated `ILocalizableStringResolver`, not construct Creatio Core's concrete `LocalizableString` directly. Inject the abstraction into the domain service that needs localized text:
 
 ```csharp
 using System.Globalization;
@@ -30,8 +41,8 @@ public sealed class GreetingService {
         _strings = strings;
     }
 
-    public string GetSpanishGreeting() {
-        string greeting = _strings.GetCultureValueWithFallback(
+    public string? GetSpanishGreeting() {
+        string? greeting = _strings.GetCultureValueWithFallback(
             "<OwningSchemaName>",
             "LocalizableStrings.<Key>.Value",
             CultureInfo.GetCultureInfo("es-ES"));
@@ -56,13 +67,11 @@ Do not replace the resolver with an `I*Helper`, static accessor, or package-wide
 
 ## Thin web-service boundary
 
-A configuration web service validates transport input, creates an application scope, resolves a domain service, delegates, and maps the concrete response DTO. It MUST NOT construct `LocalizableString` or perform localization logic. Read `configuration-webservice` and `configuration-webservice-tests` before implementing or testing that endpoint.
+A configuration web service validates transport input, creates an application scope, resolves a domain service, delegates, and maps the concrete response DTO. The transport entry point depends on that domain service, not directly on `ILocalizableStringResolver`. It MUST NOT construct `LocalizableString` or perform localization logic. Read `configuration-webservice` and `configuration-webservice-tests` before implementing or testing that endpoint.
 
 ## Freedom UI boundary
 
-Freedom UI pages bind visible text through `$Resources.Strings.<Key>`. The persisted resource still uses `LocalizableStrings.<Key>.Value`, and the page's schema metadata must declare the localizable value so Creatio can populate the runtime resource dictionary.
-
-Read `page-schema-resources` before creating or changing a page resource. It owns the `resources` parameter, data-source caption auto-provisioning, validator macros, and binding syntax. Do not copy those rules here.
+Read `page-schema-resources` before creating or changing a Freedom UI page resource. It owns binding syntax, the `resources` parameter, data-source caption auto-provisioning, validator macros, and the decision whether a custom page resource must be registered. Do not infer one binding or registration rule for every page resource, and do not copy those rules here.
 
 After deployment, use `get-page` and inspect `bundle.resources.strings.<Key>` as the platform oracle. A resource XML file on disk is not sufficient proof that the Freedom UI runtime can resolve it.
 
@@ -85,8 +94,7 @@ Keep `ResourceContent` assertions for package structure and fast feedback:
 
 - the resource belongs to the intended schema;
 - persisted item names use `LocalizableStrings.<Key>.Value`;
-- Freedom UI code binds `$Resources.Strings.<Key>`;
-- the page metadata declares every custom page resource;
+- Freedom UI bindings and metadata follow `page-schema-resources` for the specific resource type;
 - the secondary resource deliberately omits the fallback test key.
 
 Keep `Implementation` assertions behavioral:
@@ -96,7 +104,7 @@ Keep `Implementation` assertions behavioral:
 
 Run both stand-free categories with coverage enabled and enforce 100% line, branch, and method coverage for the production package assembly. Keep the threshold in the test project so a regression fails the coverage command.
 
-Run Creatio-backed tests after synchronizing and compiling the package. Assert strict and fallback results independently. For a Freedom UI page, also assert `get-page` exposes the expected cultures under `bundle.resources.strings`, then render the page once in each culture. The default-only value must remain visible in the secondary culture to prove fallback.
+Run Creatio-backed tests after synchronizing and compiling the package. Assert strict and fallback results independently. For a Freedom UI page, also assert each `bundle.resources.strings.<Key>` object from `get-page` exposes the expected culture properties, then render the page once in each culture. The default-only value must remain visible in the secondary culture to prove fallback.
 
 ## Failure signals and recovery
 

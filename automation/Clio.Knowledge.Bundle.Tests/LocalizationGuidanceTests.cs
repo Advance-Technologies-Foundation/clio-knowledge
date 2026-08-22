@@ -17,6 +17,8 @@ public sealed class LocalizationGuidanceTests
             "guidance", "mcp", "guides", "localizable-values.md"));
         string routing = File.ReadAllText(Path.Combine(repositoryRoot,
             "guidance", "mcp", "guides", "routing.md"));
+        string pageResources = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance", "mcp", "guides", "page-schema", "resources.md"));
         string catalog = File.ReadAllText(Path.Combine(repositoryRoot,
             "catalog", "reference-examples", "creatio-localization.yaml"));
         using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(
@@ -30,6 +32,8 @@ public sealed class LocalizationGuidanceTests
         // Assert
         guide.Should().Contain("A dedicated source-code schema MAY own package-level backend values",
             because: "the generated app primitive must remain a narrow owner rather than a global registry");
+        guide.Should().Contain("Starting with Clio 8.1.0.111",
+            because: "tool-dependent guidance must declare the first compatible Clio release");
         guide.Should().Contain("ILocalizableStringResolver",
             because: "the article must teach the injectable boundary over the Creatio platform primitive");
         guide.Should().Contain("LocalizableStringResolver",
@@ -40,10 +44,14 @@ public sealed class LocalizationGuidanceTests
             because: "strict and fallback lookup are different observable contracts");
         guide.Should().Contain("throwIfNoManager: false",
             because: "the generated adapter must make the platform boolean's meaning explicit");
-        guide.Should().Contain("string greeting = _strings.GetCultureValueWithFallback",
-            because: "the teaching example must keep returned values inspectable at a breakpoint");
+        guide.Should().Contain("string? greeting = _strings.GetCultureValueWithFallback",
+            because: "the teaching example must keep nullable returned values inspectable at a breakpoint");
         guide.Should().Contain("substituted `IResourceStorage`",
             because: "developers need an executable seam for unit-testing the concrete generated adapter");
+        guide.Should().Contain("add `resource.<culture>.xml`",
+            because: "the guide must explain how to create a secondary-culture resource file");
+        guide.Should().Contain("Add or activate that culture in Creatio's Languages section",
+            because: "a culture file alone is not testable until the platform language is active");
         guide.Should().Contain("`ResourceContent`",
             because: "resource-file assertions must be distinct from executable implementation tests");
         guide.Should().Contain("`Implementation`",
@@ -62,8 +70,18 @@ public sealed class LocalizationGuidanceTests
             because: "the merged reference is now publicly consumable");
         guide.Should().NotContain("ILocalizableStringHelper",
             because: "guidance must not prescribe a mechanism-named helper abstraction");
-        routing.Should().Contain("name=localizable-values",
-            because: "agents must be able to discover the guide from the routing map");
+        routing.Should().Contain(
+            "backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources",
+            because: "agents must discover both localization and page-resource owners from the exact routing contract");
+        pageResources.Should().Contain("MUST also read `localizable-values`",
+            because: "Freedom UI work must link back to the localization ownership and testing contract");
+        source.RootElement.GetProperty("requirements").GetProperty("itemIds").EnumerateArray()
+            .Select(item => item.GetString()).Should().Contain("localizable-values",
+                because: "activation requirements must include the localization guide item");
+        source.RootElement.GetProperty("requirements").GetProperty("resourceUris").EnumerateArray()
+            .Select(item => item.GetString()).Should().Contain(
+                "docs://knowledge/com.creatio.clio/localizable-values",
+                because: "activation requirements must include the localization guide URI");
         resource.GetProperty("uri").GetString().Should().Be(
             "docs://knowledge/com.creatio.clio/localizable-values",
             because: "the article needs one stable canonical route");
