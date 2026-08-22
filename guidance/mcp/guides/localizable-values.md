@@ -76,7 +76,7 @@ A configuration web service validates transport input, creates an application sc
 
 Read `page-schema-resources` before creating or changing a Freedom UI page resource. It owns binding syntax, the `resources` parameter, data-source caption auto-provisioning, validator macros, and the decision whether a custom page resource must be registered. Do not infer one binding or registration rule for every page resource, and do not copy those rules here.
 
-After deployment, use `get-page` and inspect `bundle.resources.strings.<Key>` as the platform oracle. A resource XML file on disk is not sufficient proof that the Freedom UI runtime can resolve it.
+After deployment, use `get-page` and inspect `bundle.resources.strings.<Key>` as the platform oracle for an explicitly registered custom page resource. A resource XML file on disk is not sufficient proof that the Freedom UI runtime can resolve it. For data-source-bound captions and other resource types, follow the decision rules in `page-schema-resources`; absence from this node is not by itself proof of a defect.
 
 ## Test the behavior
 
@@ -113,7 +113,7 @@ Run Creatio-backed tests after synchronizing and compiling the package. Assert s
 
 - Strict lookup is `null`, fallback returns the default value: expected when the requested translation is intentionally absent. Add the translation if strict coverage is required.
 - Strict and fallback lookups are both `null`: verify the owning schema name, exact `LocalizableStrings.<Key>.Value` item name, active cultures, package synchronization, and configuration compilation.
-- Backend lookup succeeds but a Freedom UI label is blank: run `get-page`. If `bundle.resources.strings` lacks the key, repair the page localizable-value metadata and persisted item name, then synchronize, compile, clear cache, and reload.
+- Backend lookup succeeds but a Freedom UI label is blank: read `page-schema-resources`, run `get-page`, and diagnose the binding key and registration decision according to that guide. Do not add or change page resource metadata based only on absence from `bundle.resources.strings`.
 - The page shows the default value in every culture: verify the secondary culture is active, the user profile uses it, and that culture's resource file contains the translated key.
 - A value cannot be found after moving it to a shared registry schema: restore ownership to the consuming schema or update every lookup deliberately. Do not use a global registry to hide ownership errors.
 

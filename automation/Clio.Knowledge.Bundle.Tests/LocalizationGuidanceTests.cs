@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -28,6 +29,7 @@ public sealed class LocalizationGuidanceTests
         JsonElement resource = source.RootElement.GetProperty("resources")
             .EnumerateArray()
             .Single(item => item.GetProperty("itemId").GetString() == "localizable-values");
+        Match revisionMatch = Regex.Match(catalog, "(?m)^[ \\t]*revision:[ \\t]*([0-9a-f]{40})[ \\t]*\\r?$");
 
         // Assert
         guide.Should().Contain("A dedicated source-code schema MAY own package-level backend values",
@@ -68,6 +70,10 @@ public sealed class LocalizationGuidanceTests
             because: "agents need the independent executable reference after it is published");
         catalog.Should().Contain("revision: 273eb7531a8284b6072730b097769b95df56a02e",
             because: "the catalog must pin the exact reviewed reference revision");
+        revisionMatch.Success.Should().BeTrue(
+            because: "the reference catalog must expose one immutable forty-character revision");
+        guide.Should().Contain($"/tree/{revisionMatch.Groups[1].Value}",
+            because: "the guide and catalog must point agents at the same reviewed lab revision");
         catalog.Should().Contain("status: published",
             because: "the merged reference is now publicly consumable");
         guide.Should().NotContain("ILocalizableStringHelper",
