@@ -75,7 +75,7 @@ namespace <PackageNamespace>.EntryPoints.ApplicationListeners {
 
 - Register `IApplicationRuntime` and `ISessionLifecycleObserver` as package singletons, or delegate both concerns to one cohesive singleton when the package is small.
 - The application runtime MUST guard duplicate `Start`/`Stop` calls and shared transitions with synchronization.
-- `OnAppStart` and `Start()` MUST establish ownership, schedule the worker, and return without waiting for network, database, or broker connectivity. Connect and retry inside the owned worker, with observable readiness and failure state. Allow one in-flight attempt and use cancellation-aware capped exponential backoff with jitter plus rate-limited failure logs.
+- `OnAppStart` and `Start()` MUST establish ownership, schedule the worker, and return without waiting for network, database, or broker connectivity. Connect and retry inside the owned worker, with observable readiness and failure state. Allow one in-flight attempt and use cancellation-aware capped exponential backoff with jitter plus rate-limited failure logs. Every attempt MUST honor the owner cancellation token and a finite per-attempt timeout that fits inside the shutdown budget.
 - During stop, only mark the owner as stopping and capture it under the transition lock. Release that lock before signaling cancellation because cancellation callbacks run synchronously, and keep it released while waiting, joining, or disposing; reacquire it only for conditional finalization.
 - Do not clear runtime state until workers have actually stopped. If bounded shutdown times out, retain the live state and log an actionable warning so a second runtime cannot start over it. A later start MUST emit a distinct `start refused: prior owner still stopping` signal while that owner remains live. When the worker later exits, its completion path MUST dispose resources and atomically clear that same owner exactly once so a future start can recover.
 - Session callbacks can overlap across sessions. Any shared observer state MUST be thread-safe.
@@ -95,7 +95,7 @@ namespace <PackageNamespace>.EntryPoints.ApplicationListeners {
    - session start and end call the singleton observer once each and pass the exact `AppEventContext`.
 4. Assert that repeated runtime `Start` does not create duplicate workers and repeated `Stop` is safe.
 5. Verify application start returns within the package's small latency budget while its external dependency is unavailable; readiness and retries belong to the worker.
-6. With the dependency unavailable, verify retry cadence is bounded, only one attempt is in flight, failure logging is rate-limited, and cancellation stops retry promptly.
+6. With the dependency unavailable, verify retry cadence is bounded, only one attempt is in flight, failure logging is rate-limited, and cancellation stops retry promptly. Cancel while an attempt is blocked and verify its token and finite timeout let the worker exit within the shutdown bound.
 7. Exercise concurrent session notifications when the observer mutates shared state.
 8. Verify each session callback returns within the package's small latency budget without waiting for downstream processing, including when its bounded queue is full.
 9. Exercise a normal cooperative stop where cancellation and worker completion use the transition lock; verify it does not deadlock or consume the timeout.

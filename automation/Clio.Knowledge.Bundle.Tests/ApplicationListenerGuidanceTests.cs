@@ -43,6 +43,7 @@ public sealed class ApplicationListenerGuidanceTests
             "Session hooks MUST NOT wait for synchronous network or database I/O",
             "return without waiting for network, database, or broker connectivity",
             "cancellation-aware capped exponential backoff with jitter",
+            "Every attempt MUST honor the owner cancellation token and a finite per-attempt timeout",
             "Release that lock before signaling cancellation",
             "Shutdown MUST be bounded",
             "consumes the same host shutdown deadline",
