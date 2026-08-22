@@ -47,6 +47,7 @@ public sealed class ApplicationListenerGuidanceTests
             "Shutdown MUST be bounded",
             "consumes the same host shutdown deadline",
             "atomically clear that same owner exactly once",
+            "start refused: prior owner still stopping",
             "creates a fresh listener instance for each dispatched event",
             "constructor or static-initializer failure is outside that hook exception boundary",
             "continues dispatching other listeners",

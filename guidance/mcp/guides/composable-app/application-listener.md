@@ -37,14 +37,14 @@ In a web farm, session start and end are not guaranteed to run on the same node 
 
 ## Stateless Listener Pattern
 
-Keep the reflection-created listener as an adapter. The service names below are package-owned placeholders, not Creatio platform interfaces.
+Keep the reflection-created listener as an adapter. The application root, its `GetRequiredService<T>()` method, and the service names below are package-owned placeholders, not Creatio platform interfaces.
 
 Place the source at `packages/<PACKAGE_NAME>/Files/src/cs/EntryPoints/ApplicationListeners/<ListenerName>.cs` under namespace `<PackageNamespace>.EntryPoints.ApplicationListeners`, unless the package already has a stricter entry-point convention.
 
 ```csharp
 using Terrasoft.Web.Common;
 
-namespace UsrPackage.EntryPoints {
+namespace <PackageNamespace>.EntryPoints.ApplicationListeners {
 	public sealed class UsrApplicationListener : AppEventListenerBase {
 		public override void OnAppStart(AppEventContext context) {
 			UsrApplication.Instance
@@ -77,7 +77,7 @@ namespace UsrPackage.EntryPoints {
 - The application runtime MUST guard duplicate `Start`/`Stop` calls and shared transitions with synchronization.
 - `OnAppStart` and `Start()` MUST establish ownership, schedule the worker, and return without waiting for network, database, or broker connectivity. Connect and retry inside the owned worker, with observable readiness and failure state. Allow one in-flight attempt and use cancellation-aware capped exponential backoff with jitter plus rate-limited failure logs.
 - During stop, only mark the owner as stopping and capture it under the transition lock. Release that lock before signaling cancellation because cancellation callbacks run synchronously, and keep it released while waiting, joining, or disposing; reacquire it only for conditional finalization.
-- Do not clear runtime state until workers have actually stopped. If bounded shutdown times out, retain the live state and log an actionable warning so a second runtime cannot start over it. When the worker later exits, its completion path MUST dispose resources and atomically clear that same owner exactly once so a future start can recover.
+- Do not clear runtime state until workers have actually stopped. If bounded shutdown times out, retain the live state and log an actionable warning so a second runtime cannot start over it. A later start MUST emit a distinct `start refused: prior owner still stopping` signal while that owner remains live. When the worker later exits, its completion path MUST dispose resources and atomically clear that same owner exactly once so a future start can recover.
 - Session callbacks can overlap across sessions. Any shared observer state MUST be thread-safe.
 - Session hooks MUST NOT wait for synchronous network or database I/O. For external observation, perform only a non-blocking enqueue into a bounded queue with an explicit overload/drop policy, then process it outside the hook.
 - Do not start a thread, timer, consumer, or native client directly in the listener and keep its handle in a listener field.
@@ -99,7 +99,7 @@ namespace UsrPackage.EntryPoints {
 7. Exercise concurrent session notifications when the observer mutates shared state.
 8. Verify each session callback returns within the package's small latency budget without waiting for downstream processing, including when its bounded queue is full.
 9. Exercise a normal cooperative stop where cancellation and worker completion use the transition lock; verify it does not deadlock or consume the timeout.
-10. Exercise a shutdown timeout in the runtime owner and verify it preserves live state, prevents a duplicate start, and emits a warning. Then complete the worker and verify cleanup happens exactly once and one later start succeeds.
+10. Exercise a shutdown timeout in the runtime owner and verify it preserves live state, prevents a duplicate start, and emits both the timeout warning and a distinct start-refused signal. Then complete the worker and verify cleanup happens exactly once and one later start succeeds.
 11. Exercise the package's small application-end wait alongside other listeners' waits and verify the cumulative time remains within the shared host shutdown budget.
 
 Test the listener only as a delegation boundary. Test worker loops, cancellation, joins, resource disposal, and failure recovery on the singleton runtime that owns them.
@@ -134,5 +134,5 @@ Do not use a shared or production environment merely to prove lifecycle dispatch
 ## Evidence And Applicability
 
 - The public four-hook surface is documented by Creatio's [`AppEventListenerBase` API](https://academy.creatio.com/api/netcoreapi/7.18.0/api/Terrasoft.Web.Common.AppEventListenerBase.html).
-- Discovery, fresh-instance activation, hook exception isolation, application/session host ordering, and the application-only event context were verified in the private `engineering/core` repository at commit `e0d0f98b80c8fd26e305804c7cb3242b76baf072`, first contained by checked tags `builds-linux/10.1.84` and `builds-windows/10.1.83`, for both .NET Framework and .NET Core hosts. Apply these observations to platform builds containing that revision; reverify them against Core source before relying on them in an older or materially different version.
+- Discovery, fresh-instance activation, serial dispatch, hook exception isolation, application/session host ordering, and the application-only event context were verified in the private `engineering/core` repository at commit `e0d0f98b80c8fd26e305804c7cb3242b76baf072`, first contained by checked tags `builds-linux/10.1.84` and `builds-windows/10.1.83`, for both .NET Framework and .NET Core hosts. Apply these observations to platform builds containing that revision; reverify them against Core source before relying on them in an older or materially different version.
 - Use the published `atf.creatio.kafka-reference` catalog item for a pinned example of the verified application-listener-to-singleton boundary. That example covers `OnAppStart` and `OnAppEnd`; it is not evidence for session identity or session ordering.
