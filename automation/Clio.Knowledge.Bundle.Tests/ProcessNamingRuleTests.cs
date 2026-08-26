@@ -175,7 +175,7 @@ public sealed class ProcessNamingRuleTests
         "Notify", "Open", "Publish", "Read", "Send", "Set", "Show", "Start", "Update", "Wait"
     ];
 
-    private const string ActivityTypes = "userTask|sendEmail|readData|performTask";
+    private const string ActivityTypes = "userTask|sendEmail|readData|performTask|preconfiguredPage";
     private const string EventTypes = "startEvent|signalStart|endEvent";
 
     [Test]
@@ -428,7 +428,8 @@ public sealed class ProcessNamingRuleTests
         ("userTask", "", ""),
         ("performTask", "", ""),
         ("readData", "", ""),
-        ("sendEmail", "", "")
+        ("sendEmail", "", ""),
+        ("preconfiguredPage", "", "")
     ];
 
     /// <summary>
