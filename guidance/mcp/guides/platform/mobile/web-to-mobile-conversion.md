@@ -347,6 +347,20 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   and the converter's `target.items` by hand is the deviation-from-tool-output this rule forbids, and their
   shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
   tree — it is not a ban on the model-side wiring the OOTB page carries.
+- RETARGET INTO A TEMPLATE-PROVIDED PARENT — INSERT ONLY THE CHILDREN, NEVER THE PARENT. When an
+  elementMap insert RETARGETS an element into a container the mobile template ALREADY provides (a header
+  action → FloatingActionButton.menuItems, the FAB living in the Scaffold's single-element "floatAction"
+  slot), the guide flags that entry with `parentExistsOnTemplate: true` and repeats the instruction in
+  guide.constraints. Insert ONLY the flagged children into the named parent; do NOT insert, merge, or
+  re-declare the parent container or its slot — the template supplies both, and authoring your own (e.g. a
+  second crt.FloatingActionButton on Scaffold.floatAction) OVERRIDES the native one (wrong icon/visibility,
+  lost menu items). This is the single-element-slot / strip rule from get-guidance `mobile-page-modification`
+  (floatAction is merge-only and the merge is discarded when the slot is already filled) applied to
+  conversion — that article owns the rule; this is only its conversion-time reminder. A guide that predates
+  the flag omits it and the constraint: fall back to the same rule and never author a container the Scaffold
+  root already carries. And a header action the mobile template ALREADY provides natively (Save / Cancel /
+  Close on the Scaffold) is NOT retargeted at all — the guide drops it (reason names "already provided
+  natively"), because a duplicate menu item would shadow the native button.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web
   columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web
