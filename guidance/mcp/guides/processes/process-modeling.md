@@ -163,6 +163,36 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   persist the flag at all, `useBackgroundMode: true` is REJECTED with a clear error on such an environment
   instead of being silently dropped. `false` is always accepted (inline execution is what that environment
   already does). `describe-business-process` reports the effective value per element, so it round-trips.
+- Approval: `approval` (the Approval element / ApprovalUserTask), which requests a visa on a record. The
+  `approval` block configures it:
+  `{ "name": "ApproveDiscount", "type": "approval", "caption": "Discount approval", "approval": {
+     "object": "<EntityName>", "recordId": { one of {"recordId": "<GUID or the [#Lookup…#] macro describe
+       reports>"} | {"processParameter": "<Name>"} | {"sourceElement": "<Element>", "sourceElementParameter":
+       "<Output>"} },
+     "purpose"?: "text shown to the approver", "allowDelegation"?: true|false,
+     "notifyApprover"?: { "emailTemplate": "<template name or id>" },
+     "notifyAuthor"?: { "emailTemplate"?: "<template name or id>",
+       "recipient"?: { one of {"value": "a@b.com"} | {"processParameter": "<Name>"} } },
+     "ignoreEmailErrors"?: true|false } }`.
+  Rules, and the two that will bite you are the last two:
+  * `object` + `recordId` are required on a FIRST configuration; both are mandatory in the designer and the
+    runtime cannot raise a visa without them. A fixed `recordId` must be a record OF `object` — a foreign id
+    is REFUSED, because the designer renders that field blank and the next human save wipes the element.
+  * Supplying `notifyApprover` / `notifyAuthor` switches that notification ON; the flag and its template are
+    written together because the runtime gates the send on the flag. There is NO way to switch one off
+    through the block — a cleared template is indistinguishable from one never set; use `addMapping` against
+    the flag parameter instead.
+  * `purpose` omitted writes the platform default "Approval required" — that is what the designer persists
+    too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
+  * The visa schema, its master column and the section are DERIVED from `object` server-side (with the
+    platform's `SysApproval` fallback when the object has no approval settings) and are never caller input.
+  * **The APPROVER is not part of this contract.** Who approves — user / role / employee's manager — is a
+    separate surface, so an element you build here is INCOMPLETE until a human sets the approver in the
+    designer. Say so when you build one; do not report it as a finished approval step.
+  * **The outcome cannot be branched on.** Approved / rejected / canceled arrives in the element's
+    `ResultParameter` output, but routing it needs a gateway and conditional flows, which are not buildable
+    (below). So `approval` gives you a configured approval STEP, not an approval FLOW. Note the outcome set
+    is three values, not two.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section below).
 - NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
@@ -595,9 +625,11 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows ar
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
-`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see "What you can build today".)
+`readData`/ReadDataUserTask. TWO user tasks have their own dedicated build type and should NOT be built as a
+generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
+(mode/sender/recipients/subject/body/options/performer; no email templates); and `approvalUserTask` ->
+`type:"approval"` — approval object + record, delegation and the two email notifications, but NOT the
+approver and NOT branching on the outcome. See "What you can build today" for both.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
