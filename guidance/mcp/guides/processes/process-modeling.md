@@ -58,11 +58,20 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       page unprompted: it is a lasting artifact in the user's app, it must be named to the no-code standards, and
       only the user knows which fields belong on it. When the only candidates are Classic UI pages, say so and
       recommend a new Freedom UI page — but leave the choice to the user.
-    * AT LEAST ONE completing button is REQUIRED and is not defaulted for you. The visual designer leaves a
-      newly discovered button unselected, so an element built without one would pass validation in the
-      designer and then hang forever at run time. Choose from the candidates the facts tool returned.
+    * AT LEAST ONE completing button is REQUIRED on a BUILD and is not defaulted for you — the server now
+      REFUSES a new Freedom UI element whose `buttons` is missing or empty, naming the field. The visual
+      designer leaves a newly discovered button unselected, so an element built without one would pass
+      validation in the designer and then hang forever at run time, which nothing downstream catches.
+      Choose from the candidates the facts tool returned. (On `setElement` the same omission still means
+      "keep the buttons the element already has" — the refusal is build-only.)
+    * `performer` OMITTED on a build defaults to the CURRENT USER — the server writes the same performer the
+      designer's card does for a new element, so you do not have to send one. Send it when the task belongs
+      to somebody else.
     * `showPage` is accepted ONLY for a `user` performer. The runtime ignores it when the task runs for
       somebody else or in background mode, so it is refused for `role`/`manager` rather than stored inert.
+      Omit it and the page IS still shown automatically: that is the task's own default and the designer
+      leaves it inherited, so DO NOT send `showPage: true` to "make sure" — sending it stores a value where a
+      designer-built element stores none.
     * `recommendation` must be a single line — a line break is rejected, because the platform renders the
       text as one line regardless of syntax.
     * The page's PARAMETERS are deliberately absent from the descriptor: the server reads them from the page
@@ -76,6 +85,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       value, and a parameter whose data type changed loses its value and is reported. This mirrors the
       designer refreshing the element when its card is opened. `describe-business-process` reports
       `preconfiguredPage.inSync` and never fixes drift itself.
+    * DRIFT IS REPORTED IN `warnings` — on the modify response and now on the BUILD response too. A cleared
+      value, a removed parameter, a rename, and a page that could not be read each raise one line naming the
+      element and the parameters. Read them: the edit SUCCEEDS, so a mapping invalidated by a page change is
+      visible only there. A page that could not be read removes NOTHING — the element keeps a stale parameter
+      list rather than a pruned one, and the warning says so.
     * Creating a Pre-configured page on a CLASSIC UI page is not supported. An element that already
       references one keeps it: `describe-business-process` reports it (including `connectedObject` and
       `connectedObjectRecord`) and never rewrites it, and `setElement` is limited to the fields both page
