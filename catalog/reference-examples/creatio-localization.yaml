@@ -1,0 +1,35 @@
+schemaVersion: 0
+id: atf.creatio.localization-reference
+title: Creatio localization reference
+status: published
+primaryUseCase:
+  id: creatio-schema-owned-localizable-values
+  summary: Demonstrate schema-owned backend and Freedom UI localizable values through an injectable LocalizableString adapter, deterministic fallback cases, and stand-free plus live Creatio tests.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-localization-lab
+  revision: 273eb7531a8284b6072730b097769b95df56a02e
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/AtfLocalizationLab
+  unitTests: tests/AtfLocalizationLab
+  backendResolver: packages/AtfLocalizationLab/Files/src/cs/LocalizableStrings/LocalizableStringResolver.cs
+supportingCapabilities:
+  - creatio-schema-owned-resources
+  - backend-localizable-string-resolution
+  - dependency-injection
+  - freedom-ui-localization
+  - strict-culture-lookup
+  - culture-fallback
+  - unit-testing
+  - live-creatio-testing
+compatibility:
+  status: example-declared
+  details: Uses Creatio 8.3.3 as its supported baseline; live-verified on Creatio 10.1.585.0, .NET 8, PostgreSQL.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - This is an educational reference workspace, not a package-wide localization registry.
+  - The pinned revision contains 19 stand-free tests with 100% line, branch, and method coverage plus 6 live Creatio tests.
+  - Registration does not promote every implementation choice to canonical Clio guidance.

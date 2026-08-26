@@ -8,6 +8,7 @@ Use this skill for source-level Creatio work, especially when the task involves 
 - Treat Creatio artifacts as package-scoped. Identify the package, schema, and object ownership before editing.
 - Prefer existing workspace conventions over generic samples. If the repository already has naming, packaging, or schema patterns, follow them.
 - Use CLIO command names exactly when you mention them. The local command set in this environment includes `new-pkg`, `push-pkg`, and `pull-pkg`.
+- For `IAppEventListener` or `AppEventListenerBase` application/session lifecycle hooks, MUST also read `application-listener`; this guide does not own reflection activation or cross-hook state.
 - For niche Creatio APIs or Freedom UI patterns, consult [docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs](docs://knowledge/com.creatio.clio/reference.creatio-composable-app-development.official-docs) before inventing a structure.
 
 ## Workflow

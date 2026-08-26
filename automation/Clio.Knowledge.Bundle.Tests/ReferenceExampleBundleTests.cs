@@ -10,6 +10,11 @@ public sealed class ReferenceExampleBundleTests
     private static readonly ReferenceExampleExpectation[] RegisteredExamples =
     [
         new(
+            "atf.creatio.custom-mcp-tool-reference",
+            "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-custom-mcp-tool-reference",
+            "30aa4d7349f91c50ee207362a2618f49f1c64a2f"),
+        new(
             "atf.creatio.google-pubsub-reference",
             "catalog/reference-examples/creatio-google-pubsub.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-google-pubsub-reference",
@@ -18,7 +23,17 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.kafka-reference",
             "catalog/reference-examples/creatio-kafka.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-kafka-reference",
-            "a1770613923ed48bea547a67be466e663feea1ef")
+            "a1770613923ed48bea547a67be466e663feea1ef"),
+        new(
+            "atf.creatio.localization-reference",
+            "catalog/reference-examples/creatio-localization.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-localization-lab",
+            "273eb7531a8284b6072730b097769b95df56a02e"),
+        new(
+            "atf.creatio.websocket-reference",
+            "catalog/reference-examples/creatio-websocket.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-websocket-reference",
+            "2d650b03c58553c934b71479c095fff669ad1049")
     ];
 
     [Test]

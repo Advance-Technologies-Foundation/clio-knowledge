@@ -68,6 +68,7 @@ Delete flow:
 ## State Across Events
 
 - Treat one listener instance as reusable during the same entity operation.
+- This rule belongs only to `BaseEntityEventListener`. You MUST NOT apply it to `AppEventListenerBase`; read `application-listener` for that listener's activation and state contract.
 - Store only operation-scoped state in private fields, for example `UserConnection`, flags, or values captured before save and used after save.
 - Initialize lazily when helper construction depends on `UserConnection`.
 - Do not let the listener become a service locator for unrelated logic.
@@ -105,6 +106,7 @@ Verified boundary: this pattern was observed in Creatio 8.1.0.6716 on .NET Frame
 
 - Subscribe to `entity.Validating` from `OnSaving` when entity validation must happen in the save pipeline.
 - Add one or more `EntityValidationMessage` items to `entity.ValidationMessages`.
+- Before initializing the message type, read `reference.configuration-entity-event-listener.validation-patterns` and preserve the exact property spelling exposed by the selected Creatio reference assembly. Do not silently correct platform API identifiers.
 - Point the message to the failing column when possible.
 - Keep validation text user-facing and specific.
 

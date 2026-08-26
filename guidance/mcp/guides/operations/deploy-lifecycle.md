@@ -12,6 +12,8 @@ Deploy preflight (run in this order)
 2. `show-passing-infrastructure` - narrow to only the choices that are safe to deploy against and read
    `recommendedDeployment` (and `recommendedByEngine`) for the deploy-creatio argument bundle.
 3. `find-empty-iis-port` - for a local Creatio deployment, take `firstAvailablePort` as the deploy `sitePort`.
+   This is a point-in-time recommendation. `deploy-creatio` reserves and revalidates that port across
+   concurrent clio processes before it changes files, databases, or IIS.
    `deploy-identity` can call the same IIS port scanner internally when `identitySitePort` is omitted.
 4. Resolve the build archive - `deploy-creatio` needs an absolute `zipFile` path. `deploy-identity`
    accepts either a standalone `IdentityService.zip` or the same Creatio distribution bundle when it
@@ -27,6 +29,9 @@ Deploy
   selected usable LocalMachine/My certificate matching the host, and warns then continues with
   HTTP when no usable certificate is installed.
 - Prefer the recommended bundle from `show-passing-infrastructure` and the port from `find-empty-iis-port`.
+- A port collision is a failed deployment, not permission to continue on the same port. Run
+  `find-empty-iis-port` again and retry with its new result. Deployments using different ports can run
+  in parallel.
 - Do not proceed if assert-infrastructure left the targeted database/Redis sections failing.
 - Deployments preserve the build database's existing forced-password-change state by default and do
   not clear it automatically. deploy-creatio does not assign a new Supervisor password.
@@ -63,5 +68,7 @@ Failure policy
 - If `assert-infrastructure` returns fail with no passing database candidates, stop with a blocker and
   report the failing sections rather than guessing a deployment target.
 - If `deploy-creatio` returns a non-zero `exit-code`, persist `execution-log-messages` and stop.
+- If the failure says `sitePort` is occupied or reserved, verify that the target was not created,
+  discover another port, and retry. Do not bypass the port check.
 - If the configured `creatio-products` folder is missing or empty, fix the path (or place a build
   there) before retrying deploy-creatio.
