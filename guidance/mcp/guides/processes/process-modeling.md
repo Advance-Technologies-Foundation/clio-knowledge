@@ -45,12 +45,19 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   a page inherits its buttons from its template chain, so they are only knowable from the merged page and
   the server cannot see them. Call `get-process-page-facts --schema-name <page>` and pass its
   `completingButtonCandidates` / `dataSources` entries through unchanged.
-    * `{"type":"preconfiguredPage","name":"Review1","preconfiguredPage":{
+    * `{"type":"preconfiguredPage","name":"ApproveRequest","caption":"Approve the request","preconfiguredPage":{
       "page":"UsrRequestReview_FormPage",
       "performer":{"type":"user|manager|role","contact":"…","role":"…","showPage":true},
       "buttons":[{"name":"SaveButton","caption":"Save | SaveButton","event":"clicked","validate":true}],
       "dataSources":[{"name":"PDS","entitySchemaName":"UsrRequest"}],
       "recommendation":"single line"}}`
+    * NO SUITABLE PAGE? The element is NEVER built without one, and the server NEVER creates a page for you —
+      a build naming a page that does not exist is refused, and so is one naming a Classic UI page. Creating the
+      page is a SEPARATE, EARLIER step: propose it to the user (name + which fields it needs), and once they
+      agree use the existing create-page flow, then build the element referencing the new page. Do not create a
+      page unprompted: it is a lasting artifact in the user's app, it must be named to the no-code standards, and
+      only the user knows which fields belong on it. When the only candidates are Classic UI pages, say so and
+      recommend a new Freedom UI page — but leave the choice to the user.
     * AT LEAST ONE completing button is REQUIRED and is not defaulted for you. The visual designer leaves a
       newly discovered button unselected, so an element built without one would pass validation in the
       designer and then hang forever at run time. Choose from the candidates the facts tool returned.
