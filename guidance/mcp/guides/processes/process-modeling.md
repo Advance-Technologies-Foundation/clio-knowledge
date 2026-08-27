@@ -246,6 +246,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   faithfully as `enabled: true` with `column: null` — a switched-on list that produces no results. Such a block
   cannot be fed straight back (the write path requires the column), so supply a column or `enabled: false` when
   re-applying.
+  On a `setElement` update, a `page` change that also changes the OBJECT is REFUSED while object-bound
+  configuration is stored — the completion conditions and this column both reference the OLD object's columns, and a
+  stranded column leaves the designer's field empty with the list still switched on. Swapping in another page of the
+  SAME object (the Classic-to-Freedom move) is fine: every reference stays valid. The refusal names the way out —
+  supply a column of the new object, or `enabled: false`; for the conditions, `clearFilter` before the retarget.
   **State this limitation to the user before building one:** the conditional flows that would ROUTE those results are
   not buildable from this contract yet (see "NOT yet buildable" above), so the process carries the result list and
   branches on it only after a human wires the flows in the designer. Building it is still useful — the list and the
