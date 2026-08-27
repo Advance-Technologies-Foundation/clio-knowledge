@@ -194,12 +194,29 @@ FLOW
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
    - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
-     request, or "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+     request, "empty container", or an "excludedComponents rule matched"). Tell the user what was dropped.
+     Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
      the converter and arrives as a drop entry with reason "empty container". WHICH container types are
      eligible is converter configuration, not a fixed list — read the drop entries rather than assuming
      one. Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
      about it — just report it with the other drops.
+     An "excludedComponents rule matched" drop is a POSITIONAL exclusion the converter applied by rule
+     (the reason names the removed type, the host type, and the host property when the rule scopes one —
+     e.g. a search filter the rule excludes from an expansion panel's compact tools strip). It is NOT
+     conversion loss: do NOT re-insert the component — not into that host, not
+     anywhere else on the page — and do NOT ask the user whether to keep it. WHICH types are excluded
+     from WHICH hosts is converter configuration, not a fixed list — read the drop reasons rather than
+     assuming one. The same type OUTSIDE the excluded position converts normally, so seeing it dropped
+     in one place and kept in another on the same page is correct, not an inconsistency. Just report it
+     with the other drops.
+     A positional exclusion emits a SECOND reason shape for everything that hung below the removed
+     component: "parent removed by an excludedComponents rule: ancestor 'X' was removed and this element
+     has no mobile parent left". Treat it exactly like the reason above — the element is gone because its
+     parent is gone, so re-creating it would rebuild the branch the rule exists to remove. Do NOT
+     re-insert it, do NOT re-parent it to a surviving container, and do NOT ask the user about it. Match
+     an excludedComponents drop on BOTH shapes: a rule that targets a container type produces mostly this
+     one, and the elements it names are the ones a user is most likely to ask about by name.
    For many→one suggestions (primaryWebMerge set, e.g. crt.FolderTree + crt.FolderTreeActions
    -> crt.FolderTreeActions), emit a SINGLE mobile component and merge in the secondary
    component's properties; do not emit the secondary as a separate component.
