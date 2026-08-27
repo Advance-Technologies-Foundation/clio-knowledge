@@ -219,7 +219,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   "role"?: "<SysAdminUnit record id or role NAME>", "showPage"?: true|false }`. A role NAME is resolved for you
   against `SysAdminUnit.Name` and an unknown one is REFUSED — the element would otherwise store an assignment
   with no resolvable performer. Omit the whole block to leave the step unassigned, which is the designer's own
-  initial state; on a `setElement` update a supplied block REPLACES the assignment, so pass every part you want
+  initial state — and say what that means rather than offering to "fix" it: the platform resolves an unassigned
+  performer to the CURRENT USER's contact at run time, which is exactly why the designer's card shows "User" and the
+  current user for an element that stores neither. A `performer: null` in a read-back therefore means "not assigned
+  explicitly", not "nobody"; on a `setElement` update a supplied block REPLACES the assignment, so pass every part you want
   kept. `showPage` is written explicitly at create (an inherited default would be
   unreportable, since `describe` reports only what an element STORES) and its VALUE follows the performer: `true`
   for a `user` performer or none at all, `false` for `manager`/`role`. That is not a policy of ours — the platform
