@@ -78,6 +78,14 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       itself and copies them onto the element, where they can then be set or mapped like any element
       parameter. They are bidirectional — a value you set pre-fills the page, and what the user entered is
       readable downstream.
+    * WHICH RECORD did the user save? Each data source gets its OWN element parameter carrying that record's
+      id, and `describe-business-process` reports it inside `preconfiguredPage.dataSources` as
+      `{name, entitySchemaName, parameter}` — take the name from `parameter` (it looks like
+      `DataSource_PDS_Id`) and NEVER compose it yourself. It is bidirectional like the page parameters: map
+      something INTO it and the page opens on that record for editing; read it AFTER the step and you have the
+      record the user saved. It does NOT appear in the element's own `parameters` list — that list carries
+      only results, outputs and values already set, and this one is filled at run time — so `dataSources` is
+      the only place it surfaces. An element built without `dataSources` has no such parameter at all.
     * Change it later with `setElement` → `elementUpdate.preconfiguredPage`; every field is optional there.
       OMITTING `buttons` or `dataSources` means "leave them alone", NOT "the page has none".
     * RE-SYNC: any `setElement` touching the element re-reads the page and reconciles its parameters —
