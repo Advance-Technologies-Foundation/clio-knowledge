@@ -85,11 +85,12 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       value, and a parameter whose data type changed loses its value and is reported. This mirrors the
       designer refreshing the element when its card is opened. `describe-business-process` reports
       `preconfiguredPage.inSync` and never fixes drift itself.
-    * DRIFT IS REPORTED IN `warnings` — on the modify response and now on the BUILD response too. A cleared
-      value, a removed parameter, a rename, and a page that could not be read each raise one line naming the
-      element and the parameters. Read them: the edit SUCCEEDS, so a mapping invalidated by a page change is
-      visible only there. A page that could not be read removes NOTHING — the element keeps a stale parameter
-      list rather than a pruned one, and the warning says so.
+    * DRIFT IS REPORTED as `message-type: "Warning"` entries in `execution-log-messages` — on a MODIFY and on a
+      BUILD alike. There is NO separate `warnings` field on the response, so looking for one and finding nothing
+      is not evidence there were none. A cleared value, a removed parameter, a rename, and a page that could not
+      be read each raise one line naming the element and the parameters. Read them: the operation SUCCEEDS, so a
+      mapping invalidated by a page change is visible ONLY there. A page that could not be read removes NOTHING —
+      the element keeps a stale parameter list rather than a pruned one, and the line says so.
     * Creating a Pre-configured page on a CLASSIC UI page is not supported. An element that already
       references one keeps it: `describe-business-process` reports it (including `connectedObject` and
       `connectedObjectRecord`) and never rewrites it, and `setElement` is limited to the fields both page
