@@ -166,10 +166,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   environment with the platform's 8.x-pages feature off offers Classic pages ONLY, so "we will use the Freedom
   UI page" is a promise you cannot keep everywhere. Rank `kind: "unknown"` last and confirm with the user that
   it really is an edit page rather than hiding it.
-  `recordType` is REQUIRED only when the chosen page serves several record types — a typed object registers the
-  SAME page once per type (`Activity` → Task / Call / Email), which the designer shows as separate entries
-  ("Activity (Task)", "Activity (Email)"). Ambiguity is refused LISTING the types; it is never resolved by
-  picking one, because the alternatives open different records.
+  `recordType` is an optional CHECK, not a selector. The designer's page list carries ONE entry per page
+  (`_fillPageSchemaList` merges a repeat row instead of adding a second), so a page registered for several
+  record types is offered once and the type FOLLOWS the page. Pass `recordType` to assert which
+  registration you expect: a mismatch is refused naming the type the environment actually registers.
   `editMode` decides which of two MUTUALLY EXCLUSIVE payloads applies, and they are exclusive IN STORAGE, not
   only in the UI: `add` (the user creates a record) takes `defaultValues`, `edit` (the user edits an existing
   one) REQUIRES `recordId`. Supplying the other mode's field is refused. On a `setElement` update, changing
@@ -220,9 +220,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   against `SysAdminUnit.Name` and an unknown one is REFUSED — the element would otherwise store an assignment
   with no resolvable performer. Omit the whole block to leave the step unassigned, which is the designer's own
   initial state; on a `setElement` update a supplied block REPLACES the assignment, so pass every part you want
-  kept. `showPage` is written explicitly as `true` at create unless you pass `false`: it is `true` by schema
-  default anyway, but `describe` reports only what an element STORES, so an inherited default would be
-  unreportable.
+  kept. `showPage` is written explicitly at create (an inherited default would be
+  unreportable, since `describe` reports only what an element STORES) and its VALUE follows the performer: `true`
+  for a `user` performer or none at all, `false` for `manager`/`role`. That is not a policy of ours — the platform
+  opens the page automatically only for the user the step is assigned to, and the designer disables the checkbox for
+  the other two kinds. An explicit `showPage: true` on `manager`/`role` is refused rather than stored and ignored.
   `logActivity` is the "Log activity" block: `{ "enabled"?: true|false, "startIn"?: { "value": N, "unit": "..." },
   "duration"?: {…}, "remindIn"?: {…}, "showInCalendar"?: true|false }`, with `unit` one of `minutes`, `hours`,
   `days`, `weeks`, `months`. Supplying the block turns the activity ON unless you pass `enabled: false`; scheduling
