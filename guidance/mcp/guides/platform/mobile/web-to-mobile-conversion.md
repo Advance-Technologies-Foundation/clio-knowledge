@@ -356,9 +356,10 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   `mobile-page-modification` (a template-provided slot is merge-only and the merge is discarded when the
   slot is already filled) applied to conversion — that article owns the rule; this is only its
   conversion-time reminder. A guide that predates the flag omits it and the constraint: fall back to the
-  same rule and never author a parent the mobile template already carries. And a source element the mobile
-  template ALREADY provides natively is NOT retargeted at all — the guide drops it (reason names "already
-  provided natively"), because a duplicate would shadow the native element.
+  same rule and never author a parent the mobile template already carries. And a source element INHERITED FROM
+  THE WEB TEMPLATE (chrome the mobile template provides natively) is NOT retargeted at all — the guide drops it
+  (reason names it "inherited from the web template"), because a duplicate would shadow the native element. A
+  page-AUTHORED element (above the web-template baseline) is not chrome and DOES convert.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web
   columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web
