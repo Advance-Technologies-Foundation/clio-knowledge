@@ -140,6 +140,139 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   presence flag, and `body` echoes the HTML with the process-macro tokens DECODED back into the same
   `[[param:…]]` / `[[element:…]]` author form — so on a MODIFY you can read the current body and edit it in
   place. A macro whose UIds no longer resolve to names is left as the raw `<img>` token (best-effort decode).
+- Open edit page: `openEditPage` (the Open edit page element / OpenEditPageUserTask) — shows a record's edit
+  page to a user and waits. The `openEditPage` block configures it:
+  `{ "name": "CollectAccountDetails", "type": "openEditPage", "caption": "Fill in the account details",
+     "openEditPage": { "page": "<PageSchemaName>", "recordType"?: "<record type UId>",
+       "editMode": "add"|"edit",
+       "defaultValues"?: [ { "column": "<ColumnName>", <one value source> }, … ],
+       "recordId"?: { <one value source> },
+       "recommendation"?: "single-line text", "hint"?: "text",
+       "performer"?: { "type": "user"|"manager"|"role", "contact"?: "<formula>",
+                       "role"?: "<role name or id>", "showPage"?: true|false },
+       "resultsByColumn"?: { "enabled"?: true|false, "column": "<LookupColumnName>" },
+       "logActivity"?: { "enabled"?: true|false, "showInCalendar"?: true|false, "priority"?: "Medium",
+                         "startIn"?: { "value": 0, "unit": "minutes" },
+                         "duration"?: { "value": 20, "unit": "minutes" },
+                         "remindIn"?: { "value": 0, "unit": "minutes" } },
+       "completion"?: { "mode": "onSave"|"onConditions" } } }`
+  PICKING THE PAGE is the part to get right, because it decides everything else: the target OBJECT and — for a
+  typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only a page REGISTERED ON A SECTION
+  can be opened; any other page is REFUSED. That refusal is protecting you, not being strict: the designer
+  resolves an element's stored page against its own list, so a page outside it makes the card render
+  "Which page to open?" EMPTY and the next human save wipes the whole element. Discover valid pages with
+  `list-entity-client-schemas` for the object (union its `sections[]` and `editPages[]`) and PREFER an entry
+  whose `kind` is `freedom`, falling back to `classic` — but state the preference CONDITIONALLY: an
+  environment with the platform's 8.x-pages feature off offers Classic pages ONLY, so "we will use the Freedom
+  UI page" is a promise you cannot keep everywhere. Rank `kind: "unknown"` last and confirm with the user that
+  it really is an edit page rather than hiding it.
+  `recordType` is REQUIRED only when the chosen page serves several record types — a typed object registers the
+  SAME page once per type (`Activity` → Task / Call / Email), which the designer shows as separate entries
+  ("Activity (Task)", "Activity (Email)"). Ambiguity is refused LISTING the types; it is never resolved by
+  picking one, because the alternatives open different records.
+  `editMode` decides which of two MUTUALLY EXCLUSIVE payloads applies, and they are exclusive IN STORAGE, not
+  only in the UI: `add` (the user creates a record) takes `defaultValues`, `edit` (the user edits an existing
+  one) REQUIRES `recordId`. Supplying the other mode's field is refused. On a `setElement` update, changing
+  either `page` or `editMode` is DESTRUCTIVE — the designer itself warns that changing the page loses every
+  field value and filter setting — so both require the new mode-specific value in the same update, and the old
+  branch is CLEARED afterwards. That clearing matters beyond tidiness: the runtime applies stored pre-filled
+  values in EITHER mode, so a leftover set would be live configuration nobody asked for.
+  `defaultValues` uses the SAME entry shape and the same stored format a Modify data element's `values` use:
+  per column, exactly ONE of `value` (a constant — TEXT columns only and non-empty; a date/lookup/numeric
+  constant is refused because the runtime reads those columns typed), `processParameter`,
+  `sourceElement` + `sourceElementParameter` (an EARLIER element's output), or `expression` (a raw macro — and
+  this is how a LOOKUP value is set: `[#Lookup.{objectSchemaUId}.{recordId}#]`).
+  `recordId` takes exactly ONE of `value` (a fixed record Id — the server wraps it into the lookup macro
+  against the page's own object, so you never need that object's UId), `processParameter`,
+  `sourceElement` + `sourceElementParameter` (e.g. a `signalStart` element's `RecordId`), or `expression`.
+  `recommendation` is the text shown on the opened page. The designer REQUIRES it, so it defaults to the
+  element caption; the platform stores a SINGLE line and a line break is REFUSED rather than silently
+  re-encoded. For a value taken from the process, map the element's `Recommendation` parameter with
+  `addMapping` instead — the same policy the email subject follows.
+  `completion.mode` — `onSave` (the default) completes the step as soon as the user saves the record;
+  `onConditions` completes it only when the saved record matches the element's separate `filter` block, and
+  REQUIRES that filter in the same request. The pairing is enforced BOTH ways because the runtime gates the
+  filter on the mode: a filter without `onConditions` (or the mode without a filter) would store, compile and
+  run GREEN while the condition is silently ignored. An EMPTY condition group counts as NO conditions, not as a
+  filter — the runtime evaluates an empty group as matching everything — so `onConditions` with an empty `filter` is
+  refused for the same reason. (The designer permits that state, so a process read back with `onConditions` and no
+  conditions completes on every save regardless of what its card suggests.) The rule holds in the REVERSE direction too, which is the part
+  that surprises callers: switching an element back to `onSave` while its filter is still stored is refused, so
+  order the operations `clearFilter` then `setElement` (one ordered batch is atomic). On `setElement` the mode is
+  validated against the element's STORED filter, because that operation carries no filter field of its own. Where several Open edit page elements for the SAME object
+  sit in parallel branches, give each its own completion condition — otherwise they complete together.
+  `defaultValues` is the whole "Which default values to set in the fields of new records?" block: a supplied array
+  REPLACES the stored set (so removing ONE field means sending the others), and an EMPTY array `[]` removes them
+  ALL — the only way to empty the block, since an omitted field keeps what is stored and the runtime applies
+  whatever stays there. At create `[]` is simply a no-op. Per-entry value sources map onto the designer's own
+  menu, whose contents depend on the COLUMN's type: on a text column it offers "Process parameter", "System setting"
+  and "Formula"; on a lookup column it adds "Lookup value". `processParameter` = "Process parameter";
+  `expression` with `[#Lookup.{objectSchemaUId}.{recordId}#]` = "Lookup value"; `value` is a plain TEXT constant
+  (a typed constant is refused — the runtime reads those columns typed). "System setting" and "Formula" are NOT
+  supported on any field of this element. The `recordId` field's menu is the richest — it also offers
+  "Current user account" when the page's object is Account — and any such option is reachable through
+  `expression`, which is passed through verbatim.
+  `performer` is "Who performs the task?" together with "Show page automatically":
+  `{ "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's contact>",
+  "role"?: "<SysAdminUnit record id or role NAME>", "showPage"?: true|false }`. A role NAME is resolved for you
+  against `SysAdminUnit.Name` and an unknown one is REFUSED — the element would otherwise store an assignment
+  with no resolvable performer. Omit the whole block to leave the step unassigned, which is the designer's own
+  initial state; on a `setElement` update a supplied block REPLACES the assignment, so pass every part you want
+  kept. `showPage` is written explicitly as `true` at create unless you pass `false`: it is `true` by schema
+  default anyway, but `describe` reports only what an element STORES, so an inherited default would be
+  unreportable.
+  `logActivity` is the "Log activity" block: `{ "enabled"?: true|false, "startIn"?: { "value": N, "unit": "..." },
+  "duration"?: {…}, "remindIn"?: {…}, "showInCalendar"?: true|false }`, with `unit` one of `minutes`, `hours`,
+  `days`, `weeks`, `months`. Supplying the block turns the activity ON unless you pass `enabled: false`; scheduling
+  fields together with `enabled: false` are REFUSED, because the platform creates no activity for them to describe
+  and they would sit in the schema reading as live configuration. **The unit is required with a non-zero value and
+  always travels with it** — the platform keeps the number and the unit in two INDEPENDENT parameters, so a number
+  written alone is measured in whatever unit the element already had: stored, compiled and running green while
+  meaning something else. Zero needs no unit. Enabling the block has a second effect worth stating to the user: the
+  same flag decides whether this element's "Connected to" links are written at run time.
+  `resultsByColumn` is "Create a list of results by column": `{ "enabled"?: true|false, "column": "<ColumnName>" }`.
+  The step's outcome becomes one result per value of a LOOKUP column of the page's object, which is what lets
+  following elements branch on what the user chose. Only a lookup column qualifies — the runtime builds the list by
+  enumerating the column's REFERENCED object, so any other kind yields an empty list and is refused. `column` is
+  required unless you pass `enabled: false`. Two states to recognize when READING an existing element: the
+  designer lets a human switch the checkbox on and leave the required Column empty, and `describe` reports that
+  faithfully as `enabled: true` with `column: null` — a switched-on list that produces no results. Such a block
+  cannot be fed straight back (the write path requires the column), so supply a column or `enabled: false` when
+  re-applying.
+  **State this limitation to the user before building one:** the conditional flows that would ROUTE those results are
+  not buildable from this contract yet (see "NOT yet buildable" above), so the process carries the result list and
+  branches on it only after a human wires the flows in the designer. Building it is still useful — the list and the
+  column are the part a human cannot infer — but promising working branches would be wrong.
+  `priority` takes an `ActivityPriority` lookup NAME (`Medium`) or its record id; an unknown name is refused rather
+  than defaulted, because the designer marks the field required and a defaulted priority is indistinguishable from a
+  chosen one. It reads back as the name with the stored id alongside.
+  `describe-business-process` reads the configuration back as the element's `openEditPage` block,
+  round-trippable into a build/modify block with ONE asymmetry — the read reports pre-filled values AND a record
+  when the schema carries both (the write path refuses that pair), so drop the one that does not belong to the
+  reported `editMode` before re-applying, and feed `pageTypeUId` back as `recordType`. A `performer` of `null`
+  in the read-back means UNASSIGNED, never unsupported.
+  ROUTING between the three page elements — **Open edit page is the DEFAULT, not one of three equals.** Ask one
+  question: *is a user filling in COLUMNS of a record?* If yes, it is Open edit page, and no further deliberation
+  is needed. Signals that answer it yes, any one of which is enough: the request names fields or columns of an
+  object ("fill in the office, the start date and the reporting manager"); it says open/complete/check/correct/
+  specify a record, a card, or "that employee"; the record exists already or is being created by the same process.
+  Reach for another element ONLY on a positive signal for it:
+  - **Auto-generated page** — there is NO record whose columns are being edited. The user answers ad-hoc questions
+    or presses one of several buttons, and the process branches on the answer. If you can name the object and the
+    columns, this is the wrong element.
+  - **Pre-configured page** — the request names a SPECIFIC existing custom page to open as-is ("open the onboarding
+    checklist page"). A wish for a nicer layout is not this signal; a named page is.
+  Two things follow from that asymmetry and both matter more than they look:
+  1. **Neither alternative is buildable through this contract** (only Open edit page is). So routing a
+     record-editing request to one of them does not produce a different-but-working process — it produces NOTHING,
+     and the user is left with a request you could have fulfilled. Never pick them for work Open edit page can do;
+     if one is genuinely required, say so plainly and stop, rather than silently substituting another element.
+  2. **Do not ask the user which element to use.** Choosing the BPMN element is the modelling decision they
+     delegated by asking for a process. Asking which OBJECT or COLUMN is meant is fine and often right; asking
+     "should this be an Open edit page or an Auto-generated page?" hands back the job. When two readings are
+     genuinely defensible, pick Open edit page, STATE the interpretation in one line, and continue.
+  A further tell: a request that also asks for a note, hint or instruction shown to the user on the page is Open
+  edit page — `recommendation` and `hint` are its fields, and nothing else in this contract carries them.
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
@@ -616,7 +749,7 @@ System actions (palette group "System actions"):
 - `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance over a collection.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
 User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialog,
-  `openEditPageUserTask` Open edit page, `autoGeneratedPageUserTask` Auto-generated page,
+  `openEditPageUserTask` Open edit page (BUILDABLE via `type:"openEditPage"` — see "What you can build today"), `autoGeneratedPageUserTask` Auto-generated page,
   `preconfiguredPageUserTask` Pre-configured page, `emailTemplateUserTask` Send email, `approvalUserTask` Approval.
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
   signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
