@@ -195,8 +195,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   filter on the mode: a filter without `onConditions` (or the mode without a filter) would store, compile and
   run GREEN while the condition is silently ignored. An EMPTY condition group counts as NO conditions, not as a
   filter — the runtime evaluates an empty group as matching everything — so `onConditions` with an empty `filter` is
-  refused for the same reason. (The designer permits that state, so a process read back with `onConditions` and no
-  conditions completes on every save regardless of what its card suggests.) The rule holds in the REVERSE direction too, which is the part
+  refused for the same reason — on a `setElement` update too, where the element's STORED group is the one measured.
+  (The designer permits that state, so a process read back with `onConditions` and no conditions completes on every
+  save regardless of what its card suggests; switching such an element to `onConditions` is refused until it has real
+  conditions.) The rule holds in the REVERSE direction too, which is the part
   that surprises callers: switching an element back to `onSave` while its filter is still stored is refused, so
   order the operations `clearFilter` then `setElement` (one ordered batch is atomic). On `setElement` the mode is
   validated against the element's STORED filter, because that operation carries no filter field of its own. Where several Open edit page elements for the SAME object
