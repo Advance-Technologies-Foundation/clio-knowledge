@@ -169,9 +169,16 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   environment defaults to, and on the core measured above that is an activity with intervals nobody chose. And an
   `enabled: true` in a read-back is NOT evidence the caller asked for one, so do not "preserve" it on a
   read-modify-write and do not report it to a user as their configuration — `describe` reports what the element
-  STORES, which after a plain create already includes the platform's defaults. When the request is silent about an
-  optional block, leave it out, and when the block is one the environment defaults ON, say in one line that you
-  turned it off (or left it) rather than letting the user discover it on the card.
+  STORES, which after a plain create already includes the platform's defaults.
+  Before turning it off, know what the gate does and does NOT do, because the obvious fear is wrong. It does NOT
+  decide whether the performer sees the step: an element built with `enabled: false` still shows up in the user's
+  "Business process tasks" list (verified on 10.1.628 against a purpose-built probe), so switching it off does not
+  strand the task. What it DOES decide is whether the step's activity is logged with the scheduling, calendar and
+  priority the block carries — and whether the element writes its "Connected to" links at run time: with the gate
+  off `describe` reports `writesConnectionsAtRuntime: false` and `setConnections` is refused. So the trade is
+  narrow and statable: turn it off when the request wants no activity, and LEAVE IT ON when the process needs those
+  connections — which is the usual reason a user task exists in the first place. Either way, say in one line what
+  you did, rather than letting the user find the answer on the card.
   The ONE thing this rule does not reach is `useBackgroundMode`: that is element plumbing, not a feature block,
   and for a signal-started process the guidance below tells you to set it on every element that offers it. Read
   SCOPE as being about the blocks a HUMAN would recognise on the card — Log activity, the results list, a
