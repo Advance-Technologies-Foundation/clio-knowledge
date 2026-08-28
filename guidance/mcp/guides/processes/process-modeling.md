@@ -179,11 +179,16 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   narrow and statable: turn it off when the request wants no activity, and LEAVE IT ON when the process needs those
   connections — which is the usual reason a user task exists in the first place. Either way, say in one line what
   you did, rather than letting the user find the answer on the card.
-  The ONE thing this rule does not reach is `useBackgroundMode`: that is element plumbing, not a feature block,
-  and for a signal-started process the guidance below tells you to set it on every element that offers it. Read
-  SCOPE as being about the blocks a HUMAN would recognise on the card — Log activity, the results list, a
-  performer, completion conditions — and never as licence to leave the background flag off where that rule
-  applies.
+  `useBackgroundMode` is covered by this rule too, ON THIS ELEMENT: leave it off unless the request asks for
+  background execution. Three things say so, and the third is the one that matters. The platform's own corpus:
+  of the 120 Open edit page elements shipped across `PackageStore`, 118 leave the flag off, and the only two
+  that carry it are `ProcessTests` fixtures rather than business processes (across all 469 shipped user tasks,
+  7). The general rule further down — set the flag on every element of a signal-started process — predates that
+  check and was never about a step that WAITS FOR A HUMAN. And the failure it produces is SILENT: measured on a
+  10.1.628 core, an Open edit page step with the flag ON did NOT complete after its completion condition was
+  satisfied and the record saved — no error, no log entry, the instance simply sits in `Running` and the
+  performer's task never clears; clearing the flag completed it. So do not set it here unless asked — and when a
+  step will not complete although its condition is met, suspect this flag before anything else.
   PICKING THE PAGE is the part to get right, because it decides everything else: the target OBJECT and — for a
   typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only a page REGISTERED ON A SECTION
   can be opened; any other page is REFUSED. That refusal is protecting you, not being strict: the designer
@@ -323,7 +328,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
   which does not. For a SIGNAL-STARTED process set the flag on every element that offers it — the trigger fires
-  with no one waiting at a screen, so there is nothing for inline execution to return to. The designer gates the control on
+  with no one waiting at a screen, so there is nothing for inline execution to return to — with one EXCEPTION
+  established by measurement rather than reasoning: an `openEditPage` step is left INLINE (see its own rule
+  above), because with the flag on it did not resume when its completion condition was met. The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op
