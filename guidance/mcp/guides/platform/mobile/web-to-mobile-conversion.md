@@ -16,7 +16,11 @@ supported) and returns a conversion GUIDE. It does NOT generate a body and does 
 Creatio or disk. The guide contains:
   - recommendedMobileTemplate + templateNote — the mobile template to create the page from.
   - containerMap — web→mobile container-name correspondence; use it to set each
-    component's parentName to the correct mobile container.
+    component's parentName to the correct mobile container. It is a PLACEMENT map, not an identity
+    map: a pair may name two DIFFERENT mobile elements (GeneralInfoTab→GeneralTabContainer pairs the
+    web tab with the mobile tab's content grid), and it is MANY-TO-ONE — several web containers can
+    resolve to one mobile container. Use it to answer "where does this element's content go", never
+    "which mobile element IS this".
   - sourceStructure — the full resolved component tree (incl. components inherited from the
     base template), with name / type / parentName / isContainer.
   - componentSuggestions — per source component TYPE: a category (directMapping /
@@ -129,7 +133,8 @@ FLOW
 4. Build the mobile body (plain JSON: viewConfigDiff / viewModelConfigDiff / modelConfigDiff)
    by iterating elementMap. For each entry act on its operation:
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
-     FeedTabContainer→FeedContainer). REUSE the existing mobileName; do NOT insert it. (Insert
+     FeedTabContainer→FeedContainer, GeneralInfoTab→GeneralTabContainer). REUSE the existing
+     mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
      also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
      as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
@@ -154,9 +159,15 @@ FLOW
      get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
      When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
-     web tab, below); otherwise omit index and append. On a tabbed record page EVERY web tab inserts
-     as its OWN new mobile tab under Tabs (no general-tab collapse); the web wrapper's non-tab
-     (side/profile) content fills the mobile general tab's grid, EXCEPT the profile island itself:
+     web tab, below); otherwise omit index and append. On a tabbed record page every web tab the PAGE
+     authored inserts as its OWN new mobile tab under Tabs — page tabs are never collapsed onto the
+     general one. The web TEMPLATE's own general-information tab is the exception, and it is not an
+     insert at all: it arrives as a MERGE whose mobileName is the mobile general tab's CONTENT
+     container (GeneralInfoTab→GeneralTabContainer in guide.containerMap), so its content lands in
+     that container and NO second general tab is ever inserted. Read the operation off the entry —
+     do not decide "tab ⇒ insert" from the fact that the web element is a tab.
+     The web wrapper's non-tab (side/profile) content fills that same mobile general tab's grid,
+     EXCEPT the profile island itself:
      it merges into the template's profile Area card rather than landing in that grid — its children
      go INSIDE that Area card, never directly into the general tab's grid, and it must NOT be left
      empty. Take both container names from guide.containerMap, which already carries the pair for the
@@ -326,7 +337,13 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   operand type is supported in a mobile page-rule condition (attribute, const, formula, system-value,
   system-setting). Recreate each convertedRules[] entry by
   passing its `rule` VERBATIM to create-page-business-rule on the MOBILE page (after approval).
-  droppedRules[] did not convert (every referenced element drops) — report them.
+  droppedRules[] did not convert — report them. A rule lands there when every referenced element
+  drops, and ALSO when the only elements it references are containerMap PLACEMENT pairs whose two
+  sides are different mobile elements (a web tab paired with the mobile tab's content grid, e.g.
+  GeneralInfoTab→GeneralTabContainer). Such a pair is deliberately NOT treated as an identity:
+  retargeting "hide GeneralInfoTab" onto GeneralTabContainer would blank the tab's body while leaving
+  its header in the strip. Recreate that rule by hand against the element you actually mean — do not
+  "repair" the drop by substituting the mobile name from containerMap.
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
   ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
