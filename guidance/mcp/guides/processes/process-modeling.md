@@ -87,7 +87,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       only results, outputs and values already set, and this one is filled at run time — so `dataSources` is
       the only place it surfaces. An element built without `dataSources` has no such parameter at all.
     * Change it later with `setElement` → `elementUpdate.preconfiguredPage`; every field is optional there.
-      OMITTING `buttons` or `dataSources` means "leave them alone", NOT "the page has none".
+      OMITTING `buttons` or `dataSources` means "leave them alone", NOT "the page has none" — with ONE
+      exception: changing `page` on a Freedom UI element REQUIRES `buttons` in the same call. The stored buttons
+      name the PREVIOUS page's buttons, so the operation is refused rather than carried across — re-read
+      `get-process-page-facts` for the new page first. `dataSources` have no removal path through this contract,
+      so a page change carries the previous page's data-source parameters forward as inert leftovers.
     * RE-SYNC: any `setElement` touching the element re-reads the page and reconciles its parameters —
       added ones appear, values and mappings for unchanged ones survive, a renamed parameter keeps its
       value, and a parameter whose data type changed loses its value and is reported. This mirrors the
