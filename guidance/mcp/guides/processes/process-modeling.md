@@ -156,6 +156,18 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
                          "duration"?: { "value": 20, "unit": "minutes" },
                          "remindIn"?: { "value": 0, "unit": "minutes" } },
        "completion"?: { "mode": "onSave"|"onConditions" } } }`
+  SCOPE — send the blocks the request asked for plus the ones that are REQUIRED, and nothing else. Every other
+  block is gated, and omitting one leaves the element exactly as the platform defaults it: `CreateActivity` and
+  `GenerateDecisionsFromColumn` are both `false` in the element's own schema, so an unrequested "Log activity" or
+  results list is live configuration the user never asked for and has no way to explain. Neither is cosmetic —
+  enabling `logActivity` is also what makes this element write its "Connected to" links at run time, and it puts a
+  dated, reminded activity on somebody's calendar with intervals you invented (a "5 minutes" duration for filling in
+  a card is a number nobody chose). The REQUIRED half of the rule is just as strict: `page`, `editMode` with its
+  mode's payload (`defaultValues` for `add`, `recordId` for `edit`), and `recommendation`, which the designer marks
+  required and defaults to the element caption. Inside a block you DO send, its own required fields apply —
+  `resultsByColumn.column`, and a `unit` with every non-zero interval. `logActivity.priority` is required in the
+  designer but already defaulted to `Medium` in the schema, so leave it alone unless the request names one. When the
+  request is silent about an optional block, leave it out and say so in one line — do not fill it to look complete.
   PICKING THE PAGE is the part to get right, because it decides everything else: the target OBJECT and — for a
   typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only a page REGISTERED ON A SECTION
   can be opened; any other page is REFUSED. That refusal is protecting you, not being strict: the designer
