@@ -420,6 +420,14 @@ ONE SERIES PER CHART — the mobile runtime loads data for the FIRST series only
   category, or ONE series grouped by the category column — a TOTAL cannot be a grouping value. Neither the
   canvas nor a saved-body read-back catches this; only the app does.
 
+RUNTIME GAPS TO DESIGN AROUND — the mobile analytics runtime trails the web one, and no design-time
+  check reveals it. A DATE column under SUM/AVG fails the runtime request outright (server
+  `UnsupportedTypeException`) and under MIN/MAX draws an empty chart, so aggregate a number or COUNT the
+  primary column and put the date in the grouping instead (ENG-89575); negative values do not render
+  (ENG-88682); grouping through a related object can disagree with the web result (ENG-89059). Tell the
+  user when their request needs one of these rather than shipping a widget that renders blank on the
+  device.
+
 PARENT — insert into a grid container the page already has: `MainContainer` (root grid of every
   mobile template), `ListContainer` (list/section pages), or a tab's `…TabContainer` /
   `AreaProfileContainer` (record pages). Take the exact name from `bundle.containers` (`get-page`).
