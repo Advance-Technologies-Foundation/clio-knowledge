@@ -156,18 +156,22 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
                          "duration"?: { "value": 20, "unit": "minutes" },
                          "remindIn"?: { "value": 0, "unit": "minutes" } },
        "completion"?: { "mode": "onSave"|"onConditions" } } }`
-  SCOPE — send the blocks the request asked for plus the ones that are REQUIRED, and nothing else. Every other
-  block is gated, and omitting one leaves the element exactly as the platform defaults it: `CreateActivity` and
-  `GenerateDecisionsFromColumn` are both `false` in the element's own schema, so an unrequested "Log activity" or
-  results list is live configuration the user never asked for and has no way to explain. Neither is cosmetic —
-  enabling `logActivity` is also what makes this element write its "Connected to" links at run time, and it puts a
-  dated, reminded activity on somebody's calendar with intervals you invented (a "5 minutes" duration for filling in
-  a card is a number nobody chose). The REQUIRED half of the rule is just as strict: `page`, `editMode` with its
-  mode's payload (`defaultValues` for `add`, `recordId` for `edit`), and `recommendation`, which the designer marks
-  required and defaults to the element caption. Inside a block you DO send, its own required fields apply —
-  `resultsByColumn.column`, and a `unit` with every non-zero interval. `logActivity.priority` is required in the
-  designer but already defaulted to `Medium` in the schema, so leave it alone unless the request names one. When the
-  request is silent about an optional block, leave it out and say so in one line — do not fill it to look complete.
+  SCOPE — send the blocks the request asked for plus the ones that are REQUIRED, and nothing else. The REQUIRED
+  half: `page`, `editMode` with its mode's payload (`defaultValues` for `add`, `recordId` for `edit`), and
+  `recommendation`, which the designer marks required and defaults to the element caption. Inside a block you DO
+  send, its own required fields apply — `resultsByColumn.column`, and a `unit` with every non-zero interval.
+  **But do not read "omitted" as "off".** Creating this element MATERIALIZES the user-task schema's own parameter
+  defaults onto it as CONSTANTS, so an omitted block is not absent — it is whatever that schema ships. Measured on
+  a 10.1.628 core: a freshly built element comes back from `describe` with `logActivity.enabled: true`, a 5-minute
+  duration and `Medium` priority, none of it requested. The shipped 7.8.0 copy of the same schema has the gate at
+  `false`, so the default is VERSION-DEPENDENT and cannot be assumed either way. Two consequences. To have NO
+  activity you must say so — `logActivity: { "enabled": false }`; omitting the block leaves whatever the
+  environment defaults to, and on the core measured above that is an activity with intervals nobody chose. And an
+  `enabled: true` in a read-back is NOT evidence the caller asked for one, so do not "preserve" it on a
+  read-modify-write and do not report it to a user as their configuration — `describe` reports what the element
+  STORES, which after a plain create already includes the platform's defaults. When the request is silent about an
+  optional block, leave it out, and when the block is one the environment defaults ON, say in one line that you
+  turned it off (or left it) rather than letting the user discover it on the card.
   The ONE thing this rule does not reach is `useBackgroundMode`: that is element plumbing, not a feature block,
   and for a signal-started process the guidance below tells you to set it on every element that offers it. Read
   SCOPE as being about the blocks a HUMAN would recognise on the card — Log activity, the results list, a
