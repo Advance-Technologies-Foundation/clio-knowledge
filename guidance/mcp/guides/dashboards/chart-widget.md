@@ -35,9 +35,8 @@ section page.
 ## Chart type selection (alias to the supported wire values)
 
 Supported `series[*].type` wire values: bar, horizontal-bar, line, spline, area, scatter,
-doughnut, tsfunnel. Apply these aliases when the user names a different type:
+doughnut, pie, tsfunnel. Apply these aliases when the user names a different type:
 - column            -> bar        (vertical bars)
-- pie               -> doughnut
 - funnel / pipeline -> tsfunnel   (note the non-obvious wire value)
 Do NOT emit `waterfall` — it has no chart-widget series model and is not generatable here.
 
@@ -47,7 +46,7 @@ Do NOT emit `waterfall` — it has no chart-widget series model and is not gener
   filter — so multiple series with DIFFERENT aggregation functions are supported.
 - `series[*].color` colors only the DATA MARKS (bars/lines/slices). It is INDEPENDENT of `config.color`
   (the title/header accent — see Title and header). REQUIRED for cartesian series
-  (bar/horizontal-bar/line/spline/area/scatter) — omit it and the series renders BLACK; doughnut/tsfunnel
+  (bar/horizontal-bar/line/spline/area/scatter) — omit it and the series renders BLACK; doughnut/pie/tsfunnel
   ignore it and auto-color slices from the palette.
 - Aggregation: COUNT aggregates `Id`; SUM/AVG/MIN/MAX use the explicit numeric column (date is
   also valid for MIN/MAX), never `Id`. MIN/MAX on a DATE column are valid but render as near-equal
