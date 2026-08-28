@@ -136,7 +136,8 @@ the user gives none.
 - SIZE FLOOR — never ship a tiny chart. In a `crt.GridContainer` set `layoutConfig.rowSpan` >= 6
   (platform default 9; funnels 15). In a `crt.FlexContainer` the parent uses `FlexLayoutConfig` —
   set `layoutConfig.height` >= 350 (px) so the flex child doesn't collapse. The same floor applies
-  to list/pivot widgets; metric/gauge TILES are exempt (they stay ~3 rows).
+  to list/pivot widgets. Metric TILES are exempt (they stay ~3 rows). A GAUGE is NOT exempt: it draws
+  an arc, not a number, and needs its own height — see `dashboard-and-home-page-layout`.
   EXCEPTION — on a DESKTOP page (`CentralAreaDesktopTemplate`) the desktop sizing rule replaces
   this floor: every widget (charts included) may be as short as 3 rows, targeting <= 10 rows total.
   See `desktop-page`.
