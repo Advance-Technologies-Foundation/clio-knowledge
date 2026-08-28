@@ -413,12 +413,12 @@ does differently.
 NO DATA SOURCE NEEDED — an analytics widget fetches its own data from `config.…data.providing`, so the
   page's `modelConfigDiff` stays untouched and the one-data-source-per-page constraint does not apply to it.
 
-SERIES ON MOBILE — several series DO render, provided they all declare the SAME chart `type`; a mixed-type
-  config collapses to the first series in the client. The widget shows its empty state when `series` is
-  empty, when the extracted data is empty, or when the FIRST series has no points — even if later series do.
-  Keep one type across a chart's series and order a series that has data first. A multi-category ask fits
-  one chart as several same-type series; grouping by the category column is the alternative, but a TOTAL
-  cannot be a grouping value.
+ONE SERIES PER CHART — the mobile runtime loads data for the FIRST series only. Its renderer can draw
+  several same-type series and the Mobile Designer canvas does, but the later series' collections are never
+  fetched, so on the device they arrive empty (multi-series is ENG-87329, still open). Mixed types collapse
+  further: the client keeps the first series alone. A multi-category ask therefore becomes one chart PER
+  category, or ONE series grouped by the category column — a TOTAL cannot be a grouping value. Neither the
+  canvas nor a saved-body read-back catches this; only the app does.
 
 PARENT — insert into a grid container the page already has: `MainContainer` (root grid of every
   mobile template), `ListContainer` (list/section pages), or a tab's `…TabContainer` /
