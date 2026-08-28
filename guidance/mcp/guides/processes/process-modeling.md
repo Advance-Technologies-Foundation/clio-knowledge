@@ -157,8 +157,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
                          "remindIn"?: { "value": 0, "unit": "minutes" } },
        "completion"?: { "mode": "onSave"|"onConditions" } } }`
   SCOPE — send the blocks the request asked for plus the ones that are REQUIRED, and nothing else. The REQUIRED
-  half: `page`, `editMode` with its mode's payload (`defaultValues` for `add`, `recordId` for `edit`), and
-  `recommendation`, which the designer marks required and defaults to the element caption. Inside a block you DO
+  half is short: `page`, and `editMode` with its mode's payload (`defaultValues` for `add`, `recordId` for
+  `edit`). `recommendation` is NOT in it — the designer marks the field required, but the server fills it with the
+  element caption when you omit it, so send it only when the request gives you wording. Inside a block you DO
   send, its own required fields apply — `resultsByColumn.column`, and a `unit` with every non-zero interval.
   **But do not read "omitted" as "off".** Creating this element MATERIALIZES the user-task schema's own parameter
   defaults onto it as CONSTANTS, so an omitted block is not absent — it is whatever that schema ships. Measured on
@@ -176,9 +177,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   strand the task. What it DOES decide is whether the step's activity is logged with the scheduling, calendar and
   priority the block carries — and whether the element writes its "Connected to" links at run time: with the gate
   off `describe` reports `writesConnectionsAtRuntime: false` and `setConnections` is refused. So the trade is
-  narrow and statable: turn it off when the request wants no activity, and LEAVE IT ON when the process needs those
-  connections — which is the usual reason a user task exists in the first place. Either way, say in one line what
-  you did, rather than letting the user find the answer on the card.
+  narrow and DECIDABLE without judgement: leave the gate on only when the request asks for an activity, or when you
+  are also writing this element's connections in the same build — otherwise turn it off. Do not reach for "a user
+  task usually needs its connections" as a reason: the shipped corpus says the opposite, with `CreateActivity` true
+  on 15 of the 120 Open edit page elements in `PackageStore`. Either way, say in one line what you did, rather than
+  letting the user find the answer on the card.
   `useBackgroundMode` is covered by this rule too, ON THIS ELEMENT: leave it off unless the request asks for
   background execution. Three things say so, and the third is the one that matters. The platform's own corpus:
   of the 120 Open edit page elements shipped across `PackageStore`, 118 leave the flag off, and the only two
