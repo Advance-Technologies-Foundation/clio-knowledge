@@ -209,9 +209,14 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `editMode` decides which of two MUTUALLY EXCLUSIVE payloads applies, and they are exclusive IN STORAGE, not
   only in the UI: `add` (the user creates a record) takes `defaultValues`, `edit` (the user edits an existing
   one) REQUIRES `recordId`. Supplying the other mode's field is refused. On a `setElement` update, changing
-  either `page` or `editMode` is DESTRUCTIVE — the designer itself warns that changing the page loses every
-  field value and filter setting — so both require the new mode-specific value in the same update, and the old
-  branch is CLEARED afterwards. That clearing matters beyond tidiness: the runtime applies stored pre-filled
+  `editMode`, or changing `page` to one of ANOTHER OBJECT, is DESTRUCTIVE — the designer itself warns that
+  changing the page loses every field value and filter setting — so those require the new mode-specific value in
+  the same update, and the old branch is CLEARED afterwards. A page swap WITHIN the same object requires nothing:
+  every stored reference still resolves, which is what makes the Classic-to-Freedom move cheap. The payload the
+  destructive case demands may be the EMPTY one: `defaultValues: []` states "no pre-filled values" and is
+  accepted, because an add-mode element without them is an ordinary shape, not a broken one. (At CREATE the same
+  field is simply optional for `add` — there is no stale payload to displace; only `edit` insists on its
+  `recordId`.) That clearing matters beyond tidiness: the runtime applies stored pre-filled
   values in EITHER mode, so a leftover set would be live configuration nobody asked for.
   `defaultValues` uses the SAME entry shape and the same stored format a Modify data element's `values` use:
   per column, exactly ONE of `value` (a constant — TEXT columns only and non-empty; a date/lookup/numeric
