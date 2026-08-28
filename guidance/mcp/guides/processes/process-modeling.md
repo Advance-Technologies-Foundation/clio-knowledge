@@ -93,6 +93,13 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
       value, and a parameter whose data type changed loses its value and is reported. This mirrors the
       designer refreshing the element when its card is opened. `describe-business-process` reports
       `preconfiguredPage.inSync` and never fixes drift itself.
+    * `inSync: true` means "nothing left to synchronize", NOT "the element carries every page parameter". A page
+      parameter whose NAME collides with one the element already owns (its own `Title`, `Buttons`, a
+      `DataSource_*`) is SKIPPED — it is never copied onto the element, and a re-sync would skip it again, so it
+      is correctly not drift. Read `preconfiguredPage.shadowedPageParameters` beside `inSync`: anything listed
+      there is NOT reachable, and a mapping naming it would silently hit the element's own parameter instead.
+      The fix is on the page — rename the parameter there. Both fields go NULL together when the page's
+      parameters could not be read: `null` is "unknown", never "nothing is shadowed".
     * DRIFT IS REPORTED as `message-type: "Warning"` entries in `execution-log-messages` — on a MODIFY and on a
       BUILD alike. There is NO separate `warnings` field on the response, so looking for one and finding nothing
       is not evidence there were none. A cleared value, a removed parameter, a rename, and a page that could not
