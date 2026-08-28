@@ -168,6 +168,11 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   `resultsByColumn.column`, and a `unit` with every non-zero interval. `logActivity.priority` is required in the
   designer but already defaulted to `Medium` in the schema, so leave it alone unless the request names one. When the
   request is silent about an optional block, leave it out and say so in one line — do not fill it to look complete.
+  The ONE thing this rule does not reach is `useBackgroundMode`: that is element plumbing, not a feature block,
+  and for a signal-started process the guidance below tells you to set it on every element that offers it. Read
+  SCOPE as being about the blocks a HUMAN would recognise on the card — Log activity, the results list, a
+  performer, completion conditions — and never as licence to leave the background flag off where that rule
+  applies.
   PICKING THE PAGE is the part to get right, because it decides everything else: the target OBJECT and — for a
   typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only a page REGISTERED ON A SECTION
   can be opened; any other page is REFUSED. That refusal is protecting you, not being strict: the designer
