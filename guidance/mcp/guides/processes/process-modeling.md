@@ -728,7 +728,18 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
   `Time`, `DayOfWeek`, `DayInRange`. (`GetQuarter` is one of the few that really does carry the prefix, and
   it works in both forms: `DateTime.Now.GetQuarter()` and `DateTimeUtilities.GetQuarter(DateTime.Now)`.)
 - `Math`, `DateTime`, `Guid`, `string` and the ordinary operators are available, including the ternary
-  `? :` and the null-coalescing `??`.
+  `? :` and the null-coalescing `??`;
+- you may call a METHOD on the result of a macro or a value: `[#SysVariable.CurrentDateTime#].AddDays(3)`,
+  `DateTime.Now.ToString()` (the way to feed a date into a Text parameter), `"a" + "b"`,
+  `!string.IsNullOrEmpty(x)`. Combining two functions in one expression is fine too:
+  `FormulaUtilities.Min(5, 3) + Math.Abs(-2)`.
+
+**DO NOT INVENT A FUNCTION NAME.** This is the single most likely way to get a formula wrong, because the
+Creatio library is far smaller than it looks: there is no `Sum`, no `Count`, no `Concat`, no `Format`, no
+`If`. If what you need is not one of the four `FormulaUtilities` members, a `DateTimeUtilities` helper,
+`Math`, or a plain .NET member on `DateTime`/`string`/`Guid`, then a formula cannot express it — say so
+instead of guessing a plausible name. A guessed name is refused, not silently ignored, but it costs the
+user a round trip.
 
 MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 
@@ -762,6 +773,19 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
 On an environment OLDER than 1.4.0.3 none of this happens — the formula is stored unchecked and a wrong
 token fails only at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
+
+WHAT A REFUSAL LOOKS LIKE, so you can correct it yourself instead of guessing. The message always names
+the usage site and quotes the expression as YOU wrote it (not the converted form). The middle clause is
+what tells you which mistake you made:
+
+| you wrote | message contains | the fix |
+|---|---|---|
+| `FormulaUtilities.Sum(1, 2)` | `Formula value error: No applicable method` | the function does not exist — there is no Sum |
+| `System.Math.Abs(-1)` | `it references 'System', which does not exist` | drop the namespace: `Math.Abs(-1)` |
+| `math.Round(1.5)` | `it references 'math', which does not exist` | case matters: `Math.Round(1.5)` |
+| `DateTimeUtilities.GetStartOfMonth(...)` | `Formula value error: No applicable method` | drop the `Get` prefix: `StartOfMonth` |
+| `1.5` into an Integer parameter | `its result cannot be used as Int32` | the target type cannot hold it |
+| a reference to a parameter that is not there | the offending `[#…#]` token, verbatim | create the parameter, or fix the reference |
 
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`.
