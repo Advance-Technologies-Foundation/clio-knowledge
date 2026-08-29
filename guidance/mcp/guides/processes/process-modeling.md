@@ -745,12 +745,42 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 
 | family | literal form |
 |---|---|
-| process / element parameter | the server-generated meta-path; get it from `describe-business-process`, never hand-write it |
+| process / element parameter | a UId meta-path you BUILD from `describe-business-process` — see below |
 | system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
 | system setting | `[#SysSettings.Code#]` (a legacy form without the type suffix also still works) |
 | lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
+
+REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
+uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form: a bare
+`Price`, `[Price]`, `[#Price#]` and `[#Process parameters.Price#]` are ALL refused. Build the token
+yourself, in two steps:
+
+1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
+   return a ready-made meta-path, so there is nothing to copy — you assemble it);
+2. write the token around that UId, braces included:
+   * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
+   * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
+
+Worked example. `describe-business-process` reports a process parameter `Price` with
+`uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUp`:
+
+    {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUp",
+     "expression":"Math.Ceiling([#[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
+
+The designer then displays this as `RoundUp([#Price#])` — it resolves the UId back to the name, and it
+shows the designer's own spelling of the function. Both directions of that conversion are the platform's;
+you write the C# spelling and the UId, and the designer renders the friendly form. Seeing
+`RoundUp([#Price#])` in the designer is the confirmation that the reference bound correctly.
+
+A COMPUTED DEFAULT for a parameter of ANY type is a mapping, not a `value`. `addParameter` / `setParameter`
+take `value` as a literal constant, so an arithmetic or macro-bearing default cannot go there; the route is
+a mapping with `targetProcessParameter` + `expression`, exactly as above. This is NOT a date/time special
+case — date, date-time, time and lookup are only the types where the mapping route is MANDATORY (their
+constants have no literal form). For an Integer or Float parameter it is equally the route whenever the
+value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
+reads as success and silently replaces an expression that recomputes with a number that never will.
 
 WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.3. Before an `expression` mapping or a flow condition is
 stored, the server validates it and REFUSES a bad one, naming what is wrong:
