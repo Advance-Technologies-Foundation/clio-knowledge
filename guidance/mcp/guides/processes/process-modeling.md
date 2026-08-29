@@ -741,7 +741,7 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
 
-WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.0. Before an `expression` mapping or a flow condition is
+WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.1. Before an `expression` mapping or a flow condition is
 stored, the server validates it and REFUSES a bad one, naming what is wrong:
 
 - it must parse;
@@ -756,7 +756,7 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
-On an environment OLDER than 1.4.0.0 none of this happens — the formula is stored unchecked and a wrong
+On an environment OLDER than 1.4.0.1 none of this happens — the formula is stored unchecked and a wrong
 token fails only at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
 
