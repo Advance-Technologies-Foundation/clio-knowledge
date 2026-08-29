@@ -655,8 +655,12 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   mapping + `expression` path below (addMapping overwrites, so it edits a default exactly as it
   creates one). A Lookup default IS settable through `value` as a bare record Guid
   (same version story as the parameters note above).
-- Remove a parameter with `removeParameter` (parameterName; blocked when another parameter's value or an
-  element mapping still references it).
+- Remove a parameter with `removeParameter` (parameterName; blocked when another parameter's value, an
+  element mapping, an execution-context parameter or a CONDITIONAL FLOW'S CONDITION still references it —
+  sub-processes included. The refusal names each usage site. The scan is a SUPERSET of the designer's: it
+  matches a parameter UId case-insensitively where the designer matches case-sensitively, so it can refuse
+  a delete the designer would allow. Broader is the safe direction — the failure it prevents is a dangling
+  reference that surfaces at run time.).
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).
@@ -677,8 +681,11 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   * Boolean only from Boolean; any other type: exact match only. When the target must match a source
     exactly, mirror it with `typeFromElement` instead of guessing.
   `processParameter` flows a process input into the
-  field (the server builds the correct reference); `expression` is a raw C#-like formula passed through UNVALIDATED — the backend (unlike the visual designer) does NOT check it, so a wrong token / function / type fails only at RUNTIME. Do NOT invent or guess formulas: formula-authoring guidance (token format + the allowed function set) is not available yet. Prefer `value` / `processParameter` / `sourceElement`; use `expression` ONLY with a formula you already know is correct (user-supplied, or copied verbatim from an existing process via describe-business-process), e.g.
-  `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#].AddDays(3)`.
+  field (the server builds the correct reference); `expression` is a FORMULA — see "Formulas" below for the
+  vocabulary and what is checked. Still PREFER `value` / `processParameter` / `sourceElement` when one of
+  them expresses the intent: they are structural, so the server builds the reference and a rename cannot
+  break it. Reach for `expression` when the value has to be COMPUTED, or for the constant families that are
+  only expressible as a macro (date/time, lookup, system variable, system setting).
 - UNBOUND element INPUT parameters are NOT listed by `describe-business-process` (it returns only
   value-bearing parameters and outputs) — absence from describe does NOT mean the parameter does not
   exist. Input parameter names come from the user task's schema (for a custom task, the parameters it
@@ -687,9 +694,8 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
 - To CHANGE a bound value, send `addMapping` again for the same target — it overwrites the binding in
   place (like the designer). There is NO clear/unbind operation (no removeMapping): if asked to
   "remove" a value, say clearing is not supported yet and offer to overwrite it instead.
-- Date / Date-time / Time DEFAULT VALUES are the ONE formula you may author (an EXCEPTION to the
-  "don't invent formulas" rule): the designer stores a date/time constant as a formula macro (a Script
-  source), NOT a plain `value` (a `ConstValue`). Set it via `expression` — for a process-parameter
+- Date / Date-time / Time DEFAULT VALUES must be a formula, not a constant: the designer stores a
+  date/time constant as a formula macro (a Script source), NOT a plain `value` (a `ConstValue`). Set it via `expression` — for a process-parameter
   default, a mapping with `targetProcessParameter` + `expression`. The inner format is FIXED (NOT ISO,
   NOT locale): `dd.MM.yyyy` and 24-hour `HH:mm`.
   Date → `[#DateValue.dd.MM.yyyy#]` (e.g. `[#DateValue.03.07.2026#]`);
@@ -704,6 +710,94 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
 - To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —
   in the saved metadata it is a server-generated UId meta-path (`[#...[Element:{uid}].[Parameter:{uid}].[EntityColumn:{uid}]#]`), NOT a friendly `Element.Property` path, so you cannot author it — ALWAYS use `sourceElement`. Formulas are strictly typed (convert with `.ToString()` etc.).
+
+== Formulas (`expression` sources and flow conditions) ==
+
+A formula is NOT C#, and knowing what it actually is stops most wrong guesses. Creatio evaluates it with an
+EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, concretely:
+
+- `Math.Round(1.5)` resolves; `System.Math.Round(1.5)` does NOT (no namespace-qualified names) and
+  `math.Round(1.5)` does NOT (case-sensitive);
+- no lambdas, no generics, no `new`, no statements — ONE expression, on ONE line;
+- the Creatio function library in scope is `FormulaUtilities`, and it has exactly FOUR members:
+  `Min`, `Max`, `Avg`, `Mod`. There is no other Creatio helper library. If a caller asks for a function that
+  is not here and not on `DateTimeUtilities` or `Math`, the answer is that formulas cannot do it — not a
+  guess at a name;
+- date helpers live on `DateTimeUtilities` and are spelled WITHOUT a `Get` prefix: `StartOfMonth`,
+  `StartOfWeek`, `StartOfYear`, `StartOfQuarter`, `StartOfHalfYear`, `StartOfHour`, plus `Day`, `Month`,
+  `Time`, `DayOfWeek`, `DayInRange`. (`GetQuarter` is one of the few that really does carry the prefix, and
+  it works in both forms: `DateTime.Now.GetQuarter()` and `DateTimeUtilities.GetQuarter(DateTime.Now)`.)
+- `Math`, `DateTime`, `Guid`, `string` and the ordinary operators are available, including the ternary
+  `? :` and the null-coalescing `??`.
+
+MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
+
+| family | literal form |
+|---|---|
+| process / element parameter | the server-generated meta-path; get it from `describe-business-process`, never hand-write it |
+| system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
+| system setting | `[#SysSettings.Code#]` (a legacy form without the type suffix also still works) |
+| lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
+| date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
+| boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
+
+WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.0. Before an `expression` mapping or a flow condition is
+stored, the server validates it and REFUSES a bad one, naming what is wrong:
+
+- it must parse;
+- every `[# … #]` parameter reference must resolve to a parameter IN THAT PROCESS — a dangling one is
+  refused with the offending token named. This is what makes an `expression` referencing a parameter safe to
+  author rather than a runtime gamble;
+- an unknown identifier is refused with the identifier named;
+- the result must fit the target. Numeric targets are all checked as `decimal`, so ANY numeric formula fits
+  ANY numeric parameter — do not expect an Integer target to reject a fractional formula, the runtime
+  coerces on assignment and the check matches the runtime rather than the declared type. The checks that DO
+  bite are cross-family: text into a number, a number into a Boolean condition, a date into a Guid;
+- a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
+  process using a dialect this version has not seen still round-trips.
+
+On an environment OLDER than 1.4.0.0 none of this happens — the formula is stored unchecked and a wrong
+token fails only at run time. clio refuses `create-business-process` / `modify-business-process` against such
+an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
+
+PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
+not obvious to the next reader; write `(a && b) || c`.
+
+== Conditional flows and branch conditions ==
+
+A branch is a flow with a CONDITION. You do not build one — you build a plain flow and then set its
+condition:
+
+1. `create-business-process` (or `addFlow`) makes the flow. `flows[].kind` is still refused on the build
+   path: a conditional branch cannot be declared there.
+2. `modify-business-process` with `setFlowCondition` (`source`, `target`, `condition`) turns that flow into a
+   conditional one.
+
+NO GATEWAY IS NEEDED and none is created. The platform synthesizes an exclusive gateway for a conditional
+flow whose source is not one, so a branch straight off an activity is legitimate — it is what the platform's
+own tests rely on. Gateway ELEMENTS are still not buildable.
+
+The condition must evaluate to a BOOLEAN. An integer is refused: the interpreted engine, which is the
+default, does not coerce it the way the older compiled engine did.
+
+An EMPTY condition is refused, and the reason is worth knowing because it is silent otherwise: the platform
+stores an empty condition as the literal `true`, so an "empty" branch is an ALWAYS-TAKEN branch. To drop a
+condition, remove the flow and add a plain one — there is no clear-condition operation.
+
+BRANCH PRECEDENCE IS FLOW ORDER, and nothing in the metadata records it. Where two conditional branches leave
+the same element, they are evaluated in the order the flows were added and the FIRST whose condition is true
+is taken. So `Amount > 100` and `Amount > 1000` resolve differently purely by which flow was added first,
+with no diagnostic and nothing a human can inspect. Add the most specific branch FIRST, and say so when you
+report what you built. `setFlowCondition` keeps a flow's position when it converts it, so setting a condition
+never silently reorders your branches.
+
+A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
+`condition` text, so you can verify what you wrote.
+
+Corpus-attested condition shapes, most common first — these are what real processes use:
+`X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
+boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
+`A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with
