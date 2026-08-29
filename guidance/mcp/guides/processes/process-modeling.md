@@ -741,7 +741,7 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
 
-WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.1. Before an `expression` mapping or a flow condition is
+WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.2. Before an `expression` mapping or a flow condition is
 stored, the server validates it and REFUSES a bad one, naming what is wrong:
 
 - it must parse;
@@ -749,14 +749,17 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   refused with the offending token named. This is what makes an `expression` referencing a parameter safe to
   author rather than a runtime gamble;
 - an unknown identifier is refused with the identifier named;
-- the result must fit the target. Numeric targets are all checked as `decimal`, so ANY numeric formula fits
-  ANY numeric parameter — do not expect an Integer target to reject a fractional formula, the runtime
-  coerces on assignment and the check matches the runtime rather than the declared type. The checks that DO
-  bite are cross-family: text into a number, a number into a Boolean condition, a date into a Guid;
+- the result must fit the target parameter's DECLARED type. This matters more than it sounds, because
+  conversion retypes numeric constants: a fractional literal becomes `decimal`, and so does anything
+  containing a division (`1/2` is converted so it yields `0.5` rather than integer `0`). So `1.5` and
+  `1 / 2` are REFUSED for an **Integer** parameter and accepted for a **Float** one — a Float parameter's
+  CLR type is `decimal`. Plain integer arithmetic (`1 + 1`) fits both. This is the same check the
+  platform's own pre-save validation runs, so a formula this refuses would have been refused at save time
+  anyway, just later and with a worse message;
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
-On an environment OLDER than 1.4.0.1 none of this happens — the formula is stored unchecked and a wrong
+On an environment OLDER than 1.4.0.2 none of this happens — the formula is stored unchecked and a wrong
 token fails only at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
 
