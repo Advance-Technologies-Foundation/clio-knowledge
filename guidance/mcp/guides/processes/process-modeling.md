@@ -62,7 +62,9 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   setup completes) — plus the card's auto-mode-only `senderValidator`.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
-  the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
+  the contact's email at send time; an entity-COLUMN recipient would need a raw `expression` carrying a
+  three-segment meta-path whose column UId nothing reports, so it is NOT authorable today (ENG-91844) —
+  route the column through a process parameter instead. What remains reachable here is a raw
   `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".
@@ -444,7 +446,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
   and the runtime reads every non-text column TYPED — a date/lookup/numeric constant would save green and
   fail at run time, so the server REFUSES it at build. Assign non-text columns via `processParameter`,
   `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` / `[#Lookup.…#]` —
-  same macro grammar as parameter defaults, see "DEFAULT-value macro rules"). An empty `value` is refused
+  same macro grammar as parameter defaults, see the Formulas section). An empty `value` is refused
   for every type: the runtime silently discards an empty assignment.
 - The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean
   "update every record of the object"). To target ONE record, filter on `Id` against a process parameter
@@ -509,7 +511,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
   `DayOfYearToday` (the ONLY DayOfYear macro that takes NO argument); **system / lookup** `CurrentUser` |
   `CurrentUserContact`.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
-  `value`, a `macro`, a `datePart`, or isNull/isNotNull — NOT `processParameter` / `elementParameter` /
+  `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
   instance exists, so a parameter / element output / meta-path reference has no value yet. The server
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
@@ -562,6 +564,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
    signal/readData/
    changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
+   element that OFFERS it (four kinds remove the control — see the catalog), on any
    element kind, `readData` / `changeData` on the matching data element only (see the "Read data element" /
    "Modify data element" sections for their partial-update and source-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
@@ -699,8 +702,9 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   them expresses the intent: they are structural, so the server builds the reference and a rename cannot
   break it. Reach for `expression` when the value has to be COMPUTED, or for the constant families that have
   no literal form — date/time, system variable, system setting. A LOOKUP is not one of them on a PARAMETER:
-  its value is a bare record Guid in `value`. The macro form is still the route for a lookup COLUMN on a
-  `changeData` element, whose `value` is text-only — see that section.
+  its value is a bare record Guid in `value`. The macro form is still the route for a CONSTANT lookup
+  column on a `changeData` element, whose `value` is text-only; a column fed from the process uses
+  `processParameter` or `sourceElement` — see that section.
 - UNBOUND element INPUT parameters are NOT listed by `describe-business-process` (it returns only
   value-bearing parameters and outputs) — absence from describe does NOT mean the parameter does not
   exist. Input parameter names come from the user task's schema (for a custom task, the parameters it
@@ -721,8 +725,10 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` expression form (both GUIDs: the referenced OBJECT's
   schema UId, NOT its name, then the RECORD's Id) still exists. On a PARAMETER default it is the fallback:
   prefer the bare Guid, and never use the macro for a parameter whose consumer reads ConstValue only — an
-  ActivityUserTask's category is that case. It remains the ONLY route where `value` cannot carry a Guid at
-  all, which is a `changeData` element's lookup column.
+  ActivityUserTask's category is that case. It remains the route for a CONSTANT lookup on a `changeData`
+  element's column, whose `value` is text-only — but a column fed from elsewhere in the process is not a
+  constant and does not use it: `processParameter` or `sourceElement` carry a record id that exists only at
+  run time, which a `[#Lookup…#]` macro cannot.
   EXCEPTION — an Activity CONNECTION: there you send a bare `recordId` to `setConnections` and the server
   composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
 - To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —
@@ -736,8 +742,10 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   `describe-business-process` reports, and it is the only accepted form.
   The third segment above, `[EntityColumn:{uid}]`, is what the PLATFORM writes when it stores such a
   reference. You cannot author one: `describe-business-process` reports no column UIds, so there is nowhere
-  to get it — and a read record's individual columns are not referenceable downstream yet either
-  (ENG-91844). Author two segments, not three.
+  to get it. A read record's individual columns are not referenceable from a MAPPING, a `changeData` value
+  or a filter condition either (ENG-91844) — but an email BODY macro does reach them, with
+  `[[element:<Element>.<OutputParameter>.<Column>]]`, a different grammar that needs no UId. Inside a
+  formula: author two segments, not three.
 
 == Formulas (`expression` sources and flow conditions) ==
 
@@ -808,7 +816,7 @@ reports a process parameter `PriceParameter` with
     {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUpParameter",
      "expression":"Math.Ceiling([#[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
 
-The designer then displays this as `RoundUp([#Price#])` — it resolves the UId back to the name, and it
+The designer then displays this as `RoundUp([#PriceParameter#])` — it resolves the UId back to the name, and it
 shows the designer's own spelling of the function. Both directions of that conversion are the platform's;
 you write the C# spelling and the UId, and the designer renders the friendly form.
 
@@ -817,7 +825,7 @@ worse than none. The check you can actually run is `describe-business-process`: 
 on the parameter as `source: "Script"` with your expression in `value` (NOT in an `expression` field — the
 describe contract has no such field on a parameter). `source: "ConstValue"` there means the formula was
 never stored as one and a constant went in instead. For a flow, the read-back is `kind: "conditional"` with
-the `condition` text. If a human is at a browser, `RoundUp([#Price#])` in the designer is the same
+the `condition` text. If a human is at a browser, `RoundUp([#PriceParameter#])` in the designer is the same
 confirmation in friendlier spelling.
 
 A COMPUTED DEFAULT for a parameter of ANY type is a mapping, not a `value`. `addParameter` / `setParameter`
@@ -846,10 +854,10 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   containing a division (`1/2` is converted so it yields `0.5` rather than integer `0`). So `1.5` and
   `1 / 2` are REFUSED for an **Integer** parameter and accepted for a **Float** one — a Float parameter's
   CLR type is `decimal`. Plain integer arithmetic (`1 + 1`) fits both. The package runs this check EARLY,
-  at the moment you write the formula; the platform's own pre-save validation runs the equivalent one when
-  the schema is saved. So a formula refused here would have been refused later anyway, with a worse
-  message. A package too old to carry this check does not run it at all — the platform's own pre-save gate
-  is a different check with a different message, and it is not a substitute;
+  at the moment you write the formula. The platform's own pre-save validation covers the same ground for a
+  formula that reaches it, so one refused here would have been refused later anyway with a worse message —
+  but only the package's check names the offending token, and only it runs before anything is stored. A
+  package too old to carry it does not run it at all;
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
@@ -1117,7 +1125,9 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBefore",       "value": "30" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBeforePeriod", "value": "0" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "ActivityCategory",
-       "value": "F51C4643-58E6-DF11-971B-001D60E938C6" } } ]
+       "value": "<the environment's CALL category id, read from the ActivityCategory lookup. NOT
+                  F51C4643-58E6-DF11-971B-001D60E938C6, which is 'To do' and the runtime default: using it
+                  leaves this CALL task categorised To do, saving and running with no error at all>" } } ]
 
 3) describe-business-process -> every parameter you bound now appears with its source and value.
    The ones you did NOT bind stay hidden. That is expected; it is not a failure.
@@ -1286,7 +1296,9 @@ SAY the Activity's TYPE is still Task — see the Type-is-not-settable rule at t
   auto-relation rules and quick-add, and is normally absent from the designer's "Connected to" as well —
   except `Project`, which the designer injects client-side and DOES display. And an `expression` in the
   `[#SysSettings...#]` family is accepted unchecked: its value type cannot be read at design time, so a
-  setting that does not hold a record id leaves the column empty at run time. Read the caveats — they arrive
+  setting holding the wrong KIND of value leaves the column empty at run time. A setting holding NOTHING is
+  the other case and worse: the interpreted engine THROWS on it rather than resolving to null, so an empty
+  setting fails the step instead of blanking the column. Read the caveats — they arrive
   as `message-type: "Warning"` entries in `execution-log-messages`, NOT as a `warnings` field on the
   response, so finding no such field is not evidence there were none. Some are neutral acknowledgements (a
   column that was already unbound), not failures.
