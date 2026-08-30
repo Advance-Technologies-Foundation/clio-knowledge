@@ -312,13 +312,15 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     choice: this catalog governs NAMES, so a structural difference between two runs is OUT OF SCOPE
     here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
     reason no naming rule can fix.
-N10 Sequence-flow labels — NOT YET BUILDABLE (a flow's LABEL is; the flow itself is not — a conditional
-    flow is built with `setFlowCondition`, see "Conditional flows and branch conditions". Default flows
-    and gateway ELEMENTS remain outside the buildable slice; ENG-91853 is the ticket that extends it).
-    Recorded here so the catalog is complete, the same
-    way the R1–R17 header separates the full catalog from the buildable slice. When they land: label a
-    conditional flow with the decision outcome it represents (`Budget > 10 000`), and label the default
+N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flow: `flows[]` takes
+    `source` and `target` and nothing else, so this rule cannot be applied yet by any route. Recorded
+    here so the catalog is complete, the same way the R1–R17 header separates the full catalog from the
+    buildable slice. When labels land: label a conditional flow with the decision outcome it represents
+    (`Budget > 10 000` — a human-readable caption, not the condition's own text), and label the default
     flow explicitly rather than leaving it blank.
+    Do not read this rule as a statement about FLOWS. A conditional flow itself IS buildable — plain
+    flow, then `setFlowCondition`; see "Conditional flows and branch conditions". Only the LABEL is
+    missing, along with default flows and gateway ELEMENTS (ENG-91853 extends that).
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own section below ("Activity connections") and no naming surface at all.
 
@@ -733,9 +735,10 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
   `math.Round(1.5)` does NOT (case-sensitive);
 - no lambdas, no generics, no statements — ONE expression, on ONE line;
 - the Creatio function library in scope is `FormulaUtilities`, and it has exactly FOUR members:
-  `Min`, `Max`, `Avg`, `Mod`. There is no other Creatio helper library. If a caller asks for a function that
-  is not here and not on `DateTimeUtilities` or `Math`, the answer is that formulas cannot do it — not a
-  guess at a name;
+  `Min`, `Max`, `Avg`, `Mod`. There is no other Creatio HELPER library — which is not the same as saying a
+  formula cannot do the thing: the ordinary .NET members are in scope too, so look for one before you
+  conclude anything is impossible (see DO NOT INVENT A FUNCTION NAME below). What you must not do is guess
+  a plausible Creatio name;
 - date helpers live on `DateTimeUtilities` and are spelled WITHOUT a `Get` prefix: `StartOfMonth`,
   `StartOfWeek`, `StartOfYear`, `StartOfQuarter`, `StartOfHalfYear`, `StartOfHour`, plus `Day`, `Month`,
   `Time`, `DayOfWeek`, `DayInRange`. (`GetQuarter` is one of the few that really does carry the prefix, and
@@ -743,7 +746,8 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
 - `Math`, `DateTime`, `Guid`, `string`, `Convert`, `TimeSpan` and the ordinary operators are available,
   including the ternary `? :` and the null-coalescing `??`. This is the GUIDED set, not the enforced one:
   the registry is wider, and a formula is server-evaluated code rather than a sandbox. Stay inside the
-  guided set unless you have a reason not to, and never assume the engine will stop you;
+  guided set unless you have a reason not to. An identifier the registry does not carry IS refused, by
+  name — the thing not to rely on is the engine refusing something merely because it is unwise;
 - you may call a METHOD on the result of a macro or a value: `[#SysVariable.CurrentDateTime#].AddDays(3)`,
   `DateTime.Now.ToString()` (the way to feed a date into a Text parameter), `"a" + "b"`,
   `!string.IsNullOrEmpty(X)` (`X` being a reference token, never a parameter's name). Combining two
@@ -783,7 +787,9 @@ yourself, in two steps:
    * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
    * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
-Worked example. `describe-business-process` reports a process parameter `Price` with
+Worked example — note the target is a FLOAT parameter: `Math.Ceiling` returns `decimal`, and a decimal
+result into an Integer parameter is refused by the type rule above. `describe-business-process` reports a
+process parameter `Price` with
 `uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUp`:
 
     {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUp",
@@ -807,8 +813,10 @@ a mapping with `targetProcessParameter` + `expression`, exactly as above. This i
 case — date, date-time and time are the types where the mapping route is MANDATORY (their constants have
 no literal form). A LOOKUP is NOT one of them: its default is a bare record Guid in `value`, which is the
 preferred route and the only one an ActivityUserTask category accepts — see the parameter sections above.
-Reaching for `expression` with `[#Lookup…#]` on a lookup target saves and compiles, and then silently
-degrades the element's allowed-results list. For an Integer or Float parameter it is equally the route whenever the
+On an ActivityUserTask's `ActivityCategory` specifically, reaching for `expression` with `[#Lookup…#]`
+instead saves and compiles and then silently degrades the element's allowed-results list — see NOTE-2 in
+the Perform task section. Elsewhere the macro form is legitimate; on a lookup DEFAULT the bare Guid is
+simply the better route. For an Integer or Float parameter it is equally the route whenever the
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
 
@@ -824,15 +832,22 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   conversion retypes numeric constants: a fractional literal becomes `decimal`, and so does anything
   containing a division (`1/2` is converted so it yields `0.5` rather than integer `0`). So `1.5` and
   `1 / 2` are REFUSED for an **Integer** parameter and accepted for a **Float** one — a Float parameter's
-  CLR type is `decimal`. Plain integer arithmetic (`1 + 1`) fits both. This is the same check the
-  platform's own pre-save validation runs, so a formula this refuses would have been refused at save time
-  anyway, just later and with a worse message;
+  CLR type is `decimal`. Plain integer arithmetic (`1 + 1`) fits both. The package runs this check EARLY,
+  at the moment you write the formula; the platform's own pre-save validation runs the equivalent one when
+  the schema is saved. So a formula refused here would have been refused later anyway, with a worse
+  message — and on a package too old to carry this check, "later" is where it happens;
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
 On an environment OLDER than 1.4.0.3 none of this happens — the formula is stored unchecked and a wrong
 token fails only at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
+
+THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE UNREACHABLE. Elsewhere this article
+explains what an older `CrtProcessBuilder` does differently — the `[#Lookup…#]` macro on a pre-1.3.1.1
+package, an unchecked expression, an unvalidated user-task name. Those paragraphs are history, not a
+branch to take: on a refusal, run `install-process-builder`. Do not re-send a call in an older dialect
+"because the package may be old" — clio refused before the call left, so no dialect reaches the server.
 
 WHAT A REFUSAL LOOKS LIKE, so you can correct it yourself instead of guessing. The message always names
 the usage site and quotes the expression as YOU wrote it (not the converted form). The middle clause is
@@ -875,15 +890,18 @@ default, does not coerce it the way the older compiled engine did.
 
 An EMPTY condition is refused, and the reason is worth knowing because it is silent otherwise: the platform
 stores an empty condition as the literal `true`, so an "empty" branch is an ALWAYS-TAKEN branch. To drop a
-condition, remove the flow and add a plain one — there is no clear-condition operation.
+condition, remove the flow and add a plain one — there is no clear-condition operation. The replacement
+lands LAST, and since precedence IS insertion order (below), that silently changes which sibling branch
+runs: if the element has other conditional branches, re-add every one of them in the intended order. A
+condition on a DEFAULT branch is refused.
 
 BRANCH PRECEDENCE IS FLOW ORDER, and nothing in the metadata records it. Where two conditional branches
 leave the same element, they are evaluated in the order the flows were added and the FIRST whose
 condition is true is taken. So a branch that fires above 100 and a branch that fires above 1000 resolve
 differently purely by which flow was added first, with no diagnostic and nothing a human can inspect. Add
-the most specific branch FIRST, and say so when you report what you built — report the order you chose
-and why, which is useful whatever the engine does, rather than asserting which branch will win. `setFlowCondition` keeps a
-flow's position when it converts it, so setting a condition never silently reorders your branches.
+the most specific branch FIRST, and report the order you chose and why — the order is the only thing that
+records the intent, so it belongs in what you tell the user. `setFlowCondition` keeps a flow's position
+when it converts it, so setting a condition never silently reorders your branches; remove-and-add does.
 
 A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
 `condition` text, so you can verify what you wrote.
