@@ -309,8 +309,10 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     choice: this catalog governs NAMES, so a structural difference between two runs is OUT OF SCOPE
     here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
     reason no naming rule can fix.
-N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows are outside the buildable
-    slice; ENG-91853 is the ticket that extends it). Recorded here so the catalog is complete, the same
+N10 Sequence-flow labels — NOT YET BUILDABLE (a flow's LABEL is; the flow itself is not — a conditional
+    flow is built with `setFlowCondition`, see "Conditional flows and branch conditions". Default flows
+    and gateway ELEMENTS remain outside the buildable slice; ENG-91853 is the ticket that extends it).
+    Recorded here so the catalog is complete, the same
     way the R1–R17 header separates the full catalog from the buildable slice. When they land: label a
     conditional flow with the decision outcome it represents (`Budget > 10 000`), and label the default
     flow explicitly rather than leaving it blank.
@@ -829,6 +831,11 @@ not obvious to the next reader; write `(a && b) || c`.
 
 == Conditional flows and branch conditions ==
 
+READ "REFERENCING A PARAMETER" UNDER FORMULAS BEFORE WRITING A CONDITION. Every parameter a condition
+names is referenced by its UId meta-path — `[#[Parameter:{uid}]#]` — and never by its name; a bare
+`Amount` is refused. Short names appear below to keep the rules readable: they describe the DECISION,
+they are not the text you write.
+
 A branch is a flow with a CONDITION. You do not build one — you build a plain flow and then set its
 condition:
 
@@ -848,17 +855,19 @@ An EMPTY condition is refused, and the reason is worth knowing because it is sil
 stores an empty condition as the literal `true`, so an "empty" branch is an ALWAYS-TAKEN branch. To drop a
 condition, remove the flow and add a plain one — there is no clear-condition operation.
 
-BRANCH PRECEDENCE IS FLOW ORDER, and nothing in the metadata records it. Where two conditional branches leave
-the same element, they are evaluated in the order the flows were added and the FIRST whose condition is true
-is taken. So `Amount > 100` and `Amount > 1000` resolve differently purely by which flow was added first,
-with no diagnostic and nothing a human can inspect. Add the most specific branch FIRST, and say so when you
-report what you built. `setFlowCondition` keeps a flow's position when it converts it, so setting a condition
-never silently reorders your branches.
+BRANCH PRECEDENCE IS FLOW ORDER, and nothing in the metadata records it. Where two conditional branches
+leave the same element, they are evaluated in the order the flows were added and the FIRST whose
+condition is true is taken. So a branch that fires above 100 and a branch that fires above 1000 resolve
+differently purely by which flow was added first, with no diagnostic and nothing a human can inspect. Add
+the most specific branch FIRST, and say so when you report what you built. `setFlowCondition` keeps a
+flow's position when it converts it, so setting a condition never silently reorders your branches.
 
 A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
 `condition` text, so you can verify what you wrote.
 
-Corpus-attested condition shapes, most common first — these are what real processes use:
+Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
+`B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
+parameter's name:
 `X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
 boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
 `A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.
