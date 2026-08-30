@@ -72,7 +72,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   and over a named Contact: the setting is what an administrator can change afterwards without reopening the
   process, while a hard-coded address silently keeps mailing the old destination. Discover the code with
   `list-sys-settings` (pass `search-pattern` — the unfiltered catalog is hundreds of rows), and create the
-  setting with `create-sys-setting` when it does not exist yet rather than falling back to a literal. When a
+  setting with `create-sys-setting` when it does not exist yet rather than falling back to a literal — and
+then SET ITS VALUE. A setting that exists with no value throws at run time in the interpreted engine (the
+default), where the older compiled engine returned null, so creating one and leaving it empty ships a
+process that saves clean and fails on the first send. When a
   request names a recipient by ROLE rather than by address ("notify HR", "tell support"), treat a system
   setting as the expected answer and offer it explicitly — an option set of literal / contact / parameter
   omits the one source that survives a change of staff. The HTML body is stored verbatim;
@@ -391,7 +394,9 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- LIMITATION — the read record's individual COLUMN values are NOT referenceable downstream yet. The
+- LIMITATION — the read record's individual COLUMN values are not referenceable from a MAPPING, a
+  `changeData` value or a filter condition. (An email BODY macro is the exception and does reach them:
+  `[[element:Read.ResultEntity.Column]]` — see the Send email section.) The
   element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
   the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
   that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
@@ -692,8 +697,10 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   field (the server builds the correct reference); `expression` is a FORMULA — see "Formulas" below for the
   vocabulary and what is checked. Still PREFER `value` / `processParameter` / `sourceElement` when one of
   them expresses the intent: they are structural, so the server builds the reference and a rename cannot
-  break it. Reach for `expression` when the value has to be COMPUTED, or for the constant families that are
-  only expressible as a macro (date/time, lookup, system variable, system setting).
+  break it. Reach for `expression` when the value has to be COMPUTED, or for the constant families that have
+  no literal form — date/time, system variable, system setting. A LOOKUP is not one of them on a PARAMETER:
+  its value is a bare record Guid in `value`. The macro form is still the route for a lookup COLUMN on a
+  `changeData` element, whose `value` is text-only — see that section.
 - UNBOUND element INPUT parameters are NOT listed by `describe-business-process` (it returns only
   value-bearing parameters and outputs) — absence from describe does NOT mean the parameter does not
   exist. Input parameter names come from the user task's schema (for a custom task, the parameters it
@@ -712,8 +719,10 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   Guid in `value` (route ships from CrtProcessBuilder 1.3.1.1 — stored as the ConstValue the runtime reads; on an
   ActivityUserTask category the ConstValue encoding is REQUIRED, see the Perform-task section's NOTE-2). The
   `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` expression form (both GUIDs: the referenced OBJECT's
-  schema UId, NOT its name, then the RECORD's Id) still exists, but reach for it only on a pre-1.3.1.1 package
-  that rejects the bare Guid — and never for a parameter whose consumer reads ConstValue only.
+  schema UId, NOT its name, then the RECORD's Id) still exists. On a PARAMETER default it is the fallback:
+  prefer the bare Guid, and never use the macro for a parameter whose consumer reads ConstValue only — an
+  ActivityUserTask's category is that case. It remains the ONLY route where `value` cannot carry a Guid at
+  all, which is a `changeData` element's lookup column.
   EXCEPTION — an Activity CONNECTION: there you send a bare `recordId` to `setConnections` and the server
   composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
 - To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —
@@ -725,6 +734,10 @@ Flows: sequence (default `connect`), conditional (setup -> conditionalConnection
   parameter: inside an `expression` there is no structured alternative, and the UId meta-path is exactly
   what you write. See "Referencing a parameter" under Formulas — you build it from the `uid` that
   `describe-business-process` reports, and it is the only accepted form.
+  The third segment above, `[EntityColumn:{uid}]`, is what the PLATFORM writes when it stores such a
+  reference. You cannot author one: `describe-business-process` reports no column UIds, so there is nowhere
+  to get it — and a read record's individual columns are not referenceable downstream yet either
+  (ENG-91844). Author two segments, not three.
 
 == Formulas (`expression` sources and flow conditions) ==
 
@@ -788,11 +801,11 @@ yourself, in two steps:
    * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
 Worked example — note the target is a FLOAT parameter: `Math.Ceiling` returns `decimal`, and a decimal
-result into an Integer parameter is refused by the type rule above. `describe-business-process` reports a
-process parameter `Price` with
-`uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUp`:
+result into an Integer parameter is refused by the result-type rule below. `describe-business-process`
+reports a process parameter `PriceParameter` with
+`uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUpParameter`:
 
-    {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUp",
+    {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUpParameter",
      "expression":"Math.Ceiling([#[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
 
 The designer then displays this as `RoundUp([#Price#])` — it resolves the UId back to the name, and it
@@ -835,7 +848,8 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   CLR type is `decimal`. Plain integer arithmetic (`1 + 1`) fits both. The package runs this check EARLY,
   at the moment you write the formula; the platform's own pre-save validation runs the equivalent one when
   the schema is saved. So a formula refused here would have been refused later anyway, with a worse
-  message — and on a package too old to carry this check, "later" is where it happens;
+  message. A package too old to carry this check does not run it at all — the platform's own pre-save gate
+  is a different check with a different message, and it is not a substitute;
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
@@ -846,8 +860,10 @@ an environment for exactly that reason; the fix is `install-process-builder`, no
 THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE UNREACHABLE. Elsewhere this article
 explains what an older `CrtProcessBuilder` does differently — the `[#Lookup…#]` macro on a pre-1.3.1.1
 package, an unchecked expression, an unvalidated user-task name. Those paragraphs are history, not a
-branch to take: on a refusal, run `install-process-builder`. Do not re-send a call in an older dialect
-"because the package may be old" — clio refused before the call left, so no dialect reaches the server.
+branch to take: on a refusal from a CURRENT clio, run `install-process-builder`. Do not re-send a call in
+an older dialect "because the package may be old" — this clio refused before the call left, so no dialect
+reaches the server. Under an OLDER clio the call does go through and the old package rejects it itself;
+that rejection is real and still means the package is behind, not that the contract is wrong.
 
 WHAT A REFUSAL LOOKS LIKE, so you can correct it yourself instead of guessing. The message always names
 the usage site and quotes the expression as YOU wrote it (not the converted form). The middle clause is
