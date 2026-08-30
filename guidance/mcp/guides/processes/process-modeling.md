@@ -165,7 +165,10 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
   already does). `describe-business-process` reports the effective value per element, so it round-trips.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section below).
-- NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
+- A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
+  `modify-business-process` + `setFlowCondition`. No gateway element is involved — see "Conditional flows
+  and branch conditions".
+- NOT yet buildable: gateway ELEMENTS, default flows, timer/message start, intermediate events,
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
@@ -548,7 +551,8 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (a flow's LABEL is; the flow itse
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/
+   setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
+   signal/readData/
    changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element kind, `readData` / `changeData` on the matching data element only (see the "Read data element" /
@@ -584,7 +588,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE (a flow's LABEL is; the flow itse
   operations array, then re-describe and clean up any leftover references to the removed element.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateways, conditional/default flows,
+- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
   sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
   still remove or rewire them by name and nothing will warn you. Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
@@ -727,7 +731,7 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
 
 - `Math.Round(1.5)` resolves; `System.Math.Round(1.5)` does NOT (no namespace-qualified names) and
   `math.Round(1.5)` does NOT (case-sensitive);
-- no lambdas, no generics, no `new`, no statements — ONE expression, on ONE line;
+- no lambdas, no generics, no statements — ONE expression, on ONE line;
 - the Creatio function library in scope is `FormulaUtilities`, and it has exactly FOUR members:
   `Min`, `Max`, `Avg`, `Mod`. There is no other Creatio helper library. If a caller asks for a function that
   is not here and not on `DateTimeUtilities` or `Math`, the answer is that formulas cannot do it — not a
@@ -736,18 +740,25 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
   `StartOfWeek`, `StartOfYear`, `StartOfQuarter`, `StartOfHalfYear`, `StartOfHour`, plus `Day`, `Month`,
   `Time`, `DayOfWeek`, `DayInRange`. (`GetQuarter` is one of the few that really does carry the prefix, and
   it works in both forms: `DateTime.Now.GetQuarter()` and `DateTimeUtilities.GetQuarter(DateTime.Now)`.)
-- `Math`, `DateTime`, `Guid`, `string` and the ordinary operators are available, including the ternary
-  `? :` and the null-coalescing `??`;
+- `Math`, `DateTime`, `Guid`, `string`, `Convert`, `TimeSpan` and the ordinary operators are available,
+  including the ternary `? :` and the null-coalescing `??`. This is the GUIDED set, not the enforced one:
+  the registry is wider, and a formula is server-evaluated code rather than a sandbox. Stay inside the
+  guided set unless you have a reason not to, and never assume the engine will stop you;
 - you may call a METHOD on the result of a macro or a value: `[#SysVariable.CurrentDateTime#].AddDays(3)`,
   `DateTime.Now.ToString()` (the way to feed a date into a Text parameter), `"a" + "b"`,
-  `!string.IsNullOrEmpty(x)`. Combining two functions in one expression is fine too:
+  `!string.IsNullOrEmpty(X)` (`X` being a reference token, never a parameter's name). Combining two
+  functions in one expression is fine too:
   `FormulaUtilities.Min(5, 3) + Math.Abs(-2)`.
 
 **DO NOT INVENT A FUNCTION NAME.** This is the single most likely way to get a formula wrong, because the
-Creatio library is far smaller than it looks: there is no `Sum`, no `Count`, no `Concat`, no `Format`, no
-`If`. If what you need is not one of the four `FormulaUtilities` members, a `DateTimeUtilities` helper,
-`Math`, or a plain .NET member on `DateTime`/`string`/`Guid`, then a formula cannot express it — say so
-instead of guessing a plausible name. A guessed name is refused, not silently ignored, but it costs the
+CREATIO library is far smaller than it looks: there is no Creatio `Sum`, `Count`, `Concat`, `Format` or
+`If`. That is a statement about Creatio's helpers, NOT about what a formula can express — the ordinary
+.NET members are there: concatenation is `+` or `string.Concat`, formatting is `string.Format` or
+`.ToString(...)`, a conditional is the ternary `? :`, and a conversion is `Convert.ToInt32(...)`. Reach for
+the .NET member before you conclude anything is impossible. Only when neither a `FormulaUtilities` member,
+a `DateTimeUtilities` helper, `Math`, nor a plain .NET member on `DateTime`/`string`/`Guid`/`Convert` will
+do should you tell the user a formula cannot express it — a wrong "the platform cannot do that" is the
+most expensive answer this guide can produce, because the user has no reason to re-check it. A guessed name is refused, not silently ignored, but it costs the
 user a round trip.
 
 MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
@@ -756,7 +767,7 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 |---|---|
 | process / element parameter | a UId meta-path you BUILD from `describe-business-process` — see below |
 | system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
-| system setting | `[#SysSettings.Code#]` (a legacy form without the type suffix also still works) |
+| system setting | `[#SysSettings.Code#]`; a form carrying the value-type suffix also round-trips. In the interpreted engine (the default) an UNSET setting THROWS at run time where the older compiled engine returned null — do not reference one that may be empty without a fallback |
 | lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
@@ -780,14 +791,24 @@ Worked example. `describe-business-process` reports a process parameter `Price` 
 
 The designer then displays this as `RoundUp([#Price#])` — it resolves the UId back to the name, and it
 shows the designer's own spelling of the function. Both directions of that conversion are the platform's;
-you write the C# spelling and the UId, and the designer renders the friendly form. Seeing
-`RoundUp([#Price#])` in the designer is the confirmation that the reference bound correctly.
+you write the C# spelling and the UId, and the designer renders the friendly form.
+
+CONFIRM IT WITHOUT THE DESIGNER. No tool returns a designer link, so do not offer one — an invented URL is
+worse than none. The check you can actually run is `describe-business-process`: a stored formula reads back
+on the parameter as `source: "Script"` with your expression in `value` (NOT in an `expression` field — the
+describe contract has no such field on a parameter). `source: "ConstValue"` there means the formula was
+never stored as one and a constant went in instead. For a flow, the read-back is `kind: "conditional"` with
+the `condition` text. If a human is at a browser, `RoundUp([#Price#])` in the designer is the same
+confirmation in friendlier spelling.
 
 A COMPUTED DEFAULT for a parameter of ANY type is a mapping, not a `value`. `addParameter` / `setParameter`
 take `value` as a literal constant, so an arithmetic or macro-bearing default cannot go there; the route is
 a mapping with `targetProcessParameter` + `expression`, exactly as above. This is NOT a date/time special
-case — date, date-time, time and lookup are only the types where the mapping route is MANDATORY (their
-constants have no literal form). For an Integer or Float parameter it is equally the route whenever the
+case — date, date-time and time are the types where the mapping route is MANDATORY (their constants have
+no literal form). A LOOKUP is NOT one of them: its default is a bare record Guid in `value`, which is the
+preferred route and the only one an ActivityUserTask category accepts — see the parameter sections above.
+Reaching for `expression` with `[#Lookup…#]` on a lookup target saves and compiles, and then silently
+degrades the element's allowed-results list. For an Integer or Float parameter it is equally the route whenever the
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
 
@@ -827,7 +848,8 @@ what tells you which mistake you made:
 | a reference to a parameter that is not there | the offending `[#…#]` token, verbatim | create the parameter, or fix the reference |
 
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
-not obvious to the next reader; write `(a && b) || c`.
+not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions
+here, each of which references its parameters by UId meta-path like everything else.)
 
 == Conditional flows and branch conditions ==
 
@@ -859,7 +881,8 @@ BRANCH PRECEDENCE IS FLOW ORDER, and nothing in the metadata records it. Where t
 leave the same element, they are evaluated in the order the flows were added and the FIRST whose
 condition is true is taken. So a branch that fires above 100 and a branch that fires above 1000 resolve
 differently purely by which flow was added first, with no diagnostic and nothing a human can inspect. Add
-the most specific branch FIRST, and say so when you report what you built. `setFlowCondition` keeps a
+the most specific branch FIRST, and say so when you report what you built — report the order you chose
+and why, which is useful whatever the engine does, rather than asserting which branch will win. `setFlowCondition` keeps a
 flow's position when it converts it, so setting a condition never silently reorders your branches.
 
 A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
@@ -961,9 +984,15 @@ boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!
   ActivityResult      Guid. The element's RESULT (the completed activity's result record). Visible in describe
                       from the start (isResult: true). Usable as a mapping SOURCE for a downstream element via
                       `sourceElement` + `sourceElementParameter` (verified: saves, reads back as a
-                      server-built `[Element:{uid}]` metapath, and resolves at run time). NOTE: conditional
-                      flows are NOT buildable from clio yet, so a clio-built process can READ the result but
-                      cannot BRANCH on it — say so instead of promising branching.
+                      server-built `[Element:{uid}]` metapath, and resolves at run time). You CAN branch
+                      on it: `setFlowCondition` on the flows leaving this element. One usability caveat
+                      to pass on when you do — verified on a stand: on a flow whose source is a single
+                      result-bearing activity, the designer opens the RESULTS editor for that connector,
+                      not a formula field, so a human cannot see or edit the condition there, and saving
+                      from the designer raises "Required fields of some elements are not filled in"
+                      naming that connector. The condition works and survives the save; it is simply not
+                      manageable from the UI in that topology. Say so rather than letting the owner
+                      discover it.
   CurrentActivityId   Guid. The created Activity's Id.
                       It is INVISIBLE in describe until bound — the name above is the only way to find it.
                       It resolves as a mapping SOURCE for a downstream element (verified end to end).
@@ -1237,8 +1266,12 @@ SAY the Activity's TYPE is still Task — see the Type-is-not-settable rule at t
 
 == Connection rules R1–R17 (validate-process-graph enforces the structural subset: R1–R3, R7,
    R9–R15, R17; R4–R6, R8 and R16 are semantic or not yet enforced — verify those yourself.
-   Validation pass ≠ buildable: the rules cover the FULL catalog incl. gateways and conditional
-   flows, but only the "What you can build today" slice above can actually be built) ==
+   Validation pass ≠ buildable: the rules cover the FULL catalog, but only the "What you can build
+   today" slice above can actually be built — conditional flows ARE in that slice, gateway ELEMENTS and
+   default flows are not. The exclusive gateway the platform synthesizes for a conditional branch is a
+   GENERATION-TIME construct and never appears as a graph node, so R7 and R14 do not apply to it: do not
+   model one when you validate a planned branch, and do not report a process as violating them because
+   it has one) ==
 R1  Start event: no incoming flow; exactly one outgoing.
 R2  End event: no outgoing flow; one or more incoming.
 R3  Exactly one top-level start event; every path reaches an end event.
