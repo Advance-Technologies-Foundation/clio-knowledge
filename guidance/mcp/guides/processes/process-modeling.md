@@ -754,10 +754,23 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 |---|---|
 | process / element parameter | a UId meta-path you BUILD from `describe-business-process` — see below |
 | system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
-| system setting | `[#SysSettings.Code#]` (a legacy form without the type suffix also still works) |
-| lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
+| system setting | `[#SysSettings.Code<Type>#]`, e.g. `[#SysSettings.MaxFileSize<Integer>#]` — WRITE THIS ONE. The untyped `[#SysSettings.Code#]` is a legacy form: it still round-trips, so do not "fix" one you read back, but do not author it |
+| lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs; see below for getting them |
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
+
+A LOOKUP VALUE needs TWO GUIDs, and a bare record id is NOT a substitute. Getting them:
+
+1. the reference object's schema UId — `find-entity-schema` by name (for example `ActivityCategory`);
+2. the record's id — read the lookup's own table, e.g. `clio-run dataservice` selecting `Id` from
+   `ActivityCategory` where `Name = 'Call'`.
+
+Then write `[#Lookup.{schemaUId}.{recordId}#]` as the `expression`.
+
+Do NOT take the shortcut of putting the bare record Guid in `value` as a constant. It is tempting because
+the mapping rules do say a Guid source into a lookup TARGET is allowed, and it type-checks and saves — but
+it stores an id with no object behind it, and the record then reads back as a value nobody can resolve or
+see in the designer. If you cannot obtain both GUIDs, say so rather than storing the bare id.
 
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
 uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form: a bare
