@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.52",
+  "libraryVersion": "1.13.53",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -89,6 +89,7 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-script-task",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
@@ -216,6 +217,7 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
@@ -1190,6 +1192,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-script-task",
+      "title": "Process ScriptTask C#",
+      "description": "Guides C# inside an existing Creatio process ScriptTask: exact process parameter codes, Get/Set access, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and target-environment verification.",
+      "topicId": "creatio.process-script-task",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-script-task",
+      "legacyUris": [
+        "docs://mcp/guides/process-script-task"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
+      "bundlePath": "resources/process-script-task.md",
       "mediaType": "text/plain"
     },
     {
