@@ -523,7 +523,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
   `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value` (a signalStart filter
-  allows only a constant `value`/`macro`/`datePart`, never a `processParameter` — see the restriction above):
+  allows only a constant `value` or `macro`, never a `processParameter` — see the restriction above):
   `{ "column": "CreatedOn", "datePart": "Year", "comparison": "equal", "value": "2026" }` reads
   `Year(CreatedOn) = 2026`. `HourMinute` is the exception — it extracts the TIME-OF-DAY and compares it to a
   `value` in `HH:mm[:ss]` form: `{ "column": "CreatedOn", "datePart": "HourMinute", "comparison": "equal",
@@ -564,8 +564,8 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
    signal/readData/
    changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
-   element that OFFERS it (four kinds remove the control — see the catalog), on any
-   element kind, `readData` / `changeData` on the matching data element only (see the "Read data element" /
+   element that OFFERS it (four kinds remove the control — see the catalog), `readData` / `changeData` on
+   the matching data element only (see the "Read data element" /
    "Modify data element" sections for their partial-update and source-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
@@ -861,8 +861,10 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
-On an environment OLDER than 1.4.0.3 none of this happens — the formula is stored unchecked and a wrong
-token fails only at run time. clio refuses `create-business-process` / `modify-business-process` against such
+On an environment OLDER than 1.4.0.3 none of THIS happens — the package does not check the formula, so
+nothing names the offending token and nothing refuses before the write. The platform's own pre-save gate
+still runs at save time and still refuses what it refuses; what you lose is the early, specific message,
+and anything that gate does not cover then fails at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
 
 THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE UNREACHABLE. Elsewhere this article
@@ -1080,8 +1082,9 @@ NOTE-1 (the performer): "Who performs the task?" has TWO layers, and picking the
   * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
     performer to open the page for) and stays untouched for user.
   * describe reads the block back top-level on the element (`performer`: type + the stored formula +
-    roleDisplay) and it is re-appliable verbatim. REFUSED on any element other than performTask — the
-    retired CallUserTask by name (its runtime IGNORES the assignment).
+    roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
+    than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
+    element has its own `email.performer`, which is a different field and is not refused.
   LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Four working ways:
   * a bare Contact record Guid in `value` — the Guid must be an EXISTING Contact record: an id of another
     entity (a ROLE id is the classic mistake) is REFUSED naming the reference object, because before this
@@ -1125,9 +1128,11 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBefore",       "value": "30" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBeforePeriod", "value": "0" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "ActivityCategory",
-       "value": "<the environment's CALL category id, read from the ActivityCategory lookup. NOT
-                  F51C4643-58E6-DF11-971B-001D60E938C6, which is 'To do' and the runtime default: using it
-                  leaves this CALL task categorised To do, saving and running with no error at all>" } } ]
+       "value": "03DF85BF-6B19-4DEA-8463-D5D49B80BB28" } } ]
+   <- that is ActivityCategory CallAsTask, the TASK-typed Call row. Do NOT resolve "Call" by name: it is two
+      rows, and the other one (ActivityType Call, E52BD583-...) is the row the designer never offers on this
+      element. And do NOT leave the field unset or set to F51C4643-... ("To do", the runtime default) - a
+      call task then ships categorised To do, saving and running with no error at all. See NOTE-2.
 
 3) describe-business-process -> every parameter you bound now appears with its source and value.
    The ones you did NOT bind stay hidden. That is expected; it is not a failure.
