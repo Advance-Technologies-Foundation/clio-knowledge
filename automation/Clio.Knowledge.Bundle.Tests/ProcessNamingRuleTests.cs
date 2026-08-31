@@ -5,15 +5,22 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Guards the ENG-94378 payload: the <c>Naming and codes</c> section of the process-modeling guide, the
-/// load-bearing clauses that make its rules correct, the guide's own examples (which a generating model
-/// copies in preference to the prose), and the two intra-guide citations that point at the section. The
-/// content digest cannot guard a rule's wording — it is re-recorded on every edit — so a renumbered rule,
-/// a dropped carve-out, an example drifted back to <c>Start1</c>, or a citation left pointing at a section
-/// that no longer exists would otherwise ship green. Since N5 makes an element code a FUNCTION of its
-/// caption, the examples are also checked against the derivation itself rather than against a shape
-/// predicate: five of them contradicted the rule while the handle scan, which sees only a trailing digit or
-/// a camelCase head, reported green (d-krestov, PR #82).
+/// Guards the ENG-94378 payload: the <c>Naming and codes</c> section — since ENG-96212 the whole of the
+/// <c>process-naming</c> article — the load-bearing clauses that make its rules correct, the process
+/// guides' own examples (which a generating model copies in preference to the prose), and the two
+/// citations that point at the section. The content digest cannot guard a rule's wording — it is
+/// re-recorded on every edit — so a renumbered rule, a dropped carve-out, an example drifted back to
+/// <c>Start1</c>, or a citation left pointing at a section that no longer exists would otherwise ship
+/// green. Since N5 makes an element code a FUNCTION of its caption, the examples are also checked against
+/// the derivation itself rather than against a shape predicate: five of them contradicted the rule while
+/// the handle scan, which sees only a trailing digit or a camelCase head, reported green (d-krestov, PR
+/// #82).
+///
+/// ENG-96212 changed WHERE this content lives, not what it says. The naming rules are one article now, and
+/// the two citations that used to read "see the section below" cross an article boundary — so
+/// <see cref="NamingCitations_ShouldResolveToTheNamingArticle"/> additionally checks that the cited
+/// article is a declared get-guidance topic. A pointer to an article a reader cannot fetch is the same
+/// dangling pointer the old test guarded against, one layer down.
 ///
 /// Three conflicts were resolved while writing the section; the resolutions are recorded here rather than
 /// in the shipped guide, which states each rule without re-litigating it:
@@ -50,10 +57,32 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class ProcessNamingRuleTests
 {
-    private const string OwnerGuide = "guidance/mcp/guides/processes/process-modeling.md";
+    private const string NamingArticle = "process-naming";
+    private const string NamingGuide = "guidance/mcp/guides/processes/naming.md";
+    private const string DescriptorGuide = "guidance/mcp/guides/processes/process-modeling.md";
+    private const string BundleSource = "bundle-source.json";
     private const string CoreRulesGuide = "guidance/mcp/guides/core-rules.md";
     private const string PrefixOwnerGuide = "guidance/mcp/guides/applications/app-modeling.md";
-    private const string NextSectionHeading = "== Trigger a process on a record event";
+
+    /// <summary>
+    /// ENG-96212 split the monolithic process-modeling guide into seven articles, because the single
+    /// article no longer fit in one get-guidance response: the payload spilled to a file that Read cannot
+    /// page (it is one line), so every agent grepped a fragment and no agent read the whole thing. The
+    /// naming rules moved to their own article, but the EXAMPLES a generating model copies are now spread
+    /// across all seven — the worked Perform task example, the Send email element, the data elements. So
+    /// every example scan below reads the SET rather than one file; scanning only the entry article would
+    /// still pass while silently guarding nothing but the descriptor.
+    /// </summary>
+    private static readonly string[] ProcessGuides =
+    [
+        "guidance/mcp/guides/processes/process-modeling.md",
+        "guidance/mcp/guides/processes/naming.md",
+        "guidance/mcp/guides/processes/data-elements.md",
+        "guidance/mcp/guides/processes/parameters.md",
+        "guidance/mcp/guides/processes/perform-task.md",
+        "guidance/mcp/guides/processes/send-email.md",
+        "guidance/mcp/guides/processes/activity-connections.md"
+    ];
 
     /// <summary>
     /// Every rule the section ships. A dropped or renumbered rule fails here rather than silently
@@ -182,7 +211,7 @@ public sealed class ProcessNamingRuleTests
     [Description("The Naming and codes section exists in the process-modeling guide and still carries every rule.")]
     public void NamingSection_ShouldExistWithEveryRule()
     {
-        string section = NamingSection(ReadGuide(OwnerGuide));
+        string section = NamingSection();
 
         string[] missingRules = RuleNumbers
             .Where(rule => !Regex.IsMatch(section, $@"(?m)^{Regex.Escape(rule)}\s"))
@@ -197,7 +226,7 @@ public sealed class ProcessNamingRuleTests
     [Description("Every load-bearing clause of the naming rules is still inside the section.")]
     public void NamingSection_ShouldKeepLoadBearingClauses()
     {
-        string sectionNormalized = Normalize(NamingSection(ReadGuide(OwnerGuide)));
+        string sectionNormalized = Normalize(NamingSection());
 
         string[] droppedClauses = LoadBearingClauses
             .Where(clause => !sectionNormalized.Contains(clause.Fragment))
@@ -212,7 +241,7 @@ public sealed class ProcessNamingRuleTests
     [Description("The rules are numbered N-, not R-, so they are never mistaken for the validate-process-graph-enforced connection rules.")]
     public void NamingSection_ShouldNotReuseTheEnforcedRSeries()
     {
-        string section = NamingSection(ReadGuide(OwnerGuide));
+        string section = NamingSection();
 
         Regex.IsMatch(section, @"(?m)^R\d+\s").Should().BeFalse(
             because: "R1-R17 are pre-checked by validate-process-graph and the N rules are not; reusing an R "
@@ -224,33 +253,33 @@ public sealed class ProcessNamingRuleTests
     }
 
     [Test]
-    [Description("The Build recipe and Parameters citations resolve to the Naming and codes section rather than dangling.")]
-    public void NamingCitations_ShouldResolveToTheSection()
+    [Description("The Build recipe and Parameters citations resolve to the process-naming article rather than dangling.")]
+    public void NamingCitations_ShouldResolveToTheNamingArticle()
     {
-        string guideNormalized = Normalize(ReadGuide(OwnerGuide));
+        string guideNormalized = Normalize(ReadProcessGuides());
 
-        guideNormalized.Should().Contain($"name them per {RuleRange} in \"Naming and codes\"",
+        guideNormalized.Should().Contain($"name them per {RuleRange} in `{NamingArticle}`",
             because: "Build recipe step 1 is where the model plans the graph — the naming pointer has to be there, "
                 + "and a pointer no test guards is a pointer a later edit drops");
-        guideNormalized.Should().Contain("Name a process parameter per N8 in \"Naming and codes\"",
-            because: "the Parameters section introduces parameters[].name; N8 governs it and must be cited there");
+        guideNormalized.Should().Contain($"Name a process parameter per N8 in `{NamingArticle}`",
+            because: "the parameters article introduces parameters[].name; N8 governs it and must be cited there");
 
-        string[] citedSections = Regex.Matches(guideNormalized, @"in \x22([^\x22]+)\x22")
-            .Select(match => match.Groups[1].Value.Trim())
-            .Where(cited => cited.Contains("Naming and codes"))
-            .Distinct()
-            .ToArray();
-
-        citedSections.Should().NotBeEmpty(because: "the citations above must be discoverable by the same scan that validates them");
-        citedSections.Should().OnlyContain(cited => guideNormalized.Contains($"== {cited} ({RuleRange}) =="),
-            because: "a citation naming a section the guide does not define is a dangling pointer");
+        // Since ENG-96212 the citation crosses an ARTICLE boundary, so resolving it takes two things that
+        // a same-file "see below" never needed: the section must exist at the destination, and the
+        // destination must be a get-guidance topic. A reader who cannot fetch `process-naming` cannot
+        // reach N1-N10 at all, which is the exact failure the split was done to remove.
+        ReadGuide(NamingGuide).Should().Contain(SectionHeading,
+            because: $"the citations name {NamingArticle} as the owner of {RuleRange}, so it must define the section");
+        ReadGuide(BundleSource).Should().Contain($"\"itemId\": \"{NamingArticle}\"",
+            because: "a cross-article citation only resolves if the cited article is a declared get-guidance topic; "
+                + "an article that exists on disk but is absent from bundle-source.json is unreachable at runtime");
     }
 
     [Test]
     [Description("The guide's own JSON examples obey the naming rules, so copying an example applies them.")]
     public void GuideExamples_ShouldObeyTheNamingRules()
     {
-        string guide = ReadGuide(OwnerGuide);
+        string guide = ReadProcessGuides();
 
         string[] offenders = Regex.Matches(guide, ElementHandleKeys)
             .Select(match => match.Groups[1].Value)
@@ -274,7 +303,7 @@ public sealed class ProcessNamingRuleTests
     [Description("Every element code in a guide example is what N5's derivation produces from that element's own caption.")]
     public void GuideExamples_ShouldDeriveEveryElementCodeFromItsCaption()
     {
-        (string Type, string Name, string Caption)[] elements = CaptionedElements(ReadGuide(OwnerGuide));
+        (string Type, string Name, string Caption)[] elements = CaptionedElements(ReadProcessGuides());
 
         elements.Should().HaveCountGreaterThanOrEqualTo(8,
             because: "the scan has to reach every caption-bearing example — a predicate that matches nothing, or "
@@ -298,7 +327,7 @@ public sealed class ProcessNamingRuleTests
     [Description("Every parameter code in a guide example carries N8's Parameter suffix.")]
     public void GuideExamples_ShouldSuffixEveryParameterCode()
     {
-        string guide = ReadGuide(OwnerGuide);
+        string guide = ReadProcessGuides();
 
         string[] parameterCodes = Regex.Matches(guide, ParameterCodeKeys)
             .Select(match => match.Groups[1].Value)
@@ -322,7 +351,7 @@ public sealed class ProcessNamingRuleTests
     [Description("Activity captions in the examples open with a verb; event captions name a trigger or an outcome instead.")]
     public void GuideExamples_ShouldShapeCaptionsByElementKind()
     {
-        string guide = ReadGuide(OwnerGuide);
+        string guide = ReadProcessGuides();
 
         string[] activitiesNotVerbFirst = CaptionsOf(guide, ActivityTypes)
             .Where(caption => !ActivityVerbs.Contains(FirstWord(caption), StringComparer.Ordinal))
@@ -347,7 +376,7 @@ public sealed class ProcessNamingRuleTests
     [Description("The canonical descriptor example carries an N2-shaped process code.")]
     public void CanonicalDescriptorExample_ShouldCarryAnN2ShapedProcessCode()
     {
-        string descriptor = DescriptorExample(ReadGuide(OwnerGuide));
+        string descriptor = DescriptorExample(ReadGuide(DescriptorGuide));
 
         Regex.Match(descriptor, @"""name"":\s*""([^""]+)""").Groups[1].Value.Should()
             .MatchRegex(@"^[A-Z][A-Za-z]*[A-Z][A-Za-z]*(_[A-Z][A-Za-z]*)+$",
@@ -359,7 +388,7 @@ public sealed class ProcessNamingRuleTests
     [Description("Every element declared in a guide example carries a caption, events included.")]
     public void GuideExamples_ShouldCaptionEveryElement()
     {
-        string guide = ReadGuide(OwnerGuide);
+        string guide = ReadProcessGuides();
 
         string[] elementsWithoutCaption = Regex
             .Matches(guide, @"""type"":\s*""(?:startEvent|signalStart|endEvent|userTask|sendEmail|readData|performTask)""")
@@ -397,13 +426,27 @@ public sealed class ProcessNamingRuleTests
             because: "the rule governs no name or code, so it is session hygiene and core-rules owns it — but it "
                 + "must survive the move out of the naming section rather than be lost in it");
 
-        Normalize(NamingSection(ReadGuide(OwnerGuide))).Should().NotContain("Leave NO scratch behind",
+        Normalize(NamingSection()).Should().NotContain("Leave NO scratch behind",
             because: "AGENTS.md gives every rule one owner, and a cleanup rule counted among the naming rules "
                 + "inflates the catalog the four E2E stories are scored against");
     }
 
-    private static string NamingSection(string guide) =>
-        Section(guide, SectionHeading, NextSectionHeading);
+    /// <summary>
+    /// Since ENG-96212 the naming rules ARE their own article, so the section runs from its heading to the
+    /// end of the file rather than to the next heading. Reading it from the naming article specifically —
+    /// not from the concatenated set — is what keeps "this rule lives in the naming article" assertable.
+    /// </summary>
+    private static string NamingSection()
+    {
+        string guide = ReadGuide(NamingGuide);
+        int start = guide.IndexOf(SectionHeading, StringComparison.Ordinal);
+        start.Should().BeGreaterThanOrEqualTo(0,
+            because: $"{NamingGuide} must carry the '{SectionHeading}' section the citations point at");
+        return guide[start..];
+    }
+
+    private static string ReadProcessGuides() =>
+        string.Join("\n", ProcessGuides.Select(ReadGuide));
 
     private static string DescriptorExample(string guide) =>
         Section(guide, "== Descriptor (create-business-process) ==", "- `name` is the local element handle");
