@@ -11,8 +11,9 @@ Deploy preflight (run in this order)
    Read `status` (pass/partial/fail) and `database-candidates`.
 2. `show-passing-infrastructure` - narrow to only the choices that are safe to deploy against and read
    `recommendedDeployment` (and `recommendedByEngine`) for the deploy-creatio argument bundle.
-3. `find-empty-iis-port` - for a local Creatio deployment, take `firstAvailablePort` as the deploy `sitePort`.
-   `deploy-identity` can call the same IIS port scanner internally when `identitySitePort` is omitted.
+3. `find-empty-iis-port` - for a local IIS deployment, take `firstAvailablePort` as the deploy `sitePort`.
+   Do not use this IIS-only preflight as a requirement for an explicit dotnet deployment. `deploy-identity`
+   can call the same IIS port scanner internally when `identitySitePort` is omitted.
 4. Resolve the build archive - `deploy-creatio` needs an absolute `zipFile` path. `deploy-identity`
    accepts either a standalone `IdentityService.zip` or the same Creatio distribution bundle when it
    contains `IdentityService.zip` at the configured `identityArchivePathInBundle` path. When `zipFile`
@@ -22,10 +23,25 @@ Deploy preflight (run in this order)
 Deploy
 - `deploy-creatio` is the most consequential, hardest-to-reverse tool: it drops and recreates the target
   site. Required args: `siteName`, `zipFile` (absolute build archive path), `sitePort`. Optional:
-  `dbServerName`, `redisServerName` (omit to keep the default Kubernetes deployment path), and
-  `useHttps` (local IIS only). HTTPS is opportunistic: clio uses a pinned or deterministically
-  selected usable LocalMachine/My certificate matching the host, and warns then continues with
-  HTTP when no usable certificate is installed.
+  `dbServerName`, `redisServerName` (omit to keep the default Kubernetes deployment path), `deployment`,
+  `bindAllInterfaces`, and the HTTPS certificate fields.
+- `deployment` accepts `auto`, `iis`, or `dotnet`. `auto` selects IIS on Windows and dotnet on macOS/Linux;
+  use `deployment: "dotnet"` when a Windows caller must avoid IIS. `find-empty-iis-port` is relevant to
+  the IIS path only.
+- For local IIS, `useHttps` is opportunistic: clio uses a pinned or deterministically selected usable
+  LocalMachine/My certificate matching the host, and warns then continues with HTTP when no usable
+  certificate is installed.
+- For dotnet, Kestrel binds to loopback (`localhost`) by default. Set `bindAllInterfaces: true` only when
+  a container, Kubernetes service, or remote reverse proxy must reach Kestrel over the network. This is
+  an explicit network-exposure choice, not a TLS setting; direct network-facing HTTP is plaintext and
+  must be protected by TLS or an appropriate network boundary.
+- For dotnet, `useHttps: true` selects an HTTPS Kestrel endpoint and MUST have either `certificatePath`
+  or an existing Kestrel certificate configuration. It does not fall back to HTTP. A PFX certificate
+  may use `certificatePassword`; a PEM or CRT certificate also requires `certificateKeyPath`. Certificate
+  passwords are sensitive, are written to the deployed Kestrel configuration when supplied, and MUST
+  NOT be echoed in an MCP response, log, or public message.
+- For dotnet, leaving `useHttps` false keeps existing HTTPS endpoint configuration rather than deleting it,
+  while explicit HTTPS removes the plaintext HTTP endpoints selected by the deployment.
 - Prefer the recommended bundle from `show-passing-infrastructure` and the port from `find-empty-iis-port`.
 - Do not proceed if assert-infrastructure left the targeted database/Redis sections failing.
 - Deployments preserve the build database's existing forced-password-change state by default and do
