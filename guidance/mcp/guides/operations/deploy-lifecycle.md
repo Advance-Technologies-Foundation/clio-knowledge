@@ -38,8 +38,8 @@ Deploy
 - For dotnet, `useHttps: true` selects an HTTPS Kestrel endpoint and MUST have either `certificatePath`
   or an existing Kestrel certificate configuration. It does not fall back to HTTP. A PFX certificate
   may use `certificatePassword`; a PEM or CRT certificate also requires `certificateKeyPath`. Certificate
-  passwords are sensitive, are written to the deployed Kestrel configuration when supplied, and MUST
-  NOT be echoed in an MCP response, log, or public message.
+  passwords are sensitive, are passed to the deployed host through Kestrel environment configuration,
+  are not written to `appsettings.json`, and MUST NOT be echoed in an MCP response, log, or public message.
 - For dotnet, leaving `useHttps` false keeps existing HTTPS endpoint configuration rather than deleting it,
   while explicit HTTPS removes the plaintext HTTP endpoints selected by the deployment.
 - Prefer the recommended bundle from `show-passing-infrastructure` and the port from `find-empty-iis-port`.
