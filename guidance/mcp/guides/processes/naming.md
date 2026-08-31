@@ -1,6 +1,6 @@
 clio MCP process-naming guide — name a business process, its elements and its parameters
 
-One of seven process articles. `process-modeling` is the entry point and indexes the other six.
+Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, and parameter codes.
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.
@@ -83,7 +83,7 @@ N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO auton
     content word on the way. Two independent runs of one request wrote the SAME caption "Follow-up task
     created" and produced `EndFollowUpTaskCreated` and `EndFollowUpCreated`
     (ENG-94378, clean-room re-run 2026-08-21) — the drift came from shortening, and it is what makes
-    two generations of the same request undiffable. Every element example in this guide is derivable
+    two generations of the same request undiffable. Every element example across the process guides is derivable
     this way, and `GuideExamples_ShouldDeriveEveryElementCodeFromItsCaption` holds them to it — where a
     caption and a code disagree, the caption is the input and the code is what is wrong.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a

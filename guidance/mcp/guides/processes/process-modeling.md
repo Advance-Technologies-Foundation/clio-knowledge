@@ -117,7 +117,7 @@ article from what this one says; read that article.
   UId GUID; the platform reserves "Id" for the GUID, so the handle is `name`, not `id`. A `userTask`
   element auto-carries the task's parameters; map values into them with `mappings`. For a record trigger
   use `signalStart` (see `process-data-elements`).
-- EVERY code and caption in the examples of this guide is N1-N10 compliant on purpose (see `process-naming`): copy their SHAPE, not just their fields. A generated `Start1` / `task1` / `End1` is the
+- EVERY code and caption in the examples across these process guides is N1-N10 compliant on purpose (see `process-naming`): copy their SHAPE, not just their fields. A generated `Start1` / `task1` / `End1` is the
   failure those rules exist to prevent, and an example is what a model copies first.
 
 == Build recipe (intent -> running process) ==

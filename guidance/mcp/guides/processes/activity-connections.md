@@ -1,6 +1,6 @@
 clio MCP process-activity-connections guide — bind an Activity's "Connected to" links
 
-One of seven process articles. `process-modeling` is the entry point and indexes the other six.
+Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the "Connected to" links of the Activity a task creates, and the R1-R17 connection rules.
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.

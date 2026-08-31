@@ -68,16 +68,13 @@ public sealed class ProcessGuideResponseSizeTests
     /// </summary>
     private const int EnvelopeAllowance = 1_400;
 
-    /// <summary>
-    /// Articles allowed over the budget, each with the ticket that removes the exception. Named so the
-    /// exception is visible and shrinking rather than an implicit consequence of which folder the test
-    /// happens to scan. Removing an entry is the goal; adding one needs a reason.
-    ///
-    /// The two known over-budget articles — page-schema-handlers and mobile-page-modification — are NOT
-    /// in the processes folder, so they are outside this fixture's scope rather than grandfathered by it.
-    /// They carry the same defect and are tracked as a follow-up on PR #110.
-    /// </summary>
-    private static readonly Dictionary<string, string> Grandfathered = [];
+    // No exception list. Every article in scope is inside the budget, so an empty allow-list would be
+    // machinery for a case that does not exist — and an empty one is the easiest place to quietly add a
+    // first entry. The two known over-budget articles, page-schema-handlers and mobile-page-modification,
+    // are not in the processes folder: they are outside this fixture's scope rather than excused by it,
+    // carry the same defect, and are tracked as a follow-up on PR #110. Generalising this fixture to all
+    // guidance is the right end state, and that is when an explicit, ticketed exception list earns its
+    // place.
 
     [Test]
     [Description("Every process article fits in one get-guidance response, so an agent can read it whole.")]
@@ -91,7 +88,6 @@ public sealed class ProcessGuideResponseSizeTests
                 + "report every article as within budget while measuring none of them");
 
         (string ItemId, int Size)[] tooLarge = declared
-            .Where(article => !Grandfathered.ContainsKey(article.ItemId))
             .Select(article => (article.ItemId, Size: ResponseSize(repositoryRoot, article.SourcePath)))
             .Where(measured => measured.Size > MaxResponseCharacters)
             .ToArray();

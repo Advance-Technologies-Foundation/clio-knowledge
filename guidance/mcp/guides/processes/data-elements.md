@@ -1,6 +1,6 @@
 clio MCP process-data-elements guide — record triggers, Read data, Modify data and their filters
 
-One of seven process articles. `process-modeling` is the entry point and indexes the other six.
+Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of starting a process from a record event, the Read data and Modify data elements, and the record filter all three share.
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.
