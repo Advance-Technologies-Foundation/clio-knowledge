@@ -35,13 +35,15 @@ Deploy
   certificate is installed.
 - For dotnet, Kestrel binds to loopback (`localhost`) by default. Set `bindAllInterfaces: true` only when
   a container, Kubernetes service, or remote reverse proxy must reach Kestrel over the network. This is
-  an explicit network-exposure choice, not a TLS setting; direct network-facing HTTP is plaintext and
-  must be protected by TLS or an appropriate network boundary.
+  an explicit HTTPS-only network-exposure choice; clio rejects a dotnet deployment that combines
+  `bindAllInterfaces: true` with plaintext HTTP.
 - For dotnet, `useHttps: true` selects an HTTPS Kestrel endpoint and MUST have either `certificatePath`
   or an existing Kestrel certificate configuration. It does not fall back to HTTP. A PFX certificate
-  may use `certificatePassword`; a PEM or CRT certificate also requires `certificateKeyPath`. Certificate
-  passwords are sensitive, are passed to the deployed host through Kestrel environment configuration,
-  are not written to `appsettings.json`, and MUST NOT be echoed in an MCP response, log, or public message.
+  may use `certificatePassword` as the name of an environment variable containing the password, or
+  `certificatePasswordFile` as a path to a password file; a PEM or CRT certificate also requires
+  `certificateKeyPath`. Never send the raw password as an MCP argument. Certificate passwords are
+  sensitive, are passed to the deployed host through Kestrel environment configuration, are not written
+  to `appsettings.json`, and MUST NOT be echoed in an MCP response, log, or public message.
 - For dotnet, leaving `useHttps` false keeps existing HTTPS endpoint configuration rather than deleting it,
   while explicit HTTPS removes the plaintext HTTP endpoints selected by the deployment.
 - Prefer the recommended bundle from `show-passing-infrastructure` and the port from `find-empty-iis-port`.
