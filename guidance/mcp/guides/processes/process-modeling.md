@@ -175,7 +175,7 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
        "role"?: "<role name or id>" },                                  // role only
      "allowDelegation"?: true|false,
      "notifyApprover"?: { "emailTemplate": "<template name or id>" },
-     "notifyAuthor"?: { "emailTemplate"?: "<template name or id>",
+     "notifyAuthor"?: { "emailTemplate": "<template name or id>",
        "recipient"?: { one of {"value": "a@b.com"} | {"processParameter": "<Name>"} } },
      "ignoreEmailErrors"?: true|false } }`.
   Rules, and the two that will bite you are the last two:
@@ -184,9 +184,13 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
     record OF `object` — a foreign id is REFUSED, because the designer renders that field blank and the next
     human save wipes the element.
   * Supplying `notifyApprover` / `notifyAuthor` switches that notification ON; the flag and its template are
-    written together because the runtime gates the send on the flag. There is NO way to switch one off
-    through the block — a cleared template is indistinguishable from one never set; use `addMapping` against
-    the flag parameter instead.
+    written together because the runtime gates the send on the flag. EITHER is REFUSED without an
+    `emailTemplate` unless the element already carries one — so `{}` is how you switch a notification back on
+    using the template it already has. The reason: the runtime does NOT check for a template before sending,
+    and it ignores email errors by default, so a flag with no template gives you an element that reports the
+    notification as configured, saves, compiles, runs green and silently never sends. There is NO way to
+    switch one off through the block — a cleared template is indistinguishable from one never set; use
+    `addMapping` against the flag parameter instead.
   * `purpose` omitted writes the platform default "Approval required" — that is what the designer persists
     too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
   * The visa schema, its master column and the section are DERIVED from `object` server-side (with the
