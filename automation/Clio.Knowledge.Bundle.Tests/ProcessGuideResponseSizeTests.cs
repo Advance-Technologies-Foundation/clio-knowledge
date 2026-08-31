@@ -87,9 +87,23 @@ public sealed class ProcessGuideResponseSizeTests
             because: "the set is derived from the manifest, and a derivation that selected nothing would "
                 + "report every article as within budget while measuring none of them");
 
-        (string ItemId, int Size)[] tooLarge = declared
+        (string ItemId, int Size)[] measured = declared
             .Select(article => (article.ItemId, Size: ResponseSize(repositoryRoot, article.SourcePath)))
-            .Where(measured => measured.Size > MaxResponseCharacters)
+            .OrderByDescending(article => article.Size)
+            .ToArray();
+
+        // Headroom is reported on a GREEN run, not only when it is gone. Without this the slide from 87%
+        // to 97% to red is invisible, and the first person to see the number is whoever hits the failure —
+        // at the moment when raising the budget looks cheapest.
+        foreach ((string itemId, int size) in measured)
+        {
+            TestContext.WriteLine(
+                $"{itemId,-32} {size,7:N0}  {(double)size / MaxResponseCharacters,6:P1} of budget"
+                + (size > MaxResponseCharacters * 0.9 ? "   <-- approaching the limit; split it" : string.Empty));
+        }
+
+        (string ItemId, int Size)[] tooLarge = measured
+            .Where(article => article.Size > MaxResponseCharacters)
             .ToArray();
 
         tooLarge.Should().BeEmpty(

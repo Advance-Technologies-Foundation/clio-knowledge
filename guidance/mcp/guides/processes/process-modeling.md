@@ -61,10 +61,9 @@ article from what this one says; read that article.
   element — their target object and values cannot be set yet, so those steps do nothing useful until a
   human configures them in the designer. Say so when you use one; do not present such a result as a working
   data operation.
-- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only — email
-  TEMPLATES are not supported, so say so if the user asks for one. It is fully configurable through its
-  `email` block: mode, sender, recipients, subject, HTML body, options and the manual-mode performer.
-  The whole contract, including the body macros and the recipient rules, is in `process-send-email`.
+- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
+  configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
+  manual-mode performer. `process-send-email` owns the contract and its limits.
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an

@@ -66,6 +66,17 @@ internal static class ProcessGuideSet
                     + "articles must each stay a declared get-guidance topic."))];
     }
 
+    /// <summary>Every itemId the manifest declares, for resolving a pointer to a servable topic.</summary>
+    internal static HashSet<string> DeclaredItemIds(string repositoryRoot)
+    {
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        return manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Select(resource => resource.GetProperty("itemId").GetString()!)
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
     internal static string Read(string repositoryRoot, string sourcePath) =>
         File.ReadAllText(Path.Combine(repositoryRoot, sourcePath.Replace('/', Path.DirectorySeparatorChar)));
 

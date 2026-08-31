@@ -139,6 +139,11 @@ So size is a delivery contract, not a matter of taste:
 - Rewrite every "see the section below" that now crosses an article boundary. A citation that names
   no article still reads as a complete instruction while withholding the rule it points at, which is
   invisible at review time; `ProcessGuideCrossReferenceTests` scans for it.
+- Never let a split separate a destructive or irreversible operation from its preconditions. Routing
+  sends an agent to ONE article and the premise is that it reads that article whole, so an instruction
+  to remove, clear or overwrite something in a live customer environment must carry its preconditions
+  where the instruction is — restate them inline as a MUST and cite the owning article for the detail.
+  Keeping the rule in one place is right; leaving the reader to discover that it exists is not.
 
 ## Advisory changes
 

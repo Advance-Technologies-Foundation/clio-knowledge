@@ -220,9 +220,13 @@ public sealed class GuidanceMigrationTests
             .EnumerateArray()
             .Where(resource => ProcessGuideSet.SplitItemIds.Contains(resource.GetProperty("itemId").GetString()))
             .ToArray();
+        // Absence of the PROPERTY, not absence of one flag name. Matching only "process-designer" would
+        // leave every other flag value free to hide one of the six while this stayed green — a
+        // name-specific hole in the only per-resource disclosure control the repository has. The scoping
+        // that keeps a future restricted-capability guide out of a red build is the SplitItemIds filter
+        // above; it does not need the predicate narrowed as well.
         string[] regatedArticles = splitResources
-            .Where(resource => resource.TryGetProperty("requiredFeatures", out JsonElement features)
-                && features.EnumerateArray().Any(feature => feature.GetString() == "process-designer"))
+            .Where(resource => resource.TryGetProperty("requiredFeatures", out _))
             .Select(resource => resource.GetProperty("itemId").GetString()!)
             .ToArray();
         JsonElement repositoryResource = repositorySchema.RootElement.GetProperty("$defs")

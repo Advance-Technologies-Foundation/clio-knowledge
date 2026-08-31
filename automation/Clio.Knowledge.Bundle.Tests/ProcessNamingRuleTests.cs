@@ -75,7 +75,13 @@ public sealed class ProcessNamingRuleTests
     /// every example scan below reads the SET rather than one file; scanning only the entry article would
     /// still pass while silently guarding nothing but the descriptor.
     /// </summary>
-    private static string[] ProcessGuides => ProcessGuideSet.SplitPaths(FindRepositoryRoot());
+    /// <summary>
+    /// Every DECLARED process article, not the seven the split produced. The example scans below are
+    /// about what a generating model copies, and it copies from whatever is published — so an eighth
+    /// article would otherwise ship with its JSON examples unscanned while every test stayed green.
+    /// </summary>
+    private static string[] ProcessGuides =>
+        [.. ProcessGuideSet.Declared(FindRepositoryRoot()).Select(article => article.SourcePath)];
 
     /// <summary>
     /// Every rule the section ships. A dropped or renumbered rule fails here rather than silently
