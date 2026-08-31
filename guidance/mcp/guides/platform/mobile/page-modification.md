@@ -144,8 +144,9 @@ record binding is REQUIRED (ENG-95822) — `ProcessSchemaParameter1` is a stand-
 get-process-signature echoes; resolve the real one (see the run-process-button guide). Use
 `RegardlessOfThePage` instead when no record is passed. These three are STRUCTURAL and offline, so
 both validate-page and update-page reject a button that omits them. One thing still needs the
-environment: parameter-CODE correctness is validated only by update-page against the live signature,
-so a green validate-page is not a full guarantee — do not treat it as one.
+environment: parameter-CODE correctness is validated only against the live signature, so a body can
+pass validate-page and still be refused by update-page on that check — do not treat a green
+validate-page as a full guarantee.
 
 The same defect applies to "set": "set" is a remove followed by an insert on the same payload, so
 it drops the type identically AND destroys the element that did carry a valid one. An "insert"
