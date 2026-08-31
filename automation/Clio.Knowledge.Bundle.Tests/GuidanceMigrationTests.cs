@@ -177,7 +177,7 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Declares process-modeling as feature-gated and keeps requiredFeatures optional in both v1 contracts.")]
+    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins process-modeling as un-gated at go-live (ENG-96132), and keeps requiredFeatures optional in both v1 contracts.")]
     public void FeatureGating_ShouldBeDeclaredByTheResourceAndBothSchemas()
     {
         // Arrange
@@ -193,21 +193,27 @@ public sealed class GuidanceMigrationTests
             "schemas/v1/knowledge-bundle.schema.json")));
 
         // Act
-        JsonElement processModeling = source.RootElement.GetProperty("resources")
+        JsonElement webToMobileConversion = source.RootElement.GetProperty("resources")
             .EnumerateArray()
-            .Single(resource => resource.GetProperty("itemId").GetString() == "process-modeling");
-        string[] requiredFeatures = processModeling.GetProperty("requiredFeatures")
+            .Single(resource => resource.GetProperty("itemId").GetString() == "freedom-page-web-to-mobile-conversion");
+        string[] requiredFeatures = webToMobileConversion.GetProperty("requiredFeatures")
             .EnumerateArray()
             .Select(feature => feature.GetString()!)
             .ToArray();
+        JsonElement processModeling = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(resource => resource.GetProperty("itemId").GetString() == "process-modeling");
         JsonElement repositoryResource = repositorySchema.RootElement.GetProperty("$defs")
             .GetProperty("resource");
         JsonElement bundleResource = bundleSchema.RootElement.GetProperty("$defs")
             .GetProperty("resource");
 
         // Assert
-        requiredFeatures.Should().Equal(["process-designer"],
-            because: "process-modeling must not be advertised while its experimental Clio feature is disabled");
+        requiredFeatures.Should().Equal(["mobile-page-converter"],
+            because: "freedom-page-web-to-mobile-conversion must not be advertised while its experimental Clio feature is disabled");
+        processModeling.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
+            because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
+                + "the guide the GA business-process tools name as mandatory reading");
         repositoryResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(
             because: "Git repositories must be able to declare per-resource feature requirements");
         bundleResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.46",
+  "libraryVersion": "1.13.54",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -45,6 +45,7 @@
       "configuration-webservice",
       "configuration-webservice-tests",
       "core-rules",
+      "creatio-three-way-merge",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
       "custom-mcp-tools",
@@ -88,6 +89,7 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-script-task",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
@@ -171,6 +173,7 @@
       "docs://knowledge/com.creatio.clio/configuration-webservice",
       "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
       "docs://knowledge/com.creatio.clio/core-rules",
+      "docs://knowledge/com.creatio.clio/creatio-three-way-merge",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
       "docs://knowledge/com.creatio.clio/custom-mcp-tools",
@@ -214,6 +217,7 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
@@ -1179,15 +1183,26 @@
       "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks, the fully configurable Send email element (custom message: mode, sender, recipients, subject, HTML body, options, manual-mode performer; no email templates), and sequence flows; gateways, conditional/default flows and timers are not buildable yet. Also owns the N1-N10 naming rules for the process caption and code, element captions and codes, and process parameter codes.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
-      "requiredFeatures": [
-        "process-designer"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
       "legacyUris": [
         "docs://mcp/guides/process-modeling"
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-script-task",
+      "title": "Process ScriptTask C#",
+      "description": "Guides C# inside an existing Creatio process ScriptTask: exact process parameter codes, Get/Set access, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and target-environment verification.",
+      "topicId": "creatio.process-script-task",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-script-task",
+      "legacyUris": [
+        "docs://mcp/guides/process-script-task"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
+      "bundlePath": "resources/process-script-task.md",
       "mediaType": "text/plain"
     },
     {
@@ -1818,6 +1833,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/related-data/list.md",
       "bundlePath": "resources/related-list.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "creatio-three-way-merge",
+      "title": "Creatio package three-way merge",
+      "description": "Guides agents through a preview-only semantic merge of Git stage 1/2/3 Creatio package artifacts, explicit status handling, user-directed conflict resolution, no-write proof, and live package verification.",
+      "topicId": "creatio.git-three-way-merge",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/creatio-three-way-merge",
+      "legacyUris": [
+        "docs://mcp/guides/creatio-three-way-merge"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/creatio-three-way-merge.md",
+      "bundlePath": "resources/creatio-three-way-merge.md",
       "mediaType": "text/plain"
     },
     {
