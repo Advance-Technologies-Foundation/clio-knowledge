@@ -512,7 +512,8 @@ VERIFY IN THE APP — a mobile widget cannot be verified in a browser. Check the
   `get-page`, the layout on the Mobile Designer canvas, and the rendered result in the mobile
   application (device or emulator). The app is offline-first: it serves the local cache first, so
   synchronize after a schema change and re-login before checking workplace or section lists. An emulator
-  also exposes the page metadata, business-rule metadata and merged manifest the client actually received. `/0/ClientApp/` is the designer app and `/0/Shell/` the runtime shell; the mobile client
+  also exposes the page metadata, business-rule metadata and merged manifest the client actually
+  received. `/0/ClientApp/` is the designer app and `/0/Shell/` the runtime shell; the mobile client
   may be Flutter-first (`UseMobileFlutterFirst`) and `/0/Nui/mobile.aspx` may be absent — that says
   nothing about the widget. A `success: true` save proves persistence only: re-read with `get-page` and
   check `willCreateReplacingInDesignPackage`.
