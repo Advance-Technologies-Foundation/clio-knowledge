@@ -10,6 +10,26 @@ The examples below are intentionally limited to behavior verified in the clio Vi
 Entity guidance lab by comparing the complete runtime filter tree produced by native C#
 with the tree produced by an ATF.Repository/DataService query.
 
+## Required namespaces
+The Creatio types used in these ESQ recipes come from two namespace and assembly pairs:
+- `Terrasoft.Common` from `Terrasoft.Common.dll`;
+- `Terrasoft.Core.Entities` from `Terrasoft.Core.dll`.
+
+```csharp
+using Terrasoft.Common;       // AggregationTypeStrict, LogicalOperationStrict
+using Terrasoft.Core.Entities; // EntitySchemaQuery and the remaining ESQ types
+```
+
+This split was verified from Creatio 10.0.0.858 assemblies and rechecked in 10.1.480 and
+10.1.585. `AggregationTypeStrict` is `Terrasoft.Common.AggregationTypeStrict`; it is not in
+`Terrasoft.Core.DB`.
+
+Add both `using` directives in a source-code schema. A process ScriptTask has a generated
+ambient `using` set that can differ, so the recipes below fully qualify the two
+`Terrasoft.Common` enums instead of assuming that namespace is imported. The remaining ESQ
+types are in `Terrasoft.Core.Entities`; fully qualify them too if the target host does not
+already import that namespace.
+
 ## Create the query and select columns
 ```csharp
 EntitySchemaQuery esq = new(userConnection.EntitySchemaManager, "UsrCodexVirtualRecord");
@@ -131,7 +151,9 @@ shape against the database and never omit it in a way that broadens the query.
 Always pass an `object[]`. A value-type array such as `Guid[]` can bind as one array-valued
 `params object[]` argument instead of several parameters. Convert it explicitly when needed:
 ```csharp
-object[] ownerIdsAsParameters = ownerIds.Cast<object>().ToArray();
+object[] ownerIdsAsParameters = System.Array.ConvertAll(
+    ownerIds,
+    ownerId => (object)ownerId);
 ```
 
 DataService uses serialized `filterType: 4` to distinguish In from Compare while building ESQ.
@@ -193,9 +215,12 @@ Native ESQ resolves that logical path to runtime `UsrOwnerId`. The parameter CLR
 `System.Guid`, but its forced type is `LookupDataValueType`, not `GuidDataValueType`. This distinction
 is why lookup Ids must not be parsed as ordinary Guid columns.
 
-Multi-value lookup membership uses the same Equal-plus-collection runtime representation as In:
+Multi-value lookup membership uses the same Equal-plus-collection runtime representation as In.
+Given a `Guid[] ownerIds`, box each value without relying on LINQ imports:
 ```csharp
-object[] ownerIdsAsParameters = ownerIds.Cast<object>().ToArray();
+object[] ownerIdsAsParameters = System.Array.ConvertAll(
+    ownerIds,
+    ownerId => (object)ownerId);
 esq.Filters.Add(esq.CreateFilterWithParameters(
     FilterComparisonType.Equal, "UsrOwner", ownerIdsAsParameters));
 ```
@@ -286,7 +311,7 @@ related records:
 EntitySchemaQueryFilter activityCount = esq.CreateFilter(
     FilterComparisonType.Greater,
     ownerActivities,
-    AggregationTypeStrict.Count,
+    Terrasoft.Common.AggregationTypeStrict.Count,
     1,
     out EntitySchemaQuery activitySubQuery);
 
@@ -355,7 +380,7 @@ Do not change the root collection to OR when the desired runtime shape is the no
 AND containing one nested OR group. Create the OR collection explicitly:
 ```csharp
 EntitySchemaQueryFilterCollection orGroup =
-    new(esq, LogicalOperationStrict.Or);
+    new(esq, Terrasoft.Common.LogicalOperationStrict.Or);
 orGroup.Add(nameEquals);
 orGroup.Add(sequenceGreater);
 esq.Filters.Add(orGroup);
@@ -368,7 +393,7 @@ root AND -> nested OR -> A, B.
 `A AND (B OR C)`:
 ```csharp
 EntitySchemaQueryFilterCollection nestedOr =
-    new(esq, LogicalOperationStrict.Or);
+    new(esq, Terrasoft.Common.LogicalOperationStrict.Or);
 nestedOr.Add(sequenceGreater);
 nestedOr.Add(sequenceLess);
 
@@ -379,12 +404,12 @@ esq.Filters.Add(nestedOr);
 `(A AND B) OR C`:
 ```csharp
 EntitySchemaQueryFilterCollection nestedAnd =
-    new(esq, LogicalOperationStrict.And);
+    new(esq, Terrasoft.Common.LogicalOperationStrict.And);
 nestedAnd.Add(nameEquals);
 nestedAnd.Add(sequenceGreater);
 
 EntitySchemaQueryFilterCollection nestedOr =
-    new(esq, LogicalOperationStrict.Or);
+    new(esq, Terrasoft.Common.LogicalOperationStrict.Or);
 nestedOr.Add(nestedAnd);
 nestedOr.Add(sequenceLess);
 
@@ -406,7 +431,7 @@ disabledLeaf.IsEnabled = false;
 esq.Filters.Add(disabledLeaf);
 
 EntitySchemaQueryFilterCollection disabledGroup =
-    new(esq, LogicalOperationStrict.Or);
+    new(esq, Terrasoft.Common.LogicalOperationStrict.Or);
 disabledGroup.Add(nameEquals);
 disabledGroup.Add(sequenceLess);
 disabledGroup.IsEnabled = false;
@@ -428,7 +453,7 @@ available to backend parsing code.
 Set `IsNot` on the collection after adding the predicates that form the group:
 ```csharp
 EntitySchemaQueryFilterCollection negatedOr =
-    new(esq, LogicalOperationStrict.Or);
+    new(esq, Terrasoft.Common.LogicalOperationStrict.Or);
 negatedOr.Add(nameEquals);
 negatedOr.Add(sequenceLess);
 negatedOr.IsNot = true;

@@ -43,10 +43,12 @@ A Creatio analytics surface lays widgets on a responsive 12-column grid. Every w
 whole number of columns wide and a whole number of rows tall.
 
 - WIDTH is what you tune most — a widget's width is a slice of 12.
-- HEIGHT is `layoutConfig.rowSpan` (grid rows). Platform defaults: metric tile 3, chart 9, funnel 15,
-  list/pivot 9. HARD FLOOR: a chart, list, or pivot must have `rowSpan` >= 6 — below that it renders
-  unreadably short. Metric/gauge tiles are exempt (they stay ~3). The "rows" elsewhere in this guide
-  are these `rowSpan` values, so "a chart ~3 rows" means the ~9-`rowSpan` default, not literally 3.
+- HEIGHT is `layoutConfig.rowSpan` (grid rows). Platform defaults: metric tile 3, gauge 3, chart 9,
+  funnel 15, list/pivot 9. HARD FLOOR: a chart, list, or pivot must have `rowSpan` >= 6 — below that
+  it renders unreadably short. A METRIC TILE is exempt: it holds a number and stays ~3. A GAUGE is NOT —
+  it ships the tile's default of 3 but has a semicircular arc to draw, and at 3 rows the dial renders
+  too small to read. Give a gauge `rowSpan` 6, floor 5. The "rows" elsewhere in this guide are these
+  `rowSpan` values, so "a chart ~3 rows" means the ~9-`rowSpan` default, not literally 3.
 - Each row of widgets must sum to EXACTLY 12 columns.
 
 The only widths you normally need:
@@ -214,6 +216,7 @@ used, verify text/contrast against the accessibility/contrast guidance.
 - No chart sits in the metric band, and no metric tile is dropped among the charts.
 - Every widget uses the plain-white (`without-fill`) card (no stray colored cards for variety or
   branding).
-- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); metric/gauge tiles stay short (~3).
+- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); metric tiles stay short
+  (~3); each gauge is 6 (floor 5) so its arc is not squashed.
 - Multi-topic surfaces are split into labeled sections, each = metric band + chart row.
 - Titles and value colors use theme defaults (red only for overdue/negative).
