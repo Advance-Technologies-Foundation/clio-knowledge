@@ -94,8 +94,8 @@ case — date, date-time and time are the types where the mapping route is MANDA
 no literal form). A LOOKUP is NOT one of them: its default is a bare record Guid in `value`, which is the
 preferred route and the only one an ActivityUserTask category accepts — see `process-parameters`.
 On an ActivityUserTask's `ActivityCategory` specifically, reaching for `expression` with `[#Lookup…#]`
-instead saves and compiles and then silently degrades the element's allowed-results list — see NOTE-2 in
-the Perform task section. Elsewhere the macro form is legitimate; on a lookup DEFAULT the bare Guid is
+instead saves and compiles and then silently degrades the element's allowed-results list — see
+`process-perform-task`. Elsewhere the macro form is legitimate; on a lookup DEFAULT the bare Guid is
 simply the better route. For an Integer or Float parameter it is equally the route whenever the
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
@@ -126,9 +126,9 @@ still runs at save time and still refuses what it refuses; what you lose is the 
 and anything that gate does not cover then fails at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
 
-THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE UNREACHABLE. Elsewhere this article
+THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE SET UNREACHABLE. Where an article
 explains what an older `CrtProcessBuilder` does differently — the `[#Lookup…#]` macro on a pre-1.3.1.1
-package, an unchecked expression, an unvalidated user-task name. Those paragraphs are history, not a
+package in `process-parameters` is the surviving example — those paragraphs are history, not a
 branch to take: on a refusal from a CURRENT clio, run `install-process-builder`. Do not re-send a call in
 an older dialect "because the package may be old" — this clio refused before the call left, so no dialect
 reaches the server. Under an OLDER clio the call does go through and the old package rejects it itself;

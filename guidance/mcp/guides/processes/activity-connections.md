@@ -20,7 +20,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   whatever the source resolves to.
 - `recordId` NEEDS NO SCHEMA UId. The server composes `[#Lookup.{schemaUId}.{recordId}#]` from the target
   column's own reference entity, so send the bare record id. This is the one place the "you cannot guess
-  these ids" warning ABOVE does not apply — for a connection, do NOT hand-write the Lookup token.
+  these ids" warning in `process-parameters` does not apply — for a connection, do NOT hand-write the
+  Lookup token.
 - CURRENT USER — "link it to me / to my contact / to my account". This is the ONE macro you may author on a
   connection, because the set is CLOSED and named here. Send it as `expression`, chosen by the target
   column's own entity: a Contact column -> `[#SysVariable.CurrentUserContact#]`; an Account column ->

@@ -80,7 +80,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   `elementParameter` — the element runs inside a live process instance.
 - LIMITATION — the read record's individual COLUMN values are not referenceable from a MAPPING, a
   `changeData` value or a filter condition. (An email BODY macro is the exception and does reach them:
-  `[[element:Read.ResultEntity.Column]]` — see the Send email section.) The
+  `[[element:Read.ResultEntity.Column]]` — see `process-send-email`.) The
   element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
   the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
   that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
