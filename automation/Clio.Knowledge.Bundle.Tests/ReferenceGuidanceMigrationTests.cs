@@ -154,6 +154,48 @@ public sealed class ReferenceGuidanceMigrationTests
             because: "every migrated supporting article must be reachable from its primary guide and every link must resolve");
     }
 
+    [Test]
+    [Description("Keeps EntityValidationMessage examples compilable against the verified Creatio Core property spelling.")]
+    public void EntityEventListenerValidationGuidance_ShouldUseVerifiedMassageTypeProperty()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string validationReference = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "references",
+            "configuration-entity-event-listener",
+            "validation-patterns.md"));
+        string primaryGuidance = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "guidance",
+            "mcp",
+            "guides",
+            "composable-app",
+            "configuration-entity-event-listener.md"));
+
+        // Act
+        string validationExample = Regex.Matches(
+                validationReference,
+                "```csharp\\s*(?<code>[\\s\\S]*?)```",
+                RegexOptions.CultureInvariant)
+            .Select(match => match.Groups["code"].Value)
+            .Single(code => code.Contains("new EntityValidationMessage", StringComparison.Ordinal));
+        bool usesVerifiedProperty = validationExample.Contains(
+            "MassageType = MessageType.Error",
+            StringComparison.Ordinal);
+        bool usesUnsupportedCorrectedProperty = validationExample.Contains(
+            "MessageType = MessageType.Error",
+            StringComparison.Ordinal);
+
+        // Assert
+        usesVerifiedProperty.Should().BeTrue(
+            because: "the supported Creatio 10.0 contract exposes the legacy MassageType property name");
+        usesUnsupportedCorrectedProperty.Should().BeFalse(
+            because: "EntityValidationMessage.MessageType does not compile against the verified target references");
+        primaryGuidance.Should().Contain("reference.configuration-entity-event-listener.validation-patterns",
+            because: "agents need to reach the version-scoped property rule before writing validation code");
+    }
+
     private static IEnumerable<JsonElement> ReferenceResources(JsonDocument source) =>
         source.RootElement.GetProperty("resources")
             .EnumerateArray()

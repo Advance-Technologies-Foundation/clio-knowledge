@@ -15,6 +15,16 @@ the `get-component-info` documentation and its references first.
 
 ----
 
+## Mobile pages
+
+On a mobile page (`schemaType = 10`) this is the same `crt.ChartWidget` with the same `config`
+contract, but the type must be resolved from the MOBILE registry
+(`get-component-info schema-type: "mobile"`), and placement, sizing, theming and record scoping all
+differ. Read `mobile-page-modification` → ANALYTICS WIDGETS ON MOBILE first; the Placement,
+Style, Display-settings size floors and "Filter by page data" sections below are web/desktop only.
+Mobile has no dashboard or home-page template — a chart goes onto an existing mobile record or
+section page.
+
 ## Routing — is a chart the right widget?
 
 - A single aggregated value (one number) -> Metric tile (`crt.IndicatorWidget`); see `indicator-widget`.
@@ -25,9 +35,8 @@ the `get-component-info` documentation and its references first.
 ## Chart type selection (alias to the supported wire values)
 
 Supported `series[*].type` wire values: bar, horizontal-bar, line, spline, area, scatter,
-doughnut, tsfunnel. Apply these aliases when the user names a different type:
+doughnut, pie, tsfunnel. Apply these aliases when the user names a different type:
 - column            -> bar        (vertical bars)
-- pie               -> doughnut
 - funnel / pipeline -> tsfunnel   (note the non-obvious wire value)
 Do NOT emit `waterfall` — it has no chart-widget series model and is not generatable here.
 
@@ -37,7 +46,7 @@ Do NOT emit `waterfall` — it has no chart-widget series model and is not gener
   filter — so multiple series with DIFFERENT aggregation functions are supported.
 - `series[*].color` colors only the DATA MARKS (bars/lines/slices). It is INDEPENDENT of `config.color`
   (the title/header accent — see Title and header). REQUIRED for cartesian series
-  (bar/horizontal-bar/line/spline/area/scatter) — omit it and the series renders BLACK; doughnut/tsfunnel
+  (bar/horizontal-bar/line/spline/area/scatter) — omit it and the series renders BLACK; doughnut/pie/tsfunnel
   ignore it and auto-color slices from the palette.
 - Aggregation: COUNT aggregates `Id`; SUM/AVG/MIN/MAX use the explicit numeric column (date is
   also valid for MIN/MAX), never `Id`. MIN/MAX on a DATE column are valid but render as near-equal
@@ -126,7 +135,8 @@ the user gives none.
 - SIZE FLOOR — never ship a tiny chart. In a `crt.GridContainer` set `layoutConfig.rowSpan` >= 6
   (platform default 9; funnels 15). In a `crt.FlexContainer` the parent uses `FlexLayoutConfig` —
   set `layoutConfig.height` >= 350 (px) so the flex child doesn't collapse. The same floor applies
-  to list/pivot widgets; metric/gauge TILES are exempt (they stay ~3 rows).
+  to list/pivot widgets. Metric TILES are exempt (they stay ~3 rows). A GAUGE is NOT exempt: it draws
+  an arc, not a number, and needs its own height — see `dashboard-and-home-page-layout`.
   EXCEPTION — on a DESKTOP page (`CentralAreaDesktopTemplate`) the desktop sizing rule replaces
   this floor: every widget (charts included) may be as short as 3 rows, targeting <= 10 rows total.
   See `desktop-page`.

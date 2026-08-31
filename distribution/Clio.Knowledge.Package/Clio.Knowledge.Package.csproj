@@ -2,7 +2,13 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <PackageId>ATF.Clio.Knowledge</PackageId>
-    <Version>1.13.9</Version>
+    <!-- Read out of bundle-source.json rather than restated here. The packed transport version must
+         equal the signed libraryVersion, so a second declaration of the same number is only an
+         opportunity to publish a package whose version disagrees with the library inside it.
+         Evaluation-time property functions, so no target ordering can leave Version unresolved. -->
+    <KnowledgeSourceManifest>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\..\bundle-source.json'))</KnowledgeSourceManifest>
+    <KnowledgeLibraryVersionDeclaration>$([System.Text.RegularExpressions.Regex]::Match($(KnowledgeSourceManifest), '"libraryVersion"\s*:\s*"[0-9.]+"'))</KnowledgeLibraryVersionDeclaration>
+    <Version>$([System.Text.RegularExpressions.Regex]::Match($(KnowledgeLibraryVersionDeclaration), '[0-9]+(?:\.[0-9]+)*'))</Version>
     <Authors>Advance Technologies Foundation</Authors>
     <Description>Signed com.creatio.clio knowledge library for the Clio MCP server.</Description>
     <PackageTags>clio;knowledge;com.creatio.clio</PackageTags>
@@ -18,6 +24,14 @@
     <KnowledgeRepositoryId>Advance-Technologies-Foundation/clio-knowledge</KnowledgeRepositoryId>
     <GenerateNuspecDependsOn>RejectAccidentalTestSignedPackage;BuildKnowledgeBundle;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
   </PropertyGroup>
+  <!-- Regex::Match yields an EMPTY STRING on no match rather than failing, so a missing libraryVersion,
+       a renamed key or a mis-edited pattern would silently leave Version blank and surface far away as
+       "Package version '' is invalid" from the SDK. Fail at the extraction site instead, naming the
+       source file the number is supposed to come from. -->
+  <Target Name="RequireDerivedPackageVersion" BeforeTargets="Build;Pack;GenerateNuspec">
+    <Error Condition="'$(Version)' == ''"
+           Text="Could not extract libraryVersion from bundle-source.json; verify the key exists and matches the expected pattern." />
+  </Target>
   <ItemGroup>
     <None Include="$(GeneratedBundlePath)"
           Pack="true"

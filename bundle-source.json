@@ -3,8 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.9",
-  "sequence": 24,
+  "libraryVersion": "1.13.65",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -17,18 +16,24 @@
   },
   "requirements": {
     "tools": [
+      "configure-knowledge-feedback-policy",
       "get-guidance",
-      "list-knowledge-examples"
+      "get-knowledge-feedback-policy",
+	  "list-knowledge-examples"
     ],
     "itemIds": [
       "agent-execution",
+      "application-listener",
       "app-modeling",
       "workplaces",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
+      "atf.creatio.custom-mcp-tool-reference",
       "atf.creatio.google-pubsub-reference",
       "atf.creatio.kafka-reference",
+      "atf.creatio.localization-reference",
+      "atf.creatio.websocket-reference",
       "branding",
       "business-rule-filters",
       "business-rules",
@@ -40,8 +45,10 @@
       "configuration-webservice",
       "configuration-webservice-tests",
       "core-rules",
+      "creatio-three-way-merge",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
+      "custom-mcp-tools",
       "dashboard-and-home-page-layout",
       "dashboard-creation",
       "dashboard-design",
@@ -66,6 +73,8 @@
       "identity-assertion",
       "indicator-widget",
       "integration-testing",
+      "localizable-values",
+      "knowledge-feedback",
       "mobile-page-modification",
       "package-dependencies",
       "page-creation",
@@ -80,6 +89,13 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-naming",
+      "process-data-elements",
+      "process-parameters",
+      "process-perform-task",
+      "process-send-email",
+      "process-activity-connections",
+      "process-script-task",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
@@ -136,17 +152,22 @@
       "theming",
       "ui-project",
       "virtual-entities",
+      "websocket-messaging",
       "when-to-use-requests"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/agent-execution",
+      "docs://knowledge/com.creatio.clio/application-listener",
       "docs://knowledge/com.creatio.clio/app-modeling",
       "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
+      "docs://knowledge/com.creatio.clio/atf.creatio.custom-mcp-tool-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.google-pubsub-reference",
       "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
+      "docs://knowledge/com.creatio.clio/atf.creatio.localization-reference",
+      "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
       "docs://knowledge/com.creatio.clio/branding",
       "docs://knowledge/com.creatio.clio/business-rule-filters",
       "docs://knowledge/com.creatio.clio/business-rules",
@@ -158,8 +179,10 @@
       "docs://knowledge/com.creatio.clio/configuration-webservice",
       "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
       "docs://knowledge/com.creatio.clio/core-rules",
+      "docs://knowledge/com.creatio.clio/creatio-three-way-merge",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
+      "docs://knowledge/com.creatio.clio/custom-mcp-tools",
       "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
       "docs://knowledge/com.creatio.clio/dashboard-creation",
       "docs://knowledge/com.creatio.clio/dashboard-design",
@@ -184,6 +207,8 @@
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
       "docs://knowledge/com.creatio.clio/integration-testing",
+      "docs://knowledge/com.creatio.clio/localizable-values",
+      "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
       "docs://knowledge/com.creatio.clio/page-creation",
@@ -198,6 +223,13 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-naming",
+      "docs://knowledge/com.creatio.clio/process-data-elements",
+      "docs://knowledge/com.creatio.clio/process-parameters",
+      "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-send-email",
+      "docs://knowledge/com.creatio.clio/process-activity-connections",
+      "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
@@ -254,6 +286,7 @@
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
+      "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/when-to-use-requests"
     ]
   },
@@ -285,6 +318,20 @@
       "sourcePath": "guidance/mcp/guides/applications/app-modeling.md",
       "bundlePath": "resources/app-modeling.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "application-listener",
+      "title": "Creatio application and session lifecycle listeners",
+      "description": "Canonical guidance for all four IAppEventListener and AppEventListenerBase hooks: reflection activation, stateless delegation to package singletons, application start/end, session start/end, cross-runtime limits, failure handling, and tests.",
+      "topicId": "creatio.application-listener",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/application-listener",
+      "legacyUris": [
+        "docs://mcp/guides/application-listener"
+      ],
+      "sourcePath": "guidance/mcp/guides/composable-app/application-listener.md",
+      "bundlePath": "resources/application-listener.md",
+      "mediaType": "text/markdown"
     },
     {
       "itemId": "workplaces",
@@ -343,6 +390,17 @@
       "mediaType": "text/markdown"
     },
     {
+      "itemId": "atf.creatio.custom-mcp-tool-reference",
+      "title": "Creatio custom MCP tool reference",
+      "description": "Educational reference workspace for implementing, publishing, discovering, authenticating to, and invoking a custom C# MCP tool directly in Creatio.",
+      "topicId": "atf.creatio.custom-mcp-tool-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.custom-mcp-tool-reference",
+      "sourcePath": "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
+      "bundlePath": "resources/atf.creatio.custom-mcp-tool-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
       "itemId": "atf.creatio.google-pubsub-reference",
       "title": "Creatio Google Pub/Sub reference",
       "description": "Vetted reference workspace for Google Pub/Sub request/reply, publishing, streaming subscriptions, native-library lifecycle, tests, and a round-trip console in Creatio.",
@@ -362,6 +420,28 @@
       "uri": "docs://knowledge/com.creatio.clio/atf.creatio.kafka-reference",
       "sourcePath": "catalog/reference-examples/creatio-kafka.yaml",
       "bundlePath": "resources/atf.creatio.kafka-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "atf.creatio.localization-reference",
+      "title": "Creatio localization reference",
+      "description": "Published reference workspace for schema-owned backend and Freedom UI localizable values, injectable LocalizableString resolution, fallback behavior, and deterministic tests.",
+      "topicId": "atf.creatio.localization-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.localization-reference",
+      "sourcePath": "catalog/reference-examples/creatio-localization.yaml",
+      "bundlePath": "resources/atf.creatio.localization-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "atf.creatio.websocket-reference",
+      "title": "Creatio WebSocket reference",
+      "description": "Live-verified reference workspace for backend-to-frontend push, same-user frontend PTP bridging, low-trust frontend BROADCAST fan-out, and the internal SERVER receive boundary.",
+      "topicId": "atf.creatio.websocket-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.websocket-reference",
+      "sourcePath": "catalog/reference-examples/creatio-websocket.yaml",
+      "bundlePath": "resources/atf.creatio.websocket-reference.yaml",
       "mediaType": "text/yaml"
     },
     {
@@ -507,7 +587,7 @@
     {
       "itemId": "core-rules",
       "title": "Core rules",
-      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
+      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, scratch cleanup, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
       "topicId": "creatio.core-rules",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/core-rules",
@@ -544,6 +624,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/platform/freedom-ui/iframe-section.md",
       "bundlePath": "resources/creatio-freedom-iframe-section.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "custom-mcp-tools",
+      "title": "Creatio custom C# MCP tools",
+      "description": "Guides implementation, package-data publication, direct authentication and invocation, catalogue refresh, troubleshooting, and testing of custom C# MCP source-code actions hosted by Creatio.",
+      "topicId": "creatio.custom-mcp-tools",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/custom-mcp-tools",
+      "legacyUris": [
+        "docs://mcp/guides/custom-mcp-tools"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/custom-mcp-tools.md",
+      "bundlePath": "resources/custom-mcp-tools.md",
       "mediaType": "text/markdown"
     },
     {
@@ -647,7 +741,7 @@
     {
       "itemId": "deploy-lifecycle",
       "title": "Deployment lifecycle",
-      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> find-empty-iis-port -> deploy-creatio/deploy-identity, plus build discovery, registration, IdentityService, and cliogate installation.",
+      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: infrastructure preflight, conditional IIS port discovery, explicit IIS or dotnet selection, secure loopback defaults, opt-in network binding, dotnet HTTPS certificate handling, build discovery, registration, IdentityService, and cliogate installation.",
       "topicId": "creatio.deploy-lifecycle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
@@ -886,9 +980,37 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "localizable-values",
+      "title": "Localizable values",
+      "description": "Guides Creatio schema ownership for localizable values, backend LocalizableString strict and fallback lookup, Freedom UI ownership boundaries, and deterministic localization testing.",
+      "topicId": "creatio.localizable-values",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/localizable-values",
+      "legacyUris": [
+        "docs://mcp/guides/localizable-values"
+      ],
+      "sourcePath": "guidance/mcp/guides/localizable-values.md",
+      "bundlePath": "resources/localizable-values.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "knowledge-feedback",
+      "title": "Knowledge feedback",
+      "description": "Defines task-end reconciliation when observed behavior contradicts guidance, including standing approval, report scope, evidence, privacy, deduplication, and agent-owned GitHub submission.",
+      "topicId": "creatio.knowledge-feedback",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/knowledge-feedback",
+      "legacyUris": [
+        "docs://mcp/guides/knowledge-feedback"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/knowledge-feedback.md",
+      "bundlePath": "resources/knowledge-feedback.md",
+      "mediaType": "text/markdown"
+    },
+    {
       "itemId": "mobile-page-modification",
       "title": "Mobile page modification",
-      "description": "Mobile-specific differences from the base page-modification guidance: plain JSON body format (no AMD), crt.Scaffold root element rules, the mobile component registry, naming conventions, template hierarchy, and the supported request catalogue.",
+      "description": "Mobile-specific differences from the base page-modification guidance: plain JSON body format (no AMD), the operation shape rules (a component type outside \"values\" is discarded; a merge never authors child elements), crt.Scaffold root element rules, button placement away from the Scaffold action slots, the mobile component registry, naming conventions, template hierarchy, and the supported request catalogue.",
       "topicId": "creatio.mobile-page-modification",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/mobile-page-modification",
@@ -1070,18 +1192,113 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks and sequence flows; gateways, conditional/default flows and timers are not buildable yet.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
-      "requiredFeatures": [
-        "process-designer"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
       "legacyUris": [
         "docs://mcp/guides/process-modeling"
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-naming",
+      "title": "Process naming rules (N1-N10)",
+      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R17 connection rules and none of these -- so they are authoring obligations, not validated ones.",
+      "topicId": "creatio.process-naming",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-naming",
+      "legacyUris": [
+        "docs://mcp/guides/process-naming"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/naming.md",
+      "bundlePath": "resources/process-naming.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-data-elements",
+      "title": "Process data elements and record filters",
+      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, the Modify data element target and column values, and the data-source filter that all three share: column dot-paths, the comparison set, the right-hand value sources, the complete relative-date macro vocabulary, the datePart left-hand modifier, and the signal-start restriction that forbids parameter references before an instance exists.",
+      "topicId": "creatio.process-data-elements",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-data-elements",
+      "legacyUris": [
+        "docs://mcp/guides/process-data-elements"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/data-elements.md",
+      "bundlePath": "resources/process-data-elements.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-parameters",
+      "title": "Process parameters and mappings",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros that are the one formula an author may write rather than copy.",
+      "topicId": "creatio.process-parameters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-parameters",
+      "legacyUris": [
+        "docs://mcp/guides/process-parameters"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/parameters.md",
+      "bundlePath": "resources/process-parameters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-perform-task",
+      "title": "Perform task element",
+      "description": "Owns the Creatio Perform task element (performTask / ActivityUserTask): what it produces and when the process resumes, the full table of settable parameters with the shared *Period unit enum, the parameters the runtime sets that must never be written as targets, and the two performer layers -- the element-level performer block that assigns to a role or a manager, and OwnerId for one person. Also states why the Activity type is always Task expressed through a category, and why Approval is not this element.",
+      "topicId": "creatio.process-perform-task",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-perform-task",
+      "legacyUris": [
+        "docs://mcp/guides/process-perform-task"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
+      "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-send-email",
+      "title": "Send email element",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, sender resolution and why a missing sender fails at run time rather than at save, recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
+      "topicId": "creatio.process-send-email",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-send-email",
+      "legacyUris": [
+        "docs://mcp/guides/process-send-email"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/send-email.md",
+      "bundlePath": "resources/process-send-email.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-activity-connections",
+      "title": "Activity connections (\"Connected to\")",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R17 connection rules, which are about sequence flows and not about these links.",
+      "topicId": "creatio.process-activity-connections",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
+      "legacyUris": [
+        "docs://mcp/guides/process-activity-connections"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/activity-connections.md",
+      "bundlePath": "resources/process-activity-connections.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-script-task",
+      "title": "Process ScriptTask C#",
+      "description": "Guides C# inside an existing Creatio process ScriptTask: exact process parameter codes, Get/Set access, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and target-environment verification.",
+      "topicId": "creatio.process-script-task",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-script-task",
+      "legacyUris": [
+        "docs://mcp/guides/process-script-task"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
+      "bundlePath": "resources/process-script-task.md",
       "mediaType": "text/plain"
     },
     {
@@ -1715,6 +1932,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "creatio-three-way-merge",
+      "title": "Creatio package three-way merge",
+      "description": "Guides agents through a preview-only semantic merge of Git stage 1/2/3 Creatio package artifacts, explicit status handling, user-directed conflict resolution, no-write proof, and live package verification.",
+      "topicId": "creatio.git-three-way-merge",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/creatio-three-way-merge",
+      "legacyUris": [
+        "docs://mcp/guides/creatio-three-way-merge"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/creatio-three-way-merge.md",
+      "bundlePath": "resources/creatio-three-way-merge.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "related-page-binding",
       "title": "Page-to-object binding",
       "description": "Canonical MCP guidance for binding Freedom UI pages to an object via create-related-page-addon: choosing the default record page and the add-record page (optionally per role and type), name discovery, the replace-not-merge semantics, and error handling.",
@@ -1843,7 +2074,7 @@
     {
       "itemId": "ui-project",
       "title": "Freedom UI projects",
-      "description": "Canonical MCP guidance for scaffolding a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, and the create-workspace prerequisite.",
+      "description": "Canonical MCP guidance for scaffolding and testing a Freedom UI Angular remote-module project inside an existing clio workspace via new-ui-project: required arguments, naming constraints, file placement, runner selection, and the create-workspace prerequisite.",
       "topicId": "creatio.ui-project",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/ui-project",
@@ -1866,6 +2097,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "websocket-messaging",
+      "title": "Creatio WebSocket messaging",
+      "description": "Canonical Creatio guidance for backend-to-frontend push, frontend PTP and BROADCAST routes, lifecycle-safe MessageChannelService subscriptions, transient delivery, and the internal-only SERVER receive boundary.",
+      "topicId": "creatio.websocket-messaging",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/websocket-messaging",
+      "legacyUris": [
+        "docs://mcp/guides/websocket-messaging"
+      ],
+      "sourcePath": "guidance/mcp/guides/integration/websocket-messaging.md",
+      "bundlePath": "resources/websocket-messaging.md",
       "mediaType": "text/plain"
     },
     {

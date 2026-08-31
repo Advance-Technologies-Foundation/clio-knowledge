@@ -25,7 +25,9 @@ Creatio or disk. The guide contains:
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
     merge / insert / drop / relocate-children). Iterate this to build the body; it already
     encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
-    re-derive placement from containerMap + componentSuggestions.
+    re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
+    parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
+    IS AUTHORITATIVE in HARD MOBILE RULES.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED
@@ -98,8 +100,12 @@ separate response AFTER you show a plain-language plan:
   separate explicit go-ahead.
 - Headless / autonomous mode: never self-approve. Produce the plan, ask for confirmation, and END
   THE TURN without writing or registering anything.
-These gate rules are authoritative on their own — the plan, the approval handshake, and the
-conversion report are all described in this guide; do not depend on any external document.
+These gate rules are SELF-SUFFICIENT and mandatory on their own: running the guide and presenting the
+plan write nothing, and every persistence or registration step needs the developer's explicit approval
+first — never do less than this. A higher-level workflow that invoked the conversion MAY layer a richer
+approval process on top (for example a structured, plan-first review with an explicit approve step
+before any write); follow that when it is present. This article does not depend on any such workflow —
+it stays focused on the conversion itself, and the body-building mechanics are the rest of it below.
 
 ─────────────────────────────────────────────────────────────
 FLOW
@@ -125,15 +131,27 @@ FLOW
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
      FeedTabContainer→FeedContainer). REUSE the existing mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
-     also carry a prebuilt mobileValues (for component twins whose rule declares carryProperties,
-     e.g. FolderTree->FolderTreeActions carrying sourceSchemaName/rootSchemaName) — paste it onto
-     the merged element verbatim, deterministically, as part of this same step. This does NOT
-     require a separate confirmation beyond Gate M — it is a mechanical property fill-in, not a new
-     decision. If the mobile list template already provides the List / ListItem elements, configure
+     also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
+     as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
+     not a new decision). A merge carries prebuilt mobileValues in two twin shapes:
+       • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
+         sourceSchemaName/rootSchemaName): only those keys are carried.
+       • same-component twin — the mobile template provides the SAME component the page changed, either
+         under a DIFFERENT name via a components mapping (AttachmentList→AttachmentFileList) or,
+         AUTOMATICALLY, under the SAME name with no mapping needed (Feed→Feed). Its mobileValues carry
+         ONLY what the page CHANGED from the web template — e.g. the attachments detail's recordColumnName
+         (the object-specific link column), or Feed's dataSourceName/entitySchemaName. A property the page
+         left at the web-template default is deliberately OMITTED so the mobile element keeps its OWN
+         default (an unset attachments recordColumnName stays the mobile default RecordId); a template
+         component the page did not change gets no elementMap entry at all. Paste the carried mobileValues
+         as-is — never add the omitted defaults yourself; the mobile element already supplies them.
+     If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
-   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items").
+   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items"). Use the
+     entry's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
+     get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
      When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
      web tab, below); otherwise omit index and append. On a tabbed record page EVERY web tab inserts
@@ -157,10 +175,13 @@ FLOW
      hand-edit these bindings — paste mobileValues as-is. Then add ONLY
      what mobileValues deliberately leaves out:
        • the value binding (control, or value for lookups) — type-specific, so it is not prebuilt;
-       • for a structural mapping (grid → crt.List + crt.ListItem), build the row: add a crt.ListItem
-         into the crt.List's itemLayout (title = first column, body = the rest); see the
-         componentSuggestions note and the mobileContracts example. If the template already provides
-         the List/ListItem, configure them by merge-by-name instead of inserting (see the merge branch).
+         (the row of a grid → crt.List insert is NOT one of these — see the next paragraph.)
+     A grid → crt.List INSERT arrives with its row ALREADY BUILT: mobileValues carries the
+     crt.ListItem under itemLayout (title = the first grid column, body = the rest) AND every source
+     property the grid carried, each already shaped to what the mobile component accepts. Paste it as-is;
+     do NOT rebuild the row and do NOT strip properties. This is prebuilt only for an INSERT — when the
+     mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
+     configure by merge-by-name (see the merge branch).
      The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens — both a
      top-level caption AND nested ones (e.g. config.title, text.template). Register them ALL: pass
      guide.resourceStrings (a { key: en-US text } map covering the whole converted body) to update-page
@@ -172,14 +193,30 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type, multi-data-source, or
-     "empty container"). Tell the user what was dropped. Empty containers are already handled FOR you:
+   - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
+     request, "empty container", or an "excludedComponents rule matched"). Tell the user what was dropped.
+     Empty containers are already handled FOR you:
      a converter-created layout container whose every child dropped was removed deterministically by
-     the converter and arrives as a drop entry with reason "empty container" (an ExpansionPanel
-     removed with header buttons says its tools were discarded). WHICH container types are eligible
-     is converter configuration, not a fixed list — read the drop entries rather than assuming one.
-     Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
+     the converter and arrives as a drop entry with reason "empty container". WHICH container types are
+     eligible is converter configuration, not a fixed list — read the drop entries rather than assuming
+     one. Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
      about it — just report it with the other drops.
+     An "excludedComponents rule matched" drop is a POSITIONAL exclusion the converter applied by rule
+     (the reason names the removed type, the host type, and the host property when the rule scopes one —
+     e.g. a search filter the rule excludes from an expansion panel's compact tools strip). It is NOT
+     conversion loss: do NOT re-insert the component — not into that host, not
+     anywhere else on the page — and do NOT ask the user whether to keep it. WHICH types are excluded
+     from WHICH hosts is converter configuration, not a fixed list — read the drop reasons rather than
+     assuming one. The same type OUTSIDE the excluded position converts normally, so seeing it dropped
+     in one place and kept in another on the same page is correct, not an inconsistency. Just report it
+     with the other drops.
+     A positional exclusion emits a SECOND reason shape for everything that hung below the removed
+     component: "parent removed by an excludedComponents rule: ancestor 'X' was removed and this element
+     has no mobile parent left". Treat it exactly like the reason above — the element is gone because its
+     parent is gone, so re-creating it would rebuild the branch the rule exists to remove. Do NOT
+     re-insert it, do NOT re-parent it to a surviving container, and do NOT ask the user about it. Match
+     an excludedComponents drop on BOTH shapes: a rule that targets a container type produces mostly this
+     one, and the elements it names are the ones a user is most likely to ask about by name.
    For many→one suggestions (primaryWebMerge set, e.g. crt.FolderTree + crt.FolderTreeActions
    -> crt.FolderTreeActions), emit a SINGLE mobile component and merge in the secondary
    component's properties; do not emit the secondary as a separate component.
@@ -265,11 +302,22 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is valid
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
   dropped by the differ.
-- LIST ROW (grid → crt.List + crt.ListItem): the row layout lives on a crt.ListItem placed in the
-  crt.List's itemLayout (title = first grid column, body = the rest). If the mobile list template
-  already provides the List/ListItem elements, configure them by MERGE-BY-NAME (the row goes on the
-  ListItem element) — NEVER insert a second crt.List and NEVER put itemLayout inside a merge of the
-  parent List (silent no-op; ListItem is a separate named element).
+- LIST ROW (grid → crt.List + crt.ListItem): the row lives on a crt.ListItem in the crt.List's
+  itemLayout — title = the FIRST grid column, body = every other column in source order.
+  For an INSERT the converter has already built the row into mobileValues; paste it, do NOT rebuild it.
+  It is NOT prebuilt when the mobile list TEMPLATE already provides the List/ListItem elements: then
+  configure the row by MERGE-BY-NAME onto the ListItem element (title + body). NEVER insert a second
+  crt.List, and NEVER put itemLayout inside a merge of the parent List — crt.List is not a container and
+  itemLayout is an input, so addressing it as a child slot makes the client answer "is not a container
+  for other items" and the WHOLE schema fails to build (ListItem is a separate named element). When you
+  build the row, a title is a plain "$Binding" STRING; the { "value": "$Binding" } shape is for body
+  entries only — using it for the title renders an empty Title column while the body looks correct.
+  A title binds only a DIRECT TEXT column of the collection's entity — a lookup column, or a
+  ForwardReference projection of its display column, leaves the Title column empty. The converter does
+  NOT select around this: the row leads with the first column whatever its type, so a grid whose first
+  column is a lookup ships a title that renders as an empty Title column and nothing reports it. Tell the
+  user when you see one, and set the row's leading value in the designer. The row still renders
+  otherwise: body entries show as labeled value rows, lookups included.
 - PAGE-level business rules ARE converted for you in guide.pageBusinessRules: each rule keeps
   its condition and only the actions that survive on mobile. Page rules carry ONLY element
   actions — hide / show / make-editable / read-only / required / optional — and an action
@@ -290,6 +338,45 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   guide.requestConversions is the advisory summary (convertedRequests / flaggedRequests); dropped
   components appear in elementMap as `drop`. Tell the user which action components were removed.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
+- ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing elementMap entries when building a page from
+  get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info
+  stays authoritative for component SHAPE) — apply each elementMap entry's `parentName` + `propertyName`
+  EXACTLY as the guide gives them, for EVERY component type. The guide already resolved the correct
+  mobile parent for THIS page; that decision is final. NEVER relocate a component to a different parent
+  because of its type, because get-component-info calls some other component its "typical parent" /
+  "container" / lists it under "parent types", or because a component "usually" lives somewhere else.
+  get-component-info describes a component's SHAPE in ISOLATION — it is generic and does NOT override the
+  per-page placement in elementMap; when the two disagree, elementMap wins, always. Overriding the
+  guide's placement (improvising a "better" parent) is the #1 cause of a component that renders but does
+  not work. Worked example (illustration only — the parent is whatever the ENTRY names, never a fixed
+  value): when the guide returns a quick filter with `parentName: HeaderContainer, propertyName: items`,
+  insert it under exactly that parent — and under whatever parent the entry names in any other conversion.
+  Do NOT relocate it into crt.QuickFilterGroup because get-component-info (mobile) calls crt.QuickFilterGroup
+  the container for crt.QuickFilter. Mechanism (per the ENG-94937 investigation on Creatio Mobile — verify
+  against your target platform version): crt.QuickFilterGroup is model-driven, so it builds its chips at
+  RUNTIME from the `QuickFilterGroup_Value` attribute via `crt.QuickFilterGroupAttributeConverter` (driven by
+  the `FilterGroupButton` in HeaderContainer); a crt.QuickFilter inserted as a static child of its `items` is
+  never bound. Placement alone is necessary but NOT sufficient here: a working page ALSO needs that model side
+  (the `QuickFilterGroup_Value` attribute + the converter's `target.items`). Confirm the guide's data-section
+  diffs (guide.modelConfigDiff / guide.viewModelConfigDiff — apply VERBATIM, see DATA SECTIONS) carry that
+  model side. If they do NOT, STOP and report it as an incomplete guide output (a converter gap) — do NOT
+  hand-author modelConfigDiff / viewModelConfigDiff for it: inventing the `QuickFilterGroup_Value` attribute
+  and the converter's `target.items` by hand is the deviation-from-tool-output this rule forbids, and their
+  shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
+  tree — it is not a ban on the model-side wiring the OOTB page carries.
+- RETARGET INTO A TEMPLATE-PROVIDED PARENT — INSERT ONLY THE CHILDREN, NEVER THE PARENT. When an
+  elementMap insert RETARGETS an element into a container the mobile template ALREADY provides, the guide
+  flags that entry with `parentExistsOnTemplate: true` and repeats the instruction in guide.constraints.
+  Insert ONLY the flagged children into the named parent; do NOT insert, merge, or re-declare the parent
+  container or its slot — the template supplies it, and authoring your own OVERRIDES the native one
+  (wrong configuration, lost children). This is the single-element-slot / strip rule from get-guidance
+  `mobile-page-modification` (a template-provided slot is merge-only and the merge is discarded when the
+  slot is already filled) applied to conversion — that article owns the rule; this is only its
+  conversion-time reminder. A guide that predates the flag omits it and the constraint: fall back to the
+  same rule and never author a parent the mobile template already carries. And a source element INHERITED FROM
+  THE WEB TEMPLATE (chrome the mobile template provides natively) is NOT retargeted at all — the guide drops it
+  (reason names it "inherited from the web template"), because a duplicate would shadow the native element. A
+  page-AUTHORED element (above the web-template baseline) is not chrome and DOES convert.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web
   columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web
