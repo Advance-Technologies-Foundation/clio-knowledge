@@ -68,13 +68,14 @@ public sealed class ProcessGuideResponseSizeTests
     /// </summary>
     private const int EnvelopeAllowance = 1_400;
 
-    // No exception list. Every article in scope is inside the budget, so an empty allow-list would be
-    // machinery for a case that does not exist — and an empty one is the easiest place to quietly add a
-    // first entry. The two known over-budget articles, page-schema-handlers and mobile-page-modification,
-    // are not in the processes folder: they are outside this fixture's scope rather than excused by it,
-    // carry the same defect, and are tracked as a follow-up on PR #110. Generalising this fixture to all
-    // guidance is the right end state, and that is when an explicit, ticketed exception list earns its
-    // place.
+    // Scope: the processes folder. No exception list, because every article in scope is inside the
+    // budget — an empty allow-list would be machinery for a case that does not exist, and an empty one is
+    // the easiest place to quietly add a first entry.
+    //
+    // Articles elsewhere in guidance/ are not measured here. Several are over this budget, and two were
+    // observed to spill outright when probed on 2026-08-31: page-schema-handlers at 50,351 response
+    // characters and mobile-page-modification at 52,655. That is recorded as measurement, not as a
+    // commitment — nothing here owns their remediation.
 
     [Test]
     [Description("Every process article fits in one get-guidance response, so an agent can read it whole.")]
