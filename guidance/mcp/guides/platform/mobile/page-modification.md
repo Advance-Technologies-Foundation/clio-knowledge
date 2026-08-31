@@ -120,7 +120,8 @@ wired while being invisible — which is why this misreads as a placement proble
     "parentName": "AreaProfileContainer", "propertyName": "items",
     "values": { "clicked": { "request": "crt.RunBusinessProcessRequest",
                              "params": { "processName": "UsrProcess_e629820",
-                                         "processRunType": "ForTheSelectedPage" } },
+                                         "processRunType": "ForTheSelectedPage",
+                                         "recordIdProcessParameterName": "ProcessSchemaParameter1" } },
                 "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
 
   // RIGHT — type inside values
@@ -129,15 +130,20 @@ wired while being invisible — which is why this misreads as a placement proble
     "values": { "type": "crt.Button",
                 "clicked": { "request": "crt.RunBusinessProcessRequest",
                              "params": { "processName": "UsrProcess_e629820",
-                                         "processRunType": "ForTheSelectedPage" } },
+                                         "processRunType": "ForTheSelectedPage",
+                                         "recordIdProcessParameterName": "ProcessSchemaParameter1" } },
                 "layoutConfig": { "column": 1, "row": 1, "colSpan": 1, "rowSpan": 1 } } }
 
 The "layoutConfig" is not optional decoration: a grid container positions its children with it. See
 BUTTON PLACEMENT below for where a button may go and the full shape it needs.
 
 processName / processRunType appear in both examples because update-page REJECTS a
-crt.RunBusinessProcessRequest button that omits them (see the run-process-button guide for how to
-resolve the code). validate-page does not reach that check on a mobile body, so a body can pass
+crt.RunBusinessProcessRequest button that omits them. `recordIdProcessParameterName` appears too
+because these run `ForTheSelectedPage`: that run type passes the current record into a named process
+parameter, so the record binding is REQUIRED and update-page rejects a ForTheSelectedPage button that
+omits it (ENG-95822) — `ProcessSchemaParameter1` is a stand-in for the CODE get-process-signature
+echoes; resolve the real one (see the run-process-button guide). Use `RegardlessOfThePage` instead when
+no record is passed. validate-page does not reach these checks on a mobile body, so a body can pass
 validate-page and still be refused by update-page — do not treat validate-page green as sufficient.
 
 The same defect applies to "set": "set" is a remove followed by an insert on the same payload, so
@@ -614,7 +620,10 @@ crt.RunBusinessProcessRequest
   Starts a business process. processName AND processRunType are both REQUIRED
   (e.g. 'ForTheSelectedPage' for the current record; 'RegardlessOfThePage' for none).
   "For the selected page" maps to processRunType: 'ForTheSelectedPage' — setting
-  recordIdProcessParameterName alone does NOT select the run type.
+  recordIdProcessParameterName alone does NOT select the run type. And the reverse also
+  holds: 'ForTheSelectedPage' REQUIRES recordIdProcessParameterName (the process parameter
+  CODE that receives the current record) — update-page rejects a ForTheSelectedPage button
+  that omits it (ENG-95822); use 'RegardlessOfThePage' when no record is passed.
   FULL parameter contract is the request catalog (single source of truth): call
   get-request-info request-type=crt.RunBusinessProcessRequest schema-type=mobile and resolve
   the process with get-process-signature FIRST. On mobile pages ALWAYS pass

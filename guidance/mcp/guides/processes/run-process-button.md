@@ -53,8 +53,8 @@ Set either to false only when the user explicitly does not want that behavior.
   and register the text via the resources parameter.
 
 Variant V3 — pass the current record Id (form/edit page)
-Use when the process has a Guid/Lookup input parameter that should receive the open record.
-The handler reads the primary data source record Id and injects it into the named parameter.
+Use for a process that should run against the open record. The handler reads the primary data
+source record Id and injects it into the named parameter.
 {
     "request": "crt.RunBusinessProcessRequest",
     "params": {
@@ -64,6 +64,13 @@ The handler reads the primary data source record Id and injects it into the name
         "recordIdProcessParameterName": "ProcessSchemaParameter1"
     }
 }
+- REQUIRED with `ForTheSelectedPage`: `recordIdProcessParameterName` is the whole point of this
+  run type — it names the process parameter that receives the current record, and the designer
+  marks that field required. A `ForTheSelectedPage` button WITHOUT it runs the process with NO
+  record (contradicting "run for this record"), yet the platform still saves it — so `validate-page`
+  and `update-page` REJECT that button up front (ENG-95822), naming the button and this key.
+  If the process has no input parameter to receive the record, either add one with
+  create/modify-business-process, or use `RegardlessOfThePage` because the record is not being passed.
 - `recordIdProcessParameterName` must be a parameter CODE from the signature.
 - NOTE on the codes in these examples: `UsrProcess_e629820` and `ProcessSchemaParameter1/2` are READ
   from an existing, human-made process — the autonumbered shapes are what the visual designer generates
@@ -132,6 +139,7 @@ the two disagree)
 - processParameters            (object) — { "<ParameterCODE>": value }; keys are CODES, not captions.
 - parameterMappings            (object) — { "<ParameterCODE>": "<sourceColumn>" }; keys are CODES.
 - recordIdProcessParameterName (string) — parameter CODE that receives the current/selected record Id.
+                               REQUIRED when processRunType=ForTheSelectedPage (validate-page/update-page reject its absence, ENG-95822).
 - resultParameterNames         (string[]) — process OUTPUT parameter CODES to read back.
 - dataSourceName               (string) — datasource used by ForTheSelectedRecords.
 - filters / sorting            (object) — record selection for ForTheSelectedRecords.
@@ -141,7 +149,9 @@ the two disagree)
 
 processRunType reference
 - `RegardlessOfThePage` — run globally, no record context (V1/V2).
-- `ForTheSelectedPage` — run for the current form record (V3).
+- `ForTheSelectedPage` — run for the current form record (V3). REQUIRES `recordIdProcessParameterName`
+  (the parameter that receives the record); validate-page/update-page reject a ForTheSelectedPage button
+  without it (ENG-95822).
 - `ForTheSelectedRecords` — run for grid-selected records; pair with dataSourceName /
   filters / sorting / selectionStateAttributeName. NOTE: accepted by the web and mobile
   runtime, but the mobile designer does not yet emit it (ENG-87164) — author it for web for now.
