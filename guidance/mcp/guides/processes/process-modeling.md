@@ -45,7 +45,8 @@ article from what this one says; read that article.
     false, and NOT permission: a non-user-task element, an unresolvable user-task schema and a user task
     outside the supported six all report `null`. `setConnections` is refused on `false` AND on `null`; only
     `true` means it is accepted.
-  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R17.
+  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R17
+    (the rules themselves are in `process-activity-connections`).
 
 == What you can build today (create-business-process) ==
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element

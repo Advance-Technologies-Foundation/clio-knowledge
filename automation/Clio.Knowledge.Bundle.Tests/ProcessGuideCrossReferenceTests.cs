@@ -74,6 +74,72 @@ public sealed class ProcessGuideCrossReferenceTests
                 + "instruction while silently withholding the rule. Found: " + string.Join("; ", dangling));
     }
 
+    /// <summary>
+    /// Section markers distinctive enough to name one owner, paired with the article that owns them.
+    /// The quoted-citation scan above cannot see these: the reference that survived it read "the same
+    /// way the R1-R17 header separates the full catalog from the buildable slice" — no quotes, no
+    /// locator word, and the header it compares itself to had moved to another article. A reader cannot
+    /// check that comparison without being told where to look.
+    /// </summary>
+    private static readonly (string Marker, string Owner)[] MovedSectionMarkers =
+    [
+        ("R1-R17", "process-activity-connections"),
+        ("R1–R17", "process-activity-connections"),      // en dash, as the articles write it
+        ("N1-N10", "process-naming"),
+        ("Naming and codes", "process-naming"),
+        ("Data source filters", "process-data-elements")
+    ];
+
+    [Test]
+    [Description("An article naming a section another article owns points at that article.")]
+    public void ProcessGuides_ShouldNameTheOwningArticle_WhenReferencingAMovedSection()
+    {
+        string repositoryRoot = FindRepositoryRoot();
+        Dictionary<string, string> ownerByPath = ProcessGuideSet.SplitItemIds
+            .Zip(ProcessGuideSet.SplitPaths)
+            .ToDictionary(pair => pair.Second, pair => pair.First);
+
+        List<string> unattributed = [];
+        foreach (string relativePath in ProcessGuideSet.SplitPaths)
+        {
+            string text = ReadArticle(repositoryRoot, relativePath);
+            foreach ((string marker, string owner) in MovedSectionMarkers)
+            {
+                if (ownerByPath[relativePath] == owner)
+                {
+                    continue;   // the owner may name its own section however it likes
+                }
+                foreach (int index in Occurrences(text, marker))
+                {
+                    // Wide enough to span the entry article's index, where the article name heads the
+                    // entry and the section it owns is named on the continuation line below it.
+                    int from = Math.Max(0, index - 220);
+                    int to = Math.Min(text.Length, index + marker.Length + 220);
+                    if (text[from..to].Contains($"`{owner}`", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+                    unattributed.Add($"{relativePath}: '{marker}' without naming {owner}");
+                }
+            }
+        }
+
+        unattributed.Should().BeEmpty(
+            because: "after the split these sections live in one article each, and a bare mention leaves the "
+                + "reader with a claim they cannot check — the reference is not broken enough to look broken, "
+                + "which is why it survives review. Found: " + string.Join("; ", unattributed));
+    }
+
+    private static IEnumerable<int> Occurrences(string text, string value)
+    {
+        for (int index = text.IndexOf(value, StringComparison.Ordinal);
+             index >= 0;
+             index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal))
+        {
+            yield return index;
+        }
+    }
+
     [Test]
     [Description("Every article the split produced is reachable from the routing map and from the entry article's index.")]
     public void Routing_ShouldNameEverySplitArticle_AndTheEntryArticleShouldIndexThem()
