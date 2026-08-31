@@ -409,6 +409,128 @@ the matching specialized input. Fall back to a generic input only when the catal
 has no specialized match.
 
 ─────────────────────────────────────────────────────────────
+ANALYTICS WIDGETS ON MOBILE (charts and metrics)
+─────────────────────────────────────────────────────────────
+`crt.ChartWidget` and `crt.IndicatorWidget` ARE mobile components — they are in the mobile
+registry and the Mobile Designer offers them under "Widgets". `crt.Dashboards` is not, and mobile
+has no dashboard / home-page template, so an analytics request always lands on an EXISTING mobile
+page: a record page (`*_MobileFormPage`) or a section page (`*_MobileListPage`).
+Read `chart-widget` / `indicator-widget` for the widget payload; this section owns only what mobile
+does differently.
+
+NO DATA SOURCE NEEDED — an analytics widget fetches its own data from `config.…data.providing`, so the
+  page's `modelConfigDiff` stays untouched and the one-data-source-per-page constraint does not apply to it.
+
+ONE SERIES PER CHART — the mobile runtime loads data for the FIRST series only. Its renderer can draw
+  several same-type series and the Mobile Designer canvas does, but the later series' collections are never
+  fetched, so on the device they arrive empty (multi-series is ENG-87329, still open). Mixed types collapse
+  further: the client keeps the first series alone. A multi-category ask therefore becomes one chart PER
+  category, or ONE series grouped by the category column — a TOTAL cannot be a grouping value. Neither the
+  canvas nor a saved-body read-back catches this; only the app does.
+
+RUNTIME GAPS TO DESIGN AROUND — the mobile analytics runtime trails the web one, and no design-time
+  check reveals it. A DATE column under SUM/AVG fails the runtime request outright (server
+  `UnsupportedTypeException`) and under MIN/MAX draws an empty chart, so aggregate a number or COUNT the
+  primary column and put the date in the grouping instead (ENG-89575); negative values do not render
+  (ENG-88682); grouping through a related object can disagree with the web result (ENG-89059). Tell the
+  user when their request needs one of these rather than shipping a widget that renders blank on the
+  device.
+
+PARENT — insert into a grid container the page already has: `MainContainer` (root grid of every
+  mobile template), `ListContainer` (list/section pages), or a tab's `…TabContainer` /
+  `AreaProfileContainer` (record pages). Take the exact name from `bundle.containers` (`get-page`).
+  `crt.DetailsGrid` does not exist on mobile.
+
+RE-ROW THE SIBLINGS — every child of a mobile grid carries an explicit `layoutConfig.row`, so a
+  widget insert must also `merge` `layoutConfig` on the existing siblings; two children must never
+  claim the same row (chart at `row: 1` → the list moves to `row: 2`). Skipping this collapses the
+  layout.
+
+NO SIZE FLOOR — the mobile runtime owns widget height: ship `rowSpan: 1` and ignore the web and
+  dashboard floors (`rowSpan >= 6`, flex `height >= 350`).
+
+THEME — `theme: "without-fill"` plus a visible `config.color` (the Mobile Designer's "Plain white").
+  Dashboard-only and desktop-only themes/slots do not apply.
+
+STRINGS — widget `config` strings use `#ResourceString(<key>)#` AND must be registered in the page
+  resources; component labels on the same page use `$Resources.Strings.<key>`. Mixing them up
+  renders a header with no title.
+
+REACHABILITY FIRST — a section reaches the mobile app only when BOTH a `SysModuleInWorkplace` row in a
+  workplace with `SysApplicationClientType` = Mobile AND a non-empty `SysModule.MobileSectionSchemaUId`
+  exist for it. `create-app` sets both up itself, so a scaffolded app is already reachable; the check
+  matters for apps whose package was built without mobile pages. Without them the page and its widget
+  exist in the Mobile Designer only. Registering a mobile section is separate work, not part of adding a
+  widget. Workplace-driven registration is the 8.3.3+ mechanism and is gated by the feature
+  `Mobile.UseSysWorkplaceForModuleRegistration`; with that feature OFF the section list comes from the
+  legacy `MobileApplicationManifest`, so check the feature before trusting the workplace query. A widget
+  insert never touches the manifest.
+
+DIFF THE BODY AROUND AN APPEND WRITE — `viewConfigDiff` dedupes by element name and keeps the last entry,
+  so an append can silently drop a PRE-EXISTING operation your fragment never names (observed three
+  times: a page with two `FolderTreeActions` merges lost `rootSchemaName`, with `success: true`). Dump
+  the own body before writing, diff the read-back after, restore losses as one consolidated merge — and
+  note that the write-path validator rejects inline user-visible literals that the templates themselves
+  ship, so a faithful restore is not always possible.
+
+NAMING CONFLICT — the mobile runtime resolves pages by `<Entity>_MobileListPage` /
+  `<Entity>_MobileFormPage`, while `create-page` / `update-page` enforce the environment's
+  `SchemaNamePrefix`. Report the conflict; never flip the `SchemaNamePrefix` setting to work around it.
+
+RECORD SCOPE — on a record page each series is scoped through `data.providing.dependencies`
+  (`{ attributePath: "<chart entity column>", relationPath: "<primaryDataSourceName>.<attribute>" }`).
+  `relationPath` is NOT restricted to `Id`: the platform supports lookup columns and the primary
+  attribute only, so `PDS.Id` (this record) and `PDS.<SomeLookup>` (rows sharing that lookup) are both
+  valid, while a text/number/date column is rejected. The Mobile Designer wires this automatically;
+  `update-page` does NOT — author it or the widget shows every row. A section page has no record
+  context: emit no `dependencies` there.
+
+SCOPING CANNOT BE VERIFIED ON THE CANVAS — the relation resolver returns null at design time, so a
+  scoped chart draws the unscoped distribution in the designer. That is expected. The canvas proves the
+  widget resolves, the layout holds and the aggregation returns numbers; the scope itself is provable
+  only in the mobile app (device/emulator) or by replaying the runtime request.
+
+PAGE FILTERS come free — both widgets declare `PlatformAPIs.Filtration`, so the page's quick filters
+  narrow them with no extra wiring.
+
+DRILL-DOWN — an optional `drilldownConfig` on the widget ROOT overrides the drill-down list layout
+  (an array position-aligned with `config.series[]` for a chart, a single object for a metric).
+  Omit it for the platform default.
+
+REPLACING CHAINS — a customized mobile page is usually a chain (template → vendor package → your
+  design package). `get-page-hierarchy` is the tool that settles it; `parentSchemaName` from `get-page` /
+  `list-pages` is ambiguous (it may name the TEMPLATE or the replaced schema). Author into the leaf
+  (`get-page`'s `designPackageName`) — the runtime merges every level. Two consequences: the section is
+  registered against the ROOT UId, and a replacing schema inherits its parent's name, so the
+  `SchemaNamePrefix` check never fires when you edit an existing page (only when creating one).
+
+DESIGNER URL — `/0/ClientApp/#/MobilePageDesigner/<ROOT schemaUId>`. The leaf UId opens an empty
+  designer shell, and changing only the hash does not remount the designer — reload the page.
+
+BROWSER LOGIN INVALIDATES THE clio SESSION — signing into the same stand as the same user in a browser
+  can invalidate clio's session; clio calls then return IIS 401 HTML and surface as
+  "Unexpected character encountered while parsing value: <". It is an expired session, not a malformed
+  request. Do the machine read-backs first, or use a separate account for the browser.
+
+ORPHANED RESOURCE KEYS — the resources payload only adds/updates. Replacing a widget leaves its
+  `<oldName>_title` / `<oldName>_series_0` keys registered with nothing referencing them, and there is
+  no documented way to delete a key. Harmless, but say so instead of claiming a clean replacement.
+
+VERIFY IN THE APP — a mobile widget cannot be verified in a browser. Check the saved body with
+  `get-page`, the layout on the Mobile Designer canvas, and the rendered result in the mobile
+  application (device or emulator). The app is offline-first: it serves the local cache first, so
+  synchronize after a schema change and re-login before checking workplace or section lists. An emulator
+  also exposes the page metadata, business-rule metadata and merged manifest the client actually
+  received. `/0/ClientApp/` is the designer app and `/0/Shell/` the runtime shell; the mobile client
+  may be Flutter-first (`UseMobileFlutterFirst`) and `/0/Nui/mobile.aspx` may be absent — that says
+  nothing about the widget. A `success: true` save proves persistence only: re-read with `get-page` and
+  check `willCreateReplacingInDesignPackage`.
+
+Evidence: schemas produced by the Mobile Designer on Creatio 8.3.4 / 10.0 for a record page
+(`MobilePageWithTabsFreedomTemplate`) and a section page (`BaseMobileListTemplate`), read back with
+`get-page` (ENG-95577).
+
+─────────────────────────────────────────────────────────────
 ADAPTIVE BREAKPOINTS
 ─────────────────────────────────────────────────────────────
 The web→mobile conversion PROPOSES an adaptive layout for containers that group 2+ fields

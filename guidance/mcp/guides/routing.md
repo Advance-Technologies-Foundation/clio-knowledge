@@ -7,6 +7,10 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
 
 - Pages (Freedom UI): create/edit -> get-component-info (read resolvedFrom) + name=page-modification
   - page-modification is the entry; after its GATE read the ONE matching sub-guide: name=page-modification-overview (save lifecycle), name=page-modification-field-contract (insert a data-bound field), name=page-modification-containers (parentName / bundle.json), name=page-modification-components (button/handler/viewConfigDiff rules)
+  - MOBILE pages (schemaType 10: `*_MobileListPage` / `*_MobileFormPage`, anything opened in the Mobile
+    Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
+    to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
+  - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
