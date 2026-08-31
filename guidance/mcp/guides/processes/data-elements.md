@@ -38,6 +38,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   Use the entity COLUMN name (here `UsrName`), not the field caption ("Name").
 - To convert an EXISTING process to start on a record event, use `modify-business-process`:
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
+  `removeElement` is DESTRUCTIVE and the modify path validates nothing: it cascades to every flow
+  touching the element without re-joining the gap. The rules that make a removal safe — describe first,
+  validate the graph AS IT WILL BE, confirm with the user — are in `process-modeling`. Read them before
+  removing anything, not after.
 - To change an EXISTING signal's trigger or tracked columns IN PLACE (without re-adding it), use the
   `setSignal` op — it preserves the element and its flows:
     { "op": "setSignal", "elementName": "OrderAmountOrStatusChangedSignal",
@@ -62,7 +66,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. An element a
   human configured in one of those modes CANNOT be converted to first-record through this API at all — an
   explicit `"mode": "first"` is refused too, because the conversion would leave the element's collection
-  item parameters behind. Remove the element (`removeElement`) and add a new `readData` one instead.
+  item parameters behind. Remove the element (`removeElement`) and add a new `readData` one instead —
+  under the destructive-removal rules in `process-modeling`, since the removal cascades to this
+  element's flows and mappings and the modify path will not warn you.
 - `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
   list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
   supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own

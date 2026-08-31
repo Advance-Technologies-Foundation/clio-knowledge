@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
@@ -73,16 +74,7 @@ public sealed class ProcessNamingRuleTests
     /// every example scan below reads the SET rather than one file; scanning only the entry article would
     /// still pass while silently guarding nothing but the descriptor.
     /// </summary>
-    private static readonly string[] ProcessGuides =
-    [
-        "guidance/mcp/guides/processes/process-modeling.md",
-        "guidance/mcp/guides/processes/naming.md",
-        "guidance/mcp/guides/processes/data-elements.md",
-        "guidance/mcp/guides/processes/parameters.md",
-        "guidance/mcp/guides/processes/perform-task.md",
-        "guidance/mcp/guides/processes/send-email.md",
-        "guidance/mcp/guides/processes/activity-connections.md"
-    ];
+    private static readonly string[] ProcessGuides = ProcessGuideSet.SplitPaths;
 
     /// <summary>
     /// Every rule the section ships. A dropped or renumbered rule fails here rather than silently
@@ -270,7 +262,14 @@ public sealed class ProcessNamingRuleTests
         // reach N1-N10 at all, which is the exact failure the split was done to remove.
         ReadGuide(NamingGuide).Should().Contain(SectionHeading,
             because: $"the citations name {NamingArticle} as the owner of {RuleRange}, so it must define the section");
-        ReadGuide(BundleSource).Should().Contain($"\"itemId\": \"{NamingArticle}\"",
+
+        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllBytes(
+            Path.Combine(FindRepositoryRoot(), BundleSource)));
+        string[] declaredTopics = manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Select(resource => resource.GetProperty("itemId").GetString()!)
+            .ToArray();
+        declaredTopics.Should().Contain(NamingArticle,
             because: "a cross-article citation only resolves if the cited article is a declared get-guidance topic; "
                 + "an article that exists on disk but is absent from bundle-source.json is unreachable at runtime");
     }

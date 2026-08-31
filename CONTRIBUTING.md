@@ -114,6 +114,32 @@ A guidance contribution should state:
 - supporting evidence;
 - related reference implementations without treating their incidental choices as universal requirements.
 
+### An article must fit in one `get-guidance` response
+
+An article is delivered as a single JSON line. Past a size limit the caller cannot accept it, the
+payload is spilled to a file, and because that file has one line it cannot be paged either — so the
+agent greps a fragment and which fragment it gets decides the answer. `get-guidance` takes only
+`name`; there is no `section` and no `offset`. Correct, reviewed, evidence-backed text in an
+oversized article simply does not reach its reader, and nothing about the failure looks like a
+failure.
+
+So size is a delivery contract, not a matter of taste:
+
+- Keep every article inside the budget in
+  `automation/Clio.Knowledge.Bundle.Tests/ProcessGuideResponseSizeTests.cs`, which is the enforcing
+  check. Measure the JSON-escaped payload, not the file on disk — escaping inflates a
+  backtick-dense article by 20–35%.
+- When an article outgrows the budget, split it at a section boundary rather than trimming
+  evidence. Give each piece its own `itemId` in `bundle-source.json`, keep the original `itemId`,
+  `uri` and `legacyUris` on the piece that stays the entry point, and have that entry index the
+  others.
+- State in each new article which rules it is the authoritative owner of, and cite sibling articles
+  by NAME rather than repeating their rules — the one-owner rule in `AGENTS.md` applies across the
+  split exactly as it does within one article.
+- Rewrite every "see the section below" that now crosses an article boundary. A citation that names
+  no article still reads as a complete instruction while withholding the rule it points at, which is
+  invisible at review time; `ProcessGuideCrossReferenceTests` scans for it.
+
 ## Advisory changes
 
 An advisory should state:

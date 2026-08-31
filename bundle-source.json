@@ -1192,7 +1192,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks and sequence flows -- gateway ELEMENTS and timers are not), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",

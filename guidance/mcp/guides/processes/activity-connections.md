@@ -196,3 +196,4 @@ R16 Sub-process (callActivity) target must begin with a Simple start; collection
 R17 (advisory) Add data one-record mode outputs only Id; chain a Read data for other fields.
 
 Quick can/can't (source -> target via sequence flow): start->{activity,gateway,intermediate,end} ok,
+never ->start (R1); end is a sink, never a source (R2); event-based gateway out must hit a catch event (R10).

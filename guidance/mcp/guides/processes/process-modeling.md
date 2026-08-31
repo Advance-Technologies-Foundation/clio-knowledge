@@ -60,6 +60,10 @@ article from what this one says; read that article.
   element — their target object and values cannot be set yet, so those steps do nothing useful until a
   human configures them in the designer. Say so when you use one; do not present such a result as a working
   data operation.
+- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only — email
+  TEMPLATES are not supported, so say so if the user asks for one. It is fully configurable through its
+  `email` block: mode, sender, recipients, subject, HTML body, options and the manual-mode performer.
+  The whole contract, including the body macros and the recipient rules, is in `process-send-email`.
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
@@ -179,7 +183,7 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
 `emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see "What you can build today".)
+(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
@@ -187,8 +191,8 @@ System actions (palette group "System actions"):
     aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
-    element's `changeData` block (target object + column values) plus a `filter` — see the "Modify data
-    element" section.
+    element's `changeData` block (target object + column values) plus a `filter` — see
+    `process-data-elements`.
 - `deleteDataUserTask` Delete data — delete matched records.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).

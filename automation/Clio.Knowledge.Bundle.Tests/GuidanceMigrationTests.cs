@@ -177,7 +177,7 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins process-modeling as un-gated at go-live (ENG-96132), and keeps requiredFeatures optional in both v1 contracts.")]
+    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins all seven ENG-96212 process articles as un-gated at go-live (ENG-96132), and keeps requiredFeatures optional in both v1 contracts.")]
     public void FeatureGating_ShouldBeDeclaredByTheResourceAndBothSchemas()
     {
         // Arrange
@@ -208,10 +208,19 @@ public sealed class GuidanceMigrationTests
         // have to hold together: re-gating any ONE of the seven would hide part of the guidance the GA
         // business-process tools name as mandatory reading, and it would do it where nobody is looking —
         // the entry article would keep answering while the sub-guide it routes to went dark.
-        string[] regatedArticles = source.RootElement.GetProperty("resources")
+        //
+        // Scoped to those seven ITEM IDS rather than to everything under the processes folder, and that
+        // distinction matters. `requiredFeatures` is the only per-resource disclosure control this
+        // repository has. Written as a standing prohibition over a path prefix, this assertion would turn
+        // a red build on the next process guide that legitimately documents a restricted capability — and
+        // the cheapest way out of a red build is to drop the gate, which is precisely the outcome the
+        // control exists to prevent. The go-live was a decision about these seven articles; the assertion
+        // says only that.
+        JsonElement[] splitResources = source.RootElement.GetProperty("resources")
             .EnumerateArray()
-            .Where(resource => resource.GetProperty("sourcePath").GetString()!
-                .StartsWith("guidance/mcp/guides/processes/", StringComparison.Ordinal))
+            .Where(resource => ProcessGuideSet.SplitItemIds.Contains(resource.GetProperty("itemId").GetString()))
+            .ToArray();
+        string[] regatedArticles = splitResources
             .Where(resource => resource.TryGetProperty("requiredFeatures", out JsonElement features)
                 && features.EnumerateArray().Any(feature => feature.GetString() == "process-designer"))
             .Select(resource => resource.GetProperty("itemId").GetString()!)
@@ -227,6 +236,10 @@ public sealed class GuidanceMigrationTests
         processModeling.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
             because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
                 + "the guide the GA business-process tools name as mandatory reading");
+        splitResources.Should().HaveCount(ProcessGuideSet.SplitItemIds.Length,
+            because: "the scan below proves nothing unless it actually selected the seven articles — if they "
+                + "are renamed or moved and the filter matches nothing, an empty result would report the "
+                + "gate decision as intact while guarding none of it");
         regatedArticles.Should().BeEmpty(
             because: "the six articles ENG-96212 split out of process-modeling carry the same go-live decision as "
                 + "the entry article; gating one of them hides part of that mandatory reading while the entry "

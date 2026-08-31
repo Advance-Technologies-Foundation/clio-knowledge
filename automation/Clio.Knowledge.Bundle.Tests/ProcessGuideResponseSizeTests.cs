@@ -27,39 +27,40 @@ namespace Clio.Knowledge.Bundle.Tests;
 ///   process-modeling          71,177 chars  spilled
 ///
 /// The cliff is therefore somewhere in (32,698, 50,351]; the exact token limit is the harness's and is not
-/// published. <see cref="MaxResponseCharacters"/> sits at the largest size OBSERVED to pass, so every
-/// article is held to a size that has actually been round-tripped through the real tool rather than to an
-/// inferred threshold. Two articles outside this suite's scope — page-schema-handlers and
-/// mobile-page-modification — are over it today and have the same defect; they are not ENG-96212's to fix.
+/// published. <see cref="MaxResponseCharacters"/> sits BELOW the largest size observed to pass, so every
+/// article is held to a size that has actually been round-tripped through the real tool, with room left
+/// for the two moving parts this repository does not own — the harness limit and clio's envelope. Two
+/// articles outside this suite's scope — page-schema-handlers and mobile-page-modification — are over the
+/// cliff today and have the same defect; they are not ENG-96212's to fix.
 /// </summary>
 [TestFixture]
 public sealed class ProcessGuideResponseSizeTests
 {
     /// <summary>
-    /// The largest get-guidance response observed to return whole instead of spilling. See the class
-    /// summary for the four measurements this is drawn from.
+    /// The budget, set DELIBERATELY BELOW the largest response observed to survive the round trip
+    /// (32,698 characters — see the class summary). That observation is a single data point at a single
+    /// moment, and two of the things it depends on are not this repository's to hold still: the harness's
+    /// token limit, and the size of the envelope clio wraps the article in. Sitting exactly on a measured
+    /// ceiling means the first change to either one turns a passing article into a spilling one with no
+    /// warning, so the margin is part of the contract rather than slack in it.
     /// </summary>
-    private const int MaxResponseCharacters = 32_698;
+    private const int MaxResponseCharacters = 30_000;
 
     /// <summary>
     /// The response carries the article inside a JSON envelope — feedback policy, name, uri, itemId,
     /// topicId, libraryVersion, digest and the resolved local path. Measured at 1,218 and 1,258 characters
-    /// on two articles; 1,400 is the allowance so a longer itemId cannot quietly eat the margin.
+    /// on two articles; 1,400 is the allowance so a longer itemId cannot quietly eat the margin. The
+    /// envelope is built by the clio repository, so treat this as an estimate that repository can
+    /// invalidate, not as a contract this one enforces — which is the other reason the budget above keeps
+    /// room under the measured ceiling.
     /// </summary>
     private const int EnvelopeAllowance = 1_400;
 
-    private static readonly string[] ProcessArticles =
-    [
-        "guidance/mcp/guides/processes/process-modeling.md",
-        "guidance/mcp/guides/processes/naming.md",
-        "guidance/mcp/guides/processes/data-elements.md",
-        "guidance/mcp/guides/processes/parameters.md",
-        "guidance/mcp/guides/processes/perform-task.md",
-        "guidance/mcp/guides/processes/send-email.md",
-        "guidance/mcp/guides/processes/activity-connections.md",
-        "guidance/mcp/guides/processes/process-script-task.md",
-        "guidance/mcp/guides/processes/run-process-button.md"
-    ];
+    /// <summary>
+    /// Every article in the processes folder. The size limit is a property of the TRANSPORT, so it binds
+    /// the two guides the split did not touch exactly as much as the seven it produced.
+    /// </summary>
+    private static readonly string[] ProcessArticles = ProcessGuideSet.AllPaths;
 
     [Test]
     [Description("Every process article fits in one get-guidance response, so an agent can read it whole.")]
