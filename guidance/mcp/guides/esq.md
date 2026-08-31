@@ -29,7 +29,7 @@ The DataService SelectQuery request envelope
   - `rootSchemaName` (string): the entity being queried. Required.
   - `operationType` (int): 0 = Select. (Obsolete/ignored server-side on the DTO but every client still sends 0; include it.)
   - `columns` (object): a `{ "items": { "<alias>": <SelectQueryColumn> } }` map — see Columns below.
-  - `allColumns` (bool): true selects all schema columns; usually false with an explicit `columns` map.
+  - `allColumns` (bool): true selects all schema columns, including Blob, Image, and File values when the schema contains them. Use false with an explicit `columns` map for exploratory reads; a binary column can make even a small row set exceed the MCP response budget.
   - `rowCount` (int): max rows; -1 = no limit (the default). Set a small positive value when validating a filter.
   - `rowsOffset` (int): paging offset; pair with `isPageable: true`.
   - `isPageable` (bool), `isDistinct` (bool), `useLocalization` (bool), `ignoreDisplayValues` (bool): common toggles.
@@ -151,6 +151,7 @@ Worked example: count Contacts created this year, owned by the current user
 Running a query with execute-esq
 - Build the SelectQuery and run it with the `execute-esq` tool to read data from a live environment — the returned rows are the query result.
 - Response shape: `execute-esq` returns `{ success, count, rows }`. `rows` is the array of result records and `count` is the NUMBER OF ROWS — not your aggregate. For a COUNT(Id) query the answer is the aggregate value inside `rows[0]` under your column alias (e.g. `rows[0].RecordsCount`), and `count` is just 1. Result rows also include the record `Id` even when you did not select it.
+- When `get-tool-contract` for `execute-esq` advertises `error-class=result-too-large`, Clio caps the raw DataService response at 200000 UTF-8 bytes before MCP serialization. A larger response returns `{ "success": false, "error-class": "result-too-large", "error": "..." }`; it does not return partial rows. Recover by selecting only the required `columns.items`, lowering `rowCount`, or paging with `rowsOffset` plus `isPageable: true`, then retry. Do not retry the same broad `allColumns: true` query unchanged. Older Clio builds do not guarantee this bounded failure, so avoid broad `allColumns: true` reads there too.
 - Running a query is also the fastest way to check a filter: a successful call confirms the schema name, every column path, and the whole filter tree parse and resolve. To check a filter before saving it anywhere, (1) take the filter group you plan to use, (2) wrap it in a SelectQuery with a single COUNT(Id) aggregation and the same `rootSchemaName`, (3) execute it, (4) compare the count to expectations, (5) only then commit it to its destination. This catches wrong paths, wrong lookup objects, and wrong macros before they reach a page.
 
 Related guidance

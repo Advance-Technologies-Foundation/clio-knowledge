@@ -9,6 +9,7 @@ For brand colours, fonts, and custom themes read the theming guide (`get-guidanc
 Constraints
 - Every branding asset here is an environment-wide (All-Users) setting, not per-user: applying one changes the look for every user after a page refresh. The favicon needs more: the user must sign out and back in, and an already-open browser tab may keep the old icon until it is closed and reopened. Tell them so whenever it changes.
 - Branding writes require the `CanCustomizeBranding` license. Check up front with `check-theming-access` (`canCustomizeBranding` in the response); when it is false, stop — do not upload or write anything — and tell the user something like: "Custom branding is not available for the Growth plan. Upgrade your subscription to Enterprise or Unlimited."
+- A successful access check proves the branding licence/rights only; it does not probe every transport used by the asset tools. `set-logo` writes Binary system settings, while `upload-image` and the file form of `set-background-image` authenticate to the image API. One path may therefore work while the other is blocked by authentication, proxy, or CSRF configuration. Relay the failing tool's exact error and diagnose that path; do not reinterpret an image-API failure as a licensing failure or use a successful logo write as proof that background upload must work.
 - Applying a logo cannot be automatically reverted by clio; warn the user before writing one.
 
 Target package (data delivery)
