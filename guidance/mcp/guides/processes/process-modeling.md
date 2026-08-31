@@ -169,15 +169,20 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
      "object": "<EntityName>", "recordId": { one of {"recordId": "<GUID or the [#Lookup…#] macro describe
        reports>"} | {"processParameter": "<Name>"} | {"sourceElement": "<Element>", "sourceElementParameter":
        "<Output>"} },
-     "purpose"?: "text shown to the approver", "allowDelegation"?: true|false,
+     "purpose"?: "text shown to the approver",
+     "approver": { "type": "user"|"manager"|"role",
+       "employee"?: "<user name, id, or [#SysVariable.CurrentUser#]>",  // user / manager only
+       "role"?: "<role name or id>" },                                  // role only
+     "allowDelegation"?: true|false,
      "notifyApprover"?: { "emailTemplate": "<template name or id>" },
      "notifyAuthor"?: { "emailTemplate"?: "<template name or id>",
        "recipient"?: { one of {"value": "a@b.com"} | {"processParameter": "<Name>"} } },
      "ignoreEmailErrors"?: true|false } }`.
   Rules, and the two that will bite you are the last two:
-  * `object` + `recordId` are required on a FIRST configuration; both are mandatory in the designer and the
-    runtime cannot raise a visa without them. A fixed `recordId` must be a record OF `object` — a foreign id
-    is REFUSED, because the designer renders that field blank and the next human save wipes the element.
+  * `object` + `recordId` + `approver` are required on a FIRST configuration; the runtime cannot raise a visa
+    without a record, and an approval nobody is assigned to cannot be acted on. A fixed `recordId` must be a
+    record OF `object` — a foreign id is REFUSED, because the designer renders that field blank and the next
+    human save wipes the element.
   * Supplying `notifyApprover` / `notifyAuthor` switches that notification ON; the flag and its template are
     written together because the runtime gates the send on the flag. There is NO way to switch one off
     through the block — a cleared template is indistinguishable from one never set; use `addMapping` against
@@ -186,9 +191,17 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
     too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
   * The visa schema, its master column and the section are DERIVED from `object` server-side (with the
     platform's `SysApproval` fallback when the object has no approval settings) and are never caller input.
-  * **The APPROVER is not part of this contract.** Who approves — user / role / employee's manager — is a
-    separate surface, so an element you build here is INCOMPLETE until a human sets the approver in the
-    designer. Say so when you build one; do not report it as a finished approval step.
+  * `approver` sets WHO approves. `user` is a named user, `role` is a group (every user of the role sees the
+    visa), and `manager` approves through the chain — for `manager`, `employee` names the person WHOSE
+    manager approves, not the manager. The user or role is CHECKED TO EXIST against the same set the
+    designer's own picker offers, and an ambiguous NAME is refused so you pass the id rather than silently
+    get whichever row came back first. An omitted `employee` takes the designer's one-click default, the
+    current user; the block itself is NOT defaulted, though — omitting `approver` on a first configuration is
+    refused, because making whoever ran the build the approver routes real approvals to somebody nobody
+    chose. On a modify, omitting it keeps the approver the element already has. Supplying it REPLACES the
+    approver whole — the field belonging to the type you switched AWAY from is cleared, exactly as the
+    designer does, so a switch leaves no contradictory leftover. Formula and system-setting sources are not
+    offered.
   * **The outcome cannot be branched on.** Approved / rejected / canceled arrives in the element's
     `ResultParameter` output, but routing it needs a gateway and conditional flows, which are not buildable
     (below). So `approval` gives you a configured approval STEP, not an approval FLOW. Note the outcome set
@@ -628,8 +641,8 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `readData`/ReadDataUserTask. TWO user tasks have their own dedicated build type and should NOT be built as a
 generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
 (mode/sender/recipients/subject/body/options/performer; no email templates); and `approvalUserTask` ->
-`type:"approval"` — approval object + record, delegation and the two email notifications, but NOT the
-approver and NOT branching on the outcome. See "What you can build today" for both.)
+`type:"approval"` — approval object + record, the approver, delegation and the two email notifications, but
+NOT branching on the outcome. See "What you can build today".)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
