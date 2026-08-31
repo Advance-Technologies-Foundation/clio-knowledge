@@ -20,7 +20,9 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — the guide carries the three-step recipe
+  - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
+  - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
