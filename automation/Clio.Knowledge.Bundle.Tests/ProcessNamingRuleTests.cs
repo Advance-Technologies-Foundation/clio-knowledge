@@ -61,6 +61,7 @@ public sealed class ProcessNamingRuleTests
     private const string NamingArticle = "process-naming";
     private const string NamingGuide = "guidance/mcp/guides/processes/naming.md";
     private const string DescriptorGuide = "guidance/mcp/guides/processes/process-modeling.md";
+    private const string ParametersGuide = "guidance/mcp/guides/processes/parameters.md";
     private const string BundleSource = "bundle-source.json";
     private const string CoreRulesGuide = "guidance/mcp/guides/core-rules.md";
     private const string PrefixOwnerGuide = "guidance/mcp/guides/applications/app-modeling.md";
@@ -74,7 +75,7 @@ public sealed class ProcessNamingRuleTests
     /// every example scan below reads the SET rather than one file; scanning only the entry article would
     /// still pass while silently guarding nothing but the descriptor.
     /// </summary>
-    private static readonly string[] ProcessGuides = ProcessGuideSet.SplitPaths;
+    private static string[] ProcessGuides => ProcessGuideSet.SplitPaths(FindRepositoryRoot());
 
     /// <summary>
     /// Every rule the section ships. A dropped or renumbered rule fails here rather than silently
@@ -248,13 +249,20 @@ public sealed class ProcessNamingRuleTests
     [Description("The Build recipe and Parameters citations resolve to the process-naming article rather than dangling.")]
     public void NamingCitations_ShouldResolveToTheNamingArticle()
     {
-        string guideNormalized = Normalize(ReadProcessGuides());
+        // Each pointer is asserted against the file that must CARRY it, not against the concatenation of
+        // all seven. Read from the concatenation these assertions still pass once a pointer has been moved
+        // into an unrelated article — which is the opposite of what the because-clauses claim, and after a
+        // split "which article states this" is the whole question.
+        string buildRecipe = Normalize(ReadGuide(DescriptorGuide));
+        string parameters = Normalize(ReadGuide(ParametersGuide));
 
-        guideNormalized.Should().Contain($"name them per {RuleRange} in `{NamingArticle}`",
-            because: "Build recipe step 1 is where the model plans the graph — the naming pointer has to be there, "
-                + "and a pointer no test guards is a pointer a later edit drops");
-        guideNormalized.Should().Contain($"Name a process parameter per N8 in `{NamingArticle}`",
-            because: "the parameters article introduces parameters[].name; N8 governs it and must be cited there");
+        buildRecipe.Should().Contain($"name them per {RuleRange} in `{NamingArticle}`",
+            because: "Build recipe step 1 is where the model plans the graph, and the recipe lives in the entry "
+                + "article — the naming pointer has to be there, and a pointer no test guards is a pointer a "
+                + "later edit drops");
+        parameters.Should().Contain($"Name a process parameter per N8 in `{NamingArticle}`",
+            because: "the parameters article is where parameters[].name is introduced; N8 governs it and must "
+                + "be cited at that introduction rather than somewhere in the set");
 
         // Since ENG-96212 the citation crosses an ARTICLE boundary, so resolving it takes two things that
         // a same-file "see below" never needed: the section must exist at the destination, and the

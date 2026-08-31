@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
@@ -35,7 +36,7 @@ public sealed class ProcessGuideCrossReferenceTests
         List<string> dangling = [];
         int scanned = 0;
 
-        foreach (string relativePath in ProcessGuideSet.SplitPaths)
+        foreach (string relativePath in ProcessGuideSet.SplitPaths(repositoryRoot))
         {
             string text = ReadArticle(repositoryRoot, relativePath);
             string headings = string.Join(" | ", Heading.Matches(text).Select(m => m.Groups[1].Value));
@@ -96,11 +97,11 @@ public sealed class ProcessGuideCrossReferenceTests
     {
         string repositoryRoot = FindRepositoryRoot();
         Dictionary<string, string> ownerByPath = ProcessGuideSet.SplitItemIds
-            .Zip(ProcessGuideSet.SplitPaths)
+            .Zip(ProcessGuideSet.SplitPaths(repositoryRoot))
             .ToDictionary(pair => pair.Second, pair => pair.First);
 
         List<string> unattributed = [];
-        foreach (string relativePath in ProcessGuideSet.SplitPaths)
+        foreach (string relativePath in ProcessGuideSet.SplitPaths(repositoryRoot))
         {
             string text = ReadArticle(repositoryRoot, relativePath);
             foreach ((string marker, string owner) in MovedSectionMarkers)
@@ -146,7 +147,7 @@ public sealed class ProcessGuideCrossReferenceTests
     {
         string repositoryRoot = FindRepositoryRoot();
         string routing = ReadArticle(repositoryRoot, "guidance/mcp/guides/routing.md");
-        string entry = ReadArticle(repositoryRoot, ProcessGuideSet.SplitPaths[0]);
+        string entry = ReadArticle(repositoryRoot, ProcessGuideSet.SplitPaths(repositoryRoot)[0]);
 
         string[] missingFromRouting = ProcessGuideSet.SplitItemIds
             .Where(itemId => !routing.Contains($"name={itemId}", StringComparison.Ordinal))
@@ -163,6 +164,40 @@ public sealed class ProcessGuideCrossReferenceTests
             because: "process-modeling keeps the legacy uri and is where a reader following an old pointer "
                 + "lands; if it does not index its siblings, the split turns one reachable article into one "
                 + "reachable article and six orphans");
+    }
+
+    /// <summary>
+    /// The token routing uses to name a guide, matching the extraction in
+    /// <c>automation/Clio.Knowledge.OracleCapture/Program.cs</c>.
+    /// </summary>
+    private static readonly Regex RoutingName = new(@"\bname=([a-z0-9][a-z0-9-]*)", RegexOptions.Compiled);
+
+    [Test]
+    [Description("Every name= token in the routing map resolves to a topic get-guidance can actually serve.")]
+    public void Routing_ShouldOnlyNameDeclaredGuidanceTopics()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string routing = ReadArticle(repositoryRoot, "guidance/mcp/guides/routing.md");
+
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        HashSet<string> declared = manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Select(resource => resource.GetProperty("itemId").GetString()!)
+            .ToHashSet(StringComparer.Ordinal);
+
+        string[] routed = RoutingName.Matches(routing)
+            .Select(match => match.Groups[1].Value)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+
+        routed.Should().HaveCountGreaterThan(20,
+            because: "routing names most of the library; a token scan that found only a handful would be "
+                + "matching something other than the routing rows and would prove nothing");
+        routed.Where(name => !declared.Contains(name)).Should().BeEmpty(
+            because: "routing is the map an agent reads before choosing a guide, so a row naming a topic the "
+                + "manifest does not declare sends the reader to a get-guidance call that cannot succeed — "
+                + "a misspelling here is indistinguishable from the article not existing");
     }
 
     private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();

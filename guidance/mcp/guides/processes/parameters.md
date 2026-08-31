@@ -31,7 +31,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   creates one). A Lookup default IS settable through `value` as a bare record Guid
   (same version story as the parameters note above).
 - Remove a parameter with `removeParameter` (parameterName; blocked when another parameter's value or an
-  element mapping still references it).
+  element mapping still references it). That block is the platform refusing a dangling reference, not the
+  modify path validating your edit — it validates nothing. On an EXISTING customer process the
+  describe-first and confirm-the-removal rules in `process-modeling` still apply.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).
