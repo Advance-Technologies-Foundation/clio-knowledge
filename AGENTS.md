@@ -7,7 +7,7 @@
 This repository is the knowledge control plane for Clio. It owns guidance content, advisories, capability identifiers, reference-example metadata, validation contracts, and publication automation. It does not own Clio executable behavior or complete reference workspaces.
 
 ## Working rules
-
+asdasdasdasdasdasd
 - Read `README.md` and `CONTRIBUTING.md` before making a change.
 - Keep content human-readable in source control. Markdown, YAML, and JSON are preferred source formats.
 - Do not add complete reference workspaces or copied application source. Reference immutable releases or commits in the catalog.
