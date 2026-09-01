@@ -66,7 +66,9 @@ guide rather than `process-modeling`.
                       Verify against the environment before trusting either id.
                       Set it as a bare record Guid in `value`. The route ships from CrtProcessBuilder
                       1.3.1.1, and a CURRENT clio additionally refuses any environment older than the
-                      version it bundles.
+                      version it bundles. From 1.3.2.3 the server also resolves the record's NAME into the
+                      parameter's display value, so the designer's "Task category" field shows `Call`
+                      rather than the raw Guid, and describe reports it as `valueDisplay` (see NOTE-2).
                       A stale environment surfaces as ONE OF TWO refusals, and both mean YOUR ENVIRONMENT IS BEHIND,
                       not that the parameter is unsettable: a current clio refuses the call UP FRONT with its
                       package-convergence message naming both versions and the install hint; an older clio
@@ -162,13 +164,37 @@ NOTE-1 (the performer): "Who performs the task?" has TWO layers, and picking the
 
 NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue), not a formula. The element's
   allowed-results list is computed from the category ONLY when the category's source is ConstValue (the
-  platform's `GetResultParameterAllValues` reads `SourceValue.Value` only for a ConstValue source); writing it
-  as a `[#Lookup...#]` expression sets the Activity's category column but SILENTLY DEGRADES the allowed-results
-  list the task page / designer result dropdown offers, falling back to the default set. Do NOT try to verify
-  the degradation through the `Activity.AllowedResult` column — that column derives from outgoing CONDITIONAL
-  flows, not from the category, and is empty either way on a process without them. So the bare-Guid `value` is
-  the only correct route; on a pre-1.3.1.1 package the parameter cannot be set correctly — update the package
-  rather than using the expression form.
+  platform's `GetResultParameterAllValues` reads `SourceValue.Value` only for a ConstValue source — client-side
+  and server-side alike); writing it as a `[#Lookup...#]` expression sets the Activity's category column but
+  SILENTLY DEGRADES the allowed-results list the task page / designer result dropdown offers, falling back to
+  the default set. Do NOT try to verify the degradation through the `Activity.AllowedResult` column — that
+  column derives from outgoing CONDITIONAL flows, not from the category, and is empty either way on a process
+  without them. So the bare-Guid `value` is the only correct route; on a pre-1.3.1.1 package the parameter
+  cannot be set correctly — update the package rather than using the expression form.
+
+  This is also what the DESIGNER stores. Measured across the designer's own output, a lookup constant a human
+  picks is `{Source: ConstValue, Value: <bare record Guid>}` on the element parameter, with the record's NAME —
+  not the id — in the parameter's DisplayValue. The `[#Lookup...#]` macro form the designer does produce belongs
+  to a different place: a change-data COLUMN mapping, where the value is a formula in its own right. Do not
+  carry the macro across to an element parameter because you saw it in a designer-authored schema.
+
+  DisplayValue is where a design-time defect used to live and is worth understanding, because it is invisible
+  in `metadata.json`: it is a LOCALIZABLE string, so it is serialized into the schema's RESOURCES
+  (`BaseElements.<Element>.Parameters.<Param>.DisplayValue`), not into the metadata beside `Value`. The designer
+  shows a NON-EMPTY DisplayValue verbatim and resolves the record name itself only when it is EMPTY — so a
+  DisplayValue holding the raw id made the "Task category" field render `03df85bf-…` instead of `Call`, while
+  the runtime behaved correctly the whole time. From CrtProcessBuilder 1.3.2.3 the server resolves the
+  referenced record's name and stores THAT, and leaves DisplayValue unset when it cannot (which is the correct
+  degrade — the designer then resolves the name). Nothing about the input contract changed: you still pass a
+  bare record Guid.
+
+  Two conveniences shipped with it, both from 1.3.2.3:
+  * an already-composed `[#Lookup.{objectUId}.{recordId}#]` passed as `value` on a Lookup target is DECODED to
+    the bare record id and stored as a ConstValue — so a value echoed back from describe re-submits unchanged.
+    This does not make the expression form correct here; it makes the round trip safe;
+  * `describe-business-process` reports the resolved name as `valueDisplay` beside the unchanged bare-Guid
+    `value`. `valueDisplay` is read-only and re-derived on every write — never feed it back as `value`. Its
+    absence means the environment could not name the record, NOT that the value is wrong.
 
 --- Worked example: "Call the client, due in 2 days, assigned to the process starter" ---
 1) create-business-process
