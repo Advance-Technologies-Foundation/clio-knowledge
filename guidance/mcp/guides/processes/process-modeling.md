@@ -66,11 +66,9 @@ article from what this one says; read that article.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
   manual-mode performer. `process-send-email` owns the contract and its limits.
-- Approval: `approval` (the Approval element / ApprovalUserTask) is BUILDABLE and configurable through its
-  `approval` block — the object and record under approval, WHO approves, delegation and the two email
-  notifications. What it does NOT give you is branching on the verdict: routing approved/rejected/canceled
-  needs a gateway, which is not buildable, so say "a configured approval STEP, not an approval FLOW".
-  `process-approval` owns the contract and its limits.
+- Approval: `approval` (the Approval element / ApprovalUserTask) is BUILDABLE through its `approval` block —
+  object and record, who approves, delegation, the two notifications. It gives a configured approval STEP,
+  not an approval FLOW: branching on the verdict needs a gateway. `process-approval` owns the contract.
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
@@ -167,15 +165,11 @@ article from what this one says; read that article.
 
 == Set what was asked for, and nothing else ==
 - An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
-  behaviour the requester never chose (a flag left out keeps the platform's own value, which is not always
-  the falsy one), and it destroys the "nobody decided this" signal — `describe-business-process` reports
-  what is WRITTEN, so absence means "not set", never "off".
-- Set an unrequested field only when the request implies it unambiguously. For fields that genuinely
-  cannot be omitted the server REFUSES rather than defaulting, and names what is missing — so you will be
-  told; never pre-empt that by inventing a value.
-- When the field the server names is a BUSINESS decision the request did not make — who approves, who
-  performs, whom to notify — ASK. Carrying the value over from another process you built earlier in the
-  same session is a guess wearing the clothes of context: nobody chose it for THIS process.
+  behaviour nobody chose (a flag left out keeps the platform's value, not always the falsy one) and erases
+  the "not decided" signal — describe reports what is WRITTEN, so absence means "not set", never "off".
+- Required fields need no guessing: the server REFUSES and names what is missing. When what it names is a
+  BUSINESS decision the request did not make — who approves, who performs, whom to notify — ASK. A value
+  carried over from a process you built earlier in the session is a guess wearing the clothes of context.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
@@ -203,8 +197,7 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `readData`/ReadDataUserTask. TWO user tasks have their own dedicated build type and must NOT be built as a
 generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
 (mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`; and
-`approvalUserTask` -> `type:"approval"` — the object and record under approval, the approver, delegation and
-the two email notifications, see `process-approval`.)
+`approvalUserTask` -> `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
