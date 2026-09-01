@@ -72,6 +72,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   `allowDelegation: false`). For the fields that genuinely cannot be left out — `object`, `recordId`,
   `approver`, and each notification's template and recipient — the server refuses rather than defaulting, so
   you will be told; do not pre-empt it by inventing a value.
+- **When a REQUIRED field is a business decision the request did not make, ASK — do not carry one over.**
+  `approver` is the case that matters: it is required precisely because it decides who receives real
+  approvals, which is why nothing defaults it. A request that says what to approve but not who signs it off
+  is incomplete, and the honest response is a question. Reusing the approver from another process you built
+  earlier in the same session looks like context and is a guess: nobody chose it for THIS process, and the
+  result is an approval routed to a team that was never asked. The same applies to the notification
+  recipient — an address is a person, not a formatting detail.
 - The visa schema, its master column and the section are DERIVED from `object` server-side (with the
   platform's `SysApproval` fallback when the object has no approval settings) and are never caller input.
 - **The outcome cannot be branched on.** Approved / rejected / canceled arrives in the element's

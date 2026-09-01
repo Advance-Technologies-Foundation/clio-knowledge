@@ -173,6 +173,9 @@ article from what this one says; read that article.
 - Set an unrequested field only when the request implies it unambiguously. For fields that genuinely
   cannot be omitted the server REFUSES rather than defaulting, and names what is missing — so you will be
   told; never pre-empt that by inventing a value.
+- When the field the server names is a BUSINESS decision the request did not make — who approves, who
+  performs, whom to notify — ASK. Carrying the value over from another process you built earlier in the
+  same session is a guess wearing the clothes of context: nobody chose it for THIS process.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
