@@ -107,10 +107,16 @@ filter — the runtime evaluates an empty group as matching everything — so `o
 refused for the same reason — on a `setElement` update too, where the element's STORED group is the one measured.
 (The designer permits that state, so a process read back with `onConditions` and no conditions completes on every
 save regardless of what its card suggests; switching such an element to `onConditions` is refused until it has real
-conditions.) The rule holds in the REVERSE direction too, which is the part
-that surprises callers: switching an element back to `onSave` while its filter is still stored is refused, so
-order the operations `clearFilter` then `setElement` (one ordered batch is atomic). On `setElement` the mode is
-validated against the element's STORED filter, because that operation carries no filter field of its own. Where several Open edit page elements for the SAME object
+conditions.) On `setElement` the mode is validated against the element's STORED filter, because that operation
+carries no filter field of its own.
+ON THIS ELEMENT `setFilter` AND `clearFilter` MOVE THE COMPLETION MODE THEMSELVES, which is the surprise worth
+planning for: they change what the step DOES through an operation that names only its conditions. `setFilter` with
+real conditions switches the step to `onConditions`; with an EMPTY group it leaves the mode OFF (an empty group
+matches everything, so calling it conditions is the contradiction the pairing rule prevents); `clearFilter`
+returns it to `onSave`. A targeted "just add the conditions" edit therefore turns a completes-on-save step into a
+conditional one — say so when you make one. They move together because a bare `setFilter` reaches this element
+without passing through the `openEditPage` block that owns the pairing rule. So `clearFilter` alone now returns an
+element to `onSave`; a following `setElement` with `mode: "onSave"` is a harmless no-op, not a required step. Where several Open edit page elements for the SAME object
 sit in parallel branches, give each its own completion condition — otherwise they complete together.
 `defaultValues` is the whole "Which default values to set in the fields of new records?" block: a supplied array
 REPLACES the stored set (so removing ONE field means sending the others), and an EMPTY array `[]` removes them
