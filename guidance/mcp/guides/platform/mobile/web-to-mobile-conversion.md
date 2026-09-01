@@ -17,10 +17,11 @@ Creatio or disk. The guide contains:
   - recommendedMobileTemplate + templateNote — the mobile template to create the page from.
   - containerMap — web→mobile container-name correspondence; use it to set each
     component's parentName to the correct mobile container. It is a PLACEMENT map, not an identity
-    map: a pair may name two DIFFERENT mobile elements (GeneralInfoTab→GeneralTabContainer pairs the
-    web tab with the mobile tab's content grid), and it is MANY-TO-ONE — several web containers can
-    resolve to one mobile container. Use it to answer "where does this element's content go", never
-    "which mobile element IS this".
+    map: a pair may name two DIFFERENT mobile elements (CardContentWrapper→GeneralTabContainer pairs
+    the web card wrapper with the mobile general tab's content grid; CardToggleTabPanel→Tabs), and it
+    is MANY-TO-ONE — several web containers can resolve to one mobile container. Use it to UNDERSTAND
+    why an entry's parentName is what it is — never to decide placement yourself (elementMap owns
+    that, see ELEMENT PLACEMENT IS AUTHORITATIVE), and never to answer "which mobile element IS this".
   - sourceStructure — the full resolved component tree (incl. components inherited from the
     base template), with name / type / parentName / isContainer.
   - componentSuggestions — per source component TYPE: a category (directMapping /
@@ -32,6 +33,11 @@ Creatio or disk. The guide contains:
     re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
     parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
     IS AUTHORITATIVE in HARD MOBILE RULES.
+  - tabStripPlacementLosses — elements the element map would place directly in a mobile tab strip
+    (crt.TabPanel) without being tabs. A strip renders ONLY crt.TabContainer children, so each of
+    these — and everything nested inside it — is LOST from the converted page. Present ONLY when the
+    conversion is incomplete; absent on a healthy one. constraints carries the same list as prose,
+    but read the FIELD. See ELEMENT PLACEMENT IS AUTHORITATIVE for what to do about it.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED
@@ -133,7 +139,8 @@ FLOW
 4. Build the mobile body (plain JSON: viewConfigDiff / viewModelConfigDiff / modelConfigDiff)
    by iterating elementMap. For each entry act on its operation:
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
-     FeedTabContainer→FeedContainer, GeneralInfoTab→GeneralTabContainer). REUSE the existing
+     FeedTabContainer→FeedContainer, GeneralInfoTab→GeneralInfoTab,
+     GeneralInfoTabContainer→GeneralTabContainer). REUSE the existing
      mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
      also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
@@ -162,12 +169,16 @@ FLOW
      web tab, below); otherwise omit index and append. On a tabbed record page every web tab the PAGE
      authored inserts as its OWN new mobile tab under Tabs — page tabs are never collapsed onto the
      general one. The web TEMPLATE's own general-information tab is the exception, and it is not an
-     insert at all: it arrives as a MERGE whose mobileName is the mobile general tab's CONTENT
-     container (GeneralInfoTab→GeneralTabContainer in guide.containerMap), so its content lands in
-     that container and NO second general tab is ever inserted. Read the operation off the entry —
-     do not decide "tab ⇒ insert" from the fact that the web element is a tab.
-     The web wrapper's non-tab (side/profile) content fills that same mobile general tab's grid,
-     EXCEPT the profile island itself:
+     insert at all: it is a MERGE twin (GeneralInfoTab→GeneralInfoTab), so NO second general tab is
+     ever inserted under Tabs. Its content grid is a SEPARATE merge twin
+     (GeneralInfoTabContainer→GeneralTabContainer). Where the page's content lands therefore follows
+     where the WEB page put it: a page that KEPT the template's GeneralInfoTabContainer has its
+     content land in the mobile GeneralTabContainer, and a page that REMOVED it has its content land
+     in the mobile GeneralInfoTab's own body. Both sit inside the Details tab and both can host
+     content — take each entry's parentName as given rather than assuming one of them. Read the
+     operation off the entry — do not decide "tab ⇒ insert" from the fact that the web element is a tab.
+     The web card wrapper's non-tab (side/profile) content fills the mobile general tab's content GRID
+     (CardContentWrapper→GeneralTabContainer), EXCEPT the profile island itself:
      it merges into the template's profile Area card rather than landing in that grid — its children
      go INSIDE that Area card, never directly into the general tab's grid, and it must NOT be left
      empty. Take both container names from guide.containerMap, which already carries the pair for the
@@ -337,13 +348,12 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   operand type is supported in a mobile page-rule condition (attribute, const, formula, system-value,
   system-setting). Recreate each convertedRules[] entry by
   passing its `rule` VERBATIM to create-page-business-rule on the MOBILE page (after approval).
-  droppedRules[] did not convert — report them. A rule lands there when every referenced element
-  drops, and ALSO when the only elements it references are containerMap PLACEMENT pairs whose two
-  sides are different mobile elements (a web tab paired with the mobile tab's content grid, e.g.
-  GeneralInfoTab→GeneralTabContainer). Such a pair is deliberately NOT treated as an identity:
-  retargeting "hide GeneralInfoTab" onto GeneralTabContainer would blank the tab's body while leaving
-  its header in the strip. Recreate that rule by hand against the element you actually mean — do not
-  "repair" the drop by substituting the mobile name from containerMap.
+  droppedRules[] did not convert — report them; the entry's reason names the cause.
+  CAVEAT on the other side: a rule that targets a container whose containerMap pair names a DIFFERENT
+  mobile element (FeedTabContainer→FeedContainer, AttachmentsTabContainer→AttachmentsContainer) is
+  NOT dropped — it converts with the action retargeted onto that mobile name, i.e. onto the tab's
+  BODY rather than the tab itself. Inspect each convertedRules[] entry's action targets before
+  passing the rule to create-page-business-rule, and tell the user about any that were retargeted.
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
   ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
@@ -363,7 +373,11 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   because of its type, because get-component-info calls some other component its "typical parent" /
   "container" / lists it under "parent types", or because a component "usually" lives somewhere else.
   get-component-info describes a component's SHAPE in ISOLATION — it is generic and does NOT override the
-  per-page placement in elementMap; when the two disagree, elementMap wins, always. Overriding the
+  per-page placement in elementMap; when the two disagree, elementMap wins, always.
+  ONE exception, and only this one: when guide.tabStripPlacementLosses is present, the placement of
+  those named entries is known to be WRONG — the converter could not resolve where they belong. Do
+  NOT apply them, and do NOT invent a parent for them: REPORT the list to the user and STOP.
+  Inventing a replacement is a second unverifiable placement, not a fix. Overriding the
   guide's placement (improvising a "better" parent) is the #1 cause of a component that renders but does
   not work. Worked example (illustration only — the parent is whatever the ENTRY names, never a fixed
   value): when the guide returns a quick filter with `parentName: HeaderContainer, propertyName: items`,
