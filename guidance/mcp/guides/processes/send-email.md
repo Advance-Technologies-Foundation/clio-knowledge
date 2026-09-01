@@ -30,7 +30,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four.
   That is an AUTHORING rule, not a tool contract — neither the build nor the platform save enforces any of
   them (the designer itself saves an auto element with unfilled required fields after a warning dialog —
-  designer specimen capture, ENG-92706), so every omission surfaces only at RUN time, on a process that
+  designer specimen capture), so every omission surfaces only at RUN time, on a process that
   built green. The `body` omission is the trap that motivates the rule: the build reports success,
   `describe-business-process` reports success too — `hasBody:false` is the ONLY trace, so read the element
   back and check it — and the run fails with `Localizable template not found for record
