@@ -119,10 +119,15 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   package too old to carry it does not run it at all;
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips;
+- it must not be blank. An empty condition is not "no condition": the platform substitutes the literal
+  `true` at the use site, producing an always-taken branch nobody asked for;
 - it must be a single line. A newline is refused outright — this is the platform's own rule, and the
   package agrees with it early so the message names the usage site rather than leaving it to the pre-save
-  gate. It is not the FIRST thing checked: blank, length and the per-request budget come before it, so a
-  long two-line formula is refused for its length;
+  gate. It is not the first thing checked, so do not read a length or budget refusal on a two-line formula
+  as a contradiction;
+- it must not contain `__crtParam`. The validator reserves that prefix for its own substitution, so an
+  expression carrying it would bind to a variable this pass declares and then fail at run time as an
+  unknown identifier;
 - it must be at most **2048 characters**. That is generous for a formula but NOT for one built by
   concatenation: a metapath reference is about 60 characters, so roughly thirty of them exhaust it. The cap
   applies to the text as you write it, before macros are resolved. It also applies on the paths that store a
