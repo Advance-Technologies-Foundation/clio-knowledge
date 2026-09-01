@@ -33,9 +33,10 @@ Creatio or disk. The guide contains:
     re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
     parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
     IS AUTHORITATIVE in HARD MOBILE RULES.
-  - tabStripPlacementLosses — elements the element map would place directly in a mobile tab strip
-    (crt.TabPanel) without being tabs. A strip renders ONLY crt.TabContainer children, so each of
-    these — and everything nested inside it — is LOST from the converted page. Present ONLY when the
+  - placementLosses — elements the element map would place in a receiver that CANNOT hold them. A
+    crt.TabPanel is the commonest case (it shows only its tabs) but not the only one; which types
+    cannot host content is converter configuration, so read the field rather than assuming tabs. Each
+    of these — and everything nested inside it — is LOST from the converted page. Present ONLY when the
     conversion is incomplete; absent on a healthy one. constraints carries the same list as prose,
     but read the FIELD. See ELEMENT PLACEMENT IS AUTHORITATIVE for what to do about it.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
@@ -379,7 +380,7 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   "container" / lists it under "parent types", or because a component "usually" lives somewhere else.
   get-component-info describes a component's SHAPE in ISOLATION — it is generic and does NOT override the
   per-page placement in elementMap; when the two disagree, elementMap wins, always.
-  ONE exception, and only this one: when guide.tabStripPlacementLosses is present, the placement of
+  ONE exception, and only this one: when guide.placementLosses is present, the placement of
   those named entries is known to be WRONG — the converter could not resolve where they belong. Do
   NOT apply them, and do NOT invent a parent for them: REPORT the list to the user and STOP.
   Inventing a replacement is a second unverifiable placement, not a fix. Overriding the
