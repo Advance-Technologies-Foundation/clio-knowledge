@@ -628,6 +628,33 @@ Rules of thumb:
     through child `layoutConfig.adaptive`.
 
 ─────────────────────────────────────────────────────────────
+REQUIRED FIELDS — set isRequired on the attribute, not just the column
+─────────────────────────────────────────────────────────────
+When the request says a field is required (e.g. "customer name, phone, e-mail and driver
+licence are required"), marking the underlying entity COLUMN required is not enough for the
+mobile page: the required indicator and the client-side "please fill in" check come from the
+field's viewModel ATTRIBUTE. A body authored through update-page carries only what you write,
+so declare it there — add "isRequired": true to that field's entry in viewModelConfigDiff,
+alongside its modelConfig:
+
+  { "operation": "merge", "path": ["attributes"], "values": {
+      "UsrCustomerName": {
+        "modelConfig": { "path": "PDS.UsrCustomerName" },
+        "isRequired": true
+      }
+  } }
+
+Do this for every field the request calls required. isRequired is the standard Freedom UI
+attribute flag for a required field; it is what the designer's required marker
+(`.crt-input-required`) and the save-time validation read.
+
+Evidence: a mobile form generated with all its columns required but with NO isRequired on any
+page attribute showed no required markers at all — the attributes were bare
+`{ "modelConfig": { "path": "PDS.<Col>" } }` (ENG-96314, observed on a release run 2026-09-01,
+curated knowledge 1.13.64). Platform build not pinned; the isRequired attribute flag itself is
+canonical Freedom UI, not specific to that version.
+
+─────────────────────────────────────────────────────────────
 FIELD GROUPING IN CONTAINERS (mobile layout convention)
 ─────────────────────────────────────────────────────────────
 On mobile pages, fields MUST be grouped inside crt.GridContainer instances
