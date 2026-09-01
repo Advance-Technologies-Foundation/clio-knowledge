@@ -94,14 +94,21 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   ActivityResult      Guid. The element's RESULT (the completed activity's result record). Visible in describe
                       from the start (isResult: true). Usable as a mapping SOURCE for a downstream element via
                       `sourceElement` + `sourceElementParameter` (verified: saves, reads back as a
-                      server-built `[Element:{uid}]` metapath, and resolves at run time). You CAN branch
-                      on it: `setFlowCondition` on the flows leaving this element. One usability caveat
-                      to pass on when you do — verified on a stand: on a flow whose source is a single
-                      result-bearing activity, the designer opens the RESULTS editor for that connector,
-                      not a formula field, so a human cannot see or edit the condition there, and saving
-                      from the designer raises "Required fields of some elements are not filled in"
-                      naming that connector. The condition works and survives the save; it is simply not
-                      manageable from the UI in that topology. Say so rather than letting the owner
+                      server-built `[Element:{uid}]` metapath, and resolves at run time). You can branch
+                      on it with `setFlowCondition` — but ONLY while nothing is selected in the results
+                      editor for that connector, and that is a real limit rather than a caveat. On a flow
+                      whose source is a result-bearing activity the designer opens the RESULTS editor,
+                      not a formula field. While that selection is EMPTY the platform falls back to the
+                      formula and your condition runs. The moment an author picks a result there, the
+                      platform reads the selection and stops reading the formula entirely — a condition
+                      written afterwards is stored, describes back, and is never evaluated. clio refuses
+                      that case rather than reporting a success that changes nothing; the refusal names
+                      the activity result and tells you to clear the selection first. It affects real
+                      content: 337 of the 1 522 conditional flows shipped in 7.8.0 carry such a
+                      selection. Also expect, in this topology, that saving from the designer raises
+                      "Required fields of some elements are not filled in" naming that connector, and
+                      that a human cannot see or edit the formula there. Say so rather than letting the
+                      owner
                       discover it.
   CurrentActivityId   Guid. The created Activity's Id.
                       It is INVISIBLE in describe until bound — the name above is the only way to find it.

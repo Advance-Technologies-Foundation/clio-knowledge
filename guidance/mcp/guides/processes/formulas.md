@@ -57,9 +57,20 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
 
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
-uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form: a bare
-`Price`, `[Price]`, `[#Price#]` and `[#Process parameters.Price#]` are ALL refused. Build the token
-yourself, in two steps:
+uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form — but the
+four wrong shapes do not all fail the same way, and the difference matters:
+
+- a bare `Price` and `[Price]` are REFUSED, naming the identifier. The engine sees them and does not
+  resolve them.
+- `[#Price#]` and `[#Process parameters.Price#]` look like macros, so they are read as an unrecognised
+  macro FAMILY. On a **flow condition** clio refuses them, because nothing downstream would: a sequence
+  flow is not a parametrized element, so the platform's pre-save gate never inspects it, and such a branch
+  would save, describe back as conditional, and never be taken. On a **mapping** they are accepted with a
+  warning and then refused by the platform's own pre-save gate — with a message naming neither your token
+  nor the element, which is why the warning is worth reading rather than waiting for it.
+
+The same is true of a typo in a real family: `[#SysSettingz.Foo#]` is an unrecognised family, not an
+unknown setting. Build the token yourself, in two steps:
 
 1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
    return a ready-made meta-path, so there is nothing to copy — you assemble it);
