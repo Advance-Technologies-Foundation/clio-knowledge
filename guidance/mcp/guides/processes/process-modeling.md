@@ -165,6 +165,15 @@ article from what this one says; read that article.
   business objects, DCM, value lists, and a CUSTOM user-task schema — see the user-task note below) carry
   their own compile obligations and are NOT covered here.
 
+== Set what was asked for, and nothing else ==
+- An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
+  behaviour the requester never chose (a flag left out keeps the platform's own value, which is not always
+  the falsy one), and it destroys the "nobody decided this" signal — `describe-business-process` reports
+  what is WRITTEN, so absence means "not set", never "off".
+- Set an unrequested field only when the request implies it unambiguously. For fields that genuinely
+  cannot be omitted the server REFUSES rather than defaulting, and names what is missing — so you will be
+  told; never pre-empt that by inventing a value.
+
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
 - The modify path runs NO structural validation (only the create path validates the graph):

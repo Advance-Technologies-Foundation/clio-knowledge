@@ -57,6 +57,21 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   one. That is why the recipient is required rather than optional.
 - `purpose` omitted writes the platform default "Approval required" — that is what the designer persists
   too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
+- **Do not set an optional field the request did not mention.** Three things go wrong when you do, and the
+  first is the one that bites:
+  * **It changes behaviour.** `allowDelegation` left out keeps the platform's own value (`true` in a
+    designer-saved element). Writing `false` because the request was silent FORBIDS delegation that nobody
+    asked to forbid.
+  * **It destroys the "not decided" signal.** `describe-business-process` reports what is WRITTEN, so
+    absence means "nobody set this", never "off". Once you write `false`, no later reader — human or agent —
+    can tell a deliberate choice from a guess.
+  * **It puts words in the requester's mouth.** `purpose` is read by the person approving. The default is
+    neutral; an invented sentence is wording the requester never approved.
+
+  Set an unrequested field only when the request implies it unambiguously ("nobody else may sign it off" →
+  `allowDelegation: false`). For the fields that genuinely cannot be left out — `object`, `recordId`,
+  `approver`, and each notification's template and recipient — the server refuses rather than defaulting, so
+  you will be told; do not pre-empt it by inventing a value.
 - The visa schema, its master column and the section are DERIVED from `object` server-side (with the
   platform's `SysApproval` fallback when the object has no approval settings) and are never caller input.
 - **The outcome cannot be branched on.** Approved / rejected / canceled arrives in the element's
