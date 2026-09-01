@@ -100,7 +100,7 @@ simply the better route. For an Integer or Float parameter it is equally the rou
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
 
-WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.3. Before an `expression` mapping or a flow condition is
+WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.0 (the floor this clio requires is 1.4.0.3). Before an `expression` mapping or a flow condition is
 stored, the server validates it and REFUSES a bad one, naming what is wrong:
 
 - it must parse;
@@ -142,10 +142,10 @@ what tells you which mistake you made:
 
 | you wrote | message contains | the fix |
 |---|---|---|
-| `FormulaUtilities.Sum(1, 2)` | `is not a valid formula: No applicable method 'Sum' exists in type 'FormulaUtilities'` | the function does not exist — there is no Sum |
+| `FormulaUtilities.Sum(1, 2)` | `No applicable method 'Sum' exists in type 'FormulaUtilities'` | the function does not exist — there is no Sum |
 | `System.Math.Abs(-1)` | `it references 'System', which does not exist` | drop the namespace: `Math.Abs(-1)` |
 | `math.Round(1.5)` | `it references 'math', which does not exist` | case matters: `Math.Round(1.5)` |
-| `DateTimeUtilities.GetStartOfMonth(...)` | `is not a valid formula: No applicable method 'GetStartOfMonth' exists in type 'DateTimeUtilities'` | drop the `Get` prefix: `StartOfMonth` |
+| `DateTimeUtilities.GetStartOfMonth(...)` | `No applicable method 'GetStartOfMonth' exists in type 'DateTimeUtilities'` | drop the `Get` prefix: `StartOfMonth` |
 | `1.5` into an Integer parameter | `its result cannot be used as Int32` | the target type cannot hold it |
 | a reference to a parameter that is not there | the offending `[#…#]` token, verbatim | create the parameter, or fix the reference |
 
