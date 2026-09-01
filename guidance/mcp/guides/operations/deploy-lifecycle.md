@@ -11,9 +11,11 @@ Deploy preflight (run in this order)
    Read `status` (pass/partial/fail) and `database-candidates`.
 2. `show-passing-infrastructure` - narrow to only the choices that are safe to deploy against and read
    `recommendedDeployment` (and `recommendedByEngine`) for the deploy-creatio argument bundle.
-3. `find-empty-iis-port` - for a local Creatio deployment, take `firstAvailablePort` as the deploy `sitePort`.
-   This is a point-in-time recommendation. `deploy-creatio` reserves and revalidates that port across
-   concurrent clio processes before it changes files, databases, or IIS. Do not use this IIS-only
+3. For local IIS, omit `sitePort` to let `deploy-creatio` reserve the first available port from
+   `deploy-creatio-defaults.site-port-range`. Fresh and upgraded settings default to the inclusive range
+   `[40100, 40199]`. Use `find-empty-iis-port` only when you need to inspect or explicitly choose a port;
+   its result is a point-in-time recommendation and the deploy command still reserves and revalidates it
+   across concurrent clio processes before it changes files, databases, or IIS. Do not use this IIS-only
    preflight as a requirement for an explicit dotnet deployment.
    `deploy-identity` can call the same IIS port scanner internally when `identitySitePort` is omitted.
 4. Resolve the build archive - `deploy-creatio` needs an absolute `zipFile` path. `deploy-identity`
@@ -24,12 +26,12 @@ Deploy preflight (run in this order)
 
 Deploy
 - `deploy-creatio` is the most consequential, hardest-to-reverse tool: it drops and recreates the target
-  site. Required args: `siteName`, `zipFile` (absolute build archive path), `sitePort`. Optional:
+  site. Required args: `siteName`, `zipFile` (absolute build archive path). Optional: `sitePort`,
   `dbServerName`, `redisServerName` (omit to keep the default Kubernetes deployment path), `deployment`,
   `bindAllInterfaces`, and the HTTPS certificate fields.
 - `deployment` accepts `auto`, `iis`, or `dotnet`. `auto` selects IIS on Windows and dotnet on macOS/Linux;
-  use `deployment: "dotnet"` when a Windows caller must avoid IIS. `find-empty-iis-port` is relevant to
-  the IIS path only.
+  use `deployment: "dotnet"` when a Windows caller must avoid IIS. `find-empty-iis-port` and the configured
+  site-port range are relevant to the IIS path only.
 - For local IIS, `useHttps` is opportunistic: clio uses a pinned or deterministically selected usable
   LocalMachine/My certificate matching the host, and warns then continues with HTTP when no usable
   certificate is installed.
@@ -46,10 +48,11 @@ Deploy
   to `appsettings.json`, and MUST NOT be echoed in an MCP response, log, or public message.
 - For dotnet, leaving `useHttps` false keeps existing HTTPS endpoint configuration rather than deleting it,
   while explicit HTTPS removes the plaintext HTTP endpoints selected by the deployment.
-- Prefer the recommended bundle from `show-passing-infrastructure` and the port from `find-empty-iis-port`.
-- A port collision is a failed deployment, not permission to continue on the same port. Run
-  `find-empty-iis-port` again and retry with its new result. Deployments using different ports can run
-  in parallel.
+- Prefer the recommended bundle from `show-passing-infrastructure`. For local IIS, omit `sitePort` to use
+  the configured range. An explicit `sitePort` overrides both the configured fixed port and range.
+- An explicit port collision is a failed deployment, not permission to continue on the same port. Automatic
+  selection atomically skips a candidate claimed by another deployment and continues through the configured
+  range. Deployments using different ports can run in parallel.
 - Do not proceed if assert-infrastructure left the targeted database/Redis sections failing.
 - Deployments preserve the build database's existing forced-password-change state by default and do
   not clear it automatically. deploy-creatio does not assign a new Supervisor password.
@@ -86,7 +89,8 @@ Failure policy
 - If `assert-infrastructure` returns fail with no passing database candidates, stop with a blocker and
   report the failing sections rather than guessing a deployment target.
 - If `deploy-creatio` returns a non-zero `exit-code`, persist `execution-log-messages` and stop.
-- If the failure says `sitePort` is occupied or reserved, verify that the target was not created,
-  discover another port, and retry. Do not bypass the port check.
+- If an explicit `sitePort` is occupied or reserved, verify that the target was not created, discover another
+  port, and retry or omit the argument to use the configured range. If the configured range is exhausted,
+  free a port or configure a different valid inclusive range. Do not bypass the port check.
 - If the configured `creatio-products` folder is missing or empty, fix the path (or place a build
   there) before retrying deploy-creatio.
