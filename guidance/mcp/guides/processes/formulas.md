@@ -120,8 +120,10 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
-On an environment older than 1.4.0.0 none of THIS happens — the package does not check the formula. Between 1.4.0.0 and .2 it DOES check, against one numeric rule that disagreed with the platform's own pre-save gate, which is the whole reason the floor is .3 and not .0, so
-nothing names the offending token and nothing refuses before the write. The platform's own pre-save gate
+On an environment older than 1.4.0.0 none of THIS happens — the package does not check the formula, so
+nothing names the offending token and nothing refuses before the write. 1.4.0.0 and .1 DO check, against
+one numeric rule that disagreed with the platform's own pre-save gate; .2 already carries the corrected
+rule, and what separates .2 from the .3 floor this clio requires is a different set of fixes. The platform's own pre-save gate
 still runs at save time and still refuses what it refuses; what you lose is the early, specific message,
 and anything that gate does not cover then fails at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
