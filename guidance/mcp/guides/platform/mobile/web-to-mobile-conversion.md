@@ -16,12 +16,7 @@ supported) and returns a conversion GUIDE. It does NOT generate a body and does 
 Creatio or disk. The guide contains:
   - recommendedMobileTemplate + templateNote — the mobile template to create the page from.
   - containerMap — web→mobile container-name correspondence; use it to set each
-    component's parentName to the correct mobile container. It is a PLACEMENT map, not an identity
-    map: a pair may name two DIFFERENT mobile elements (CardContentWrapper→GeneralTabContainer pairs
-    the web card wrapper with the mobile general tab's content grid; CardToggleTabPanel→Tabs), and it
-    is MANY-TO-ONE — several web containers can resolve to one mobile container. Use it to UNDERSTAND
-    why an entry's parentName is what it is — never to decide placement yourself (elementMap owns
-    that, see ELEMENT PLACEMENT IS AUTHORITATIVE), and never to answer "which mobile element IS this".
+    component's parentName to the correct mobile container.
   - sourceStructure — the full resolved component tree (incl. components inherited from the
     base template), with name / type / parentName / isContainer.
   - componentSuggestions — per source component TYPE: a category (directMapping /
@@ -162,30 +157,19 @@ FLOW
      When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
      web tab, below); otherwise omit index and append. On a tabbed record page every web tab the PAGE
-     authored inserts as its OWN new mobile tab under Tabs — page tabs are never collapsed onto the
-     general one. The web TEMPLATE's own general-information tab is the exception, and it is not an
-     insert at all: it is a MERGE twin (GeneralInfoTab→GeneralInfoTab), so NO second general tab is
-     ever inserted under Tabs. Its content grid is a SEPARATE merge twin
-     (GeneralInfoTabContainer→GeneralTabContainer). Where the page's content lands follows where the
-     WEB page put it, and the two shapes legitimately DIFFER: a page that KEPT the template's
-     GeneralInfoTabContainer has its content land in the mobile GeneralTabContainer, while a page that
-     REMOVED that grid and put content straight under the tab has it land in GeneralInfoTab, the tab's
-     own body. Both are valid receivers — a crt.TabContainer holds items just as a crt.GridContainer
-     does — and the two web pages do not render identically either, so the conversion carries the
-     difference rather than normalising one shape into the other. Take each entry's parentName as
-     given rather than deriving it, and do not "correct" one shape to match the other. Read the
-     operation off the entry — do not decide "tab ⇒ insert" from the fact that the web element is a tab.
+     authored inserts as its OWN new mobile tab under Tabs. The web TEMPLATE's own
+     general-information tab is the exception: it is a MERGE twin (GeneralInfoTab→GeneralInfoTab), so
+     no second general tab is ever inserted, and its content grid is a separate merge twin
+     (GeneralInfoTabContainer→GeneralTabContainer). Content lands where the WEB page put it — in
+     GeneralTabContainer if the page kept that grid, in GeneralInfoTab if it removed it. Both are
+     valid receivers: take parentName as given and do not normalise one shape into the other.
      The web card wrapper's non-tab (side/profile) content fills the mobile general tab's content GRID
      (CardContentWrapper→GeneralTabContainer), EXCEPT the profile island itself:
      it merges into the template's profile Area card rather than landing in that grid — its children
      go INSIDE that Area card, never directly into the general tab's grid, and it must NOT be left
      empty. Take both container names from guide.containerMap, which already carries the pair for the
      chosen template (e.g. SideAreaProfileContainer→AreaProfileContainer); do not assume a fixed
-     pair. The island's own STYLING is template-provided and is not carried across. Its BEHAVIOUR is
-     not carried either: if the web wrapper has a BOUND `visible`, or a page business rule targets it,
-     that logic does NOT survive the merge — move it onto AreaProfileContainer, or onto each promoted
-     child, and tell the user you did. Silently dropping it hides a field that the web page hides
-     conditionally. Tab ORDER is already deterministic: every converted web tab arrives with
+     pair. Tab ORDER is already deterministic: every converted web tab arrives with
      an explicit index (1, 2, … — right after the template's general tab), so applying the inserts
      verbatim yields general tab, converted web tabs, Feed, Attachments, with the template's
      FeedTab/AttachmentsTab staying last automatically — do NOT reorder tabs or invent indexes
@@ -350,12 +334,7 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   operand type is supported in a mobile page-rule condition (attribute, const, formula, system-value,
   system-setting). Recreate each convertedRules[] entry by
   passing its `rule` VERBATIM to create-page-business-rule on the MOBILE page (after approval).
-  droppedRules[] did not convert — report them; the entry's reason names the cause.
-  CAVEAT on the other side: a rule that targets a container whose containerMap pair names a DIFFERENT
-  mobile element (FeedTabContainer→FeedContainer, AttachmentsTabContainer→AttachmentsContainer) is
-  NOT dropped — it converts with the action retargeted onto that mobile name, i.e. onto the tab's
-  BODY rather than the tab itself. Inspect each convertedRules[] entry's action targets before
-  passing the rule to create-page-business-rule, and tell the user about any that were retargeted.
+  droppedRules[] did not convert (every referenced element drops) — report them.
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
   ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
