@@ -120,7 +120,7 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
 - a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
   process using a dialect this version has not seen still round-trips.
 
-On an environment OLDER than 1.4.0.3 none of THIS happens — the package does not check the formula, so
+On an environment older than 1.4.0.0 none of THIS happens — the package does not check the formula. Between 1.4.0.0 and .2 it DOES check, against one numeric rule that disagreed with the platform's own pre-save gate, which is the whole reason the floor is .3 and not .0, so
 nothing names the offending token and nothing refuses before the write. The platform's own pre-save gate
 still runs at save time and still refuses what it refuses; what you lose is the early, specific message,
 and anything that gate does not cover then fails at run time. clio refuses `create-business-process` / `modify-business-process` against such
@@ -140,10 +140,10 @@ what tells you which mistake you made:
 
 | you wrote | message contains | the fix |
 |---|---|---|
-| `FormulaUtilities.Sum(1, 2)` | `Formula value error: No applicable method` | the function does not exist — there is no Sum |
+| `FormulaUtilities.Sum(1, 2)` | `is not a valid formula: No applicable method 'Sum' exists in type 'FormulaUtilities'` | the function does not exist — there is no Sum |
 | `System.Math.Abs(-1)` | `it references 'System', which does not exist` | drop the namespace: `Math.Abs(-1)` |
 | `math.Round(1.5)` | `it references 'math', which does not exist` | case matters: `Math.Round(1.5)` |
-| `DateTimeUtilities.GetStartOfMonth(...)` | `Formula value error: No applicable method` | drop the `Get` prefix: `StartOfMonth` |
+| `DateTimeUtilities.GetStartOfMonth(...)` | `is not a valid formula: No applicable method 'GetStartOfMonth' exists in type 'DateTimeUtilities'` | drop the `Get` prefix: `StartOfMonth` |
 | `1.5` into an Integer parameter | `its result cannot be used as Int32` | the target type cannot hold it |
 | a reference to a parameter that is not there | the offending `[#…#]` token, verbatim | create the parameter, or fix the reference |
 

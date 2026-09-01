@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.65",
+  "libraryVersion": "1.13.67",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1194,7 +1194,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, default flows and timers are NOT buildable, but a conditional BRANCH is: build the flow plain, then set its condition with modify-business-process setFlowCondition, and the platform synthesizes the gateway), the build recipe, the safety rules for editing an existing process, and the element catalog. Routes onward to the seven articles that own the rest: process-naming, process-data-elements, process-parameters, process-formulas, process-perform-task, process-send-email and process-activity-connections. Each of the eight is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1236,7 +1236,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros that are the one formula an author may write rather than copy.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -1250,7 +1250,7 @@
     {
       "itemId": "process-formulas",
       "title": "Process formulas and branch conditions",
-      "description": "Owns the `expression` mapping source and the CONDITION on a conditional flow: the vocabulary the platform's expression interpreter actually accepts (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families and which of them the server can type-check, what CrtProcessBuilder 1.4.0.3 and later validate before anything is stored and what each refusal names, and branch precedence - which is flow ORDER and is recorded nowhere in the metadata.",
+      "description": "Owns the `expression` mapping source and the CONDITION on a conditional flow: the vocabulary the platform's expression interpreter actually accepts (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, and what the server checks and what it stores unchecked, what CrtProcessBuilder 1.4.0.3 and later validate before anything is stored and what each refusal names, and branch precedence - which is flow ORDER and is recorded nowhere in the metadata.",
       "topicId": "creatio.process-formulas",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-formulas",
