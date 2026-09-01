@@ -173,9 +173,10 @@ FLOW
      ever inserted under Tabs. Its content grid is a SEPARATE merge twin
      (GeneralInfoTabContainer→GeneralTabContainer). Where the page's content lands therefore follows
      where the WEB page put it: a page that KEPT the template's GeneralInfoTabContainer has its
-     content land in the mobile GeneralTabContainer, and a page that REMOVED it has its content land
-     in the mobile GeneralInfoTab's own body. Both sit inside the Details tab and both can host
-     content — take each entry's parentName as given rather than assuming one of them. Read the
+     content land in the mobile GeneralTabContainer, and so does a page that REMOVED it — the tab's
+     containers entry declares childrenTo, which sends its children into that same grid. Two web pages
+     that render identically therefore produce the same mobile tree. Take each entry's parentName as
+     given rather than deriving it. Read the
      operation off the entry — do not decide "tab ⇒ insert" from the fact that the web element is a tab.
      The web card wrapper's non-tab (side/profile) content fills the mobile general tab's content GRID
      (CardContentWrapper→GeneralTabContainer), EXCEPT the profile island itself:
@@ -183,7 +184,11 @@ FLOW
      go INSIDE that Area card, never directly into the general tab's grid, and it must NOT be left
      empty. Take both container names from guide.containerMap, which already carries the pair for the
      chosen template (e.g. SideAreaProfileContainer→AreaProfileContainer); do not assume a fixed
-     pair. Tab ORDER is already deterministic: every converted web tab arrives with
+     pair. The island's own STYLING is template-provided and is not carried across. Its BEHAVIOUR is
+     not carried either: if the web wrapper has a BOUND `visible`, or a page business rule targets it,
+     that logic does NOT survive the merge — move it onto AreaProfileContainer, or onto each promoted
+     child, and tell the user you did. Silently dropping it hides a field that the web page hides
+     conditionally. Tab ORDER is already deterministic: every converted web tab arrives with
      an explicit index (1, 2, … — right after the template's general tab), so applying the inserts
      verbatim yields general tab, converted web tabs, Feed, Attachments, with the template's
      FeedTab/AttachmentsTab staying last automatically — do NOT reorder tabs or invent indexes
