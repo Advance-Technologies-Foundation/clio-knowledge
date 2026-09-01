@@ -305,6 +305,30 @@ Handlers — reference-only, from an existing remote module:
   type) only if the user explicitly asks for them AND the handler is already implemented in
   a remote module. Do not author handler code inside the mobile page body.
 
+─────────────────────────────────────────────────────────────
+REQUIRED FIELDS — isRequired shows the marker; enforcement is a business rule
+─────────────────────────────────────────────────────────────
+When the request says a field is required, marking the underlying entity COLUMN required does not, on
+its own, make the mobile field show as required. The designer's required marker (`.crt-input-required`)
+is declared by the field's viewModel ATTRIBUTE: add `"isRequired": true` to that field's attribute in
+viewModelConfigDiff, alongside its modelConfig. Name the attribute per the field contract,
+`{DataSource}_{Column}` (see field-contract):
+
+  { "operation": "merge", "path": ["attributes"], "values": {
+      "PDS_UsrCustomerName": { "modelConfig": { "path": "PDS.UsrCustomerName" }, "isRequired": true }
+  } }
+
+Do this for every field the request calls required.
+
+This governs the required MARKER only — it is NOT input validation. Mobile pages support no validators
+(see VALIDATORS above), so to actually BLOCK saving an empty required field, add an entity-level
+business rule (`create-entity-business-rules`) — the same route that section points to.
+
+Evidence: a mobile form whose entity columns were all required but whose page attributes carried NO
+isRequired — each was bare `{ "modelConfig": { "path": "PDS.<Column>" } }` — showed no required markers
+at all (ENG-96314, observed on a release run 2026-09-01, curated knowledge 1.13.64). What was observed
+is that direction — absent isRequired, absent marker; platform build not pinned.
+
 ────────────────────────────────────────────────────────
 crt.Scaffold — do NOT re-insert
 ────────────────────────────────────────────────────────
@@ -626,33 +650,6 @@ Rules of thumb:
   - Adaptive child placement is supported inside crt.GridContainer. For crt.FlexContainer,
     reflow happens through the container's own `direction` / `wrap` properties, not
     through child `layoutConfig.adaptive`.
-
-─────────────────────────────────────────────────────────────
-REQUIRED FIELDS — set isRequired on the attribute, not just the column
-─────────────────────────────────────────────────────────────
-When the request says a field is required (e.g. "customer name, phone, e-mail and driver
-licence are required"), marking the underlying entity COLUMN required is not enough for the
-mobile page: the required indicator and the client-side "please fill in" check come from the
-field's viewModel ATTRIBUTE. A body authored through update-page carries only what you write,
-so declare it there — add "isRequired": true to that field's entry in viewModelConfigDiff,
-alongside its modelConfig:
-
-  { "operation": "merge", "path": ["attributes"], "values": {
-      "UsrCustomerName": {
-        "modelConfig": { "path": "PDS.UsrCustomerName" },
-        "isRequired": true
-      }
-  } }
-
-Do this for every field the request calls required. isRequired is the standard Freedom UI
-attribute flag for a required field; it is what the designer's required marker
-(`.crt-input-required`) and the save-time validation read.
-
-Evidence: a mobile form generated with all its columns required but with NO isRequired on any
-page attribute showed no required markers at all — the attributes were bare
-`{ "modelConfig": { "path": "PDS.<Col>" } }` (ENG-96314, observed on a release run 2026-09-01,
-curated knowledge 1.13.64). Platform build not pinned; the isRequired attribute flag itself is
-canonical Freedom UI, not specific to that version.
 
 ─────────────────────────────────────────────────────────────
 FIELD GROUPING IN CONTAINERS (mobile layout convention)
