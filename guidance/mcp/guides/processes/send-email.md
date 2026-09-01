@@ -27,12 +27,41 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   `exchange_process_send_error_v2.feature` (RND-T26743: auto mode with `Sender` = a `Guid.Empty` formula
   SAVES with no validation dialog and fails only at run time; RND-T26744 `@ft_SkipSenderValidation`: the same
   setup completes) — plus the card's auto-mode-only `senderValidator`.
+  AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four.
+  That is an AUTHORING rule, not a tool contract — neither the build nor the platform save enforces any of
+  them (the designer itself saves an auto element with unfilled required fields after a warning dialog —
+  designer specimen capture, ENG-92706), so every omission surfaces only at RUN time, on a process that
+  built green. The `body` omission is the trap that motivates the rule: the build reports success,
+  `describe-business-process` reports success too — `hasBody:false` is the ONLY trace, so read the element
+  back and check it — and the run fails with `Localizable template not found for record
+  00000000-0000-0000-0000-000000000000` (reported on ENG-95979; the mechanism is in the applier source:
+  `subject` or `body` writes `BodyTemplateType="1"` — custom message — so a subject-only element points at
+  a body template that does not exist). Note the asymmetry: an explicitly EMPTY `body` (`""` or whitespace)
+  IS rejected at build (`requires a non-empty 'email.body'`); only an OMITTED one slips through.
+  `sender` is resolved at BUILD time and takes exactly three shapes: a `MailboxSyncSettings` record id
+  (a GUID), the `[#Lookup.{objectUId}.{recordId}#]` macro that describe echoes back (round-trip), or a
+  sender EMAIL ADDRESS resolved against `MailboxSyncSettings.SenderEmailAddress`. ANY other string —
+  including a `[#SysSettings.<Code>#]` formula — is treated as an address, matches no mailbox, and FAILS
+  the build with `no MailboxSyncSettings record has sender email '<value>'. Configure the mailbox on the
+  environment or pass the record id.` (`SendEmailApplier.ApplySender`, CrtProcessBuilder sources, read
+  2026-09-01). So the system-setting source the recipient ranking below prefers is NOT usable for `sender`
+  through this tool — the designer's own sender menu offers Process parameter / Lookup / System setting /
+  Formula, so say "not through this tool yet", never "Creatio cannot". Keep the two sender failures apart:
+  a MISSING sender saves and fails the RUN (rules above); a MALFORMED sender fails the BUILD. The sender
+  choice that survives an address change is the environment mailbox itself: the address you pass is
+  resolved to the mailbox RECORD at build, so an administrator can later change that mailbox's address
+  without reopening the process.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
   the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
   `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".
+  RANK RECIPIENT SOURCES for `to`/`cc`/`bcc`: a SYSTEM SETTING first, then a lookup PROCESS PARAMETER or an
+  entity lookup COLUMN (the raw `expression` route above), a CONSTANT address LAST. When the user supplies a
+  literal address ("send it to hr@company.com"), ADVISE AGAINST storing it and offer the ranked alternatives
+  — a system setting for a team address, a lookup parameter or column for a record-bound one — and take the
+  literal only when the user declines them.
   A SYSTEM SETTING is reachable today and is the RIGHT default for an address that belongs to a team rather
   than a person (an HR inbox, a support alias): send the recipient as an `expression` whose formula is
   `[#SysSettings.<Code>#]` — e.g. `[#SysSettings.UsrHrNotificationEmail#]`. Prefer it over a literal address
