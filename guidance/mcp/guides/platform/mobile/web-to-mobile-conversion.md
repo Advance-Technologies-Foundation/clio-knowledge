@@ -166,12 +166,14 @@ FLOW
      general one. The web TEMPLATE's own general-information tab is the exception, and it is not an
      insert at all: it is a MERGE twin (GeneralInfoTab→GeneralInfoTab), so NO second general tab is
      ever inserted under Tabs. Its content grid is a SEPARATE merge twin
-     (GeneralInfoTabContainer→GeneralTabContainer). Where the page's content lands therefore follows
-     where the WEB page put it: a page that KEPT the template's GeneralInfoTabContainer has its
-     content land in the mobile GeneralTabContainer, and so does a page that REMOVED it — the tab's
-     containers entry declares childrenTo, which sends its children into that same grid. Two web pages
-     that render identically therefore produce the same mobile tree. Take each entry's parentName as
-     given rather than deriving it. Read the
+     (GeneralInfoTabContainer→GeneralTabContainer). Where the page's content lands follows where the
+     WEB page put it, and the two shapes legitimately DIFFER: a page that KEPT the template's
+     GeneralInfoTabContainer has its content land in the mobile GeneralTabContainer, while a page that
+     REMOVED that grid and put content straight under the tab has it land in GeneralInfoTab, the tab's
+     own body. Both are valid receivers — a crt.TabContainer holds items just as a crt.GridContainer
+     does — and the two web pages do not render identically either, so the conversion carries the
+     difference rather than normalising one shape into the other. Take each entry's parentName as
+     given rather than deriving it, and do not "correct" one shape to match the other. Read the
      operation off the entry — do not decide "tab ⇒ insert" from the fact that the web element is a tab.
      The web card wrapper's non-tab (side/profile) content fills the mobile general tab's content GRID
      (CardContentWrapper→GeneralTabContainer), EXCEPT the profile island itself:
