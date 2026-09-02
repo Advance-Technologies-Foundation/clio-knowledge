@@ -306,6 +306,14 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 ─────────────────────────────────────────────────────────────
 - Mobile body is plain JSON with only viewConfigDiff / viewModelConfigDiff / modelConfigDiff.
 - NO handlers, NO validators, NO custom converters in the mobile body.
+- USE ONLY MOBILE-REGISTERED COMPONENT TYPES (get-component-info schema-type "mobile"). The converter
+  never hands you one that is not: a source component whose type is absent from the mobile registry is
+  DROPPED, and the drop reason says `type 'X' not in mobile registry`. So this rule only ever binds a
+  type YOU introduce. validate-page reports a deviation rather than blocking it, because a custom mobile
+  component registered in your own package is legitimately absent from the registry — so read WHICH of
+  the two diagnostics you got: a type that exists in the WEB registry but not the mobile one almost
+  always has a mobile alternative to look up instead, while a type in NEITHER registry is either your
+  own registered custom component (ignore it) or a misspelled / invented type that will not render.
 - viewConfigDiff INSERTS address the slot by parentName + propertyName ONLY — never use "path" in a
   viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is valid
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
