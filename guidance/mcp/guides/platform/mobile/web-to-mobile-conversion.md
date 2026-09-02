@@ -24,7 +24,10 @@ Creatio or disk. The guide contains:
     suggested mobile type(s), and a primaryWebMerge note for many→one mappings.
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
     merge / insert / drop / relocate-children). Iterate this to build the body; it already
-    encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
+    encodes merge-vs-insert, the mobile parent, survivability and caption resources. Every insert
+    also carries `parentSource` — whether its parent is created by this map (`"page"` / `"converter"`)
+    or must already exist on the target page (`"template"`), see NEVER AUTHOR A PARENT THIS MAP DOES
+    NOT CREATE in HARD MOBILE RULES. Do NOT
     re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
     parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
     IS AUTHORITATIVE in HARD MOBILE RULES.
@@ -396,16 +399,20 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   and the converter's `target.items` by hand is the deviation-from-tool-output this rule forbids, and their
   shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
   tree — it is not a ban on the model-side wiring the OOTB page carries.
-- RETARGET INTO A TEMPLATE-PROVIDED PARENT — INSERT ONLY THE CHILDREN, NEVER THE PARENT. When an
-  elementMap insert RETARGETS an element into a container the mobile template ALREADY provides, the guide
-  flags that entry with `parentExistsOnTemplate: true` and repeats the instruction in guide.constraints.
-  Insert ONLY the flagged children into the named parent; do NOT insert, merge, or re-declare the parent
-  container or its slot — the template supplies it, and authoring your own OVERRIDES the native one
-  (wrong configuration, lost children). This is the single-element-slot / strip rule from get-guidance
-  `mobile-page-modification` (a template-provided slot is merge-only and the merge is discarded when the
-  slot is already filled) applied to conversion — that article owns the rule; this is only its
-  conversion-time reminder. A guide that predates the flag omits it and the constraint: fall back to the
-  same rule and never author a parent the mobile template already carries. And a source element INHERITED FROM
+- NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE — read `elementMap[].parentSource`. Every insert that
+  names a parent carries it, and it has three values: `"template"` means NOTHING in the element map creates
+  that parent, so the target page must already provide it (from the mobile template — `MainContainer`, or
+  `FloatingActionButton` via the Scaffold's `floatAction` slot); `"page"` and `"converter"` mean the parent
+  IS inserted by this map, by its own entry, having come from the source page or been synthesized by the
+  converter respectively. For `"template"`: insert ONLY the child into the named parent — do NOT insert,
+  merge, or re-declare the parent container or its slot. The template supplies both, and authoring your own
+  OVERRIDES the native one (wrong configuration, lost children). This is the single-element-slot / strip
+  rule from get-guidance `mobile-page-modification` (a template-provided slot is merge-only and the merge is
+  discarded when the slot is already filled) applied to conversion — that article owns the rule; this is
+  only its conversion-time reminder. An older guide carries a retarget-only `parentExistsOnTemplate: true`
+  boolean instead, and it was NOT stamped on an ordinary insert into a template-provided parent: on such a
+  guide do not read its absence as "safe to author", fall back to the same rule and never author a parent
+  the mobile template already carries. And a source element INHERITED FROM
   THE WEB TEMPLATE (chrome the mobile template provides natively) is NOT retargeted at all — the guide drops it
   (reason names it "inherited from the web template"), because a duplicate would shadow the native element. A
   page-AUTHORED element (above the web-template baseline) is not chrome and DOES convert.
