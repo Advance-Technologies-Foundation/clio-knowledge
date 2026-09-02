@@ -3,6 +3,8 @@ clio MCP run-process-button guide
 Goal: add a Freedom UI button that starts a business process. Reuse the built-in
 request `crt.RunBusinessProcessRequest` (handled by the platform RunBusinessProcessHandler).
 Do NOT write a custom handler — the `handlers` block stays empty for this button.
+Creating a process for this button (rather than reusing one)? Its code and caption and every element and
+parameter code are governed by N1-N10, owned by `process-naming` — read it before you name anything.
 
 MANDATORY pre-write step
 - Call `get-process-signature process-name=<code-or-caption> environment-name=<env>` FIRST.
@@ -71,8 +73,6 @@ handler reads the primary data source record Id and injects it into the named pa
   and `update-page` REJECT that button up front (ENG-95822), naming the button and this key.
   If the process has no input parameter to receive the record, either add one with
   create/modify-business-process, or use `RegardlessOfThePage` because the record is not being passed.
-  When you create a process for this button (rather than reuse one), its code and caption and every
-  element/parameter code follow N1-N10 — read `process-naming` before you name anything.
 - `recordIdProcessParameterName` must be a parameter CODE from the signature.
 - `parameterMappings` does NOT substitute for it: the designer's required record field IS
   `recordIdProcessParameterName`, so a `ForTheSelectedPage` button that only maps a column
