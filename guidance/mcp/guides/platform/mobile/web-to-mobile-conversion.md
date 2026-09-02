@@ -82,9 +82,18 @@ Creatio or disk. The guide contains:
   - resourceStrings — every localized string the converted body references (top-level captions AND
     nested tokens like config.title / text.template), keyed by resource name and resolved to its
     en-US text. Register this whole map via update-page `resources` so every #ResourceString token renders.
+  - dataSectionConflicts — one entry per template-owned data-section value the page changed that
+    NEITHER diff can express, each with its `section` (which diff to hand-edit), `path` (segments),
+    `entry` (the array element's name, when it has one) and `kind`. Null when there are none, which is
+    normal. READ THE KIND — the three do not share an outcome and two need OPPOSITE remedies:
+    `changed-named-element` and `changed-scalar` mean the page's value is NOT applied and the template's
+    wins (if the page's value must win, edit that entry in the diff by hand before pasting), while
+    `nameless-changed-in-place` drops NOTHING — the page's element is inserted and will DUPLICATE the
+    template's own at runtime, so remove one of the two. Treating them as one warning sends you to the
+    wrong fix. Report them at the gate; none is silently absorbed.
   - constraints — findings SPECIFIC TO THIS CONVERSION, and nothing else: a degraded data-section
-    diff, an unreadable web template, a template-owned array the differ cannot edit, a normalization
-    that could not run. EMPTY is a valid and common result — it means the converter found nothing you
+    diff, an unreadable web template, a normalization that could not run. EMPTY is a valid and common
+    result — it means the converter found nothing you
     have to weigh, NOT that the rules do not apply. The standing mobile rules are in THIS article and
     are enforced by validate-page / update-page; they are deliberately not repeated per page, because a
     line that fires for every conversion says nothing about the one in front of you.
@@ -304,6 +313,13 @@ DISCARD its data-source section and rebuild it from guide.modelConfigDiff.
   components. Converters: reference only OOTB mobile converters; a definitive mobile converter list
   is forthcoming — flag any custom converter for manual review.
 - guide.modelConfig / guide.viewModelConfig are the same data in full-object form, for reference.
+- WHAT THE DIFFS CANNOT CARRY — no operation in the mobile vocabulary edits an existing array element
+  IN PLACE: the path applier matches elements by `_id` while these config elements are keyed by `name`,
+  so a name-addressed merge has no `_id` to resolve and an insert would duplicate the name. So when the
+  page changes a value the mobile template already owns, the converter lets the template win and reports
+  the loss in guide.dataSectionConflicts rather than shipping a silently lossy body. Read each entry's
+  `kind` (see the field above) — a changed named element or a changed collection scalar loses the page's
+  value, while a nameless element edited in place loses nothing and duplicates instead.
 - DEGRADED CASE — a diff can only be targeted when there was a base to diff against. When clio had no
   usable mobile-template base for a config, that config's diff degrades to a SINGLE ROOT MERGE and a
   constraint reports it, naming which diff degraded and why (an unreadable template bundle, or simply
