@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.54",
+  "libraryVersion": "1.13.73",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -19,7 +19,7 @@
       "configure-knowledge-feedback-policy",
       "get-guidance",
       "get-knowledge-feedback-policy",
-	  "list-knowledge-examples"
+      "list-knowledge-examples"
     ],
     "itemIds": [
       "agent-execution",
@@ -60,6 +60,7 @@
       "deploy-lifecycle",
       "describe-environment",
       "desktop-page",
+      "email-templates",
       "esq",
       "esq-filter-parsing",
       "esq-filters",
@@ -89,6 +90,13 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-naming",
+      "process-data-elements",
+      "process-parameters",
+      "process-perform-task",
+      "process-send-email",
+      "process-preconfigured-page",
+      "process-activity-connections",
       "process-script-task",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
@@ -188,6 +196,7 @@
       "docs://knowledge/com.creatio.clio/deploy-lifecycle",
       "docs://knowledge/com.creatio.clio/describe-environment",
       "docs://knowledge/com.creatio.clio/desktop-page",
+      "docs://knowledge/com.creatio.clio/email-templates",
       "docs://knowledge/com.creatio.clio/esq",
       "docs://knowledge/com.creatio.clio/esq-filter-parsing",
       "docs://knowledge/com.creatio.clio/esq-filters",
@@ -217,6 +226,13 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-naming",
+      "docs://knowledge/com.creatio.clio/process-data-elements",
+      "docs://knowledge/com.creatio.clio/process-parameters",
+      "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-send-email",
+      "docs://knowledge/com.creatio.clio/process-preconfigured-page",
+      "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
@@ -729,7 +745,7 @@
     {
       "itemId": "deploy-lifecycle",
       "title": "Deployment lifecycle",
-      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> find-empty-iis-port -> deploy-creatio/deploy-identity, plus build discovery, registration, IdentityService, and cliogate installation.",
+      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> deploy-creatio with automatic configured-range IIS port selection, optional explicit port inspection, deploy-identity, build discovery, registration, and cliogate installation.",
       "topicId": "creatio.deploy-lifecycle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
@@ -766,6 +782,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/dataservice-upsert.md",
       "bundlePath": "resources/dataservice-upsert.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "email-templates",
+      "title": "Email template content",
+      "description": "Guides guarded read, update, language handling, and format-preserving copy workflows for legacy and Beefree marketing-email and message-template content.",
+      "topicId": "creatio.email-templates",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/email-templates",
+      "legacyUris": [
+        "docs://mcp/guides/email-templates"
+      ],
+      "sourcePath": "guidance/mcp/guides/email-templates.md",
+      "bundlePath": "resources/email-templates.md",
       "mediaType": "text/plain"
     },
     {
@@ -1180,7 +1210,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Guides declarative Creatio business-process design, process inspection, mutation, and connection rules R1-R17 over the full BPMN catalog. What create-business-process can build today is a slice of that catalog — Simple/Signal start, end, user tasks, the fully configurable Send email element (custom message: mode, sender, recipients, subject, HTML body, options, manual-mode performer; no email templates), and sequence flows; gateways, conditional/default flows and timers are not buildable yet. Also owns the N1-N10 naming rules for the process caption and code, element captions and codes, and process parameter codes.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1189,6 +1219,104 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-naming",
+      "title": "Process naming rules (N1-N10)",
+      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R17 connection rules and none of these -- so they are authoring obligations, not validated ones.",
+      "topicId": "creatio.process-naming",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-naming",
+      "legacyUris": [
+        "docs://mcp/guides/process-naming"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/naming.md",
+      "bundlePath": "resources/process-naming.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-data-elements",
+      "title": "Process data elements and record filters",
+      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, the Modify data element target and column values, and the data-source filter that all three share: column dot-paths, the comparison set, the right-hand value sources, the complete relative-date macro vocabulary, the datePart left-hand modifier, and the signal-start restriction that forbids parameter references before an instance exists.",
+      "topicId": "creatio.process-data-elements",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-data-elements",
+      "legacyUris": [
+        "docs://mcp/guides/process-data-elements"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/data-elements.md",
+      "bundlePath": "resources/process-data-elements.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-parameters",
+      "title": "Process parameters and mappings",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros that are the one formula an author may write rather than copy.",
+      "topicId": "creatio.process-parameters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-parameters",
+      "legacyUris": [
+        "docs://mcp/guides/process-parameters"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/parameters.md",
+      "bundlePath": "resources/process-parameters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-perform-task",
+      "title": "Perform task element",
+      "description": "Owns the Creatio Perform task element (performTask / ActivityUserTask): what it produces and when the process resumes, the full table of settable parameters with the shared *Period unit enum, the parameters the runtime sets that must never be written as targets, and the two performer layers -- the element-level performer block that assigns to a role or a manager, and OwnerId for one person. Also states why the Activity type is always Task expressed through a category, and why Approval is not this element.",
+      "topicId": "creatio.process-perform-task",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-perform-task",
+      "legacyUris": [
+        "docs://mcp/guides/process-perform-task"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
+      "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-send-email",
+      "title": "Send email element",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, sender resolution and why a missing sender fails at run time rather than at save, recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
+      "topicId": "creatio.process-send-email",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-send-email",
+      "legacyUris": [
+        "docs://mcp/guides/process-send-email"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/send-email.md",
+      "bundlePath": "resources/process-send-email.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-preconfigured-page",
+      "title": "Pre-configured page element",
+      "description": "Owns the Creatio Pre-configured page element (preconfiguredPage / PreconfiguredPageUserTask): why the page's completing buttons and data sources must be read with get-process-page-facts instead of invented, why at least one completing button is required on a build, the performer and the showPage rule that applies only to a user performer, the element parameter each data source carries the saved record id in, what a later setElement re-synchronizes and where drift is reported, and the Classic UI page limits.",
+      "topicId": "creatio.process-preconfigured-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-preconfigured-page",
+      "legacyUris": [
+        "docs://mcp/guides/process-preconfigured-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/preconfigured-page.md",
+      "bundlePath": "resources/process-preconfigured-page.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-activity-connections",
+      "title": "Activity connections (\"Connected to\")",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R17 connection rules, which are about sequence flows and not about these links.",
+      "topicId": "creatio.process-activity-connections",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
+      "legacyUris": [
+        "docs://mcp/guides/process-activity-connections"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/activity-connections.md",
+      "bundlePath": "resources/process-activity-connections.md",
       "mediaType": "text/plain"
     },
     {
