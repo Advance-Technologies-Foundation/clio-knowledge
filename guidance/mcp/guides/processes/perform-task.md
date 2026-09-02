@@ -1,6 +1,9 @@
 clio MCP process-perform-task guide — the Perform task element (ActivityUserTask)
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Creating a process here? Its code and caption, and every element and parameter code, are governed by
+N1-N10, owned by `process-naming` — read it BEFORE you name anything, even if you entered from this leaf
+guide rather than `process-modeling`.
 This article is the authoritative owner of the Perform task element -- what it produces, its parameters, and who performs it.
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.

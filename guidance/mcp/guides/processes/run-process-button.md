@@ -71,6 +71,8 @@ handler reads the primary data source record Id and injects it into the named pa
   and `update-page` REJECT that button up front (ENG-95822), naming the button and this key.
   If the process has no input parameter to receive the record, either add one with
   create/modify-business-process, or use `RegardlessOfThePage` because the record is not being passed.
+  When you create a process for this button (rather than reuse one), its code and caption and every
+  element/parameter code follow N1-N10 — read `process-naming` before you name anything.
 - `recordIdProcessParameterName` must be a parameter CODE from the signature.
 - `parameterMappings` does NOT substitute for it: the designer's required record field IS
   `recordIdProcessParameterName`, so a `ForTheSelectedPage` button that only maps a column
