@@ -128,8 +128,14 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   formula that reaches it, so one refused here would have been refused later anyway with a worse message —
   but only the package's check names the offending token, and only it runs before anything is stored. A
   package too old to carry it does not run it at all;
-- a macro family the package does not recognise is ACCEPTED with a warning rather than refused, so a
-  process using a dialect this version has not seen still round-trips;
+- a macro family the package does not recognise is accepted by the PACKAGE'S check with a warning
+  rather than refused — which keeps a describe/modify round trip working on a dialect this version has
+  not seen. It does NOT mean the edit goes through: the platform's own pre-save validation runs after,
+  and if no converter resolves that macro in the context you used it, the save is refused with
+  `Process validation failed` naming your expression. Measured over a mapping onto a plain process
+  parameter, `[#UsrUnknownDialect.Something#]`, `[#ColumnValue.Id#]` and `[#SamplingColumnValue.Id#]`
+  were all three refused that way — the last two being real platform families. So expect an ERROR, not
+  a warning, unless the macro is one the platform can convert where you put it;
 - it must not be blank. An empty condition is not "no condition": the platform substitutes the literal
   `true` at the use site, producing an always-taken branch nobody asked for;
 - it must be a single line. A newline is refused outright — this is the platform's own rule, and the
