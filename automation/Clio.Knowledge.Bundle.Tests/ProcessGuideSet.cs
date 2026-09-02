@@ -33,7 +33,8 @@ internal static class ProcessGuideSet
         "process-parameters",
         "process-perform-task",
         "process-send-email",
-        "process-activity-connections"
+        "process-activity-connections",
+        "process-preconfigured-page"
     ];
 
     internal sealed record Article(string ItemId, string SourcePath);
