@@ -47,6 +47,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
+- Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
