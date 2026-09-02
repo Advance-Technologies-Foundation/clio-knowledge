@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.65",
+  "libraryVersion": "1.13.66",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -93,6 +93,7 @@
       "process-data-elements",
       "process-parameters",
       "process-perform-task",
+      "process-open-edit-page",
       "process-send-email",
       "process-activity-connections",
       "process-script-task",
@@ -227,6 +228,7 @@
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-open-edit-page",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1257,6 +1259,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
       "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-open-edit-page",
+      "title": "Open edit page element",
+      "description": "Owns the Creatio Open edit page element (openEditPage / OpenEditPageUserTask) -- the step that shows a record's edit page to a user and waits. Covers the page and the object and record type DERIVED from it, the add and edit modes and what each one requires, pre-filled column values and their value sources, the record to open, recommendation and hint, the performer and the show-page flag that follows it, the Log activity gate and what it actually gates, the result column, and the completion condition and the filter it is paired with. Also owns the two rules that decide WHEN to choose this element over its neighbours, why an omitted block is not the same as a disabled one, and why background mode is set on demand here rather than by the general signal-started rule.",
+      "topicId": "creatio.process-open-edit-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-open-edit-page",
+      "legacyUris": [
+        "docs://mcp/guides/process-open-edit-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/open-edit-page.md",
+      "bundlePath": "resources/process-open-edit-page.md",
       "mediaType": "text/plain"
     },
     {
