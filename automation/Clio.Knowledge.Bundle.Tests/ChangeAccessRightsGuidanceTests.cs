@@ -57,9 +57,11 @@ public sealed class ChangeAccessRightsGuidanceTests
             because: "a supplied add/remove REPLACES the collection while describe reads back lossily, so this "
                 + "sentence is the only thing standing between a routine read-modify-write and silently deleted "
                 + "permission entries");
-        guide.Should().Contain("empty grantee filter matches every contact",
-            because: "it names the widening consequence of writing back a selected-employees entry whose filter "
-                + "did not decode -- a scoped grant becomes an unscoped one");
+        guide.Should().Contain("fails the WHOLE batch at build",
+            because: "writing back a selected-employees entry whose filter did not decode no longer widens the "
+                + "grant silently -- the applier refuses a conditionless grantee filter, so the round trip is a "
+                + "hard failure instead. The agent must be prepared for the batch to fail rather than for a "
+                + "scoped grant to quietly become unscoped");
         guide.Should().Contain("at least in these cases",
             because: "the silent-no-op list is an OPEN set -- a fourth cause (a package too old to "
                 + "understand the block) produces the same symptom, and a closed 'in each of these cases' "
