@@ -1268,6 +1268,9 @@
       "topicId": "creatio.process-access-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-access-rights",
+      "legacyUris": [
+        "docs://mcp/guides/process-access-rights"
+      ],
       "sourcePath": "guidance/mcp/guides/processes/access-rights.md",
       "bundlePath": "resources/process-access-rights.md",
       "mediaType": "text/plain"
