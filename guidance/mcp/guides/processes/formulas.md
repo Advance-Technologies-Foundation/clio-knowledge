@@ -111,7 +111,7 @@ simply the better route. For an Integer or Float parameter it is equally the rou
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
 
-WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.0 (the floor this clio requires is 1.4.0.3). Before an `expression` mapping or a flow condition is
+WHAT IS CHECKED, from `CrtProcessBuilder` 1.4.0.0 (the floor this clio requires is 1.4.0.35). Before an `expression` mapping or a flow condition is
 stored, the server validates it and REFUSES a bad one, naming what is wrong:
 
 - it must parse;
@@ -128,8 +128,10 @@ stored, the server validates it and REFUSES a bad one, naming what is wrong:
   formula that reaches it, so one refused here would have been refused later anyway with a worse message —
   but only the package's check names the offending token, and only it runs before anything is stored. A
   package too old to carry it does not run it at all;
-- a macro family the package does not recognise is accepted by the PACKAGE'S check with a warning
-  rather than refused — which keeps a describe/modify round trip working on a dialect this version has
+- a macro family the package does not recognise is, in a MAPPING, accepted by the PACKAGE'S check with a
+  warning rather than refused (on a NEW flow condition it is REFUSED outright, from 1.4.0.32 - a condition
+  is the one place with no platform backstop, so an unconvertible macro there would save as a branch that
+  never runs) — which keeps a describe/modify round trip working on a dialect this version has
   not seen. It does NOT mean the edit goes through: the platform's own pre-save validation runs after,
   and if no converter resolves that macro in the context you used it, the save is refused with
   `Process validation failed` naming your expression. Measured over a mapping onto a plain process
@@ -165,7 +167,13 @@ platform's parser, and it is a platform defect rather than something clio can ca
 On an environment older than 1.4.0.0 none of THIS happens — the package does not check the formula, so
 nothing names the offending token and nothing refuses before the write. 1.4.0.0 and .1 DO check, against
 one numeric rule that disagreed with the platform's own pre-save gate; .2 already carries the corrected
-rule, and what separates .2 from the .3 floor this clio requires is a different set of fixes. The platform's own pre-save gate
+rule. What carries the floor all the way to .35 is that the individual refusals listed above arrived
+later, and each was measured rather than inferred: the activity-result guard and the unrecognised-family
+refusal on a NEW condition first ship in .32, and the platform-grammar element segment in .35. The
+thresholds are therefore per-refusal rather than one cliff: below .32 a `setFlowCondition` on a
+result-driven branch is stored and then ignored at run time, which is the silent failure this article
+promises protection from, and .35 is what the enforced floor names because the element segment lands there.
+The platform's own pre-save gate
 still runs at save time and still refuses what it refuses; what you lose is the early, specific message,
 and anything that gate does not cover then fails at run time. clio refuses `create-business-process` / `modify-business-process` against such
 an environment for exactly that reason; the fix is `install-process-builder`, not a workaround.
