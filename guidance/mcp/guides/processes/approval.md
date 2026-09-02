@@ -59,12 +59,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
 - **Do not set an optional field the request did not mention.** Three things go wrong when you do, and the
   first is the one that bites:
-  * **It changes behaviour.** `allowDelegation` left out keeps the platform's own value (`true` in a
-    designer-saved element). Writing `false` because the request was silent FORBIDS delegation that nobody
-    asked to forbid.
   * **It destroys the "not decided" signal.** `describe-business-process` reports what is WRITTEN, so
-    absence means "nobody set this", never "off". Once you write `false`, no later reader — human or agent —
-    can tell a deliberate choice from a guess.
+    absence means "nobody set this", never "off". Once you write `allowDelegation: false`, no later reader —
+    human or agent — can tell a deliberate choice from a guess. Note what this bullet does NOT claim: on this
+    element only `ignoreEmailErrors` carries a schema-level default, so an omitted `allowDelegation` is
+    simply unset and the runtime reads it as false — the same behaviour writing `false` produces. The cost
+    is the lost signal, not a changed outcome. (A DESIGNER-saved element does carry `true`, because the
+    human's save writes it; a builder-made one does not, so the two are not interchangeable.)
   * **It puts words in the requester's mouth.** `purpose` is read by the person approving. The default is
     neutral; an invented sentence is wording the requester never approved.
 
