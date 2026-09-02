@@ -107,10 +107,12 @@ that same value "NotSet". Verify it on your stand before relying on it as an acc
   pick up the signal-entity default `process-data-elements` documents — write `"object": "Contact"`
   explicitly. SECURITY NOTE, two parts. The runtime evaluates this filter with record permissions
   DISABLED — it matches every contact the filter describes, regardless of what the user running the
-  process can see. And this filter FAILS OPEN: one with no conditions matches EVERY contact, so the
-  entry grants to the whole organisation. That is the SAME failure mode as the element's own record
-  `filter` carrying no conditions (see "Which records" below); only the total ABSENCE of a record filter
-  is inert. Neither is refused at build. Always give both filters conditions.
+  process can see. And a conditionless filter here is REFUSED at build: one with no conditions would
+  match EVERY contact and grant to the whole organisation, so the applier rejects it rather than storing
+  it. The element's own record `filter` is NOT symmetrical - one carrying an `object` but no conditions
+  builds green and DOES fail open, changing permissions on every record of the target object (see
+  "Which records" below); only the total ABSENCE of a record filter is inert. Always give both filters
+  conditions.
 
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
 you never create those yourself. `selectedEmployees` needs no parameter.
@@ -134,7 +136,8 @@ differently and only one of them is safe:
   - a filter with an `"object"` but NO conditions — builds green and is NOT refused, and it does not
     mean "no records": it narrows nothing, so expect it to match EVERY record of that object and change
     permissions on all of them. (Expected from the code path rather than observed on a stand — the
-    conditionless-group guard exists only for `signalStart` filters. Treat it as fail-open and always
+    conditionless-group guard covers `signalStart` filters and this element's grantee filter, but NOT
+    this record filter. Treat it as fail-open and always
     supply conditions.)
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
@@ -167,8 +170,8 @@ before sending the operation — the same destructive-confirmation rule `process
   MUST: never build a replacement from a described element unless EVERY entry decoded. `describe` reports a
   stored-but-undecodable collection as `[]` and reports a legacy `FilterEdit` selected-employees entry
   WITHOUT its filter (see Read-back), so a naive describe -> modify -> setElement round trip deletes entries
-  that were never read back, and can turn a scoped selected-employees grant into an unscoped one — an
-  empty grantee filter matches every contact. Omit the collection to keep what is stored.
+  that were never read back, and a re-sent `selectedEmployees` entry whose filter did not
+  decode now fails the WHOLE batch at build, since a grantee filter with no conditions is refused. Omit the collection to keep what is stored.
 - `[]` clears a collection. Clearing one is safe only while the OTHER still holds an entry —
   clearing both leaves a permanently dead element that still reports success.
 - On ANY object change, the FIRST configuration included, the stored record filter clears unless it
@@ -194,8 +197,10 @@ there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if 
   - `level` on a remove entry;
   - an empty `operations` list;
   - an unknown grantee `type`, or `allRolesAndUsers` on write;
-  - an unknown or ambiguous role name; a contact id that matches no record;
-  - a `selectedEmployees` filter rooted anywhere but `Contact`;
+  - an unknown or ambiguous role name; a contact id that matches no record (this check FAILS OPEN — if the lookup itself errors, the id is
+    accepted unverified, so a clean build does not prove the contact exists);
+  - a `selectedEmployees` filter rooted anywhere but `Contact`, or one carrying no conditions at all
+    (it would select every `Contact` and grant to the whole organisation);
   - an `accessRights` block on an element that is not a Change access rights element.
 Others exist (an entry with no `grantee`, an unknown `operations` or `level` token, a grantee type
 missing its payload key), so treat this as the shape of what is checked rather than an exhaustive list.

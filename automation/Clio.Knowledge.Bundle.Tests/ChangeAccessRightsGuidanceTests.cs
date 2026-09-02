@@ -80,11 +80,15 @@ public sealed class ChangeAccessRightsGuidanceTests
             because: "an unverified level in the grant collection fails in the OPPOSITE direction -- if "
                 + "the runtime does not treat it as a deny, the entry ADDS access for the grantee the "
                 + "caller meant to block");
-        guide.Should().Contain("this filter FAILS OPEN",
-            because: "a condition-less selectedEmployees filter matches EVERY contact, the opposite of "
-                + "the element's own record filter carrying no conditions -- only the total ABSENCE of a filter is "
-                + "inert, and stating the hazard only in the "
-                + "round-trip aside was how a fresh entry could grant organisation-wide");
+        guide.Should().Contain("a conditionless filter here is REFUSED at build",
+            because: "the applier rejects a selectedEmployees filter with no conditions rather than storing "
+                + "it, so an agent must not be told the state is merely hazardous -- it is unreachable, and "
+                + "an article that describes it as storable sends the agent into a refusal documented nowhere");
+        guide.Should().Contain("builds green and DOES fail open",
+            because: "the element's own record filter is NOT symmetrical with the grantee filter: one "
+                + "carrying an object but no conditions is still unrefused and still changes permissions on "
+                + "every record of the target object, which is the larger blast radius and the half that "
+                + "remains true");
         guide.Should().Contain("DELETES the matching record-right rows; it does not deny",
             because: "record permissions are additive, so a successful revoke can still leave the operation "
                 + "in place through another role -- an agent that reads remove as 'deny' ships a false negative");
