@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.65",
+  "libraryVersion": "1.13.67",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -743,7 +743,7 @@
     {
       "itemId": "deploy-lifecycle",
       "title": "Deployment lifecycle",
-      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> find-empty-iis-port -> deploy-creatio/deploy-identity, plus build discovery, registration, IdentityService, and cliogate installation.",
+      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> deploy-creatio with automatic configured-range IIS port selection, optional explicit port inspection, deploy-identity, build discovery, registration, and cliogate installation.",
       "topicId": "creatio.deploy-lifecycle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
