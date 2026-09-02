@@ -66,7 +66,7 @@ guide rather than `process-modeling`.
                       Verify against the environment before trusting either id.
                       Set it as a bare record Guid in `value`. The route ships from CrtProcessBuilder
                       1.3.1.1, and a CURRENT clio additionally refuses any environment older than the
-                      version it bundles. From 1.3.2.3 the server also resolves the record's NAME into the
+                      version it bundles. From 1.3.2.4 the server also resolves the record's NAME into the
                       parameter's display value, so the designer's "Task category" field shows `Call`
                       rather than the raw Guid, and describe reports it as `valueDisplay` (see NOTE-2).
                       A stale environment surfaces as ONE OF TWO refusals, and both mean YOUR ENVIRONMENT IS BEHIND,
@@ -183,12 +183,12 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
   (`BaseElements.<Element>.Parameters.<Param>.DisplayValue`), not into the metadata beside `Value`. The designer
   shows a NON-EMPTY DisplayValue verbatim and resolves the record name itself only when it is EMPTY — so a
   DisplayValue holding the raw id made the "Task category" field render `03df85bf-…` instead of `Call`, while
-  the runtime behaved correctly the whole time. From CrtProcessBuilder 1.3.2.3 the server resolves the
+  the runtime behaved correctly the whole time. From CrtProcessBuilder 1.3.2.4 the server resolves the
   referenced record's name and stores THAT, and leaves DisplayValue unset when it cannot (which is the correct
   degrade — the designer then resolves the name). Nothing about the input contract changed: you still pass a
   bare record Guid.
 
-  Two conveniences shipped with it, both from 1.3.2.3:
+  Two conveniences shipped with it, both from 1.3.2.4:
   * an already-composed `[#Lookup.{objectUId}.{recordId}#]` passed as `value` on a Lookup target is DECODED to
     the bare record id and stored as a ConstValue — so a value echoed back from describe re-submits unchanged.
     This does not make the expression form correct here; it makes the round trip safe;
