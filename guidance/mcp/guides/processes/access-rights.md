@@ -106,8 +106,9 @@ that same value "NotSet". Verify it on your stand before relying on it as an acc
   explicitly. SECURITY NOTE, two parts. The runtime evaluates this filter with record permissions
   DISABLED — it matches every contact the filter describes, regardless of what the user running the
   process can see. And this filter FAILS OPEN: one with no conditions matches EVERY contact, so the
-  entry grants to the whole organisation. That is the opposite of the element's record `filter`, whose
-  empty case is an inert no-op, and it is not refused at build. Always give it conditions.
+  entry grants to the whole organisation. That is the SAME failure mode as the element's own record
+  `filter` carrying no conditions (see "Which records" below); only the total ABSENCE of a record filter
+  is inert. Neither is refused at build. Always give both filters conditions.
 
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
 you never create those yourself. `selectedEmployees` needs no parameter.

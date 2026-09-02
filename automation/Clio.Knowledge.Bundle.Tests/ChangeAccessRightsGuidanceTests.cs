@@ -11,7 +11,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// NotContain guards wording a review caught before it shipped. Two overclaims were removed and must
 /// not come back anywhere in the set: that the server refuses an EMPTY RECORD FILTER at build time (it
 /// never does -- only a non-administrated object is refused), and that the build-time refusals are
-/// therefore the only feedback that will ever exist (they are not: an empty filter and
+/// therefore the only feedback that will ever exist (they are not: NO record filter and
 /// both-collections-empty each build green and then do nothing). On an access-control element with no
 /// output parameters, either wording licenses "the build succeeded, so the rights changed" -- the one
 /// conclusion this guidance exists to prevent. The negative assertions sweep every DECLARED process
@@ -78,7 +78,8 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "mechanism is how an unenforced deny gets shipped as an access control");
         guide.Should().Contain("this filter FAILS OPEN",
             because: "a condition-less selectedEmployees filter matches EVERY contact, the opposite of "
-                + "the record filter's inert empty case a few lines above -- stating it only in the "
+                + "the element's own record filter carrying no conditions -- only the total ABSENCE of a filter is "
+                + "inert, and stating the hazard only in the "
                 + "round-trip aside was how a fresh entry could grant organisation-wide");
         guide.Should().Contain("DELETES the matching record-right rows; it does not deny",
             because: "record permissions are additive, so a successful revoke can still leave the operation "
@@ -103,8 +104,8 @@ public sealed class ChangeAccessRightsGuidanceTests
         owning.Should().Contain("Clearing one is safe only while the OTHER still holds an entry",
             because: "`[]` is the documented clearing idiom, so the both-empty hazard has to be attached "
                 + "at the point of use rather than left to a distant paragraph");
-        entry.Should().Contain("silently does nothing on an empty record filter OR with both collections",
-            because: "the entry article is read first and must carry both hazards, not only the filter one");
+        entry.Should().Contain("silently does nothing with NO record filter at all OR with both collections empty",
+            because: "the entry article is read first and must name the states as the owner does -- \"empty filter\" now reads as the FAIL-OPEN conditionless case, whose blast radius is the opposite");
         entry.Should().Contain("so a clean build does NOT mean the element will do anything",
             because: "this is the inverted, correct form of the 'build-time refusals are the only feedback' "
                 + "overclaim that a review caught");
@@ -143,6 +144,12 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "only to declared articles carrying it");
         entry.Should().Contain("`process-access-rights`",
             because: "the entry article keeps only a pointer, so the pointer is the whole route to the shape");
+        filters.Should().Contain("Defaults to the signal entity on a signalStart ONLY",
+            because: "the unscoped default was the round-9 defect: it is wrong for readData, changeData "
+                + "and changeAccessRights alike, since DataNodeFilterTarget refuses a filter with no object");
+        filters.Should().Contain("it is REQUIRED",
+            because: "reverting the correction would resume telling agents to omit the object and walk "
+                + "them into a build refusal on every data element");
         filters.Should().Contain("and on a `changeAccessRights` element (which records get or lose",
             because: "the record filter is owned there; an enumeration that omits the element tells agents "
                 + "its filter is unsupported, producing the silent no-op the guidance warns about");

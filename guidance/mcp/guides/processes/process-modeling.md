@@ -64,8 +64,9 @@ article from what this one says; read that article.
   CONFIGURABLE via its `accessRights` block plus a record `filter`; `process-access-rights` owns that
   contract and you must read it before building one — the grantee is an OBJECT with a `type`
   discriminator, not a string. Two facts belong here: the element has NO output parameters, and its
-  runtime silently does nothing on an empty record filter OR with both collections empty.
-  Neither of those is refused at build, so a clean build does NOT mean the element will do anything.
+  runtime silently does nothing with NO record filter at all OR with both collections empty; a filter that
+  IS present but has no conditions is the opposite hazard and matches every record.
+  None of those is refused at build, so a clean build does NOT mean the element will do anything.
   CAVEAT: Add data and Delete data still place an UNCONFIGURED
   element — their target object and values cannot be set yet, so those steps do nothing useful until a
   human configures them in the designer. Say so when you use one; do not present such a result as a working

@@ -1264,7 +1264,7 @@
     {
       "itemId": "process-access-rights",
       "title": "Change access rights element",
-      "description": "Owns the Creatio Change access rights element (changeAccessRights / ChangeAdminRightsUserTask): the accessRights block shape, the add and remove permission entries, the read/edit/delete operations and the permit/delegate/restrict levels, the three grantee kinds (role, employee by contact, and selected employees via a Contact-rooted filter the runtime evaluates with record permissions disabled), the setElement replace-and-clear semantics, the describe read-back, and the silent runtime no-ops that are NOT refused at build time -- an empty record filter and both collections empty -- on an element that has no output parameters to report them.",
+      "description": "Owns the Creatio Change access rights element (changeAccessRights / ChangeAdminRightsUserTask): the accessRights block shape, the add and remove permission entries, the read/edit/delete operations and the permit/delegate/restrict levels, the three grantee kinds (role, employee by contact, and selected employees via a Contact-rooted filter the runtime evaluates with record permissions disabled), the setElement replace-and-clear semantics, the describe read-back, and the silent runtime no-ops that are NOT refused at build time -- no record filter at all, and both collections empty -- plus the opposite hazard of a filter with no conditions, on an element that has no output parameters to report any of them.",
       "topicId": "creatio.process-access-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-access-rights",
