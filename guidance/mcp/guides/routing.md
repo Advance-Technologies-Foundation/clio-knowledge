@@ -60,4 +60,4 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - identity assertion / Identity Service V3 -> name=identity-assertion
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
   - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
-- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access -> name=record-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights

@@ -28,10 +28,17 @@ check detects this one for you: it reads the process back after the operation an
 did not land, or when the read-back could not be obtained at all. Treat either warning as "the
 permissions were NOT changed". VERSION BOUNDARY: that check ships WITH the clio release that introduced
 this element, so on an OLDER clio there is no such warning and its absence proves nothing. Unless you
-know the clio you are running emits it, verify the outcome yourself with `describe-business-process`
-before reporting a grant or revoke as applied. This matters most on a REVOKE: a
-revocation that silently does nothing leaves privileges in place while reporting success.
-Always supply a record `filter`, and always leave at least one entry in a collection.
+know the clio you are running emits it, read the process back with `describe-business-process`.
+But be precise about what that proves: `describe-business-process` is a process DEFINITION read. It
+confirms the `accessRights` block LANDED — the case above — and it proves NOTHING about whether any
+permission changed. It cannot see a record `filter` that matched zero records, a `remove` whose grantee
+still holds the operation through another role or a default right, or an `employee` formula that
+resolved to nobody. To verify the OUTCOME, run the process and then read the permissions on at least
+one record the filter actually matched, with `get-record-rights` (see `record-rights`). On a REVOKE that
+outcome check is a MUST before you report it as applied: record permissions are additive, so a surviving
+row through another role looks exactly like success.
+Always supply a record `filter` with an explicit `object`, and never leave BOTH collections empty —
+one of the two may legitimately be empty or omitted.
 
 == The accessRights block ==
 Set it on a `changeAccessRights` element at create, or later with `modify-business-process`
@@ -116,6 +123,9 @@ sibling of `accessRights` on the element, not a key inside it, and it uses the s
 than you intended changes permissions on all of them, and one that matches none changes nothing while
 reporting success. To act on a single record, filter `Id` against a process parameter or a trigger
 output.
+Give the record `filter` an explicit `"object"` equal to the `accessRights` object. It does NOT inherit
+that object, and unlike a `signalStart` filter it does not fall back to a signal entity either: a record
+filter with no `object` is REFUSED at build, naming the element.
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
     "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
@@ -166,6 +176,7 @@ array — indistinguishable from a genuinely empty one, so do not treat `[]` as 
 there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if written back.
 
 == What is refused at build ==
+  - a record `filter` with no `object` (it names no root entity to filter on);
   - an object that does not use record permissions;
   - an unknown object, or a present-but-blank `object`;
   - `level` on a remove entry;

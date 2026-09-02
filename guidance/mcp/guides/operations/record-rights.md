@@ -10,7 +10,10 @@ Target the record with entity=<EntitySchemaName> + record-id=<guid> (both requir
 - A DASHBOARD (or any client-unit schema): entity=SysSchemaAdminUnit record-id=<schema UId>.
   Resolve the schema UId from its name yourself with execute-esq: select UId where Name = '<SchemaName>'
   on SysUserLevelSchema (personal schemas) first, then SysSchema (configuration schemas).
-  For a DASHBOARD, ALSO read `get-guidance name=dashboard-rights` — grants are DATA (lost when the
+  To change record permissions from INSIDE a running business process rather than now, that is the
+Change access rights element — read `get-guidance name=process-access-rights`; this article owns the
+permission model and the direct grant/revoke path, and note the level vocabularies differ (`granted`/`delegated` here, `permit`/`delegate`/`restrict` there).
+For a DASHBOARD, ALSO read `get-guidance name=dashboard-rights` — grants are DATA (lost when the
   package moves to another environment); it covers re-applying them on the target vs shipping them
   as a package data binding.
 
