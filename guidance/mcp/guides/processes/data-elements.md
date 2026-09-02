@@ -1,7 +1,8 @@
 clio MCP process-data-elements guide — record triggers, Read data, Modify data and their filters
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of starting a process from a record event, the Read data and Modify data elements, and the record filter all three share.
+This article is the authoritative owner of starting a process from a record event, the Read data and Modify data elements, and the record filter all three share (the Change access
+rights element consumes the same filter; see `process-access-rights`).
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
@@ -157,8 +158,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
   the platform Terrasoft.FilterGroup — you NEVER hand-write the escaped filter JSON.
 - Usable today on a `signalStart` (restrict the record trigger), on a `readData` element (restrict which
-  records the read selects from) and on a `changeData` element (restrict which records are updated —
-  effectively mandatory there). Shape:
+  records the read selects from), on a `changeData` element (restrict which records are updated —
+  effectively mandatory there) and on a `changeAccessRights` element (which records get or lose
+  permissions; see `process-access-rights`). Shape:
     "filter": {
       "object": "<EntityName>",        // root object; defaults to the signal entity if omitted
       "logicalOperation": "and",       // "and" (default) | "or"
@@ -216,7 +218,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   see the "Read data element" section), and on a `changeData` element it is effectively MANDATORY — the
   runtime refuses to update with an empty filter (see the "Modify data element" section). A `filter` on an
   Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet, so
-  THEIR filters are not end-to-end usable in this increment.
+  THEIR filters are not end-to-end usable in this increment. On a `changeAccessRights` element the
+  filter is MANDATORY in effect too, but an empty one is not refused: the element runtime silently
+  does nothing (see `process-access-rights`).
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
   `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,

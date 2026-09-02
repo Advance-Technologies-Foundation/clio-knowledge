@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.64",
+  "libraryVersion": "1.13.66",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -93,6 +93,7 @@
       "process-data-elements",
       "process-parameters",
       "process-perform-task",
+      "process-access-rights",
       "process-send-email",
       "process-activity-connections",
       "process-script-task",
@@ -227,6 +228,7 @@
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-access-rights",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1192,7 +1194,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the seven articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-access-rights, process-send-email and process-activity-connections. Each of the eight is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1257,6 +1259,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
       "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-access-rights",
+      "title": "Change access rights element",
+      "description": "Owns the Creatio Change access rights element (changeAccessRights / ChangeAdminRightsUserTask): the accessRights block shape, the add and remove permission entries, the read/edit/delete operations and the permit/delegate/restrict levels, the three grantee kinds (role, employee by contact, and selected employees via a Contact-rooted filter the runtime evaluates with record permissions disabled), the setElement replace-and-clear semantics, the describe read-back, and the silent runtime no-ops that are NOT refused at build time -- an empty record filter and both collections empty -- on an element that has no output parameters to report them.",
+      "topicId": "creatio.process-access-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-access-rights",
+      "sourcePath": "guidance/mcp/guides/processes/access-rights.md",
+      "bundlePath": "resources/process-access-rights.md",
       "mediaType": "text/plain"
     },
     {
