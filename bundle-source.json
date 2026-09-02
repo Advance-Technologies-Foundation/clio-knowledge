@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.66",
+  "libraryVersion": "1.13.67",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -19,7 +19,7 @@
       "configure-knowledge-feedback-policy",
       "get-guidance",
       "get-knowledge-feedback-policy",
-	  "list-knowledge-examples"
+      "list-knowledge-examples"
     ],
     "itemIds": [
       "agent-execution",
@@ -60,6 +60,7 @@
       "deploy-lifecycle",
       "describe-environment",
       "desktop-page",
+      "email-templates",
       "esq",
       "esq-filter-parsing",
       "esq-filters",
@@ -194,6 +195,7 @@
       "docs://knowledge/com.creatio.clio/deploy-lifecycle",
       "docs://knowledge/com.creatio.clio/describe-environment",
       "docs://knowledge/com.creatio.clio/desktop-page",
+      "docs://knowledge/com.creatio.clio/email-templates",
       "docs://knowledge/com.creatio.clio/esq",
       "docs://knowledge/com.creatio.clio/esq-filter-parsing",
       "docs://knowledge/com.creatio.clio/esq-filters",
@@ -778,6 +780,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/dataservice-upsert.md",
       "bundlePath": "resources/dataservice-upsert.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "email-templates",
+      "title": "Email template content",
+      "description": "Guides guarded read, update, language handling, and format-preserving copy workflows for legacy and Beefree marketing-email and message-template content.",
+      "topicId": "creatio.email-templates",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/email-templates",
+      "legacyUris": [
+        "docs://mcp/guides/email-templates"
+      ],
+      "sourcePath": "guidance/mcp/guides/email-templates.md",
+      "bundlePath": "resources/email-templates.md",
       "mediaType": "text/plain"
     },
     {
