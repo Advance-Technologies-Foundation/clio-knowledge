@@ -49,7 +49,7 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "runs the process -- a security-relevant surprise that must be stated where it is used");
         guide.Should().Contain("The legacy `allRolesAndUsers` grantee is DESCRIBE-ONLY",
             because: "it decodes but is refused on write, so agents must model it as explicit role entries");
-        guide.Should().Contain("your stand that it actually blocks the operation",
+        guide.Should().Contain("Confirm on your stand that it actually blocks the",
             because: "`restrict` is prescribed as the way to BLOCK access but is enum-derived and unobserved; "
                 + "separating the recommendation from that hedge is what a review caught, and a size trim is "
                 + "exactly what would reunite them");
@@ -76,6 +76,10 @@ public sealed class ChangeAccessRightsGuidanceTests
         guide.Should().Contain("is NOT a verified substitute for removal",
             because: "positioning an enum-derived, unobserved level as a replacement for the one verified "
                 + "mechanism is how an unenforced deny gets shipped as an access control");
+        guide.Should().Contain("a `restrict` entry lives in `add`, the GRANT collection",
+            because: "an unverified level in the grant collection fails in the OPPOSITE direction -- if "
+                + "the runtime does not treat it as a deny, the entry ADDS access for the grantee the "
+                + "caller meant to block");
         guide.Should().Contain("this filter FAILS OPEN",
             because: "a condition-less selectedEmployees filter matches EVERY contact, the opposite of "
                 + "the element's own record filter carrying no conditions -- only the total ABSENCE of a filter is "

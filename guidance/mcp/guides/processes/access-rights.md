@@ -71,9 +71,11 @@ permissions are grant-based and additive, so the grantee can still hold the oper
 role's row or through the object's default rights. If the intent is to BLOCK rather than to un-grant, `level: "restrict"` is the only candidate mechanism —
 but it is NOT a verified substitute for removal: it is enum-derived and UNOBSERVED, and the PROVENANCE
 note under Levels records evidence pointing the other way (the platform captions that same value
-"NotSet"). Do not swap a removal for a `restrict` entry on the assumption that it denies. Confirm on
-your stand that it actually blocks the operation, and never report an access block as achieved on the
-strength of a green build.
+"NotSet"). Do not swap a removal for a `restrict` entry on the assumption that it denies. Note which way it
+fails if it does not: a `restrict` entry lives in `add`, the GRANT collection, so an unverified level
+that the runtime does not treat as a deny leaves you having ADDED an entry for that grantee rather
+than blocking one — the opposite of the intent. Confirm on your stand that it actually blocks the
+operation, and never report an access block as achieved on the strength of a green build.
 
 == Levels (add entries only) ==
   `permit`   — the default when `level` is omitted: the grantee gets the operation. This default is
@@ -149,7 +151,9 @@ are affected, and every grantee with its operations and level, and get an explic
 
 == Changing it later (setElement) ==
 MUST, before you apply any of this to a live environment: a supplied `add`, a `remove` entry, a `[]`
-clear and an `object` retarget all CHANGE OR DESTROY record permissions that people currently rely on,
+clear, an `object` retarget, and a `setFilter`/`clearFilter` on this element all CHANGE OR DESTROY
+record permissions that people currently rely on — the filter is gated for the same reason as the
+rest: it decides WHICH records the change lands on, so widening it widens every entry at once,
 and the element reports nothing at run time about what it did. `add` belongs on that list in both
 directions: it REPLACES the whole collection, so it destroys every grant it does not restate, and it
 widens access to whoever it names. Show the user the target object, the record `filter` that decides
