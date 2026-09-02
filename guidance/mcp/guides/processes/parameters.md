@@ -35,8 +35,12 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   sub-processes included. The refusal names each usage site. The scan is a SUPERSET of the designer's: it
   matches a parameter UId case-insensitively where the designer matches case-sensitively, so it can refuse
   a delete the designer would allow. Broader is the safe direction — the failure it prevents is a dangling
-  reference that surfaces at run time.). That block is the platform refusing a dangling reference, not the
-  modify path validating your edit — it validates nothing. On an EXISTING customer process the
+  reference that surfaces at run time.). That refusal is CrtProcessBuilder's own scan, which is why it can
+  NAME each usage site — the platform's pre-save gate catches the same dangling reference and reports it as
+  an unnamed error carrying only a parameter UId. And the modify path is not unvalidated: an `expression` or
+  a flow condition is checked before it is stored, and the whole schema goes through the platform's own
+  process validation before the save (which fails CLOSED — no verdict is treated as invalid, never as valid).
+  What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
   describe-first and confirm-the-removal rules in `process-modeling` still apply.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
