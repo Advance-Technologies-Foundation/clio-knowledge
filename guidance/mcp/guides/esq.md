@@ -52,6 +52,22 @@ Expression building blocks (BaseExpression)
     - functionType 3 DatePart: `{ "expressionType": 1, "functionType": 3, "datePartType": <n>, "functionArgument": { "expressionType": 0, "columnPath": "<DateColumn>" } }` (1 Day, 2 Week, 3 Month, 4 Year, 5 Weekday, 6 Hour, 7 HourMinute).
     - functionType 4 Length, 5 Window, 6 DateAdd, 7 DateDiff: advanced. DateDiff carries `dateDiffInterval` (0 Year, 1 Month, 2 Day, 3 Hour, 4 Minute, 5 Millisecond) and `functionArguments` (array of two operands).
   - 2 Parameter: a literal value: `{ "expressionType": 2, "parameter": { "dataValueType": <n>, "value": <v> } }`. The `parameter.value` shape depends on the data type (see `esq-filters-frontend` value shapes). For Blob/multi-value, use `parameter.arrayValue` (string array).
+    - Literal DateTime `CompareFilter` leaf (place it under `filters.items`):
+      ```json
+      {
+        "filterType": 1,
+        "comparisonType": 3,
+        "leftExpression": { "expressionType": 0, "columnPath": "ModifiedOn" },
+        "rightExpression": {
+          "expressionType": 2,
+          "parameter": {
+            "dataValueType": 7,
+            "value": "\"2026-01-01T00:00:00.000Z\""
+          }
+        }
+      }
+      ```
+      The outer `value` is a string containing a JSON-encoded ISO date string. A plain ISO value such as `"value": "2026-01-01T00:00:00.000Z"` is not accepted and can produce `ArgumentNullException: Value cannot be null`. This complete filter leaf makes the main query-container contract usable; `esq-filters-frontend` remains the exhaustive owner of Date, DateTime, Time, timezone, and macro shapes.
   - 3 SubQuery: a correlated sub-query over a backward-reference path: `{ "expressionType": 3, "columnPath": "[Child:Parent].Column", "subFilters": <group>, "subOrderColumn"?, "subOrderDirection"? }`. With an aggregation it also carries `functionType: 2` + `aggregationType`.
   - 4 ArithmeticOperation: `{ "expressionType": 4, "arithmeticOperation": <n>, "leftArithmeticOperand": <expr>, "rightArithmeticOperand": <expr> }` (0 Addition, 1 Subtraction, 2 Multiplication, 3 Division).
 
