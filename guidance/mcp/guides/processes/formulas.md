@@ -212,22 +212,46 @@ The condition must evaluate to a BOOLEAN. An integer is refused: the interpreted
 default, does not coerce it the way the older compiled engine did.
 
 An EMPTY condition is refused, and the reason is worth knowing because it is silent otherwise: the platform
-stores an empty condition as the literal `true`, so an "empty" branch is an ALWAYS-TAKEN branch. To drop a
-condition, remove the flow and add a plain one — there is no clear-condition operation. The replacement
-lands LAST, and since precedence IS insertion order (below), that silently changes which sibling branch
-runs: if the element has other conditional branches, re-add every one of them in the intended order. A
+stores an empty condition as the literal `true`, so an "empty" branch is an ALWAYS-TAKEN branch. A
 condition on a DEFAULT branch is refused.
 
-BRANCH PRECEDENCE IS FLOW ORDER, and nothing in the metadata records it. Where two conditional branches
-leave the same element, they are evaluated in the order the flows were added and the FIRST whose
-condition is true is taken. So a branch that fires above 100 and a branch that fires above 1000 resolve
-differently purely by which flow was added first, with no diagnostic and nothing a human can inspect. Add
-the most specific branch FIRST, and report the order you chose and why — the order is the only thing that
-records the intent, so it belongs in what you tell the user. `setFlowCondition` keeps a flow's position
-when it converts it, so setting a condition never silently reorders your branches; remove-and-add does.
+**A PLAIN sibling flow IS the else branch.** This is the single most useful fact about branching here and it
+is easy to miss: the platform treats any non-conditional flow leaving the element as the default, and takes
+it only when no condition matched. So `if/else` is *one* `setFlowCondition` plus a plain `addFlow` — you do
+not need a "default flow" element, and the R7 rule ("exclusive diverge needs conditional flows plus exactly
+one default") is satisfied by exactly that shape.
+
+Two consequences worth having before you build:
+
+- **Give every branching element a plain sibling.** If no condition matches and there is no plain flow, the
+  run FAILS rather than falling through. Two mutually-negated conditions look safe and are not: when the
+  parameter is null both are false and the process throws.
+- **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
+  only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
+  outgoing flow is taken. That is a parallel split, silently.
+
+That second point is why there is no clear-condition operation and why you should not reach for
+remove-and-add to get one. If you remove the only conditional flow and add a plain one, an exclusive branch
+becomes a parallel one and `describe` shows `kind: "sequence"` on both — which reads exactly like "condition
+cleared, as asked". To CHANGE a condition, call `setFlowCondition` again: it overwrites in place and keeps
+the flow's position. To make a branch unconditional, set its condition to `true` and leave the kind alone.
+
+BRANCH PRECEDENCE IS FLOW ORDER among the formula-bearing siblings, and the order is inspectable: `flows[]`
+in `describe-business-process` is emitted in the stored order, which is the order the runtime builds. Where
+two formula branches leave the same element, the FIRST whose condition is true is taken — so a branch that
+fires above 100 and one that fires above 1000 resolve differently purely by which was added first. Add the
+most specific FIRST, and say which order you chose and why, because nothing but the order records the
+intent.
+
+One exception, and it matters on a Perform-task element: a branch chosen by the activity's RESULT is
+evaluated BEFORE any formula branch, whatever the flow order says. So on an element that already has a
+result-driven branch, adding a formula branch does not put you in a race you control by ordering — the
+result branch wins. `describe` marks those with `branchesOnActivityResult: true`, and `setFlowCondition`
+refuses to write a condition onto one.
 
 A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
-`condition` text, so you can verify what you wrote.
+`condition` text. That confirms what was STORED, not what will run: a flow with
+`branchesOnActivityResult: true` reports its text and ignores it.
 
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
 `B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
