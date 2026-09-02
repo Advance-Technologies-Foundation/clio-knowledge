@@ -145,8 +145,12 @@ article from what this one says; read that article.
    changeData/accessRights/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element kind, `readData` / `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), `accessRights` on a Change access rights element only (see
-   `process-access-rights` for its partial-update, collection-replace and object-retarget rules), and a sendEmail
+   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
+   access to whoever it names, on live records, and the element reports nothing at run time; show the user
+   the target object, the record `filter` and every grantee with its operations and level, and get an
+   explicit yes before sending (see `process-access-rights` for the partial-update, collection-replace and
+   object-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
    Activity's "Connected to" links (see `process-activity-connections`)).
@@ -205,9 +209,8 @@ System actions (palette group "System actions"):
     `process-data-elements`.
 - `deleteDataUserTask` Delete data — delete matched records.
 - `changeAdminRightsUserTask` Change access rights — grant/revoke record permissions on matched records.
-    BUILDABLE via the element's `accessRights` block (alias `changeAccessRights`) plus a `filter` for WHICH
-    records. No outputs, and two configurations run green while doing nothing — `process-access-rights`
-    owns the shape and the hazards.
+    BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
+    `process-access-rights` owns the shape and the hazards.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two

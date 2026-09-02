@@ -154,7 +154,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
   comes back as its raw `[#…#]` in `expression`).
 
-== Data source filters (signalStart trigger condition / readData + changeData record filter) ==
+== Data source filters (signalStart trigger condition / data-element record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
   the platform Terrasoft.FilterGroup — you NEVER hand-write the escaped filter JSON.
 - Usable today on a `signalStart` (restrict the record trigger), on a `readData` element (restrict which
@@ -162,7 +162,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   effectively mandatory there) and on a `changeAccessRights` element (which records get or lose
   permissions; see `process-access-rights`). Shape:
     "filter": {
-      "object": "<EntityName>",        // root object; defaults to the signal entity if omitted
+      "object": "<EntityName>",        // root object. Defaults to the signal entity on a signalStart ONLY;
+                                 // on readData / changeData / changeAccessRights it is REQUIRED
+                                 // and a filter without it is refused at build
       "logicalOperation": "and",       // "and" (default) | "or"
       "conditions": [
         { "column": "UsrName",      "comparison": "equal", "value": "Start" },
@@ -219,8 +221,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   runtime refuses to update with an empty filter (see the "Modify data element" section). A `filter` on an
   Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet, so
   THEIR filters are not end-to-end usable in this increment. On a `changeAccessRights` element the
-  filter is MANDATORY in effect too, but an empty one is not refused: the element runtime silently
-  does nothing (see `process-access-rights`).
+  filter is MANDATORY in effect too, and its three states behave differently — see
+  `process-access-rights`, which owns them.
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
   `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,

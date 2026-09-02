@@ -16,7 +16,7 @@ happen inside a running process. Note the two surfaces spell levels differently 
 This element has **NO output parameters**. Nothing downstream can branch on whether permissions were
 changed, and a run that changes nothing looks exactly like a run that worked. Its runtime silently
 does NOTHING — no error, no log an agent can read back — at least in these cases:
-  1. the element's record `filter` is empty (WHICH records to act on was never narrowed);
+  1. the element has NO record `filter` at all (the parameter was never set);
   2. `add` and `remove` are BOTH empty (there is no permission to apply);
   3. the target object does not use record permissions (`AdministratedByRecords` off).
 Only case 3 is refused at build time. Cases 1 and 2 build green, save, publish and run — so a clean
@@ -123,9 +123,16 @@ sibling of `accessRights` on the element, not a key inside it, and it uses the s
 than you intended changes permissions on all of them, and one that matches none changes nothing while
 reporting success. To act on a single record, filter `Id` against a process parameter or a trigger
 output.
-Give the record `filter` an explicit `"object"` equal to the `accessRights` object. It does NOT inherit
-that object, and unlike a `signalStart` filter it does not fall back to a signal entity either: a record
-filter with no `object` is REFUSED at build, naming the element.
+Give the record `filter` an explicit `"object"` equal to the `accessRights` object — see
+`process-data-elements`, which owns that rule for every data element. Three filter states behave
+differently and only one of them is safe:
+  - NO filter at all — the runtime does nothing (silent no-op case 1 above). Not refused.
+  - a filter with no `"object"` — REFUSED at build, naming the element.
+  - a filter with an `"object"` but NO conditions — builds green and is NOT refused, and it does not
+    mean "no records": it narrows nothing, so expect it to match EVERY record of that object and change
+    permissions on all of them. (Expected from the code path rather than observed on a stand — the
+    conditionless-group guard exists only for `signalStart` filters. Treat it as fail-open and always
+    supply conditions.)
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
     "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
