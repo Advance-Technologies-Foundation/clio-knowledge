@@ -5,7 +5,12 @@ Part of the process guide set. `process-modeling` is the entry point and indexes
 This article is the authoritative owner of the Creatio **Change access rights** element
 (`changeAccessRights` / `ChangeAdminRightsUserTask`): its `accessRights` block, the permission entries,
 the three grantee kinds, and the read-back contract. `process-modeling` owns the build lifecycle and
-points here; `process-data-elements` owns the record `filter` shape this element consumes.
+points here; `process-data-elements` owns the record `filter` shape this element consumes;
+`record-rights` owns the record-permission model itself (the `Sys<Entity>Right` storage and the direct
+`get-record-rights` / `set-record-rights` path). Choose between them by WHEN the change happens: use
+`record-rights` for an ad-hoc grant or revoke you make now, and this element only when the change must
+happen inside a running process. Note the two surfaces spell levels differently — `record-rights` exposes
+`granted`/`delegated`, this block uses `permit`/`delegate`/`restrict`.
 
 == Read this first: the element cannot tell you it did nothing ==
 This element has **NO output parameters**. Nothing downstream can branch on whether permissions were
@@ -64,9 +69,12 @@ your stand that it actually blocks the operation, and never report an access blo
 strength of a green build.
 
 == Levels (add entries only) ==
-  `permit`   — the default when `level` is omitted: the grantee gets the operation.
+  `permit`   — the default when `level` is omitted: the grantee gets the operation. This default is
+    applied by the SERVER, which writes the permit value explicitly onto the stored entry, so the
+    platform enum's zero value in the PROVENANCE note below is never reached by omitting `level`.
   `delegate` — "Permit with rights to delegate": the grantee may pass the right onward.
-  `restrict` — an explicit deny (UNVERIFIED — see PROVENANCE below).
+  `restrict` — an UNVERIFIED level. Its enum member is named Deny, but the record-rights detail
+    captions the same value "NotSet", so do not assume it denies (see PROVENANCE below).
 A `level` on a REMOVE entry is REFUSED, not ignored: the runtime never reads one there, so accepting
 it would silently discard your intent.
 
@@ -86,9 +94,13 @@ that same value "NotSet". Verify it on your stand before relying on it as an acc
   make that unsafe. Pass an id.
 - `selectedEmployees` — every user whose CONTACT matches a filter. The filter is the ordinary filter
   shape (see `process-data-elements`) and its root is always `Contact`: omit `object` or set it to
-  `Contact`; anything else is refused rather than silently ignored. SECURITY NOTE: the runtime
-  evaluates this filter with record permissions DISABLED — it matches every contact the filter
-  describes, regardless of what the user running the process can see. Scope it deliberately.
+  `Contact`; anything else is refused rather than silently ignored, and an omitted `object` does NOT
+  pick up the signal-entity default `process-data-elements` documents — write `"object": "Contact"`
+  explicitly. SECURITY NOTE, two parts. The runtime evaluates this filter with record permissions
+  DISABLED — it matches every contact the filter describes, regardless of what the user running the
+  process can see. And this filter FAILS OPEN: one with no conditions matches EVERY contact, so the
+  entry grants to the whole organisation. That is the opposite of the element's record `filter`, whose
+  empty case is an inert no-op, and it is not refused at build. Always give it conditions.
 
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
 you never create those yourself. `selectedEmployees` needs no parameter.
@@ -106,18 +118,23 @@ reporting success. To act on a single record, filter `Id` against a process para
 output.
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
-    "accessRights": { "object": "Order", "add": [ { "operations": ["read"],
+    "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
         "grantee": { "type": "role", "role": "Sales Department" } } ] },
     "filter": { "object": "Order", "conditions": [
         { "column": "Id", "comparison": "equal", "processParameter": "OrderIdParameter" } ] } }
 
 Grant to the NARROWEST role that satisfies the request. `All employees` resolves and builds green, so an
 example copied with only the object and filter substituted would ship a grant to the entire user base.
+The same MUST as `setElement` applies when you BUILD one of these: a grant widens who can read, edit or
+delete live records, so show the user the target object, the record `filter` that decides WHICH records
+are affected, and every grantee with its operations and level, and get an explicit yes before building.
 
 == Changing it later (setElement) ==
-MUST, before you apply any of this to a live environment: a `remove` entry, a `[]` clear and an `object`
-retarget all CHANGE OR DESTROY record permissions that people currently rely on, and the element reports
-nothing at run time about what it did. Show the user the target object, the record `filter` that decides
+MUST, before you apply any of this to a live environment: a supplied `add`, a `remove` entry, a `[]`
+clear and an `object` retarget all CHANGE OR DESTROY record permissions that people currently rely on,
+and the element reports nothing at run time about what it did. `add` belongs on that list in both
+directions: it REPLACES the whole collection, so it destroys every grant it does not restate, and it
+widens access to whoever it names. Show the user the target object, the record `filter` that decides
 WHICH records are affected, and every grantee with its operations and level, and get an explicit yes
 before sending the operation — the same destructive-confirmation rule `process-modeling` states for
 `removeElement` / `removeFlow` / `removeParameter`, which owns it in full.
@@ -133,7 +150,9 @@ before sending the operation — the same destructive-confirmation rule `process
 - `[]` clears a collection. Clearing one is safe only while the OTHER still holds an entry —
   clearing both leaves a permanently dead element that still reports success.
 - On ANY object change, the FIRST configuration included, the stored record filter clears unless it
-  already targets the incoming object. Re-issue `setFilter` in the same operations array.
+  already targets the incoming object. Issue the `setFilter` AFTER the `setElement` that changes
+  `object`, in the same operations array: `setFilter` never validates its own `object` against the
+  element, so one sent BEFORE the retarget is cleared by it (see `process-data-elements`).
 - A present-but-blank `object` is refused; omit it to keep the current target.
 
 == Read-back (describe-business-process) ==

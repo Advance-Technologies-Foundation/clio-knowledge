@@ -44,7 +44,7 @@ public sealed class ChangeAccessRightsGuidanceTests
             because: "each grantee kind must show which sibling key carries its payload");
         guide.Should().Contain("A `level` on a REMOVE entry is REFUSED, not ignored",
             because: "a silently dropped level would change what the caller believes was granted");
-        guide.Should().Contain("record permissions DISABLED",
+        guide.Should().Contain("evaluates this filter with record permissions",
             because: "the selected-employees filter matches every contact it describes regardless of who "
                 + "runs the process -- a security-relevant surprise that must be stated where it is used");
         guide.Should().Contain("The legacy `allRolesAndUsers` grantee is DESCRIBE-ONLY",
@@ -76,6 +76,10 @@ public sealed class ChangeAccessRightsGuidanceTests
         guide.Should().Contain("is NOT a verified substitute for removal",
             because: "positioning an enum-derived, unobserved level as a replacement for the one verified "
                 + "mechanism is how an unenforced deny gets shipped as an access control");
+        guide.Should().Contain("this filter FAILS OPEN",
+            because: "a condition-less selectedEmployees filter matches EVERY contact, the opposite of "
+                + "the record filter's inert empty case a few lines above -- stating it only in the "
+                + "round-trip aside was how a fresh entry could grant organisation-wide");
         guide.Should().Contain("DELETES the matching record-right rows; it does not deny",
             because: "record permissions are additive, so a successful revoke can still leave the operation "
                 + "in place through another role -- an agent that reads remove as 'deny' ships a false negative");
