@@ -91,12 +91,29 @@ Creatio or disk. The guide contains:
     `nameless-changed-in-place` drops NOTHING — the page's element is inserted and will DUPLICATE the
     template's own at runtime, so remove one of the two. Treating them as one warning sends you to the
     wrong fix. Report them at the gate; none is silently absorbed.
-  - constraints — findings SPECIFIC TO THIS CONVERSION, and nothing else: a degraded data-section
-    diff, an unreadable web template, a normalization that could not run. EMPTY is a valid and common
-    result — it means the converter found nothing you
-    have to weigh, NOT that the rules do not apply. The standing mobile rules are in THIS article and
-    are enforced by validate-page / update-page; they are deliberately not repeated per page, because a
-    line that fires for every conversion says nothing about the one in front of you.
+  - diagnostics — what the conversion could NOT do, one entry per occurrence, each with a `code` and an
+    `impact`. ABSENT on a clean conversion — that means the converter found nothing you have to weigh,
+    NOT that the rules do not apply. Every diagnostic describes an ABSENCE, which is why none of them
+    could be an elementMap entry: a component that was never removed produces no drop, a standard that
+    never ran produces no normalization entry. Read `impact` first, because it is the only thing that
+    changes what you do:
+      • `conversion` — this conversion's output or report is affected and the remedy is YOURS to apply
+        before treating the page as done. Codes: `data-section-root-merge-fallback` (a config had no
+        usable template base, so its diff degraded to a root merge — `sections` names which diff,
+        `cause` says whether a re-run can fix it); `component-twin-not-prebuilt` (a same-component twin
+        could not be diffed against the web-template baseline, so it is an ADVISORY merge with no
+        prebuilt mobileValues — `elements` names what you now configure by merge-by-name per
+        componentSuggestions); `exclusion-search-truncated` (a search hit its depth budget, so a banned
+        component nested deeper is STILL on the page with NO drop entry — re-check the deepest branches).
+      • `converter-config` — a rule in the PUBLISHED rules file is malformed, so the behaviour it
+        declares did not run. You cannot fix it from here: report it and carry on. Codes:
+        `exclusion-filters-discarded` and `normalization-rules-skipped`, each with a `count`. These
+        exist because the rules file is fetched at run time, so a typo in a published rule silently
+        switches a rule off and nothing else would say so.
+    The remedy per code is above and in this article; it is deliberately NOT repeated in the payload.
+    The standing mobile rules likewise live in THIS article and are enforced by validate-page /
+    update-page, because a line that fires for every conversion says nothing about the one in front of
+    you.
   - nextSteps — the ordered flow.
 
 ─────────────────────────────────────────────────────────────
@@ -322,14 +339,15 @@ DISCARD its data-source section and rebuild it from guide.modelConfigDiff.
   value, while a nameless element edited in place loses nothing and duplicates instead.
 - DEGRADED CASE — a diff can only be targeted when there was a base to diff against. When clio had no
   usable mobile-template base for a config, that config's diff degrades to a SINGLE ROOT MERGE and a
-  constraint reports it, naming which diff degraded and why (an unreadable template bundle, or simply
-  no base for that config — a template carrying only the other section, or a page with no known
-  template, degrades with the bundle read perfectly fine). This matters because a root merge REPLACES
-  arrays wholesale: any array the mobile template also owns — a data source's own sort/filter array, or
+  `data-section-root-merge-fallback` diagnostic reports it: `sections` names which diff degraded and
+  `cause` says why — `mobile-template-unreadable` (a re-run can fix it) versus `no-template-base`
+  (nothing to re-run; a template carrying only the other section, or a page with no known template,
+  degrades with the bundle read perfectly fine). This matters because a root merge REPLACES arrays
+  wholesale: any array the mobile template also owns — a data source's own sort/filter array, or
   Items.modelConfig.filterAttributes' built-in QuickFilterGroup_Filters on BaseMobileListTemplate — can
   lose its baseline entries. Verify those arrays before pasting, or re-run the tool with
   environment-name/uri set so clio can diff against the real base and emit inserts instead. Absence of
-  that constraint means every diff you got is targeted; do not go looking for reassurance in prose.
+  that diagnostic means every diff you got is targeted; do not go looking for reassurance in prose.
 
 CHECKLIST before validate-page: confirm no insert dropped a property the mobile component supports
 (you pasted mobileValues verbatim). validate-page enforces the critical ones — a data-source
