@@ -79,7 +79,13 @@ Creatio or disk. The guide contains:
   - resourceStrings — every localized string the converted body references (top-level captions AND
     nested tokens like config.title / text.template), keyed by resource name and resolved to its
     en-US text. Register this whole map via update-page `resources` so every #ResourceString token renders.
-  - constraints + nextSteps — the hard mobile rules and the ordered flow.
+  - constraints — findings SPECIFIC TO THIS CONVERSION, and nothing else: a degraded data-section
+    diff, an unreadable web template, a template-owned array the differ cannot edit, a normalization
+    that could not run. EMPTY is a valid and common result — it means the converter found nothing you
+    have to weigh, NOT that the rules do not apply. The standing mobile rules are in THIS article and
+    are enforced by validate-page / update-page; they are deliberately not repeated per page, because a
+    line that fires for every conversion says nothing about the one in front of you.
+  - nextSteps — the ordered flow.
 
 ─────────────────────────────────────────────────────────────
 GATES — MANDATORY HARD STOPS (analysis-first: nothing is written until the developer approves)
@@ -295,6 +301,16 @@ DISCARD its data-source section and rebuild it from guide.modelConfigDiff.
   components. Converters: reference only OOTB mobile converters; a definitive mobile converter list
   is forthcoming — flag any custom converter for manual review.
 - guide.modelConfig / guide.viewModelConfig are the same data in full-object form, for reference.
+- DEGRADED CASE — a diff can only be targeted when there was a base to diff against. When clio had no
+  usable mobile-template base for a config, that config's diff degrades to a SINGLE ROOT MERGE and a
+  constraint reports it, naming which diff degraded and why (an unreadable template bundle, or simply
+  no base for that config — a template carrying only the other section, or a page with no known
+  template, degrades with the bundle read perfectly fine). This matters because a root merge REPLACES
+  arrays wholesale: any array the mobile template also owns — a data source's own sort/filter array, or
+  Items.modelConfig.filterAttributes' built-in QuickFilterGroup_Filters on BaseMobileListTemplate — can
+  lose its baseline entries. Verify those arrays before pasting, or re-run the tool with
+  environment-name/uri set so clio can diff against the real base and emit inserts instead. Absence of
+  that constraint means every diff you got is targeted; do not go looking for reassurance in prose.
 
 CHECKLIST before validate-page: confirm no insert dropped a property the mobile component supports
 (you pasted mobileValues verbatim). validate-page enforces the critical ones — a data-source
