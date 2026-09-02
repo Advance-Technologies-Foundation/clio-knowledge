@@ -14,7 +14,11 @@ TOOL: get-mobile-page-conversion-guide (ADVISORY-ONLY — builds nothing, writes
 It detects the source page type (today only Freedom UI web, sourceType "freedom-web", is
 supported) and returns a conversion GUIDE. It does NOT generate a body and does NOT save to
 Creatio or disk. The guide contains:
-  - recommendedMobileTemplate + templateNote — the mobile template to create the page from.
+  - recommendedMobileTemplate + templateNote — the mobile template to create the page from. When the
+    source page's web template matches no conversion rule, this is a GENERIC mobile base rather than a
+    matched counterpart, and templateNote says so: no container or component name correspondence is
+    known, so every element lands where the source tree puts it. Read the note before treating the
+    recommendation as a pair, and review that page in the designer more closely.
   - containerMap — web→mobile container-name correspondence; use it to set each
     component's parentName to the correct mobile container.
   - sourceStructure — the full resolved component tree (incl. components inherited from the
@@ -98,13 +102,12 @@ Creatio or disk. The guide contains:
     never ran produces no normalization entry. Read `impact` first, because it is the only thing that
     changes what you do:
       • `conversion` — this conversion's output or report is affected and the remedy is YOURS to apply
-        before treating the page as done. Codes: `data-section-root-merge-fallback` (a config had no
-        usable template base, so its diff degraded to a root merge — `sections` names which diff,
+        before treating the page as done. Codes: `data-section-root-merge-fallback` (the mobile template
+        was unobtainable, so that config's diff degraded to a root merge — `sections` names which diff,
         `cause` says whether a re-run can fix it); `component-twin-not-prebuilt` (a same-component twin
         could not be diffed against the web-template baseline, so it is an ADVISORY merge with no
         prebuilt mobileValues — `elements` names what you now configure by merge-by-name per
-        componentSuggestions); `exclusion-search-truncated` (a search hit its depth budget, so a banned
-        component nested deeper is STILL on the page with NO drop entry — re-check the deepest branches).
+        componentSuggestions).
       • `converter-config` — a rule in the PUBLISHED rules file is malformed, so the behaviour it
         declares did not run. You cannot fix it from here: report it and carry on. Codes:
         `exclusion-filters-discarded` and `normalization-rules-skipped`, each with a `count`. These
@@ -337,12 +340,14 @@ DISCARD its data-source section and rebuild it from guide.modelConfigDiff.
   the loss in guide.dataSectionConflicts rather than shipping a silently lossy body. Read each entry's
   `kind` (see the field above) — a changed named element or a changed collection scalar loses the page's
   value, while a nameless element edited in place loses nothing and duplicates instead.
-- DEGRADED CASE — a diff can only be targeted when there was a base to diff against. When clio had no
-  usable mobile-template base for a config, that config's diff degrades to a SINGLE ROOT MERGE and a
+- DEGRADED CASE — a diff can only be targeted when there was a base to diff against. When the mobile
+  template was UNOBTAINABLE, that config's diff degrades to a SINGLE ROOT MERGE and a
   `data-section-root-merge-fallback` diagnostic reports it: `sections` names which diff degraded and
-  `cause` says why — `mobile-template-unreadable` (a re-run can fix it) versus `no-template-base`
-  (nothing to re-run; a template carrying only the other section, or a page with no known template,
-  degrades with the bundle read perfectly fine). This matters because a root merge REPLACES arrays
+  `cause` says why — `mobile-template-unreadable` (a template was named, so a re-run can fix it) versus
+  `no-template-base` (no template was named at all, so there is nothing to re-run). A template that was
+  read successfully and simply declares no such config section ALSO produces a root merge, and that one
+  is deliberately NOT reported: a base that owns nothing in that section has nothing to lose.
+  This matters because a root merge REPLACES arrays
   wholesale: any array the mobile template also owns — a data source's own sort/filter array, or
   Items.modelConfig.filterAttributes' built-in QuickFilterGroup_Filters on BaseMobileListTemplate — can
   lose its baseline entries. Verify those arrays before pasting, or re-run the tool with
