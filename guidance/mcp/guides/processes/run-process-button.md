@@ -77,11 +77,56 @@ handler reads the primary data source record Id and injects it into the named pa
 - `parameterMappings` does NOT substitute for it: the designer's required record field IS
   `recordIdProcessParameterName`, so a `ForTheSelectedPage` button that only maps a column
   (even `Id`) through `parameterMappings` still leaves the required field empty and is rejected.
-- NOTE on the codes in these examples: `UsrProcess_e629820` and `ProcessSchemaParameter1/2` are READ
+- `parameterMappings` was NOT observed to deliver ordinary parameter VALUES under `ForTheSelectedPage`.
+  Mapping a column (e.g. `"ProcessSchemaParameter2": "UsrName"`) is ACCEPTED by validate-page/update-page,
+  but in the case checked the value did not reach the started process — the parameter opened empty
+  (one process on a live Creatio 10.1.x SalesEnterprise stand, ENG-96432; behavior for other run types
+  and versions is unverified, and the field's supported purpose is not documented here). To pass VALUES
+  from the record use `processParameters` with `$Attr` bindings (V2), or the mix in V4 when you also need
+  the record Id.
+- NOTE on the codes in these examples: `UsrProcess_e629820` and `ProcessSchemaParameter1/2/3` are READ
   from an existing, human-made process — the autonumbered shapes are what the visual designer generates
   when nobody names things. They are NOT a naming model. This guide does not create or rename a process;
   here you copy exactly what `get-process-signature` echoes back, however it was named.
 - For a Lookup parameter, prefer one whose reference schema matches the page's primary entity.
+
+Variant V4 — run FOR the selected record AND pass other parameter values (the mix)
+Use when the process must run "for the current record" (its Id via the record mechanism) AND also
+receive other column values (e.g. Name + Phone). Combine `recordIdProcessParameterName` (the record Id)
+with `processParameters` carrying `$Attr` bindings for the rest — NOT `parameterMappings`, which was not
+observed to deliver values (see the ForTheSelectedPage notes above).
+{
+    "request": "crt.RunBusinessProcessRequest",
+    "params": {
+        "processName": "UsrProcess_e629820",
+        "processRunType": "ForTheSelectedPage",
+        "saveAtProcessStart": true,
+        "recordIdProcessParameterName": "ProcessSchemaParameter3",
+        "processParameters": {
+            "ProcessSchemaParameter1": "$UsrName",
+            "ProcessSchemaParameter2": "$UsrPhoneNumber"
+        }
+    }
+}
+Declare each referenced attribute in viewModelConfigDiff, DS-bound to the record column it carries
+(a constant `value` would not track the record):
+viewModelConfigDiff: [
+    {
+        "operation": "merge",
+        "path": [],
+        "values": {
+            "attributes": {
+                "UsrName":        { "modelConfig": { "path": "PDS.UsrName" } },
+                "UsrPhoneNumber": { "modelConfig": { "path": "PDS.UsrPhoneNumber" } }
+            }
+        }
+    }
+]
+- The record's Id reaches `ProcessSchemaParameter3` via the ForTheSelectedPage record mechanism; the
+  other values reach their parameters from the DS-bound view-model attributes (`$UsrName`, `$UsrPhoneNumber`).
+- Like the `$Attr` bindings in V2 (below), these are agent-only — the OOTB designer does not produce them.
+- Verified end-to-end on a live stand (ENG-96432): the same page FAILED the process-launch check when
+  Name/Phone were wired through `parameterMappings`, and PASSED once they were moved to `processParameters`.
 
 Variant V2 — bind a parameter to a view-model attribute
 Binding expressions ($Attr) inside params (including nested processParameters) are resolved
@@ -143,6 +188,9 @@ the two disagree)
 - processRunType               (string, REQUIRED) — see the reference below.
 - processParameters            (object) — { "<ParameterCODE>": value }; keys are CODES, not captions.
 - parameterMappings            (object) — { "<ParameterCODE>": "<sourceColumn>" }; keys are CODES.
+                               To pass parameter VALUES, use `processParameters` ($Attr) — see the
+                               ForTheSelectedPage notes and V4 for what parameterMappings was not
+                               observed to carry.
 - recordIdProcessParameterName (string) — parameter CODE that receives the current/selected record Id.
                                REQUIRED with processRunType=ForTheSelectedPage; validate-page and
                                update-page reject its absence (ENG-95822).
