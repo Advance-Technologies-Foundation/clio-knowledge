@@ -18,6 +18,10 @@ authoritative owner -- read the one your task needs instead of guessing:
                                      HTML body and its process macros.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R17 connection rules.
+  * `process-versions`             - the version model: a version is a separate schema, which member
+                                     runs, and why a Name never tells you. Read it BEFORE editing or
+                                     launching ANY existing process -- you cannot know one has versions
+                                     until you have.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -175,6 +179,19 @@ article from what this one says; read that article.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
   lost). Warn the user before editing a process with a curated diagram.
+- You MUST read `isActiveVersion` from the describe output before ANY modify, because a modify edits the
+  one schema you named and a process can be a family of them. Three branches, all mandatory:
+  * FALSE -> you are about to edit a version the runtime does NOT execute. Re-describe by
+    `activeVersionSchemaUId` and edit THAT member, or the save succeeds, reports success and changes
+    nothing in production. Resolving by `process-name` lands here by default: the base name is the ROOT.
+  * TRUE -> the edit changes what the next run executes, IN PLACE. There is no version boundary, this
+    build creates no version to fall back to, and no operation restores the previous graph — so it is
+    irreversible. Tell the user that in those terms and get explicit confirmation before saving.
+  * Fields absent, or FALSE with no `activeVersionSchemaUId` -> the standing is UNKNOWN or no active
+    version could be established. Do not guess which member to edit; say so and stop.
+  Running instances are never moved by any of this: they stay on the version they started on. The model,
+  the fields and the identity rules are owned by `process-versions` — read it before editing a process
+  that has versions, and note you cannot know that it has any until you have read the fields.
 
 == Element catalog (data-id -> label -> purpose) ==
 (The `data-id` strings below are the vocabulary for `validate-process-graph` and for reasoning about /

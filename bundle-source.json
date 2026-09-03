@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.76",
+  "libraryVersion": "1.13.77",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -96,6 +96,7 @@
       "process-perform-task",
       "process-send-email",
       "process-activity-connections",
+      "process-versions",
       "process-script-task",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
@@ -231,6 +232,7 @@
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
+      "docs://knowledge/com.creatio.clio/process-versions",
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
@@ -1208,7 +1210,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the seven articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email, process-activity-connections and process-versions. Each of the eight is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1301,6 +1303,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/activity-connections.md",
       "bundlePath": "resources/process-activity-connections.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-versions",
+      "title": "Process versions",
+      "description": "Owns the Creatio process VERSION model and the version fields of describe-business-process: a version is a separate schema rather than a revision, the family is flat with the root as every member's parent, exactly one member is the active version the runtime executes, a running instance stays on the version it started on so a rollback affects only later runs, and deleting a version does not exist. States that versionhood can never be inferred from a schema Name, which identity to pass when you want the version that runs rather than a specific one, how to launch a versioned process, and what this build cannot do: nothing here creates a version or sets the active one.",
+      "topicId": "creatio.process-versions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-versions",
+      "legacyUris": [
+        "docs://mcp/guides/process-versions"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/versions.md",
+      "bundlePath": "resources/process-versions.md",
       "mediaType": "text/plain"
     },
     {
