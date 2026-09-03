@@ -12,9 +12,10 @@ authoritative owner -- read the one your task needs instead of guessing:
                                      three share.
   * `process-parameters`           - process parameters, element-parameter mappings, type
                                      compatibility, and the date/time/lookup default macros.
-  * `process-formulas`             - the `expression` mapping source and the condition on a
-                                     conditional flow: what the interpreter accepts, how to reference
-                                     a parameter, and why branch precedence is flow ORDER.
+  * `process-formulas`             - the `expression` mapping source and the formula
+                                    vocabulary both it and a condition use
+  * `process-branch-conditions`    - the condition on a conditional flow: setting one,
+                                    branch precedence, and the parallel-split hazard
   * `process-perform-task`         - the Perform task element: its parameter table, the performer
                                      layers, and what the runtime sets.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
@@ -93,7 +94,8 @@ article from what this one says; read that article.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section of `process-data-elements`).
 - A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
-  `modify-business-process` + `setFlowCondition`. No gateway element is involved — see `process-formulas`.
+  `modify-business-process` + `setFlowCondition`. No gateway element is involved — see
+  `process-branch-conditions`.
 - NOT yet buildable: gateway ELEMENTS, default flows, timer/message start, intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),

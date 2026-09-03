@@ -125,7 +125,7 @@ N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flo
     the decision outcome it represents (`Budget > 10 000` — a human-readable caption, not the condition's
     own text), and label the default flow explicitly rather than leaving it blank.
     Do not read this rule as a statement about FLOWS. A conditional flow itself IS buildable — build it
-    plain, then `setFlowCondition`; see `process-formulas`. Only the LABEL is missing, along with default
+    plain, then `setFlowCondition`; see `process-branch-conditions`. Only the LABEL is missing, along with default
     flows and gateway ELEMENTS (ENG-91853 extends that).
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own article (`process-activity-connections`) and no naming surface at all.

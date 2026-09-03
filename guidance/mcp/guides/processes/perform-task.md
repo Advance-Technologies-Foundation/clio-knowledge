@@ -103,7 +103,7 @@ guide rather than `process-modeling`.
                       on it with `setFlowCondition`, but ONLY while nothing is selected in the results
                       editor for that connector — the designer opens that editor rather than a formula
                       field here, and a selected result makes the platform stop reading the formula.
-                      clio refuses it; `process-formulas` owns the rule. Affects 337 of the 1 522
+                      clio refuses it; `process-branch-conditions` owns the rule. Affects 337 of the 1 522
                       conditional flows shipped in 7.8.0. Say two things out loud, or the owner finds
                       them alone: the designer's save raises "Required fields of some elements are not
                       filled in" naming that connector, and a human cannot see or edit the formula

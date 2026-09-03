@@ -1,4 +1,4 @@
-clio MCP process-formulas guide - expression sources, the formula vocabulary and branch conditions
+clio MCP process-formulas guide - expression sources and the formula vocabulary a condition also uses
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the `expression` mapping source, the formula vocabulary the
