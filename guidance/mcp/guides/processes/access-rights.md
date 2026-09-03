@@ -19,8 +19,9 @@ does NOTHING — no error, no log an agent can read back — at least in these c
   1. the record `filter` is PRESENT but carries no conditions (the runtime exits "filters empty");
   2. `add` and `remove` are BOTH empty (there is no permission to apply);
   3. the target object does not use record permissions (`AdministratedByRecords` off).
-Only case 3 is refused at build time. Cases 1 and 2 build green, save, publish and run — so a clean
-build is NOT evidence that the element will do anything.
+Only case 3 is refused at build time — the refusal and the runtime no-op are the same fact seen from two
+sides: the build rejects the object precisely BECAUSE the runtime would exit on it. Cases 1 and 2 build
+green, save, publish and run — so a clean build is NOT evidence that the element will do anything.
 DANGER — the opposite failure, and the one that actually costs you: an element with NO record `filter`
 at all is **not** a no-op. The runtime never enters the filter block, so the query runs UNFILTERED and
 the permission change lands on EVERY record of the target object. That query also runs with record
@@ -75,21 +76,24 @@ carries the payload; the other two are ignored:
 A successful `remove` DELETES the matching record-right rows; it does not deny. Creatio record
 permissions are grant-based and additive, so the grantee can still hold the operation through another
 role's row or through the object's default rights. If the intent is to BLOCK rather than to un-grant, `level: "restrict"` is the only candidate mechanism —
-but it is NOT a verified substitute for removal: it is enum-derived and UNOBSERVED, and the PROVENANCE
-note under Levels records evidence pointing the other way (the platform captions that same value
-"NotSet"). Do not swap a removal for a `restrict` entry on the assumption that it denies. Note which way it
-fails if it does not: a `restrict` entry lives in `add`, the GRANT collection, so an unverified level
-that the runtime does not treat as a deny leaves you having ADDED an entry for that grantee rather
-than blocking one — the opposite of the intent. Confirm on your stand that it actually blocks the
-operation, and never report an access block as achieved on the strength of a green build.
+but it is DESTRUCTIVE, not merely unverified, and its damage runs the opposite way from what an earlier
+version of this article warned about. `UseDenyRecordRights` gates only record positioning, never whether a
+rights row is written. Against a grantee who ALREADY holds Allow for that operation, a `restrict` entry
+UPDATES that row down to Deny — it destroys a grant the record already had. And a fresh insert writes one
+row per operation: the one you named at your level, and the OTHER TWO at Deny. So
+`operations: ["read"], level: "restrict"` also denies edit and delete for that grantee.
+Use a `remove` entry to take access away. Reach for `restrict` only when you mean to override access
+granted elsewhere, and confirm the result on your stand — never report an access block as achieved on the
+strength of a green build.
 
 == Levels (add entries only) ==
   `permit`   — the default when `level` is omitted: the grantee gets the operation. This default is
     applied by the SERVER, which writes the permit value explicitly onto the stored entry, so the
     platform enum's zero value in the PROVENANCE note below is never reached by omitting `level`.
   `delegate` — "Permit with rights to delegate": the grantee may pass the right onward.
-  `restrict` — an UNVERIFIED level. Its enum member is named Deny, but the record-rights detail
-    captions the same value "NotSet", so do not assume it denies (see PROVENANCE below).
+  `restrict` — the platform Deny level, and the DESTRUCTIVE one: it downgrades an existing Allow row
+    for that grantee to Deny, and on a fresh insert denies the two operations you did NOT name. The
+    record-rights detail captions the same value "NotSet", which is a UI rendering, not the storage.
 A `level` on a REMOVE entry is REFUSED, not ignored: the runtime never reads one there, so accepting
 it would silently discard your intent.
 
@@ -126,8 +130,13 @@ A `role` or `employee` grantee is backed by a generated element parameter (`Role
 you never create those yourself. `selectedEmployees` needs no parameter.
 
 The legacy `allRolesAndUsers` grantee is DESCRIBE-ONLY: shipped processes carry it and the runtime
-honours it, but the current designer cannot create one and writing it is refused. Model it as
-explicit role entries.
+honours it, but this contract's three writable kinds are `role`, `employee` and `selectedEmployees`, so
+writing it is refused. Model it as explicit role entries — but NOT as a like-for-like swap on a REMOVE
+entry, because the two run different platform operations: `allRolesAndUsers` drops EVERY rights row for
+that operation on the record, while a role drops only that one role's row and leaves every individually
+granted user untouched. Shipped approval processes use the first to lock a record. And because a supplied
+collection REPLACES the stored one, a process carrying this grantee cannot be edited through this API at
+all: re-sending its read-back hits the refusal.
 
 == Which records: the element's own filter ==
 `accessRights` says WHO and WHAT; the element's separate `filter` block says WHICH records — it is a

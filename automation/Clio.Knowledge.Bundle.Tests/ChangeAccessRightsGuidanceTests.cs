@@ -49,10 +49,10 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "runs the process -- a security-relevant surprise that must be stated where it is used");
         guide.Should().Contain("The legacy `allRolesAndUsers` grantee is DESCRIBE-ONLY",
             because: "it decodes but is refused on write, so agents must model it as explicit role entries");
-        guide.Should().Contain("Confirm on your stand that it actually blocks the",
-            because: "`restrict` is prescribed as the way to BLOCK access but is enum-derived and unobserved; "
-                + "separating the recommendation from that hedge is what a review caught, and a size trim is "
-                + "exactly what would reunite them");
+        guide.Should().Contain("UPDATES that row down to Deny",
+            because: "restrict's real worst case is DESTRUCTIVE, not accidental widening: it downgrades a "
+                + "grant the record already had and denies the two operations the caller never named. An "
+                + "article warning only about accidental granting gates the wrong thing");
         guide.Should().Contain("never build a replacement from a described element unless EVERY entry decoded",
             because: "a supplied add/remove REPLACES the collection while describe reads back lossily, so this "
                 + "sentence is the only thing standing between a routine read-modify-write and silently deleted "
@@ -75,13 +75,15 @@ public sealed class ChangeAccessRightsGuidanceTests
         guide.Should().Contain("MUST, before you apply any of this to a live environment",
             because: "CONTRIBUTING requires a removal-class instruction to carry its preconditions inline, "
                 + "and setElement can revoke permissions people currently rely on");
-        guide.Should().Contain("is NOT a verified substitute for removal",
-            because: "positioning an enum-derived, unobserved level as a replacement for the one verified "
-                + "mechanism is how an unenforced deny gets shipped as an access control");
-        guide.Should().Contain("a `restrict` entry lives in `add`, the GRANT collection",
-            because: "an unverified level in the grant collection fails in the OPPOSITE direction -- if "
-                + "the runtime does not treat it as a deny, the entry ADDS access for the grantee the "
-                + "caller meant to block");
+        guide.Should().Contain("Use a `remove` entry to take access away",
+            because: "remove is the verified mechanism and restrict is the destructive one, so the article "
+                + "must name the safe path explicitly rather than leaving restrict as the obvious way to "
+                + "block");
+        guide.Should().Contain("also denies edit and delete for that grantee",
+            because: "a fresh insert writes one row per operation -- the named one at the caller's level and "
+                + "the other two at Deny -- so restrict reaches operations the caller never mentioned. This "
+                + "replaced a pin asserting the opposite direction (that restrict accidentally GRANTS), which "
+                + "was the inverted model");
         guide.Should().Contain("a conditionless filter here is REFUSED at build",
             because: "the applier rejects a selectedEmployees filter with no conditions rather than storing "
                 + "it, so an agent must not be told the state is merely hazardous -- it is unreachable, and "
@@ -112,7 +114,7 @@ public sealed class ChangeAccessRightsGuidanceTests
         string entry = ProcessGuideSet.Read(repositoryRoot, EntryArticle);
 
         // Assert
-        owning.Should().Contain("Only case 3 is refused at build time.",
+        owning.Should().Contain("Only case 3 is refused at build time",
             because: "exactly one of the three no-ops is enforced; scoping it wrong is what shipped as a "
                 + "review Blocker the first time");
         owning.Should().Contain("Clearing one is safe only while the OTHER still holds an entry",
