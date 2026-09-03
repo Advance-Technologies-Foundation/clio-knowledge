@@ -794,21 +794,6 @@
       ],
       "sourcePath": "guidance/mcp/guides/email-templates.md",
       "bundlePath": "resources/email-templates.md",
-      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> deploy-creatio with automatic configured-range IIS port selection, optional explicit port inspection, deploy-identity, build discovery, registration, and cliogate installation.",
-      "mediaType": "text/plain"
-    },
-    {
-      "itemId": "email-templates",
-      "title": "Email template content",
-      "description": "Guides guarded read, update, language handling, and format-preserving copy workflows for legacy and Beefree marketing-email and message-template content.",
-      "topicId": "creatio.email-templates",
-      "role": "guidance",
-      "uri": "docs://knowledge/com.creatio.clio/email-templates",
-      "legacyUris": [
-        "docs://mcp/guides/email-templates"
-      ],
-      "sourcePath": "guidance/mcp/guides/email-templates.md",
-      "bundlePath": "resources/email-templates.md",
       "mediaType": "text/plain"
     },
     {
