@@ -55,6 +55,10 @@ public sealed class ProcessFormulaGuidanceTests
             "the refusal quotes the CONVERTED expression, so a caller who cannot find their own text "
             + "concludes the wrong formula was validated"),
         ("[#[Parameter:{", "the reference form is the one thing an agent cannot derive or guess"),
+        ("never `1.2m`",
+            "a blind run measured an agent writing the C# decimal suffix after READING this article: the "
+            + "converter appends its own unconditionally, so the literal arrives as 1.2mm and is refused - "
+            + "the suffix was documented only as something refusals SHOW you, which is too late"),
     ];
 
     /// <summary>Clauses in the branch article, including both silent-when-wrong hazards.</summary>
