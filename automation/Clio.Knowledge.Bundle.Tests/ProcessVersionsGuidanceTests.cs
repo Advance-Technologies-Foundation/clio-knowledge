@@ -216,6 +216,10 @@ public sealed class ProcessVersionsGuidanceTests
             because: "process-name and run-process both justify themselves by citing V1");
         guide.Should().Contain("V4  A version's Name is",
             because: "V7's first bullet cites V4 for why a name tail proves nothing");
+        guide.Should().Contain("the implication runs one way",
+            because: "a stock stand carries parentless schemas numbered 1 and 2, so 'the root is version 0' as a two-way rule is measurably false (ENG-94374 story 8)");
+        guide.Should().Contain("Treat this as the default,",
+            because: "stock versions named ...V2 / ...Extended / ...WithTracking exist, so V4 must not read as a test a caller can apply");
         guide.Should().Contain("There is no operation that CREATES a version.",
             because: "the boundary is what stops an agent promising a version or a rollback this build cannot perform");
         guide.Should().Contain("There is no operation that SETS the active version",

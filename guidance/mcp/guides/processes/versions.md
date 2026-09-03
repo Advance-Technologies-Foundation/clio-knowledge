@@ -11,7 +11,7 @@ has bitten an agent that assumed the ordinary "one schema, many revisions" shape
 Evidence, so you can weigh each one rather than trust the list: V1-V4 were read off a live
 Creatio (core 10.1.448.0, ENG-94374, 2026-09-03) -- the stock family `InvoiceVisaProcess` /
 `InvoiceVisaProcessInvoice1` in package `Invoice`, queried through the process-library view and then
-through `describe-business-process`; twelve such families ship with the product, so this is the default
+through `describe-business-process`; 14 such families are visible in the process library on a stock install (18 version schemas exist, and the view does not show them all), so this is the default
 state of a fresh install rather than a contrived one. V5 and V6 are read from the platform's own code
 (the versions detail disables Add/Edit/Copy/Delete; the removal path cancels every process-log row of the
 schema) and were NOT exercised -- neither an instance migration nor a delete was attempted, because both
@@ -26,14 +26,20 @@ V1  A version is a SEPARATE SCHEMA, not a revision of one schema. Saving a new v
     list and its own graph. Both rows exist forever, side by side, in the process library.
 V2  The family is FLAT. Every version points at the ROOT as its parent -- never at the version before
     it -- so there is no chain to walk and "the previous version" is not a relationship the platform
-    stores. The root is version 0 and is its own family key.
+    stores. The root is its own family key. It is USUALLY version 0, and the implication runs one way
+    only: version 0 means root, but a root is not obliged to be 0 -- the number is a stamped property,
+    not one derived from the family, and stock stands carry parentless schemas numbered 1 and 2. So the
+    number never settles whether a process has versions; the size of the family does.
 V3  Exactly ONE member of a family is the ACTIVE version, and that is the one the runtime executes.
     Every other member is a readable, startable-by-code schema that the platform's own triggers and
     schedules will not choose.
-V4  A version's Name is `<rootName><PackageName><version>` -- `UsrProcess_0370312Custom1` is version 1
-    of `UsrProcess_0370312` in package `Custom`. The trailing `Custom1` is a PACKAGE NAME followed by a
-    number, not a literal suffix, so it differs per package and a cross-package family has members
-    whose names share no common tail.
+V4  A version's Name is `<rootName><PackageName><version>` WHEN the toolkit named it --
+    `UsrProcess_0370312Custom1` is version 1 of `UsrProcess_0370312` in package `Custom`. The trailing
+    `Custom1` is a PACKAGE NAME followed by a number, not a literal suffix, so it differs per package
+    and a cross-package family has members whose names share no common tail. Treat this as the default,
+    not a law: a schema author can name a version anything, and stock stands ship versions called
+    `...V2`, `...Extended` and `...WithTracking`. V4 tells you how to READ a toolkit-made name; it is
+    not a test you can apply, which is V7.
 V5  A running INSTANCE stays on the version it started on. Changing which version is active therefore
     affects only runs that start afterwards: nothing in flight moves, nothing in flight is rewritten,
     and a rollback is not a repair of anything already running. Instances are never migrated between
@@ -74,7 +80,8 @@ Creatio environment's own version.
 The fields:
   `version`                 - this schema's own version number. 0 means THIS IS THE ROOT, which an
                               unversioned process and the root of a large family report alike; it is
-                              not a count and never means "no versions".
+                              not a count and never means "no versions". A root can also report a
+                              NON-zero number (V2), so do not invert the rule.
   `isActiveVersion`         - whether THIS schema is the one the runtime executes.
   `activeVersionName`       - the Name of the version that does, ready to re-describe.
   `activeVersionSchemaUId`  - its UId, which identifies it unambiguously where the caption cannot.
