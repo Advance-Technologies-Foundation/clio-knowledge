@@ -109,10 +109,10 @@ that same value "NotSet". Verify it on your stand before relying on it as an acc
   DISABLED — it matches every contact the filter describes, regardless of what the user running the
   process can see. And a conditionless filter here is REFUSED at build: one with no conditions would
   match EVERY contact and grant to the whole organisation, so the applier rejects it rather than storing
-  it. The element's own record `filter` is NOT symmetrical - one carrying an `object` but no conditions
-  builds green and DOES fail open, changing permissions on every record of the target object (see
-  "Which records" below); only the total ABSENCE of a record filter is inert. Always give both filters
-  conditions.
+  it. The element's own record `filter` is refused on the same grounds - one carrying an `object` but no
+  conditions would change permissions on every record of the target object (see "Which records" below).
+  Only the total ABSENCE of a record filter escapes both guards, and that one is inert rather than wide.
+  Always give both filters conditions.
 
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
 you never create those yourself. `selectedEmployees` needs no parameter.
@@ -133,11 +133,10 @@ Give the record `filter` an explicit `"object"` equal to the `accessRights` obje
 differently and only one of them is safe:
   - NO filter at all — the runtime does nothing (silent no-op case 1 above). Not refused.
   - a filter with no `"object"` — REFUSED at build, naming the element.
-  - a filter with an `"object"` but NO conditions — builds green and is NOT refused, and it does not
-    mean "no records": it narrows nothing, so expect it to match EVERY record of that object and change
-    permissions on all of them. (Expected from the code path rather than observed on a stand — the
-    conditionless-group guard covers `signalStart` filters and this element's grantee filter, but NOT
-    this record filter. Treat it as fail-open and always supply conditions.)
+  - a filter with an `"object"` but NO conditions — REFUSED at build. It does not mean "no records": it
+    narrows nothing, so it would match EVERY record of that object and change permissions on all of
+    them, silently. The conditionless-group guard covers `signalStart` filters, this element's grantee
+    filter and this record filter alike.
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
     "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
@@ -200,6 +199,7 @@ there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if 
     accepted unverified, so a clean build does not prove the contact exists);
   - a `selectedEmployees` filter rooted anywhere but `Contact`, or one carrying no conditions at all
     (it would select every `Contact` and grant to the whole organisation);
+  - a record `filter` carrying an `object` but no conditions (it would act on every record of it);
   - an `accessRights` block on an element that is not a Change access rights element.
 Others exist (an entry with no `grantee`, an unknown `operations` or `level` token, a grantee type
 missing its payload key), so treat this as the shape of what is checked rather than an exhaustive list.
