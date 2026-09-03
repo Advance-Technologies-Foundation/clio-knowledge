@@ -16,6 +16,8 @@ authoritative owner -- read the one your task needs instead of guessing:
                                      layers, and what the runtime sets.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
+  * `process-approval`             - the Approval element: the object and record under approval, who
+                                     approves, delegation and the two email notifications.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R17 connection rules.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
@@ -64,6 +66,9 @@ article from what this one says; read that article.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
   manual-mode performer. `process-send-email` owns the contract and its limits.
+- Approval: `approval` (the Approval element / ApprovalUserTask) is BUILDABLE through its `approval` block —
+  object and record, who approves, delegation, the two notifications. It gives a configured approval STEP,
+  not an approval FLOW: branching on the verdict needs a gateway. `process-approval` owns the contract.
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
@@ -158,6 +163,14 @@ article from what this one says; read that article.
   business objects, DCM, value lists, and a CUSTOM user-task schema — see the user-task note below) carry
   their own compile obligations and are NOT covered here.
 
+== Set what was asked for, and nothing else ==
+- An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
+  behaviour nobody chose (a flag left out keeps the platform's value, not always the falsy one) and erases
+  the "not decided" signal — describe reports what is WRITTEN, so absence means "not set", never "off".
+- Required fields need no guessing: the server REFUSES and names what is missing. When what it names is a
+  BUSINESS decision the request did not make — who approves, who performs, whom to notify — ASK. A value
+  carried over from a process you built earlier in the session is a guess wearing the clothes of context.
+
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
 - The modify path runs NO structural validation (only the create path validates the graph):
@@ -181,9 +194,10 @@ article from what this one says; read that article.
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
-`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`.)
+`readData`/ReadDataUserTask. TWO user tasks have their own dedicated build type and must NOT be built as a
+generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
+(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`; and
+`approvalUserTask` -> `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus

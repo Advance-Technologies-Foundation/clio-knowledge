@@ -33,6 +33,7 @@ internal static class ProcessGuideSet
         "process-parameters",
         "process-perform-task",
         "process-send-email",
+        "process-approval",
         "process-activity-connections"
     ];
 

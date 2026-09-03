@@ -95,6 +95,7 @@
       "process-parameters",
       "process-perform-task",
       "process-send-email",
+      "process-approval",
       "process-activity-connections",
       "process-script-task",
       "record-rights",
@@ -230,6 +231,7 @@
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-send-email",
+      "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/record-rights",
@@ -1208,7 +1210,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the seven articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email, process-approval and process-activity-connections. Each is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1287,6 +1289,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/send-email.md",
       "bundlePath": "resources/process-send-email.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-approval",
+      "title": "Approval element",
+      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome that cannot be branched on without a gateway.",
+      "topicId": "creatio.process-approval",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-approval",
+      "legacyUris": [
+        "docs://mcp/guides/process-approval"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/approval.md",
+      "bundlePath": "resources/process-approval.md",
       "mediaType": "text/plain"
     },
     {
