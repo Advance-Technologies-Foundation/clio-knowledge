@@ -91,8 +91,7 @@ article from what this one says; read that article.
   "Data source filters" section of `process-data-elements`).
 - NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
-  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
-  collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
+  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
 
@@ -185,10 +184,10 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
 (mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`.)
 System actions (palette group "System actions"):
-- `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
-    a `filter` — see `process-data-elements`. The other read modes (collection / count /
-    aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
+- `readDataUserTask`  Read data    — read first record / collection / count / aggregation of an object.
+    ALL FOUR modes are buildable via the element's `readData` block (source object, mode, columns, sort,
+    numberOfRecords, aggregation) plus a `filter` — see `process-data-elements`; describe reads every mode
+    back as `mode: "first" | "collection" | "count" | "aggregation"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
     element's `changeData` block (target object + column values) plus a `filter` — see

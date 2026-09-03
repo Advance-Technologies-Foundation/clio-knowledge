@@ -50,25 +50,41 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   current change type, and include `entity` only to retarget the trigger object (retargeting clears any
   filter bound to the old entity).
 
-== Read data element (readData) — first-record mode ==
-- A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
-  parameter (the whole record). Configure it with the element's `readData` block:
+== Read data element (readData) — first / collection / count / aggregation modes ==
+- A `readData` element reads from one object in one of FOUR modes (ships from CrtProcessBuilder 1.4.0.42;
+  before it only `first` built). Configure it with the element's `readData` block:
     { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
       "readData": {
         "source": "Contact",                                  // REQUIRED at create: the entity to read
-        "mode": "first",                                      // optional; "first" is the only buildable mode
-        "columns": ["Name", "Email"],                         // optional; omit or [] = read ALL columns
-        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"
+        "mode": "first",                                      // optional; first (default) | collection | count | aggregation
+        "columns": ["Name", "Email"],                         // optional for first (omit or [] = ALL columns); REQUIRED for collection
+        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"; first/collection only
       },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
-- `mode`: only `first` (first record of the sorted selection). The designer's other read modes —
-  collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. An element a
-  human configured in one of those modes CANNOT be converted to first-record through this API at all — an
-  explicit `"mode": "first"` is refused too, because the conversion would leave the element's collection
-  item parameters behind. Remove the element (`removeElement`) and add a new `readData` one instead —
-  under the destructive-removal rules in `process-modeling`, since the removal cascades to this
-  element's flows and mappings and the modify path will not warn you.
+- `mode` and what each one produces (the output is what `describe-business-process` marks `isResult: true`,
+  and what a downstream mapping's `sourceElementParameter` names):
+  * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
+  * `collection` — EVERY matching record → `ResultEntityCollection` (the raw list) AND
+    `ResultCompositeObjectList` (the SHAPED list: one item property per selected column — mirror THIS one into
+    a collection process parameter, see `process-parameters`). `columns` is REQUIRED (with no selection the
+    runtime would read every column of the object); each column must be a type a collection can carry
+    (a Blob/Image/File column is refused — the runtime would drop it silently). Optional
+    `"numberOfRecords": 100` reads a top-N of the sorted selection; omit it to read every record.
+  * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
+  * `aggregation` — `"aggregation": { "function": "sum" | "avg" | "min" | "max", "column": "Amount" }` is
+    REQUIRED. The OUTPUT is chosen by the column's TYPE, exactly as the runtime writes it: an Integer column →
+    `ResultIntegerFunction`; a Float / Money column → `ResultFloatFunction`; a Date / Date-time / Time column
+    (min/max only) → `ResultDateTimeFunction`. Any other column type — and sum/avg over a date — is REFUSED,
+    because the runtime writes NO result for it, silently. `columns` and `sort` are refused in count /
+    aggregation (the runtime ignores both there, so accepting them would be a silent no-op).
+  Omit `mode` at create for `first`; omit it on a `setElement` update to KEEP the element's current mode.
+  Changing the mode through `setElement` is a real conversion: the previous mode's parameters are cleared, the
+  result flag moves to the new mode's output, the column selection / sort survive between first and collection
+  but are cleared on entering count / aggregation, and leaving collection empties `ResultCompositeObjectList`'s
+  item properties (the platform rebuilds them only WHILE in collection mode — the designer clears them the same
+  way). A collection process parameter mirrored from the element (`process-parameters`) is NOT re-mirrored by
+  a mode or column change — re-issue its `setParameter` re-mirror afterwards.
 - `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
   list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
   supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own
