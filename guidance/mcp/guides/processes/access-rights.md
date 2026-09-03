@@ -19,9 +19,11 @@ does NOTHING — no error, no log an agent can read back — at least in these c
   1. the record `filter` is PRESENT but carries no conditions (the runtime exits "filters empty");
   2. `add` and `remove` are BOTH empty (there is no permission to apply);
   3. the target object does not use record permissions (`AdministratedByRecords` off).
-Only case 3 is refused at build time — the refusal and the runtime no-op are the same fact seen from two
-sides: the build rejects the object precisely BECAUSE the runtime would exit on it. Cases 1 and 2 build
-green, save, publish and run — so a clean build is NOT evidence that the element will do anything.
+Cases 1 and 3 are refused at build time — for both, the refusal and the runtime no-op are the same fact
+seen from two sides: the build rejects the configuration precisely BECAUSE the runtime would exit on it.
+Only case 2 builds green, saves, publishes and runs — and a designer-built element can still arrive in
+case 1, since the refusal guards what this API writes, not what already exists. So a clean build is NOT
+evidence that the element will do anything.
 DANGER — the opposite failure, and the one that actually costs you: an element with NO record `filter`
 at all is **not** a no-op. The runtime never enters the filter block, so the query runs UNFILTERED and
 the permission change lands on EVERY record of the target object. That query also runs with record

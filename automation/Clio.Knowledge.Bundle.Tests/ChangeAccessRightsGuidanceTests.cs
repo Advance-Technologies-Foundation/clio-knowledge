@@ -120,9 +120,14 @@ public sealed class ChangeAccessRightsGuidanceTests
         string entry = ProcessGuideSet.Read(repositoryRoot, EntryArticle);
 
         // Assert
-        owning.Should().Contain("Only case 3 is refused at build time",
-            because: "exactly one of the three no-ops is enforced; scoping it wrong is what shipped as a "
-                + "review Blocker the first time");
+        owning.Should().Contain("Cases 1 and 3 are refused at build time",
+            because: "TWO of the three no-ops are enforced, and the article previously claimed one while its "
+                + "own refused-at-build list named both - a contradiction this pin actively held in place, "
+                + "since correcting the prose turned the test red and pushed the next contributor back to the "
+                + "wrong claim");
+        owning.Should().NotContain("Only case 3 is refused",
+            because: "the superseded scoping must not come back; it is the half that made the article "
+                + "disagree with itself");
         owning.Should().Contain("Clearing one is safe only while the OTHER still holds an entry",
             because: "`[]` is the documented clearing idiom, so the both-empty hazard has to be attached "
                 + "at the point of use rather than left to a distant paragraph");
