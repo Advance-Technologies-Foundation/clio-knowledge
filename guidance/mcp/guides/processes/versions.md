@@ -8,7 +8,7 @@ a name in backticks is a get-guidance topic to fetch, not a section to scroll to
 == The model (V1-V7) ==
 (These are PLATFORM facts, not authoring rules. Nothing you write changes them, and every one of them
 has bitten an agent that assumed the ordinary "one schema, many revisions" shape instead.)
-Evidence, so you can weigh each one rather than trust the list: V1-V4 and V7 were read off a live
+Evidence, so you can weigh each one rather than trust the list: V1-V4 were read off a live
 Creatio (core 10.1.448.0, ENG-94374, 2026-09-03) -- the stock family `InvoiceVisaProcess` /
 `InvoiceVisaProcessInvoice1` in package `Invoice`, queried through the process-library view and then
 through `describe-business-process`; twelve such families ship with the product, so this is the default
@@ -17,6 +17,10 @@ state of a fresh install rather than a contrived one. V5 and V6 are read from th
 schema) and were NOT exercised -- neither an instance migration nor a delete was attempted, because both
 are destructive and the second is what V6 forbids. Treat V5 and V6 as source-read, and if you find a
 platform build where either does not hold, that is a finding worth reporting, not a licence to proceed.
+V7 is DERIVED, not observed: it follows from V4 plus the fact that the root carries no marker, and the
+two shapes it warns about were seen on that same stand. Nothing was probed to prove a name CANNOT carry
+the information -- a negative like that is not observable, which is itself the reason to stop trying to
+read it out of the name.
 V1  A version is a SEPARATE SCHEMA, not a revision of one schema. Saving a new version of
     `UsrAccount_Onboard` produces a second schema with its own UId, its own Name, its own parameter
     list and its own graph. Both rows exist forever, side by side, in the process library.
@@ -81,15 +85,19 @@ The fields:
   `versionsTruncatedAt`     - present only when the family was longer than the list published.
   `versionReadWarning`      - present only when the standing could NOT be established.
 
-Read `isActiveVersion` BEFORE you explain or edit anything. Three outcomes, and only the first two are
-ordinary: TRUE means you hold the version that runs; FALSE plus an `activeVersionSchemaUId` means
-describe again by that UId and work from the result; FALSE or absent WITHOUT an
-`activeVersionSchemaUId` means no active version could be established for the family, so there is no
-graph to redirect to -- say the standing is unknown, name the family from `versions[]`, and do NOT fall
-back to the one you happen to be holding. FALSE means the graph you are holding is
-not the one that runs: describe again by `activeVersionSchemaUId` and work from that. This is the whole
-reason the fields exist -- resolving a versioned process by `process-name` returns the root, and the
-root is normally inactive.
+Read `isActiveVersion` BEFORE you explain or edit anything. That is the whole reason the fields exist:
+resolving a versioned process by `process-name` returns the root, and the root is normally inactive.
+Three outcomes, and only the first two are ordinary:
+  * TRUE -- you hold the version that runs. Proceed.
+  * FALSE WITH an `activeVersionSchemaUId` -- the graph you are holding is NOT the one that runs.
+    Describe again by that UId and work from the result. This is the common case on a versioned process.
+  * FALSE with NO `activeVersionSchemaUId`, or the version fields absent -- there is no graph to redirect
+    to, and the two causes are not the same answer. Fields absent AND no `versionReadWarning` is the
+    old-clio case above: this client reports no standing at all, so it is unknowable from here and
+    upgrading clio is the fix, not re-describing. Otherwise the process library established no active
+    version for this family: say the standing is unknown and, WHEN `versions[]` is present, name its
+    members so the user can choose one by code. Either way do NOT fall back to the graph you happen to
+    be holding, and do not redirect by an `activeVersionSchemaUId` that is not in the response.
 
 Four traps in those fields, each of which reads as good news if you skip it:
   * ABSENT is not zero, and zero is not "unversioned" either. `version: 0` is a real answer, but it says

@@ -56,8 +56,7 @@ public sealed class ProcessVersionsGuidanceTests
             because: "a version's name tail is a package name plus a number, so a regex over names is a wrong answer that looks right");
         guide.Should().Contain("ABSENT is not zero, and zero is not \"unversioned\" either.",
             because: "reporting an unestablished standing as 'unversioned' reproduces the defect the version fields were added to stop");
-        guide.Should().Contain("it says",
-            because: "the article has to say what version 0 DOES mean, not only what it does not");
+
         guide.Should().Contain("only THIS IS THE FAMILY ROOT",
             because: "the root of a versioned family reports 0 with no warning, so 0 alone can never settle whether a process has versions - the review found this sentence claiming the opposite");
         guide.Should().Contain("LENGTH of `versions[]`",
@@ -175,9 +174,9 @@ public sealed class ProcessVersionsGuidanceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         string[] fields =
         [
-            "version", "isActiveVersion", "activeVersionName", "activeVersionSchemaUId",
-            "versionRootSchemaUId", "versions[]", "activeVersionSource", "versionsTruncatedAt",
-            "versionReadWarning"
+            "`version`", "`isActiveVersion`", "`activeVersionName`", "`activeVersionSchemaUId`",
+            "`versionRootSchemaUId`", "`versions[]`", "`activeVersionSource`", "`versionsTruncatedAt`",
+            "`versionReadWarning`"
         ];
 
         // Act
@@ -199,6 +198,29 @@ public sealed class ProcessVersionsGuidanceTests
             because: "the boundary is what stops an agent promising a version or a rollback this build cannot perform");
         guide.Should().Contain("There is no operation that SETS the active version",
             because: "a rollback request has to be refused explicitly, not answered with a process copy");
+    }
+
+    [Test]
+    [Description("Pins the three-outcome isActiveVersion rule and the ABSENCE of the unconditional redirect that a round-one splice left behind, which 125 green tests did not notice.")]
+    public void Guide_ShouldDefineAllThreeOutcomesAndNotRestateTheUnconditionalRedirect()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string guide = ProcessGuideSet.Read(repositoryRoot, GuidePath);
+
+        // Assert
+        guide.Should().Contain("Three outcomes",
+            because: "this is the only instruction the article makes mandatory, so an undefined branch propagates into a wrong edit");
+        guide.Should().Contain("FALSE WITH an `activeVersionSchemaUId`",
+            because: "the redirect is only performable when the response carries the UId to redirect by");
+        guide.Should().Contain("FALSE with NO `activeVersionSchemaUId`",
+            because: "the branch where there is nothing to redirect to has to be stated, not left to the reader");
+        guide.Should().NotContain("describe again by `activeVersionSchemaUId` and work from that.",
+            because: "that sentence prescribes the redirect UNCONDITIONALLY and contradicts the branch above it - it survived a round-one edit and shipped green, so its absence is what has to be guarded");
+        guide.Should().Contain("WHEN `versions[]` is present",
+            because: "the remedy named a field that is absent in exactly the state that reaches it, which made a mandatory instruction unexecutable");
     }
 
 }

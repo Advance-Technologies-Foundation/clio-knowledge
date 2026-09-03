@@ -179,20 +179,21 @@ article from what this one says; read that article.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
   lost). Warn the user before editing a process with a curated diagram.
-- You MUST read `isActiveVersion` from the describe output before ANY modify, because a modify edits the
-  one schema you named and a process can be a family of them. Three branches, all mandatory:
-  * FALSE -> you are about to edit a version the runtime does NOT execute. Re-describe by
-    `activeVersionSchemaUId` and edit THAT member, or the save succeeds, reports success and changes
-    nothing in production. Resolving by `process-name` lands here by default: the base name is the ROOT.
-  * TRUE -> the edit changes what the next run executes, IN PLACE. There is no version boundary, this
-    build creates no version to fall back to, and no operation restores the previous graph — so it is
-    irreversible. Tell the user that in those terms and get explicit confirmation before saving.
-  * Fields absent, or FALSE with no `activeVersionSchemaUId` -> the standing is UNKNOWN or no active
-    version could be established. Do not guess which member to edit; say so and stop.
-  Running instances are never moved by any of this: they stay on the version they started on. The model,
-  the fields and the identity rules are owned by `process-versions` — read it before editing a process
-  that has versions, and note you cannot know that it has any until you have read the fields.
-
+- You MUST read `isActiveVersion` from the describe output before ANY modify. A modify edits the ONE
+  schema you named and a process can be a family of them, so this is a precondition, not advice:
+  * FALSE with an `activeVersionSchemaUId` -> you are about to edit a version the runtime does not
+    execute; the save succeeds and changes nothing in production. Re-describe by that UId and edit THAT
+    member. Resolving by `process-name` lands here by default — the base name is the ROOT.
+  * TRUE -> the edit changes what the next run executes, IN PLACE, with no version boundary, nothing to
+    roll back to and no operation in this build that restores the previous graph. It is irreversible:
+    say so in those terms and get explicit confirmation before saving.
+  * Anything else -> read `process-versions`, which owns the remaining outcomes and tells apart a clio
+    that cannot report the standing from a family whose active version is genuinely unresolved. Do not
+    improvise between them, and do not stop on the first one: an older clio reports no standing for any
+    process, and that is a client gap rather than a finding about theirs.
+  Running instances are never moved by any of this — they stay on the version they started on.
+  `process-versions` owns the model, the fields and the identity rules; read it before editing or
+  launching any existing process, since you cannot know one has versions until you have.
 == Element catalog (data-id -> label -> purpose) ==
 (The `data-id` strings below are the vocabulary for `validate-process-graph` and for reasoning about /
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
