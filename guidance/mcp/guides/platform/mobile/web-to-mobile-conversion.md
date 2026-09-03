@@ -27,7 +27,7 @@ Creatio or disk. The guide contains:
     withAdaptation / alternativeAvailable / unsupported / requiresManualDecision), the
     suggested mobile type(s), and a primaryWebMerge note for many→one mappings.
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
-    merge / insert / drop / relocate-children). Iterate this to build the body; it already
+    merge / insert / relocate-children). Iterate this to build the body; it already
     encodes merge-vs-insert, the mobile parent, survivability and caption resources. Every insert
     also carries `parentSource` — whether its parent is created by this map (`"page"` / `"converter"`),
     already exists on the target page (`"template"`), or is provided by NEITHER (`"unknown"`, which you
@@ -106,7 +106,10 @@ Creatio or disk. The guide contains:
     wrong fix. Report them at the gate; none is silently absorbed.
   THERE IS NO `diagnostics` FIELD, and none of its four codes survives — do not look for it, and do not
   read its absence as "nothing to weigh". Each went somewhere:
-    - a twin with no prebuilt delta → that entry's own `reason` codes. See REASON CODES below.
+    - a twin with no prebuilt delta → read the ENTRY. `mobileValues: null` on a `merge` means there
+      is nothing prebuilt to apply; when `mobileType` also differs from the source type, the payload is
+      absent BY DESIGN and the how-to is type-driven (componentSuggestions). Either way the operation
+      itself is the whole instruction.
     - the root-merge fallback → the cause that mattered now REFUSES the conversion (see DEGRADED CASE).
       Detect the benign remainder structurally: a data-section diff that is one op with `path: []`.
     - the two rules-file codes → clio's CI, for whoever authored the typo. You get no signal, because
@@ -188,8 +191,9 @@ FLOW
          deliberately OMITTED so the mobile element keeps its OWN default (an unset recordColumnName
          stays the mobile default RecordId). Paste mobileValues as-is; never add the omitted defaults.
          A template component the page did NOT change still gets an entry — an advisory `merge` with
-         `mobileValues: null` — so a page business rule targeting it still converts. That entry is not
-         necessarily work: its `reason` code says which of the twin cases it is (see REASON CODES).
+         `mobileValues: null` — so a page business rule targeting it still converts. Apply it as given:
+         with no payload there is nothing to merge, and the mobile template's own configuration stands.
+         Never fill such an entry in from the source element's values.
      If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
@@ -222,7 +226,7 @@ FLOW
      them. It also already carries the CONVERTED event-binding requests (a button's `clicked`, a
      field's `valueChange`/`updated`): supported requests are kept (remapped when the mobile name
      differs). A component whose request the mobile app does NOT support is not inserted at all — it
-     was already DROPPED (see the elementMap `drop` entry), so you never see it here. Do NOT re-add or
+     was already DROPPED (see its `droppedElements` entry), so you never see it here. Do NOT re-add or
      hand-edit these bindings — paste mobileValues as-is. Then add ONLY
      what mobileValues deliberately leaves out:
        • the value binding (control, or value for lookups) — type-specific, so it is not prebuilt;
@@ -243,22 +247,14 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely; its `reason` codes say why. Tell the user what was dropped.
-     `drop-empty-container` is already handled FOR you: a converter-created layout container whose every
-     child dropped was removed deterministically. Do NOT re-create it, do NOT re-parent anything into it,
-     and do NOT ask the user about it — just report it with the other drops.
-     `drop-excluded-by-rule` is a POSITIONAL exclusion the converter applied by rule; its params name the
-     removed type, the `hostType`, and the `slot` when the rule scopes one (e.g. a search filter excluded
-     from an expansion panel's compact tools strip). It is NOT conversion loss: do NOT re-insert the
-     component — not into that host, not anywhere else — and do NOT ask whether to keep it. The same type
-     OUTSIDE the excluded position converts normally, so seeing it dropped in one place and kept in another
-     on the same page is correct.
-     `drop-parent-excluded` covers everything that hung below such a component (`ancestor` names it).
-     Treat it identically — the element is gone because its parent is gone, so re-creating it would rebuild
-     the branch the rule exists to remove. Match an exclusion on BOTH codes: a rule targeting a container
-     type produces mostly the second, and the elements it names are the ones a user asks about by name.
-     WHICH types are excluded from WHICH hosts is converter configuration, not a fixed list — read the
-     codes rather than assuming one.
+   (There is no `drop` operation. An element that did not convert is not something to apply, so it is
+   NOT in elementMap at all — it is in `guide.droppedElements`, with a coded reason. Report those; apply
+   none of them. get-guidance `freedom-page-mobile-reason-codes` has every code and what to say about
+   it. The two you will see most often are NOT conversion loss and must never be re-inserted:
+   `drop-inherited-chrome` (the mobile template provides its own) and `drop-excluded-by-rule` (a
+   POSITIONAL exclusion — the same type outside that position converts normally, so seeing it dropped in
+   one place and kept in another on the same page is correct). WHICH types are excluded from WHICH hosts
+   is converter configuration, not a fixed list — read the codes rather than assuming one.)
    For many→one suggestions (primaryWebMerge set, e.g. crt.FolderTree + crt.FolderTreeActions
    -> crt.FolderTreeActions), emit a SINGLE mobile component and merge in the secondary
    component's properties; do not emit the secondary as a separate component.
@@ -357,10 +353,16 @@ attribute whose "path" contains a "." must keep its "type", and an inserted fiel
 caption ("label"); both are errors that block update-page.
 
 ─────────────────────────────────────────────────────────────
-REASON CODES — elementMap[].reason is a LIST of {code, params?}, never prose. Every code, what it
-means and what (if anything) to DO about it: get-guidance `freedom-page-mobile-reason-codes`. Load it
-once per run when you are about to read elementMap; branch on `code`, read `params` for the values,
-and REPORT an unrecognised code instead of guessing at it.
+DROPPED ELEMENTS — `guide.droppedElements` lists every source element that did NOT reach the mobile
+page, each with `reason`: a LIST of {code, params?}, never prose. It is the audit trail of what was not
+built — REPORT it, apply none of it, and re-insert nothing from it. elementMap carries no reason at all,
+because every entry there is an operation whose own fields say what to do.
+Every code, what it means and what to tell the user: get-guidance `freedom-page-mobile-reason-codes`.
+Load it once per run when droppedElements is non-empty; branch on `code`, read `params` for the values,
+and REPORT an unrecognised code instead of guessing at it. Do NOT infer the cause from the element's
+TYPE: on the OOTB Leads_FormPage, 11 of 12 dropped elements have a type that converts perfectly well
+elsewhere on the same page, so a type-based reading turns four different outcomes into "conversion
+loss" and invites you to re-insert what the converter deliberately removed.
 
 HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 ─────────────────────────────────────────────────────────────
@@ -406,13 +408,13 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
   ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
-  that does not remap to a supported one) is DROPPED (elementMap operation `drop`, reason names the
+  that does not remap to a supported one) is DROPPED (a `droppedElements` entry whose reason names the
   request) — a dead button is not shipped. Other component types are NOT dropped for an unsupported
   request (some legitimately use a system request absent from the list): their binding is kept verbatim
   and flagged. A supported request is kept in
   elementMap[].mobileValues (remapped when the mobile name differs) — paste mobileValues verbatim.
   guide.requestConversions is the advisory summary (convertedRequests / flaggedRequests); dropped
-  components appear in elementMap as `drop`. Tell the user which action components were removed.
+  components appear in `droppedElements`. Tell the user which action components were removed.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing elementMap entries when building a page from
   get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info

@@ -19,7 +19,22 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class ExcludedComponentsDropGuidanceTests
 {
-    private const string OwnerGuide = "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md";
+    /// <summary>
+    /// The guides that TOGETHER carry the positional-exclusion rule, concatenated before matching.
+    /// </summary>
+    /// <remarks>
+    /// The rule used to live entirely in the conversion article. ENG-95827 moved `reason` off the element
+    /// map into `droppedElements` and split the code table into its own article, so the per-code directives
+    /// now live there while the conversion article keeps the routing and the "converter configuration, not a
+    /// fixed list" framing. The GUARANTEE this fixture protects is unchanged and is about the READER, not
+    /// about a file: an agent that follows the routing loads both, so a clause is intact when either carries
+    /// it. Pinning one file would fail on a legitimate move; pinning neither would let a clause vanish.
+    /// </remarks>
+    private static readonly string[] OwnerGuides =
+    [
+        "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md",
+        "guidance/mcp/guides/platform/mobile/web-to-mobile-reason-codes.md"
+    ];
 
     /// <summary>
     /// The two reason CODES clio emits for one positional exclusion. Both come from
@@ -71,7 +86,7 @@ public sealed class ExcludedComponentsDropGuidanceTests
     [Description("Both reason shapes clio emits for a positional exclusion are taught by the guide, so neither kind of drop reaches an agent unexplained.")]
     public void Guide_ShouldTeachBothExcludedComponentsReasonShapes()
     {
-        string guide = Normalize(ReadGuide(OwnerGuide));
+        string guide = Normalize(string.Concat(OwnerGuides.Select(ReadGuide)));
 
         string[] missing = ReasonShapes
             .Where(shape => !guide.Contains(shape.Fragment))
@@ -87,7 +102,7 @@ public sealed class ExcludedComponentsDropGuidanceTests
     [Description("Every load-bearing clause of the positional-exclusion guidance is intact.")]
     public void Guide_ShouldKeepEveryLoadBearingClauseOfTheExclusionRule()
     {
-        string guide = Normalize(ReadGuide(OwnerGuide));
+        string guide = Normalize(string.Concat(OwnerGuides.Select(ReadGuide)));
 
         string[] dropped = LoadBearingClauses
             .Where(clause => !guide.Contains(clause.Fragment))
