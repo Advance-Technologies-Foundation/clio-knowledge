@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.81",
+  "libraryVersion": "1.13.82",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1266,7 +1266,7 @@
     {
       "itemId": "process-formulas",
       "title": "Process formulas and branch conditions",
-      "description": "Owns the `expression` mapping source and the CONDITION on a conditional flow: the vocabulary the platform's expression interpreter actually accepts (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; this clio requires 1.4.0.41), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - the length bound clio still applies, and branch precedence - which is flow ORDER and is recorded nowhere in the metadata.",
+      "description": "Owns the `expression` mapping source and the CONDITION on a conditional flow: the vocabulary the platform's expression interpreter actually accepts (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; an environment below clio's enforced floor is refused up front), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - the length bound clio still applies, and branch precedence - which is flow ORDER and is recorded nowhere in the metadata.",
       "topicId": "creatio.process-formulas",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-formulas",

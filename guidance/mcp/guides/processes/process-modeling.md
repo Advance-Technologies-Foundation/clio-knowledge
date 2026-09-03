@@ -95,7 +95,7 @@ article from what this one says; read that article.
 - A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
   `modify-business-process` + `setFlowCondition`. No gateway element is involved — see `process-formulas`.
 - NOT yet buildable: gateway ELEMENTS, default flows, timer/message start, intermediate events,
-    `formulaTask`, `scriptTask`, `webService`, `deleteDataUserTask` (each also marked READ-ONLY in the
+    `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
@@ -199,11 +199,13 @@ System actions (palette group "System actions"):
     a `filter` — see `process-data-elements`. The other read modes (collection / count /
     aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
-    The element builds, but its target object and column values do NOT yet — see below.
+    The element builds, but its target object and column values do NOT yet — see the caveat near
+    the top of this guide.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements`.
-- `deleteDataUserTask` Delete data — delete matched records. READ-ONLY here (not buildable).
+- `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
+    BUILDS, but its target object and filter do NOT yet — see the caveat near the top of this guide.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
     READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
     be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a
