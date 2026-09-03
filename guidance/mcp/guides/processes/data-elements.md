@@ -38,7 +38,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   Use the entity COLUMN name (here `UsrName`), not the field caption ("Name").
 - To convert an EXISTING process to start on a record event, use `modify-business-process`:
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
-  `removeElement` is DESTRUCTIVE and the modify path validates nothing: it cascades to every flow
+  `removeElement` is DESTRUCTIVE and no pre-save validation restores what it breaks: it cascades to every flow
   touching the element without re-joining the gap. The rules that make a removal safe — describe first,
   validate the graph AS IT WILL BE, confirm with the user — are in `process-modeling`. Read them before
   removing anything, not after.
@@ -78,7 +78,12 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- LIMITATION — the read record's individual COLUMN values are not referenceable from a MAPPING, a
+- LIMITATION — read this as CLOSED, not as a list with gaps: a read record's individual COLUMN values
+  are referenceable from NOWHERE taking a formula or a value, a conditional flow's `condition`
+  included — so "the record I just read has status X", the likeliest branch after a read, cannot be
+  authored. Nowhere to GET one either: describe reports no column UIds, so author TWO segments
+  (`[#[Element:{uid}].[Parameter:{uid}]#]`), never three. One exception, whose form
+  `process-send-email` owns: a Send email body macro. Concretely, not referenceable from a MAPPING, a
   `changeData` value or a filter condition. (An email BODY macro is the exception and does reach them:
   `[[element:Read.ResultEntity.Column]]` — see `process-send-email`.) The
   element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);

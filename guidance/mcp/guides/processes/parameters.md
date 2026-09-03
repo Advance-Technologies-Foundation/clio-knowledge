@@ -36,7 +36,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   matches a parameter UId case-insensitively where the designer matches case-sensitively, so it can refuse
   a delete the designer would allow. Broader is the safe direction — the failure it prevents is a dangling
   reference that surfaces at run time.). That refusal is CrtProcessBuilder's own scan, which is why it can
-  NAME each usage site. And the modify path is not unvalidated: the whole schema goes through the platform's
+  NAME each usage site. And the modify path is not unvalidated FOR A FORMULA: the whole schema goes through the platform's
   own process validation before the save (which fails CLOSED — no verdict is treated as invalid, never as
   valid), and that gate is what judges a formula — an `expression` mapping and a flow condition alike. From
   CrtProcessBuilder 1.4.0.41 it is the ONLY thing that judges one: the package no longer checks a formula
