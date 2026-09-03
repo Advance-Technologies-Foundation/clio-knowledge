@@ -86,10 +86,15 @@ public sealed class ChangeAccessRightsGuidanceTests
             because: "the applier rejects a selectedEmployees filter with no conditions rather than storing "
                 + "it, so an agent must not be told the state is merely hazardous -- it is unreachable, and "
                 + "an article that describes it as storable sends the agent into a refusal documented nowhere");
-        guide.Should().Contain("is refused on the same grounds",
-            because: "the record filter carrying an object but no conditions is the LARGER blast radius of "
-                + "the two -- every record of the target object rather than every contact -- so guarding the "
-                + "grantee filter alone would refuse the smaller hazard and permit the bigger one");
+        guide.Should().Contain("applies the change to EVERY record of the target object",
+            because: "verified against ChangeAdminRightsUserTask.InternalExecute: an ABSENT record filter "
+                + "never enters the filter block, so the ESQ runs unfiltered. This is the element's widest "
+                + "state and it is neither refused nor warned, so the article naming it is the only thing "
+                + "standing between an agent omitting the filter to stage an element and a mass grant");
+        guide.Should().Contain("the runtime changes nothing (silent no-op)",
+            because: "the mirror fact: a record filter PRESENT with no conditions is the silent no-op, not "
+                + "the fail-open case. The two states were documented backwards across three repos, and "
+                + "pinning both directions is what stops the inversion coming back");
         guide.Should().Contain("DELETES the matching record-right rows; it does not deny",
             because: "record permissions are additive, so a successful revoke can still leave the operation "
                 + "in place through another role -- an agent that reads remove as 'deny' ships a false negative");
@@ -113,8 +118,10 @@ public sealed class ChangeAccessRightsGuidanceTests
         owning.Should().Contain("Clearing one is safe only while the OTHER still holds an entry",
             because: "`[]` is the documented clearing idiom, so the both-empty hazard has to be attached "
                 + "at the point of use rather than left to a distant paragraph");
-        entry.Should().Contain("silently does nothing with NO record filter at all OR with both collections empty",
-            because: "the entry article is read first and must name the states as the owner does -- \"empty filter\" now reads as the FAIL-OPEN conditionless case, whose blast radius is the opposite");
+        entry.Should().Contain("a record filter that is ABSENT is the opposite hazard and acts on every record",
+            because: "the entry article is read first and must name the states the way the runtime behaves, "
+                + "not the way the phrase \"empty filter\" suggests -- reading absence as inert is what makes "
+                + "an agent omit the filter deliberately");
         entry.Should().Contain("so a clean build does NOT mean the element will do anything",
             because: "this is the inverted, correct form of the 'build-time refusals are the only feedback' "
                 + "overclaim that a review caught");
@@ -124,7 +131,9 @@ public sealed class ChangeAccessRightsGuidanceTests
             string text = ProcessGuideSet.Read(repositoryRoot, article.SourcePath);
             text.Should().NotContain("fails silently (empty filter, non-administrated object)",
                 because: $"{article.ItemId} would pair both hazards with a build-time refusal that exists "
-                    + "only for the non-administrated object -- round-1 review Blocker");
+                    + "only for the non-administrated object -- round-1 review Blocker. (Scoped to this "
+                    + "phrasing on purpose: \"empty filter\" is legitimate in process-data-elements, where "
+                    + "readData/changeData do not have this element's inverted states.)");
             text.Should().NotContain("the only feedback that will ever exist",
                 because: $"{article.ItemId} would tell an agent a green build proves an effective element, "
                     + "while two unrefused silent no-ops exist -- round-2 review Major");

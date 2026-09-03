@@ -16,11 +16,17 @@ happen inside a running process. Note the two surfaces spell levels differently 
 This element has **NO output parameters**. Nothing downstream can branch on whether permissions were
 changed, and a run that changes nothing looks exactly like a run that worked. Its runtime silently
 does NOTHING — no error, no log an agent can read back — at least in these cases:
-  1. the element has NO record `filter` at all (the parameter was never set);
+  1. the record `filter` is PRESENT but carries no conditions (the runtime exits "filters empty");
   2. `add` and `remove` are BOTH empty (there is no permission to apply);
   3. the target object does not use record permissions (`AdministratedByRecords` off).
 Only case 3 is refused at build time. Cases 1 and 2 build green, save, publish and run — so a clean
 build is NOT evidence that the element will do anything.
+DANGER — the opposite failure, and the one that actually costs you: an element with NO record `filter`
+at all is **not** a no-op. The runtime never enters the filter block, so the query runs UNFILTERED and
+the permission change lands on EVERY record of the target object. That query also runs with record
+permissions DISABLED, so the radius is every row in the table, not the rows the caller can see. This
+state is not refused, and an older clio will actively tell you the element is inert. Never omit the
+filter to stage or dry-run an element.
 A FOURTH cause produces the same symptom with a different fix: an environment whose deployed
 CrtProcessBuilder predates this element DISCARDS the whole `accessRights` block while deserializing and
 still answers success, leaving the element unconfigured. A clio that carries the accessRights read-back
@@ -107,12 +113,14 @@ that same value "NotSet". Verify it on your stand before relying on it as an acc
   pick up the signal-entity default `process-data-elements` documents — write `"object": "Contact"`
   explicitly. SECURITY NOTE, two parts. The runtime evaluates this filter with record permissions
   DISABLED — it matches every contact the filter describes, regardless of what the user running the
-  process can see. And a conditionless filter here is REFUSED at build: one with no conditions would
+  process can see. The element's OWN record filter is evaluated the same way, so neither filter is
+  limited to records the running user could see. And a conditionless filter here is REFUSED at build: one with no conditions would
   match EVERY contact and grant to the whole organisation, so the applier rejects it rather than storing
-  it. The element's own record `filter` is refused on the same grounds - one carrying an `object` but no
-  conditions would change permissions on every record of the target object (see "Which records" below).
-  Only the total ABSENCE of a record filter escapes both guards, and that one is inert rather than wide.
-  Always give both filters conditions.
+  it. The element's own record `filter` behaves the OPPOSITE way and must not be reasoned about by
+  analogy: one carrying an `object` but no conditions is a silent no-op, while the total ABSENCE of a
+  record filter is the wide state that acts on every record (see "Which records" below). The two filters
+  fail in opposite directions, so always give the grantee filter conditions AND always give the element
+  a record filter.
 
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
 you never create those yourself. `selectedEmployees` needs no parameter.
@@ -131,12 +139,14 @@ output.
 Give the record `filter` an explicit `"object"` equal to the `accessRights` object — see
 `process-data-elements`, which owns that rule for every data element. Three filter states behave
 differently and only one of them is safe:
-  - NO filter at all — the runtime does nothing (silent no-op case 1 above). Not refused.
+  - NO filter at all — the WIDEST state, not the safest: the runtime skips the filter block entirely and
+    applies the change to EVERY record of the target object, with record permissions disabled. Not
+    refused and not warned. This is the state to check for first.
   - a filter with no `"object"` — REFUSED at build, naming the element.
-  - a filter with an `"object"` but NO conditions — REFUSED at build. It does not mean "no records": it
-    narrows nothing, so it would match EVERY record of that object and change permissions on all of
-    them, silently. The conditionless-group guard covers `signalStart` filters, this element's grantee
-    filter and this record filter alike.
+  - a filter with an `"object"` but NO conditions — the runtime changes nothing (silent no-op), taking
+    its "filters empty" exit. The current package also REFUSES it at build, so a caller writing
+    through clio cannot reach it, though a designer-built element can. That refusal is a no-op guard —
+    the same class as the non-administrated-object refusal — NOT a fail-open guard.
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
     "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
@@ -199,7 +209,7 @@ there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if 
     accepted unverified, so a clean build does not prove the contact exists);
   - a `selectedEmployees` filter rooted anywhere but `Contact`, or one carrying no conditions at all
     (it would select every `Contact` and grant to the whole organisation);
-  - a record `filter` carrying an `object` but no conditions (it would act on every record of it);
+  - a record `filter` carrying an `object` but no conditions (it is a silent no-op at run time);
   - an `accessRights` block on an element that is not a Change access rights element.
 Others exist (an entry with no `grantee`, an unknown `operations` or `level` token, a grantee type
 missing its payload key), so treat this as the shape of what is checked rather than an exhaustive list.
