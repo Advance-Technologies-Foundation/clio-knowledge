@@ -158,8 +158,10 @@ Give the record `filter` an explicit `"object"` equal to the `accessRights` obje
 `process-data-elements`, which owns that rule for every data element. Three filter states behave
 differently and only one of them is safe:
   - NO filter at all — the WIDEST state, not the safest: the runtime skips the filter block entirely and
-    applies the change to EVERY record of the target object, with record permissions disabled. Not
-    refused and not warned. This is the state to check for first.
+    applies the change to EVERY record of the target object, with record permissions disabled. The
+    PLATFORM neither refuses nor warns about it, but a clio carrying the read-back check DOES warn,
+    naming the element and this consequence — so that warning is the signal, and it is the only one.
+    This is the state to check for first.
   - a filter with no `"object"` — REFUSED at build, naming the element.
   - a filter with an `"object"` but NO conditions — the runtime changes nothing (silent no-op), taking
     its "filters empty" exit. The current package also REFUSES it at build, so a caller writing
