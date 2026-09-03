@@ -7,7 +7,7 @@ the user about it. `reason` is a LIST of {code, params?}. Branch on `code`; read
 occurrence's values.
 
 NOTHING HERE IS AN INSTRUCTION TO APPLY. droppedElements is the audit trail of what was NOT built —
-you REPORT it. `guide.elementMap` holds everything to apply, and it carries no reason at all, because
+you REPORT it. `guide.viewConfigDiff` holds everything to apply, and it carries no reason at all, because
 every entry there is a deterministic operation whose own fields say what to do.
 
 WHY A DROP NEEDS A CODE AND AN OPERATION DOES NOT

@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Guards the ENG-93152 payload: the <c>NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE</c> HARD RULE and
+/// Guards the ENG-93152 payload: the <c>NEVER AUTHOR A PARENT THE DIFF DOES NOT CREATE</c> HARD RULE and
 /// the load-bearing clauses that make it correct. The content digest cannot guard a rule's wording — it is
 /// re-recorded on every edit — so a rename, a dropped clause, or a moved bullet would otherwise ship
 /// green. This rule exists specifically because an agent got it wrong in practice (it recreated a
@@ -25,7 +25,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class RetargetParentRuleTests
 {
-    private const string RuleName = "NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE";
+    private const string RuleName = "NEVER AUTHOR A PARENT THE DIFF DOES NOT CREATE";
     private const string OwnerGuide = "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md";
     private const string SectionHeading = "HARD MOBILE RULES";
     private const string NextSectionHeading = "LIMITATIONS (be transparent)";
@@ -34,8 +34,8 @@ public sealed class RetargetParentRuleTests
     // the reason it protects.
     private static readonly (string Fragment, string Because)[] LoadBearingClauses =
     [
-        ("parentSource", "the rule is driven by this per-entry signal; without naming it the caller cannot act on it"),
-        ("\"template\"", "only this value means the parent is not created by the map — the rule is useless without naming the value that triggers it"),
+        ("unresolvedParents", "the only case the response still reports as a field, and the only one the caller cannot derive from the diff itself"),
+        ("insert ONLY the child", "the directive itself; without it the rule states a fact and asks for nothing"),
         ("mobile-page-modification", "the single-element-slot rule is OWNED there and only cross-referenced here — not duplicated"),
         ("single-element-slot", "the rule must name the owned mechanism it is the conversion-time reminder of"),
         ("drop-inherited-chrome", "the drop is decided by web-template-baseline membership, not by a mobile-template name match; pinned as the reason CODE since ENG-95827 replaced the sentence with one"),
@@ -45,7 +45,7 @@ public sealed class RetargetParentRuleTests
     ];
 
     [Test]
-    [Description("The NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE rule still exists as a bullet INSIDE the HARD MOBILE RULES section, with every load-bearing clause intact.")]
+    [Description("The NEVER AUTHOR A PARENT THE DIFF DOES NOT CREATE rule still exists as a bullet INSIDE the HARD MOBILE RULES section, with every load-bearing clause intact.")]
     public void Rule_ShouldExistWithLoadBearingClausesInsideSection()
     {
         string section = HardMobileRulesSection(ReadGuide(OwnerGuide));
