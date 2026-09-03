@@ -29,8 +29,9 @@ Creatio or disk. The guide contains:
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
     merge / insert / drop / relocate-children). Iterate this to build the body; it already
     encodes merge-vs-insert, the mobile parent, survivability and caption resources. Every insert
-    also carries `parentSource` — whether its parent is created by this map (`"page"` / `"converter"`)
-    or must already exist on the target page (`"template"`), see NEVER AUTHOR A PARENT THIS MAP DOES
+    also carries `parentSource` — whether its parent is created by this map (`"page"` / `"converter"`),
+    already exists on the target page (`"template"`), or is provided by NEITHER (`"unknown"`, which you
+    must report rather than work around), see NEVER AUTHOR A PARENT THIS MAP DOES
     NOT CREATE in HARD MOBILE RULES. Do NOT
     re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
     parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
@@ -89,13 +90,11 @@ Creatio or disk. The guide contains:
     declared text is EMPTY is included on purpose — that is the page's own "no visible label", and
     reproducing it is what makes the mobile page match the web one.
     NOT EVERY #ResourceString TOKEN IN THE BODY HAS AN ENTRY HERE, and that is correct — do NOT invent
-    one. A list column's caption is resolved by the platform from the entity column itself, so a page
-    declares only the ones it RENAMED; the platform's own MobilePageWithTabsFreedomTemplate ships
-    referencing AttachmentListDS_Name / _CreatedOn / _CreatedBy / _Size and declaring none of them.
-    Registering a key for such a token would REPLACE a localized column title with one hardcoded
-    culture — worse than leaving it alone. So: register the map as given, and if a token still renders
-    as its raw name on the device, the fix is the entity column or the source page's own resources, not
-    a key added here.
+    one. The platform resolves a list column's caption from the entity column itself, so a page declares
+    only the ones it RENAMED (its own MobilePageWithTabsFreedomTemplate references AttachmentListDS_Name
+    and friends while declaring none of them). Inventing a key would REPLACE a localized column title
+    with one hardcoded culture. If a token still renders raw on the device, the fix is the entity column
+    or the source page's resources — not a key added here.
   - dataSectionConflicts — one entry per template-owned data-section value the page changed that
     NEITHER diff can express, each with its `section` (which diff to hand-edit), `path` (segments),
     `entry` (the array element's name, when it has one) and `kind`. Null when there are none, which is
@@ -105,28 +104,15 @@ Creatio or disk. The guide contains:
     `nameless-changed-in-place` drops NOTHING — the page's element is inserted and will DUPLICATE the
     template's own at runtime, so remove one of the two. Treating them as one warning sends you to the
     wrong fix. Report them at the gate; none is silently absorbed.
-  - diagnostics — what the conversion could NOT do, one entry per occurrence, each with a `code` and an
-    `impact`. ABSENT on a clean conversion — that means the converter found nothing you have to weigh,
-    NOT that the rules do not apply. Every diagnostic describes an ABSENCE, which is why none of them
-    could be an elementMap entry: a component that was never removed produces no drop, a standard that
-    never ran produces no normalization entry. Read `impact` first, because it is the only thing that
-    changes what you do:
-      • `conversion` — this conversion's output or report is affected and the remedy is YOURS to apply
-        before treating the page as done. Codes: `data-section-root-merge-fallback` (the mobile template
-        was unobtainable, so that config's diff degraded to a root merge — `sections` names which diff,
-        `cause` says whether a re-run can fix it); `component-twin-not-prebuilt` (a same-component twin
-        could not be diffed against the web-template baseline, so it is an ADVISORY merge with no
-        prebuilt mobileValues — `elements` names what you now configure by merge-by-name per
-        componentSuggestions).
-      • `converter-config` — a rule in the PUBLISHED rules file is malformed, so the behaviour it
-        declares did not run. You cannot fix it from here: report it and carry on. Codes:
-        `exclusion-filters-discarded` and `normalization-rules-skipped`, each with a `count`. These
-        exist because the rules file is fetched at run time, so a typo in a published rule silently
-        switches a rule off and nothing else would say so.
-    The remedy per code is above and in this article; it is deliberately NOT repeated in the payload.
-    The standing mobile rules likewise live in THIS article and are enforced by validate-page /
-    update-page, because a line that fires for every conversion says nothing about the one in front of
-    you.
+  THERE IS NO `diagnostics` FIELD, and none of its four codes survives — do not look for it, and do not
+  read its absence as "nothing to weigh". Each went somewhere:
+    - a twin with no prebuilt delta → that entry's own `reason`. Read `reason` on every `merge` whose
+      `mobileValues` is null; it separates "configure by merge-by-name" (real work) from "NOTHING to
+      apply" and from a by-design different mobile type (both: do nothing). See MERGE below.
+    - the root-merge fallback → the cause that mattered now REFUSES the conversion (see DEGRADED CASE).
+      Detect the benign remainder structurally: a data-section diff that is one op with `path: []`.
+    - the two rules-file codes → clio's CI, for whoever authored the typo. You get no signal, because
+      you could never fix a published rules file from here.
   There is deliberately NO prose section in the guide — no constraints, no diagnostics, no nextSteps.
   The standing rules are in THIS article and are enforced by validate-page / update-page; the ordered
   flow is the FLOW section below and the conversion skill's gated steps. The guide carries facts about
@@ -188,22 +174,24 @@ FLOW
      also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
      as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
      not a new decision). Concretely: EMIT A MERGE OPERATION in viewConfigDiff on that mobileName with
-     those values. Do not treat mobileValues as an insert-only concern — a merge is the ONLY way some
-     values reach the page at all. An anchor the converter had to move down a row, to make room for
-     content the page places above it, arrives exactly this way: its whole new layoutConfig lives only in
-     the merge entry's mobileValues, so skipping that merge silently reproduces the misplacement on the
-     mobile page and nothing reports it. A merge carries prebuilt mobileValues in two twin shapes:
+     those values. mobileValues is NOT an insert-only concern — a merge is the only way some values reach
+     the page at all. An anchor the converter moved down a row, to make room for content placed above it,
+     arrives this way: its whole new layoutConfig lives only in the merge's mobileValues, so skipping
+     that merge silently reproduces the misplacement and nothing reports it. Two twin shapes:
        • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
          sourceSchemaName/rootSchemaName): only those keys are carried.
        • same-component twin — the mobile template provides the SAME component the page changed, either
          under a DIFFERENT name via a components mapping (AttachmentList→AttachmentFileList) or,
-         AUTOMATICALLY, under the SAME name with no mapping needed (Feed→Feed). Its mobileValues carry
-         ONLY what the page CHANGED from the web template — e.g. the attachments detail's recordColumnName
-         (the object-specific link column), or Feed's dataSourceName/entitySchemaName. A property the page
-         left at the web-template default is deliberately OMITTED so the mobile element keeps its OWN
-         default (an unset attachments recordColumnName stays the mobile default RecordId); a template
-         component the page did not change gets no elementMap entry at all. Paste the carried mobileValues
-         as-is — never add the omitted defaults yourself; the mobile element already supplies them.
+         AUTOMATICALLY, under the SAME name (Feed→Feed) — the automatic route also requires the element
+         to be INHERITED FROM THE WEB TEMPLATE; a page-authored element merely sharing a name and type
+         stays an `insert`, keeping its parent, index, caption and bindings. Its mobileValues carry ONLY
+         what the page CHANGED from the web template — the attachments detail's recordColumnName, or
+         Feed's dataSourceName/entitySchemaName. A property left at the web-template default is
+         deliberately OMITTED so the mobile element keeps its OWN default (an unset recordColumnName
+         stays the mobile default RecordId). Paste mobileValues as-is; never add the omitted defaults.
+         A template component the page did NOT change still gets an entry — an advisory `merge` with
+         `mobileValues: null` — so a page business rule targeting it still converts. That entry is not
+         work: read `reason` to tell "NOTHING to apply" from "configure this one by hand".
      If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
@@ -247,11 +235,10 @@ FLOW
      do NOT rebuild the row and do NOT strip properties. This is prebuilt only for an INSERT — when the
      mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
      configure by merge-by-name (see the merge branch).
-     The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens — both a
-     top-level caption AND nested ones (e.g. config.title, text.template). Register them ALL: pass
-     guide.resourceStrings (a { key: en-US text } map covering the whole converted body) to update-page
-     `resources` in one call — do NOT register a #ResourceString(...)# token as the value, and do not
-     hand-pick individual keys. A token whose key is not registered renders blank. Consult
+     The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens. Pass
+     guide.resourceStrings to update-page `resources` in ONE call, exactly as given — do not hand-pick
+     keys, do not register a #ResourceString(...)# token as a value, and do not add keys the map omits
+     (see the resourceStrings field above for why an omission is correct). Consult
      mobileContracts / get-component-info (schema-type "mobile") only
      for those not-prebuilt parts. validate-page is the backstop — it
      rejects an insert that drops a required property (e.g. a field caption, or a lookup-path
@@ -359,19 +346,20 @@ DISCARD its data-source section and rebuild it from guide.modelConfigDiff.
   the loss in guide.dataSectionConflicts rather than shipping a silently lossy body. Read each entry's
   `kind` (see the field above) — a changed named element or a changed collection scalar loses the page's
   value, while a nameless element edited in place loses nothing and duplicates instead.
-- DEGRADED CASE — a diff can only be targeted when there was a base to diff against. When the mobile
-  template was UNOBTAINABLE, that config's diff degrades to a SINGLE ROOT MERGE and a
-  `data-section-root-merge-fallback` diagnostic reports it: `sections` names which diff degraded and
-  `cause` says why — `mobile-template-unreadable` (a template was named, so a re-run can fix it) versus
-  `no-template-base` (no template was named at all, so there is nothing to re-run). A template that was
-  read successfully and simply declares no such config section ALSO produces a root merge, and that one
-  is deliberately NOT reported: a base that owns nothing in that section has nothing to lose.
-  This matters because a root merge REPLACES arrays
-  wholesale: any array the mobile template also owns — a data source's own sort/filter array, or
-  Items.modelConfig.filterAttributes' built-in QuickFilterGroup_Filters on BaseMobileListTemplate — can
-  lose its baseline entries. Verify those arrays before pasting, or re-run the tool with
-  environment-name/uri set so clio can diff against the real base and emit inserts instead. Absence of
-  that diagnostic means every diff you got is targeted; do not go looking for reassurance in prose.
+- DEGRADED CASE — a diff can only be targeted when there was a base to diff against. An UNOBTAINABLE
+  template no longer degrades the guide: the tool REFUSES with `success: false` and an error naming the
+  cause and its fix — a named-but-unreadable MOBILE template or an unreadable WEB template are
+  environment checks (the mobile package / the source package), while no mobile template named at all is
+  a rules-file fix (`templates` entry or `defaultMobileTemplate`) that re-running cannot help. Never
+  convert around a refusal: each of those states ships inserts DUPLICATING elements the template
+  provides.
+  What remains is the BENIGN root merge — a template read successfully that simply declares no such
+  config section. Deliberately not reported, because a base owning nothing there has nothing to lose.
+  Detect it structurally (one op with `path: []`) and check it only because a root merge REPLACES arrays
+  wholesale: any array the mobile template also owns (a data source's own sort/filter array, or
+  Items.modelConfig.filterAttributes' built-in QuickFilterGroup_Filters on BaseMobileListTemplate) loses
+  entries. There is no diagnostic to read for this, and its absence is not reassurance — look at the
+  `path`.
 
 CHECKLIST before validate-page: confirm no insert dropped a property the mobile component supports
 (you pasted mobileValues verbatim). validate-page enforces the critical ones — a data-source
@@ -458,16 +446,25 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   shape is defined nowhere in this guide. "Do NOT move the chip into crt.QuickFilterGroup" is about the VIEW
   tree — it is not a ban on the model-side wiring the OOTB page carries.
 - NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE — read `elementMap[].parentSource`. Every insert that
-  names a parent carries it, and it has three values: `"template"` means NOTHING in the element map creates
-  that parent, so the target page must already provide it (from the mobile template — `MainContainer`, or
-  `FloatingActionButton` via the Scaffold's `floatAction` slot); `"page"` and `"converter"` mean the parent
-  IS inserted by this map, by its own entry, having come from the source page or been synthesized by the
-  converter respectively. For `"template"`: insert ONLY the child into the named parent — do NOT insert,
-  merge, or re-declare the parent container or its slot. The template supplies both, and authoring your own
-  OVERRIDES the native one (wrong configuration, lost children). This is the single-element-slot / strip
-  rule from get-guidance `mobile-page-modification` (a template-provided slot is merge-only and the merge is
-  discarded when the slot is already filled) applied to conversion — that article owns the rule; this is
-  only its conversion-time reminder. An older guide carries a retarget-only `parentExistsOnTemplate: true`
+  names a parent carries it, and it has four values: `"template"` means nothing in the element map creates
+  that parent AND the probed mobile template does provide it (`MainContainer`, or `FloatingActionButton`
+  via the Scaffold's `floatAction` slot); `"page"` and `"converter"` mean the parent IS inserted by this
+  map, by its own entry, having come from the source page or been synthesized by the converter
+  respectively; `"unknown"` means NEITHER provides it.
+  For `"template"`: never author, recreate or duplicate the parent ELEMENT — your copy OVERRIDES the
+  native one (wrong configuration, lost children). Two things this does NOT forbid: the parent's own
+  `merge` entry, if the map carries one, must still be applied (that is how a container's per-breakpoint
+  `columns` and a shifted `layoutConfig` reach the page — FLOW step 4); and when the parent does not yet
+  carry the SLOT you insert into, the two-step idiom from get-guidance `mobile-page-modification` applies
+  — `merge` declaring the empty slot, then the insert — because an insert into a property the element
+  lacks THROWS (`menuItems` on `crt.FloatingActionButton`, which this converter emits). The
+  single-element-slot rule that article owns forbids REPLACING a filled template slot (the merge is
+  discarded when the slot is already filled), not initializing an absent one; this is only its
+  conversion-time reminder.
+  For `"unknown"`: STOP and report the parent name. Inserting into it throws and authoring it may
+  duplicate something the template owns under another name. It is a conversion-RULES defect — a
+  `containers` mapping naming a container the target template lacks — not yours to work around.
+  An older guide carries a retarget-only `parentExistsOnTemplate: true`
   boolean instead, and it was NOT stamped on an ordinary insert into a template-provided parent: on such a
   guide do not read its absence as "safe to author", fall back to the same rule and never author a parent
   the mobile template already carries. And a source element INHERITED FROM
