@@ -60,14 +60,14 @@ REFERENCING A PARAMETER — the one thing that is not guessable, so read this be
 uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form — but the
 four wrong shapes do not all fail the same way, and the difference matters:
 
-- a bare `Price` and `[Price]` are REFUSED, naming the identifier. The engine sees them and does not
-  resolve them.
-- `[#Price#]` and `[#Process parameters.Price#]` look like macros, so they are read as an unrecognised
-  macro FAMILY — and no converter resolves one, so the raw token reaches the interpreter and does not
-  parse. Both are REFUSED, on a mapping and on a flow condition alike, with
-  `Formula value error: Expression expected (at index 0).` The message names the position, not your token,
-  so recognise the shape: an `Expression expected (at index 0)` on a formula that starts with `[#` means
-  the family is wrong, not the syntax.
+- a bare `Price` is REFUSED naming the identifier: `Formula value error: Parameter "Price" not found`.
+- `[Price]` is REFUSED too, but does NOT name it — it faults on the bracket:
+  `Formula value error: Expression expected (at index 0).` Measured; the two are not interchangeable.
+- `[#Price#]` and `[#Process parameters.Price#]` are read as an unrecognised macro FAMILY, which no
+  converter resolves, so the raw token reaches the interpreter and does not parse. Both are REFUSED, on a
+  mapping and on a condition alike: `Formula value error: Expression expected (at index N)`, where N is
+  where your `[#` starts. Recognise the shape, not the number — that fault on a formula containing `[#`
+  means the family is wrong, not the syntax.
 
 The same is true of a typo in a real family: `[#SysSettingz.Foo#]` is an unrecognised family, not an
 unknown setting. Build the token yourself, in two steps:
@@ -112,20 +112,25 @@ value has to be computed. Do NOT evaluate the arithmetic yourself and store the 
 reads as success and silently replaces an expression that recomputes with a number that never will.
 
 WHAT IS CHECKED, and BY WHOM. The **platform** validates every formula — an `expression` mapping and a
-flow condition alike — at its own pre-save gate, and clio's `CrtProcessBuilder` package does not check it
-at all (from 1.4.0.41; earlier versions checked it a second time themselves, which is what that release
-removed). Two consequences that change how you read a failure:
+flow condition alike — at its own pre-save gate. From `CrtProcessBuilder` 1.4.0.41 the package adds
+nothing to that verdict beyond the two checks under *What CLIO still checks* below. Two consequences
+that change how you read a failure:
 
 - **A bad formula fails the WHOLE call.** The refusal comes from the save, not from the operation that
   carried the formula, so a `modify-business-process` batch does not tell you which operation it was — it
   tells you which PARAMETER or FLOW. Nothing is written: a refused edit is atomic.
-- **The message is the platform's.** It always names the parametrized element or flow, the character index
-  of the fault, and the expression — but the expression **as the platform's own converter left it, not as
-  you wrote it**. A parameter reference appears as the parameter's NAME, a fractional literal gains an `m`,
-  and a division gains a `((decimal)…)` wrapper. So `[#[Parameter:{24a7…}]#]` comes back as `Amount` and
-  `1.5` comes back as `1.5m`; do not read that as the wrong formula having been validated.
+- **The message is the platform's.** It always names the parametrized element, the flow, or the parameter
+  — whichever holds the bad value. A character index and the expression come with a PARSE fault only: a
+  type mismatch names the types, an unknown identifier names the identifier, an unresolvable `[#…#]`
+  reference names the reference and the remedy, and a newline quotes the expression as empty. Do not wait
+  for an index that is not coming.
+- **When the expression IS quoted, it is quoted as the platform's own converter left it, not as you wrote
+  it.** A parameter reference appears as the parameter's NAME, a fractional literal gains an `m`, and a
+  division gains a `((decimal)…)` wrapper. So `[#[Parameter:{24a7…}]#]` comes back as `Amount` and `1.5`
+  comes back as `1.5m`; do not read that as the wrong formula having been validated.
 
-What the gate refuses (each one measured against a stand, core 10.0.731.0):
+What the gate refuses. Every message quoted here and in the table below is verbatim from a stand at core
+10.0.731.0 — none of it is paraphrased or inferred:
 
 - it must PARSE — `1 +` gives `Formula value error: Invalid Operation (at index 3).`;
 - every identifier must resolve. An unknown one is named: `System.Math.Abs(-1)` gives
@@ -147,54 +152,53 @@ What the gate refuses (each one measured against a stand, core 10.0.731.0):
   rather than integer `0`). So `1.5` and `1 / 2` are REFUSED for an **Integer** parameter and accepted for
   a **Float** one — a Float parameter's CLR type is `decimal`. Plain integer arithmetic (`1 + 1`) fits
   both;
-- it must be a single line, and it must not be blank. An empty condition is not "no condition": the
-  platform substitutes the literal `true` at the use site, producing an always-taken branch nobody asked
-  for — clio refuses an empty `condition` up front for that reason.
+- it must be a single line. A newline is refused with `Formula value error: Expression contains invalid
+  line break symbol. Use \n as new line character` — the platform's own rule
+  (`ProcessParameterValueProvider.ValidateExpression`), and the one class where the quoted expression
+  comes back EMPTY. A bare carriage return with no line feed is NOT refused: the platform checks for `\n`
+  only, and CR is whitespace to the interpreter, so such a formula parses and stores on one line.
 
-What CLIO still checks, and it is one thing: **length, at most 2048 characters.** It runs before anything
-is stored, because the pre-save gate is what runs the platform's macro converters and those regexes have
-no match timeout — a bound applied at the gate would be applied too late. 2048 is generous for a formula
-but NOT for one built by concatenation: a metapath reference is about 60 characters, so roughly thirty of
+What CLIO still checks, and it is two things.
+
+**A blank `condition` is refused up front.** An empty condition is not "no condition": the platform
+substitutes the literal `true`, producing an always-taken branch nobody asked for. This check is clio's
+own, because the gate would ACCEPT it.
+
+**Length, at most 2048 characters**, applied before anything is stored — the pre-save gate is what runs
+the platform's macro converters, whose regexes have no match timeout, so a bound applied there would be
+too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is about 60 characters, so roughly thirty of
 them exhaust it, and the cap applies to the text as you write it, before macros are resolved. The same
 bound covers the paths that store a formula without any other check — a `changeData` value `expression`, a
 Send email recipient, a performer contact, a connection expression, a filter condition expression.
 
-There is no longer a per-REQUEST character budget. One existed while clio validated formulas itself,
-because each validated formula cost a parse and an IL emission; storing one costs almost nothing, so the
-bound went with the cost. A large batch is bounded by the request-item cap (1 000 items) like any other.
+There is no per-REQUEST budget; a large batch is bounded by the request-item cap (1 000 items).
 
-What is NOT refused: the SHAPE of an expression. Deep bracket nesting, long runs of `!`/`-`, and long
-chains of `? :` are all accepted, exactly as the visual designer accepts them. Do not write pathological
-shapes on the strength of that — a deep enough expression can take the whole application down at the
-platform's parser, and it is a platform defect rather than something clio can catch for you.
+What is NOT refused: the SHAPE of an expression — deep bracket nesting, long unary runs, long `? :`
+chains — exactly as the visual designer accepts them. Do not exploit that: a deep enough expression takes
+the whole application down at the platform's parser, which is a platform defect nothing here can catch.
 
-ON AN OLDER PACKAGE the formula is still refused, in different words. Before 1.4.0.41 the package ran its
-own check first and its message named the usage site in prose ("the condition on the flow from 'Task1' to
-'EndA' …") and quoted the expression as you wrote it; it also refused an unrecognised macro family on a
-NEW condition itself, from 1.4.0.32. None of that changes WHETHER a formula is accepted — the platform's
-gate ran underneath it the whole time and is what actually decided — so treat the difference as wording,
-not as capability. Below 1.4.0.0 the package stored an `expression` mapping unchecked and `setFlowCondition`
-did not exist at all. clio refuses `create-business-process` / `modify-business-process` against an
+ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words — and an older package
+refuses MORE, not less (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW
+condition). A refusal from a pre-1.4.0.41 environment is therefore not evidence the formula is bad:
+update the package. Below 1.4.0.0 an `expression` mapping was stored unchecked and `setFlowCondition` did
+not exist. clio refuses `create-business-process` / `modify-business-process` against an
 environment below its enforced floor; the fix is `install-process-builder`, not a workaround.
 
-THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE SET UNREACHABLE. Where an article
-explains what an older `CrtProcessBuilder` does differently — the `[#Lookup…#]` macro on a pre-1.3.1.1
-package in `process-parameters` is the surviving example — those paragraphs are history, not a
-branch to take: on a refusal from a CURRENT clio, run `install-process-builder`. Do not re-send a call in
-an older dialect "because the package may be old" — this clio refused before the call left, so no dialect
-reaches the server. Under an OLDER clio the call does go through and the old package rejects it itself;
-that rejection is real and still means the package is behind, not that the contract is wrong.
+THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE SET UNREACHABLE — they are history,
+not a branch to take. On a refusal from a CURRENT clio, run `install-process-builder`; never re-send a
+call in an older dialect, because clio refused before it left and no dialect reached the server.
 
-WHAT A REFUSAL LOOKS LIKE, so you can correct it yourself instead of guessing. Every row below is a
-verbatim measurement, and every one is prefixed by `Process validation failed:` plus the element or
-parameter name:
+WHAT A REFUSAL LOOKS LIKE. Every row is a verbatim measurement, prefixed by `Process validation failed:`
+plus the element or parameter name:
 
 | you wrote | message contains | the fix |
 |---|---|---|
 | `FormulaUtilities.Sum(1, 2) > 0` | `Formula value error: No applicable method 'Sum' exists in type 'FormulaUtilities' (at index 17).` | the function does not exist — there is no Sum |
 | `System.Math.Abs(-1) > 0` | `Formula value error: Parameter "System" not found` | drop the namespace: `Math.Abs(-1)` |
 | `math.Round(1.5) > 0` | `Formula value error: Parameter "math" not found` | case matters: `Math.Round(1.5)` |
-| `DateTimeUtilities.GetStartOfMonth(…)` | `Formula value error: No applicable method 'GetStartOfMonth' exists in type 'DateTimeUtilities' (at index 18).` | drop the `Get` prefix: `StartOfMonth` |
+| `DateTimeUtilities.GetStartOfMonth(DateTime.Now) > DateTime.MinValue` | `Formula value error: No applicable method 'GetStartOfMonth' exists in type 'DateTimeUtilities' (at index 18).` | drop the `Get` prefix: `StartOfMonth` |
+| a formula split across two lines | `Formula value error: Expression contains invalid line break symbol. Use \n as new line character` | put it on one line — and note the expression is quoted as EMPTY here |
+| `[Price] > 100` | `Formula value error: Expression expected (at index 0).` | brackets are not a reference; use the UId metapath |
 | `1 +` | `Formula value error: Invalid Operation (at index 3).` | the expression is incomplete |
 | `1.5` into an Integer parameter | `Error while executing expression "1.5m": Formula value error: Cannot convert type "Decimal" to "Int32"` | the target type cannot hold it — note the quoted `1.5m` |
 | an Integer parameter as a whole condition | `Error while executing expression "Amount": Formula value error: Cannot convert type "Int32" to "Boolean"` | a condition must be bool — compare it |
@@ -224,12 +228,9 @@ NO GATEWAY IS NEEDED and none is created. The platform synthesizes an exclusive 
 flow whose source is not one, so a branch straight off an activity is legitimate — it is what the platform's
 own tests rely on. Gateway ELEMENTS are still not buildable.
 
-The condition must evaluate to a BOOLEAN. An integer is refused: the interpreted engine, which is the
-default, does not coerce it the way the older compiled engine did.
-
-An EMPTY condition is refused, and the reason is worth knowing because it is silent otherwise: the platform
-stores an empty condition as the literal `true`, so an "empty" branch is an ALWAYS-TAKEN branch. A
-condition on a DEFAULT branch is refused.
+What a condition must satisfy is above, under WHAT IS CHECKED — it is validated as a formula whose target
+type is `bool`, so an integer is refused, and an empty one is refused because the platform stores it as
+the literal `true`. Specific to a branch: a condition on a DEFAULT branch is refused.
 
 **A PLAIN sibling flow IS the else branch.** This is the single most useful fact about branching here and it
 is easy to miss: the platform treats any non-conditional flow leaving the element as the default, and takes

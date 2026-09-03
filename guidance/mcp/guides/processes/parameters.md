@@ -36,10 +36,14 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   matches a parameter UId case-insensitively where the designer matches case-sensitively, so it can refuse
   a delete the designer would allow. Broader is the safe direction — the failure it prevents is a dangling
   reference that surfaces at run time.). That refusal is CrtProcessBuilder's own scan, which is why it can
-  NAME each usage site — the platform's pre-save gate catches the same dangling reference and reports it as
-  an unnamed error carrying only a parameter UId. And the modify path is not unvalidated: an `expression` or
-  a flow condition is checked before it is stored, and the whole schema goes through the platform's own
-  process validation before the save (which fails CLOSED — no verdict is treated as invalid, never as valid).
+  NAME each usage site. And the modify path is not unvalidated: the whole schema goes through the platform's
+  own process validation before the save (which fails CLOSED — no verdict is treated as invalid, never as
+  valid), and that gate is what judges a formula — an `expression` mapping and a flow condition alike. From
+  CrtProcessBuilder 1.4.0.41 it is the ONLY thing that judges one: the package no longer checks a formula
+  before storing it, so a bad formula fails the whole call at the save rather than the operation that
+  carried it. See `process-formulas` for what that refusal says. (The gate's own dangling-reference message
+  used to be an unnamed serialised error carrying only a parameter UId; from 1.4.0.41 the package rewrites
+  that one message into a sentence naming the reference and the remedy.)
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
   describe-first and confirm-the-removal rules in `process-modeling` still apply.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
