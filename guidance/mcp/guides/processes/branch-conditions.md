@@ -31,8 +31,11 @@ the literal `true`. Specific to a branch: a condition on a DEFAULT branch is ref
 **A PLAIN sibling flow IS the else branch.** This is the single most useful fact about branching here and it
 is easy to miss: the platform treats any non-conditional flow leaving the element as the default, and takes
 it only when no condition matched. So `if/else` is *one* `setFlowCondition` plus a plain `addFlow` — you do
-not need a "default flow" element, and the R7 rule ("exclusive diverge needs conditional flows plus exactly
-one default") is satisfied by exactly that shape.
+not need a "default flow" element. R7 does NOT apply to this shape - not "is satisfied by it":
+`process-activity-connections` owns R1-R17 and states why, and the difference is operational. The
+gateway is synthesized at generation time and never appears as a graph node, so there is no
+exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding
+elsewhere in the graph as already handled.
 
 Two consequences worth having before you build:
 

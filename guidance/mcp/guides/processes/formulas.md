@@ -180,8 +180,19 @@ Send email recipient, a performer contact, a connection expression, a filter con
 There is no per-REQUEST budget; a large batch is bounded by the request-item cap (1 000 items).
 
 What is NOT refused: the SHAPE of an expression — deep bracket nesting, long unary runs, long `? :`
-chains — exactly as the visual designer accepts them. Do not exploit that: a deep enough expression takes
-the whole application down at the platform's parser, which is a platform defect nothing here can catch.
+chains — exactly as the visual designer accepts them, and neither clio's length bound nor the platform's
+gate looks at it. Keep expressions FLAT, and never build one by concatenation or in a loop. The reason is
+not style: the platform parses by recursive descent with no stack guard, so a sufficiently nested
+expression ends the worker process rather than failing — uncatchable, taking every concurrent request
+with it, and nothing in this path can refuse it. Measured on one stand (core 10.0.731.0) against
+CrtProcessBuilder 1.4.0.52; treat it as one measurement, not a platform constant, and as a platform
+defect that only the platform can close.
+
+Two things make "keep it flat" harder than it sounds, which is why the rule is written as a habit
+rather than a limit. The depth you write is NOT the depth the parser sees — the platform's own converter
+inflates it, so an expression with no brackets at all can arrive deeply nested. And clio's
+character bound is not a mitigation: it bounds LENGTH, and the dangerous expression is short and dense
+rather than long and flat.
 
 ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words — and an older package
 refuses MORE, not less (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW
