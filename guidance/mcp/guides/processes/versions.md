@@ -61,14 +61,15 @@ V7  A schema Name tells you NOTHING about whether a process is a version, which 
     report is the only answer, and a regex over the name is a wrong answer that looks right.
 
 == Reading the standing ==
-Starting with clio 8.1.0.118, `describe-business-process` carries the version fields beside the graph.
-On an older clio the fields are simply not in the response -- ALL of them, `versionReadWarning`
-included -- and that is not the "read failed" state described below: it is a client that does not report
-version standing at all. Tell the difference before you act on it: no version keys AND no
-`versionReadWarning` means the clio you are talking to predates the feature, so the standing is
-unknowable from here and upgrading clio is the fix, not re-describing. Everything in this section and
-the two that follow assumes that build or newer; nothing here is a statement about the Creatio
-environment's own version.
+`describe-business-process` carries the version fields beside the graph from clio
+<CLIO-READBACK-VERSION-TBD> onward. Check by BEHAVIOUR rather than by number, because the behaviour is
+the stronger test and the one you can perform: no version keys AND no `versionReadWarning` in the
+response means the clio you are talking to does not report version standing at all -- so it is
+unknowable from here, and upgrading clio is the fix rather than re-describing. That state is NOT the
+"read failed" state described below, where the fields are absent but a warning says why, nor the
+partial one, where a warning arrives beside the facts that WERE established. Everything in this section
+and the two that follow assumes a clio that carries the fields; none of it is a statement about the
+Creatio environment's own version.
 
 The fields:
   `version`                 - this schema's own version number. 0 means THIS IS THE ROOT, which an
