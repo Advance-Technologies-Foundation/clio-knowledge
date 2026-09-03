@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -22,19 +22,25 @@ public sealed class ExcludedComponentsDropGuidanceTests
     private const string OwnerGuide = "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md";
 
     /// <summary>
-    /// The two reason SHAPES clio emits for one positional exclusion. Both come from
+    /// The two reason CODES clio emits for one positional exclusion. Both come from
     /// <c>ExcludedComponentsPass</c> in the clio repository — the first from <c>BuildDropReason</c>
     /// (the component the rule names), the second from <c>DropOrphanedSubtrees</c> (everything that
-    /// hung below it). An agent matches a drop on these substrings, so a divergence between the
-    /// converter and this guide is a silent failure: the unmatched drop reads as conversion loss and
-    /// the natural response to conversion loss is to re-insert.
+    /// hung below it). An agent branches on these codes, so a divergence between the converter and this
+    /// guide is a silent failure: the unmatched drop reads as conversion loss and the natural response
+    /// to conversion loss is to re-insert.
     /// </summary>
+    /// <remarks>
+    /// These were English SUBSTRINGS until ENG-95827 replaced <c>reason</c> with a list of
+    /// {code, params}. Pinning the codes is strictly stronger: a code is a closed-vocabulary token the
+    /// converter cannot reword by accident, whereas the old fragments could drift out of a format string
+    /// with nothing failing until an agent misclassified a drop.
+    /// </remarks>
     private static readonly (string Fragment, string Because)[] ReasonShapes =
     [
-        ("excludedComponents rule matched",
-            "the direct-removal reason ExcludedComponentsPass.BuildDropReason emits; the guide keys on this substring"),
-        ("parent removed by an excludedComponents rule",
-            "the orphan-cascade reason DropOrphanedSubtrees emits — a rule targeting a CONTAINER type produces "
+        ("drop-excluded-by-rule",
+            "the direct-removal code ExcludedComponentsPass.BuildDropReason emits; the guide keys on this code"),
+        ("drop-parent-excluded",
+            "the orphan-cascade code DropOrphanedSubtrees emits — a rule targeting a CONTAINER type produces "
                 + "mostly this shape, and it names the very elements a user asks about")
     ];
 
@@ -51,12 +57,12 @@ public sealed class ExcludedComponentsDropGuidanceTests
             "the single directive whose loss silently undoes ENG-95081"),
         ("not into that host, not",
             "re-inserting somewhere else is the obvious workaround and must be closed explicitly"),
-        ("do NOT ask the user whether to keep it",
+        ("do NOT ask whether to keep it",
             "asking re-opens a decision the converter configuration already made"),
         ("converter configuration",
             "which types are banned from which hosts must stay data the agent READS, never a list it memorizes"),
-        ("read the drop reasons",
-            "the agent must be routed to the reasons rather than to an assumed type list"),
+        ("codes rather than assuming one",
+            "the agent must be routed to the codes rather than to an assumed type list"),
         ("converts normally",
             "dropped-here / kept-there on one page is correct and must not be reported as an inconsistency")
     ];

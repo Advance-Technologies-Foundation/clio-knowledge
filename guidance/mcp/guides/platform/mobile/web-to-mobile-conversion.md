@@ -106,9 +106,7 @@ Creatio or disk. The guide contains:
     wrong fix. Report them at the gate; none is silently absorbed.
   THERE IS NO `diagnostics` FIELD, and none of its four codes survives — do not look for it, and do not
   read its absence as "nothing to weigh". Each went somewhere:
-    - a twin with no prebuilt delta → that entry's own `reason`. Read `reason` on every `merge` whose
-      `mobileValues` is null; it separates "configure by merge-by-name" (real work) from "NOTHING to
-      apply" and from a by-design different mobile type (both: do nothing). See MERGE below.
+    - a twin with no prebuilt delta → that entry's own `reason` codes. See REASON CODES below.
     - the root-merge fallback → the cause that mattered now REFUSES the conversion (see DEGRADED CASE).
       Detect the benign remainder structurally: a data-section diff that is one op with `path: []`.
     - the two rules-file codes → clio's CI, for whoever authored the typo. You get no signal, because
@@ -191,7 +189,7 @@ FLOW
          stays the mobile default RecordId). Paste mobileValues as-is; never add the omitted defaults.
          A template component the page did NOT change still gets an entry — an advisory `merge` with
          `mobileValues: null` — so a page business rule targeting it still converts. That entry is not
-         work: read `reason` to tell "NOTHING to apply" from "configure this one by hand".
+         necessarily work: its `reason` code says which of the twin cases it is (see REASON CODES).
      If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
@@ -245,30 +243,22 @@ FLOW
      attribute's type) and update-page refuses to save.
    - relocate-children — do NOT recreate this container; its children are placed in parentName
      instead (each child has its own entry whose parentName already points there).
-   - drop — skip the element entirely (reason explains why: unsupported type, an unsupported button
-     request, "empty container", or an "excludedComponents rule matched"). Tell the user what was dropped.
-     Empty containers are already handled FOR you:
-     a converter-created layout container whose every child dropped was removed deterministically by
-     the converter and arrives as a drop entry with reason "empty container". WHICH container types are
-     eligible is converter configuration, not a fixed list — read the drop entries rather than assuming
-     one. Do NOT re-create such a container, do NOT re-parent anything into it, and do NOT ask the user
-     about it — just report it with the other drops.
-     An "excludedComponents rule matched" drop is a POSITIONAL exclusion the converter applied by rule
-     (the reason names the removed type, the host type, and the host property when the rule scopes one —
-     e.g. a search filter the rule excludes from an expansion panel's compact tools strip). It is NOT
-     conversion loss: do NOT re-insert the component — not into that host, not
-     anywhere else on the page — and do NOT ask the user whether to keep it. WHICH types are excluded
-     from WHICH hosts is converter configuration, not a fixed list — read the drop reasons rather than
-     assuming one. The same type OUTSIDE the excluded position converts normally, so seeing it dropped
-     in one place and kept in another on the same page is correct, not an inconsistency. Just report it
-     with the other drops.
-     A positional exclusion emits a SECOND reason shape for everything that hung below the removed
-     component: "parent removed by an excludedComponents rule: ancestor 'X' was removed and this element
-     has no mobile parent left". Treat it exactly like the reason above — the element is gone because its
-     parent is gone, so re-creating it would rebuild the branch the rule exists to remove. Do NOT
-     re-insert it, do NOT re-parent it to a surviving container, and do NOT ask the user about it. Match
-     an excludedComponents drop on BOTH shapes: a rule that targets a container type produces mostly this
-     one, and the elements it names are the ones a user is most likely to ask about by name.
+   - drop — skip the element entirely; its `reason` codes say why. Tell the user what was dropped.
+     `drop-empty-container` is already handled FOR you: a converter-created layout container whose every
+     child dropped was removed deterministically. Do NOT re-create it, do NOT re-parent anything into it,
+     and do NOT ask the user about it — just report it with the other drops.
+     `drop-excluded-by-rule` is a POSITIONAL exclusion the converter applied by rule; its params name the
+     removed type, the `hostType`, and the `slot` when the rule scopes one (e.g. a search filter excluded
+     from an expansion panel's compact tools strip). It is NOT conversion loss: do NOT re-insert the
+     component — not into that host, not anywhere else — and do NOT ask whether to keep it. The same type
+     OUTSIDE the excluded position converts normally, so seeing it dropped in one place and kept in another
+     on the same page is correct.
+     `drop-parent-excluded` covers everything that hung below such a component (`ancestor` names it).
+     Treat it identically — the element is gone because its parent is gone, so re-creating it would rebuild
+     the branch the rule exists to remove. Match an exclusion on BOTH codes: a rule targeting a container
+     type produces mostly the second, and the elements it names are the ones a user asks about by name.
+     WHICH types are excluded from WHICH hosts is converter configuration, not a fixed list — read the
+     codes rather than assuming one.
    For many→one suggestions (primaryWebMerge set, e.g. crt.FolderTree + crt.FolderTreeActions
    -> crt.FolderTreeActions), emit a SINGLE mobile component and merge in the secondary
    component's properties; do not emit the secondary as a separate component.
@@ -367,13 +357,18 @@ attribute whose "path" contains a "." must keep its "type", and an inserted fiel
 caption ("label"); both are errors that block update-page.
 
 ─────────────────────────────────────────────────────────────
+REASON CODES — elementMap[].reason is a LIST of {code, params?}, never prose. Every code, what it
+means and what (if anything) to DO about it: get-guidance `freedom-page-mobile-reason-codes`. Load it
+once per run when you are about to read elementMap; branch on `code`, read `params` for the values,
+and REPORT an unrecognised code instead of guessing at it.
+
 HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 ─────────────────────────────────────────────────────────────
 - Mobile body is plain JSON with only viewConfigDiff / viewModelConfigDiff / modelConfigDiff.
 - NO handlers, NO validators, NO custom converters in the mobile body.
 - USE ONLY MOBILE-REGISTERED COMPONENT TYPES (get-component-info schema-type "mobile"). The converter
   never hands you one that is not: a source component whose type is absent from the mobile registry is
-  DROPPED, and the drop reason says `type 'X' not in mobile registry`. So this rule only ever binds a
+  DROPPED with reason code `drop-type-not-in-mobile-registry`. So this rule only ever binds a
   type YOU introduce. validate-page reports a deviation rather than blocking it, because a custom mobile
   component registered in your own package is legitimately absent from the registry — so read WHICH of
   the two diagnostics you got: a type that exists in the WEB registry but not the mobile one almost
@@ -469,7 +464,7 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   guide do not read its absence as "safe to author", fall back to the same rule and never author a parent
   the mobile template already carries. And a source element INHERITED FROM
   THE WEB TEMPLATE (chrome the mobile template provides natively) is NOT retargeted at all — the guide drops it
-  (reason names it "inherited from the web template"), because a duplicate would shadow the native element. A
+  (reason code `drop-inherited-chrome`), because a duplicate would shadow the native element. A
   page-AUTHORED element (above the web-template baseline) is not chrome and DOES convert.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
   into mobileValues for you: the container's per-breakpoint columns (small = 1, medium/large = the web

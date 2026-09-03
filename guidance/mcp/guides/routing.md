@@ -11,6 +11,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
     Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
     to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
   - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
+  - decode an elementMap[].reason code from that conversion -> name=freedom-page-mobile-reason-codes
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page

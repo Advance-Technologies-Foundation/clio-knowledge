@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.78",
+  "libraryVersion": "1.13.80",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -70,6 +70,7 @@
       "feature-toggle",
       "feature-toggle-tests",
       "freedom-page-web-to-mobile-conversion",
+      "freedom-page-mobile-reason-codes",
       "home-page",
       "identity-assertion",
       "indicator-widget",
@@ -205,6 +206,7 @@
       "docs://knowledge/com.creatio.clio/feature-toggle",
       "docs://knowledge/com.creatio.clio/feature-toggle-tests",
       "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
+      "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
       "docs://knowledge/com.creatio.clio/home-page",
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
@@ -937,6 +939,23 @@
       ],
       "sourcePath": "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md",
       "bundlePath": "resources/freedom-page-web-to-mobile-conversion.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "freedom-page-mobile-reason-codes",
+      "title": "Freedom UI mobile conversion: elementMap reason codes",
+      "description": "The closed vocabulary of elementMap[].reason codes returned by get-mobile-page-conversion-guide, and what each asks of the caller: the four component-twin states (only one of which is work to do), insert classifications, placement changes the converter made on the caller's behalf, and every drop code with its params. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
+      "topicId": "creatio.freedom-page-mobile-reason-codes",
+      "role": "guidance",
+      "requiredFeatures": [
+        "mobile-page-converter"
+      ],
+      "uri": "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
+      "legacyUris": [
+        "docs://mcp/guides/freedom-page-mobile-reason-codes"
+      ],
+      "sourcePath": "guidance/mcp/guides/platform/mobile/web-to-mobile-reason-codes.md",
+      "bundlePath": "resources/freedom-page-mobile-reason-codes.md",
       "mediaType": "text/plain"
     },
     {

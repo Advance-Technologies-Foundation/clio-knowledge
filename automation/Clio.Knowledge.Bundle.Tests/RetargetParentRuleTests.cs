@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -38,7 +38,7 @@ public sealed class RetargetParentRuleTests
         ("\"template\"", "only this value means the parent is not created by the map — the rule is useless without naming the value that triggers it"),
         ("mobile-page-modification", "the single-element-slot rule is OWNED there and only cross-referenced here — not duplicated"),
         ("single-element-slot", "the rule must name the owned mechanism it is the conversion-time reminder of"),
-        ("inherited from the web template", "the drop is decided by web-template-baseline membership, not by a mobile-template name match"),
+        ("drop-inherited-chrome", "the drop is decided by web-template-baseline membership, not by a mobile-template name match; pinned as the reason CODE since ENG-95827 replaced the sentence with one"),
         ("above the web-template baseline", "a page-AUTHORED element is not chrome and must still convert — the rule must say so"),
         ("parentExistsOnTemplate", "an older guide carries this retarget-only boolean instead, and the rule must name it to be usable there"),
         ("older guide", "the rule must degrade gracefully, and specifically must not let the old boolean's ABSENCE be read as \"safe to author\"")
