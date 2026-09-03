@@ -117,7 +117,11 @@ Creatio or disk. The guide contains:
     The standing mobile rules likewise live in THIS article and are enforced by validate-page /
     update-page, because a line that fires for every conversion says nothing about the one in front of
     you.
-  - nextSteps — the ordered flow.
+  There is deliberately NO prose section in the guide — no constraints, no diagnostics, no nextSteps.
+  The standing rules are in THIS article and are enforced by validate-page / update-page; the ordered
+  flow is the FLOW section below and the conversion skill's gated steps. The guide carries facts about
+  the page in front of you, and nothing that would fire the same way on every conversion. If a guide you
+  are handed still has those arrays, it predates this and you may read them — but this article wins.
 
 ─────────────────────────────────────────────────────────────
 GATES — MANDATORY HARD STOPS (analysis-first: nothing is written until the developer approves)
@@ -173,7 +177,12 @@ FLOW
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
      also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
      as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
-     not a new decision). A merge carries prebuilt mobileValues in two twin shapes:
+     not a new decision). Concretely: EMIT A MERGE OPERATION in viewConfigDiff on that mobileName with
+     those values. Do not treat mobileValues as an insert-only concern — a merge is the ONLY way some
+     values reach the page at all. An anchor the converter had to move down a row, to make room for
+     content the page places above it, arrives exactly this way: its whole new layoutConfig lives only in
+     the merge entry's mobileValues, so skipping that merge silently reproduces the misplacement on the
+     mobile page and nothing reports it. A merge carries prebuilt mobileValues in two twin shapes:
        • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
          sourceSchemaName/rootSchemaName): only those keys are carried.
        • same-component twin — the mobile template provides the SAME component the page changed, either
