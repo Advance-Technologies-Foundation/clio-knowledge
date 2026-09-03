@@ -1,3 +1,6 @@
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -8,14 +11,19 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <see cref="ProcessScriptTaskGuidanceTests"/> pins the ScriptTask rules.
 ///
 /// Every claim here was verified against the server implementation and a live stand run, and each
-/// NotContain guards wording a review caught before it shipped. Two overclaims were removed and must
-/// not come back anywhere in the set: that the server refuses an EMPTY RECORD FILTER at build time (it
-/// never does -- only a non-administrated object is refused), and that the build-time refusals are
-/// therefore the only feedback that will ever exist (they are not: NO record filter and
-/// both-collections-empty each build green and then do nothing). On an access-control element with no
-/// output parameters, either wording licenses "the build succeeded, so the rights changed" -- the one
-/// conclusion this guidance exists to prevent. The negative assertions sweep every DECLARED process
-/// article rather than a named file, because ownership of this narrative has already moved once.
+/// NotContain guards wording a review caught before it shipped.
+///
+/// Two things this set exists to keep straight, because both shipped backwards once. FIRST, the two
+/// filter states are OPPOSITES: a record filter that is ABSENT is the WIDENING state -- the runtime
+/// never enters its filter branch, so the query runs unfiltered with record permissions disabled and
+/// the change lands on every row -- while a filter that is PRESENT but carries no conditions is the
+/// INERT one, and a current package refuses that at build. Reading absence as inert is what makes an
+/// agent omit the filter deliberately. SECOND, the build-time refusals are not the only feedback, but
+/// neither are they absent: of the three no-op causes only both-collections-empty builds green
+/// unrefused. On an access-control element with no output parameters, getting either wrong licenses
+/// "the build succeeded, so the rights changed" -- the one conclusion this guidance exists to
+/// prevent. The negative assertions sweep every DECLARED process article rather than a named file,
+/// because ownership of this narrative has already moved once.
 /// </summary>
 [TestFixture]
 public sealed class ChangeAccessRightsGuidanceTests
@@ -109,8 +117,36 @@ public sealed class ChangeAccessRightsGuidanceTests
     }
 
     [Test]
-    [Description("Both silent runtime no-ops are named, and no declared article claims they are refused.")]
-    public void Guidance_ShouldNameBothSilentNoOps_AndNoArticleShouldClaimTheyAreRefused()
+    [Description("The manifest DESCRIPTIONS are swept for the filter-state inversion too, not just the article bodies. A description is what an MCP client shows an agent choosing which guide to read, so it is the first thing read about this element and the last thing anyone edits carefully. Every other pin in this fixture reads a .md; the description is the one surface none of them covered, and it is the one that shipped the inversion.")]
+    public void ManifestDescriptions_ShouldNotStateTheFilterStatesBackwards()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        string[] descriptions = [.. manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Select(resource => resource.TryGetProperty("description", out JsonElement value)
+                ? value.GetString() ?? string.Empty
+                : string.Empty)];
+
+        // Assert
+        descriptions.Should().NotBeEmpty(because: "the manifest declares described resources");
+        foreach (string description in descriptions)
+        {
+            description.Should().NotContain("no-ops that are NOT refused at build time -- no record filter",
+                because: "this exact phrasing shipped and called an ABSENT record filter a silent no-op; it is the widening state, and an agent reading the description decides on that basis whether to open the "
+                    + "article at all");
+            description.Should().NotContain("opposite hazard of a filter with no conditions",
+                because: "a conditionless filter is the INERT state and is refused at build, so calling it the opposite hazard inverts both halves at once");
+        }
+    }
+
+    [Test]
+    [Description("The three no-op causes are named with the RIGHT ones marked refused: cases 1 and 3 are refused at build time and only case 2 builds green. The article once claimed one refusal while its own list named two, and the entry article has to state the absent-filter hazard in the widening direction.")]
+    public void Guidance_ShouldNameTheNoOpCauses_AndMarkTheRefusedOnesCorrectly()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();

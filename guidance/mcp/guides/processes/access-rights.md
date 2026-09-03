@@ -28,7 +28,8 @@ DANGER — the opposite failure, and the one that actually costs you: an element
 at all is **not** a no-op. The runtime never enters the filter block, so the query runs UNFILTERED and
 the permission change lands on EVERY record of the target object. That query also runs with record
 permissions DISABLED, so the radius is every row in the table, not the rows the caller can see. This
-state is not refused, and an older clio will actively tell you the element is inert. Never omit the
+state is refused by nothing on the platform and reported by no output parameter; a clio carrying the
+read-back check warns about it, and a clio predating that check says nothing at all. Never omit the
 filter to stage or dry-run an element.
 A FOURTH cause produces the same symptom with a different fix: an environment whose deployed
 CrtProcessBuilder predates this element DISCARDS the whole `accessRights` block while deserializing and
@@ -215,8 +216,9 @@ operations, level and grantee in the same wire shape you write. A role/employee 
 stored formula plus the stored caption in `display`, and an echoed `[#Lookup…#]` macro re-applies as
 written. A `selectedEmployees` filter decodes when stored in the modern format; a legacy `FilterEdit`
 value reports the entry without its filter. A stored-but-undecodable collection reports as an EMPTY
-array — indistinguishable from a genuinely empty one, so do not treat `[]` as proof there is nothing
-there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if written back.
+array, but `addUnreadable`/`removeUnreadable` say how many entries could NOT be reported (-1 when the
+collection itself did not decode). So `[]` with a non-zero count means UNKNOWN, not empty; only `[]`
+with a zero count is proof there is nothing there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if written back.
 
 == What is refused at build ==
   - a record `filter` with no `object` (it names no root entity to filter on);
@@ -233,5 +235,6 @@ there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if 
   - an `accessRights` block on an element that is not a Change access rights element.
 Others exist (an entry with no `grantee`, an unknown `operations` or `level` token, a grantee type
 missing its payload key), so treat this as the shape of what is checked rather than an exhaustive list.
-The one thing it is safe to conclude: the two silent runtime no-ops at the top of this article are NOT
-among the refusals — they build green.
+The one thing it is safe to conclude: of the three no-op causes at the top of this article, only case 2
+(`add` and `remove` both empty) is absent from the refusals and builds green. Cases 1 and 3 ARE refused,
+as stated there.
