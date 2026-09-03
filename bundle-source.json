@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.83",
+  "libraryVersion": "1.13.84",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -94,6 +94,7 @@
       "process-data-elements",
       "process-parameters",
       "process-formulas",
+      "process-branch-conditions",
       "process-perform-task",
       "process-send-email",
       "process-activity-connections",
@@ -230,6 +231,7 @@
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-formulas",
+      "docs://knowledge/com.creatio.clio/process-branch-conditions",
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
@@ -1265,8 +1267,8 @@
     },
     {
       "itemId": "process-formulas",
-      "title": "Process formulas and branch conditions",
-      "description": "Owns the `expression` mapping source and the CONDITION on a conditional flow: the vocabulary the platform's expression interpreter actually accepts (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; an environment below clio's enforced floor is refused up front), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - the length bound clio still applies, and branch precedence - which is flow ORDER, inspectable through the flows[] describe reports, and carried by no explicit priority field.",
+      "title": "Process formulas",
+      "description": "Owns the vocabulary the platform's expression interpreter actually accepts for an `expression` mapping source and for a flow condition (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; an environment below clio's enforced floor is refused up front), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - and the length bound clio still applies. Branch mechanics moved to `process-branch-conditions`.",
       "topicId": "creatio.process-formulas",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-formulas",
@@ -1275,6 +1277,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/formulas.md",
       "bundlePath": "resources/process-formulas.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-branch-conditions",
+      "title": "Process branch conditions",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: turning a plain flow into a conditional one in place with setFlowCondition, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "topicId": "creatio.process-branch-conditions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
+      "legacyUris": [
+        "docs://mcp/guides/process-branch-conditions"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/branch-conditions.md",
+      "bundlePath": "resources/process-branch-conditions.md",
       "mediaType": "text/plain"
     },
     {

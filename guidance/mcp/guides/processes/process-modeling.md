@@ -179,7 +179,12 @@ article from what this one says; read that article.
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
   sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. Treat such a process as high-risk:
+  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+  even though you CAN build one: removing the last conditional flow off an element leaves it with plain
+  flows only, the platform stops synthesizing the gateway, and EVERY outgoing flow is then taken — a
+  parallel split where an approval or threshold gate used to be, which describe reports as
+  `kind: "sequence"` on both, reading exactly like "condition cleared, as asked". `process-formulas`
+  owns the detail. Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout

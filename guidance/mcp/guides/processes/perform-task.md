@@ -239,10 +239,8 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBeforePeriod", "value": "0" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "ActivityCategory",
        "value": "03DF85BF-6B19-4DEA-8463-D5D49B80BB28" } } ]
-   <- that is ActivityCategory CallAsTask, the TASK-typed Call row. Do NOT resolve "Call" by name: it is two
-      rows, and the other one (ActivityType Call, E52BD583-...) is the row the designer never offers on this
-      element. And do NOT leave the field unset or set to F51C4643-... ("To do", the runtime default) - a
-      call task then ships categorised To do, saving and running with no error at all. See NOTE-2.
+   <- ActivityCategory CallAsTask. The three rows, which one to use and why resolving by NAME is a coin
+      flip are stated once near the top of this article; do not restate them here.
 
 3) describe-business-process -> every parameter you bound now appears with its source and value.
    The ones you did NOT bind stay hidden. That is expected; it is not a failure.

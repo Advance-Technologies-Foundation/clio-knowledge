@@ -26,7 +26,13 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
 - `Math`, `DateTime`, `Guid`, `string`, `Convert`, `TimeSpan` and the ordinary operators are available,
   including the ternary `? :` and the null-coalescing `??`. This is the GUIDED set, not the enforced one:
   the registry is wider, and a formula is server-evaluated code rather than a sandbox. Stay inside the
-  guided set unless you have a reason not to. An identifier the registry does not carry IS refused, by
+  guided set unless you have a reason not to.
+- SAFETY, not style: never build a formula by pasting text you do not control - a record field, a user
+  message, anything read back from the environment. A quote or bracket in that text does not fail
+  safely, it changes what the expression MEANS, and the platform validates the result rather than your
+  intent. Put such a value in a process PARAMETER and reference the parameter; author literals only
+  from text you wrote.
+- An identifier the registry does not carry IS refused, by
   name — the thing not to rely on is the engine refusing something merely because it is unwise;
 - you may call a METHOD on the result of a macro or a value: `[#SysVariable.CurrentDateTime#].AddDays(3)`,
   `DateTime.Now.ToString()` (the way to feed a date into a Text parameter), `"a" + "b"`,
@@ -211,68 +217,7 @@ here, each of which references its parameters by UId meta-path like everything e
 
 == Conditional flows and branch conditions ==
 
-READ "REFERENCING A PARAMETER" UNDER FORMULAS BEFORE WRITING A CONDITION. Every parameter a condition
-names is referenced by its UId meta-path — `[#[Parameter:{uid}]#]` — and never by its name; a bare
-`Amount` is refused. Short names appear below to keep the rules readable: they describe the DECISION,
-they are not the text you write.
-
-A branch is a flow with a CONDITION. You do not build one — you build a plain flow and then set its
-condition:
-
-1. `create-business-process` (or `addFlow`) makes the flow. `flows[].kind` is still refused on the build
-   path: a conditional branch cannot be declared there.
-2. `modify-business-process` with `setFlowCondition` (`source`, `target`, `condition`) turns that flow into a
-   conditional one.
-
-NO GATEWAY IS NEEDED and none is created. The platform synthesizes an exclusive gateway for a conditional
-flow whose source is not one, so a branch straight off an activity is legitimate — it is what the platform's
-own tests rely on. Gateway ELEMENTS are still not buildable.
-
-What a condition must satisfy is above, under WHAT IS CHECKED — it is validated as a formula whose target
-type is `bool`, so an integer is refused, and an empty one is refused because the platform stores it as
-the literal `true`. Specific to a branch: a condition on a DEFAULT branch is refused.
-
-**A PLAIN sibling flow IS the else branch.** This is the single most useful fact about branching here and it
-is easy to miss: the platform treats any non-conditional flow leaving the element as the default, and takes
-it only when no condition matched. So `if/else` is *one* `setFlowCondition` plus a plain `addFlow` — you do
-not need a "default flow" element, and the R7 rule ("exclusive diverge needs conditional flows plus exactly
-one default") is satisfied by exactly that shape.
-
-Two consequences worth having before you build:
-
-- **Give every branching element a plain sibling.** If no condition matches and there is no plain flow, the
-  run FAILS rather than falling through. Two mutually-negated conditions look safe and are not: when the
-  parameter is null both are false and the process throws.
-- **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
-  only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
-  outgoing flow is taken. That is a parallel split, silently.
-
-That second point is why there is no clear-condition operation and why you should not reach for
-remove-and-add to get one. If you remove the only conditional flow and add a plain one, an exclusive branch
-becomes a parallel one and `describe` shows `kind: "sequence"` on both — which reads exactly like "condition
-cleared, as asked". To CHANGE a condition, call `setFlowCondition` again: it overwrites in place and keeps
-the flow's position. To make a branch unconditional, set its condition to `true` and leave the kind alone.
-
-BRANCH PRECEDENCE IS FLOW ORDER among the formula-bearing siblings, and the order is inspectable: `flows[]`
-in `describe-business-process` is emitted in the stored order, which is the order the runtime builds. Where
-two formula branches leave the same element, the FIRST whose condition is true is taken — so a branch that
-fires above 100 and one that fires above 1000 resolve differently purely by which was added first. Add the
-most specific FIRST, and say which order you chose and why, because nothing but the order records the
-intent.
-
-One exception, and it matters on a Perform-task element: a branch chosen by the activity's RESULT is
-evaluated BEFORE any formula branch, whatever the flow order says. So on an element that already has a
-result-driven branch, adding a formula branch does not put you in a race you control by ordering — the
-result branch wins. `describe` marks those with `branchesOnActivityResult: true`, and `setFlowCondition`
-refuses to write a condition onto one.
-
-A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
-`condition` text. That confirms what was STORED, not what will run: a flow with
-`branchesOnActivityResult: true` reports its text and ignores it.
-
-Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
-`B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
-parameter's name:
-`X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
-boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
-`A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.
+Moved to its own guide: `get-guidance name=process-branch-conditions`. It owns turning a plain flow
+into a conditional one, what a condition may contain, branch PRECEDENCE, the activity-result case, and
+the parallel-split hazard of clearing the last condition. This guide owns the formula vocabulary both
+use.
