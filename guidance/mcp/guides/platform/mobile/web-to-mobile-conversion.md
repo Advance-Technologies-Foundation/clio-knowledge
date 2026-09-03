@@ -83,9 +83,19 @@ Creatio or disk. The guide contains:
     already read it, and it mirrors that section's `normalized[]` ONLY. Prefer normalizations, which also
     carries `skipped[]` and the standards this one cannot express. Read it only when the clio you are
     talking to returns no normalizations.
-  - resourceStrings — every localized string the converted body references (top-level captions AND
-    nested tokens like config.title / text.template), keyed by resource name and resolved to its
-    en-US text. Register this whole map via update-page `resources` so every #ResourceString token renders.
+  - resourceStrings — every localized string the SOURCE PAGE DECLARES for the tokens the converted body
+    references (top-level captions AND nested ones like config.title / text.template), keyed by resource
+    name and resolved to its en-US text. Register this whole map via update-page `resources`. A key whose
+    declared text is EMPTY is included on purpose — that is the page's own "no visible label", and
+    reproducing it is what makes the mobile page match the web one.
+    NOT EVERY #ResourceString TOKEN IN THE BODY HAS AN ENTRY HERE, and that is correct — do NOT invent
+    one. A list column's caption is resolved by the platform from the entity column itself, so a page
+    declares only the ones it RENAMED; the platform's own MobilePageWithTabsFreedomTemplate ships
+    referencing AttachmentListDS_Name / _CreatedOn / _CreatedBy / _Size and declaring none of them.
+    Registering a key for such a token would REPLACE a localized column title with one hardcoded
+    culture — worse than leaving it alone. So: register the map as given, and if a token still renders
+    as its raw name on the device, the fix is the entity column or the source page's own resources, not
+    a key added here.
   - dataSectionConflicts — one entry per template-owned data-section value the page changed that
     NEITHER diff can express, each with its `section` (which diff to hand-edit), `path` (segments),
     `entry` (the array element's name, when it has one) and `kind`. Null when there are none, which is
