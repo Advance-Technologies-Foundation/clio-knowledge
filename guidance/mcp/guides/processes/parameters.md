@@ -92,12 +92,19 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   Guid in `value` (route ships from CrtProcessBuilder 1.3.1.1 — stored as the ConstValue the runtime reads; on an
   ActivityUserTask category the ConstValue encoding is REQUIRED, see NOTE-2 in `process-perform-task`). The
   `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` expression form (both GUIDs: the referenced OBJECT's
-  schema UId, NOT its name, then the RECORD's Id) still exists. On a PARAMETER default it is the fallback:
-  prefer the bare Guid, and never use the macro for a parameter whose consumer reads ConstValue only — an
-  ActivityUserTask's category is that case. It remains the route for a CONSTANT lookup on a `changeData`
-  element's column, whose `value` is text-only — but a column fed from elsewhere in the process is not a
-  constant and does not use it: `processParameter` or `sourceElement` carry a record id that exists only at
-  run time, which a `[#Lookup…#]` macro cannot — see `process-data-elements`.
+  schema UId, NOT its name, then the RECORD's Id) still exists, but reach for it only on a pre-1.3.1.1
+  package that rejects the bare Guid — and never for a parameter whose consumer reads ConstValue only, an
+  ActivityUserTask's category being that case. From 1.4.0.40 that same macro is ACCEPTED in a MAPPING's
+  `value` (`addMapping`, and `mappings[]` at create) on a Lookup target and decoded back to the bare record
+  id, so a value echoed from describe re-submits unchanged; that is a round-trip convenience, not a reason
+  to author the macro form. It is the MAPPING route only — `addParameter` / `setParameter` still take the
+  bare Guid and refuse the macro. 1.4.0.40 also resolves the referenced record's NAME into the parameter's
+  display value — the designer renders that, so a lookup constant shows a word instead of a Guid, and
+  describe reports it as the read-only `valueDisplay` beside the unchanged bare-Guid `value`.
+  It remains the route for a CONSTANT lookup on a `changeData` element's column, whose `value` is text-only
+  — but a column fed from elsewhere in the process is not a constant and does not use it:
+  `processParameter` or `sourceElement` carry a record id that exists only at run time, which a
+  `[#Lookup…#]` macro cannot — see `process-data-elements`.
   EXCEPTION — an Activity CONNECTION: there you send a bare `recordId` to `setConnections` and the server
   composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
 - To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —
