@@ -68,7 +68,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   macro (`[#…#]`) in `value` is refused too: the field is stored as a plain constant nothing resolves, so it
   would be mailed with the brackets intact and the failure swallowed.
 - `purpose` omitted writes the platform default "Approval required" — that is what the designer persists
-  too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
+  too, so an omitted purpose is not an empty one. On a MODIFY it is a partial update like the rest of the
+  block: an element that already carries a purpose keeps it, so flipping some other field cannot silently
+  replace the text the approver reads. `ignoreEmailErrors` is already `true` by platform default.
 - **Do not set an optional field the request did not mention.** Three things go wrong when you do, and the
   first is the one that bites:
   * **It destroys the "not decided" signal.** `describe-business-process` reports what is WRITTEN, so
