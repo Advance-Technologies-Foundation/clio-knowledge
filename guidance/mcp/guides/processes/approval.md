@@ -34,20 +34,25 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   visa), and `manager` approves through the chain — for `manager`, `employee` names the person WHOSE
   manager approves, not the manager. The user or role is CHECKED TO EXIST against the same set the
   designer's own picker offers, and an ambiguous NAME is refused so you pass the id rather than silently
-  get whichever row came back first. An omitted `employee` takes the designer's one-click default, the
-  current user; the block itself is NOT defaulted, though — omitting `approver` on a first configuration is
-  refused, because making whoever ran the build the approver routes real approvals to somebody nobody
-  chose. On a modify, omitting it keeps the approver the element already has. Supplying it REPLACES the
-  approver whole — the field belonging to the type you switched AWAY from is cleared, exactly as the
-  designer does, so a switch leaves no contradictory leftover. Formula and system-setting sources are not
-  offered.
+  get whichever row came back first. Omitting `approver` on a first configuration is REFUSED, because making
+  whoever ran the build the approver routes real approvals to somebody nobody chose; on a modify, omitting
+  it keeps the approver the element already has.
+- Switching only the TYPE is a supported edit and does not need the person restated. `user` and `manager`
+  share one stored field, so `{"approver":{"type":"manager"}}` against an element approved by Anna means
+  "Anna's manager approves instead" and KEEPS Anna — the same thing the designer does across that switch.
+  An omitted `employee` takes the designer's one-click default, the current user, only on an element that
+  names nobody yet. Switching TO `role` clears the person, because a role approves and a leftover employee
+  would be a value nothing reads; switching away from `role` clears the role for the same reason. Formula
+  and system-setting sources are not offered.
 - Supplying `notifyApprover` / `notifyAuthor` switches that notification ON; the flag and its template are
   written together because the runtime gates the send on the flag. EITHER is REFUSED without an
   `emailTemplate`, and `notifyAuthor` is ALSO refused without a `recipient` — unless the element already
   carries one, so `{}` is how you switch a notification back on using what it already has. Both refusals
   guard the same silent failure: the runtime checks neither before sending and ignores email errors by
   default, so either gap gives you an element that reports the notification as configured, saves, compiles,
-  runs green and never sends. There is NO way to switch one off through the block — a cleared template is
+  runs green and never sends. The template is also CHECKED TO EXIST, for that same reason — an id nobody can
+  resolve fails inside the send and is swallowed — so a placeholder id, `00000000-0000-0000-0000-000000000000`
+  included, is refused rather than stored. Pass a real template name or id, or leave the notification out. There is NO way to switch one off through the block — a cleared template is
   indistinguishable from one never set; use `addMapping` against the flag parameter instead (see
   `process-parameters`).
 - **"Author" is a misnomer, and it is the field people get wrong.** The runtime does NOT resolve who authored
@@ -55,6 +60,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   writes — and the send is gated on that list being non-empty. So "notify the person who created the order"
   is NOT something the element can work out on its own: give it an address, or a process parameter carrying
   one. That is why the recipient is required rather than optional.
+- The `recipient` is a TEXT address: a constant (`{"value": "a@b.com"}`) or a process parameter carrying
+  one. Several addresses in one string work — the runtime splits on `;` and `,`. What is NOT available here
+  is what the designer additionally offers: a Contact or Account LOOKUP, which is how a human usually wires
+  "notify the record's owner". That source is refused on type grounds, so do not spend turns trying to bind
+  `Owner` — resolve the address into a text process parameter earlier in the process, or ask for one. A
+  macro (`[#…#]`) in `value` is refused too: the field is stored as a plain constant nothing resolves, so it
+  would be mailed with the brackets intact and the failure swallowed.
 - `purpose` omitted writes the platform default "Approval required" — that is what the designer persists
   too, so an omitted purpose is not an empty one. `ignoreEmailErrors` is already `true` by platform default.
 - **Do not set an optional field the request did not mention.** Three things go wrong when you do, and the
