@@ -11,8 +11,8 @@ Scope
 - Telemetry MUST NEVER gate, delay, or alter the developer's task. Every rule below is subordinate to
   that one.
 - Requires a clio that accepts the flow-agnostic vocabulary: the stages and the
-  `workflow`/`variant`/`model` fields landed in ENG-92551 and ship in the first clio release that
-  follows it. Check capability, not a version string — `get-tool-contract` for `send-telemetry` is
+  `workflow`/`variant`/`model` fields landed in ENG-92551 and ship in clio 8.1.0.119 and later.
+  Check capability, not a version string — `get-tool-contract` for `send-telemetry` is
   authoritative, and if its `event_name` enumerates the stages below, the installed clio accepts them.
   An older clio rejects every stage here with `unknown-event-name`, which Failure handling covers:
   nothing breaks, the run simply reports nothing.
