@@ -1,20 +1,31 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Guards the ENG-93152 payload: the <c>RETARGET INTO A TEMPLATE-PROVIDED PARENT</c> HARD RULE and the
-/// load-bearing clauses that make it correct. The content digest cannot guard a rule's wording — it is
+/// Guards the ENG-93152 payload: the <c>NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE</c> HARD RULE and
+/// the load-bearing clauses that make it correct. The content digest cannot guard a rule's wording — it is
 /// re-recorded on every edit — so a rename, a dropped clause, or a moved bullet would otherwise ship
 /// green. This rule exists specifically because an agent got it wrong in practice (it recreated a
 /// template-provided parent instead of inserting only the children), so its clauses are load-bearing.
 /// </summary>
+/// <remarks>
+/// ENG-95827 renamed the rule and re-pinned two clauses, deliberately — the guard caught both, which is
+/// what it is for. It was <c>RETARGET INTO A TEMPLATE-PROVIDED PARENT</c> and keyed off
+/// <c>parentExistsOnTemplate</c>, a boolean that clio set on its three RETARGET code paths only, so an
+/// ORDINARY insert into a template-provided parent carried nothing and the rule did not reach it. clio now
+/// stamps <c>parentSource</c> on every insert, so the rule covers every parent rather than retargets alone
+/// and its name says so. The <c>guide.constraints</c> clause is gone because it stopped being true: the
+/// instruction is no longer repeated per response, so pinning it would force the guide to claim a runtime
+/// duplicate that does not exist. The older-guide fallback is still pinned — a guide that predates
+/// <c>parentSource</c> must not have the boolean's ABSENCE read as "safe to author".
+/// </remarks>
 [TestFixture]
 public sealed class RetargetParentRuleTests
 {
-    private const string RuleName = "RETARGET INTO A TEMPLATE-PROVIDED PARENT";
+    private const string RuleName = "NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE";
     private const string OwnerGuide = "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md";
     private const string SectionHeading = "HARD MOBILE RULES";
     private const string NextSectionHeading = "LIMITATIONS (be transparent)";
@@ -23,17 +34,18 @@ public sealed class RetargetParentRuleTests
     // the reason it protects.
     private static readonly (string Fragment, string Because)[] LoadBearingClauses =
     [
-        ("parentExistsOnTemplate", "the rule is driven by this feature-detected signal; without naming it the caller cannot act on it"),
-        ("guide.constraints", "the instruction is also repeated at runtime, so the rule must say where"),
+        ("parentSource", "the rule is driven by this per-entry signal; without naming it the caller cannot act on it"),
+        ("\"template\"", "only this value means the parent is not created by the map — the rule is useless without naming the value that triggers it"),
         ("mobile-page-modification", "the single-element-slot rule is OWNED there and only cross-referenced here — not duplicated"),
         ("single-element-slot", "the rule must name the owned mechanism it is the conversion-time reminder of"),
-        ("inherited from the web template", "the drop is decided by web-template-baseline membership, not by a mobile-template name match"),
+        ("drop-inherited-chrome", "the drop is decided by web-template-baseline membership, not by a mobile-template name match; pinned as the reason CODE since ENG-95827 replaced the sentence with one"),
         ("above the web-template baseline", "a page-AUTHORED element is not chrome and must still convert — the rule must say so"),
-        ("predates the flag", "the rule must degrade gracefully on an older guide that omits the signal")
+        ("parentExistsOnTemplate", "an older guide carries this retarget-only boolean instead, and the rule must name it to be usable there"),
+        ("older guide", "the rule must degrade gracefully, and specifically must not let the old boolean's ABSENCE be read as \"safe to author\"")
     ];
 
     [Test]
-    [Description("The RETARGET INTO A TEMPLATE-PROVIDED PARENT rule still exists as a bullet INSIDE the HARD MOBILE RULES section, with every load-bearing clause intact.")]
+    [Description("The NEVER AUTHOR A PARENT THIS MAP DOES NOT CREATE rule still exists as a bullet INSIDE the HARD MOBILE RULES section, with every load-bearing clause intact.")]
     public void Rule_ShouldExistWithLoadBearingClausesInsideSection()
     {
         string section = HardMobileRulesSection(ReadGuide(OwnerGuide));
