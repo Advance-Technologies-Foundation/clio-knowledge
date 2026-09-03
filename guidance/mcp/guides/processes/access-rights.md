@@ -33,9 +33,16 @@ CrtProcessBuilder predates this element DISCARDS the whole `accessRights` block 
 still answers success, leaving the element unconfigured. A clio that carries the accessRights read-back
 check detects this one for you: it reads the process back after the operation and warns when the block
 did not land, or when the read-back could not be obtained at all. Treat either warning as "the
-permissions were NOT changed". VERSION BOUNDARY: that check ships WITH the clio release that introduced
-this element, so on an OLDER clio there is no such warning and its absence proves nothing. Unless you
-know the clio you are running emits it, read the process back with `describe-business-process`.
+permissions were NOT changed". VERSION BOUNDARIES - there are TWO, and they are different questions:
+  - the CrtProcessBuilder deployed on the ENVIRONMENT decides whether the block lands at all. Anything
+    older than `<TBD-PACKAGE-VERSION>` discards it. Check with `list-packages` and read the
+    CrtProcessBuilder row.
+  - the CLIO you are running decides whether you are TOLD. The read-back check ships in
+    `<TBD-CLIO-VERSION>` and later; an older clio emits no warning, so its silence proves nothing.
+    Check with `clio --version`.
+  Both placeholders are pending the release that carries this feature. Until they are filled in, do not
+  treat the absence of a warning as evidence: read the process back with `describe-business-process`
+  yourself.
 But be precise about what that proves: `describe-business-process` is a process DEFINITION read. It
 confirms the `accessRights` block LANDED — the case above — and it proves NOTHING about whether any
 permission changed. It cannot see a record `filter` that matched zero records, a `remove` whose grantee

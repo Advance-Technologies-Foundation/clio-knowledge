@@ -69,9 +69,15 @@ public sealed class ChangeAccessRightsGuidanceTests
         guide.Should().Contain("A FOURTH cause produces the same symptom",
             because: "the package-age discard is invisible at build time and is the one cause clio can "
                 + "detect, so it has to be named where the other three are");
-        guide.Should().Contain("VERSION BOUNDARY",
-            because: "the clio read-back warning ships WITH this release; stating it unconditionally let an "
-                + "agent on an older clio read the ABSENCE of a warning as proof the revoke landed");
+        guide.Should().Contain("VERSION BOUNDARIES - there are TWO",
+            because: "an agent has to answer two DIFFERENT questions - whether the ENVIRONMENT's deployed package "
+                + "lands the block at all, and whether the CLIO it is running would tell it if not. A single "
+                + "boundary conflated them, so an agent could satisfy itself on the wrong one and read the absence "
+                + "of a warning as proof the revoke landed");
+        guide.Should().Contain("<TBD-CLIO-VERSION>",
+            because: "both boundaries are placeheld until the release carrying this feature exists, and the marker "
+                + "is deliberately greppable so it cannot ship unnoticed. If this ever fails, check that a REAL "
+                + "version replaced it rather than the sentence being quietly deleted");
         guide.Should().Contain("MUST, before you apply any of this to a live environment",
             because: "CONTRIBUTING requires a removal-class instruction to carry its preconditions inline, "
                 + "and setElement can revoke permissions people currently rely on");
