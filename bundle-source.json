@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.88",
+  "libraryVersion": "1.13.89",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1214,7 +1214,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, default flows and timers are NOT buildable, but a conditional BRANCH is: build the flow plain, then set its condition with modify-business-process setFlowCondition, and the platform synthesizes the gateway), the build recipe, the safety rules for editing an existing process, and the element catalog. Routes onward to the seven articles that own the rest: process-naming, process-data-elements, process-parameters, process-formulas, process-perform-task, process-send-email and process-activity-connections. Each of the eight is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, default flows and timers are NOT buildable, but a conditional BRANCH is: build the flow plain, then set its condition with modify-business-process setFlowCondition, and the platform synthesizes the gateway), the build recipe, the safety rules for editing an existing process, and the element catalog. Routes onward to the eight articles that own the rest: process-naming, process-data-elements, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the nine is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",

@@ -1,5 +1,6 @@
 # Conditional flows and branch conditions
 
+Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 Split out of `process-formulas` because that article had no budget headroom left: the two halves are
 read at different times - the vocabulary while authoring any formula, this while planning a BRANCH.
 The formula vocabulary, the reference syntax, what each refusal names and the length bound stay there
@@ -24,7 +25,7 @@ NO GATEWAY IS NEEDED and none is created. The platform synthesizes an exclusive 
 flow whose source is not one, so a branch straight off an activity is legitimate — it is what the platform's
 own tests rely on. Gateway ELEMENTS are still not buildable.
 
-What a condition must satisfy is above, under WHAT IS CHECKED — it is validated as a formula whose target
+What a condition must satisfy is in `process-formulas`, under WHAT IS CHECKED — it is validated as a formula whose target
 type is `bool`, so an integer is refused, and an empty one is refused because the platform stores it as
 the literal `true`. Specific to a branch: a condition on a DEFAULT branch is refused.
 
