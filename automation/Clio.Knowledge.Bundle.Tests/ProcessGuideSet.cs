@@ -21,11 +21,15 @@ internal static class ProcessGuideSet
 
     /// <summary>
     /// The articles the ENG-96132 go-live decision covers, entry article first: the seven ENG-96212 split
-    /// <c>process-modeling</c> into, plus <c>process-element-catalog</c>, which ENG-96536 extracted from the
-    /// entry article's OWN body. That eighth is on the list for the same reason the other seven are — the
-    /// text in it shipped un-gated as part of process-modeling, so gating it would hide guidance the GA
-    /// business-process tools name as mandatory reading. Named explicitly rather than derived, because it
-    /// records a DECISION about specific articles: a future process guide that legitimately documents a
+    /// <c>process-modeling</c> into, plus the four ENG-96536 extracted from three of those seven. The four
+    /// are on the list for the same reason the original seven are — every word in them shipped un-gated
+    /// inside its parent, so gating one would hide guidance the GA business-process tools name as mandatory
+    /// reading, and it would hide it where nobody is looking: the parent keeps answering and merely says
+    /// the rule "is owned by" an article get-guidance can no longer serve.
+    ///
+    /// The criterion is EXTRACTED-FROM-A-LISTED-ARTICLE, so a split adds its pieces here. It is not
+    /// "every article under the processes folder": named explicitly rather than derived because the list
+    /// records a DECISION about specific articles, and a future process guide that legitimately documents a
     /// restricted capability must be able to carry `requiredFeatures` without turning this red. See
     /// <see cref="Declared"/> for the derived set the size contract uses.
     /// </summary>
@@ -35,8 +39,11 @@ internal static class ProcessGuideSet
         "process-element-catalog",
         "process-naming",
         "process-data-elements",
+        "process-data-source-filters",
         "process-parameters",
         "process-perform-task",
+        "process-task-performer",
+        "process-task-category",
         "process-send-email",
         "process-activity-connections"
     ];

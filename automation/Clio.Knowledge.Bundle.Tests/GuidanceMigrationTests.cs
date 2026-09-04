@@ -177,7 +177,7 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins all seven ENG-96212 process articles as un-gated at go-live (ENG-96132), and keeps requiredFeatures optional in both v1 contracts.")]
+    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins every process article the ENG-96132 go-live covers as un-gated - the seven ENG-96212 produced and the four ENG-96536 extracted from them - and keeps requiredFeatures optional in both v1 contracts.")]
     public void FeatureGating_ShouldBeDeclaredByTheResourceAndBothSchemas()
     {
         // Arrange
@@ -241,13 +241,14 @@ public sealed class GuidanceMigrationTests
             because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
                 + "the guide the GA business-process tools name as mandatory reading");
         splitResources.Should().HaveCount(ProcessGuideSet.SplitItemIds.Length,
-            because: "the scan below proves nothing unless it actually selected the seven articles — if they "
-                + "are renamed or moved and the filter matches nothing, an empty result would report the "
-                + "gate decision as intact while guarding none of it");
+            because: "the scan below proves nothing unless it actually selected every article on the list — if "
+                + "one is renamed or moved and the filter stops matching it, a short result would report the "
+                + "gate decision as intact while guarding less of it than it claims");
         regatedArticles.Should().BeEmpty(
-            because: "the six articles ENG-96212 split out of process-modeling carry the same go-live decision as "
-                + "the entry article; gating one of them hides part of that mandatory reading while the entry "
-                + "article keeps answering, so the loss shows up as a bad answer rather than as a missing guide");
+            because: "every article split out of process-modeling, directly or at one remove, carries the same "
+                + "go-live decision as the entry article; gating one hides part of that mandatory reading while "
+                + "the article it was split from keeps answering, so the loss shows up as a bad answer rather "
+                + "than as a missing guide");
         repositoryResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(
             because: "Git repositories must be able to declare per-resource feature requirements");
         bundleResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(

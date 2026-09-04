@@ -29,14 +29,14 @@ public sealed class ProcessFormulaGuidanceTests
 {
     private const string FormulaGuide = "guidance/mcp/guides/processes/formulas.md";
     private const string BranchGuide = "guidance/mcp/guides/processes/branch-conditions.md";
-    private const string ModelingGuide = "guidance/mcp/guides/processes/process-modeling.md";
     private const string DataElementsGuide = "guidance/mcp/guides/processes/data-elements.md";
 
     /// <summary>
-    /// The callActivity claim below is asserted HERE and not against <see cref="ModelingGuide"/>: ENG-96536
+    /// The callActivity claim below is asserted HERE and not against <c>process-modeling.md</c>: ENG-96536
     /// moved the element catalog, and the sentence with it, out of the entry article. Left pointed at the
     /// entry, the NotContain would have passed on an article that no longer holds the sentence at all -
-    /// green, and guarding nothing.
+    /// green, and guarding nothing. Nothing in this fixture reads the entry article any more, which is why
+    /// there is no constant for it to be pointed at by accident.
     /// </summary>
     private const string ElementCatalogGuide = "guidance/mcp/guides/processes/element-catalog.md";
 

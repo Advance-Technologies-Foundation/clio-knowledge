@@ -68,6 +68,14 @@ public sealed class ProcessGuideResponseSizeTests
     private const double HeadroomThreshold = 0.9;
 
     /// <summary>
+    /// Where the reported line starts saying "watch this", BELOW the gate. It has to be a separate number:
+    /// printed at <see cref="HeadroomThreshold"/> the marker can only appear on a run that is already red,
+    /// which is the "first person to see the number is whoever hits the failure" outcome the report exists
+    /// to prevent — the same defect as the old print, one tier up.
+    /// </summary>
+    private const double ReportThreshold = 0.8;
+
+    /// <summary>
     /// The get-guidance response wraps the article in a JSON envelope — feedback policy, name, uri,
     /// itemId, topicId, libraryVersion, digest and the resolved local path. Measured at 1,218 and 1,258
     /// characters on two articles (2026-08-31); 1,400 is the allowance.
@@ -94,9 +102,13 @@ public sealed class ProcessGuideResponseSizeTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
-        declared.Should().HaveCountGreaterThanOrEqualTo(ProcessGuideSet.SplitItemIds.Length,
-            because: "the set is derived from the manifest, and a derivation that selected nothing would "
-                + "report every article as within budget while measuring none of them");
+        // A superset check, not a count. A count floor of SplitItemIds.Length accepted a derivation that
+        // had lost several articles — 11 named, 15 declared, so four could leave the measured set and
+        // still clear the floor. Naming them means the article that left is the one the failure reports.
+        declared.Select(article => article.ItemId).Should().Contain(ProcessGuideSet.SplitItemIds,
+            because: "the set is derived from the manifest, so an article that stops matching the "
+                + "derivation is one this contract silently stops measuring — and the go-live articles are "
+                + "the ones whose delivery was decided, so they are the floor");
 
         (string ItemId, int Size)[] measured = declared
             .Select(article => (article.ItemId, Size: ResponseSize(repositoryRoot, article.SourcePath)))
@@ -105,14 +117,17 @@ public sealed class ProcessGuideResponseSizeTests
 
         // Headroom is reported on a GREEN run, not only when it is gone. Without this the slide from 87%
         // to 97% to red is invisible, and the first person to see the number is whoever hits the failure —
-        // at the moment when raising the budget looks cheapest.
+        // at the moment when raising the budget looks cheapest. Two tiers, because one is not a warning:
+        // ReportThreshold is a heads-up on a green run, HeadroomThreshold is where the run stops being one.
         foreach ((string itemId, int size) in measured)
         {
             TestContext.WriteLine(
                 $"{itemId,-32} {size,7:N0}  {(double)size / MaxResponseCharacters,6:P1} of budget"
                 + (size > MaxResponseCharacters * HeadroomThreshold
-                    ? "   <-- over the headroom threshold; split it"
-                    : string.Empty));
+                    ? "   <-- over the headroom gate; split it"
+                    : size > MaxResponseCharacters * ReportThreshold
+                        ? "   <-- approaching the headroom gate; plan the seam"
+                        : string.Empty));
         }
 
         (string ItemId, int Size)[] tooLarge = measured
@@ -135,9 +150,10 @@ public sealed class ProcessGuideResponseSizeTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
-        declared.Should().HaveCountGreaterThanOrEqualTo(ProcessGuideSet.SplitItemIds.Length,
-            because: "the set is derived from the manifest, and a derivation that selected nothing would "
-                + "report every article as having room while measuring none of them");
+        declared.Select(article => article.ItemId).Should().Contain(ProcessGuideSet.SplitItemIds,
+            because: "the set is derived from the manifest, so an article that stops matching the "
+                + "derivation is one this contract silently stops measuring — see the same floor on the "
+                + "delivery gate above");
 
         int threshold = (int)(MaxResponseCharacters * HeadroomThreshold);
         (string ItemId, int Size)[] crowded = declared

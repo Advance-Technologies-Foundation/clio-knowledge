@@ -1222,7 +1222,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog moved to process-element-catalog, which the recipe sends you to before you plan a graph. Routes onward to the twelve articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-send-email and process-activity-connections. Each of the thirteen is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog moved to process-element-catalog, which the recipe sends you to before you plan a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-send-email and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1263,7 +1263,7 @@
     },
     {
       "itemId": "process-data-elements",
-      "title": "Process data elements and record filters",
+      "title": "Process data elements",
       "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
       "topicId": "creatio.process-data-elements",
       "role": "guidance",

@@ -57,7 +57,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
   (e.g. filter the read by a process parameter's value) and on a `changeData` element, where the filter is
   effectively MANDATORY (the runtime refuses to update with an empty one); on Add/Delete data they serialize
-  but the task itself is not buildable yet (see below).
+  but the task itself is not buildable yet (see below; `process-element-catalog` owns which elements are
+  buildable and is the article to re-read when that changes).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
   `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value`; a `datePart` WITH a
@@ -74,8 +75,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   see the "Read data element" section of `process-data-elements`), and on a `changeData` element it is
   effectively MANDATORY — the runtime refuses to update with an empty filter (see the "Modify data
   element" section of `process-data-elements`). A `filter` on an
-  Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet, so
-  THEIR filters are not end-to-end usable in this increment.
+  Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet
+  (`process-element-catalog` owns that, and this sentence is only true while it says so), so THEIR
+  filters are not end-to-end usable in this increment.
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
   `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,

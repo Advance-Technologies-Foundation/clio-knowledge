@@ -69,7 +69,6 @@ public sealed class ProcessGuideCrossReferenceTests
         ("R1-R17", "process-activity-connections"),
         ("R1–R17", "process-activity-connections"),      // en dash, as the articles write it
         ("N1-N10", "process-naming"),
-        ("Naming and codes", "process-naming"),
         // ENG-96536 moved this section into its own article; the row follows the section, not the file
         // it used to live in. Left on process-data-elements, the owner-skip would have exempted the
         // article that no longer defines it while the one that does went unwatched.
@@ -82,20 +81,16 @@ public sealed class ProcessGuideCrossReferenceTests
         // a different subject, and a marker cannot tell the two apart.
         // Was ("CONDITION on a conditional flow", ...), which matched NOTHING in the folder — it was
         // keyed on the manifest description's wording rather than on anything an article says, so the
-        // row read as a guard while guarding nothing. ENG-96536 replaced it with the phrasing a
-        // non-owner actually uses when it hands precedence over, and added
-        // EveryMovedSectionMarker_ShouldStillMatchSomewhereInTheSet so the next dead row is visible
-        // instead of reassuring. Lower case on purpose: comparison is Ordinal, and the three spellings
-        // in the folder are three different strings — the owner heads its own section BRANCH PRECEDENCE
-        // IS FLOW ORDER, process-modeling's index writes "branch precedence", and process-formulas
-        // writes "branch PRECEDENCE". This row watches the index spelling, which is the one a
-        // sibling restating the rule would reach for.
+        // row read as a guard while guarding nothing.
         //
-        // Recorded while choosing it, because it will bite the next row too: process-formulas names
-        // the owner ONLY inside `get-guidance name=process-branch-conditions`, so the backticked
-        // `process-branch-conditions` this scan looks for is absent there and its "branch PRECEDENCE"
-        // reads as unattributed. Not fixed here — the fix is one line in an article at 88% of budget,
-        // and ENG-96536 is not the change that should grow it.
+        // Its replacement had to survive a second question: not "does it match" but "can it FAIL". The
+        // folder writes this phrase three ways — the owner heads its section BRANCH PRECEDENCE IS FLOW
+        // ORDER, the entry article's index writes "branch precedence", process-formulas writes "branch
+        // PRECEDENCE" — and a case-sensitive row on the index spelling matched only the index, whose
+        // bullet label sits ~60 characters above it by construction, so the window could never be
+        // missing the owner. It matched, and it could not fail. Occurrences is OrdinalIgnoreCase now, so
+        // this one row reaches all three; the process-formulas mention, genuinely unattributed at ~230
+        // lines from that article's own pointer, was what it caught first.
         ("branch precedence", "process-branch-conditions"),
         ("the last conditional flow", "process-branch-conditions"),
         // ENG-96536 moved "What you can build today" and the element catalog out of the entry article,
@@ -106,7 +101,14 @@ public sealed class ProcessGuideCrossReferenceTests
         // N6 in process-naming). The heading's capitalised "Element catalog" is the owner's and is not a
         // marker: Occurrences compares Ordinal, so the two cases do not collide.
         ("What you can build today", "process-element-catalog"),
-        ("element catalog", "process-element-catalog")
+        ("element catalog", "process-element-catalog"),
+        // The perform-task split shipped with no rows, and that is precisely how a stale pointer got
+        // through it: process-formulas kept sending readers to `process-perform-task` for the
+        // allowed-results degradation after the rule moved to `process-task-category`, and no scan in
+        // this file could see an unquoted pointer with no locator word. These two rows are what makes
+        // that class of miss red rather than reviewable.
+        ("allowed-results", "process-task-category"),
+        ("Who performs the task", "process-task-performer")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
@@ -239,39 +241,61 @@ public sealed class ProcessGuideCrossReferenceTests
     }
 
     [Test]
-    [Description("Every moved-section marker still matches somewhere in the set, so a reworded or "
-        + "reflowed phrase cannot leave a row scanning nothing while the test stays green.")]
-    public void EveryMovedSectionMarker_ShouldStillMatchSomewhereInTheSet()
+    [Description("Every moved-section marker still matches in an article that does NOT own it, which is "
+        + "the only place the scan it feeds can report anything - so no row can be reworded into a guard "
+        + "that cannot fail while the suite stays green.")]
+    public void EveryMovedSectionMarker_ShouldStillMatchOutsideItsOwner()
     {
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string[] articles = [.. ProcessGuideSet.Declared(repositoryRoot)
+        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
+        string[] articles = [.. declared
             .Select(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath)))];
-        HashSet<string> declaredItemIds = ProcessGuideSet.DeclaredItemIds(repositoryRoot);
+        // The PROCESS-folder ids, not DeclaredItemIds. The owner-skip this protects
+        // (ProcessGuides_ShouldNameTheOwningArticle_WhenReferencingAMovedSection) iterates only the
+        // articles Declared() yields, so an owner that is a real manifest id from somewhere else in the
+        // library — a renamed row, or a copy-paste from another folder — is never skipped, and every
+        // legitimate mention of that phrase gets reported instead. Checking against all 140 ids would
+        // clear exactly that case and catch only a misspelling.
+        HashSet<string> processItemIds = [.. declared.Select(article => article.ItemId)];
 
-        articles.Should().NotBeEmpty(because: "a scan over no articles would clear every row");
+        // Not a vacuous-pass guard — an empty scan CONDEMNS every row here rather than clearing it,
+        // because a marker matches nowhere in an empty set. It is here so that failure reports the
+        // derivation as the cause instead of listing every marker as dead.
+        articles.Should().NotBeEmpty(because: "a scan over no articles would report every row as dead");
 
-        // SOMEWHERE, not "outside its owner" and not "in its owner" — both of those look like the
-        // invariant and neither is one. "Naming and codes" is a heading only its owner writes; "the
-        // last conditional flow" is a phrase only a NON-owner writes, because the owner words it
-        // differently. A row is dead when it matches in neither place, and that is the only case this
-        // can assert without banning a row deliberately aimed at a phrase nobody has written yet.
+        // OUTSIDE THE OWNER, deliberately. A first version of this test asked only whether the phrase
+        // occurred anywhere in the set, and that is not the invariant: the scan this list feeds skips the
+        // owner, so a row whose OWNER writes the phrase looks alive here while guarding nothing. Measured
+        // on the row this change added: rewording the single non-owner occurrence of "What you can build
+        // today" left every test in this fixture green, because the owner's own heading still matched.
+        //
+        // It does forbid a row aimed at a phrase nobody has written yet. That is the trade taken on
+        // purpose: an unfalsifiable row is indistinguishable from a broken one, and this fixture exists
+        // because a check that reassures is worse than no check. ("Naming and codes", process-naming) was
+        // dropped for exactly this reason — zero non-owner occurrences, and references to that article
+        // are already watched by ("N1-N10", process-naming), which has seven.
         string[] dead = [.. MovedSectionMarkers
-            .Where(row => !articles.Any(article => article.Contains(row.Marker, StringComparison.Ordinal)))
+            .Where(row => !declared
+                .Where(article => article.ItemId != row.Owner)
+                .Any(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))
+                    .Contains(row.Marker, StringComparison.OrdinalIgnoreCase)))
             .Select(row => $"'{row.Marker}' (owner {row.Owner})")];
         string[] unownable = [.. MovedSectionMarkers
-            .Where(row => !declaredItemIds.Contains(row.Owner))
+            .Where(row => !processItemIds.Contains(row.Owner))
             .Select(row => $"'{row.Marker}' names owner {row.Owner}")];
 
         dead.Should().BeEmpty(
-            because: "the scan below skips a marker's OWNER and reports a non-owner mention that does not "
-                + "name it; a marker matching nowhere at all reports no unattributed mentions for the "
-                + "same reason an empty scan does, and that has already happened here twice — a reflow "
-                + "moved a phrase across a line break, and a row was keyed on manifest wording no article "
-                + "uses. Re-key the row to what the articles now say, or drop it. Dead: "
+            because: "the scan below skips a marker's OWNER, so a row that matches only inside its owner "
+                + "has no article left to report and cannot fail — it reads as coverage and is none. That "
+                + "has happened here twice already: a row keyed on manifest wording no article uses, and a "
+                + "row whose one non-owner match was the entry index's own continuation line, which sits "
+                + "sixty characters under the bullet that names the owner by construction. Re-key the row "
+                + "to what a sibling now writes, or drop it. Unfalsifiable: "
                 + string.Join("; ", dead));
         unownable.Should().BeEmpty(
-            because: "an owner the manifest does not declare cannot be skipped as the owner, so the row "
-                + "scans the article that DEFINES the section as if it were borrowing it. Found: "
+            because: "an owner outside the scanned set cannot be skipped as the owner, so the row scans the "
+                + "article that DEFINES the section as if it were borrowing it — and every legitimate "
+                + "mention of the phrase is then reported. Found: "
                 + string.Join("; ", unownable));
     }
 
@@ -370,9 +394,13 @@ public sealed class ProcessGuideCrossReferenceTests
 
     private static IEnumerable<int> Occurrences(string text, string value)
     {
-        for (int index = text.IndexOf(value, StringComparison.Ordinal);
+        // OrdinalIgnoreCase, matching Owns() above: a marker is a PHRASE, and which case a sibling writes
+        // it in is not a fact about whether the reference is attributed. Case-sensitive, this scan needed
+        // one row per spelling — and the spelling that actually dangled (process-formulas writing "branch
+        // PRECEDENCE" where the index writes "branch precedence") was the one no row had.
+        for (int index = text.IndexOf(value, StringComparison.OrdinalIgnoreCase);
              index >= 0;
-             index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal))
+             index = text.IndexOf(value, index + value.Length, StringComparison.OrdinalIgnoreCase))
         {
             yield return index;
         }

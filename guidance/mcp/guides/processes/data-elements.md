@@ -104,7 +104,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   object is REFUSED while any other parameter still maps from the element (the refusal names each
   dependent — re-map or remove them first, the same block the designer applies); a retarget that proceeds
   clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
-  `setFilter`) in the same operations array. `describe-business-process` reads the whole block back
+  `setFilter`) in the same operations array. MUST, before any `setFilter` on a live process: `setFilter`
+  REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
+  back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
+  and the read-back shape. `describe-business-process` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
   create/modify. Read-back limits on a HUMAN-made element: a linked-object column is omitted from
   `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
@@ -156,7 +159,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   values yet, and a retarget is refused while another parameter still maps from the element. On ANY target change
   (FIRST configuration included) the stored record filter clears UNLESS its root already targets the incoming
   object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
-  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
+  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`.
+  MUST: that `setFilter` REPLACES the element's whole filter — read the current one back with
+  `describe-business-process` and send it complete, or the records this element updates silently widen.
+  `process-data-source-filters` owns the op and its read-back. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
   process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
   `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.

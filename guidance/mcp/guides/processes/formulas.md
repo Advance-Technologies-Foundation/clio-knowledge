@@ -118,7 +118,9 @@ no literal form). A LOOKUP is NOT one of them: its default is a bare record Guid
 preferred route and the only one an ActivityUserTask category accepts — see `process-parameters`.
 On an ActivityUserTask's `ActivityCategory` specifically, reaching for `expression` with `[#Lookup…#]`
 instead saves and compiles and then silently degrades the element's allowed-results list — see
-`process-perform-task`. Elsewhere the macro form is legitimate; on a lookup DEFAULT the bare Guid is
+`process-task-category`, which owns that rule, why `Activity.AllowedResult` is the wrong place to look
+for the degradation, and what to do on a package too old to accept the constant. Elsewhere the macro
+form is legitimate; on a lookup DEFAULT the bare Guid is
 simply the better route. For an Integer or Float parameter it is equally the route whenever the
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
@@ -234,7 +236,8 @@ here, each of which references its parameters by UId meta-path like everything e
 
 == Conditional flows and branch conditions ==
 
-Moved to its own guide: `get-guidance name=process-branch-conditions`. It owns turning a plain flow
-into a conditional one, what a condition may contain, branch PRECEDENCE, the activity-result case, and
+Moved to its own guide, `process-branch-conditions` (`get-guidance name=process-branch-conditions`).
+It owns turning a plain flow into a conditional one, what a condition may contain, branch PRECEDENCE,
+the activity-result case, and
 the parallel-split hazard of clearing the last condition. This guide owns the formula vocabulary both
 use.

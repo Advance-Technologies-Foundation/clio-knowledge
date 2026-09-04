@@ -21,9 +21,10 @@ guide rather than `process-modeling`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
-  columns, sort, plus a record `filter` (see `process-data-elements`). A `changeData` element
-  is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter` (see
-  `process-data-elements`). CAVEAT: Add data and Delete data still place an UNCONFIGURED
+  columns, sort, plus a record `filter` (the block is in `process-data-elements`, the filter contract in
+  `process-data-source-filters`). A `changeData` element
+  is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
+  (same two owners). CAVEAT: Add data and Delete data still place an UNCONFIGURED
   element — their target object and values cannot be set yet, so those steps do nothing useful until a
   human configures them in the designer. Say so when you use one; do not present such a result as a working
   data operation.
@@ -78,14 +79,15 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
-    a `filter` — see `process-data-elements`. The other read modes (collection / count /
+    a `filter` — see `process-data-elements` for the block and `process-data-source-filters` for the
+    filter. The other read modes (collection / count /
     aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
     The element builds, but its target object and column values do NOT yet — see the caveat near
     the top of this guide.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
     element's `changeData` block (target object + column values) plus a `filter` — see
-    `process-data-elements`.
+    `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
     BUILDS, but its target object and filter do NOT yet — see the caveat near the top of this guide.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
