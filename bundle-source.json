@@ -98,6 +98,8 @@
       "process-formulas",
       "process-branch-conditions",
       "process-perform-task",
+      "process-task-performer",
+      "process-task-category",
       "process-send-email",
       "process-activity-connections",
       "process-script-task",
@@ -238,6 +240,8 @@
       "docs://knowledge/com.creatio.clio/process-formulas",
       "docs://knowledge/com.creatio.clio/process-branch-conditions",
       "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-task-performer",
+      "docs://knowledge/com.creatio.clio/process-task-category",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1218,7 +1222,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog moved to process-element-catalog, which the recipe sends you to before you plan a graph. Routes onward to the ten articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the eleven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog moved to process-element-catalog, which the recipe sends you to before you plan a graph. Routes onward to the twelve articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-send-email and process-activity-connections. Each of the thirteen is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1330,7 +1334,7 @@
     {
       "itemId": "process-perform-task",
       "title": "Perform task element",
-      "description": "Owns the Creatio Perform task element (performTask / ActivityUserTask): what it produces and when the process resumes, the full table of settable parameters with the shared *Period unit enum, the parameters the runtime sets that must never be written as targets, and the two performer layers -- the element-level performer block that assigns to a role or a manager, and OwnerId for one person. Also states why the Activity type is always Task expressed through a category, and why Approval is not this element.",
+      "description": "Owns the Creatio Perform task element (performTask / ActivityUserTask): what it produces and when the process resumes, the full table of settable parameters with the shared *Period unit enum, the parameters the runtime sets that must never be written as targets, the CurrentActivityId adoption trap, and that the Connected-to lookups are connections rather than mappings. Also states why the Activity type is always Task expressed through a category, WHICH category id to use for a call, why the retired CallUserTask is a dead end, and why Approval is not this element. WHO performs the task is owned by process-task-performer; HOW a category or priority value must be written, by process-task-category.",
       "topicId": "creatio.process-perform-task",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-perform-task",
@@ -1339,6 +1343,34 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
       "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-task-performer",
+      "title": "Process task performer",
+      "description": "Owns \"Who performs the task?\" for a Creatio Perform task, on both layers. Layer 1 is the element-level performer block (from CrtProcessBuilder 1.3.1.1), the ONLY route to a TEAM: type role stores the role on the Activity's own OwnerRole column and leaves Owner EMPTY -- the claim model, not an unassigned task -- and the role is checked to exist, so a typo'd name, an invented Guid, a USER's SysAdminUnit id and an ambiguous name are all refused; type manager resolves the contact's manager at RUN time and raises there when it has none; type user takes a bare Contact Guid or a current-user-contact formula. Layer 2 is the OwnerId parameter, for one named person only, with its four accepted sources and its refusal of a SysAdminUnit reference. Also states that the block is refused on every element except performTask, and that leaving BOTH layers unset silently assigns the process starter rather than nobody. Split out of process-perform-task.",
+      "topicId": "creatio.process-task-performer",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-task-performer",
+      "legacyUris": [
+        "docs://mcp/guides/process-task-performer"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/task-performer.md",
+      "bundlePath": "resources/process-task-performer.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-task-category",
+      "title": "Process task category and priority",
+      "description": "Owns how a task element's ActivityCategory and ActivityPriority must be WRITTEN: a bare record Guid in value, stored as a ConstValue, never a lookup-macro formula. States why -- the allowed-results list the task page and the designer result dropdown offer is computed from the category only when its source is ConstValue, so the formula form sets the column and silently degrades that list -- and that Activity.AllowedResult is the wrong place to look for the degradation. Also owns the DisplayValue story: it is a localizable string serialized into the schema RESOURCES rather than beside Value, the designer shows a non-empty one verbatim and resolves the record name only when it is empty, and from CrtProcessBuilder 1.4.0.40 the server resolves and stores the name, decodes an already-composed lookup macro passed as a mapping value, and reports the resolved name as read-only valueDisplay. Split out of process-perform-task, which keeps the element and its parameter table.",
+      "topicId": "creatio.process-task-category",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-task-category",
+      "legacyUris": [
+        "docs://mcp/guides/process-task-category"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/task-category.md",
+      "bundlePath": "resources/process-task-category.md",
       "mediaType": "text/plain"
     },
     {

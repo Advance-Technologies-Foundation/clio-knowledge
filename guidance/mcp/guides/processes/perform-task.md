@@ -1,7 +1,10 @@
 clio MCP process-perform-task guide — the Perform task element (ActivityUserTask)
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of the Perform task element -- what it produces, its parameters, and who performs it.
+This article is the authoritative owner of the Perform task element -- what it produces, its parameters,
+and what the runtime writes back. Two of its settings are their own subject and have their own articles:
+WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
+written is owned by `process-task-category`.
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 Creating a process here? Its code and caption, and every element and parameter code, are governed by
@@ -52,8 +55,14 @@ guide rather than `process-modeling`.
                       the constant reached Activity.Title on a running process). ALWAYS also give the element a
                       meaningful `caption` — the Title falls back to the caption when Recommendation is empty,
                       which makes a good caption a free safety net.
-  OwnerId             Lookup -> Contact. THE PERFORMER ("Who performs the task?").                   [see NOTE-1]
-  ActivityCategory    Lookup -> ActivityCategory. Task category. Required by the designer UI.        [see NOTE-2]
+  OwnerId             Lookup -> Contact. THE PERFORMER ("Who performs the task?"), for ONE named person.
+                      A TEAM is never routed through OwnerId -- that needs the element-level `performer`
+                      block. Both layers, their accepted sources and their refusals are owned by
+                      `process-task-performer`; read it before you answer "who".
+  ActivityCategory    Lookup -> ActivityCategory. Task category. Required by the designer UI.
+                      MUST be a bare record Guid in `value`, never a `[#Lookup...#]` formula -- the
+                      formula form degrades the allowed-results list silently, and
+                      `process-task-category` owns that rule and its evidence.
                       "To do" = F51C4643-58E6-DF11-971B-001D60E938C6 (also the runtime default).
                       "Call" is TWO rows and the element needs the TASK-typed one — the platform names both:
                       03DF85BF-6B19-4DEA-8463-D5D49B80BB28 is ActivityType Task
@@ -68,14 +77,16 @@ guide rather than `process-modeling`.
                       1.3.1.1, and a CURRENT clio additionally refuses any environment older than the
                       version it bundles. From 1.4.0.40 the server also resolves the record's NAME into the
                       parameter's display value, so the designer's "Task category" field shows `Call`
-                      rather than the raw Guid, and describe reports it as `valueDisplay` (see NOTE-2).
+                      rather than the raw Guid, and describe reports it as `valueDisplay` (see
+                      `process-task-category`).
                       A stale environment surfaces as ONE OF TWO refusals, and both mean YOUR ENVIRONMENT IS BEHIND,
                       not that the parameter is unsettable: a current clio refuses the call UP FRONT with its
                       package-convergence message naming both versions and the install hint; an older clio
                       lets the call through and the old package rejects it with "Value '...' is not valid for
                       parameter 'ActivityCategory' of type Lookup: a Lookup constant is a formula token, not a
                       plain value. Set it via a mapping 'expression' instead...". Either way: update the
-                      package (install-process-builder); do NOT fall back to the expression form (see NOTE-2).
+                      package (install-process-builder); do NOT fall back to the expression form (see
+                      `process-task-category`).
   ActivityPriority    Lookup -> ActivityPriority. Default = ab96fa02-7fe6-df11-971b-001d60e938c6 (Medium).
                       Same bare-Guid `value` route and same version story as ActivityCategory.
   Duration            Integer, default 20.  Planned duration.        DueDate = StartDate + Duration
@@ -132,92 +143,6 @@ guide rather than `process-modeling`.
   QueueItem: do not use it — no consumer of this parameter is known in the platform runtime or the designer
   package (searched, not proven absent), so a written value has no known effect.
 
-NOTE-1 (the performer): "Who performs the task?" has TWO layers, and picking the right one is the whole game.
-  LAYER 1 — the element-level `performer` block (ships from CrtProcessBuilder 1.3.1.1, same version story as
-  ActivityCategory). Set it on the performTask element in create/addElement, or in place via setElement's
-  `elementUpdate.performer`: { "type": "user"|"manager"|"role", "contact"?, "role"?, "showPage"? }.
-  * type "role" is THE way to assign to a TEAM: pass a role name or record id in `role`. The created
-    Activity carries the role in its own OwnerRole column and its Owner stays EMPTY — the claim model:
-    every user of the role sees the task, whoever takes and completes it is recorded. Do not read the
-    empty Owner back as "unassigned". The role is CHECKED TO EXIST on either route, against the same role
-    set the designer's picker offers — so a typo'd name, an invented Guid and a USER's own SysAdminUnit id
-    are refused instead of stored (a user is not a role; for one person use type "user"), and so is a name
-    that matches MORE THAN ONE role - a name cannot say which group performs the task, so pass the id. Look
-    the role up on the environment rather than guessing an id.
-  * type "manager" resolves the contact's MANAGER at RUN time (default contact = the process starter); when
-    the contact's employee record has no manager the process raises an error at run time — say so when the
-    org data may be incomplete.
-  * type "user" with `contact` is the single-person form: pass a bare Contact record Guid (checked to exist,
-    and stored as the encoding the designer produces) or a formula like [#SysVariable.CurrentUserContact#];
-    an omitted contact defaults to the process starter.
-  * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
-    performer to open the page for) and stays untouched for user.
-  * describe reads the block back top-level on the element (`performer`: type + the stored formula +
-    roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
-    than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
-    element has its own `email.performer`, which is a different field and is not refused.
-  LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Four working ways:
-  * a bare Contact record Guid in `value` — the Guid must be an EXISTING Contact record: an id of another
-    entity (a ROLE id is the classic mistake) is REFUSED naming the reference object, because before this
-    guard it persisted as a well-formed ConstValue referencing nothing at run time;
-  * a process parameter: create it with `typeFromElement` + `typeFromElementParameter: "OwnerId"` so the types
-    are guaranteed compatible, then map it in;
-  * another element's Contact/Guid output parameter;
-  * `expression: "[#SysVariable.CurrentUserContact#]"` for "whoever started the process".
-  A Lookup -> SysAdminUnit PARAMETER source is likewise REJECTED (incompatible reference object). NEVER route
-  a team through OwnerId — that is what the `performer` block's type "role" is for.
-  Leaving both layers unset is NOT an unassigned task — at run time the task silently falls to the current
-  user's contact (whoever started the process). There is no "nobody" state; omitting the performer is a choice.
-
-NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue), not a formula. The element's
-  allowed-results list is computed from the category ONLY when the category's source is ConstValue (the
-  platform's `GetResultParameterAllValues` reads `SourceValue.Value` only for a ConstValue source — client-side
-  and server-side alike); writing it as a `[#Lookup...#]` expression sets the Activity's category column but
-  SILENTLY DEGRADES the allowed-results list the task page / designer result dropdown offers, falling back to
-  the default set. Do NOT try to verify the degradation through the `Activity.AllowedResult` column — that
-  column derives from outgoing CONDITIONAL flows, not from the category, and is empty either way on a process
-  without them. So the bare-Guid `value` is the only correct route; on a pre-1.3.1.1 package the parameter
-  cannot be set correctly — update the package rather than using the expression form.
-
-  This matches what the DESIGNER stores for the real-lookup families this rule is about (a task element's
-  ActivityCategory / ActivityPriority): a lookup constant a human picks is
-  `{Source: ConstValue, Value: <bare record Guid>}` on the element parameter, with the record's NAME - or
-  nothing at all - in the parameter's DisplayValue. Do not read that as a universal designer rule: the
-  designer's own corpus is mixed (absent, the raw Guid and a readable name all occur, and the platform ships
-  a first-party schema with the raw Guid in DisplayValue), so an agent checking a real schema will find
-  counter-examples. Name-or-nothing is the CORRECT convention, not the most common one. The `[#Lookup...#]`
-  macro form the designer does produce belongs to a different place: a change-data COLUMN mapping, where the
-  value is a formula in its own right. Do not carry the macro across to an element parameter because you saw it
-  in a designer-authored schema.
-
-  DisplayValue is where a design-time defect used to live and is worth understanding, because it is invisible
-  in `metadata.json`: it is a LOCALIZABLE string, so it is serialized into the schema's RESOURCES
-  (`BaseElements.<Element>.Parameters.<Param>.DisplayValue`), not into the metadata beside `Value`. The designer
-  shows a NON-EMPTY DisplayValue verbatim and resolves the record name itself only when it is EMPTY — so a
-  DisplayValue holding the raw id made the "Task category" field render `03df85bf-…` instead of `Call`, while
-  the runtime behaved correctly the whole time. From CrtProcessBuilder 1.4.0.40 the server resolves the
-  referenced record's name and stores THAT, and leaves DisplayValue unset when it cannot (which is the correct
-  degrade — the designer then resolves the name). Nothing about the input contract changed: you still pass a
-  bare record Guid.
-  Why the server resolves the name rather than simply leaving DisplayValue empty: only the Perform task's
-  category field re-resolves an empty display value (`ActivityUserTaskPropertiesPage.initActivityCategory`).
-  Every other designer surface reads the parameter through `getMappingValue()`, which returns
-  `displayValue || value` (`process-schema-parameter.js`) — an empty display value renders the raw Guid again
-  there. "Just write nothing" is therefore the cheaper WRONG fix, not a safe alternative.
-  Evidence: observed on a Creatio 8.x stand through `describe-business-process` and the pulled schema
-  resources (`Resources/<Process>.Process/resource.en-US.xml`) against CrtProcessBuilder 1.4.0.40; the client
-  behaviour is read from the designer's own source, not inferred.
-
-  Two conveniences shipped with it, both from 1.4.0.40:
-  * an already-composed `[#Lookup.{objectUId}.{recordId}#]` passed as a MAPPING `value` on a Lookup target is
-    DECODED to the bare record id and stored as a ConstValue — so a value echoed back from describe re-submits
-    unchanged. This does not make the expression form correct here; it makes the round trip safe. Which
-    routes accept the macro and which refuse it is owned by `process-parameters` (the "A LOOKUP value is
-    DIFFERENT" bullet) — read it there rather than here, so the two never drift;
-  * `describe-business-process` reports the resolved name as `valueDisplay` beside the unchanged bare-Guid
-    `value`. `valueDisplay` is read-only and re-derived on every write — never feed it back as `value`. Its
-    absence means the environment could not name the record, NOT that the value is wrong.
-
 --- Worked example: "Call the client, due in 2 days, assigned to the process starter" ---
 1) create-business-process
    { "name": "UsrClient_Call", "caption": "Call client about renewal",
@@ -246,7 +171,8 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
    The ones you did NOT bind stay hidden. That is expected; it is not a failure.
 
 Variant — the same task ASSIGNED TO A TEAM ("the sales department calls the client"): drop the OwnerId
-mapping from step 2 and set the element-level performer instead (works inline in step 1's element too):
+mapping from step 2 and set the element-level performer instead (works inline in step 1's element too;
+the block's full contract is in `process-task-performer`):
    [ { "op": "setElement", "elementName": "CallClientAboutRenewal",
        "elementUpdate": { "performer": { "type": "role", "role": "Sales Department" } } } ]
 Look the role name up on the environment first (SysAdminUnit; a role with no users means a task nobody

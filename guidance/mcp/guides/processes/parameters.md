@@ -90,7 +90,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   Date-time → `[#DateTimeValue.dd.MM.yyyy HH:mm#]` (e.g. `[#DateTimeValue.03.07.2026 02:15#]`);
   Time → `[#TimeValue.HH:mm#]` (e.g. `[#TimeValue.12:20#]`). A LOOKUP value is DIFFERENT: prefer a bare record
   Guid in `value` (route ships from CrtProcessBuilder 1.3.1.1 — stored as the ConstValue the runtime reads; on an
-  ActivityUserTask category the ConstValue encoding is REQUIRED, see NOTE-2 in `process-perform-task`). The
+  ActivityUserTask category the ConstValue encoding is REQUIRED, owned by `process-task-category`). The
   `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` expression form (both GUIDs: the referenced OBJECT's
   schema UId, NOT its name, then the RECORD's Id) still exists, but reach for it only on a pre-1.3.1.1
   package that rejects the bare Guid — and never for a parameter whose consumer reads ConstValue only, an

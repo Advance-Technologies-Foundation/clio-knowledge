@@ -36,7 +36,12 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
-  - the Perform task element — a human step, who performs it, its parameter table -> name=process-perform-task
+  - the Perform task element — a human step, what it produces, its parameter table ->
+    name=process-perform-task
+  - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
+    name=process-task-performer
+  - a task's ActivityCategory / ActivityPriority value, a "Task category" field showing a raw Guid, or a
+    results dropdown offering the wrong set -> name=process-task-category
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
     name=process-activity-connections
