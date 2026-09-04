@@ -358,8 +358,8 @@ Scope and limits of this rule:
   (AUTHORING CHILDREN). A merge that patches PROPERTIES of an element the template already owns
   in that slot is a different case again, and nothing here applies to it. ("set" is no longer named
   here because it behaves as an insert — see OPERATION SHAPE — so the insert rule already covers it.)
-- It governs a body YOU author. A page produced by web-to-mobile conversion follows the elementMap
-  placement of that guide instead.
+- It governs a body YOU author. A page produced by web-to-mobile conversion follows the
+  viewConfigDiff placement of that guide instead.
 - clio warns — never blocks — on exactly one shape: an insert of crt.Button into Scaffold/"actions".
   "leading" is advice; no validator checks it.
 - Verified for "actions" (ENG-95429, live stand): a button inserted there is absent from the

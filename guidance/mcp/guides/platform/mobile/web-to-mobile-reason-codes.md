@@ -44,6 +44,14 @@ NOT LOSS — report it, and re-insert NOTHING
   drop-empty-container         Every child dropped, so the converter removed the empty shell. Automatic
                                housekeeping: do not re-create it, do not re-parent anything into it, and
                                do not ask the user about it.
+  drop-container-no-mobile-equivalent
+                               A CONTAINER whose params.webType is absent from the mobile registry: the
+                               wrapper is not recreated, but its CHILDREN are — each one is in
+                               viewConfigDiff already re-parented to params.target, so the branch is
+                               FLATTENED, not lost. Contrast drop-type-not-in-mobile-registry below: same
+                               cause on a LEAF, where it IS loss. Say the layout wrapper is gone if that
+                               matters, and author NOTHING — re-creating it would insert a parent the diff
+                               does not create, and the children already name their new one.
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is

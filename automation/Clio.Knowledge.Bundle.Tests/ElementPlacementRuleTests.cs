@@ -20,7 +20,7 @@ public sealed class ElementPlacementRuleTests
     private const string NextSectionHeading = "LIMITATIONS (be transparent)";
 
     // The ELEMENT PLACEMENT rule is deliberately SELF-CONTAINED in the conversion guide (the only place
-    // an elementMap is consumed). General mobile-editing guides — page-modification.md, containers.md —
+    // a converter viewConfigDiff is consumed). General mobile-editing guides — page-modification.md, containers.md —
     // stay converter-free, so there are no reciprocal pointers to guard here; the citation scan below runs
     // over the owner guide alone.
 
@@ -80,7 +80,7 @@ public sealed class ElementPlacementRuleTests
             .ToArray();
 
         citedRules.Length.Should().BeGreaterThanOrEqualTo(2,
-            because: "the two anchor citations — the elementMap field description and the FLOW insert branch, the exact "
+            because: "the two anchor citations — the viewConfigDiff field description and the FLOW insert branch, the exact "
                 + "points where the model improvised the parent — must both exist, not just be resolvable when absent");
 
         string[] unresolved = citedRules

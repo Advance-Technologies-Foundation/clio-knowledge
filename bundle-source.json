@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.82",
+  "libraryVersion": "1.13.83",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -943,8 +943,8 @@
     },
     {
       "itemId": "freedom-page-mobile-reason-codes",
-      "title": "Freedom UI mobile conversion: elementMap reason codes",
-      "description": "The closed vocabulary of elementMap[].reason codes returned by get-mobile-page-conversion-guide, and what each asks of the caller: the four component-twin states (only one of which is work to do), insert classifications, placement changes the converter made on the caller's behalf, and every drop code with its params. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
+      "title": "Freedom UI mobile conversion: droppedElements reason codes",
+      "description": "The closed vocabulary of droppedElements[].reason codes returned by get-mobile-page-conversion-guide — why a source element did NOT reach the mobile page — and what to tell the user about each: which drops are not conversion loss and must be re-inserted NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify a drop; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
       "requiredFeatures": [

@@ -68,7 +68,7 @@ public sealed class MobileOperationShapeRuleTests
         ("extrapolation", "only the actions slot was tested — the leading slot must stay labelled as an extension of that observation"),
         ("NOT claimed", "the guide must keep disclaiming any statement about runtime rendering, which was never tested"),
         ("patches PROPERTIES", "the rule is about an insert of your own button; a merge that patches an existing element PROPERTIES is a different case and must not be read as blocked"),
-        ("elementMap", "a converted page follows its elementMap placement, so the two guides cannot be read as contradicting")
+        ("viewConfigDiff placement", "a converted page follows its viewConfigDiff placement, so the two guides cannot be read as contradicting")
     ];
 
     [Test]
