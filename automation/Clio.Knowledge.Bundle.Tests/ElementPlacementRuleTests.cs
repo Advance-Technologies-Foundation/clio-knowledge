@@ -19,10 +19,15 @@ public sealed class ElementPlacementRuleTests
     private const string SectionHeading = "HARD MOBILE RULES";
     private const string NextSectionHeading = "LIMITATIONS (be transparent)";
 
-    // The ELEMENT PLACEMENT rule is deliberately SELF-CONTAINED in the conversion guide (the only place
-    // a converter viewConfigDiff is consumed). General mobile-editing guides — page-modification.md, containers.md —
-    // stay converter-free, so there are no reciprocal pointers to guard here; the citation scan below runs
-    // over the owner guide alone.
+    // The ELEMENT PLACEMENT rule is deliberately SELF-CONTAINED in the conversion guide, so the citation
+    // scan below runs over the owner guide alone. This comment used to claim the general mobile-editing
+    // guides "stay converter-free" and that there was nothing reciprocal to guard. That was not true, and
+    // saying it is how a stale pointer sat unnoticed: page-modification.md carries exactly ONE pointer here
+    // — the scope carve-out on the button-insert rule, pinned by MobileOperationShapeRuleTests. The
+    // standing rule is narrower than "converter-free" and is what actually holds: a pointer to the
+    // conversion guide is allowed wherever a general rule would otherwise contradict it, but a converter
+    // RESPONSE FIELD NAME outside the conversion guides is not — it couples a general guide to a contract
+    // it does not own, and `elementMap` -> `viewConfigDiff` (ENG-95827) proved it rots there.
 
     // STOPGAP / REFACTOR REMINDER (ENG-91859): the crt.QuickFilterGroup-specific clauses below
     // (QuickFilterGroup_Value, crt.QuickFilterGroupAttributeConverter, the model-side / not-sufficient /

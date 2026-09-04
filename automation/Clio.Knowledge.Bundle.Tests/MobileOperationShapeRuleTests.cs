@@ -68,7 +68,14 @@ public sealed class MobileOperationShapeRuleTests
         ("extrapolation", "only the actions slot was tested — the leading slot must stay labelled as an extension of that observation"),
         ("NOT claimed", "the guide must keep disclaiming any statement about runtime rendering, which was never tested"),
         ("patches PROPERTIES", "the rule is about an insert of your own button; a merge that patches an existing element PROPERTIES is a different case and must not be read as blocked"),
-        ("viewConfigDiff placement", "a converted page follows its viewConfigDiff placement, so the two guides cannot be read as contradicting")
+        ("web-to-mobile conversion follows the placement",
+            "the carve-out that stops this rule contradicting the conversion guide, and it is the "
+                + "\"read the names from get-page\" clause it protects, not the Scaffold/actions ban — the "
+                + "converter never inserts there, but its diff DOES insert into containers the same diff "
+                + "creates, which get-page cannot show. Pinned without a converter field name on purpose: "
+                + "naming one coupled this general guide to the converter's contract and went stale once "
+                + "already (ENG-95827), and `viewConfigDiff` means the page's own body property everywhere "
+                + "else in this file")
     ];
 
     [Test]
