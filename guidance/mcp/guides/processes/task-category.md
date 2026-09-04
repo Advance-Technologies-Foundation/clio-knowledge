@@ -1,9 +1,11 @@
 clio MCP process-task-category guide — a task's category and priority are lookup CONSTANTS
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of HOW a task element's ActivityCategory and ActivityPriority
-must be written -- a bare record Guid in `value`, stored as a ConstValue, never a `[#Lookup...#]`
-formula -- why the formula form degrades the allowed-results list silently, how DisplayValue is
+This article is the authoritative owner of WHY a task element's ActivityCategory and ActivityPriority
+MUST be a bare record Guid in `value`, stored as a ConstValue, and MUST NOT be a `[#Lookup...#]`
+formula. `process-perform-task` owns the parameter itself: the category ids, which of the two "Call"
+rows to use, and the two refusal texts a stale package returns with their remedy. Read this article for
+why the formula form is wrong and what it silently degrades -- why the formula form degrades the allowed-results list silently, how DisplayValue is
 serialized into the schema resources rather than the metadata, and which CrtProcessBuilder version
 each behaviour ships from. `process-perform-task` owns the element and its parameter table, and states
 WHICH category id to use; this article states what goes wrong when the value is written any other way.

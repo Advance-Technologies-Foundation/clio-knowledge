@@ -92,43 +92,69 @@ public sealed class ProcessGuideContentPreservationTests
     private static string Excerpt(string line) =>
         line.Length <= 60 ? line : "…" + line[^60..];
 
+    private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();
+
+    private static int Occurrences(string text, string value)
+    {
+        int count = 0;
+        for (int index = text.IndexOf(value, StringComparison.Ordinal);
+             index >= 0;
+             index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal))
+        {
+            count++;
+        }
+        return count;
+    }
+
     /// <summary>
     /// One load-bearing clause per section ENG-96536 moved, with the reason it is the clause that matters.
     /// Chosen the way the R1-R17 pins were: not a summary of the article, but the sentence whose loss a
     /// reader could not detect — a completeness claim, a refusal, or a default that reads as absent.
     /// Verbatim rather than paraphrased, so a reworded rule fails here instead of drifting quietly.
     /// </summary>
-    private static readonly (string ItemId, string Clause, string Because)[] MovedPayloads =
+    private static readonly (string ItemId, string Clause, int AtLeast, string Because)[] MovedPayloads =
     [
-        ("process-data-source-filters", "COMPLETE set — an unknown name is rejected at BUILD",
+        ("process-data-source-filters", "COMPLETE set — an unknown name is rejected at BUILD", 1,
             "the macro vocabulary is only usable because it is stated to be exhaustive and validated at "
             + "build; trimmed to a sample, a reader has no way to tell a missing macro from an invalid one"),
-        ("process-data-source-filters", "the ONLY DayOfYear macro that takes NO argument",
+        ("process-data-source-filters", "the ONLY DayOfYear macro that takes NO argument", 1,
             "the one exception in that vocabulary, and the one an agent gets wrong by symmetry with its "
             + "six argument-taking neighbours"),
-        ("process-data-source-filters", "SIGNAL-START RESTRICTION",
+        ("process-data-source-filters", "SIGNAL-START RESTRICTION", 1,
             "the restriction that makes a signal filter different from every other filter; without it a "
             + "parameter reference is authored on a trigger evaluated before any instance exists"),
-        ("process-data-source-filters", "REPLACES the element's whole filter",
-            "the precondition on the one op here that overwrites live configuration; process-data-elements "
-            + "restates it inline as a MUST and cites this article for the detail"),
-        ("process-task-performer", "OwnerRole column and its Owner stays EMPTY",
+        ("process-data-source-filters", "REPLACES the element's whole filter", 1,
+            "the precondition on the one op here that overwrites live configuration"),
+        // Pinned on the RESTATEMENT, not only on the owner. The first version of this row named only
+        // process-data-source-filters, and deleting BOTH inline MUSTs from process-data-elements — the
+        // whole reason CONTRIBUTING requires the restatement — left the suite green. The copy a reader
+        // fetches to configure a changeData element is the one that has to survive.
+        ("process-data-elements", "REPLACES the element's whole filter", 2,
+            "twice, because two setElement bullets each instruct a setFilter on a live process and each "
+            + "carries the precondition inline; losing either one widens the records an element updates "
+            + "with nothing to warn the reader"),
+        ("process-task-performer", "OwnerRole column and its Owner stays EMPTY", 1,
             "the claim model. A reader who loses this reads the empty Owner back as an unassigned task and "
             + "\"fixes\" it by routing the team through OwnerId, which this article forbids"),
-        ("process-task-performer", "NOT an unassigned task",
+        ("process-task-performer", "NOT an unassigned task", 1,
             "leaving both layers unset silently assigns the process starter; there is no nobody state, and "
             + "the absence of a performer reads as a decision not yet made"),
-        ("process-task-category", "only for a ConstValue source",
+        ("process-task-category", "only for a ConstValue source", 1,
             "the mechanism behind the whole article. Without it the rule is a style preference and the "
             + "expression form looks like a working alternative"),
-        ("process-task-category", "Activity.AllowedResult",
+        ("process-task-category", "Activity.AllowedResult", 1,
             "the trap: the column a reader reaches for to verify the degradation derives from conditional "
             + "flows, not from the category, so it confirms the wrong thing either way"),
-        ("process-element-catalog", "NOT yet buildable",
+        ("process-element-catalog", "NOT yet buildable", 1,
             "the article exists to say what cannot be built; silence here used to read as buildable, which "
             + "is the defect its own text records"),
-        ("process-element-catalog", "READ-ONLY here",
-            "the per-entry marker that carries that same distinction into the catalog rows")
+        ("process-element-catalog", "READ-ONLY here", 4,
+            "the per-entry marker that carries that same distinction into the catalog rows — FOUR of "
+            + "them, one per read-only entry, because a pin satisfied by any single occurrence let two "
+            + "rows lose their marker and stay green"),
+        ("process-element-catalog", "NOT in a build descriptor", 1,
+            "the OTHER cannot-build fact, and the one a short form of this list dropped: the Connected-to "
+            + "links are not in a build descriptor at all, so the flagship \"a task connected to the account\" shape has to bind them afterwards")
     ];
 
     [Test]
@@ -148,10 +174,17 @@ public sealed class ProcessGuideContentPreservationTests
             because: "a pin against an article the manifest no longer declares checks nothing, and the "
                 + "article being gone is the larger defect. Not declared: " + string.Join(", ", undeclared));
 
+        // Collapsed on BOTH sides. These articles hard-wrap near 100 columns and four of the pinned
+        // clauses are under 50 characters, so a re-wrap that changes no words used to report the clause
+        // as LOST — a content-loss failure for an edit that lost nothing. Both sibling mechanisms
+        // (LoadBearingClauses, MovedSectionMarkers) collapse first, and MovedSectionMarkers carries the
+        // comment explaining why; this one did not.
         string[] missing = [.. MovedPayloads
-            .Where(payload => !byItemId[payload.ItemId]
-                .Contains(payload.Clause, StringComparison.Ordinal))
-            .Select(payload => $"{payload.ItemId} lost \"{payload.Clause}\" — {payload.Because}")];
+            .Select(payload => (payload, Found: Occurrences(
+                Collapse(byItemId[payload.ItemId]), Collapse(payload.Clause))))
+            .Where(measured => measured.Found < measured.payload.AtLeast)
+            .Select(measured => $"{measured.payload.ItemId} carries \"{measured.payload.Clause}\" "
+                + $"{measured.Found} time(s), needs {measured.payload.AtLeast} — {measured.payload.Because}")];
 
         missing.Should().BeEmpty(
             because: "these clauses moved into new articles, where a later trim is invisible to every other "

@@ -2,10 +2,12 @@ clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
 Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
-READING CONVENTION for every guide below: a rule lives in exactly ONE article and is cited from the
-others by NAME, never repeated, so a `name-in-backticks` inside a guide is a get-guidance topic to
-fetch and not a section to scroll to. An article states what it is the authoritative owner of; do not
-infer a rule it does not claim.
+READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
+`esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
+how a guide points at a rule it does not own. Backticks around anything else are ordinary code:
+columns, ops, and page-body sections such as `handlers` or `converters` are not topics. Where a guide
+restates something another guide owns — a destructive precondition, kept next to the instruction it
+guards — it says whose rule it is and names that guide for the rest.
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -44,8 +46,9 @@ infer a rule it does not claim.
     name=process-perform-task
   - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
     name=process-task-performer
-  - a task's ActivityCategory / ActivityPriority value, a "Task category" field showing a raw Guid, or a
-    results dropdown offering the wrong set -> name=process-task-category
+  - a "Task category" field showing a raw Guid, a results dropdown offering the wrong set, or WHY a
+    category must be a constant rather than a formula -> name=process-task-category (the ids themselves,
+    and what a stale package refuses, are in name=process-perform-task)
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
     name=process-activity-connections

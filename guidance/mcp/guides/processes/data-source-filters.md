@@ -53,8 +53,8 @@ is the one contract all three share, which is why it reads as its own subject.
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
   parameter" option for signal starts). Parameter references ARE valid on a data-operation element filter —
   the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
-  (e.g. filter the read by a process parameter's value) and on a `changeData` element, where the filter is
-  effectively MANDATORY (the runtime refuses to update with an empty one); on Add/Delete data they serialize
+  (e.g. filter the read by a process parameter's value) and on a `changeData` element, where a filter is
+  effectively mandatory (`process-data-elements` owns that rule and states why); on Add/Delete data they serialize
   but the task itself is not buildable yet (see below; `process-element-catalog` owns which elements are
   buildable and is the article to re-read when that changes).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a

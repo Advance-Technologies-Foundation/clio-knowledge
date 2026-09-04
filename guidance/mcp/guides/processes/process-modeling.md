@@ -26,10 +26,10 @@ owner -- read the one your task needs instead of guessing:
                                      what the runtime sets.
   * `process-task-performer`       - who performs a task: the element-level performer block (the only
                                      route to a TEAM) and OwnerId for one person.
-  * `process-task-category`        - WHY a category or priority must be a bare-Guid constant, and what
-                                     degrades silently when it is a formula. NOT needed to build one:
-                                     `process-perform-task` carries the rule and the ids. Read this
-                                     when a value is refused, a field shows a raw Guid, or a results
+  * `process-task-category`        - WHY a category or priority MUST be a bare-Guid constant and MUST
+                                     NOT be a formula, and what degrades silently when it is one. Not
+                                     needed to BUILD one -- `process-perform-task` carries the ids and
+                                     the refusals. Read this when a field shows a raw Guid or a results
                                      dropdown offers the wrong set.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
@@ -89,15 +89,12 @@ article from what this one says; read that article.
   failure those rules exist to prevent, and an example is what a model copies first.
 
 == Build recipe (intent -> running process) ==
-Before step 1, and stated here so that planning costs no extra fetch, what this API does NOT
-build today: gateway ELEMENTS, default flows, timer/message start, intermediate events, `formulaTask`,
-`scriptTask`, `webService`, sub-process, the Add/Delete-data target object + values, and the Read
-data collection / count / aggregation modes. A conditional BRANCH *is* buildable -- as a condition
-set on a plain flow, not as a gateway element.
-`process-element-catalog` OWNS that list and the per-element detail; this is the short form, kept
-here because a plan built around an unbuildable element fails only at build time. Fetch the catalog
-when you need the `data-id` vocabulary, an element you have not built before, or to read an existing
-process back.
+Before step 1 you MUST read `process-element-catalog`. It is the authoritative owner of what
+`create-business-process` builds today and what it does not, and a plan built around something it
+cannot build fails only at build time -- there is no earlier signal. A short form was tried here and
+reverted: it stated the conditional branch wrongly, dropped the "Connected to" links (which are NOT
+in a build descriptor at all) and dropped the Add/Delete-data filter caveat, and the test written to
+keep the two copies in step could not see any of the three. One fetch is cheaper than a wrong plan.
 1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.

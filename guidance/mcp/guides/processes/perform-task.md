@@ -4,8 +4,11 @@ Part of the process guide set. `process-modeling` is the entry point and indexes
 This article is the authoritative owner of the Perform task element -- what it produces, its parameters,
 and what the runtime writes back. Two of its settings are their own subject and have their own articles:
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
-written is owned by `process-task-category`.
-Naming anything here? Every code and caption is governed by N1-N10 in `process-naming`; read it first.
+written -- and what silently degrades when it is written as a formula -- is owned by
+`process-task-category`. The ids, the two refusal texts and their remedy are here.
+Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
+owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
+leaf rather than through `process-modeling`.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with
@@ -160,7 +163,7 @@ Naming anything here? Every code and caption is governed by N1-N10 in `process-n
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBeforePeriod", "value": "0" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "ActivityCategory",
        "value": "03DF85BF-6B19-4DEA-8463-D5D49B80BB28" } } ]
-   <- ActivityCategory CallAsTask. The three rows, which one to use and why resolving by NAME is a coin
+   <- ActivityCategory CallAsTask. The two "Call" rows, which one to use and why resolving by NAME is a coin
       flip are stated once near the top of this article; do not restate them here.
 
 3) describe-business-process -> every parameter you bound now appears with its source and value.

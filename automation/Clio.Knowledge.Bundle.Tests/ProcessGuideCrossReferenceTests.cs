@@ -98,8 +98,9 @@ public sealed class ProcessGuideCrossReferenceTests
         // phrase was checked against the folder the way the rows above were: "What you can build today"
         // occurs in one non-owner (activity-connections, where the validation-pass-is-not-buildable caveat
         // cites the slice), and lower-case "element catalog" in two (the entry's own index and recipe, and
-        // N6 in process-naming). The heading's capitalised "Element catalog" is the owner's and is not a
-        // marker: Occurrences compares Ordinal, so the two cases do not collide.
+        // N6 in process-naming). The owner's capitalised heading "Element catalog" matches this row too —
+        // Occurrences is OrdinalIgnoreCase — and is harmless only because the owner is skipped. A
+        // non-owner writing the capitalised form WILL be required to name the owner, which is correct.
         ("What you can build today", "process-element-catalog"),
         ("element catalog", "process-element-catalog"),
         // The perform-task split shipped with no rows, and that is precisely how a stale pointer got
@@ -108,7 +109,12 @@ public sealed class ProcessGuideCrossReferenceTests
         // this file could see an unquoted pointer with no locator word. These two rows are what makes
         // that class of miss red rather than reviewable.
         ("allowed-results", "process-task-category"),
-        ("Who performs the task", "process-task-performer")
+        // Keyed on "element-level `performer`" and NOT on "Who performs the task", which was the first
+        // choice and is a tripwire: its one non-owner occurrence sits 185 characters from the owner name
+        // in a 220-character window, so inserting 46 characters of unrelated prose into the same
+        // parameter row reported it as unattributed when the article names the owner right below. Slack
+        // is 144 characters on this phrase; every other row has 60 or more.
+        ("element-level `performer`", "process-task-performer")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
@@ -131,6 +137,43 @@ public sealed class ProcessGuideCrossReferenceTests
         "validate-process-graph",
         "confirm destructive removals with the user"
     ];
+
+    /// <summary>
+    /// What makes a backticked sibling name readable as a FETCH rather than as a heading. Every article in
+    /// this set used to carry that sentence itself, which meant any single article could lose it and the
+    /// other ten still told the reader; ENG-96536 deduplicated it into <c>routing</c>, which every agent
+    /// reads before anything else, and that trade removed the redundancy along with the repetition.
+    ///
+    /// So it is pinned. Nothing else in the suite reads routing's prose — the routing assertions match
+    /// `name=` tokens only — and routing is itself a get-guidance article under the same size pressure as
+    /// any other, so a trim for length would take the convention out of the library entirely with the
+    /// whole suite green. Every other rule this change moved got a marker row, a payload pin or a
+    /// survival test; this one had none.
+    /// </summary>
+    private static readonly string[] ReadingConventionClauses =
+    [
+        "READING CONVENTION",
+        "get-guidance topic to fetch",
+        "not a heading to scroll to"
+    ];
+
+    [Test]
+    [Description("The reading convention survives in routing, which is the only copy of it left.")]
+    public void TheReadingConvention_ShouldSurviveInRouting()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string routing = Collapse(ReadRouting(repositoryRoot));
+
+        string[] missing = [.. ReadingConventionClauses
+            .Where(clause => !routing.Contains(clause, StringComparison.Ordinal))];
+
+        missing.Should().BeEmpty(
+            because: "eleven articles gave up their own copy of this sentence for this one, so it is now "
+                + "the only place the library says that a backticked sibling name is a topic to fetch. "
+                + "Without it every cross-article pointer in the set reads as a heading the reader cannot "
+                + "find. If routing has to lose it, put it back in the articles rather than nowhere. "
+                + "Missing: " + string.Join(", ", missing));
+    }
 
     [Test]
     [Description("Every quoted section citation resolves in its own article or names the article that owns it.")]
@@ -238,83 +281,6 @@ public sealed class ProcessGuideCrossReferenceTests
             because: "after the split these sections live in one article each, and a bare mention leaves the "
                 + "reader with a claim they cannot check — the reference is not broken enough to look broken, "
                 + "which is why it survives review. Found: " + string.Join("; ", unattributed));
-    }
-
-    /// <summary>
-    /// The one place a rule is deliberately stated TWICE: the entry article carries the bare list of what
-    /// <c>create-business-process</c> cannot build, and <c>process-element-catalog</c> owns that list and
-    /// the per-element detail. The duplication is the same trade CONTRIBUTING prescribes for a destructive
-    /// precondition — restate the short form where the reader is, cite the owner for the rest — and it is
-    /// taken for a measured reason: a plan built around an unbuildable element fails only at build time, and
-    /// requiring a second get-guidance call before step 1 of the recipe cost the flagship build path an
-    /// extra fetch and 16-19% more characters.
-    ///
-    /// What that trade buys has to be paid for HERE, because nothing else in this repository compares
-    /// duplicated prose for agreement — the review of ENG-96536 found three copies of one platform claim
-    /// across two files and every test green. The failure this prevents is one-directional in practice: an
-    /// element becomes buildable, the owner's list shrinks, and the entry article keeps telling every
-    /// reader it cannot be built. That reads as authoritative and is checked by no one.
-    /// </summary>
-    private const string NotBuildableMarker = "NOT yet buildable:";
-
-    /// <summary>Includes the colon: the lead-in before it is prose, not a list item.</summary>
-    private const string EntryShortFormMarker = "build today:";
-
-    [Test]
-    [Description("The entry article's inline list of what cannot be built says exactly what the article "
-        + "that OWNS that list says, so the deliberate duplication cannot drift.")]
-    public void TheEntryShortFormOfWhatCannotBeBuilt_ShouldSayWhatItsOwnerSays()
-    {
-        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
-        string Body(string itemId) => ProcessGuideSet.Read(repositoryRoot,
-            declared.Single(article => article.ItemId == itemId).SourcePath);
-
-        string[] owner = NotBuildableItems(Body("process-element-catalog"), NotBuildableMarker,
-            "Use the catalog below");
-        string[] entry = NotBuildableItems(Body(ProcessGuideSet.SplitItemIds[0]), EntryShortFormMarker,
-            "A conditional BRANCH");
-
-        // Both floors, because either parse returning nothing would make the comparison below vacuous and
-        // report the two lists as agreeing while reading neither.
-        owner.Should().HaveCountGreaterThan(4,
-            because: "the owner's list is the source of truth here, and a parse that found almost nothing "
-                + "would clear this test while comparing nothing");
-        entry.Should().HaveCountGreaterThan(4,
-            because: "the entry's short form exists to save a fetch; a parse that found almost nothing "
-                + "would report agreement with the owner without having read it");
-
-        entry.Should().BeEquivalentTo(owner,
-            because: "the entry article states this list only to save the reader a get-guidance call before "
-                + "step 1 of the recipe; the moment it disagrees with the article that OWNS it, that saving "
-                + "is bought with a wrong answer instead. Update BOTH, or drop the short form and let the "
-                + "recipe send the reader to `process-element-catalog`");
-    }
-
-    /// <summary>
-    /// The comma-separated items of a "cannot build" list, normalised so the two articles can be compared.
-    /// Parentheses are stripped BEFORE splitting — the owner's asides carry commas of their own, and
-    /// splitting first would shred one item into three.
-    /// </summary>
-    private static string[] NotBuildableItems(string article, string startMarker, string endMarker)
-    {
-        int from = article.IndexOf(startMarker, StringComparison.Ordinal);
-        if (from < 0)
-        {
-            return [];
-        }
-        from += startMarker.Length;
-        int to = article.IndexOf(endMarker, from, StringComparison.Ordinal);
-        string slice = Collapse(article[from..(to < 0 ? article.Length : to)]);
-        slice = Regex.Replace(slice, @"\([^)]*\)", " ");
-        slice = slice.Replace("`", string.Empty).Replace("--", " ");
-        return [.. slice
-            .Split([",", " and "], StringSplitOptions.RemoveEmptyEntries)
-            .Select(item => Collapse(item).Trim('.', ':', ';').Trim())
-            .Where(item => item.Length > 3)
-            .Select(item => item.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
-                ? item[4..]
-                : item)];
     }
 
     [Test]

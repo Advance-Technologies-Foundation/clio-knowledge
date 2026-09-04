@@ -45,6 +45,6 @@ LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON onl
 * another element's Contact/Guid output parameter;
 * `expression: "[#SysVariable.CurrentUserContact#]"` for "whoever started the process".
 A Lookup -> SysAdminUnit PARAMETER source is likewise REJECTED (incompatible reference object). NEVER route
-a team through OwnerId — that is what the `performer` block's type "role" is for.
+a team through OwnerId — MUST NOT: that is what the `performer` block's type "role" is for.
 Leaving both layers unset is NOT an unassigned task — at run time the task silently falls to the current
 user's contact (whoever started the process). There is no "nobody" state; omitting the performer is a choice.

@@ -204,24 +204,25 @@ public sealed class GuidanceMigrationTests
             .EnumerateArray()
             .Single(resource => resource.GetProperty("itemId").GetString() == "process-modeling");
 
-        // ENG-96212 split process-modeling into seven articles, and ENG-96132 un-gated it. Both halves
-        // have to hold together: re-gating any ONE of the seven would hide part of the guidance the GA
-        // business-process tools name as mandatory reading, and it would do it where nobody is looking —
-        // the entry article would keep answering while the sub-guide it routes to went dark.
+        // ENG-96212 split process-modeling into seven articles and ENG-96132 un-gated it; ENG-96536 then
+        // extracted four more from three of those seven. Both halves have to hold together: re-gating any
+        // ONE of the eleven would hide part of the guidance the GA business-process tools name as
+        // mandatory reading, and it would do it where nobody is looking — the article it was split from
+        // would keep answering while the sub-guide it routes to went dark.
         //
-        // Scoped to those seven ITEM IDS rather than to everything under the processes folder, and that
+        // Scoped to those ELEVEN ITEM IDS rather than to everything under the processes folder, and that
         // distinction matters. `requiredFeatures` is the only per-resource disclosure control this
         // repository has. Written as a standing prohibition over a path prefix, this assertion would turn
         // a red build on the next process guide that legitimately documents a restricted capability — and
         // the cheapest way out of a red build is to drop the gate, which is precisely the outcome the
-        // control exists to prevent. The go-live was a decision about these seven articles; the assertion
-        // says only that.
+        // control exists to prevent. The go-live was a decision about the text in these eleven articles;
+        // the assertion says only that.
         JsonElement[] splitResources = source.RootElement.GetProperty("resources")
             .EnumerateArray()
             .Where(resource => ProcessGuideSet.SplitItemIds.Contains(resource.GetProperty("itemId").GetString()))
             .ToArray();
         // Absence of the PROPERTY, not absence of one flag name. Matching only "process-designer" would
-        // leave every other flag value free to hide one of the six while this stayed green — a
+        // leave every other flag value free to hide one of them while this stayed green — a
         // name-specific hole in the only per-resource disclosure control the repository has. The scoping
         // that keeps a future restricted-capability guide out of a red build is the SplitItemIds filter
         // above; it does not need the predicate narrowed as well.

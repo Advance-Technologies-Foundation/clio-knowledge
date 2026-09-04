@@ -8,7 +8,9 @@ budget headroom left, and because both of these sections grow with every element
 while the lifecycle around them does not.
 `process-modeling` keeps the lifecycle: the tools, the descriptor, the build recipe and the safety
 rules for editing an existing process.
-Naming anything here? Every code and caption is governed by N1-N10 in `process-naming`; read it first.
+Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
+owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
+leaf rather than through `process-modeling`.
 
 == What you can build today (create-business-process) ==
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
@@ -55,7 +57,8 @@ Naming anything here? Every code and caption is governed by N1-N10 in `process-n
 - A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
   `modify-business-process` + `setFlowCondition`. No gateway element is involved — see
   `process-branch-conditions`.
-- NOT yet buildable: gateway ELEMENTS, default flows, timer/message start, intermediate events,
+- NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
+  in a build descriptor: gateway ELEMENTS, default flows, timer/message start, intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
@@ -85,7 +88,9 @@ System actions (palette group "System actions"):
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
-    BUILDS, but its target object and filter do NOT yet — see the caveat near the top of this guide.
+    BUILDS, but its target object and values do NOT yet — see the caveat near the top of this guide. Its
+    `filter` is SERIALIZED but not end-to-end usable, exactly as on Add data: a clean build is UNSUPPORTED
+    as a working delete, so do not report one as scoped.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
     READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
     be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a

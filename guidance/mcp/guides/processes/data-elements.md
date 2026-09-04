@@ -51,6 +51,12 @@ may contain.
   Partial update: omit `changedColumns` to clear column tracking (fire on any change), omit `on` to keep the
   current change type, and include `entity` only to retarget the trigger object (retargeting clears any
   filter bound to the old entity).
+  MUST, on a live process: both of those omissions WIDEN the trigger silently. Omitting `changedColumns`
+  makes the process fire on any change to the record, and an `entity` retarget clears the record filter,
+  after which the process fires on every add/modify/delete of the new object. Neither is reported as an
+  error. Re-send the filter with `setFilter` in the same operations array when you retarget, and re-state
+  `changedColumns` when you meant to keep it -- `process-data-source-filters` owns `setFilter` and its
+  read-back, and that op REPLACES the whole filter, so read the current one back first.
 
 == Read data element (readData) — first-record mode ==
 - A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
