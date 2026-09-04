@@ -76,7 +76,14 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   ActivityUserTask category the ConstValue encoding is REQUIRED, see NOTE-2 in `process-perform-task`). The
   `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` expression form (both GUIDs: the referenced OBJECT's
   schema UId, NOT its name, then the RECORD's Id) still exists, but reach for it only on a pre-1.3.1.1 package
-  that rejects the bare Guid — and never for a parameter whose consumer reads ConstValue only.
+  that rejects the bare Guid — and never for a parameter whose consumer reads ConstValue only. From 1.4.0.40
+  that same macro is ACCEPTED in a MAPPING's `value` (`addMapping`, and `mappings[]` at create) on a Lookup
+  target and decoded back to the bare record id, so a value echoed from describe re-submits unchanged; that is
+  a round-trip convenience, not a reason to author the macro form. It is the MAPPING route only —
+  `addParameter` / `setParameter` still take the bare Guid and refuse the macro. 1.4.0.40 also resolves the
+  referenced record's NAME into the parameter's display value — the designer renders that, so a lookup
+  constant shows a word instead of a Guid, and describe reports it as the read-only
+  `valueDisplay` beside the unchanged bare-Guid `value`.
   EXCEPTION — an Activity CONNECTION: there you send a bare `recordId` to `setConnections` and the server
   composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
 - To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —

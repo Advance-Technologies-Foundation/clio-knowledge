@@ -14,7 +14,9 @@ Deploy preflight (run in this order)
 3. For local IIS, omit `sitePort` to let `deploy-creatio` reserve the first available port from
    `deploy-creatio-defaults.site-port-range`. Fresh and upgraded settings default to the inclusive range
    `[40100, 40199]`. Use `find-empty-iis-port` only when you need to inspect or explicitly choose a port;
-   its result is a point-in-time recommendation and the deploy command still reserves and revalidates it.
+   its result is a point-in-time recommendation and the deploy command still reserves and revalidates it
+   across concurrent clio processes before it changes files, databases, or IIS. Do not treat
+   `find-empty-iis-port` as a required step for a dotnet deployment.
    `deploy-identity` can call the same IIS port scanner internally when `identitySitePort` is omitted.
 4. Resolve the build archive - `deploy-creatio` needs an absolute `zipFile` path. `deploy-identity`
    accepts either a standalone `IdentityService.zip` or the same Creatio distribution bundle when it
@@ -29,6 +31,10 @@ Deploy
   `useHttps` (local IIS only). HTTPS is opportunistic: clio uses a pinned or deterministically
   selected usable LocalMachine/My certificate matching the host, and warns then continues with
   HTTP when no usable certificate is installed.
+- `deploy-creatio` has no argument that selects the deployment method. Choosing IIS or dotnet
+  explicitly is a CLI-only option of `install-creatio` (`--deployment auto|iis|dotnet`); it is not
+  reachable over MCP. `find-empty-iis-port` and the configured site-port range are relevant to the
+  IIS path only.
 - Prefer the recommended bundle from `show-passing-infrastructure`. For local IIS, omit `sitePort` to use
   the configured range. An explicit `sitePort` overrides both the configured fixed port and range.
 - An explicit port collision is a failed deployment, not permission to continue on the same port. Automatic
