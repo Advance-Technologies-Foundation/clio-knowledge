@@ -78,14 +78,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- LIMITATION — read this as CLOSED, not as a list with gaps: a read record's individual COLUMN values
-  are referenceable from NOWHERE taking a formula or a value, a conditional flow's `condition`
-  included — so "the record I just read has status X", the likeliest branch after a read, cannot be
-  authored. Nowhere to GET one either: describe reports no column UIds, so author TWO segments
-  (`[#[Element:{uid}].[Parameter:{uid}]#]`), never three. One exception, whose form
-  `process-send-email` owns: a Send email body macro. Concretely, not referenceable from a MAPPING, a
-  `changeData` value or a filter condition. (An email BODY macro is the exception and does reach them:
-  `[[element:Read.ResultEntity.Column]]` — see `process-send-email`.) The
+- LIMITATION — a read record's individual COLUMN values are out of reach in practice, so "the record I
+  just read has status X", the likeliest branch after a read, cannot be authored. NOT because the
+  platform refuses a third segment — it parses one — but because describe reports no column UIds, so
+  there is nowhere to GET the one you would have to write. Author TWO segments
+  (`[#[Element:{uid}].[Parameter:{uid}]#]`) in a mapping, a `changeData` value or a filter condition.
+  One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
+  `[[element:Read.ResultEntity.Column]]`. The
   element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
   the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
   that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
