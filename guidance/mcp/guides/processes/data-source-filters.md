@@ -54,7 +54,7 @@ is the one contract all three share, which is why it reads as its own subject.
   parameter" option for signal starts). Parameter references ARE valid on a data-operation element filter —
   the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
   (e.g. filter the read by a process parameter's value) and on a `changeData` element, where a filter is
-  effectively mandatory (`process-data-elements` owns that rule and states why); on Add/Delete data they serialize
+  effectively MANDATORY (`process-data-elements` owns that rule and states why); on Add/Delete data they serialize
   but the task itself is not buildable yet (see below; `process-element-catalog` owns which elements are
   buildable and is the article to re-read when that changes).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
@@ -78,8 +78,10 @@ is the one contract all three share, which is why it reads as its own subject.
   filters are not end-to-end usable in this increment.
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
-  `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,
-  read the current filter first (below) and send the complete new filter.
+  MUST: `setFilter` REPLACES the element's whole filter (there is no add-one-condition op), so to add a
+  condition, read the current filter back first (below) and send the complete new filter. Sending only
+  the condition you care about silently drops every other one, which WIDENS the records the element acts
+  on -- on a `changeData` element that is a bulk update on live records.
 - `describe-business-process` reads a filter back: an element carries a decoded `filter` (the same
   object / logicalOperation / conditions / groups shape) when it has one, so you can inspect it or
   round-trip it into a `setFilter`. A parameter reference comes back as its raw meta-path `expression`.

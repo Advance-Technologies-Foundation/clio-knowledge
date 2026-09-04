@@ -41,8 +41,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # The logger is not decoration. The headroom table ("X of budget", and which article is
+      # approaching the gate) is written to the test output, which the default console logger drops --
+      # so without this the early-warning tier prints on nobody's screen and the first person to see an
+      # article near the limit is whoever's build goes red. Documented in CONTRIBUTING for local runs.
       - name: Run the producer contract suite
-        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release
+        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release --logger "console;verbosity=detailed"
 
       # Everything above is hermetic: it judges this revision alone. This step is the one thing that
       # cannot be a test, because the question is about history — whether the published bytes moved

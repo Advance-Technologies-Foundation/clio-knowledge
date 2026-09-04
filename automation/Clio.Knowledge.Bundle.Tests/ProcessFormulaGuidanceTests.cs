@@ -142,16 +142,29 @@ public sealed class ProcessFormulaGuidanceTests
     [Description("Two claims this work introduced are stated as platform absolutes and the platform disagrees. A sub-process does NOT hold its children in the schema's own FlowElements - ProcessSchemaSubProcess implements IProcessSchemaFlowElementsContainer and owns its own collection - so describe-business-process, which iterates schema.FlowElements, does not see them; the delete guards do, because they walk GetBaseElements/GetParametrizedElements recursively. And a read record's column IS reachable in three segments: on the flow-condition path TryGetParameterMapPath puts an EntityColumn segment into SubParameterMetaPath and carries it. Both absolutes read as CLOSED questions, which is exactly how a reader stops looking - the practical limit is that describe hands out no column UIds, not that the platform refuses.")]
     public void ProcessGuides_ShouldNotOverstateTwoPlatformLimits() {
         // Arrange
-        string elementCatalog = ReadGuide(ElementCatalogGuide);
         string dataElements = ReadGuide(DataElementsGuide);
+        // Swept over the whole declared set, not one file. This assertion was repointed once already
+        // because the sentence MOVED articles, and a single-file NotContain is green the moment it moves
+        // again — verified: inserting the false sentence into process-modeling or data-elements passed.
+        string repositoryRoot = FindRepositoryRoot();
+        string[] restating = [.. ProcessGuideSet.Declared(repositoryRoot)
+            .Where(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
+                .Contains("describe-business-process` and the delete guards do see them",
+                    StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
 
         // Act & Assert
-        elementCatalog.Should().NotContain("describe-business-process` and the delete guards do see them",
+        restating.Should().BeEmpty(
+            because: "a sub-process owns its own FlowElements collection and ProcessDescriber iterates "
+                + "only schema.FlowElements, so describe does NOT see them — wherever this sentence is "
+                + "written it tells a caller to expect a delete refusal naming a flow no read API will "
+                + "show. Found in: " + string.Join(", ", restating));
+        ReadGuide(ElementCatalogGuide).Should().NotContain("describe-business-process` and the delete guards do see them",
             because: "a sub-process owns its own FlowElements collection and ProcessDescriber iterates only "
                 + "schema.FlowElements, so describe does NOT see them - and a caller told otherwise reads a "
                 + "delete refusal naming a flow no read API will show, which is the dead end this sentence "
                 + "claims to prevent");
-        elementCatalog.Should().Contain("the delete guards see them",
+        ReadGuide(ElementCatalogGuide).Should().Contain("the delete guards see them",
             because: "the true half has to survive the correction: the guards walk the recursive accessors, "
                 + "so a reference from inside a sub-process really does block a delete");
         dataElements.Should().NotContain("referenceable from NOWHERE",

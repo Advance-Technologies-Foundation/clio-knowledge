@@ -89,8 +89,8 @@ System actions (palette group "System actions"):
     `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
     BUILDS, but its target object and values do NOT yet — see the caveat near the top of this guide. Its
-    `filter` is SERIALIZED but not end-to-end usable, exactly as on Add data: a clean build is UNSUPPORTED
-    as a working delete, so do not report one as scoped.
+    `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
+    object is unset: do not report the element as a working delete.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
     READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
     be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a

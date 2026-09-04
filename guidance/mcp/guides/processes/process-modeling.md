@@ -89,12 +89,9 @@ article from what this one says; read that article.
   failure those rules exist to prevent, and an example is what a model copies first.
 
 == Build recipe (intent -> running process) ==
-Before step 1 you MUST read `process-element-catalog`. It is the authoritative owner of what
-`create-business-process` builds today and what it does not, and a plan built around something it
-cannot build fails only at build time -- there is no earlier signal. A short form was tried here and
-reverted: it stated the conditional branch wrongly, dropped the "Connected to" links (which are NOT
-in a build descriptor at all) and dropped the Add/Delete-data filter caveat, and the test written to
-keep the two copies in step could not see any of the three. One fetch is cheaper than a wrong plan.
+Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
+today and what it does not, and a plan built around something it cannot build fails only at build
+time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.

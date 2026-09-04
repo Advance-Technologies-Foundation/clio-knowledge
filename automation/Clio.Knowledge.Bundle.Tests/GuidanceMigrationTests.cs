@@ -219,12 +219,13 @@ public sealed class GuidanceMigrationTests
         // the assertion says only that.
         JsonElement[] splitResources = source.RootElement.GetProperty("resources")
             .EnumerateArray()
-            .Where(resource => ProcessGuideSet.SplitItemIds.Contains(resource.GetProperty("itemId").GetString()))
+            .Where(resource => ProcessGuideSet.GoLiveItemIds(repositoryRoot)
+                .Contains(resource.GetProperty("itemId").GetString()))
             .ToArray();
         // Absence of the PROPERTY, not absence of one flag name. Matching only "process-designer" would
         // leave every other flag value free to hide one of them while this stayed green — a
         // name-specific hole in the only per-resource disclosure control the repository has. The scoping
-        // that keeps a future restricted-capability guide out of a red build is the SplitItemIds filter
+        // that keeps a future restricted-capability guide out of a red build is the set-banner filter
         // above; it does not need the predicate narrowed as well.
         string[] regatedArticles = splitResources
             .Where(resource => resource.TryGetProperty("requiredFeatures", out _))
@@ -241,7 +242,7 @@ public sealed class GuidanceMigrationTests
         processModeling.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
             because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
                 + "the guide the GA business-process tools name as mandatory reading");
-        splitResources.Should().HaveCount(ProcessGuideSet.SplitItemIds.Length,
+        splitResources.Should().HaveCount(ProcessGuideSet.GoLiveItemIds(repositoryRoot).Length,
             because: "the scan below proves nothing unless it actually selected every article on the list — if "
                 + "one is renamed or moved and the filter stops matching it, a short result would report the "
                 + "gate decision as intact while guarding less of it than it claims");

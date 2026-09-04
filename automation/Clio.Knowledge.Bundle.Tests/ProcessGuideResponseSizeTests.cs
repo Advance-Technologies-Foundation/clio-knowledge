@@ -43,6 +43,53 @@ public sealed class ProcessGuideResponseSizeTests
     private const int LargestObservedPass = 32_698;
 
     /// <summary>
+    /// The article that observation was taken on, and its size AT that observation. It lives in this
+    /// repository, outside the folder this fixture measures, and it has already drifted: it is 32,996
+    /// characters today, 298 past the figure the budget is derived from. So the anchor is recorded here
+    /// and checked, because "the largest response observed to return whole" stops meaning anything once
+    /// the article it was measured on is a different article.
+    ///
+    /// This does NOT hold the article at a size. It fails when the drift grows large enough that the
+    /// observation no longer describes anything real, and the fix then is to re-probe and re-date
+    /// <see cref="LargestObservedPass"/> — not to widen this tolerance.
+    /// </summary>
+    private const string ProbeItemId = "esq-filter-parsing";
+
+    private const int ProbeDriftTolerance = 2_000;
+
+    [Test]
+    [Description("The article the response budget was measured on has not drifted far enough to make the measurement meaningless.")]
+    public void TheArticleTheBudgetWasMeasuredOn_ShouldStillResembleThatMeasurement()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        string? sourcePath = manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Where(resource => resource.GetProperty("itemId").GetString() == ProbeItemId)
+            .Select(resource => resource.GetProperty("sourcePath").GetString())
+            .FirstOrDefault();
+
+        sourcePath.Should().NotBeNull(
+            because: $"the budget is derived from one observation taken on '{ProbeItemId}'; if the "
+                + "manifest no longer declares that article, the observation describes nothing and "
+                + "LargestObservedPass has to be re-probed on an article that exists");
+
+        int size = ResponseSize(repositoryRoot, sourcePath!);
+        TestContext.WriteLine(
+            $"budget probe {ProbeItemId,-24} {size,7:N0}  observed at {LargestObservedPass,7:N0}"
+            + $"  drift {size - LargestObservedPass,+7:N0}");
+
+        Math.Abs(size - LargestObservedPass).Should().BeLessThanOrEqualTo(ProbeDriftTolerance,
+            because: $"every number in this fixture is {LargestObservedPass:N0} multiplied twice — the "
+                + "budget by 0.85, the headroom gate by 0.9 again — and that figure is one observation of "
+                + $"this one article on 2026-08-31. The article has since been edited freely, so once it "
+                + "is far from the size that was probed, nobody can say what was measured. Re-probe "
+                + "get-guidance against the published library and re-date LargestObservedPass; widening "
+                + "this tolerance instead keeps the number and discards its meaning");
+    }
+
+    /// <summary>
     /// The budget: 85% of the largest observed pass. The margin is part of the contract rather than slack
     /// in it, for three reasons. The observation is a single data point at a single moment; the real limit
     /// counts TOKENS, and a table- or backtick-dense article tokenizes worse per character than the prose
@@ -102,10 +149,11 @@ public sealed class ProcessGuideResponseSizeTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
-        // A superset check, not a count. A count floor of SplitItemIds.Length accepted a derivation that
+        // A superset check, not a count. A count floor accepted a derivation that
         // had lost several articles — 11 named, 15 declared, so four could leave the measured set and
         // still clear the floor. Naming them means the article that left is the one the failure reports.
-        declared.Select(article => article.ItemId).Should().Contain(ProcessGuideSet.SplitItemIds,
+        declared.Select(article => article.ItemId)
+            .Should().Contain(ProcessGuideSet.GoLiveItemIds(repositoryRoot),
             because: "the set is derived from the manifest, so an article that stops matching the "
                 + "derivation is one this contract silently stops measuring — and the go-live articles are "
                 + "the ones whose delivery was decided, so they are the floor");
@@ -150,7 +198,8 @@ public sealed class ProcessGuideResponseSizeTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
-        declared.Select(article => article.ItemId).Should().Contain(ProcessGuideSet.SplitItemIds,
+        declared.Select(article => article.ItemId)
+            .Should().Contain(ProcessGuideSet.GoLiveItemIds(repositoryRoot),
             because: "the set is derived from the manifest, so an article that stops matching the "
                 + "derivation is one this contract silently stops measuring — see the same floor on the "
                 + "delivery gate above");

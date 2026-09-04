@@ -113,7 +113,8 @@ public sealed class ProcessGuideCrossReferenceTests
         // choice and is a tripwire: its one non-owner occurrence sits 185 characters from the owner name
         // in a 220-character window, so inserting 46 characters of unrelated prose into the same
         // parameter row reported it as unattributed when the article names the owner right below. Slack
-        // is 144 characters on this phrase; every other row has 60 or more.
+        // is 120 characters on this phrase (the window less the 76-character gap and the 24-character
+        // owner token — the earlier note said 144 by forgetting the token); the tightest other row is 87.
         ("element-level `performer`", "process-task-performer")
     ];
 
@@ -150,11 +151,19 @@ public sealed class ProcessGuideCrossReferenceTests
     /// whole suite green. Every other rule this change moved got a marker row, a payload pin or a
     /// survival test; this one had none.
     /// </summary>
+    /// <summary>
+    /// Keyed on the convention's SUBJECT, not on its phrasing. The first version pinned "not a heading
+    /// to scroll to", which had it backwards in both directions: a rewrite that kept all three phrases
+    /// while saying "everything in backticks anywhere in the library is ordinary code" — the convention
+    /// inverted — stayed green, and restoring the wording the eleven articles actually used ("not a
+    /// section to scroll to") turned it red. So the pin now requires the two words the rule is ABOUT.
+    /// </summary>
     private static readonly string[] ReadingConventionClauses =
     [
         "READING CONVENTION",
-        "get-guidance topic to fetch",
-        "not a heading to scroll to"
+        "backticks",
+        "sibling",
+        "get-guidance topic to fetch"
     ];
 
     [Test]
@@ -164,8 +173,11 @@ public sealed class ProcessGuideCrossReferenceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         string routing = Collapse(ReadRouting(repositoryRoot));
 
+        // OrdinalIgnoreCase: which case the convention writes SIBLING GUIDE in is not a fact about
+        // the rule, and pinning it that way is how the first version of this pin came to reject a
+        // faithful reword.
         string[] missing = [.. ReadingConventionClauses
-            .Where(clause => !routing.Contains(clause, StringComparison.Ordinal))];
+            .Where(clause => !routing.Contains(clause, StringComparison.OrdinalIgnoreCase))];
 
         missing.Should().BeEmpty(
             because: "eleven articles gave up their own copy of this sentence for this one, so it is now "
@@ -367,12 +379,15 @@ public sealed class ProcessGuideCrossReferenceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         string routing = ReadRouting(repositoryRoot);
         ProcessGuideSet.Article[] articles = ProcessGuideSet.Declared(repositoryRoot);
-        string entryItemId = ProcessGuideSet.SplitItemIds[0];
+        string entryItemId = ProcessGuideSet.EntryItemId;
         string entry = ProcessGuideSet.Read(repositoryRoot,
             articles.Single(article => article.ItemId == entryItemId).SourcePath);
 
         string[] missingFromRouting = articles
-            .Where(article => !routing.Contains($"name={article.ItemId}", StringComparison.Ordinal))
+            // A word boundary, because Contains is a prefix test: with process-task-performer-legacy
+            // also declared, its row would report process-task-performer as routed while that article
+            // has no row of its own.
+            .Where(article => !RoutedNames(routing).Contains(article.ItemId))
             .Select(article => article.ItemId)
             .ToArray();
         // Which articles the ENTRY must index is decided by the articles themselves: a sub-article
@@ -432,6 +447,10 @@ public sealed class ProcessGuideCrossReferenceTests
     private static bool Owns(string[] headings, string cited) =>
         headings.Any(heading => heading.Contains(cited, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>The exact `name=` tokens routing declares, so a longer id cannot satisfy a shorter one.</summary>
+    private static HashSet<string> RoutedNames(string routing) =>
+        [.. RoutingName.Matches(routing).Select(match => match.Groups[1].Value.TrimEnd('.', '-'))];
+
     private static string ReadRouting(string repositoryRoot) =>
         ProcessGuideSet.Read(repositoryRoot, "guidance/mcp/guides/routing.md");
 
@@ -471,7 +490,7 @@ public sealed class ProcessGuideCrossReferenceTests
     {
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] articles = ProcessGuideSet.Declared(repositoryRoot);
-        string entryItemId = ProcessGuideSet.SplitItemIds[0];
+        string entryItemId = ProcessGuideSet.EntryItemId;
         string entry = ProcessGuideSet.Read(repositoryRoot,
             articles.Single(article => article.ItemId == entryItemId).SourcePath);
         string description = ManifestDescription(repositoryRoot, entryItemId);

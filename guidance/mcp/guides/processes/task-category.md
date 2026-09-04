@@ -2,18 +2,20 @@ clio MCP process-task-category guide — a task's category and priority are look
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of WHY a task element's ActivityCategory and ActivityPriority
-MUST be a bare record Guid in `value`, stored as a ConstValue, and MUST NOT be a `[#Lookup...#]`
-formula. `process-perform-task` owns the parameter itself: the category ids, which of the two "Call"
-rows to use, and the two refusal texts a stale package returns with their remedy. Read this article for
-why the formula form is wrong and what it silently degrades -- why the formula form degrades the allowed-results list silently, how DisplayValue is
-serialized into the schema resources rather than the metadata, and which CrtProcessBuilder version
-each behaviour ships from. `process-perform-task` owns the element and its parameter table, and states
-WHICH category id to use; this article states what goes wrong when the value is written any other way.
+MUST be written as a bare record Guid in `value`, stored as a ConstValue: what silently degrades when
+the mapping's SOURCE is an `expression` instead, how DisplayValue is serialized into the schema
+resources rather than the metadata, and which CrtProcessBuilder version each behaviour ships from.
+`process-perform-task` owns the element and its parameter table: WHICH category id to use, and the two
+refusals a caller sees when the environment is behind. This article states what goes wrong when the
+value is written any other way.
 Split out of `process-perform-task` because that article had no response-budget headroom left, and
 because this is the one block in it that a reader needs only when something already looks wrong.
 
 == A category or priority value MUST be a constant ==
-ActivityCategory MUST be a constant (`value`, stored as ConstValue), not a formula. The element's
+ActivityCategory MUST be stored as a ConstValue, which means the mapping's source MUST be `value` and
+MUST NOT be `expression`. (The MACRO is not the prohibited thing: from CrtProcessBuilder 1.4.0.40 an
+already-composed `[#Lookup...#]` passed as a `value` is decoded to the bare id and stored correctly --
+see the conveniences below. It is the `expression` SOURCE that degrades the results list.) The element's
 allowed-results list is computed from the category ONLY when the category's source is ConstValue (the
 platform's `GetResultParameterAllValues` reads `SourceValue.Value` only for a ConstValue source — client-side
 and server-side alike); writing it as a `[#Lookup...#]` expression sets the Activity's category column but
