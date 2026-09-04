@@ -27,12 +27,61 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   `exchange_process_send_error_v2.feature` (RND-T26743: auto mode with `Sender` = a `Guid.Empty` formula
   SAVES with no validation dialog and fails only at run time; RND-T26744 `@ft_SkipSenderValidation`: the same
   setup completes) — plus the card's auto-mode-only `senderValidator`.
+  AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four.
+  That is an AUTHORING rule, not a tool contract — neither the build nor the platform save enforces any of
+  them (the designer itself saves an auto element with unfilled required fields after a warning dialog —
+  designer specimen capture), so every omission surfaces only at RUN time, on a process that
+  built green. The `body` omission is the trap that motivates the rule: the build reports success,
+  `describe-business-process` reports success too — `hasBody:false` is the ONLY trace, so read the element
+  back and check it — and the run fails with `Localizable template not found for record
+  00000000-0000-0000-0000-000000000000` (reported on ENG-95979; the mechanism is in the applier source:
+  `subject` or `body` writes `BodyTemplateType="1"` — custom message — so a subject-only element points at
+  a body template that does not exist). Note the asymmetry: an explicitly EMPTY `body` (`""` or whitespace)
+  IS rejected at build (`requires a non-empty 'email.body'`); only an OMITTED one slips through.
+  `sender` is resolved at BUILD time and takes exactly three shapes: a `MailboxSyncSettings` record id
+  (a GUID), the `[#Lookup.{objectUId}.{recordId}#]` macro that describe echoes back (round-trip), or a
+  sender EMAIL ADDRESS resolved against `MailboxSyncSettings.SenderEmailAddress`. ANY other string —
+  including a `[#SysSettings.<Code>#]` formula — is treated as an address, matches no mailbox, and FAILS
+  the build with `no MailboxSyncSettings record has sender email '<value>'. Configure the mailbox on the
+  environment or pass the record id.` (`SendEmailApplier.ApplySender`, CrtProcessBuilder sources, read
+  2026-09-01). So the system-setting source the recipient ranking below prefers is NOT usable for `sender`
+  through this tool — the designer's own sender menu offers Process parameter / Lookup / System setting /
+  Formula, so say "not through this tool yet", never "Creatio cannot". Keep the two sender failures apart:
+  a MISSING sender saves and fails the RUN (rules above); a MALFORMED sender fails the BUILD. The sender
+  choice that survives an address change is the environment mailbox itself: the address you pass is
+  resolved to the mailbox RECORD at build, so an administrator can later change that mailbox's address
+  without reopening the process.
+  SENDER DISCIPLINE: rank `sender` sources the way the recipient ranking below ranks `to`/`cc`/`bcc`, with
+  the mailbox RECORD standing in for the system setting as the indirection an administrator can change later.
+  The build resolving a literal to a record is a platform side-effect, not a decision — the decision is
+  WHICH record, and it has to be reasoned about out loud, exactly as for a recipient. (1) DISCOVER before
+  deciding: read the mailboxes already configured (`odata-read` / `execute-esq` on `MailboxSyncSettings` —
+  `Id`, `SenderEmailAddress`, `MailServer`) BEFORE choosing a sender, and when one already carries the
+  address or the ROLE the user described ("the address we use for official notifications"), REUSE it by
+  record id and say which one. (2) A user-supplied LITERAL sender address that matches no configured mailbox
+  is NOT an instruction to create one: name the existing mailboxes as candidates first, and create a new
+  `MailboxSyncSettings` record ONLY as the LAST rung, after the user confirms the address is a distinct
+  sending identity rather than a synonym of a mailbox that exists. A second record for an address a first
+  one already serves is the sender-side twin of a hard-coded recipient — two places to update later.
+  (3) STATE the rung you took and why, in the reply — "reusing mailbox X, it already carries this address" or
+  "no mailbox carries this address; creating one because the user confirmed it is a separate identity" —
+  the same one-line justification the cc/bcc pushback gives. Creating a record is an ENVIRONMENT change:
+  the build checks only `SenderEmailAddress`, so a bare record satisfies the build while whether it SENDS
+  depends on the mailbox's server configuration, which this tool does not set up — say so when you create
+  one. Observed on ENG-95979 (manual test, 2026-09-04): an agent that pushed back on a literal `cc` with a
+  stated reason took a literal `sender` straight to a NEW mailbox record, without checking the mailbox it
+  had configured minutes earlier — the correct build result, reached without the reasoning this rule asks for.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
   the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
   `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".
+  RANK RECIPIENT SOURCES for `to`/`cc`/`bcc`: a SYSTEM SETTING first, then a lookup PROCESS PARAMETER or an
+  entity lookup COLUMN (the raw `expression` route above), a CONSTANT address LAST. When the user supplies a
+  literal address ("send it to hr@company.com"), ADVISE AGAINST storing it and offer the ranked alternatives
+  — a system setting for a team address, a lookup parameter or column for a record-bound one — and take the
+  literal only when the user declines them.
   A SYSTEM SETTING is reachable today and is the RIGHT default for an address that belongs to a team rather
   than a person (an HR inbox, a support alias): send the recipient as an `expression` whose formula is
   `[#SysSettings.<Code>#]` — e.g. `[#SysSettings.UsrHrNotificationEmail#]`. Prefer it over a literal address

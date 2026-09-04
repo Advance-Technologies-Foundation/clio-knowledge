@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.78",
+  "libraryVersion": "1.13.79",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1280,7 +1280,7 @@
     {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, sender resolution and why a missing sender fails at run time rather than at save, recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, the auto-mode mandatory fields (sender, to, subject, body) and the missing-body run-time trap, sender resolution -- why a missing sender fails at run time rather than at save while a malformed sender (a SysSettings formula) fails the build, the ranked recipient sources (system setting first, constant address last) and the matching sender discipline (discover configured mailboxes, reuse before creating a record, state the reason), recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",
