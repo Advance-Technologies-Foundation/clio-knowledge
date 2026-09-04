@@ -31,6 +31,7 @@ be registered this way; `validate-page` flags it as a warning  — see `page-sch
   another widget).
 
 ## Card theme
-The card theme is set by the SURFACE's guide, not here: `dashboard-and-home-page-layout` for dashboards and home
-pages (plain-white / `theme` "without-fill"), `desktop-page` for desktops (glassmorphism). For the
-rest of the runtime config read the `crt.IndicatorWidget` documentation via `get-component-info`.
+The card theme is set by the SURFACE's guide, not here: `dashboard-and-home-page-layout` for dashboards
+and home pages (a metric tile is plain-white / `theme` "without-fill" on both; a filled tile is that
+guide's rare critical-KPI exception), `desktop-page` for desktops (glassmorphism). For the rest of the
+runtime config read the `crt.IndicatorWidget` documentation via `get-component-info`.
