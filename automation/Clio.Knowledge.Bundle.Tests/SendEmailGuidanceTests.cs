@@ -71,6 +71,27 @@ public sealed class SendEmailGuidanceTests
                 + "alternatives rather than silently storing the literal (ENG-95979 AC)");
     }
 
+    [Test]
+    [Description("Sender gets the same ranked-source discipline as recipients: discover configured mailboxes, reuse before creating, state the reason.")]
+    public void Guide_ShouldApplyRankingDisciplineToSender()
+    {
+        string guide = ReadGuide();
+
+        guide.Should().Contain("SENDER DISCIPLINE",
+            because: "the ENG-95979 AC ranks sources for sender as well as to/cc/bcc; without a sender-specific "
+                + "rule an agent lands on a mailbox record as a build side-effect and never reasons about WHICH");
+        guide.Should().Contain("is NOT an instruction to create one",
+            because: "the manual test on ENG-95979 (2026-09-04) saw an agent create a second mailbox for a literal "
+                + "sender without checking the one it had configured minutes earlier — discovery and reuse must "
+                + "come before creation");
+        guide.Should().Contain("ONLY as the LAST rung",
+            because: "creating a MailboxSyncSettings record is the sender-side twin of a hard-coded recipient and "
+                + "must be the ranked last resort, taken only after the user confirms a distinct identity");
+        guide.Should().Contain("the build checks only `SenderEmailAddress`",
+            because: "a bare record satisfies the build without guaranteeing delivery, so an agent that creates "
+                + "one must say what the tool did and did not set up (SendEmailApplier.ApplySender)");
+    }
+
     private static string ReadGuide() =>
         ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), Article);
 }

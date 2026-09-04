@@ -51,6 +51,26 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   choice that survives an address change is the environment mailbox itself: the address you pass is
   resolved to the mailbox RECORD at build, so an administrator can later change that mailbox's address
   without reopening the process.
+  SENDER DISCIPLINE: rank `sender` sources the way the recipient ranking below ranks `to`/`cc`/`bcc`, with
+  the mailbox RECORD standing in for the system setting as the indirection an administrator can change later.
+  The build resolving a literal to a record is a platform side-effect, not a decision — the decision is
+  WHICH record, and it has to be reasoned about out loud, exactly as for a recipient. (1) DISCOVER before
+  deciding: read the mailboxes already configured (`odata-read` / `execute-esq` on `MailboxSyncSettings` —
+  `Id`, `SenderEmailAddress`, `MailServer`) BEFORE choosing a sender, and when one already carries the
+  address or the ROLE the user described ("the address we use for official notifications"), REUSE it by
+  record id and say which one. (2) A user-supplied LITERAL sender address that matches no configured mailbox
+  is NOT an instruction to create one: name the existing mailboxes as candidates first, and create a new
+  `MailboxSyncSettings` record ONLY as the LAST rung, after the user confirms the address is a distinct
+  sending identity rather than a synonym of a mailbox that exists. A second record for an address a first
+  one already serves is the sender-side twin of a hard-coded recipient — two places to update later.
+  (3) STATE the rung you took and why, in the reply — "reusing mailbox X, it already carries this address" or
+  "no mailbox carries this address; creating one because the user confirmed it is a separate identity" —
+  the same one-line justification the cc/bcc pushback gives. Creating a record is an ENVIRONMENT change:
+  the build checks only `SenderEmailAddress`, so a bare record satisfies the build while whether it SENDS
+  depends on the mailbox's server configuration, which this tool does not set up — say so when you create
+  one. Observed on ENG-95979 (manual test, 2026-09-04): an agent that pushed back on a literal `cc` with a
+  stated reason took a literal `sender` straight to a NEW mailbox record, without checking the mailbox it
+  had configured minutes earlier — the correct build result, reached without the reasoning this rule asks for.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
   the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
