@@ -56,8 +56,14 @@ public sealed class ChangeAccessRightsGuidanceTests
         guide.Should().Contain("evaluates this filter with record permissions",
             because: "the selected-employees filter matches every contact it describes regardless of who "
                 + "runs the process -- a security-relevant surprise that must be stated where it is used");
-        guide.Should().Contain("The legacy `allRolesAndUsers` grantee is DESCRIBE-ONLY",
-            because: "it decodes but is refused on write, so agents must model it as explicit role entries");
+        guide.Should().Contain("writable on a **`remove` entry only**",
+            because: "decode-only left every shipped approval process carrying this grantee uneditable "
+                + "through the API - describe returns the entry, a supplied collection REPLACES the stored "
+                + "one, so the read-back could not be sent back");
+        guide.Should().Contain("NOT interchangeable with a `role` entry",
+            because: "the two run different platform operations - a role entry on a remove drops one "
+                + "role's row and leaves individual grants standing, so it reports success and does NOT "
+                + "lock the record, which is the whole point of the approval shape");
         guide.Should().Contain("UPDATES that row down to Deny",
             because: "restrict's real worst case is DESTRUCTIVE, not accidental widening: it downgrades a "
                 + "grant the record already had and denies the two operations the caller never named. An "

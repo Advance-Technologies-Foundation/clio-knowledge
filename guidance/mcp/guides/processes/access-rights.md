@@ -139,14 +139,19 @@ that same value "NotSet". Verify it on your stand before relying on it as an acc
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
 you never create those yourself. `selectedEmployees` needs no parameter.
 
-The legacy `allRolesAndUsers` grantee is DESCRIBE-ONLY: shipped processes carry it and the runtime
-honours it, but this contract's three writable kinds are `role`, `employee` and `selectedEmployees`, so
-writing it is refused. Model it as explicit role entries — but NOT as a like-for-like swap on a REMOVE
-entry, because the two run different platform operations: `allRolesAndUsers` drops EVERY rights row for
-that operation on the record, while a role drops only that one role's row and leaves every individually
-granted user untouched. Shipped approval processes use the first to lock a record. And because a supplied
-collection REPLACES the stored one, a process carrying this grantee cannot be edited through this API at
-all: re-sending its read-back hits the refusal.
+A fourth grantee, `allRolesAndUsers`, takes no payload and is writable on a **`remove` entry only**, at
+most one per collection. It strips EVERY rights row for its operations — that is the lock-a-record shape:
+remove edit+delete from everyone, then grant them back to the approver in `add`. The shipped approval
+processes are built that way, and so is the Academy reference example for this element.
+
+It is NOT interchangeable with a `role` entry on a remove. The two run different platform operations:
+`allRolesAndUsers` drops every rights row for that operation, while a role drops only that one role's row
+and leaves every individually granted user's access standing — so a role entry there produces a process
+that reports success and does not lock the record.
+
+Refused on `add`: it carries no access level, and "grant to everyone" is not a shape the platform models
+this way — name the role you mean. A second one in the same collection is refused too, matching the
+designer, which hides the option once that collection already has one.
 
 == Which records: the element's own filter ==
 `accessRights` says WHO and WHAT; the element's separate `filter` block says WHICH records — it is a
@@ -218,7 +223,7 @@ written. A `selectedEmployees` filter decodes when stored in the modern format; 
 value reports the entry without its filter. A stored-but-undecodable collection reports as an EMPTY
 array, but `addUnreadable`/`removeUnreadable` say how many entries could NOT be reported (-1 when the
 collection itself did not decode). So `[]` with a non-zero count means UNKNOWN, not empty; only `[]`
-with a zero count is proof there is nothing there. The legacy `allRolesAndUsers` kind is reported truthfully and refused if written back.
+with a zero count is proof there is nothing there. The `allRolesAndUsers` kind is reported truthfully and can be written back on a `remove` entry, so a read-back carrying one re-applies unchanged.
 
 == What is refused at build ==
   - a record `filter` with no `object` (it names no root entity to filter on);
@@ -226,7 +231,7 @@ with a zero count is proof there is nothing there. The legacy `allRolesAndUsers`
   - an unknown object, or a present-but-blank `object`;
   - `level` on a remove entry;
   - an empty `operations` list;
-  - an unknown grantee `type`, or `allRolesAndUsers` on write;
+  - an unknown grantee `type`; `allRolesAndUsers` on an `add` entry, or twice in one collection;
   - an unknown or ambiguous role name; a contact id that matches no record (this check FAILS OPEN — if the lookup itself errors, the id is
     accepted unverified, so a clean build does not prove the contact exists);
   - a `selectedEmployees` filter rooted anywhere but `Contact`, or one carrying no conditions at all
