@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
@@ -152,6 +153,31 @@ public sealed class ProcessFormulaGuidanceTests
         dataElements.Should().Contain("describe reports no column UIds",
             because: "the real limit is discoverability, and it is the half a reader can act on: you cannot "
                 + "author a segment whose UId no read API hands you");
+    }
+
+    [Test]
+    [Description("A bullet inserted into this list does not inherit the tail of the bullet it split. Three cuts happened here across two commits, and each left the previous bullet's closing qualifier attached to the NEW bullet - so the absolute prohibition 'never 1.2m' came to end in 'Stay inside the guided set unless you have a reason not to', which is an escape hatch on the one control that exists: the converter is Terrasoft.Core, so the sentence is the only place this can be stopped. The same cut left the registry bullet asserting nothing about the reachable surface being wider than the documented one - the premise the SAFETY bullet rests on.")]
+    public void FormulaGuide_ShouldNotLetABulletInheritTheTailOfTheOneItSplit() {
+        // Arrange
+        string[] bullets = Regex.Split(ReadGuide(FormulaGuide), @"^- ", RegexOptions.Multiline);
+
+        // Act
+        string prohibition = bullets.Single(bullet => bullet.Contains("never `1.2m`"));
+        string registry = bullets.Single(bullet => bullet.Contains("`Convert`, `TimeSpan`"));
+
+        // Assert
+        prohibition.Should().NotContain("unless you have a reason not to",
+            because: "an absolute prohibition that ends in an escape hatch is not one - and this is the "
+                + "prohibition a blind run measured an agent breaking after READING the article, on the "
+                + "one control available, the converter being platform-owned");
+        registry.Should().Contain("GUIDED set",
+            because: "the scope qualifier belongs to the bullet that lists the registry: detached from it, "
+                + "nothing states that the reachable surface is wider than the documented one, which is the "
+                + "premise the SAFETY bullet argues from");
+        registry.Should().Contain("IS refused",
+            because: "the sentence about an absent identifier being refused by name is the second half of "
+                + "the registry bullet's own thought, and it was left orphaned as a bullet starting "
+                + "mid-sentence by the same splice");
     }
 
     private static string ReadGuide(string relativePath) {

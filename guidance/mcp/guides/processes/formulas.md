@@ -25,22 +25,21 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
   `Time`, `DayOfWeek`, `DayInRange`. (`GetQuarter` is one of the few that really does carry the prefix, and
   it works in both forms: `DateTime.Now.GetQuarter()` and `DateTimeUtilities.GetQuarter(DateTime.Now)`.)
 - `Math`, `DateTime`, `Guid`, `string`, `Convert`, `TimeSpan` and the ordinary operators are available,
-  including the ternary `? :` and the null-coalescing `??`.
-- Write a fractional number PLAIN - `1.2`, never `1.2m`. The platform's converter appends the decimal
-  suffix itself, unconditionally and without checking for one, so a literal you suffixed arrives as
-  `1.2mm` and the formula is refused with `')' or operator expected`. Measured: an agent that had read
-  this article still wrote `1.2m`, because the suffix is documented further down only as something
-  REFUSALS show you. Same for the `((decimal)…)` wrapper around a division - the converter adds it; do
-  not write it. This is the GUIDED set, not the enforced one:
+  including the ternary `? :` and the null-coalescing `??`. This is the GUIDED set, not the enforced one:
   the registry is wider, and a formula is server-evaluated code rather than a sandbox. Stay inside the
-  guided set unless you have a reason not to.
+  guided set unless you have a reason not to. An identifier the registry does not carry IS refused, by
+  name — the thing not to rely on is the engine refusing something merely because it is unwise;
+- Write a fractional number PLAIN - `1.2`, never `1.2m`, and this one has no exceptions. The platform's
+  converter appends the decimal suffix itself, unconditionally and without checking for one, so a literal
+  you suffixed arrives as `1.2mm` and the formula is refused with `')' or operator expected`. Measured: an
+  agent that had read this article still wrote `1.2m`, because the suffix is documented further down only
+  as something REFUSALS show you. Same for the `((decimal)…)` wrapper around a division - the converter
+  adds it; do not write it.
 - SAFETY, not style: never build a formula by pasting text you do not control - a record field, a user
   message, anything read back from the environment. A quote or bracket in that text does not fail
   safely, it changes what the expression MEANS, and the platform validates the result rather than your
   intent. Put such a value in a process PARAMETER and reference the parameter; author literals only
   from text you wrote.
-- An identifier the registry does not carry IS refused, by
-  name — the thing not to rely on is the engine refusing something merely because it is unwise;
 - you may call a METHOD on the result of a macro or a value: `[#SysVariable.CurrentDateTime#].AddDays(3)`,
   `DateTime.Now.ToString()` (the way to feed a date into a Text parameter), `"a" + "b"`,
   `!string.IsNullOrEmpty(X)` (`X` being a reference token, never a parameter's name). Combining two
