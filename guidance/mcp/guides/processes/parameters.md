@@ -2,8 +2,6 @@ clio MCP process-parameters guide — process parameters, mappings and formula d
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of process parameters, the mappings that bind them, and the date/time/lookup default macros.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup),

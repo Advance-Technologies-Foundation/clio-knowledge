@@ -9,8 +9,6 @@ each behaviour ships from. `process-perform-task` owns the element and its param
 WHICH category id to use; this article states what goes wrong when the value is written any other way.
 Split out of `process-perform-task` because that article had no response-budget headroom left, and
 because this is the one block in it that a reader needs only when something already looks wrong.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == A category or priority value MUST be a constant ==
 ActivityCategory MUST be a constant (`value`, stored as ConstValue), not a formula. The element's

@@ -5,11 +5,7 @@ This article is the authoritative owner of the Perform task element -- what it p
 and what the runtime writes back. Two of its settings are their own subject and have their own articles:
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
 written is owned by `process-task-category`.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
-Creating a process here? Its code and caption, and every element and parameter code, are governed by
-N1-N10, owned by `process-naming` — read it BEFORE you name anything, even if you entered from this leaf
-guide rather than `process-modeling`.
+Naming anything here? Every code and caption is governed by N1-N10 in `process-naming`; read it first.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with

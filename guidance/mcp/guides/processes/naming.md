@@ -2,8 +2,6 @@ clio MCP process-naming guide — name a business process, its elements and its 
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, and parameter codes.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing

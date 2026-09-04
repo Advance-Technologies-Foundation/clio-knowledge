@@ -26,8 +26,11 @@ owner -- read the one your task needs instead of guessing:
                                      what the runtime sets.
   * `process-task-performer`       - who performs a task: the element-level performer block (the only
                                      route to a TEAM) and OwnerId for one person.
-  * `process-task-category`        - a task's category and priority: a bare-Guid constant, never a
-                                     formula, and what degrades silently when it is one.
+  * `process-task-category`        - WHY a category or priority must be a bare-Guid constant, and what
+                                     degrades silently when it is a formula. NOT needed to build one:
+                                     `process-perform-task` carries the rule and the ids. Read this
+                                     when a value is refused, a field shows a raw Guid, or a results
+                                     dropdown offers the wrong set.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
@@ -86,9 +89,15 @@ article from what this one says; read that article.
   failure those rules exist to prevent, and an example is what a model copies first.
 
 == Build recipe (intent -> running process) ==
-Before step 1: `process-element-catalog` is the only place that says which elements
-`create-business-process` builds today. Read it, or you will plan the graph around a gateway ELEMENT,
-a timer start or a sub-process -- none of which this API builds -- and learn that at build time.
+Before step 1, and stated here so that planning costs no extra fetch, what this API does NOT
+build today: gateway ELEMENTS, default flows, timer/message start, intermediate events, `formulaTask`,
+`scriptTask`, `webService`, sub-process, the Add/Delete-data target object + values, and the Read
+data collection / count / aggregation modes. A conditional BRANCH *is* buildable -- as a condition
+set on a plain flow, not as a gateway element.
+`process-element-catalog` OWNS that list and the per-element detail; this is the short form, kept
+here because a plan built around an unbuildable element fails only at build time. Fetch the catalog
+when you need the `data-id` vocabulary, an element you have not built before, or to read an existing
+process back.
 1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.

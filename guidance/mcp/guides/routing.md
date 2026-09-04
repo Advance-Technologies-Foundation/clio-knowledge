@@ -2,6 +2,10 @@ clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
 Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+READING CONVENTION for every guide below: a rule lives in exactly ONE article and is cited from the
+others by NAME, never repeated, so a `name-in-backticks` inside a guide is a get-guidance topic to
+fetch and not a section to scroll to. An article states what it is the authoritative owner of; do not
+infer a rule it does not claim.
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 

@@ -9,8 +9,6 @@ parameter table and what the runtime writes back.
 Split out of `process-perform-task` because that article had no response-budget headroom left, and
 because "who does this" is a decision of its own -- it is asked in the request ("assign it to the sales
 department") rather than discovered while filling in a parameter table.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == "Who performs the task?" has TWO layers ==
 Picking the right layer is the whole game.

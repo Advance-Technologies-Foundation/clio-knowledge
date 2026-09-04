@@ -240,6 +240,83 @@ public sealed class ProcessGuideCrossReferenceTests
                 + "which is why it survives review. Found: " + string.Join("; ", unattributed));
     }
 
+    /// <summary>
+    /// The one place a rule is deliberately stated TWICE: the entry article carries the bare list of what
+    /// <c>create-business-process</c> cannot build, and <c>process-element-catalog</c> owns that list and
+    /// the per-element detail. The duplication is the same trade CONTRIBUTING prescribes for a destructive
+    /// precondition — restate the short form where the reader is, cite the owner for the rest — and it is
+    /// taken for a measured reason: a plan built around an unbuildable element fails only at build time, and
+    /// requiring a second get-guidance call before step 1 of the recipe cost the flagship build path an
+    /// extra fetch and 16-19% more characters.
+    ///
+    /// What that trade buys has to be paid for HERE, because nothing else in this repository compares
+    /// duplicated prose for agreement — the review of ENG-96536 found three copies of one platform claim
+    /// across two files and every test green. The failure this prevents is one-directional in practice: an
+    /// element becomes buildable, the owner's list shrinks, and the entry article keeps telling every
+    /// reader it cannot be built. That reads as authoritative and is checked by no one.
+    /// </summary>
+    private const string NotBuildableMarker = "NOT yet buildable:";
+
+    /// <summary>Includes the colon: the lead-in before it is prose, not a list item.</summary>
+    private const string EntryShortFormMarker = "build today:";
+
+    [Test]
+    [Description("The entry article's inline list of what cannot be built says exactly what the article "
+        + "that OWNS that list says, so the deliberate duplication cannot drift.")]
+    public void TheEntryShortFormOfWhatCannotBeBuilt_ShouldSayWhatItsOwnerSays()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
+        string Body(string itemId) => ProcessGuideSet.Read(repositoryRoot,
+            declared.Single(article => article.ItemId == itemId).SourcePath);
+
+        string[] owner = NotBuildableItems(Body("process-element-catalog"), NotBuildableMarker,
+            "Use the catalog below");
+        string[] entry = NotBuildableItems(Body(ProcessGuideSet.SplitItemIds[0]), EntryShortFormMarker,
+            "A conditional BRANCH");
+
+        // Both floors, because either parse returning nothing would make the comparison below vacuous and
+        // report the two lists as agreeing while reading neither.
+        owner.Should().HaveCountGreaterThan(4,
+            because: "the owner's list is the source of truth here, and a parse that found almost nothing "
+                + "would clear this test while comparing nothing");
+        entry.Should().HaveCountGreaterThan(4,
+            because: "the entry's short form exists to save a fetch; a parse that found almost nothing "
+                + "would report agreement with the owner without having read it");
+
+        entry.Should().BeEquivalentTo(owner,
+            because: "the entry article states this list only to save the reader a get-guidance call before "
+                + "step 1 of the recipe; the moment it disagrees with the article that OWNS it, that saving "
+                + "is bought with a wrong answer instead. Update BOTH, or drop the short form and let the "
+                + "recipe send the reader to `process-element-catalog`");
+    }
+
+    /// <summary>
+    /// The comma-separated items of a "cannot build" list, normalised so the two articles can be compared.
+    /// Parentheses are stripped BEFORE splitting — the owner's asides carry commas of their own, and
+    /// splitting first would shred one item into three.
+    /// </summary>
+    private static string[] NotBuildableItems(string article, string startMarker, string endMarker)
+    {
+        int from = article.IndexOf(startMarker, StringComparison.Ordinal);
+        if (from < 0)
+        {
+            return [];
+        }
+        from += startMarker.Length;
+        int to = article.IndexOf(endMarker, from, StringComparison.Ordinal);
+        string slice = Collapse(article[from..(to < 0 ? article.Length : to)]);
+        slice = Regex.Replace(slice, @"\([^)]*\)", " ");
+        slice = slice.Replace("`", string.Empty).Replace("--", " ");
+        return [.. slice
+            .Split([",", " and "], StringSplitOptions.RemoveEmptyEntries)
+            .Select(item => Collapse(item).Trim('.', ':', ';').Trim())
+            .Where(item => item.Length > 3)
+            .Select(item => item.StartsWith("the ", StringComparison.OrdinalIgnoreCase)
+                ? item[4..]
+                : item)];
+    }
+
     [Test]
     [Description("Every moved-section marker still matches in an article that does NOT own it, which is "
         + "the only place the scan it feeds can report anything - so no row can be reworded into a guard "

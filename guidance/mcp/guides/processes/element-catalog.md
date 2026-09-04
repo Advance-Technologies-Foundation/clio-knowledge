@@ -8,11 +8,7 @@ budget headroom left, and because both of these sections grow with every element
 while the lifecycle around them does not.
 `process-modeling` keeps the lifecycle: the tools, the descriptor, the build recipe and the safety
 rules for editing an existing process.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
-Creating a process here? Its code and caption, and every element and parameter code, are governed by
-N1-N10, owned by `process-naming` — read it BEFORE you name anything, even if you entered from this leaf
-guide rather than `process-modeling`.
+Naming anything here? Every code and caption is governed by N1-N10 in `process-naming`; read it first.
 
 == What you can build today (create-business-process) ==
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element

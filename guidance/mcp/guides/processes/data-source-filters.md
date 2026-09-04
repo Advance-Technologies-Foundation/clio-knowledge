@@ -7,8 +7,6 @@ left-hand modifier, the signal-start restriction, and how a filter is set, clear
 Split out of `process-data-elements` because that article had no response-budget headroom left. The
 three ELEMENTS that carry a filter stay there — the record trigger, Read data and Modify data — and this
 is the one contract all three share, which is why it reads as its own subject.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == Data source filters (signalStart trigger condition / readData + changeData record filter) ==
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to

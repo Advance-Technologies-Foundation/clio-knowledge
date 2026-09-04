@@ -5,8 +5,6 @@ This article is the authoritative owner of the `expression` mapping source, the 
 platform's interpreter accepts - which a flow condition uses too - how a parameter is referenced inside a
 formula, and what the server validates and refuses. The BRANCH itself, including precedence and the
 hazard of clearing the last one, belongs to `process-branch-conditions`.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 == Formulas (`expression` sources and flow conditions) ==
 
 A formula is NOT C#, and knowing what it actually is stops most wrong guesses. Creatio evaluates it with an
