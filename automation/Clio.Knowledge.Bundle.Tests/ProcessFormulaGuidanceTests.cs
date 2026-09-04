@@ -156,14 +156,33 @@ public sealed class ProcessFormulaGuidanceTests
     }
 
     [Test]
-    [Description("A bullet inserted into this list does not inherit the tail of the bullet it split. Three cuts happened here across two commits, and each left the previous bullet's closing qualifier attached to the NEW bullet - so the absolute prohibition 'never 1.2m' came to end in 'Stay inside the guided set unless you have a reason not to', which is an escape hatch on the one control that exists: the converter is Terrasoft.Core, so the sentence is the only place this can be stopped. The same cut left the registry bullet asserting nothing about the reachable surface being wider than the documented one - the premise the SAFETY bullet rests on.")]
+    [Description("A bullet inserted into this list does not inherit the tail of the bullet it split. Every cut here so far has left the previous bullet's closing qualifier attached to the NEW bullet - so the absolute prohibition 'never 1.2m' came to end in 'Stay inside the guided set unless you have a reason not to', which is an escape hatch on the one control that exists: the converter is Terrasoft.Core, so the sentence is the only place this can be stopped. The same cut left the registry bullet asserting nothing about the reachable surface being wider than the documented one - the premise the SAFETY bullet rests on.")]
     public void FormulaGuide_ShouldNotLetABulletInheritTheTailOfTheOneItSplit() {
         // Arrange
-        string[] bullets = Regex.Split(ReadGuide(FormulaGuide), @"^- ", RegexOptions.Multiline);
+        // A bullet ends where its LIST ends - at the blank line - not at the next "- " anywhere below in the
+        // file. Without the trim, the last bullet of a list swallows every following paragraph, and the
+        // NotContain below then asserts something about unrelated prose and passes for the wrong reason.
+        string[] bullets = [.. Regex.Split(ReadGuide(FormulaGuide), @"^- ", RegexOptions.Multiline)
+            // The blank-line boundary is expressed as a REGEX over a verbatim string, so no C# escape is
+            // involved: the compiler sees backslash-n twice and the engine reads a blank line. Written as a
+            // C# escape it has landed in this source as a real line break three times on this branch.
+            .Select(slice => Regex.Split(slice, @"\n\s*\n")[0])];
 
         // Act
-        string prohibition = bullets.Single(bullet => bullet.Contains("never `1.2m`"));
-        string registry = bullets.Single(bullet => bullet.Contains("`Convert`, `TimeSpan`"));
+        // ContainSingle rather than Single: each of these IS an assertion - the fragment exists, and exists
+        // ONCE - and a bare LINQ throw names neither the article nor the fragment. The likely failure is a
+        // re-wrap moving a fragment across a line break, and that has to name the clause rather than report
+        // "Sequence contains no matching element".
+        string prohibition = bullets.Should()
+            .ContainSingle(bullet => bullet.Contains("never `1.2m`"),
+                because: "the decimal-suffix prohibition has to be locatable as ONE bullet; if it is not, the "
+                    + "fragment was reworded or the list was re-split, and neither is a pass")
+            .Which;
+        string registry = bullets.Should()
+            .ContainSingle(bullet => bullet.Contains("`Convert`, `TimeSpan`"),
+                because: "the registry bullet is the one that must carry the scope qualifier, so it has to be "
+                    + "identifiable before anything is asserted about it")
+            .Which;
 
         // Assert
         prohibition.Should().NotContain("unless you have a reason not to",
