@@ -25,17 +25,23 @@ stated here once as the single source of truth; later sections only add the exac
    their charts; charts never sit in the metric band. When a surface covers several subject areas,
    split it into LABELED sections (separated by a header and spacing, never by card color), each
    section being its own metric band + chart row.
-2. Right STYLE — PLAIN WHITE card (`theme` "without-fill") is the default for EVERY widget, the same
-   on dashboards and home pages. A colored/emphasis card is a rare, deliberate signal for ONE
-   critical KPI (e.g. an SLA-breach counter the business wants impossible to miss) — at most one or
-   two per screen, on metric tiles only, never on charts, and never for variety or to "brand" a
-   section. Keep the theme-default title color; let metric value/icon colors follow the default
-   semantic (red is reserved for overdue / negative / gap counts). Don't hand-pick decorative colors.
-3. Right SIZE — size by widget TYPE, not by eye (exact column counts per type are in "Widget
-   catalog" below). Metric tiles are 1 row tall and share equal width across the band; charts are
-   ~9 rows tall (`rowSpan`; never below 6). Every row's widget widths must sum to a full 12 columns — less than 12 leaves a
-   visible gap, more than 12 wraps and breaks alignment. Composition (pie/doughnut) breakdowns come
-   in threes.
+2. Right STYLE — the card theme follows the SURFACE, not the widget, and the surfaces differ:
+   - DASHBOARD — every widget keeps the PLAIN WHITE card (`theme` "without-fill").
+   - HOME PAGE — the CHARTS carry a FILLED card ("full-fill", or "partial-fill" to match the page's
+     other charts); metric tiles stay "without-fill" unless the page already fills its tiles.
+   - DESKTOP — glassmorphism; see `desktop-page`.
+   Match what the page already has: on a home page a plain-white chart is the deviation, not the
+   default. Beyond that, a filled metric TILE is a deliberate signal for ONE critical KPI (e.g. an
+   SLA-breach counter the business wants impossible to miss), never a way to add variety or to
+   "brand" a section. Give every metric tile a SEMANTIC `layout.color` (forest-green / steel-blue for
+   neutral or positive numbers, cadmium-red / burnt-coral for overdue, negative and gap counts) —
+   color by meaning, never decoratively.
+3. Right SIZE — size by widget TYPE and SURFACE, not by eye (exact column counts per type are in
+   "Widget catalog" below). Metric tiles share equal width across the band and stay short (`rowSpan`
+   3 on a dashboard, 2 on a home page); charts are ~9-12 rows tall on a dashboard (never below 6)
+   and 4-6 on a home page (floor 4; a focal chart or funnel may run taller). Every row's widget
+   widths must sum to a full 12 columns — less than 12 leaves a visible gap, more than 12 wraps and
+   breaks alignment. Composition (pie/doughnut) breakdowns come in threes.
 
 ## The 12-column grid
 
@@ -44,8 +50,10 @@ whole number of columns wide and a whole number of rows tall.
 
 - WIDTH is what you tune most — a widget's width is a slice of 12.
 - HEIGHT is `layoutConfig.rowSpan` (grid rows). Platform defaults: metric tile 3, gauge 3, chart 9,
-  funnel 15, list/pivot 9. HARD FLOOR: a chart, list, or pivot must have `rowSpan` >= 6 — below that
-  it renders unreadably short. A METRIC TILE is exempt: it holds a number and stays ~3. A GAUGE is NOT —
+  funnel 15, list/pivot 9. HARD FLOOR on a DASHBOARD: a chart, list, or pivot must have `rowSpan` >= 6
+  — below that it renders unreadably short. A HOME PAGE packs more onto the first screen, so its charts
+  run 4-6 rows (floor 4, the size every product home page ships) and its metric tiles 2. A METRIC TILE
+  is exempt from the chart floor: it holds a number and stays ~3 on a dashboard. A GAUGE is NOT —
   it ships the tile's default of 3 but has a semicircular arc to draw, and at 3 rows the dial renders
   too small to read. Give a gauge `rowSpan` 6, floor 5. The "rows" elsewhere in this guide are these
   `rowSpan` values, so "a chart ~3 rows" means the ~9-`rowSpan` default, not literally 3.
@@ -149,17 +157,17 @@ Pick the widget from what the user wants to show, not from what looks nice:
 
 ## Widget catalog — type, when to use, default size
 
-Every widget keeps the PLAIN WHITE (`without-fill`) default (see Core rule 2); only the rare
-emphasized-KPI exception differs. Sizes below are in 12-grid columns; height is ~9 `rowSpan` for
-every chart (floor 6) and ~3 for a metric tile unless noted.
+Every widget keeps its SURFACE's card theme (see Core rule 2). Sizes below are in 12-grid columns;
+the heights are the DASHBOARD defaults — ~9 `rowSpan` for a chart (floor 6) and ~3 for a metric tile
+unless noted — and a home page runs shorter (charts 4-6, tiles 2).
 
 Metric (indicator) — a single aggregated value with a caption and a small leading icon; the
 workhorse of the top band.
 - When to use: any headline number to see at a glance — counts, sums, averages, min/max, and
   "without X" gap counts (e.g. "Accounts without primary contact").
 - Examples: "Total calls — 3", "Average handle time, sec — 160", "Overdue cases (response) — 1".
-- Size: 2 columns (6-up band) or 3 columns (4-up band); height 1 row. Only in the top band, never
-  interleaved with charts.
+- Size: 2 columns (6-up band) or 3 columns (4-up band); height 3 rows on a dashboard, 2 on a home
+  page. Only in the top band, never interleaved with charts.
 - For the runtime payload (aggregate, static filter, parentName placement, theme presets) read the
   `indicator-widget` guidance.
 
@@ -201,22 +209,26 @@ Web page widget — embeds external content / a URL.
 
 ## Styling rationale
 
-PLAIN WHITE is the native default because a customization should not visually stand out unless a
-business priority requires it — it keeps a custom analytics surface consistent with the base
-product, the same on dashboards and home pages. The colored-card exception and the title/value color
-rules live in Core rule 2; don't restate them with different limits. When a colored background IS
-used, verify text/contrast against the accessibility/contrast guidance.
+The card theme belongs to the SURFACE: a dashboard is a monitoring screen, so it stays plain white and
+lets the data carry the color, while a home page is a landing screen and every product home page
+(Sales, Lead & Opportunity, Order & Contract, Service, Contact Center) fills its chart cards. A
+customization should not visually stand out against the surface it lands on, so copy that surface
+instead of one global default. The per-surface themes and the metric color rule live in Core rule 2;
+don't restate them with different limits. When a colored background IS used, verify text/contrast
+against the accessibility/contrast guidance.
 
 ## Finish checklist
 
-- Metric tiles are in a top band, equal width, one row tall, 4 or 6 across (never 5).
+- Metric tiles are in a top band, equal width, 4 or 6 across (never 5).
 - Every chart row sums to exactly 12 columns — no row at 8 or 10 (dead space) or 14 (wrap).
 - Doughnut/pie breakdowns are grouped (ideally 3 per row at 4 cols); no lone doughnut floating at an
   odd width.
 - No chart sits in the metric band, and no metric tile is dropped among the charts.
-- Every widget uses the plain-white (`without-fill`) card (no stray colored cards for variety or
-  branding).
-- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); metric tiles stay short
-  (~3); each gauge is 6 (floor 5) so its arc is not squashed.
+- Card themes match the surface: dashboard — every widget `without-fill`; home page — charts filled,
+  metric tiles `without-fill` unless the page already fills them.
+- Each chart/list/pivot meets its surface's `rowSpan` floor (dashboard >= 6, default 9, funnel 15;
+  home page >= 4); metric tiles stay short (3 on a dashboard, 2 on a home page); each gauge is 6
+  (floor 5) so its arc is not squashed.
 - Multi-topic surfaces are split into labeled sections, each = metric band + chart row.
-- Titles and value colors use theme defaults (red only for overdue/negative).
+- Every metric tile carries a semantic `layout.color` (red/coral only for overdue, negative and gap
+  counts).
