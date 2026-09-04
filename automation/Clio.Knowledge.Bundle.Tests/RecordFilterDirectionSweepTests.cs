@@ -126,23 +126,56 @@ public sealed class RecordFilterDirectionSweepTests
         // inversion kept surviving.
         using JsonDocument manifest = JsonDocument.Parse(
             File.ReadAllBytes(Path.Combine(root, "bundle-source.json")));
-        string[] files =
+        JsonElement[] resources = [.. manifest.RootElement.GetProperty("resources").EnumerateArray()];
+        string[] declared =
         [
-            .. manifest.RootElement.GetProperty("resources").EnumerateArray()
+            .. resources
                 .Select(resource => resource.TryGetProperty("sourcePath", out JsonElement path)
                     ? path.GetString()
                     : null)
                 .Where(path => !string.IsNullOrWhiteSpace(path))
-                .Select(path => Path.Combine(root, path!.Replace('/', Path.DirectorySeparatorChar)))
-                .Distinct(StringComparer.OrdinalIgnoreCase),
-            Path.Combine(root, "bundle-source.json")
+                .Select(path => path!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
         ];
 
-        // A sweep that reads nothing reports green forever, which is worse than no sweep: it turns
-        // "nobody checked" into "checked and clean".
-        files.Length.Should().BeGreaterThan(20,
-            because: "the library publishes dozens of guidance articles, so a near-empty list means the "
-                + "enumeration failed rather than that there is nothing to sweep");
+        // The coverage assertions below track the MANIFEST rather than a constant. A constant floor cannot
+        // detect the sweep narrowing, which is the one failure that matters here: the previous version read
+        // guidance/**/*.md - 87 of 135 declared bodies - and a floor of 20 passed it with room to spare. The
+        // regression this guard exists to prevent sailed through the guard. Anything that reduces what is
+        // swept - a reverted glob, a renamed sourcePath key, a parse yielding fewer resources, a moved file -
+        // now moves one of these numbers.
+        declared.Length.Should().Be(resources.Length,
+            because: "every declared resource names a body to sweep; a renamed sourcePath key would yield "
+                + "an empty list and silently sweep nothing but the manifest");
+
+        string[] declaredFiles =
+            [.. declared.Select(path => Path.Combine(root, path.Replace('/', Path.DirectorySeparatorChar)))];
+
+        // Declared bodies do not exhaust the library's prose: the README.md files under guidance/, catalog/
+        // and references/ describe it without being declared resources, so a manifest-driven walk cannot see
+        // them. They are repository-facing entry docs - and an entry doc that nobody sweeps is exactly where
+        // the last inversion hid, in the package's workspace diary that CLAUDE.md tells the next agent to read
+        // FIRST. Swept as a union rather than by widening the manifest, because they are not shipped.
+        HashSet<string> alreadyDeclared = new(declaredFiles, StringComparer.OrdinalIgnoreCase);
+        string[] undeclaredProse =
+        [
+            .. new[] { "guidance", "catalog", "references" }
+                .Select(folder => Path.Combine(root, folder))
+                .Where(Directory.Exists)
+                .SelectMany(folder => Directory.EnumerateFiles(folder, "*.md", SearchOption.AllDirectories))
+                .Where(file => !alreadyDeclared.Contains(file))
+        ];
+
+        string[] files = [.. declaredFiles, .. undeclaredProse, Path.Combine(root, "bundle-source.json")];
+
+        string[] unreadable = [.. files.Where(file => !File.Exists(file))];
+        unreadable.Should().BeEmpty(
+            because: "a declared body that is not on disk drops out of the sweep silently:"
+                + Environment.NewLine + string.Join(Environment.NewLine, unreadable));
+
+        files.Length.Should().Be(declared.Length + undeclaredProse.Length + 1,
+            because: "the sweep must read EVERY declared body, the undeclared prose under the library's own "
+                + "folders, and the manifest itself");
 
         List<string> offenders = [];
         foreach (string file in files.Where(File.Exists))

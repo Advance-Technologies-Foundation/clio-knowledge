@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -116,6 +117,24 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "in place through another role -- an agent that reads remove as 'deny' ships a false negative");
     }
 
+
+    /// <summary>
+    /// Whitespace-normalised, regex-family matching - the technique
+    /// <see cref="RecordFilterDirectionSweepTests"/> proves out, applied to the named guards.
+    /// <para>These were byte-exact NotContain assertions. On prose rewritten four times in three days that
+    /// combination fails the wrong way twice over: a harmless reflow or copy-edit turns the build red, while
+    /// the same false claim reworded slips through green. Each pattern below names the CLAIM rather than one
+    /// spelling of it, and the match is reported so a failure says what it actually found.</para>
+    /// </summary>
+    private static void ShouldNotClaim(string text, string pattern, string subject, string because)
+    {
+        Match match = Regex.Match(Regex.Replace(text, @"\s+", " "), pattern,
+            RegexOptions.IgnoreCase);
+        match.Success.Should().BeFalse(
+            because: $"{subject}: {because}"
+                + (match.Success ? $" - found: '{match.Value}'" : string.Empty));
+    }
+
     [Test]
     [Description("The manifest DESCRIPTIONS are swept for the filter-state inversion too, not just the article bodies. A description is what an MCP client shows an agent choosing which guide to read, so it is the first thing read about this element and the last thing anyone edits carefully. Every other pin in this fixture reads a .md; the description is the one surface none of them covered, and it is the one that shipped the inversion.")]
     public void ManifestDescriptions_ShouldNotStateTheFilterStatesBackwards()
@@ -136,10 +155,12 @@ public sealed class ChangeAccessRightsGuidanceTests
         descriptions.Should().NotBeEmpty(because: "the manifest declares described resources");
         foreach (string description in descriptions)
         {
-            description.Should().NotContain("no-ops that are NOT refused at build time -- no record filter",
+            ShouldNotClaim(description,
+                @"no-?ops?[^.]{0,80}?not\s+refused[^.]{0,60}?no\s+record\s+filter", "manifest description",
                 because: "this exact phrasing shipped and called an ABSENT record filter a silent no-op; it is the widening state, and an agent reading the description decides on that basis whether to open the "
                     + "article at all");
-            description.Should().NotContain("opposite hazard of a filter with no conditions",
+            ShouldNotClaim(description,
+                @"opposite\s+hazard[^.]{0,60}?(no\s+conditions|conditionless)", "manifest description",
                 because: "a conditionless filter is the INERT state and is refused at build, so calling it the opposite hazard inverts both halves at once");
         }
     }
@@ -161,7 +182,7 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "own refused-at-build list named both - a contradiction this pin actively held in place, "
                 + "since correcting the prose turned the test red and pushed the next contributor back to the "
                 + "wrong claim");
-        owning.Should().NotContain("Only case 3 is refused",
+        ShouldNotClaim(owning, @"only\s+case\s+3\s+is\s+refused", "the owning article",
             because: "the superseded scoping must not come back; it is the half that made the article "
                 + "disagree with itself");
         owning.Should().Contain("Clearing one is safe only while the OTHER still holds an entry",
@@ -178,12 +199,12 @@ public sealed class ChangeAccessRightsGuidanceTests
         foreach (ProcessGuideSet.Article article in ProcessGuideSet.Declared(repositoryRoot))
         {
             string text = ProcessGuideSet.Read(repositoryRoot, article.SourcePath);
-            text.Should().NotContain("fails silently (empty filter, non-administrated object)",
+            ShouldNotClaim(text, @"fails\s+silently\s*\(\s*empty\s+filter", article.ItemId,
                 because: $"{article.ItemId} would pair both hazards with a build-time refusal that exists "
                     + "only for the non-administrated object -- round-1 review Blocker. (Scoped to this "
                     + "phrasing on purpose: \"empty filter\" is legitimate in process-data-elements, where "
                     + "readData/changeData do not have this element's inverted states.)");
-            text.Should().NotContain("the only feedback that will ever exist",
+            ShouldNotClaim(text, @"only\s+feedback\s+that\s+will\s+ever\s+exist", article.ItemId,
                 because: $"{article.ItemId} would tell an agent a green build proves an effective element, "
                     + "while two unrefused silent no-ops exist -- round-2 review Major");
         }
