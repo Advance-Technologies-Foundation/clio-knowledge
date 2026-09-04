@@ -54,7 +54,7 @@ guide rather than `process-modeling`.
   instead of being silently dropped. `false` is always accepted (inline execution is what that environment
   already does). `describe-business-process` reports the effective value per element, so it round-trips.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
-  "Data source filters" section of `process-data-elements`).
+  "Data source filters" section of `process-data-source-filters`).
 - A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
   `modify-business-process` + `setFlowCondition`. No gateway element is involved — see
   `process-branch-conditions`.

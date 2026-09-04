@@ -27,8 +27,10 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, modify data, or restrict which records an
-    element acts on -> name=process-data-elements
+  - start a process on a record add/modify/delete, read data, or modify data ->
+    name=process-data-elements
+  - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
+    the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas

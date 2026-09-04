@@ -93,6 +93,7 @@
       "process-element-catalog",
       "process-naming",
       "process-data-elements",
+      "process-data-source-filters",
       "process-parameters",
       "process-formulas",
       "process-branch-conditions",
@@ -232,6 +233,7 @@
       "docs://knowledge/com.creatio.clio/process-element-catalog",
       "docs://knowledge/com.creatio.clio/process-naming",
       "docs://knowledge/com.creatio.clio/process-data-elements",
+      "docs://knowledge/com.creatio.clio/process-data-source-filters",
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-formulas",
       "docs://knowledge/com.creatio.clio/process-branch-conditions",
@@ -1216,7 +1218,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog moved to process-element-catalog, which the recipe sends you to before you plan a graph. Routes onward to the nine articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the ten is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog moved to process-element-catalog, which the recipe sends you to before you plan a graph. Routes onward to the ten articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the eleven is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1258,7 +1260,7 @@
     {
       "itemId": "process-data-elements",
       "title": "Process data elements and record filters",
-      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, the Modify data element target and column values, and the data-source filter that all three share: column dot-paths, the comparison set, the right-hand value sources, the complete relative-date macro vocabulary, the datePart left-hand modifier, and the signal-start restriction that forbids parameter references before an instance exists.",
+      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
       "topicId": "creatio.process-data-elements",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-elements",
@@ -1267,6 +1269,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/data-elements.md",
       "bundlePath": "resources/process-data-elements.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-data-source-filters",
+      "title": "Process data source filters",
+      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the five right-hand value sources (value, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only a constant, a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
+      "topicId": "creatio.process-data-source-filters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-data-source-filters",
+      "legacyUris": [
+        "docs://mcp/guides/process-data-source-filters"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/data-source-filters.md",
+      "bundlePath": "resources/process-data-source-filters.md",
       "mediaType": "text/plain"
     },
     {

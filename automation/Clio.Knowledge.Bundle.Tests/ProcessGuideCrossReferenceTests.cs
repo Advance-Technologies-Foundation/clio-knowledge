@@ -70,7 +70,10 @@ public sealed class ProcessGuideCrossReferenceTests
         ("R1–R17", "process-activity-connections"),      // en dash, as the articles write it
         ("N1-N10", "process-naming"),
         ("Naming and codes", "process-naming"),
-        ("Data source filters", "process-data-elements"),
+        // ENG-96536 moved this section into its own article; the row follows the section, not the file
+        // it used to live in. Left on process-data-elements, the owner-skip would have exempted the
+        // article that no longer defines it while the one that does went unwatched.
+        ("Data source filters", "process-data-source-filters"),
         // ENG-95891 split process-branch-conditions out of process-formulas and added no marker row, so
         // this guard stayed silent about the newest split for the whole of that work. Both phrases were
         // checked against the folder before being added: each occurs in exactly one non-owner article.

@@ -11,9 +11,11 @@ owner -- read the one your task needs instead of guessing:
                                      and the element catalog (data-id -> label -> purpose).
   * `process-naming`               - N1-N10: the process caption and code, element captions and
                                      codes, parameter codes. Read it BEFORE you name anything.
-  * `process-data-elements`        - start a process from a record event (signalStart), the Read
-                                     data and Modify data elements, and the record filters all
-                                     three share.
+  * `process-data-elements`        - start a process from a record event (signalStart), and the Read
+                                     data and Modify data elements.
+  * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
+                                     right-hand value sources, the relative-date macro vocabulary and
+                                     the signal-start restriction.
   * `process-parameters`           - process parameters, element-parameter mappings, type
                                      compatibility, and the date/time/lookup default macros.
   * `process-formulas`             - the `expression` mapping source and the formula
