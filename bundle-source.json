@@ -943,8 +943,8 @@
     },
     {
       "itemId": "freedom-page-mobile-reason-codes",
-      "title": "Freedom UI mobile conversion: droppedElements reason codes",
-      "description": "The closed vocabulary of droppedElements[].reason codes returned by get-mobile-page-conversion-guide — why a source element did NOT reach the mobile page — and what to tell the user about each: which drops are not conversion loss and must be re-inserted NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify a drop; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
+      "title": "Freedom UI mobile conversion: reason codes",
+      "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
       "requiredFeatures": [
