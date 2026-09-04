@@ -199,11 +199,11 @@ public sealed class ProcessNamingRuleTests
     /// </summary>
     private static readonly string[] ActivityVerbs =
     [
-        "Add", "Approve", "Ask", "Assign", "Call", "Check", "Compute", "Create", "Delete", "Modify",
-        "Notify", "Open", "Publish", "Read", "Send", "Set", "Show", "Start", "Update", "Wait"
+        "Add", "Approve", "Ask", "Assign", "Call", "Check", "Compute", "Create", "Delete", "Grant",
+        "Modify", "Notify", "Open", "Publish", "Read", "Send", "Set", "Show", "Start", "Update", "Wait"
     ];
 
-    private const string ActivityTypes = "userTask|sendEmail|readData|performTask";
+    private const string ActivityTypes = "userTask|sendEmail|readData|changeAccessRights|performTask";
     private const string EventTypes = "startEvent|signalStart|endEvent";
 
     [Test]
@@ -404,7 +404,7 @@ public sealed class ProcessNamingRuleTests
         string guide = ReadProcessGuides();
 
         string[] elementsWithoutCaption = Regex
-            .Matches(guide, @"""type"":\s*""(?:startEvent|signalStart|endEvent|userTask|sendEmail|readData|performTask)""")
+            .Matches(guide, $@"""type"":\s*""(?:{ActivityTypes}|{EventTypes})""")
             .Select(match => EnclosingObject(guide, match.Index))
             .Where(element => !element.Contains("\"caption\"", StringComparison.Ordinal))
             .Select(Normalize)

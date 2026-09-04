@@ -14,6 +14,8 @@ authoritative owner -- read the one your task needs instead of guessing:
                                      compatibility, and the date/time/lookup default macros.
   * `process-perform-task`         - the Perform task element: its parameter table, the performer
                                      layers, and what the runtime sets.
+  * `process-access-rights`        - the Change access rights element: the `accessRights` block,
+                                     permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
@@ -53,11 +55,20 @@ article from what this one says; read that article.
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
+  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
+  `changeAccessRights`->ChangeAdminRightsUserTask, `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
   columns, sort, plus a record `filter` (see `process-data-elements`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter` (see
-  `process-data-elements`). CAVEAT: Add data and Delete data still place an UNCONFIGURED
+  `process-data-elements`). A `changeAccessRights` element (Change access rights) is
+  CONFIGURABLE via its `accessRights` block plus a record `filter`; `process-access-rights` owns that
+  contract and you must read it before building one — the grantee is an OBJECT with a `type`
+  discriminator, not a string. Two facts belong here: the element has NO output parameters, and its
+  runtime silently does nothing when the record filter IS present but carries no conditions, OR with both
+  collections empty; a record filter that is ABSENT is the opposite hazard and acts on every record.
+  The conditionless filter IS refused at build; both-collections-empty and the ABSENT filter are not,
+  so a clean build does NOT mean the element will do anything.
+  CAVEAT: Add data and Delete data still place an UNCONFIGURED
   element — their target object and values cannot be set yet, so those steps do nothing useful until a
   human configures them in the designer. Say so when you use one; do not present such a result as a working
   data operation.
@@ -91,7 +102,7 @@ article from what this one says; read that article.
   "Data source filters" section of `process-data-elements`).
 - NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
-  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
+  but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and `changeAccessRights`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
@@ -133,10 +144,15 @@ article from what this one says; read that article.
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/
-   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   changeData/accessRights/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element kind, `readData` / `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), and a sendEmail
+   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
+   access to whoever it names, on live records, and the element reports nothing at run time; show the user
+   the target object, the record `filter` and every grantee with its operations and level, and get an
+   explicit yes before sending (see `process-access-rights` for the partial-update, collection-replace and
+   object-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
    Activity's "Connected to" links (see `process-activity-connections`)).
@@ -194,6 +210,9 @@ System actions (palette group "System actions"):
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements`.
 - `deleteDataUserTask` Delete data — delete matched records.
+- `changeAdminRightsUserTask` Change access rights — grant/revoke record permissions on matched records.
+    BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
+    `process-access-rights` owns the shape and the hazards.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
