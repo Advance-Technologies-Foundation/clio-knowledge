@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
@@ -28,14 +29,18 @@ public sealed class RecordFilterDirectionSweepTests
 {
     private const string InertWords =
         @"match(es)?\s+no\s+records|changes?\s+nothing|changes?\s+no\s+permissions|cannot\s+act|"
-        + @"is\s+inert|silent\s+no-?op|does\s+nothing";
+        + @"\binert\b|silent\s+no-?op|does\s+nothing";
 
     private const string WideWords =
         @"EVERY\s+record|every\s+row|widest|unbounded|runs?\s+UNFILTERED";
 
+    // Absence is described as a noun ("no record filter") AND as the action that produces it ("clearing the
+    // record filter"). The action phrasing is what the write paths actually use; omitting it let a live
+    // inversion through the clio sweep while it reported green.
     private const string AbsentSubject =
         @"no\s+record\s+filter|NO\s+filter|without\s+a\s+filter|absent\s+filter|filter\s+is\s+absent|"
-        + @"no\s+filter\s+at\s+all";
+        + @"no\s+filter\s+at\s+all|clear(?:s|ed|ing)?\s+(?:\w+\s+){0,3}?record\s+filter|"
+        + @"record\s+filter\s+(?:was|is|were)\s+cleared|filter\s+(?:was|is)\s+CLEARED";
 
     private const string ConditionlessSubject =
         @"no\s+conditions|conditionless|carries\s+no\s+condition";
@@ -51,10 +56,15 @@ public sealed class RecordFilterDirectionSweepTests
     private static readonly string[] ExemptionMarkers =
     [
         "is a FAIL", "must not come back", "CORRECTED", "is the WIDEST", "is the WIDE", "not the inert",
-        "rather than wide", "NOT to none", "would be false", "must never", "NotContain"
+        "rather than wide", "NOT to none", "would be false", "must never", "rather than inert", "NotContain",
+        "gets told", "is how a caller", "would tell the caller"
     ];
 
     private const int ExemptionRadius = 130;
+
+    // Prose wraps - hard-wrapped Markdown especially - so subject and claim routinely sit on different
+    // lines. Matching one line at a time cannot see those at all.
+    private const int WindowLines = 3;
 
     [Test]
     [Description("No shipped guidance file or manifest description may call an ABSENT record filter inert. That claim presents the widest permission change this element can produce - every row of the object, with record permissions disabled - as harmless, on an element with no output parameters to contradict it at run time.")]
@@ -90,6 +100,19 @@ public sealed class RecordFilterDirectionSweepTests
                 + Environment.NewLine + string.Join(Environment.NewLine, offenders));
     }
 
+    // One logical line: this line plus the next few, with the punctuation that exists only because the text
+    // wraps flattened away, so a sentence split across lines reads as the sentence it is.
+    private static string Window(string[] lines, int index)
+    {
+        StringBuilder joined = new();
+        for (int offset = 0; offset < WindowLines && index + offset < lines.Length; offset++)
+        {
+            joined.Append(lines[index + offset].Replace("\"", " ").TrimStart(' ', '+', '#', '-', '*')).Append(' ');
+        }
+
+        return joined.ToString();
+    }
+
     private static Regex Inversion(string subject, string claim, string otherSubject) =>
         new($@"(?<subject>{subject})(?:(?!{otherSubject})[^.;]){{0,160}}?(?<claim>{claim})",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -121,15 +144,16 @@ public sealed class RecordFilterDirectionSweepTests
             string[] lines = File.ReadAllLines(file);
             for (int i = 0; i < lines.Length; i++)
             {
-                Match match = inversion.Match(lines[i]);
+                string window = Window(lines, i);
+                Match match = inversion.Match(window);
                 if (!match.Success)
                 {
                     continue;
                 }
 
                 int from = Math.Max(0, match.Index - ExemptionRadius);
-                int to = Math.Min(lines[i].Length, match.Index + match.Length + ExemptionRadius);
-                string vicinity = lines[i][from..to];
+                int to = Math.Min(window.Length, match.Index + match.Length + ExemptionRadius);
+                string vicinity = window[from..to];
                 if (ExemptionMarkers.Any(m => vicinity.Contains(m, StringComparison.OrdinalIgnoreCase)))
                 {
                     continue;
