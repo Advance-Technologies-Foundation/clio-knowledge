@@ -22,8 +22,10 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
-  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, what is buildable, the
-    recipe, the modify-safety rules, the element catalog). After it, read the ONE matching sub-guide:
+  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, the recipe, the
+    modify-safety rules). After it, read the ONE matching sub-guide:
+  - which elements exist, which of them `create-business-process` builds today, and the element catalog
+    (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
   - start a process on a record add/modify/delete, read data, modify data, or restrict which records an
     element acts on -> name=process-data-elements

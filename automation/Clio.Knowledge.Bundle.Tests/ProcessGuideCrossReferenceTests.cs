@@ -78,7 +78,16 @@ public sealed class ProcessGuideCrossReferenceTests
         // carries it inside BPMN rule R12 ("multiple outgoing sequence flows = implicit parallel split"),
         // a different subject, and a marker cannot tell the two apart.
         ("CONDITION on a conditional flow", "process-branch-conditions"),
-        ("the last conditional flow", "process-branch-conditions")
+        ("the last conditional flow", "process-branch-conditions"),
+        // ENG-96536 moved "What you can build today" and the element catalog out of the entry article,
+        // which had no budget headroom left and grew by both of those sections on every new element. Each
+        // phrase was checked against the folder the way the rows above were: "What you can build today"
+        // occurs in one non-owner (activity-connections, where the validation-pass-is-not-buildable caveat
+        // cites the slice), and lower-case "element catalog" in two (the entry's own index and recipe, and
+        // N6 in process-naming). The heading's capitalised "Element catalog" is the owner's and is not a
+        // marker: Occurrences compares Ordinal, so the two cases do not collide.
+        ("What you can build today", "process-element-catalog"),
+        ("element catalog", "process-element-catalog")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of

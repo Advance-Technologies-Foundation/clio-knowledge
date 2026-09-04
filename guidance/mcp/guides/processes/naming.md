@@ -88,8 +88,9 @@ N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO auton
     caption and a code disagree, the caption is the input and the code is what is wrong.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
     `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
-    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in `process-modeling`
-    lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API builds today is Terminate.
+    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in
+    `process-element-catalog` lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API
+    builds today is Terminate.
     SCOPE: the rule forbids only a code that ASSERTS a type — `EndNormal` on a Terminate end, or
     `Terminate…` on an element that is not one. It does NOT ban the `End<Reason>` shape N5 prescribes:
     `EndOnboardingStarted` names the REASON, not the type, and is correct on a Terminate end. Read the

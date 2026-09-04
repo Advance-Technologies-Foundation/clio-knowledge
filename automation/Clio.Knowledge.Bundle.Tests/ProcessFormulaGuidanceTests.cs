@@ -33,6 +33,14 @@ public sealed class ProcessFormulaGuidanceTests
     private const string DataElementsGuide = "guidance/mcp/guides/processes/data-elements.md";
 
     /// <summary>
+    /// The callActivity claim below is asserted HERE and not against <see cref="ModelingGuide"/>: ENG-96536
+    /// moved the element catalog, and the sentence with it, out of the entry article. Left pointed at the
+    /// entry, the NotContain would have passed on an article that no longer holds the sentence at all -
+    /// green, and guarding nothing.
+    /// </summary>
+    private const string ElementCatalogGuide = "guidance/mcp/guides/processes/element-catalog.md";
+
+    /// <summary>
     /// Clauses in the formula-vocabulary article. Each is pinned with the reason it protects, so a
     /// failure names the defect rather than only the missing string.
     /// </summary>
@@ -134,16 +142,16 @@ public sealed class ProcessFormulaGuidanceTests
     [Description("Two claims this work introduced are stated as platform absolutes and the platform disagrees. A sub-process does NOT hold its children in the schema's own FlowElements - ProcessSchemaSubProcess implements IProcessSchemaFlowElementsContainer and owns its own collection - so describe-business-process, which iterates schema.FlowElements, does not see them; the delete guards do, because they walk GetBaseElements/GetParametrizedElements recursively. And a read record's column IS reachable in three segments: on the flow-condition path TryGetParameterMapPath puts an EntityColumn segment into SubParameterMetaPath and carries it. Both absolutes read as CLOSED questions, which is exactly how a reader stops looking - the practical limit is that describe hands out no column UIds, not that the platform refuses.")]
     public void ProcessGuides_ShouldNotOverstateTwoPlatformLimits() {
         // Arrange
-        string modeling = ReadGuide(ModelingGuide);
+        string elementCatalog = ReadGuide(ElementCatalogGuide);
         string dataElements = ReadGuide(DataElementsGuide);
 
         // Act & Assert
-        modeling.Should().NotContain("describe-business-process` and the delete guards do see them",
+        elementCatalog.Should().NotContain("describe-business-process` and the delete guards do see them",
             because: "a sub-process owns its own FlowElements collection and ProcessDescriber iterates only "
                 + "schema.FlowElements, so describe does NOT see them - and a caller told otherwise reads a "
                 + "delete refusal naming a flow no read API will show, which is the dead end this sentence "
                 + "claims to prevent");
-        modeling.Should().Contain("the delete guards see them",
+        elementCatalog.Should().Contain("the delete guards see them",
             because: "the true half has to survive the correction: the guards walk the recursive accessors, "
                 + "so a reference from inside a sub-process really does block a delete");
         dataElements.Should().NotContain("referenceable from NOWHERE",

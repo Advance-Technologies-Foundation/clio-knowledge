@@ -20,14 +20,19 @@ internal static class ProcessGuideSet
     private const string ProcessFolder = "guidance/mcp/guides/processes/";
 
     /// <summary>
-    /// Articles ENG-96212 split <c>process-modeling</c> into, entry article first. Named explicitly
-    /// because the go-live decision (ENG-96132) and the naming-rule scans are about THESE seven, not
-    /// about whatever else the folder later holds — see <see cref="Declared"/> for the derived set that
-    /// the size contract uses.
+    /// The articles the ENG-96132 go-live decision covers, entry article first: the seven ENG-96212 split
+    /// <c>process-modeling</c> into, plus <c>process-element-catalog</c>, which ENG-96536 extracted from the
+    /// entry article's OWN body. That eighth is on the list for the same reason the other seven are — the
+    /// text in it shipped un-gated as part of process-modeling, so gating it would hide guidance the GA
+    /// business-process tools name as mandatory reading. Named explicitly rather than derived, because it
+    /// records a DECISION about specific articles: a future process guide that legitimately documents a
+    /// restricted capability must be able to carry `requiredFeatures` without turning this red. See
+    /// <see cref="Declared"/> for the derived set the size contract uses.
     /// </summary>
     internal static readonly string[] SplitItemIds =
     [
         "process-modeling",
+        "process-element-catalog",
         "process-naming",
         "process-data-elements",
         "process-parameters",
@@ -55,15 +60,15 @@ internal static class ProcessGuideSet
                 resource.GetProperty("sourcePath").GetString()!))];
     }
 
-    /// <summary>The seven split articles' source paths, derived, in <see cref="SplitItemIds"/> order.</summary>
+    /// <summary>Those articles' source paths, derived, in <see cref="SplitItemIds"/> order.</summary>
     internal static string[] SplitPaths(string repositoryRoot)
     {
         Article[] declared = Declared(repositoryRoot);
         return [.. SplitItemIds.Select(itemId =>
             declared.SingleOrDefault(article => article.ItemId == itemId)?.SourcePath
                 ?? throw new InvalidOperationException(
-                    $"bundle-source.json declares no guidance resource '{itemId}'; the ENG-96212 split "
-                    + "articles must each stay a declared get-guidance topic."))];
+                    $"bundle-source.json declares no guidance resource '{itemId}'; every article the "
+                    + "go-live decision covers must stay a declared get-guidance topic."))];
     }
 
     /// <summary>Every itemId the manifest declares, for resolving a pointer to a servable topic.</summary>
