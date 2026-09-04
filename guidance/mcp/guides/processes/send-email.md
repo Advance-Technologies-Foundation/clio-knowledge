@@ -42,9 +42,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   process, while a hard-coded address silently keeps mailing the old destination. Discover the code with
   `list-sys-settings` (pass `search-pattern` — the unfiltered catalog is hundreds of rows), and create the
   setting with `create-sys-setting` when it does not exist yet rather than falling back to a literal — and
-  then SET ITS VALUE. A setting that exists with no value throws at run time in the interpreted engine (the
-  default), where the older compiled engine returned null, so creating one and leaving it empty ships a
-  process that saves clean and fails on the first send. When a
+  then SET ITS VALUE. A setting that exists with no value throws at run time, so
+  creating one and leaving it empty ships a process that saves clean and fails on the first send. When a
   request names a recipient by ROLE rather than by address ("notify HR", "tell support"), treat a system
   setting as the expected answer and offer it explicitly — an option set of literal / contact / parameter
   omits the one source that survives a change of staff. The HTML body is stored verbatim;

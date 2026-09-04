@@ -57,6 +57,10 @@ public sealed class ProcessFormulaGuidanceTests
             "the refusal quotes the CONVERTED expression, so a caller who cannot find their own text "
             + "concludes the wrong formula was validated"),
         ("[#[Parameter:{", "the reference form is the one thing an agent cannot derive or guess"),
+        ("[#[Element:{",
+            "the ELEMENT-scoped form, which occurs ONCE in this article and was pinned by nothing: an agent "
+            + "who has the process-parameter form still cannot derive this one, and losing it costs the "
+            + "commonest mapping there is - one element's output into another element's input"),
         ("never `1.2m`",
             "a blind run measured an agent writing the C# decimal suffix after READING this article: the "
             + "converter appends its own unconditionally, so the literal arrives as 1.2mm and is refused - "
@@ -66,7 +70,7 @@ public sealed class ProcessFormulaGuidanceTests
     /// <summary>Clauses in the branch article, including both silent-when-wrong hazards.</summary>
     private static readonly (string Fragment, string Because)[] BranchClauses =
     [
-        ("only plain flows",
+        ("Do not leave a branching element with only plain flows",
             "the parallel-split hazard: removing the last conditional flow leaves the element with plain "
             + "flows, the platform stops synthesizing the gateway, and every outgoing flow is taken"),
         ("parallel split",

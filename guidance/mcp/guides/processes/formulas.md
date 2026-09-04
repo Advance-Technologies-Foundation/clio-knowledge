@@ -64,7 +64,7 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 |---|---|
 | process / element parameter | a UId meta-path you BUILD from `describe-business-process` — see below |
 | system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
-| system setting | `[#SysSettings.Code#]`; a form carrying the value-type suffix also round-trips. In the interpreted engine (the default) an UNSET setting THROWS at run time where the older compiled engine returned null — do not reference one that may be empty without a fallback |
+| system setting | `[#SysSettings.Code#]`; a form carrying the value-type suffix also round-trips. an UNSET setting THROWS at run time — do not reference one that may be empty without a fallback |
 | lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
@@ -191,9 +191,9 @@ chains — exactly as the visual designer accepts them, and neither clio's lengt
 gate looks at it. Keep expressions FLAT, and never build one by concatenation or in a loop. The reason is
 not style: the platform parses by recursive descent with no stack guard, so a sufficiently nested
 expression ends the worker process rather than failing — uncatchable, taking every concurrent request
-with it, and nothing in this path can refuse it. Measured on one stand (core 10.0.731.0) against
-CrtProcessBuilder 1.4.0.52; treat it as one measurement, not a platform constant, and as a platform
-defect that only the platform can close.
+with it, and nothing in this path can refuse it. Measured on one stand (core 10.0.731.0) on 2026-09-01. No
+CrtProcessBuilder version enters into it - the parser is the platform's - so treat it as one measurement,
+not a platform constant, and as a defect only the platform can close.
 
 Two things make "keep it flat" harder than it sounds, which is why the rule is written as a habit
 rather than a limit. The depth you write is NOT the depth the parser sees — the platform's own converter

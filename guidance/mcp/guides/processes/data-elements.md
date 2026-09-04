@@ -208,8 +208,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   but the task itself is not buildable yet (see below).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
-  `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value` (a signalStart filter
-  allows only a constant `value` or `macro`, never a `processParameter` — see the restriction above):
+  `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value`; a `datePart` WITH a
+  `macro` is refused outright (a signalStart narrows the right side further — see above):
   `{ "column": "CreatedOn", "datePart": "Year", "comparison": "equal", "value": "2026" }` reads
   `Year(CreatedOn) = 2026`. `HourMinute` is the exception — it extracts the TIME-OF-DAY and compares it to a
   `value` in `HH:mm[:ss]` form: `{ "column": "CreatedOn", "datePart": "HourMinute", "comparison": "equal",
