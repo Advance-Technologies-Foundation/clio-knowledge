@@ -98,6 +98,7 @@
       "process-activity-connections",
       "process-versions",
       "process-script-task",
+      "product-telemetry",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
@@ -234,6 +235,7 @@
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-versions",
       "docs://knowledge/com.creatio.clio/process-script-task",
+      "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
@@ -1331,6 +1333,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
       "bundlePath": "resources/process-script-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "product-telemetry",
+      "title": "Product telemetry",
+      "description": "Owns the product telemetry event vocabulary: the flow-agnostic stages (workflow_started, plan_presented, plan_approved, build_started, work_item_completed, workflow_completed, workflow_failed, ...), the `workflow` field that identifies which flow emitted one, the bounded `variant` qualifier, the deprecated app-creation-specific names, and the get-telemetry-consent / send-telemetry / withdraw-telemetry-consent consent mechanics. Per-flow emission points stay in the consumer repository's contract.",
+      "topicId": "creatio.product-telemetry",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/product-telemetry",
+      "legacyUris": [
+        "docs://mcp/guides/product-telemetry"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/product-telemetry.md",
+      "bundlePath": "resources/product-telemetry.md",
       "mediaType": "text/plain"
     },
     {
