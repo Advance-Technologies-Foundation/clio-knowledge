@@ -70,7 +70,15 @@ public sealed class ProcessGuideCrossReferenceTests
         ("R1–R17", "process-activity-connections"),      // en dash, as the articles write it
         ("N1-N10", "process-naming"),
         ("Naming and codes", "process-naming"),
-        ("Data source filters", "process-data-elements")
+        ("Data source filters", "process-data-elements"),
+        // ENG-95891 split process-branch-conditions out of process-formulas and added no marker row, so
+        // this guard stayed silent about the newest split for the whole of that work. Both phrases were
+        // checked against the folder before being added: each occurs in exactly one non-owner article.
+        // "parallel split" was the obvious third and is deliberately NOT here - activity-connections
+        // carries it inside BPMN rule R12 ("multiple outgoing sequence flows = implicit parallel split"),
+        // a different subject, and a marker cannot tell the two apart.
+        ("CONDITION on a conditional flow", "process-branch-conditions"),
+        ("the last conditional flow", "process-branch-conditions")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
@@ -169,7 +177,12 @@ public sealed class ProcessGuideCrossReferenceTests
 
         foreach (ProcessGuideSet.Article article in ProcessGuideSet.Declared(repositoryRoot))
         {
-            string text = ProcessGuideSet.Read(repositoryRoot, article.SourcePath);
+            // Collapsed, because these markers are PHRASES and the articles are hard-wrapped: a marker
+            // that a line break can split is a marker an ordinary reflow disarms silently. Found the way
+            // everything here is found - a reflow while fixing ENG-95891's stale pointer moved "the last
+            // conditional flow" across a wrap, the occurrence count went to zero, and the test passed
+            // because it was no longer scanning anything.
+            string text = Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath));
             foreach ((string marker, string owner) in MovedSectionMarkers)
             {
                 if (article.ItemId == owner)
@@ -301,4 +314,46 @@ public sealed class ProcessGuideCrossReferenceTests
     }
 
     private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();
+
+    /// <summary>
+    /// The manifest description a catalog listing shows for one guidance topic. Read from
+    /// <c>bundle-source.json</c> rather than retyped, so a rewritten description is measured, not assumed.
+    /// </summary>
+    private static string ManifestDescription(string repositoryRoot, string itemId)
+    {
+        using System.Text.Json.JsonDocument manifest = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        return manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(resource => resource.GetProperty("itemId").GetString() == itemId)
+            .GetProperty("description").GetString()!;
+    }
+
+    [Test]
+    [Description("The manifest's entry-article description indexes the same articles the entry article itself does. Both are indexes an agent picks a guide from - one it reads inside get-guidance, one it scans in the catalog beforehand - and only the article's copy was checked by anything. ENG-95891 split an eighth article out, updated the article's index and the counts in this sentence once for process-formulas, then split again and left the sentence naming seven; nothing went red, and an agent reading the catalog never learns process-branch-conditions exists.")]
+    public void ManifestEntryDescription_ShouldIndexEveryArticleTheEntryArticleIndexes()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] articles = ProcessGuideSet.Declared(repositoryRoot);
+        string entryItemId = ProcessGuideSet.SplitItemIds[0];
+        string entry = ProcessGuideSet.Read(repositoryRoot,
+            articles.Single(article => article.ItemId == entryItemId).SourcePath);
+        string description = ManifestDescription(repositoryRoot, entryItemId);
+
+        string[] indexedByArticle = [.. articles
+            .Where(article => article.ItemId != entryItemId)
+            .Where(article => entry.Contains($"`{article.ItemId}`", StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+
+        indexedByArticle.Length.Should().BeGreaterThan(1,
+            because: "the requirement is derived from what the entry article names, so an index that stopped "
+                + "naming its siblings would otherwise reduce this test to asserting nothing");
+        indexedByArticle
+            .Where(itemId => !description.Contains(itemId, StringComparison.Ordinal))
+            .Should().BeEmpty(
+                because: "the entry article indexes these and the manifest description does not, so the two "
+                    + "indexes disagree about what the set contains - and the catalog is the one an agent "
+                    + "reads BEFORE deciding which guide to fetch, so an article missing from it is one that "
+                    + "has to be already known to be found");
+    }
 }

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.78",
+  "libraryVersion": "1.13.93",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -93,6 +93,8 @@
       "process-naming",
       "process-data-elements",
       "process-parameters",
+      "process-formulas",
+      "process-branch-conditions",
       "process-perform-task",
       "process-send-email",
       "process-activity-connections",
@@ -229,6 +231,8 @@
       "docs://knowledge/com.creatio.clio/process-naming",
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-parameters",
+      "docs://knowledge/com.creatio.clio/process-formulas",
+      "docs://knowledge/com.creatio.clio/process-branch-conditions",
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
@@ -1210,7 +1214,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, default flows and timers are NOT buildable, but a conditional BRANCH is: build the flow plain, then set its condition with modify-business-process setFlowCondition, and the platform synthesizes the gateway), the build recipe, the safety rules for editing an existing process, and the element catalog. Routes onward to the eight articles that own the rest: process-naming, process-data-elements, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the nine is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1252,7 +1256,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros that are the one formula an author may write rather than copy.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -1261,6 +1265,34 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/parameters.md",
       "bundlePath": "resources/process-parameters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-formulas",
+      "title": "Process formulas",
+      "description": "Owns the vocabulary the platform's expression interpreter actually accepts for an `expression` mapping source and for a flow condition (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; an environment below clio's enforced floor is refused up front), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - and the length bound clio still applies. Branch mechanics moved to `process-branch-conditions`.",
+      "topicId": "creatio.process-formulas",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-formulas",
+      "legacyUris": [
+        "docs://mcp/guides/process-formulas"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/formulas.md",
+      "bundlePath": "resources/process-formulas.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-branch-conditions",
+      "title": "Process branch conditions",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: turning a plain flow into a conditional one in place with setFlowCondition, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "topicId": "creatio.process-branch-conditions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
+      "legacyUris": [
+        "docs://mcp/guides/process-branch-conditions"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/branch-conditions.md",
+      "bundlePath": "resources/process-branch-conditions.md",
       "mediaType": "text/plain"
     },
     {

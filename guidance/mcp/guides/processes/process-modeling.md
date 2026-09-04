@@ -12,6 +12,10 @@ authoritative owner -- read the one your task needs instead of guessing:
                                      three share.
   * `process-parameters`           - process parameters, element-parameter mappings, type
                                      compatibility, and the date/time/lookup default macros.
+  * `process-formulas`             - the `expression` mapping source and the formula
+                                    vocabulary both it and a condition use
+  * `process-branch-conditions`    - the condition on a conditional flow: setting one,
+                                    branch precedence, and the parallel-split hazard
   * `process-perform-task`         - the Perform task element: its parameter table, the performer
                                      layers, and what the runtime sets.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
@@ -89,7 +93,12 @@ article from what this one says; read that article.
   already does). `describe-business-process` reports the effective value per element, so it round-trips.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section of `process-data-elements`).
-- NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
+- A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
+  `modify-business-process` + `setFlowCondition`. No gateway element is involved — see
+  `process-branch-conditions`.
+- NOT yet buildable: gateway ELEMENTS, default flows, timer/message start, intermediate events,
+    `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
+    catalog below, where silence used to read as "buildable"),
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
@@ -132,10 +141,12 @@ article from what this one says; read that article.
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/
+   setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
+   signal/readData/
    changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
-   element kind, `readData` / `changeData` on the matching data element only (see `process-data-elements` for their
+   element that OFFERS it (four kinds remove the control — see the element catalog), `readData` /
+   `changeData` on the matching data element only (see `process-data-elements` for their
    partial-update and source-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
@@ -168,9 +179,14 @@ article from what this one says; read that article.
   operations array, then re-describe and clean up any leftover references to the removed element.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateways, conditional/default flows,
+- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
   sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. Treat such a process as high-risk:
+  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+  even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
+  conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
+  gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate
+  used to be, which describe reports as `kind: "sequence"` on both, reading exactly like "condition
+  cleared, as asked". Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
@@ -190,16 +206,27 @@ System actions (palette group "System actions"):
     a `filter` — see `process-data-elements`. The other read modes (collection / count /
     aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
+    The element builds, but its target object and column values do NOT yet — see the caveat near
+    the top of this guide.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements`.
-- `deleteDataUserTask` Delete data — delete matched records.
+- `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
+    BUILDS, but its target object and filter do NOT yet — see the caveat near the top of this guide.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
-- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
+    READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
+    be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a
+    mapping `expression` (see `process-formulas`). Compute a value with a mapping onto a process
+    parameter instead of asking for this element.
+- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication). READ-ONLY here.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
-- `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance over a collection.
+    READ-ONLY here.
+- `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance
+    over a collection. READ-ONLY here — and its children live in its OWN element collection: the delete guards see them
+    (they walk recursively), `describe-business-process` and `setElement` do not, so a refusal can name a
+    flow no read call shows you.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
 User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialog,
   `openEditPageUserTask` Open edit page, `autoGeneratedPageUserTask` Auto-generated page,
@@ -207,7 +234,7 @@ User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialo
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
   signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
-  BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6).
+  BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6 in `process-naming`).
 Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
