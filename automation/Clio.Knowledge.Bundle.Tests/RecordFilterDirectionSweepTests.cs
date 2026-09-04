@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
@@ -29,7 +30,7 @@ public sealed class RecordFilterDirectionSweepTests
 {
     private const string InertWords =
         @"match(es)?\s+no\s+records|changes?\s+nothing|changes?\s+no\s+permissions|cannot\s+act|"
-        + @"\binert\b|silent\s+no-?op|does\s+nothing";
+        + @"\binert\b|silent\s+no-?op|(?:does|do|did)\s+nothing|is\s+an?\s+no-?op";
 
     private const string WideWords =
         @"EVERY\s+record|every\s+row|widest|unbounded|runs?\s+UNFILTERED";
@@ -120,9 +121,20 @@ public sealed class RecordFilterDirectionSweepTests
     private static IReadOnlyList<string> Sweep(Regex inversion)
     {
         string root = ProcessGuideSet.FindRepositoryRoot();
+        // Every DECLARED resource body plus the manifest. Reading only guidance/**/*.md skipped 48 shipped
+        // bodies under catalog/ and references/ - and "the surface nobody swept" is precisely how this
+        // inversion kept surviving.
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(root, "bundle-source.json")));
         string[] files =
         [
-            .. Directory.EnumerateFiles(Path.Combine(root, "guidance"), "*.md", SearchOption.AllDirectories),
+            .. manifest.RootElement.GetProperty("resources").EnumerateArray()
+                .Select(resource => resource.TryGetProperty("sourcePath", out JsonElement path)
+                    ? path.GetString()
+                    : null)
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .Select(path => Path.Combine(root, path!.Replace('/', Path.DirectorySeparatorChar)))
+                .Distinct(StringComparer.OrdinalIgnoreCase),
             Path.Combine(root, "bundle-source.json")
         ];
 
@@ -145,21 +157,22 @@ public sealed class RecordFilterDirectionSweepTests
             for (int i = 0; i < lines.Length; i++)
             {
                 string window = Window(lines, i);
-                Match match = inversion.Match(window);
-                if (!match.Success)
-                {
-                    continue;
-                }
 
-                int from = Math.Max(0, match.Index - ExemptionRadius);
-                int to = Math.Min(window.Length, match.Index + match.Length + ExemptionRadius);
-                string vicinity = window[from..to];
-                if (ExemptionMarkers.Any(m => vicinity.Contains(m, StringComparison.OrdinalIgnoreCase)))
+                // EVERY match, not just the first: an exempted contrastive sentence must not hide a real
+                // inversion further along the same window.
+                for (Match match = inversion.Match(window); match.Success; match = match.NextMatch())
                 {
-                    continue;
-                }
+                    int from = Math.Max(0, match.Index - ExemptionRadius);
+                    int to = Math.Min(window.Length, match.Index + match.Length + ExemptionRadius);
+                    string vicinity = window[from..to];
+                    if (ExemptionMarkers.Any(m => vicinity.Contains(m, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
 
-                offenders.Add($"  {Path.GetRelativePath(root, file)}:{i + 1}: ...{vicinity.Trim()}...");
+                    offenders.Add($"  {Path.GetRelativePath(root, file)}:{i + 1}: ...{vicinity.Trim()}...");
+                    break;
+                }
             }
         }
 
