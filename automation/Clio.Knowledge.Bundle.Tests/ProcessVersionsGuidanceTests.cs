@@ -224,6 +224,10 @@ public sealed class ProcessVersionsGuidanceTests
             because: "the boundary is what stops an agent promising a version or a rollback this build cannot perform");
         guide.Should().Contain("There is no operation that SETS the active version",
             because: "a rollback request has to be refused explicitly, not answered with a process copy");
+        guide.Should().Contain("Save new version (Ctrl+Alt+N)",
+            because: "refusing without naming where the product does it is half an answer, and this is the affordance a builder needs");
+        guide.Should().Contain("ASKS, in its own prompt",
+            because: "the platform lets the person choose whether the new version becomes actual, so guidance must not present create and activate as one step");
     }
 
     [Test]

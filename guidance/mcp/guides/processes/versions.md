@@ -169,9 +169,17 @@ Reading the standing is the whole of it today. In particular:
     over a character column across an asymmetric pool, and two versions of one root created in
     different packages BOTH report true -- so it is not a usable "latest" signal and is left out rather
     than passed on.
-Say so plainly when a builder asks for a new version or a rollback. Proposing a copy of the process
-under a new name is NOT an equivalent: a copy is a new root with its own family, it does not become
-what the runtime executes, and it leaves the original running.
+Say so plainly when a builder asks for a new version or a rollback -- and then tell them where the
+product does it, because "I cannot" without "here is where you can" is half an answer. In the process
+designer the SAVE button is a split button: `Save new version (Ctrl+Alt+N)` creates one, and
+`Save current version (Ctrl+Alt+S)` is the in-place overwrite. After creating a version the platform
+ASKS, in its own prompt, whether to make it the actual one -- so the person stays in control of which
+version runs. Note what that means for you: creating a version and activating it are separate steps
+even in the product, so never present them as one, and never assume a version someone just created is
+the one running. `Set as actual version` in the designer ACTIONS menu activates an existing version.
+
+Proposing a copy of the process under a new name is NOT an equivalent: a copy is a new root with its own
+family, it does not become what the runtime executes, and it leaves the original running.
 
 == File design mode ==
 Under file design mode a process is absent from the process library until it has been loaded from the
