@@ -15,8 +15,8 @@ Deploy preflight (run in this order)
    `deploy-creatio-defaults.site-port-range`. Fresh and upgraded settings default to the inclusive range
    `[40100, 40199]`. Use `find-empty-iis-port` only when you need to inspect or explicitly choose a port;
    its result is a point-in-time recommendation and the deploy command still reserves and revalidates it
-   across concurrent clio processes before it changes files, databases, or IIS. Do not use this IIS-only
-   preflight as a requirement for an explicit dotnet deployment.
+   across concurrent clio processes before it changes files, databases, or IIS. Do not treat
+   `find-empty-iis-port` as a required step for a dotnet deployment.
    `deploy-identity` can call the same IIS port scanner internally when `identitySitePort` is omitted.
 4. Resolve the build archive - `deploy-creatio` needs an absolute `zipFile` path. `deploy-identity`
    accepts either a standalone `IdentityService.zip` or the same Creatio distribution bundle when it
