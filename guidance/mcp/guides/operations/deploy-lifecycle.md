@@ -27,27 +27,14 @@ Deploy preflight (run in this order)
 Deploy
 - `deploy-creatio` is the most consequential, hardest-to-reverse tool: it drops and recreates the target
   site. Required args: `siteName`, `zipFile` (absolute build archive path). Optional: `sitePort`,
-  `dbServerName`, `redisServerName` (omit to keep the default Kubernetes deployment path), `deployment`,
-  `bindAllInterfaces`, and the HTTPS certificate fields.
-- `deployment` accepts `auto`, `iis`, or `dotnet`. `auto` selects IIS on Windows and dotnet on macOS/Linux;
-  use `deployment: "dotnet"` when a Windows caller must avoid IIS. `find-empty-iis-port` and the configured
-  site-port range are relevant to the IIS path only.
-- For local IIS, `useHttps` is opportunistic: clio uses a pinned or deterministically selected usable
-  LocalMachine/My certificate matching the host, and warns then continues with HTTP when no usable
-  certificate is installed.
-- For dotnet, Kestrel binds to loopback (`localhost`) by default. Set `bindAllInterfaces: true` only when
-  a container, Kubernetes service, or remote reverse proxy must reach Kestrel over the network. This is
-  an explicit HTTPS-only network-exposure choice; clio rejects a dotnet deployment that combines
-  `bindAllInterfaces: true` with plaintext HTTP.
-- For dotnet, `useHttps: true` selects an HTTPS Kestrel endpoint and MUST have either `certificatePath`
-  or an existing Kestrel certificate configuration. It does not fall back to HTTP. A PFX certificate
-  may use `certificatePassword` as the name of an environment variable containing the password, or
-  `certificatePasswordFile` as a path to a password file; a PEM or CRT certificate also requires
-  `certificateKeyPath`. Never send the raw password as an MCP argument. Certificate passwords are
-  sensitive, are passed to the deployed host through Kestrel environment configuration, are not written
-  to `appsettings.json`, and MUST NOT be echoed in an MCP response, log, or public message.
-- For dotnet, leaving `useHttps` false keeps existing HTTPS endpoint configuration rather than deleting it,
-  while explicit HTTPS removes the plaintext HTTP endpoints selected by the deployment.
+  `dbServerName`, `redisServerName` (omit to keep the default Kubernetes deployment path), and
+  `useHttps` (local IIS only). HTTPS is opportunistic: clio uses a pinned or deterministically
+  selected usable LocalMachine/My certificate matching the host, and warns then continues with
+  HTTP when no usable certificate is installed.
+- `deploy-creatio` has no argument that selects the deployment method. Choosing IIS or dotnet
+  explicitly is a CLI-only option of `install-creatio` (`--deployment auto|iis|dotnet`); it is not
+  reachable over MCP. `find-empty-iis-port` and the configured site-port range are relevant to the
+  IIS path only.
 - Prefer the recommended bundle from `show-passing-infrastructure`. For local IIS, omit `sitePort` to use
   the configured range. An explicit `sitePort` overrides both the configured fixed port and range.
 - An explicit port collision is a failed deployment, not permission to continue on the same port. Automatic
