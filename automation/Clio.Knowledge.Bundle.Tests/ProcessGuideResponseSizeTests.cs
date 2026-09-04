@@ -51,11 +51,21 @@ public sealed class ProcessGuideResponseSizeTests
     /// </summary>
     private const int MaxResponseCharacters = (int)(LargestObservedPass * 0.85);
 
-    // Where the set stands against that budget (2026-08-31): process-data-elements is the largest at
-    // roughly 27,000 characters, which is about 97% of it. That is deliberate rather than accidental —
-    // it is the article to split FIRST when this test goes red, at the seam between the record trigger
-    // and Read/Modify data on one side and the shared data-source filter on the other. Raising the budget
-    // instead would be trading a measured delivery guarantee for the convenience of not splitting.
+    /// <summary>
+    /// The share of the budget an article may hold and still be considered to have room to work in.
+    ///
+    /// ENG-96536: for most of this fixture's life 90% only PRINTED a warning, and three articles walked
+    /// from 87% to 99.4% underneath it — 174 characters, less than one sentence, on the largest. At that
+    /// point splitting is forced on whoever happens to arrive next, and the cheapest-looking way out of
+    /// their red build is to raise the budget, which trades a measured delivery guarantee for the
+    /// convenience of not splitting. So the warning is a gate now, and
+    /// <see cref="EveryProcessArticle_ShouldKeepHeadroomForTheNextEdit"/> is where it fires.
+    ///
+    /// It needs no diff to be attributable: an article's size changes only in a change that TOUCHES it,
+    /// so the run that goes red is the run that grew it, and it goes red with roughly 2,700 characters
+    /// still in hand — which is the one thing the 100% gate cannot give the person who has to split.
+    /// </summary>
+    private const double HeadroomThreshold = 0.9;
 
     /// <summary>
     /// The get-guidance response wraps the article in a JSON envelope — feedback policy, name, uri,
@@ -100,7 +110,9 @@ public sealed class ProcessGuideResponseSizeTests
         {
             TestContext.WriteLine(
                 $"{itemId,-32} {size,7:N0}  {(double)size / MaxResponseCharacters,6:P1} of budget"
-                + (size > MaxResponseCharacters * 0.9 ? "   <-- approaching the limit; split it" : string.Empty));
+                + (size > MaxResponseCharacters * HeadroomThreshold
+                    ? "   <-- over the headroom threshold; split it"
+                    : string.Empty));
         }
 
         (string ItemId, int Size)[] tooLarge = measured
@@ -113,6 +125,45 @@ public sealed class ProcessGuideResponseSizeTests
                 + "the article at a section boundary rather than raising this budget, which is 85% of the "
                 + $"largest response measured to survive the round trip ({LargestObservedPass:N0} characters). "
                 + $"Over budget: {string.Join(", ", tooLarge.Select(m => $"{m.ItemId} at {m.Size:N0}"))}");
+    }
+
+    [Test]
+    [Description("Every process article still has room for the next edit, so the split lands on the change "
+        + "that grew the article rather than on whoever arrives once there is no room left.")]
+    public void EveryProcessArticle_ShouldKeepHeadroomForTheNextEdit()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
+
+        declared.Should().HaveCountGreaterThanOrEqualTo(ProcessGuideSet.SplitItemIds.Length,
+            because: "the set is derived from the manifest, and a derivation that selected nothing would "
+                + "report every article as having room while measuring none of them");
+
+        int threshold = (int)(MaxResponseCharacters * HeadroomThreshold);
+        (string ItemId, int Size)[] crowded = declared
+            .Select(article => (article.ItemId, Size: ResponseSize(repositoryRoot, article.SourcePath)))
+            .Where(article => article.Size > threshold)
+            .OrderByDescending(article => article.Size)
+            .ToArray();
+
+        // Deliberately a SECOND test rather than a lower budget on the first. The two say different
+        // things and a reader has to be able to tell which one failed: over 100% is a DELIVERY failure —
+        // correct text does not reach the reader at all — while over 90% is housekeeping, and the article
+        // still answers correctly the whole time. Collapsing them into one number would report the
+        // delivery failure and the housekeeping failure in the same words.
+        //
+        // Known tightest at the time this gate landed: process-formulas at 88.0% of budget, so the next
+        // substantial edit to it has to split it first. That is the gate working, not a defect in it —
+        // ENG-96536 left process-formulas alone deliberately (its boundary with
+        // process-branch-conditions was drawn by ENG-95891 and is pinned by ProcessFormulaGuidanceTests),
+        // and someone splitting it at 88% has room to do it properly.
+        crowded.Should().BeEmpty(
+            because: "an article this close to the response limit forces the split onto whoever edits it "
+                + "next, with nothing left to work with — which is how three articles reached 95-99% of "
+                + "budget while this threshold only printed a warning nobody reads. Split at a section "
+                + $"boundary now, while there is room. Over {threshold:N0} characters "
+                + $"({HeadroomThreshold:P0} of the {MaxResponseCharacters:N0} budget): "
+                + string.Join(", ", crowded.Select(a => $"{a.ItemId} at {a.Size:N0}")));
     }
 
     [Test]

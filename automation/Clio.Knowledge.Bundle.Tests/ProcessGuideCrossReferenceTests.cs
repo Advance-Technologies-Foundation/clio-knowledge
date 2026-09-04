@@ -80,7 +80,23 @@ public sealed class ProcessGuideCrossReferenceTests
         // "parallel split" was the obvious third and is deliberately NOT here - activity-connections
         // carries it inside BPMN rule R12 ("multiple outgoing sequence flows = implicit parallel split"),
         // a different subject, and a marker cannot tell the two apart.
-        ("CONDITION on a conditional flow", "process-branch-conditions"),
+        // Was ("CONDITION on a conditional flow", ...), which matched NOTHING in the folder — it was
+        // keyed on the manifest description's wording rather than on anything an article says, so the
+        // row read as a guard while guarding nothing. ENG-96536 replaced it with the phrasing a
+        // non-owner actually uses when it hands precedence over, and added
+        // EveryMovedSectionMarker_ShouldStillMatchSomewhereInTheSet so the next dead row is visible
+        // instead of reassuring. Lower case on purpose: comparison is Ordinal, and the three spellings
+        // in the folder are three different strings — the owner heads its own section BRANCH PRECEDENCE
+        // IS FLOW ORDER, process-modeling's index writes "branch precedence", and process-formulas
+        // writes "branch PRECEDENCE". This row watches the index spelling, which is the one a
+        // sibling restating the rule would reach for.
+        //
+        // Recorded while choosing it, because it will bite the next row too: process-formulas names
+        // the owner ONLY inside `get-guidance name=process-branch-conditions`, so the backticked
+        // `process-branch-conditions` this scan looks for is absent there and its "branch PRECEDENCE"
+        // reads as unattributed. Not fixed here — the fix is one line in an article at 88% of budget,
+        // and ENG-96536 is not the change that should grow it.
+        ("branch precedence", "process-branch-conditions"),
         ("the last conditional flow", "process-branch-conditions"),
         // ENG-96536 moved "What you can build today" and the element catalog out of the entry article,
         // which had no budget headroom left and grew by both of those sections on every new element. Each
@@ -220,6 +236,43 @@ public sealed class ProcessGuideCrossReferenceTests
             because: "after the split these sections live in one article each, and a bare mention leaves the "
                 + "reader with a claim they cannot check — the reference is not broken enough to look broken, "
                 + "which is why it survives review. Found: " + string.Join("; ", unattributed));
+    }
+
+    [Test]
+    [Description("Every moved-section marker still matches somewhere in the set, so a reworded or "
+        + "reflowed phrase cannot leave a row scanning nothing while the test stays green.")]
+    public void EveryMovedSectionMarker_ShouldStillMatchSomewhereInTheSet()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string[] articles = [.. ProcessGuideSet.Declared(repositoryRoot)
+            .Select(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath)))];
+        HashSet<string> declaredItemIds = ProcessGuideSet.DeclaredItemIds(repositoryRoot);
+
+        articles.Should().NotBeEmpty(because: "a scan over no articles would clear every row");
+
+        // SOMEWHERE, not "outside its owner" and not "in its owner" — both of those look like the
+        // invariant and neither is one. "Naming and codes" is a heading only its owner writes; "the
+        // last conditional flow" is a phrase only a NON-owner writes, because the owner words it
+        // differently. A row is dead when it matches in neither place, and that is the only case this
+        // can assert without banning a row deliberately aimed at a phrase nobody has written yet.
+        string[] dead = [.. MovedSectionMarkers
+            .Where(row => !articles.Any(article => article.Contains(row.Marker, StringComparison.Ordinal)))
+            .Select(row => $"'{row.Marker}' (owner {row.Owner})")];
+        string[] unownable = [.. MovedSectionMarkers
+            .Where(row => !declaredItemIds.Contains(row.Owner))
+            .Select(row => $"'{row.Marker}' names owner {row.Owner}")];
+
+        dead.Should().BeEmpty(
+            because: "the scan below skips a marker's OWNER and reports a non-owner mention that does not "
+                + "name it; a marker matching nowhere at all reports no unattributed mentions for the "
+                + "same reason an empty scan does, and that has already happened here twice — a reflow "
+                + "moved a phrase across a line break, and a row was keyed on manifest wording no article "
+                + "uses. Re-key the row to what the articles now say, or drop it. Dead: "
+                + string.Join("; ", dead));
+        unownable.Should().BeEmpty(
+            because: "an owner the manifest does not declare cannot be skipped as the owner, so the row "
+                + "scans the article that DEFINES the section as if it were borrowing it. Found: "
+                + string.Join("; ", unownable));
     }
 
     [Test]
