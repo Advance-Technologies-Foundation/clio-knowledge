@@ -42,11 +42,6 @@ public sealed class ProcessGuideCrossReferenceTests
     private static readonly Regex ArticleName = new(@"`(process-[a-z-]+)`", RegexOptions.Compiled);
 
     /// <summary>
-    /// The line every sub-article of the split opens with. It is how an article declares that
-    /// <c>process-modeling</c> is its entry point, which is what makes the entry obliged to index it.
-    /// </summary>
-
-    /// <summary>
     /// The token routing uses to name a guide. The dot is INSIDE the class: the manifest declares dotted
     /// ids (<c>atf.creatio.kafka-reference</c>), and a pattern that stopped at the dot would capture a
     /// truncated name the manifest does not declare — failing with "routing names an undeclared topic"

@@ -68,7 +68,6 @@ internal static class ProcessGuideSet
                 resource.GetProperty("sourcePath").GetString()!))];
     }
 
-
     /// <summary>Every itemId the manifest declares, for resolving a pointer to a servable topic.</summary>
     internal static HashSet<string> DeclaredItemIds(string repositoryRoot)
     {

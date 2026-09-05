@@ -212,8 +212,7 @@ public sealed class GuidanceMigrationTests
         //
         // Scoped to the articles that carry the set banner rather than to everything under the processes
         // folder — thirteen today, and derived rather than counted, so a split adds its pieces without
-        // anyone remembering to. That
-        // distinction matters. `requiredFeatures` is the only per-resource disclosure control this
+        // anyone having to remember. That distinction matters. `requiredFeatures` is the only per-resource disclosure control this
         // repository has. Written as a standing prohibition over a path prefix, this assertion would turn
         // a red build on the next process guide that legitimately documents a restricted capability — and
         // the cheapest way out of a red build is to drop the gate, which is precisely the outcome the
