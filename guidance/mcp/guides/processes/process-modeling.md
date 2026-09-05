@@ -93,10 +93,18 @@ article from what this one says; read that article.
   already does). `describe-business-process` reports the effective value per element, so it round-trips.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section of `process-data-elements`).
-- A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
-  `modify-business-process` + `setFlowCondition`. No gateway element is involved — see
-  `process-branch-conditions`.
-- NOT yet buildable: gateway ELEMENTS, default flows, timer/message start, intermediate events,
+- BRANCHING, declared where the flow is declared. `flows[]` takes `kind` (`sequence` | `conditional` |
+  `default`) and, on a conditional flow, its `condition`. The older two-step route — build the flow
+  plain, then `setFlowCondition` — still works and is what you use on a flow that ALREADY exists, but
+  do not reach for it when creating: it saves the process once with a flow that does not yet branch.
+  See `process-branch-conditions`.
+- `exclusiveGateway` (XOR) and `parallelGateway` (AND) ELEMENTS. A gateway is OPTIONAL for branching —
+  the platform synthesizes one for a conditional flow whose source is an ordinary activity, which is
+  what 485 of the 1 406 conditional flows in the shipped product do — so the element is about the
+  diagram being readable, not about making the branch work.
+  Three rules apply to the flows leaving a gateway element, none of them visible in the descriptor
+  schema; `process-branch-conditions` owns them.
+- NOT yet buildable: `inclusiveGateway` and `eventBasedGateway`, timer/message start, intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
@@ -179,7 +187,7 @@ article from what this one says; read that article.
   operations array, then re-describe and clean up any leftover references to the removed element.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
+- If describe shows constructs the builder cannot create (inclusive / event-based gateways,
   sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
   still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
@@ -235,7 +243,8 @@ Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/m
   signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
   BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6 in `process-naming`).
-Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
+Gateways: `exclusiveGateway` (XOR, BUILDABLE), `parallelGateway` (AND, BUILDABLE),
+`inclusiveGateway` (OR, read-only), `eventBasedGateway` (read-only).
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property

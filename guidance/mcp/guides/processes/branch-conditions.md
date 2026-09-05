@@ -13,26 +13,47 @@ names is referenced by its UId meta-path — `[#[Parameter:{uid}]#]` — and nev
 `Amount` is refused. Short names appear below to keep the rules readable: they describe the DECISION,
 they are not the text you write.
 
-A branch is a flow with a CONDITION. You do not build one — you build a plain flow and then set its
-condition:
+A branch is a flow with a CONDITION, and you DECLARE it where you declare the flow:
 
-1. `create-business-process` (or `addFlow`) makes the flow. `flows[].kind` is still refused on the build
-   path: a conditional branch cannot be declared there.
-2. `modify-business-process` with `setFlowCondition` (`source`, `target`, `condition`) turns that flow into a
-   conditional one.
+    "flows": [
+      { "source": "Check", "target": "Approve", "kind": "conditional", "condition": "..." },
+      { "source": "Check", "target": "Reject",  "kind": "default" }
+    ]
 
-NO GATEWAY IS NEEDED and none is created. The platform synthesizes an exclusive gateway for a conditional
-flow whose source is not one, so a branch straight off an activity is legitimate — it is what the platform's
-own tests rely on. Gateway ELEMENTS are still not buildable.
+`kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
+`condition`. The same two fields are on `addFlow`.
+
+The older two-step route — build the flow plain, then `modify-business-process` `setFlowCondition`
+(`source`, `target`, `condition`) — still works, and it is what you use on a flow that ALREADY exists,
+including a designer-authored one. Do not reach for it when CREATING: it saves the process once with a
+flow that does not yet branch. To change an existing flow's kind in either direction, `setFlow` takes
+`source`, `target`, `kind` and (for a conditional one) `condition`.
+
+NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
+is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in
+the shipped product are exactly that. `exclusiveGateway` and `parallelGateway` ELEMENTS are buildable
+too, and adding one is about the DIAGRAM being readable, not about making the branch work.
+
+Three rules apply once you place a gateway element, all enforced server-side and none of them visible
+in the descriptor schema:
+
+1. **Out of a gateway that CHOOSES** (`exclusiveGateway`, and a designer-made `inclusiveGateway`), every
+   outgoing flow must be `conditional` or `default`. A lone unconditional one is WRITTEN AS the default
+   branch — the designer cannot draw a plain flow out of a gateway either — and a second one is refused.
+2. **At most one `default` per element.** It is "the branch taken when nothing matched", so two make
+   that undecidable.
+3. **Out of a `parallelGateway`**, which starts every branch, all outgoing flows are plain `sequence`.
+   A condition there would be stored and never evaluated.
 
 What a condition must satisfy is in `process-formulas`, under WHAT IS CHECKED — it is validated as a formula whose target
 type is `bool`, so an integer is refused, and an empty one is refused because the platform stores it as
 the literal `true`. Specific to a branch: a condition on a DEFAULT branch is refused.
 
-**A PLAIN sibling flow IS the else branch.** This is the single most useful fact about branching here and it
-is easy to miss: the platform treats any non-conditional flow leaving the element as the default, and takes
-it only when no condition matched. So `if/else` is *one* `setFlowCondition` plus a plain `addFlow` — you do
-not need a "default flow" element. R7 does NOT apply to this shape - not "is satisfied by it":
+**A PLAIN sibling flow IS the else branch — off an ACTIVITY.** This is the single most useful fact about
+branching here and it is easy to miss: the platform treats any non-conditional flow leaving the element as
+the default, and takes it only when no condition matched. So `if/else` off an activity is one `conditional`
+flow plus a plain one; you do not need a "default flow" element. Out of a GATEWAY element it is different —
+rule 1 above applies, and the plain flow is written as a `default` one. R7 does NOT apply to this shape - not "is satisfied by it":
 `process-activity-connections` owns R1-R17 and states why, and the difference is operational. The
 gateway is synthesized at generation time and never appears as a graph node, so there is no
 exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding

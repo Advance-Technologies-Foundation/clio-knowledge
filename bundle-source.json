@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.93",
+  "libraryVersion": "1.13.94",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1214,7 +1214,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, default flows and timers are NOT buildable, but a conditional BRANCH is: build the flow plain, then set its condition with modify-business-process setFlowCondition, and the platform synthesizes the gateway), the build recipe, the safety rules for editing an existing process, and the element catalog. Routes onward to the eight articles that own the rest: process-naming, process-data-elements, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the nine is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, exclusive and parallel gateway ELEMENTS, and all three flow kinds declared where the flow is declared -- flows[].kind with flows[].condition; inclusive and event-based gateways, timers, intermediate events and sub-processes are NOT buildable), the build recipe, the safety rules for editing an existing process, and the element catalog. Routes onward to the eight articles that own the rest: process-naming, process-data-elements, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-send-email and process-activity-connections. Each of the nine is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1284,7 +1284,7 @@
     {
       "itemId": "process-branch-conditions",
       "title": "Process branch conditions",
-      "description": "Owns the CONDITION on a conditional flow as a branching construct: turning a plain flow into a conditional one in place with setFlowCondition, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, the three rules on the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only), what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
       "topicId": "creatio.process-branch-conditions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
