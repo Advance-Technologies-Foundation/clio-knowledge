@@ -103,6 +103,15 @@ Before opening a release-affecting pull request, run the producer contract suite
 dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj
 ```
 
+That reports pass or fail. It does NOT print the per-article headroom table: the table is written
+to the test output and needs a logger the default command does not attach, so an article sliding
+toward the limit is invisible under the line above. When you touch a process guide, run it this way
+and read the `of budget` lines:
+
+```bash
+dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj --logger "console;verbosity=detailed"
+```
+
 ## Guidance changes
 
 A guidance contribution should state:

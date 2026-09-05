@@ -177,7 +177,7 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins all seven ENG-96212 process articles as un-gated at go-live (ENG-96132), and keeps requiredFeatures optional in both v1 contracts.")]
+    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins every process article the ENG-96132 go-live covers as un-gated - the seven ENG-96212 produced and the four ENG-96536 extracted from them - and keeps requiredFeatures optional in both v1 contracts.")]
     public void FeatureGating_ShouldBeDeclaredByTheResourceAndBothSchemas()
     {
         // Arrange
@@ -204,26 +204,29 @@ public sealed class GuidanceMigrationTests
             .EnumerateArray()
             .Single(resource => resource.GetProperty("itemId").GetString() == "process-modeling");
 
-        // ENG-96212 split process-modeling into seven articles, and ENG-96132 un-gated it. Both halves
-        // have to hold together: re-gating any ONE of the seven would hide part of the guidance the GA
-        // business-process tools name as mandatory reading, and it would do it where nobody is looking —
-        // the entry article would keep answering while the sub-guide it routes to went dark.
+        // ENG-96212 split process-modeling into seven articles and ENG-96132 un-gated it; ENG-96536 then
+        // extracted four more from three of those seven. Both halves have to hold together: re-gating any
+        // ONE of them would hide part of the guidance the GA business-process tools name as
+        // mandatory reading, and it would do it where nobody is looking — the article it was split from
+        // would keep answering while the sub-guide it routes to went dark.
         //
-        // Scoped to those seven ITEM IDS rather than to everything under the processes folder, and that
-        // distinction matters. `requiredFeatures` is the only per-resource disclosure control this
+        // Scoped to the articles that carry the set banner rather than to everything under the processes
+        // folder — thirteen today, and derived rather than counted, so a split adds its pieces without
+        // anyone having to remember. That distinction matters. `requiredFeatures` is the only per-resource disclosure control this
         // repository has. Written as a standing prohibition over a path prefix, this assertion would turn
         // a red build on the next process guide that legitimately documents a restricted capability — and
         // the cheapest way out of a red build is to drop the gate, which is precisely the outcome the
-        // control exists to prevent. The go-live was a decision about these seven articles; the assertion
-        // says only that.
+        // control exists to prevent. The go-live was a decision about the text in these articles;
+        // the assertion says only that.
         JsonElement[] splitResources = source.RootElement.GetProperty("resources")
             .EnumerateArray()
-            .Where(resource => ProcessGuideSet.SplitItemIds.Contains(resource.GetProperty("itemId").GetString()))
+            .Where(resource => ProcessGuideSet.GoLiveItemIds(repositoryRoot)
+                .Contains(resource.GetProperty("itemId").GetString()))
             .ToArray();
         // Absence of the PROPERTY, not absence of one flag name. Matching only "process-designer" would
-        // leave every other flag value free to hide one of the six while this stayed green — a
+        // leave every other flag value free to hide one of them while this stayed green — a
         // name-specific hole in the only per-resource disclosure control the repository has. The scoping
-        // that keeps a future restricted-capability guide out of a red build is the SplitItemIds filter
+        // that keeps a future restricted-capability guide out of a red build is the set-banner filter
         // above; it does not need the predicate narrowed as well.
         string[] regatedArticles = splitResources
             .Where(resource => resource.TryGetProperty("requiredFeatures", out _))
@@ -240,14 +243,15 @@ public sealed class GuidanceMigrationTests
         processModeling.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
             because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
                 + "the guide the GA business-process tools name as mandatory reading");
-        splitResources.Should().HaveCount(ProcessGuideSet.SplitItemIds.Length,
-            because: "the scan below proves nothing unless it actually selected the seven articles — if they "
-                + "are renamed or moved and the filter matches nothing, an empty result would report the "
-                + "gate decision as intact while guarding none of it");
+        splitResources.Should().HaveCount(ProcessGuideSet.GoLiveItemIds(repositoryRoot).Length,
+            because: "the scan below proves nothing unless it actually selected every article on the list — if "
+                + "one is renamed or moved and the filter stops matching it, a short result would report the "
+                + "gate decision as intact while guarding less of it than it claims");
         regatedArticles.Should().BeEmpty(
-            because: "the six articles ENG-96212 split out of process-modeling carry the same go-live decision as "
-                + "the entry article; gating one of them hides part of that mandatory reading while the entry "
-                + "article keeps answering, so the loss shows up as a bad answer rather than as a missing guide");
+            because: "every article split out of process-modeling, directly or at one remove, carries the same "
+                + "go-live decision as the entry article; gating one hides part of that mandatory reading while "
+                + "the article it was split from keeps answering, so the loss shows up as a bad answer rather "
+                + "than as a missing guide");
         repositoryResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(
             because: "Git repositories must be able to declare per-resource feature requirements");
         bundleResource.GetProperty("properties").TryGetProperty("requiredFeatures", out _).Should().BeTrue(

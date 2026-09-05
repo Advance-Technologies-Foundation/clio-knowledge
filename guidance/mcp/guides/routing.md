@@ -2,6 +2,12 @@ clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
 Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
+`esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
+how a guide points at a rule it does not own. Backticks around anything else are ordinary code:
+columns, ops, and page-body sections such as `handlers` or `converters` are not topics. Where a guide
+restates something another guide owns — a destructive precondition, kept next to the instruction it
+guards — it says whose rule it is and names that guide for the rest.
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -22,17 +28,30 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
-  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, what is buildable, the
-    recipe, the modify-safety rules, the element catalog). After it, read the ONE matching sub-guide:
+  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, the recipe, the
+    modify-safety rules). After it, read the ONE matching sub-guide:
+  - which elements exist, which of them `create-business-process` builds today, and the element catalog
+    (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, modify data, or restrict which records an
-    element acts on -> name=process-data-elements
+  - start a process on a record add/modify/delete, read data, or modify data ->
+    name=process-data-elements
+  - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
+    the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
-  - the Perform task element — a human step, who performs it, its parameter table -> name=process-perform-task
+  - the Perform task element — a human step, what it produces, its parameter table ->
+    name=process-perform-task
+  - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
+    name=process-task-performer
+  - a "Task category" field showing a raw Guid, a results dropdown offering the wrong set, or WHY a
+    category must be a constant rather than a formula -> name=process-task-category
+  - an ActivityCategory / ActivityPriority mapping REFUSED ("a Lookup constant is a formula token, not a
+    plain value", or a package-convergence message) -> name=process-perform-task for the refusal texts,
+    the remedy and the ids; do NOT follow the refusal's own advice to use `expression` -- see
+    name=process-task-category for what that silently degrades
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
     name=process-activity-connections

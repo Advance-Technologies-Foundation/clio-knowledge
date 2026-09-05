@@ -2,8 +2,6 @@ clio MCP process-naming guide — name a business process, its elements and its 
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, and parameter codes.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
@@ -88,8 +86,9 @@ N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO auton
     caption and a code disagree, the caption is the input and the code is what is wrong.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
     `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
-    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in `process-modeling`
-    lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API builds today is Terminate.
+    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in
+    `process-element-catalog` lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API
+    builds today is Terminate.
     SCOPE: the rule forbids only a code that ASSERTS a type — `EndNormal` on a Terminate end, or
     `Terminate…` on an element that is not one. It does NOT ban the `End<Reason>` shape N5 prescribes:
     `EndOnboardingStarted` names the REASON, not the type, and is correct on a Terminate end. Read the
