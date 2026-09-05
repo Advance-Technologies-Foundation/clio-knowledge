@@ -68,16 +68,6 @@ internal static class ProcessGuideSet
                 resource.GetProperty("sourcePath").GetString()!))];
     }
 
-    /// <summary>Those articles' source paths, derived, in <see cref="GoLiveItemIds"/> order.</summary>
-    internal static string[] SplitPaths(string repositoryRoot)
-    {
-        Article[] declared = Declared(repositoryRoot);
-        return [.. GoLiveItemIds(repositoryRoot).Select(itemId =>
-            declared.SingleOrDefault(article => article.ItemId == itemId)?.SourcePath
-                ?? throw new InvalidOperationException(
-                    $"bundle-source.json declares no guidance resource '{itemId}'; every article the "
-                    + "go-live decision covers must stay a declared get-guidance topic."))];
-    }
 
     /// <summary>Every itemId the manifest declares, for resolving a pointer to a servable topic.</summary>
     internal static HashSet<string> DeclaredItemIds(string repositoryRoot)

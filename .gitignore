@@ -9,3 +9,8 @@ dist/
 **/bin/
 **/obj/
 .worktrees/
+
+# Test-run artifacts. One leaked into a commit on this branch; ignoring it is cheaper than
+# noticing it again.
+TestResults/
+*.trx

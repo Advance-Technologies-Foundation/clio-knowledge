@@ -217,7 +217,7 @@ public sealed class ProcessGuideResponseSizeTests
         // still answers correctly the whole time. Collapsing them into one number would report the
         // delivery failure and the housekeeping failure in the same words.
         //
-        // Known tightest at the time this gate landed: process-formulas at 88.0% of budget, so the next
+        // Known tightest, measured at e8e3790: process-formulas at 88.1% of budget, so the next
         // substantial edit to it has to split it first. That is the gate working, not a defect in it —
         // ENG-96536 left process-formulas alone deliberately (its boundary with
         // process-branch-conditions was drawn by ENG-95891 and is pinned by ProcessFormulaGuidanceTests),

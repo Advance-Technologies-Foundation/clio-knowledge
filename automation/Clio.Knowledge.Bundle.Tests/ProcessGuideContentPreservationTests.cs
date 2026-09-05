@@ -94,18 +94,6 @@ public sealed class ProcessGuideContentPreservationTests
 
     private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();
 
-    private static int Occurrences(string text, string value)
-    {
-        int count = 0;
-        for (int index = text.IndexOf(value, StringComparison.Ordinal);
-             index >= 0;
-             index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal))
-        {
-            count++;
-        }
-        return count;
-    }
-
     /// <summary>
     /// One load-bearing clause per section ENG-96536 moved, each ANCHORED to the site it protects: the
     /// clause has to sit within <see cref="AnchorWindow"/> collapsed characters of the anchor phrase.

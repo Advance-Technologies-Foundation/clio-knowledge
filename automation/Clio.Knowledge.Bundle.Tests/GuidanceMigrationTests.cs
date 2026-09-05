@@ -206,16 +206,18 @@ public sealed class GuidanceMigrationTests
 
         // ENG-96212 split process-modeling into seven articles and ENG-96132 un-gated it; ENG-96536 then
         // extracted four more from three of those seven. Both halves have to hold together: re-gating any
-        // ONE of the eleven would hide part of the guidance the GA business-process tools name as
+        // ONE of them would hide part of the guidance the GA business-process tools name as
         // mandatory reading, and it would do it where nobody is looking — the article it was split from
         // would keep answering while the sub-guide it routes to went dark.
         //
-        // Scoped to those ELEVEN ITEM IDS rather than to everything under the processes folder, and that
+        // Scoped to the articles that carry the set banner rather than to everything under the processes
+        // folder — thirteen today, and derived rather than counted, so a split adds its pieces without
+        // anyone remembering to. That
         // distinction matters. `requiredFeatures` is the only per-resource disclosure control this
         // repository has. Written as a standing prohibition over a path prefix, this assertion would turn
         // a red build on the next process guide that legitimately documents a restricted capability — and
         // the cheapest way out of a red build is to drop the gate, which is precisely the outcome the
-        // control exists to prevent. The go-live was a decision about the text in these eleven articles;
+        // control exists to prevent. The go-live was a decision about the text in these articles;
         // the assertion says only that.
         JsonElement[] splitResources = source.RootElement.GetProperty("resources")
             .EnumerateArray()

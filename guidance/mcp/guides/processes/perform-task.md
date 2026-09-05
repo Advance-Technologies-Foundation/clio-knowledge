@@ -59,9 +59,11 @@ leaf rather than through `process-modeling`.
                       block. Both layers, their accepted sources and their refusals are owned by
                       `process-task-performer`; read it before you answer "who".
   ActivityCategory    Lookup -> ActivityCategory. Task category. Required by the designer UI.
-                      MUST be a bare record Guid in `value`, never a `[#Lookup...#]` formula -- the
-                      formula form degrades the allowed-results list silently, and
-                      `process-task-category` owns that rule and its evidence.
+                      MUST be a bare record Guid in `value`, and the mapping's source MUST be `value`
+                      and never `expression` -- the expression form degrades the allowed-results list
+                      silently. (An already-composed `[#Lookup...#]` passed as a `value` is fine from
+                      CrtProcessBuilder 1.4.0.40.) `process-task-category` owns that rule and its
+                      evidence.
                       "To do" = F51C4643-58E6-DF11-971B-001D60E938C6 (also the runtime default).
                       "Call" is TWO rows and the element needs the TASK-typed one — the platform names both:
                       03DF85BF-6B19-4DEA-8463-D5D49B80BB28 is ActivityType Task

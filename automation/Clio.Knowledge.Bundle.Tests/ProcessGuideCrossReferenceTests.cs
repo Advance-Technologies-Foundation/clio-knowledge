@@ -45,7 +45,6 @@ public sealed class ProcessGuideCrossReferenceTests
     /// The line every sub-article of the split opens with. It is how an article declares that
     /// <c>process-modeling</c> is its entry point, which is what makes the entry obliged to index it.
     /// </summary>
-    private const string SetBanner = "Part of the process guide set.";
 
     /// <summary>
     /// The token routing uses to name a guide. The dot is INSIDE the class: the manifest declares dotted
@@ -150,12 +149,11 @@ public sealed class ProcessGuideCrossReferenceTests
     /// any other, so a trim for length would take the convention out of the library entirely with the
     /// whole suite green. Every other rule this change moved got a marker row, a payload pin or a
     /// survival test; this one had none.
-    /// </summary>
-    /// <summary>
+    ///
     /// Keyed on the convention's SUBJECT, not on its phrasing. The first version pinned "not a heading
     /// to scroll to", which had it backwards in both directions: a rewrite that kept all three phrases
     /// while saying "everything in backticks anywhere in the library is ordinary code" — the convention
-    /// inverted — stayed green, and restoring the wording the eleven articles actually used ("not a
+    /// inverted — stayed green, and restoring the wording the seven articles actually used ("not a
     /// section to scroll to") turned it red. So the pin now requires the two words the rule is ABOUT.
     /// </summary>
     private static readonly string[] ReadingConventionClauses =
@@ -180,7 +178,8 @@ public sealed class ProcessGuideCrossReferenceTests
             .Where(clause => !routing.Contains(clause, StringComparison.OrdinalIgnoreCase))];
 
         missing.Should().BeEmpty(
-            because: "eleven articles gave up their own copy of this sentence for this one, so it is now "
+            because: "seven articles gave up their own copy of this sentence for this one — six of them "
+                + "in this set — so it is now "
                 + "the only place the library says that a backticked sibling name is a topic to fetch. "
                 + "Without it every cross-article pointer in the set reads as a heading the reader cannot "
                 + "find. If routing has to lose it, put it back in the articles rather than nowhere. "
@@ -359,7 +358,8 @@ public sealed class ProcessGuideCrossReferenceTests
     public void DestructiveRemovalRules_ShouldSurviveInTheArticleThatOwnsThem()
     {
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string owner = ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.SplitPaths(repositoryRoot)[0]);
+        string owner = ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.Declared(repositoryRoot)
+            .Single(article => article.ItemId == ProcessGuideSet.EntryItemId).SourcePath);
 
         string[] missing = DestructiveRemovalClauses
             .Where(clause => !owner.Contains(clause, StringComparison.Ordinal))
@@ -399,14 +399,14 @@ public sealed class ProcessGuideCrossReferenceTests
         string[] missingFromIndex = articles
             .Where(article => article.ItemId != entryItemId)
             .Where(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
-                .Contains(SetBanner, StringComparison.Ordinal))
+                .Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
             .Where(article => !entry.Contains($"`{article.ItemId}`", StringComparison.Ordinal))
             .Select(article => article.ItemId)
             .ToArray();
 
         missingFromIndex.Should().NotBeNull();
         articles.Count(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
-                .Contains(SetBanner, StringComparison.Ordinal))
+                .Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
             .Should().BeGreaterThan(1,
                 because: "the index requirement is keyed on the set banner, so a banner text change would "
                     + "otherwise silently reduce this to asserting nothing");
