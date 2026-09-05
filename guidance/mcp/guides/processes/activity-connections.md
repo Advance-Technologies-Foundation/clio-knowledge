@@ -179,14 +179,15 @@ guide rather than `process-modeling`.
 - Connections are NOT graph edges. `validate-process-graph` neither checks nor is affected by them; R1-R17
   below are about sequence flows only.
 
-== Connection rules R1–R17 (validate-process-graph enforces the structural subset: R1–R3, R7,
-   R9–R15, R17; R4–R6, R8 and R16 are semantic or not yet enforced — verify those yourself.
+== Connection rules R1–R17 (validate-process-graph enforces the structural subset: R1–R3, R7–R15,
+   R17; R4–R6 and R16 are semantic or not yet enforced — verify those yourself.
    Validation pass ≠ buildable: the rules cover the FULL catalog, but only the "What you can build
-   today" slice in `process-modeling` can be built — conditional flows ARE in that slice, gateway
-   ELEMENTS and default flows are not. The exclusive gateway the platform synthesizes for a conditional
-   branch is a GENERATION-TIME construct and never appears as a graph node, so R7 and R14 do not apply
-   to it: do not model one when you validate a planned branch, and do not report a process as violating
-   them because it has one) ==
+   today" slice in `process-modeling` can be built — conditional flows, DEFAULT flows and the
+   exclusive and parallel gateway ELEMENTS are all in that slice now; inclusive and event-based
+   gateways, timers, intermediate events and sub-processes are not. The exclusive gateway the platform
+   synthesizes for a conditional branch is still a GENERATION-TIME construct and never appears as a
+   graph node, so R7 and R14 do not apply to it: do not model one when you validate a planned branch,
+   and do not report a process as violating them because it has one) ==
 R1  Start event: no incoming flow; exactly one outgoing.
 R2  End event: no outgoing flow; one or more incoming.
 R3  Exactly one top-level start event; every path reaches an end event.
@@ -194,13 +195,25 @@ R4  Terminate end kills the whole instance; Simple end ends only its path.
 R5  Start triggers: Simple=user/run; Signal(object)=record add/modify/delete; custom signal=broadcast; message=directed; timer=schedule/CRON.
 R6  Diverging gateway: 1 in, >=2 out. Converging gateway: >=2 in, 1 out.
 R7  Exclusive(OR) diverge: conditional flows + exactly one default; one path taken. Converge: first arrival, no sync.
+    Two WARNINGS, not errors, because the shipped product contains both shapes: a diverging one with no
+    default (65 shipped), and one carrying a plain sequence flow (7 shipped) - at run time that flow is
+    taken as the default branch, so say so with kind 'default' or give it a condition.
 R8  Parallel(AND) diverge: all out fire, plain sequence flows only. Converge: waits for all incoming.
+    ENFORCED as a warning: a parallel JOIN fed by two branches that leave one or-gateway BY DIFFERENT
+    FLOWS can never fire, because that gateway takes one of them. The instance hangs in Running with no
+    error - merge with an exclusive gateway instead.
 R9  Inclusive(OR) diverge: conditional flows + required default; >=1 path. Converge: syncs active branches.
+    Same two warnings as R7, reported under this id for an inclusive gateway.
 R10 Event-based gateway: each outgoing sequence flow leads directly to an intermediate catch event; first event wins.
 R11 Parallel and event-based gateways must not carry conditional/default flows.
 R12 Sequence flow: target runs after source. Multiple outgoing sequence flows = implicit parallel split.
 R13 Conditional flow originates only from a gateway or an activity.
-R14 Default flow is legal only if >=1 conditional flow leaves the same element; diverging Exclusive/Inclusive require a default.
+R14 Default flow needs a sibling conditional flow only where the element actually BRANCHES (>1 outgoing),
+    and not when a plain sibling leads into a gateway - the decision is then one element further on, which
+    is what the platform's own GetOutgoingsDefFlows does. Unscoped this rule called 45 shipped gateways
+    invalid: a CONVERGING or-gateway's single outgoing flow is a default one by construction, because the
+    designer offers no plain flow out of an or-gateway at all. At most ONE default per element - a second
+    is an error. Diverging Exclusive/Inclusive SHOULD have a default (warning, see R7).
 R15 No orphan/unreachable nodes; every flow needs a valid source and target.
 R16 Sub-process (callActivity) target must begin with a Simple start; collection mapping => multi-instance.
 R17 (advisory) Add data one-record mode outputs only Id; chain a Read data for other fields.

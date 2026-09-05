@@ -38,8 +38,11 @@ Three rules apply once you place a gateway element, all enforced server-side and
 in the descriptor schema:
 
 1. **Out of a gateway that CHOOSES** (`exclusiveGateway`, and a designer-made `inclusiveGateway`), every
-   outgoing flow must be `conditional` or `default`. A lone unconditional one is WRITTEN AS the default
-   branch — the designer cannot draw a plain flow out of a gateway either — and a second one is refused.
+   outgoing flow must be `conditional` or `default` — the designer cannot draw a plain flow out of a
+   gateway either. An unconditional one is written as the default branch ONLY while it is the gateway's
+   ONLY outgoing flow; once any sibling exists it is REFUSED, and that includes the ordinary if/else
+   shape where a `conditional` arm was declared first. **Say `kind: "default"` explicitly** and the
+   question never arises.
 2. **At most one `default` per element.** It is "the branch taken when nothing matched", so two make
    that undecidable.
 3. **Out of a `parallelGateway`**, which starts every branch, all outgoing flows are plain `sequence`.
@@ -52,8 +55,11 @@ the literal `true`. Specific to a branch: a condition on a DEFAULT branch is ref
 **A PLAIN sibling flow IS the else branch — off an ACTIVITY.** This is the single most useful fact about
 branching here and it is easy to miss: the platform treats any non-conditional flow leaving the element as
 the default, and takes it only when no condition matched. So `if/else` off an activity is one `conditional`
-flow plus a plain one; you do not need a "default flow" element. Out of a GATEWAY element it is different —
-rule 1 above applies, and the plain flow is written as a `default` one. R7 does NOT apply to this shape - not "is satisfied by it":
+flow plus a plain one; you do not need a "default flow" element. Out of a GATEWAY element it is different, and
+in a way that costs a round trip if you get it wrong: rule 1 above applies, and a plain flow is written
+as a `default` one only while it is the gateway's ONLY outgoing flow. Declare the conditional arm first —
+which the precedence advice below tells you to do — and the plain one is refused outright, aborting the
+whole `create-business-process` call. Off a gateway, write the else branch as `kind: "default"`. R7 does NOT apply to this shape - not "is satisfied by it":
 `process-activity-connections` owns R1-R17 and states why, and the difference is operational. The
 gateway is synthesized at generation time and never appears as a graph node, so there is no
 exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding
