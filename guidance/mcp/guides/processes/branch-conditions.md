@@ -68,11 +68,17 @@ Two consequences worth having before you build:
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
   outgoing flow is taken. That is a parallel split, silently.
 
-That second point is why there is no clear-condition operation and why you should not reach for
-remove-and-add to get one. If you remove the only conditional flow and add a plain one, an exclusive branch
-becomes a parallel one and `describe` shows `kind: "sequence"` on both — which reads exactly like "condition
-cleared, as asked". To CHANGE a condition, call `setFlowCondition` again: it overwrites in place and keeps
-the flow's position. To make a branch unconditional, set its condition to `true` and leave the kind alone.
+That second point is what makes CLEARING a condition the dangerous edit, and it is why the clear-condition
+operation is `setFlow` with `kind: "sequence"` rather than remove-and-add. `setFlow` re-kinds the flow in
+place: it keeps the flow's position in `flows[]` — which is its precedence — and it REFUSES the one edit
+that would silently reshape the process, namely dropping the LAST conditional flow off an element that still
+has other outgoing flows. Remove-and-add is guarded by nothing and loses the position as well: do it and the
+exclusive branch becomes a parallel one, with `describe` reporting `kind: "sequence"` on both flows — which
+reads exactly like "condition cleared, as asked".
+
+To CHANGE a condition rather than clear it, call `setFlowCondition` again: it overwrites in place and keeps
+the flow's position. To make a branch always taken, set its condition to `true` and leave the kind alone —
+which is also the way past the refusal above, and the only one that keeps the gateway.
 
 BRANCH PRECEDENCE IS FLOW ORDER among the formula-bearing siblings, and the order is inspectable: `flows[]`
 in `describe-business-process` is emitted in the stored order, which is the order the runtime builds. Where
