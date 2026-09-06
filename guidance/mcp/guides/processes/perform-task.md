@@ -66,7 +66,9 @@ guide rather than `process-modeling`.
                       Verify against the environment before trusting either id.
                       Set it as a bare record Guid in `value`. The route ships from CrtProcessBuilder
                       1.3.1.1, and a CURRENT clio additionally refuses any environment older than the
-                      version it bundles.
+                      version it bundles. From 1.4.0.40 the server also resolves the record's NAME into the
+                      parameter's display value, so the designer's "Task category" field shows `Call`
+                      rather than the raw Guid, and describe reports it as `valueDisplay` (see NOTE-2).
                       A stale environment surfaces as ONE OF TWO refusals, and both mean YOUR ENVIRONMENT IS BEHIND,
                       not that the parameter is unsettable: a current clio refuses the call UP FRONT with its
                       package-convergence message naming both versions and the install hint; an older clio
@@ -97,9 +99,15 @@ guide rather than `process-modeling`.
   ActivityResult      Guid. The element's RESULT (the completed activity's result record). Visible in describe
                       from the start (isResult: true). Usable as a mapping SOURCE for a downstream element via
                       `sourceElement` + `sourceElementParameter` (verified: saves, reads back as a
-                      server-built `[Element:{uid}]` metapath, and resolves at run time). NOTE: conditional
-                      flows are NOT buildable from clio yet, so a clio-built process can READ the result but
-                      cannot BRANCH on it — say so instead of promising branching.
+                      server-built `[Element:{uid}]` metapath, and resolves at run time). You can branch
+                      on it with `setFlowCondition`, but ONLY while nothing is selected in the results
+                      editor for that connector — the designer opens that editor rather than a formula
+                      field here, and a selected result makes the platform stop reading the formula.
+                      clio refuses it; `process-branch-conditions` owns the rule. Affects 337 of the 1 522
+                      conditional flows shipped in 7.8.0. Say two things out loud, or the owner finds
+                      them alone: the designer's save raises "Required fields of some elements are not
+                      filled in" naming that connector, and a human cannot see or edit the formula
+                      there.
   CurrentActivityId   Guid. The created Activity's Id.
                       It is INVISIBLE in describe until bound — the name above is the only way to find it.
                       It resolves as a mapping SOURCE for a downstream element (verified end to end).
@@ -145,8 +153,9 @@ NOTE-1 (the performer): "Who performs the task?" has TWO layers, and picking the
   * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
     performer to open the page for) and stays untouched for user.
   * describe reads the block back top-level on the element (`performer`: type + the stored formula +
-    roleDisplay) and it is re-appliable verbatim. REFUSED on any element other than performTask — the
-    retired CallUserTask by name (its runtime IGNORES the assignment).
+    roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
+    than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
+    element has its own `email.performer`, which is a different field and is not refused.
   LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Four working ways:
   * a bare Contact record Guid in `value` — the Guid must be an EXISTING Contact record: an id of another
     entity (a ROLE id is the classic mistake) is REFUSED naming the reference object, because before this
@@ -162,13 +171,52 @@ NOTE-1 (the performer): "Who performs the task?" has TWO layers, and picking the
 
 NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue), not a formula. The element's
   allowed-results list is computed from the category ONLY when the category's source is ConstValue (the
-  platform's `GetResultParameterAllValues` reads `SourceValue.Value` only for a ConstValue source); writing it
-  as a `[#Lookup...#]` expression sets the Activity's category column but SILENTLY DEGRADES the allowed-results
-  list the task page / designer result dropdown offers, falling back to the default set. Do NOT try to verify
-  the degradation through the `Activity.AllowedResult` column — that column derives from outgoing CONDITIONAL
-  flows, not from the category, and is empty either way on a process without them. So the bare-Guid `value` is
-  the only correct route; on a pre-1.3.1.1 package the parameter cannot be set correctly — update the package
-  rather than using the expression form.
+  platform's `GetResultParameterAllValues` reads `SourceValue.Value` only for a ConstValue source — client-side
+  and server-side alike); writing it as a `[#Lookup...#]` expression sets the Activity's category column but
+  SILENTLY DEGRADES the allowed-results list the task page / designer result dropdown offers, falling back to
+  the default set. Do NOT try to verify the degradation through the `Activity.AllowedResult` column — that
+  column derives from outgoing CONDITIONAL flows, not from the category, and is empty either way on a process
+  without them. So the bare-Guid `value` is the only correct route; on a pre-1.3.1.1 package the parameter
+  cannot be set correctly — update the package rather than using the expression form.
+
+  This matches what the DESIGNER stores for the real-lookup families this rule is about (a task element's
+  ActivityCategory / ActivityPriority): a lookup constant a human picks is
+  `{Source: ConstValue, Value: <bare record Guid>}` on the element parameter, with the record's NAME - or
+  nothing at all - in the parameter's DisplayValue. Do not read that as a universal designer rule: the
+  designer's own corpus is mixed (absent, the raw Guid and a readable name all occur, and the platform ships
+  a first-party schema with the raw Guid in DisplayValue), so an agent checking a real schema will find
+  counter-examples. Name-or-nothing is the CORRECT convention, not the most common one. The `[#Lookup...#]`
+  macro form the designer does produce belongs to a different place: a change-data COLUMN mapping, where the
+  value is a formula in its own right. Do not carry the macro across to an element parameter because you saw it
+  in a designer-authored schema.
+
+  DisplayValue is where a design-time defect used to live and is worth understanding, because it is invisible
+  in `metadata.json`: it is a LOCALIZABLE string, so it is serialized into the schema's RESOURCES
+  (`BaseElements.<Element>.Parameters.<Param>.DisplayValue`), not into the metadata beside `Value`. The designer
+  shows a NON-EMPTY DisplayValue verbatim and resolves the record name itself only when it is EMPTY — so a
+  DisplayValue holding the raw id made the "Task category" field render `03df85bf-…` instead of `Call`, while
+  the runtime behaved correctly the whole time. From CrtProcessBuilder 1.4.0.40 the server resolves the
+  referenced record's name and stores THAT, and leaves DisplayValue unset when it cannot (which is the correct
+  degrade — the designer then resolves the name). Nothing about the input contract changed: you still pass a
+  bare record Guid.
+  Why the server resolves the name rather than simply leaving DisplayValue empty: only the Perform task's
+  category field re-resolves an empty display value (`ActivityUserTaskPropertiesPage.initActivityCategory`).
+  Every other designer surface reads the parameter through `getMappingValue()`, which returns
+  `displayValue || value` (`process-schema-parameter.js`) — an empty display value renders the raw Guid again
+  there. "Just write nothing" is therefore the cheaper WRONG fix, not a safe alternative.
+  Evidence: observed on a Creatio 8.x stand through `describe-business-process` and the pulled schema
+  resources (`Resources/<Process>.Process/resource.en-US.xml`) against CrtProcessBuilder 1.4.0.40; the client
+  behaviour is read from the designer's own source, not inferred.
+
+  Two conveniences shipped with it, both from 1.4.0.40:
+  * an already-composed `[#Lookup.{objectUId}.{recordId}#]` passed as a MAPPING `value` on a Lookup target is
+    DECODED to the bare record id and stored as a ConstValue — so a value echoed back from describe re-submits
+    unchanged. This does not make the expression form correct here; it makes the round trip safe. Which
+    routes accept the macro and which refuse it is owned by `process-parameters` (the "A LOOKUP value is
+    DIFFERENT" bullet) — read it there rather than here, so the two never drift;
+  * `describe-business-process` reports the resolved name as `valueDisplay` beside the unchanged bare-Guid
+    `value`. `valueDisplay` is read-only and re-derived on every write — never feed it back as `value`. Its
+    absence means the environment could not name the record, NOT that the value is wrong.
 
 --- Worked example: "Call the client, due in 2 days, assigned to the process starter" ---
 1) create-business-process
@@ -190,7 +238,9 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBefore",       "value": "30" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBeforePeriod", "value": "0" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "ActivityCategory",
-       "value": "F51C4643-58E6-DF11-971B-001D60E938C6" } } ]
+       "value": "03DF85BF-6B19-4DEA-8463-D5D49B80BB28" } } ]
+   <- ActivityCategory CallAsTask. The three rows, which one to use and why resolving by NAME is a coin
+      flip are stated once near the top of this article; do not restate them here.
 
 3) describe-business-process -> every parameter you bound now appears with its source and value.
    The ones you did NOT bind stay hidden. That is expected; it is not a failure.

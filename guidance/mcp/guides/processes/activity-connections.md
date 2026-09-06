@@ -23,7 +23,8 @@ guide rather than `process-modeling`.
   whatever the source resolves to.
 - `recordId` NEEDS NO SCHEMA UId. The server composes `[#Lookup.{schemaUId}.{recordId}#]` from the target
   column's own reference entity, so send the bare record id. This is the one place the "you cannot guess
-  these ids" warning ABOVE does not apply — for a connection, do NOT hand-write the Lookup token.
+  these ids" warning in `process-parameters` does not apply — for a connection, do NOT hand-write the
+  Lookup token.
 - CURRENT USER — "link it to me / to my contact / to my account". This is the ONE macro you may author on a
   connection, because the set is CLOSED and named here. Send it as `expression`, chosen by the target
   column's own entity: a Contact column -> `[#SysVariable.CurrentUserContact#]`; an Account column ->
@@ -164,7 +165,9 @@ guide rather than `process-modeling`.
   auto-relation rules and quick-add, and is normally absent from the designer's "Connected to" as well —
   except `Project`, which the designer injects client-side and DOES display. And an `expression` in the
   `[#SysSettings...#]` family is accepted unchecked: its value type cannot be read at design time, so a
-  setting that does not hold a record id leaves the column empty at run time. Read the caveats — they arrive
+  setting holding the wrong KIND of value leaves the column empty at run time. A setting holding NOTHING is
+  the other case and worse: the interpreted engine THROWS on it rather than resolving to null, so an empty
+  setting fails the step instead of blanking the column. Read the caveats — they arrive
   as `message-type: "Warning"` entries in `execution-log-messages`, NOT as a `warnings` field on the
   response, so finding no such field is not evidence there were none. Some are neutral acknowledgements (a
   column that was already unbound), not failures.
@@ -178,8 +181,12 @@ guide rather than `process-modeling`.
 
 == Connection rules R1–R17 (validate-process-graph enforces the structural subset: R1–R3, R7,
    R9–R15, R17; R4–R6, R8 and R16 are semantic or not yet enforced — verify those yourself.
-   Validation pass ≠ buildable: the rules cover the FULL catalog incl. gateways and conditional
-   flows, but only the "What you can build today" slice in `process-modeling` can be built) ==
+   Validation pass ≠ buildable: the rules cover the FULL catalog, but only the "What you can build
+   today" slice in `process-modeling` can be built — conditional flows ARE in that slice, gateway
+   ELEMENTS and default flows are not. The exclusive gateway the platform synthesizes for a conditional
+   branch is a GENERATION-TIME construct and never appears as a graph node, so R7 and R14 do not apply
+   to it: do not model one when you validate a planned branch, and do not report a process as violating
+   them because it has one) ==
 R1  Start event: no incoming flow; exactly one outgoing.
 R2  End event: no outgoing flow; one or more incoming.
 R3  Exactly one top-level start event; every path reaches an end event.

@@ -38,7 +38,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   Use the entity COLUMN name (here `UsrName`), not the field caption ("Name").
 - To convert an EXISTING process to start on a record event, use `modify-business-process`:
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
-  `removeElement` is DESTRUCTIVE and the modify path validates nothing: it cascades to every flow
+  `removeElement` is DESTRUCTIVE and no pre-save validation restores what it breaks: it cascades to every flow
   touching the element without re-joining the gap. The rules that make a removal safe — describe first,
   validate the graph AS IT WILL BE, confirm with the user — are in `process-modeling`. Read them before
   removing anything, not after.
@@ -78,7 +78,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 - WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
   below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- LIMITATION — the read record's individual COLUMN values are NOT referenceable downstream yet. The
+- LIMITATION — a read record's individual COLUMN values are out of reach in practice, so "the record I
+  just read has status X", the likeliest branch after a read, cannot be authored. NOT because the
+  platform refuses a third segment — it parses one — but because describe reports no column UIds, so
+  there is nowhere to GET the one you would have to write. Author TWO segments
+  (`[#[Element:{uid}].[Parameter:{uid}]#]`) in a mapping, a `changeData` value or a filter condition.
+  One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
+  `[[element:Read.ResultEntity.Column]]`. The
   element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
   the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
   that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
@@ -191,7 +197,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   `DayOfYearToday` (the ONLY DayOfYear macro that takes NO argument); **system / lookup** `CurrentUser` |
   `CurrentUserContact`.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
-  `value`, a `macro`, a `datePart`, or isNull/isNotNull — NOT `processParameter` / `elementParameter` /
+  `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
   instance exists, so a parameter / element output / meta-path reference has no value yet. The server
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
@@ -202,8 +208,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   but the task itself is not buildable yet (see below).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
-  `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value` (a signalStart filter
-  allows only a constant `value`/`macro`/`datePart`, never a `processParameter` — see the restriction above):
+  `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value`; a `datePart` WITH a
+  `macro` is refused outright (a signalStart narrows the right side further — see above):
   `{ "column": "CreatedOn", "datePart": "Year", "comparison": "equal", "value": "2026" }` reads
   `Year(CreatedOn) = 2026`. `HourMinute` is the exception — it extracts the TIME-OF-DAY and compares it to a
   `value` in `HH:mm[:ss]` form: `{ "column": "CreatedOn", "datePart": "HourMinute", "comparison": "equal",
