@@ -7,27 +7,47 @@ PURPOSE
   dependency is a no-op).
 
 WHEN YOU NEED THIS (the canonical symptom)
-- A schema mutation (modify-entity-schema-column / update-entity-schema / create-entity /
-  sync-schemas) fails with:
-    "GetSchemaDesignItem returned an HTML error page instead of JSON".
+- A schema operation (modify-entity-schema-column / update-entity-schema / create-entity /
+  sync-schemas, and the READ paths get-entity-schema-properties /
+  get-entity-schema-column-properties / set-entity-schema-properties) fails with:
+    "Schema '<Schema>' could not be opened in package '<Package>'. The usual cause is that
+     '<Package>' has no dependency on the package that owns the layer of '<Schema>' it is
+     trying to extend."
+  followed by the packages that contribute the schema, installed applications first.
 - The MOST COMMON cause is NOT a server bug: the package you are writing into does not
   depend on the package/app that OWNS the upper layer of the object you are extending.
   A replacing schema can only be created when the target package depends on the owner of
-  the object's top layer.
+  the object's top layer. The platform raises SchemaIsNotAvailableException inside
+  GetSchemaDesignItem and the web stack renders it as an HTML page, which is why older
+  clio builds reported this as a server error or a stale database table. It is neither.
   Classic example: extending the Opportunity layer from a custom package (for example
   `Custom`) that depends only on `CrtCore` → the designer fails until the package also
   depends on `CrtLeadOppMgmtApp` (the app that owns the Opportunity layer).
+- A READ scoped to a package shows the same failure while the SAME read without
+  `--package` succeeds. That is not evidence that reads are unaffected — it means the
+  unscoped read never had to resolve the dependency. Do not conclude "reads work" from it.
 
-AUTOMATIC RESOLUTION
-clio automatically detects when GetSchemaDesignItem fails because of a missing
-dependency: it finds the package containing the target schema, adds it as a
-dependency, and retries the operation — one transparent recovery cycle. This
-applies ONLY to WRITE operations (modify-entity-schema-column, update-entity-schema,
-create-entity) and ONLY when exactly one candidate package is found.
-When multiple candidates exist, clio refuses to auto-resolve (ambiguous) and
-instructs the user to add the correct dependency manually.
-Read-only operations (get-entity-schema-properties, get-entity-schema-column-properties)
-never trigger auto-resolution.
+CLIO NEVER ADDS THE DEPENDENCY FOR YOU
+clio does NOT auto-resolve. It reports the packages that contribute the schema and are
+not already dependencies of your package, ranked with installed applications first, and
+stops. Adding one changes the package for real, more than one of them can be a valid
+dependency, and the failure alone does not prove a missing dependency is the cause — so
+the choice is yours. Treat the ranked list as a hint, not an answer.
+Two qualifications travel in the message itself and change what it is worth:
+- If clio could not read the dependencies your package already declares, the list is
+  UNFILTERED and may name packages that are already there. The message says so. Adding an
+  already-declared dependency is a harmless no-op, but it also fixes nothing.
+- If the lookup never completed, or found no contributing package, clio states that it has
+  NO evidence about the cause and names none. Do not invent one; confirm the schema name
+  and target package with find-entity-schema / list-packages and check the server log.
+
+NOT THIS CASE: a successful write whose verification reload came back empty. After
+modify-entity-schema-column saves and publishes, clio re-reads the schema to confirm.
+Publishing refreshes the schema manager in two steps and the schema is briefly missing
+while that runs (about nine seconds, measured). That failure names itself explicitly —
+"was saved and published successfully ... but the verification reload could not read it
+back yet" — and instructs you NOT to repeat the write and NOT to add a dependency. The
+change is already applied. Re-read the schema to confirm.
 
 NOT THIS CASE: a transient network flap (DNS resolution failure, connection reset,
 timeout, gateway 502/503/504) is a DIFFERENT failure class from a missing dependency.
