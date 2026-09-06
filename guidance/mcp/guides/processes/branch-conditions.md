@@ -23,11 +23,25 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 `kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
 `condition`. The same two fields are on `addFlow`.
 
-The older two-step route — build the flow plain, then `modify-business-process` `setFlowCondition`
-(`source`, `target`, `condition`) — still works, and it is what you use on a flow that ALREADY exists,
-including a designer-authored one. Do not reach for it when CREATING: it saves the process once with a
-flow that does not yet branch. To change an existing flow's kind in either direction, `setFlow` takes
-`source`, `target`, `kind` and (for a conditional one) `condition`.
+**WHICH conditions you can declare on the build path is decided by the UId rule above**, and this is
+the single thing to get right before you write a descriptor. A condition names a parameter by its UId
+meta-path; on `create-business-process` those UIds DO NOT EXIST YET — the process is being created by
+that same call and there is no field to pre-declare one. So:
+
+- **Declare it in `flows[]`** when the condition needs no parameter UId: a literal, or a
+  `[#SysSettings.Code<Type>#]` reference. In the shipped product that is about 3% of conditions.
+- **Build the flow `default` or plain and set the condition afterwards** with `modify-business-process`
+  (`setFlow` kind `conditional`, or `setFlowCondition`) whenever the condition references a PROCESS
+  PARAMETER or an ELEMENT OUTPUT — together about 88% of the shipped ones. This is not a style
+  preference; the condition cannot be expressed on the build path at all.
+
+Writing the name instead is not a way round it. `[#Amount#]` is refused by the platform's pre-save gate
+with `Formula value error: Expression expected (at index 0)`, and because that gate runs on the whole
+schema, the entire `create-business-process` call is aborted and nothing is created.
+
+The two-step route is also what you use on a flow that ALREADY exists, including a designer-authored
+one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`
+and (for a conditional one) `condition`.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in
