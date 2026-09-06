@@ -149,7 +149,7 @@ article from what this one says; read that article.
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
+   setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
    changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any

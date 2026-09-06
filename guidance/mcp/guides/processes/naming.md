@@ -118,14 +118,18 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     choice: this catalog governs NAMES, so a structural difference between two runs is OUT OF SCOPE
     here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
     reason no naming rule can fix.
-N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flow: `flows[]` takes
-    `source` and `target` and nothing else, so this rule cannot be applied yet by any route. Recorded
-    here so the catalog is complete, the same way the R1–R17 header in `process-activity-connections`
-    separates the full catalog from the buildable slice. When labels land: label a conditional flow with
-    the decision outcome it represents (`Budget > 10 000` — a human-readable caption, not the condition's
-    own text), and label the default flow explicitly rather than leaving it blank.
-    Do not read this rule as a statement about FLOWS. A conditional flow itself IS buildable — build it
-    plain, then `setFlowCondition`; see `process-branch-conditions`. Only the LABEL is missing, along with default
-    flows and gateway ELEMENTS (ENG-91853 extends that).
+N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flow, so this rule cannot be
+    applied yet by any route. Recorded here so the catalog is complete, the same way the R1–R17 header in
+    `process-activity-connections` separates the full catalog from the buildable slice. When labels land:
+    label a conditional flow with the decision outcome it represents (`Budget > 10 000` — a
+    human-readable caption, not the condition's own text), and label the default flow explicitly rather
+    than leaving it blank.
+    Do not read this rule as a statement about FLOWS. Only the LABEL is missing, and ENG-91853 is the
+    reason that is now the ONLY thing missing rather than one of four: it added `kind` and `condition`
+    to `flows[]`, so a conditional flow, a DEFAULT flow and the `exclusiveGateway` / `parallelGateway`
+    ELEMENTS are all buildable in one call. It did NOT add a label field, so this rule stays
+    NOT YET BUILDABLE and is waiting on work nobody has scheduled — do not read the reference as a
+    promise that it is coming. See `process-branch-conditions` for which conditions can be written on
+    the build path by name and which still need the modify step.
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own article (`process-activity-connections`) and no naming surface at all.
