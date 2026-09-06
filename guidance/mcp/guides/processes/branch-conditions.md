@@ -32,8 +32,19 @@ everything exists.
 
     { "source": "Check", "target": "Approve", "kind": "conditional",
       "condition": "[#Amount#] > 100" }                              // a process parameter
-    { "source": "Read", "target": "Handle", "kind": "conditional",
-      "condition": "[#Read.ResultCount#] > 0" }                      // an element's output
+    { "source": "Check", "target": "Escalate", "kind": "conditional",
+      "condition": "[#Priority#] == \"High\"" }                       // and another
+
+`[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
+before you rely on it. A `readData` in `first` mode, the only mode clio builds, exposes exactly one output
+and it is a RECORD (`ResultEntity`). Testing one of its COLUMNS needs a third meta-path segment
+(`[EntityColumn:]`) that no name can express, so a column test goes through the modify path. That is not a
+corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
+
+> Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
+> condition stores, and `describe` reads back clean — but `ReadDataUserTask.HandleResult` assigns it only in
+> `function` mode with `FunctionType == Count`, and returns before it in every other mode. On anything clio
+> builds it stays 0, so `> 0` never fires and the fallback always runs. See `data-elements.md`.
 
 `[#SysSettings.Code<Type>#]`, `[#Lookup.Schema.Record#]` and an already-written meta-path are passed
 through untouched. A name that resolves to nothing is refused before anything is saved, naming the flow
@@ -87,18 +98,28 @@ elsewhere in the graph as already handled.
 
 Two consequences worth having before you build:
 
-- **Give every branching element a plain sibling.** If no condition matches and there is no plain flow, the
-  run FAILS rather than falling through. Two mutually-negated conditions look safe and are not: when the
-  parameter is null both are false and the process throws.
+- **Give every branching element ONE fallback, and write it the way that element takes.** If no condition
+  matches and there is no fallback, the run FAILS rather than falling through. Two mutually-negated
+  conditions look safe and are not: when the parameter is null both are false and the process throws.
+  Off a GATEWAY the fallback is `kind: "default"` — a plain flow is refused there, and normalised to
+  `default` when it is the gateway's only outgoing one. Off an ORDINARY element it is a single plain flow.
+  ONE either way: a conditional branch beside TWO flows that have none is refused, because the platform
+  drops one of them and runs the other alongside the branch the condition chose.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
   outgoing flow is taken. That is a parallel split, silently.
 
 That second point is what makes CLEARING a condition the dangerous edit, and it is why the clear-condition
-operation is `setFlow` with `kind: "sequence"` rather than remove-and-add. `setFlow` re-kinds the flow in
-place: it keeps the flow's position in `flows[]` — which is its precedence — and it REFUSES the one edit
-that would silently reshape the process, namely dropping the LAST conditional flow off an element that still
-has other outgoing flows. Remove-and-add is guarded by nothing and loses the position as well: do it and the
+operation is `setFlow` rather than remove-and-add. `setFlow` re-kinds the flow in place: it keeps the flow's
+position in `flows[]` — which is its precedence — and it REFUSES the one edit that would silently reshape
+the process, namely dropping the LAST conditional flow off an element that still has other outgoing flows.
+
+**Which kind you ask for depends on the source, and off a gateway `sequence` never survives.** A deciding
+gateway's outgoing flows must each say how they are chosen, so `kind: "sequence"` there is either REFUSED
+(a conditional sibling exists) or normalised to `default` (it is the gateway's only outgoing flow) — the
+designer cannot draw a plain flow out of a gateway either. Off a gateway, clear a condition with
+`kind: "default"`, and only where the gateway has no default yet. `kind: "sequence"` is the clear-condition
+kind off an ORDINARY element. Remove-and-add is guarded by nothing and loses the position as well: do it and the
 exclusive branch becomes a parallel one, with `describe` reporting `kind: "sequence"` on both flows — which
 reads exactly like "condition cleared, as asked".
 

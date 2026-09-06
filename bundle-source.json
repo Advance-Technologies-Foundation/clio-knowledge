@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.94",
+  "libraryVersion": "1.13.95",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1228,7 +1228,7 @@
     {
       "itemId": "process-naming",
       "title": "Process naming rules (N1-N10)",
-      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R17 connection rules and none of these -- so they are authoring obligations, not validated ones.",
+      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R18 connection rules and none of these -- so they are authoring obligations, not validated ones.",
       "topicId": "creatio.process-naming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-naming",
@@ -1326,7 +1326,7 @@
     {
       "itemId": "process-activity-connections",
       "title": "Activity connections (\"Connected to\")",
-      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R17 connection rules, which are about sequence flows and not about these links.",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R18 connection rules, which are about sequence flows and not about these links.",
       "topicId": "creatio.process-activity-connections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
