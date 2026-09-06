@@ -184,9 +184,13 @@ article from what this one says; read that article.
   * FALSE with an `activeVersionSchemaUId` -> you are about to edit a version the runtime does not
     execute; the save succeeds and changes nothing in production. Re-describe by that UId and edit THAT
     member. Resolving by `process-name` lands here by default — the base name is the ROOT.
-  * TRUE -> the edit changes what the next run executes, IN PLACE, with no version boundary, nothing to
-    roll back to and no operation in this build that restores the previous graph. It is irreversible:
-    say so in those terms and get explicit confirmation before saving.
+  * TRUE -> the edit changes what the next run executes, IN PLACE, with no version boundary and
+    nothing to roll back to. That edit is irreversible: the previous graph is gone and no operation
+    anywhere brings it back. Say so in those terms and get explicit confirmation before saving --
+    and OFFER THE ALTERNATIVE, because the irreversibility is avoidable rather than inherent:
+    `modify-business-process-as-new-version` applies the SAME operations to a new version and leaves
+    the running one untouched, so nothing is lost and the switch stays a separate, explicit choice.
+    `process-versions` owns that path, including which questions to ask and when.
   * Anything else -> read `process-versions`, which owns the remaining outcomes and tells apart a clio
     that cannot report the standing from a family whose active version is genuinely unresolved. Do not
     improvise between them, and do not stop on the first one: an older clio reports no standing for any

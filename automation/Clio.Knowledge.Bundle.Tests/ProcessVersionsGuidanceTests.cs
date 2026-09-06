@@ -78,6 +78,9 @@ public sealed class ProcessVersionsGuidanceTests
             "get-process-signature",
             "generate-process-model",
             "modify-business-process",
+            "modify-business-process-as-new-version",
+            "set-active-business-process-version",
+            "install-process-builder",
             "run-process"
         ];
         // Near-misses of the names above rather than arbitrary wrong strings, because a drifting edit
@@ -88,7 +91,10 @@ public sealed class ProcessVersionsGuidanceTests
             "describe_business_process",
             "run_process",
             "get-process-signatures",
-            "generate-process-models"
+            "generate-process-models",
+            "create-business-process-version",
+            "set-active-process-version",
+            "activate-business-process-version"
         ];
 
         // Act
@@ -105,6 +111,86 @@ public sealed class ProcessVersionsGuidanceTests
             guide.Should().NotContain(wrong,
                 because: $"'{wrong}' is not a tool clio ships, and an agent that copies it from guidance gets an unknown-tool error");
         }
+    }
+
+    [Test]
+    [Description("Pins the two-step write sequence and the fact that there is no separate create step. An agent looking for a 'create version' tool it cannot find either invents one or reports the capability as missing; both are wrong, and one call carrying the edits IS the create.")]
+    public void Guide_ShouldStateTheTwoStepWriteSequence()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string guide = ProcessGuideSet.Read(repositoryRoot, GuidePath);
+
+        // Assert
+        guide.Should().Contain("There is NO separate \"create a version\" step",
+            because: "the shape an agent expects - create, then edit - does not exist, and looking for it is the first wrong turn");
+        guide.Should().Contain("carries the edits AND produces the version",
+            because: "one call does both, and an agent that splits them makes a second version by accident");
+        guide.Should().Contain("EMPTY operations array is how you take a plain snapshot",
+            because: "the restore-point gesture has no tool of its own, so it has to be named where the tool is");
+        guide.Should().Contain("created INACTIVE",
+            because: "an agent that assumes the edit went live reports the work as done while the old graph still runs");
+    }
+
+    [Test]
+    [Description("Pins the ask-once policy AND that it is agent behaviour rather than a request field. Both halves matter: without the first the agent re-asks every turn, and without the second it invents a session-mode argument that no tool takes.")]
+    public void Guide_ShouldMakeTheSessionPolicyAgentBehaviourRatherThanARequestField()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string guide = ProcessGuideSet.Read(repositoryRoot, GuidePath);
+
+        // Assert
+        guide.Should().Contain("Two questions, asked ONCE",
+            because: "asking on every edit is as bad as never asking, and the article has to say which");
+        guide.Should().Contain("say what you did in EVERY reply",
+            because: "a builder who cannot tell whether the running version changed has lost what versioning was for");
+        guide.Should().Contain("YOUR behaviour, not a field on any request",
+            because: "no tool takes a session mode, so an agent that treats the policy as an argument invents one");
+        guide.Should().Contain("Never activate on your own initiative",
+            because: "the product asks in its own prompt between the two steps, so chaining them takes a decision away from the user");
+    }
+
+    [Test]
+    [Description("Pins that a rejected edit leaves nothing behind, and its opposite: past a successful save the version exists and cannot be taken back. An agent told only the first half goes looking for wreckage; told only the second, it assumes every failure left something.")]
+    public void Guide_ShouldStateThatARejectedEditSavesNothing()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string guide = ProcessGuideSet.Read(repositoryRoot, GuidePath);
+
+        // Assert
+        guide.Should().Contain("nothing is written at all",
+            because: "a failure before the save leaves no draft, so there is nothing to clean up and no reason to hunt for one");
+        guide.Should().Contain("no half-created version",
+            because: "that is the specific worry an agent has about an aborted multi-operation call");
+        guide.Should().Contain("still names it, because it cannot be taken back",
+            because: "a failure AFTER the save names a version that really exists, and reading that as debris loses it");
+    }
+
+    [Test]
+    [Description("Pins what a rollback does and does not do. Each of the three is a promise an agent otherwise makes wrongly: that in-flight work is repaired, that the bad version is gone, and that the requested version is the one now running.")]
+    public void Guide_ShouldBoundWhatARollbackDoes()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string guide = ProcessGuideSet.Read(repositoryRoot, GuidePath);
+
+        // Assert
+        guide.Should().Contain("It reaches NEW instances only.",
+            because: "promising that a rollback repairs work in flight is the most expensive wrong answer here");
+        guide.Should().Contain("It DELETES nothing",
+            because: "a builder asking to remove the bad version has to hear that no operation does it, not that a permission is missing");
+        guide.Should().Contain("READ-BACK, not from the request",
+            because: "the platform swallows a failed sibling deactivation, so the requested version is not automatically the running one");
     }
 
     [Test]
@@ -220,10 +306,14 @@ public sealed class ProcessVersionsGuidanceTests
             because: "a stock stand carries parentless schemas numbered 1 and 2, so 'the root is version 0' as a two-way rule is measurably false (ENG-94374 story 8)");
         guide.Should().Contain("Treat this as the default,",
             because: "stock versions named ...V2 / ...Extended / ...WithTracking exist, so V4 must not read as a test a caller can apply");
-        guide.Should().Contain("There is no operation that CREATES a version.",
-            because: "the boundary is what stops an agent promising a version or a rollback this build cannot perform");
-        guide.Should().Contain("There is no operation that SETS the active version",
-            because: "a rollback request has to be refused explicitly, not answered with a process copy");
+        // The boundary MOVED in ENG-94374 stories 16-17: creating a version and setting the active one
+        // are now clio operations, so the two claims that used to be pinned here are false and their
+        // assertions are gone rather than softened. What is still a boundary is pinned instead - a
+        // running instance cannot be migrated and a version cannot be deleted, both platform facts.
+        guide.Should().Contain("Nothing MIGRATES a running instance between versions",
+            because: "an agent that believes a rollback moves work in flight promises a repair the platform cannot perform");
+        guide.Should().Contain("Nothing DELETES a version",
+            because: "the one gesture a builder asks for that no tool anywhere provides, so it has to be refused by name");
         guide.Should().Contain("Save new version (Ctrl+Alt+N)",
             because: "refusing without naming where the product does it is half an answer, and this is the affordance a builder needs");
         guide.Should().Contain("ASKS, in its own prompt",

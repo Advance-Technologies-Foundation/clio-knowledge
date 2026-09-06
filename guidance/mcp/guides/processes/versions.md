@@ -159,27 +159,91 @@ endpoint does. `run-process` refuses a display caption, and the refusal names th
 run: like the fold above it has not been exercised end to end, so treat the code in a refusal as a lead
 to verify with `describe-business-process`, not as an answer to paste into a launch.
 
-== What this build cannot do ==
-Reading the standing is the whole of it today. In particular:
-  * There is no operation that CREATES a version. `modify-business-process` edits the schema you name,
-    in place -- it does not fork one. Editing the active version of a process changes what the next run
-    executes, with no version boundary and nothing to roll back to.
-  * There is no operation that SETS the active version, so a rollback cannot be performed from here.
+== Writing a version, and making it actual ==
+Two tools, and they answer two different questions. Never treat them as one gesture.
+  `modify-business-process-as-new-version`  applies edits to a NEW VERSION of a process instead of to
+                                            the running one. This is the product's
+                                            `Save new version (Ctrl+Alt+N)`.
+  `set-active-business-process-version`     makes one member of a family the ACTUAL one. This is
+                                            `Set as actual version` in the designer's ACTIONS menu, and
+                                            it is the rollback gesture.
+There is NO separate "create a version" step, and looking for one is the first wrong turn. ONE call
+carries the edits AND produces the version; an EMPTY operations array is how you take a plain snapshot
+of the source before editing it in place. So "make a restore point" and "put this change in a new
+version" are the same tool, differing only in whether you pass operations.
+
+The `operations` array is EXACTLY the one `modify-business-process` takes -- same vocabulary, same
+descriptors, same order-and-abort rule. Read `process-modeling` for the operation reference; nothing
+about it changes because the destination is a version.
+
+What you get back: the new version's `versionSchemaUId`, the `versionName` the PLATFORM composed
+(root name + package + number, per V4 -- you cannot choose or predict it), the version NUMBER it
+allocated, `isActiveVersion` (false), the family root UId, and the applied-operation count. Optionally
+name a target package; omit it and the platform picks, and note that a version does NOT inherit the
+root's package (V4), so cross-package families are normal rather than a mistake.
+
+The new version is created INACTIVE. Creating it changes NOTHING about what the environment executes.
+That is not a limitation to work around -- it is the point, and it is why the two tools are separate.
+
+== Ask once, then behave predictably ==
+Two questions, asked ONCE, at the first edit of a session:
+  1. Do edits go to the CURRENT version, or to a NEW one?
+  2. Does each new version become the ACTUAL one?
+Then hold those answers for the rest of the session and say what you did in EVERY reply -- "edited the
+current version", "saved version 3, the running one is unchanged", "version 3 is now actual". A builder
+who has to re-derive which of those happened has lost the thing versioning was for.
+
+That policy is YOUR behaviour, not a field on any request. Neither tool takes a "session mode", and no
+call inherits anything from a previous one: every call states its own destination, and
+`set-active-business-process-version` is called or not called on its own merits each time. So "the user
+said new versions from now on" changes which tool you reach for -- it never changes what a call means.
+
+Never activate on your own initiative. After creating a version the product ASKS, in its own prompt,
+whether to make it the actual one -- in the designer, with the person answering -- so chaining
+activation onto a create is not a convenience, it is taking a decision the product hands to the user.
+Call `set-active-business-process-version` because the user asked for it.
+
+== What a rollback does, and what it does not ==
+Activating an earlier version IS the rollback, and it is bounded:
+  * It reaches NEW instances only. Instances already running stay on the version they started with and
+    finish on it (V5). A long-lived process keeps executing the old graph after the call, and that is
+    correct rather than a failure to report.
+  * It DELETES nothing (V6). The version you rolled back from stays in the family forever, visible and
+    readable. "Roll back" here means activating an earlier member, never removing a newer one -- and if
+    a builder asks you to delete the bad version, the answer is that no operation anywhere does it, not
+    that you are missing a permission.
+  * It is reported from a READ-BACK, not from the request. The platform logs and SWALLOWS a failure to
+    deactivate a sibling, so the tool re-reads the family afterwards; a mismatch FAILS and names the
+    version the environment really reports as actual. Trust that name over the one you asked for.
+  * It re-saves EVERY member of the family in one transaction -- a write nobody asked for by name,
+    reported as a warning. Nothing about the other members' graphs changes.
+
+== A rejected edit saves nothing ==
+Operations apply in order and any failure aborts the whole call. When the failure happens BEFORE the
+save, nothing is written at all: there is no half-created version, no draft, and nothing to clean up.
+Retry the corrected call -- do not go looking for wreckage from the failed one.
+
+The opposite case is the one to read carefully: once the save has succeeded the version EXISTS, and a
+failure reported after that point still names it, because it cannot be taken back (V6). The message
+says which case it is. When it names a version, that version is really on the environment.
+
+Then there is the version you created and no longer want: it is permanent and inert. Make another
+version actual instead. That is not a workaround for a missing delete -- V6 is why no delete exists.
+
+== What this build still cannot do ==
+  * Nothing MIGRATES a running instance between versions (V5). No tool, no product gesture.
+  * Nothing DELETES a version (V6).
   * `IsMaxVersion` is deliberately not surfaced. The library view computes it with a lexicographic MAX
     over a character column across an asymmetric pool, and two versions of one root created in
     different packages BOTH report true -- so it is not a usable "latest" signal and is left out rather
     than passed on.
-Say so plainly when a builder asks for a new version or a rollback -- and then tell them where the
-product does it, because "I cannot" without "here is where you can" is half an answer. In the process
-designer the SAVE button is a split button: `Save new version (Ctrl+Alt+N)` creates one, and
-`Save current version (Ctrl+Alt+S)` is the in-place overwrite. After creating a version the platform
-ASKS, in its own prompt, whether to make it the actual one -- so the person stays in control of which
-version runs. Note what that means for you: creating a version and activating it are separate steps
-even in the product, so never present them as one, and never assume a version someone just created is
-the one running. `Set as actual version` in the designer ACTIONS menu activates an existing version.
-
-Proposing a copy of the process under a new name is NOT an equivalent: a copy is a new root with its own
-family, it does not become what the runtime executes, and it leaves the original running.
+  * Copying a process under a new name is NOT a version and never was: a copy is a new ROOT with its
+    own family, it does not become what the runtime executes, and it leaves the original running. Do
+    not offer it as an equivalent.
+Both write tools require the `CrtProcessBuilder` package on the target environment at the version that
+first carries these operations; an environment behind that is refused up front, naming both versions,
+with `install-process-builder` as the remedy. That refusal means the ENVIRONMENT is behind -- it is not
+a statement about the process you named.
 
 == File design mode ==
 Under file design mode a process is absent from the process library until it has been loaded from the

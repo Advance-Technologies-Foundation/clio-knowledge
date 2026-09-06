@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.78",
+  "libraryVersion": "1.13.79",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1310,7 +1310,7 @@
     {
       "itemId": "process-versions",
       "title": "Process versions",
-      "description": "Owns the Creatio process VERSION model and the version fields of describe-business-process: a version is a separate schema rather than a revision, the family is flat with the root as every member's parent, exactly one member is the active version the runtime executes, a running instance stays on the version it started on so a rollback affects only later runs, and deleting a version does not exist. States that versionhood can never be inferred from a schema Name, which identity to pass when you want the version that runs rather than a specific one, how to launch a versioned process, and what this build cannot do: nothing here creates a version or sets the active one.",
+      "description": "Owns the Creatio process VERSION model and the version fields of describe-business-process: a version is a separate schema rather than a revision, the family is flat with the root as every member's parent, exactly one member is the active version the runtime executes, a running instance stays on the version it started on so a rollback affects only later runs, and deleting a version does not exist. States that versionhood can never be inferred from a schema Name, which identity to pass for the version that runs, and how to launch one. Owns the WRITE half too: modify-business-process-as-new-version carries the edits and produces the version in ONE call (an empty operations array is a snapshot), set-active-business-process-version makes a member actual and is the rollback gesture, the two are never chained because the product asks in between, the session policy is agent behaviour rather than a request field, and a rejected edit saves nothing while a saved version cannot be taken back.",
       "topicId": "creatio.process-versions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-versions",
