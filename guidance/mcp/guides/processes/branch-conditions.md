@@ -8,10 +8,12 @@ and are NOT restated here; fetch both when you author a condition.
 
 == Conditional flows and branch conditions ==
 
-READ "REFERENCING A PARAMETER" UNDER FORMULAS BEFORE WRITING A CONDITION. Every parameter a condition
-names is referenced by its UId meta-path — `[#[Parameter:{uid}]#]` — and never by its name; a bare
-`Amount` is refused. Short names appear below to keep the rules readable: they describe the DECISION,
-they are not the text you write.
+HOW A CONDITION NAMES A PARAMETER DEPENDS ON WHICH CALL YOU ARE IN, and getting it wrong costs the
+whole call. The RUNTIME only ever resolves a UId meta-path — `[#[Parameter:{uid}]#]`. On
+`modify-business-process` that is what you write, and `describe-business-process` gives you the UIds.
+On `create-business-process` you write the NAME instead — `[#Amount#]`, `[#Element.Parameter#]` — and
+the server expands it, because on create the UId does not exist yet. Both are spelled out below; read
+"REFERENCING A PARAMETER" under FORMULAS for the meta-path form itself.
 
 A branch is a flow with a CONDITION, and you DECLARE it where you declare the flow:
 
@@ -23,25 +25,29 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 `kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
 `condition`. The same two fields are on `addFlow`.
 
-**WHICH conditions you can declare on the build path is decided by the UId rule above**, and this is
-the single thing to get right before you write a descriptor. A condition names a parameter by its UId
-meta-path; on `create-business-process` those UIds DO NOT EXIST YET — the process is being created by
-that same call and there is no field to pre-declare one. So:
+**ON THE BUILD PATH, WRITE THE NAME.** This is the one exception to the UId rule above and it exists
+because it has to: on `create-business-process` the UIds do not exist yet — the parameters and elements
+are made by that same call — so `flows[].condition` takes a name and the server expands it once
+everything exists.
 
-- **Declare it in `flows[]`** when the condition needs no parameter UId: a literal, or a
-  `[#SysSettings.Code<Type>#]` reference. In the shipped product that is about 3% of conditions.
-- **Build the flow `default` or plain and set the condition afterwards** with `modify-business-process`
-  (`setFlow` kind `conditional`, or `setFlowCondition`) whenever the condition references a PROCESS
-  PARAMETER or an ELEMENT OUTPUT — together about 88% of the shipped ones. This is not a style
-  preference; the condition cannot be expressed on the build path at all.
+    { "source": "Check", "target": "Approve", "kind": "conditional",
+      "condition": "[#Amount#] > 100" }                              // a process parameter
+    { "source": "Read", "target": "Handle", "kind": "conditional",
+      "condition": "[#Read.ResultCount#] > 0" }                      // an element's output
 
-Writing the name instead is not a way round it. `[#Amount#]` is refused by the platform's pre-save gate
-with `Formula value error: Expression expected (at index 0)`, and because that gate runs on the whole
-schema, the entire `create-business-process` call is aborted and nothing is created.
+`[#SysSettings.Code<Type>#]`, `[#Lookup.Schema.Record#]` and an already-written meta-path are passed
+through untouched. A name that resolves to nothing is refused before anything is saved, naming the flow
+and listing the parameters that do exist — which is the whole reason to write the name rather than
+guess: without it the platform answers `Formula value error: Expression expected (at index 0)`, naming
+neither, and the entire call is aborted.
 
-The two-step route is also what you use on a flow that ALREADY exists, including a designer-authored
+**ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
+exists, so `describe-business-process` reports every UId. The two-step route — build the flow plain,
+then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
 one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`
 and (for a conditional one) `condition`.
+
+Both need `CrtProcessBuilder` 1.4.0.60 or newer; below it the build path takes a system setting only.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in
