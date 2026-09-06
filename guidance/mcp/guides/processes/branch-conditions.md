@@ -101,8 +101,9 @@ Two consequences worth having before you build:
 - **Give every branching element ONE fallback, and write it the way that element takes.** If no condition
   matches and there is no fallback, the run FAILS rather than falling through. Two mutually-negated
   conditions look safe and are not: when the parameter is null both are false and the process throws.
-  Off a GATEWAY the fallback is `kind: "default"` — a plain flow is refused there, and normalised to
-  `default` when it is the gateway's only outgoing one. Off an ORDINARY element it is a single plain flow.
+  Off a GATEWAY the fallback is the `default` branch — write `kind: "default"`, or write `sequence` and
+  the server normalises it, because a gateway has no other kind of unconditional branch. Off an ORDINARY
+  element the fallback is a single plain flow.
   ONE either way: a conditional branch beside TWO flows that have none is refused, because the platform
   drops one of them and runs the other alongside the branch the condition chose.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
@@ -114,12 +115,13 @@ operation is `setFlow` rather than remove-and-add. `setFlow` re-kinds the flow i
 position in `flows[]` — which is its precedence — and it REFUSES the one edit that would silently reshape
 the process, namely dropping the LAST conditional flow off an element that still has other outgoing flows.
 
-**Which kind you ask for depends on the source, and off a gateway `sequence` never survives.** A deciding
-gateway's outgoing flows must each say how they are chosen, so `kind: "sequence"` there is either REFUSED
-(a conditional sibling exists) or normalised to `default` (it is the gateway's only outgoing flow) — the
-designer cannot draw a plain flow out of a gateway either. Off a gateway, clear a condition with
-`kind: "default"`, and only where the gateway has no default yet. `kind: "sequence"` is the clear-condition
-kind off an ORDINARY element. Remove-and-add is guarded by nothing and loses the position as well: do it and the
+**Off a gateway, `sequence` does not survive as `sequence` — it becomes the default.** A deciding
+gateway's outgoing flows must each say how they are chosen, and the designer cannot draw a plain flow out
+of one, so `kind: "sequence"` there is normalised to `default` and a notice says so. It is REFUSED only
+when the gateway already has a default: that flow has nothing left to become, and you must give it a
+condition or re-kind the existing default first. Re-kinding the gateway's OWN default to `sequence` is a
+no-op — it stays the default, silently, because clearing the marker would leave the gateway with no
+fallback at all. Remove-and-add is guarded by nothing and loses the position as well: do it and the
 exclusive branch becomes a parallel one, with `describe` reporting `kind: "sequence"` on both flows — which
 reads exactly like "condition cleared, as asked".
 
