@@ -99,9 +99,15 @@ guide rather than `process-modeling`.
   ActivityResult      Guid. The element's RESULT (the completed activity's result record). Visible in describe
                       from the start (isResult: true). Usable as a mapping SOURCE for a downstream element via
                       `sourceElement` + `sourceElementParameter` (verified: saves, reads back as a
-                      server-built `[Element:{uid}]` metapath, and resolves at run time). NOTE: conditional
-                      flows are NOT buildable from clio yet, so a clio-built process can READ the result but
-                      cannot BRANCH on it — say so instead of promising branching.
+                      server-built `[Element:{uid}]` metapath, and resolves at run time). You can branch
+                      on it with `setFlowCondition`, but ONLY while nothing is selected in the results
+                      editor for that connector — the designer opens that editor rather than a formula
+                      field here, and a selected result makes the platform stop reading the formula.
+                      clio refuses it; `process-branch-conditions` owns the rule. Affects 337 of the 1 522
+                      conditional flows shipped in 7.8.0. Say two things out loud, or the owner finds
+                      them alone: the designer's save raises "Required fields of some elements are not
+                      filled in" naming that connector, and a human cannot see or edit the formula
+                      there.
   CurrentActivityId   Guid. The created Activity's Id.
                       It is INVISIBLE in describe until bound — the name above is the only way to find it.
                       It resolves as a mapping SOURCE for a downstream element (verified end to end).
@@ -147,8 +153,9 @@ NOTE-1 (the performer): "Who performs the task?" has TWO layers, and picking the
   * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
     performer to open the page for) and stays untouched for user.
   * describe reads the block back top-level on the element (`performer`: type + the stored formula +
-    roleDisplay) and it is re-appliable verbatim. REFUSED on any element other than performTask — the
-    retired CallUserTask by name (its runtime IGNORES the assignment).
+    roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
+    than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
+    element has its own `email.performer`, which is a different field and is not refused.
   LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Four working ways:
   * a bare Contact record Guid in `value` — the Guid must be an EXISTING Contact record: an id of another
     entity (a ROLE id is the classic mistake) is REFUSED naming the reference object, because before this
@@ -231,7 +238,9 @@ NOTE-2 (ActivityCategory): it MUST be a constant (`value`, stored as ConstValue)
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBefore",       "value": "30" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "RemindBeforePeriod", "value": "0" } },
      { "op": "addMapping", "mapping": { "elementName": "CallClientAboutRenewal", "elementParameter": "ActivityCategory",
-       "value": "F51C4643-58E6-DF11-971B-001D60E938C6" } } ]
+       "value": "03DF85BF-6B19-4DEA-8463-D5D49B80BB28" } } ]
+   <- ActivityCategory CallAsTask. The three rows, which one to use and why resolving by NAME is a coin
+      flip are stated once near the top of this article; do not restate them here.
 
 3) describe-business-process -> every parameter you bound now appears with its source and value.
    The ones you did NOT bind stay hidden. That is expected; it is not a failure.
