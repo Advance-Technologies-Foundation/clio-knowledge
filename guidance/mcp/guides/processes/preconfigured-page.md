@@ -71,22 +71,28 @@ section to scroll to.
       only results, outputs and values already set, and this one is filled at run time — so `dataSources` is
       the only place it surfaces. An element built without `dataSources` has no such parameter at all.
     * Change it later with `setElement` → `elementUpdate.preconfiguredPage`; every field is optional there.
-      OMITTING `buttons` or `dataSources` means "leave them alone", NOT "the page has none" — with ONE
-      exception: changing `page` TO a Freedom UI page REQUIRES `buttons` in the same call. The stored buttons
-      name the PREVIOUS page's buttons, so the operation is refused rather than carried across — re-read
-      `get-process-page-facts` for the new page first. Changing `page` to a Classic UI page is refused
-      outright: the contract cannot configure one. An element that already references a Classic UI page keeps
-      that reference (re-asserting the SAME page is fine) and is edited within the fields both page types share.
-    * `dataSources` have no removal path through this contract, and the leftover that produces is NOT inert
-      — this is the one rule here worth reading twice. SUPPLYING a source the new page does not declare is
-      refused (the FACTS rule above). OMITTING `dataSources` means "leave alone", so the PREVIOUS page's
-      data-source parameter is carried forward, and the step can then never finish: at run time the stored
-      source name is resolved against the page the element is now on, resolves to nothing, and the
-      completion is abandoned silently — the page stays open with no error and no validation message, and
-      the instance never leaves `Running`. `describe-business-process` still reports that source and still
-      reports `inSync: true`, so NOTHING downstream shows it. Consequence for you: a retarget onto a page
-      with FEWER data sources cannot be made correct through this contract. Say so, and build a new element
-      on the new page instead of editing the old one.
+      OMITTING `buttons` or `dataSources` means "leave them alone", NOT "the page has none" — with TWO
+      exceptions, both when `page` changes TO a Freedom UI page: `buttons` is REQUIRED in the same call (the
+      stored buttons name the PREVIOUS page's buttons, so the operation is refused rather than carried
+      across), and `dataSources` is REQUIRED whenever the element carries data sources of the previous page
+      (the refusal names them). Re-read `get-process-page-facts` for the new page first and pass both through
+      unchanged; pass `dataSources: []` when the new page declares none. Changing `page` to a Classic UI page
+      is refused outright: the contract cannot configure one. An element that already references a Classic UI
+      page keeps that reference (re-asserting the SAME page is fine) and is edited within the fields both page
+      types share.
+    * A PAGE CHANGE RECONCILES DATA SOURCES — this is the one rule here worth reading twice. The `dataSources`
+      you pass are the new page's WHOLE set: every data-source parameter the call does not re-declare is
+      REMOVED and reported (the same Warning line as a page parameter the page stopped declaring); a
+      re-declared one keeps the SAME parameter, so anything mapped from it stays valid; and the removal is
+      REFUSED — naming the dependents — while any other parameter still maps from the parameter being dropped.
+      Re-map or remove those first, or keep the element on its page. On the SAME page an omitted or partial
+      `dataSources` still leaves the others alone. Why it is this strict: a data-source parameter naming a
+      source the CURRENT page does not declare stops the step from ever completing — at run time the stored
+      name is resolved against the page the element is now on, resolves to nothing, and the completion is
+      abandoned silently (the page stays open with no error and no validation message, the instance never
+      leaves `Running`) while `describe-business-process` still reports `inSync: true`. Refused rather than
+      silently cleared, because only the caller can read the new page's sources, and a parameter dropped
+      behind the caller's back breaks whatever maps from it as quietly as the hang breaks completion.
     * RE-SYNC: any `setElement` touching the element re-reads the page and reconciles its parameters —
       added ones appear, values and mappings for unchanged ones survive, a renamed parameter keeps its
       value, and a parameter whose data type changed loses its value and is reported. This mirrors the
@@ -102,7 +108,8 @@ section to scroll to.
     * DRIFT IS REPORTED as `message-type: "Warning"` entries in `execution-log-messages` — on a MODIFY and on a
       BUILD alike. There is NO separate `warnings` field on the response, so looking for one and finding nothing
       is not evidence there were none. A cleared value, a removed parameter, a rename, and a page that could not
-      be read each raise one line naming the element and the parameters. clio adds its own validation
+      be read each raise one line naming the element and the parameters — a data-source parameter dropped by a
+      page change is reported as a removed parameter the same way. clio adds its own validation
       warnings to the same channel: a button that exists but is not a completing candidate, a data source the
       page declares outside its page-scoped entity sources, and an `entitySchemaName` that disagrees with the
       page's own (that last one still completes the step — the parameter is simply typed to the wrong
