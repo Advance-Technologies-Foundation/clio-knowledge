@@ -111,6 +111,18 @@ Before opening a release-affecting pull request, run the producer contract suite
 dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj
 ```
 
+That reports pass or fail. It does NOT print the per-article size table, and that table is the only
+early warning there is: an article between 80% and 100% of the response budget is green, by design,
+because gating that band blocked open pull requests that were doing nothing wrong. The table is
+written to the test output and needs a logger the default command does not attach, so an article
+sliding toward the limit is invisible under the line above. When you touch a process guide, run it
+this way and read the `of budget` lines -- an article marked `approaching the budget` should be split
+before it is grown further:
+
+```bash
+dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj --logger "console;verbosity=detailed"
+```
+
 ## Guidance changes
 
 A guidance contribution should state:

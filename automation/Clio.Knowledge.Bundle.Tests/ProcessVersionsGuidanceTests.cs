@@ -281,8 +281,8 @@ public sealed class ProcessVersionsGuidanceTests
             because: "the entry article indexes the set, and an article missing from the index is one a reader never learns to fetch");
         entryDescription.Should().Contain("and process-versions.",
             because: "the entry item's description enumerates what it routes to, so a new article has to join that list");
-        entryDescription.Should().Contain("Each of the ten",
-            because: "the description states how many articles the set holds, and a stale count is a claim the reader can check and find wrong");
+        entryDescription.Should().Contain("Each article in the set is sized",
+            because: "the wording has to stay count-FREE. This pin used to demand a number, and the number went stale the first time master split an article out - which is the failure the count itself was supposed to prevent, arriving from the other direction. A phrase that names no quantity cannot go stale, and the enumeration above is what keeps the membership honest");
     }
 
     [Test]

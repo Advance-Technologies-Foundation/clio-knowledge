@@ -292,5 +292,5 @@ read as "this process has no versions".
   * naming a process, its elements and its parameters -> `process-naming`
   * building and editing a process at all             -> `process-modeling`
   * what a described element or parameter contains    -> `process-modeling`, then the article it routes to
-This article owns only the version model and the version fields. It does not restate the descriptor,
-the element catalog or the connection rules.
+This article owns only the version model, the version fields and the two write operations. It does not
+restate the descriptor, the element catalog (`process-element-catalog`) or the connection rules.

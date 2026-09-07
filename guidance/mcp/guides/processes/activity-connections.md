@@ -2,11 +2,9 @@ clio MCP process-activity-connections guide — bind an Activity's "Connected to
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the "Connected to" links of the Activity a task creates, and the R1-R17 connection rules.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
-Creating a process here? Its code and caption, and every element and parameter code, are governed by
-N1-N10, owned by `process-naming` — read it BEFORE you name anything, even if you entered from this leaf
-guide rather than `process-modeling`.
+Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
+owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
+leaf rather than through `process-modeling`.
 
 == Activity connections ("Connected to") ==
 - WHAT: which records the Activity a task creates is attached to — a contact, an account, and whatever else
@@ -182,7 +180,7 @@ guide rather than `process-modeling`.
 == Connection rules R1–R17 (validate-process-graph enforces the structural subset: R1–R3, R7,
    R9–R15, R17; R4–R6, R8 and R16 are semantic or not yet enforced — verify those yourself.
    Validation pass ≠ buildable: the rules cover the FULL catalog, but only the "What you can build
-   today" slice in `process-modeling` can be built — conditional flows ARE in that slice, gateway
+   today" slice in `process-element-catalog` can be built — conditional flows ARE in that slice, gateway
    ELEMENTS and default flows are not. The exclusive gateway the platform synthesizes for a conditional
    branch is a GENERATION-TIME construct and never appears as a graph node, so R7 and R14 do not apply
    to it: do not model one when you validate a planned branch, and do not report a process as violating
