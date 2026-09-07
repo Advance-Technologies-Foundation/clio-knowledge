@@ -14,21 +14,30 @@ TOOL: get-mobile-page-conversion-guide (ADVISORY-ONLY — builds nothing, writes
 It detects the source page type (today only Freedom UI web, sourceType "freedom-web", is
 supported) and returns a conversion GUIDE. It does NOT generate a body and does NOT save to
 Creatio or disk. The guide contains:
-  - recommendedMobileTemplate + templateNote — the mobile template to create the page from. When the
-    source page's web template matches no conversion rule, this is a GENERIC mobile base rather than a
-    matched counterpart, and templateNote says so: no container or component name correspondence is
-    known, so every element lands where the source tree puts it. Read the note before treating the
-    recommendation as a pair, and review that page in the designer more closely.
-  - containerMap — web→mobile container-name correspondence; use it to set each
-    component's parentName to the correct mobile container.
+  - recommendedMobileTemplate + templateMatch — the mobile template to create the page from, and how it
+    was chosen. templateMatch is "matched" when a conversion rule pairs this page's web template with a
+    mobile counterpart, and "generic-fallback" when none does. BRANCH ON IT: on "generic-fallback" no
+    container or component name correspondence is known, containerMap is empty, and every element lands
+    where the source tree puts it — do not treat the recommendation as a pair, and review that page in
+    the designer more closely. Absent when there is no recommendation at all.
+  - containerMap — the web→mobile container-name correspondence the converter has ALREADY APPLIED,
+    for gate narration. REFERENCE ONLY: never derive or override an operation's parentName from it. The
+    operations already carry the parent, including the tab layers this map does not model.
   - sourceStructure — the full resolved component tree (incl. components inherited from the
     base template), with name / type / parentName / isContainer.
-  - componentSuggestions — per source component TYPE: a category (directMapping /
-    withAdaptation / alternativeAvailable / unsupported / requiresManualDecision), the
-    suggested mobile type(s), and a primaryWebMerge note for many→one mappings.
+  - componentSuggestions — per source component TYPE, DERIVED from the finished viewConfigDiff: what
+    the conversion DID to that type's instances. A category, spelled exactly as it ships —
+    PascalCase: DirectMapping / AlternativeAvailable / WithAdaptation / Unsupported /
+    RequiresManualDecision — plus the mobile type(s) it resolved to. A type whose configuration shipped
+    NESTED inside another element's values has no row at all: there is nothing to do about it. Report
+    this section; never plan from it — the operations are the plan.
   - viewConfigDiff — THE MOBILE PAGE'S viewConfigDiff, ready to apply in order (operation =
-    merge / insert / relocate-children). Iterate this to build the body; it already
+    merge / insert — those two and no others). Iterate this to build the body; it already
     encodes merge-vs-insert, the mobile parent, survivability and caption resources. Every insert
+    carries the component in `values`, including its `type` and its value binding. `name` is NOT
+    unique in this array: apply the operations IN ORDER and never deduplicate them by name — two
+    operations may legitimately target one element, and keeping "the cleaner one" discards a
+    layoutConfig shift nothing else reports.
     A parent an operation names is either created by the diff itself (an `insert` with that `name` is in
     it) or already on the target page from the mobile template — either way you author nothing extra for
     it; `guide.unresolvedParents` reports the one case where NEITHER provides it. See NEVER AUTHOR A
@@ -39,14 +48,14 @@ Creatio or disk. The guide contains:
   - nameMap — source element name -> mobile element name, for the elements the converter RENAMED, and
     only those. Everything else keeps its name and joins to sourceStructure directly; a viewConfigDiff
     name in neither was synthesized by the converter. Absent when nothing was renamed.
-  - pendingBindings — the value bindings the inserts still need, which the converter cannot place itself:
-    each names the element, the `sourceProperty` the source bound through (`control` / `value`), and the
-    `sourceValue` to re-attach. The mobile binding property is a TYPE-SPECIFIC rename of it (a mobile
-    `crt.ComboBox` binds via `value`, while `control` needs `items` or the page crashes), and which one a
-    type wants is not in mobileContracts — both are listed as allowed. So attach `sourceValue` under the
-    property that component's contract wants. Absent when nothing needs one.
   - unresolvedParents — inserts whose parent NEITHER the diff nor the mobile template provides. Report and
     stop; see NEVER AUTHOR A PARENT THE DIFF DOES NOT CREATE. Absent in the normal case.
+  - sectionRegistration — what the environment says about registering the page for the Mobile client,
+    plus registrationActions: the steps to propose at Gate S, each naming a clio tool and its arguments.
+    READ probeOk FIRST. When it is false the environment could not be queried and every
+    environment-derived flag is ABSENT rather than false — report that nothing was established, and do
+    NOT tell the user the page is unregistered. isFormPage is read from the page itself and is present
+    either way.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED
@@ -91,10 +100,6 @@ Creatio or disk. The guide contains:
     Merge twins the mobile template provides are untouched. SILENT — never a gate question:
     state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
     value. Null only when no standard normalized or skipped anything at all.
-  - spacingNormalization — BACK-COMPAT ALIAS of the "spacing" section, shape unchanged for callers that
-    already read it, and it mirrors that section's `normalized[]` ONLY. Prefer normalizations, which also
-    carries `skipped[]` and the standards this one cannot express. Read it only when the clio you are
-    talking to returns no normalizations.
   - resourceStrings — every localized string the SOURCE PAGE DECLARES for the tokens the converted body
     references (top-level captions AND nested ones like config.title / text.template), keyed by resource
     name and resolved to its en-US text. Register this whole map via update-page `resources`. A key whose
@@ -117,10 +122,11 @@ Creatio or disk. The guide contains:
     wrong fix. Report them at the gate; none is silently absorbed.
   THERE IS NO `diagnostics` FIELD, and none of its four codes survives — do not look for it, and do not
   read its absence as "nothing to weigh". Each went somewhere:
-    - a twin with no prebuilt delta → read the ENTRY. `values: null` on a `merge` means there
-      is nothing prebuilt to apply; when `mobileType` also differs from the source type, the payload is
-      absent BY DESIGN and the how-to is type-driven (componentSuggestions). Either way the operation
-      itself is the whole instruction.
+    - a twin with no prebuilt delta → read the ENTRY. An EMPTY `values` object (`{}`) on a `merge`
+      means there is nothing prebuilt to apply. Emptiness is the signal — never null and never absent:
+      the applier lists `values` as a required parameter of `merge` and validates every operation
+      before applying any, so one null would fail the whole array. Either way the operation itself is
+      the whole instruction.
     - the root-merge fallback → the cause that mattered now REFUSES the conversion (see DEGRADED CASE).
       Detect the benign remainder structurally: a data-section diff that is one op with `path: []`.
     - the two rules-file codes → clio's CI, for whoever authored the typo. You get no signal, because
@@ -203,9 +209,10 @@ FLOW
          deliberately OMITTED so the mobile element keeps its OWN default (an unset recordColumnName
          stays the mobile default RecordId). Paste values as-is; never add the omitted defaults.
          A template component the page did NOT change still gets an entry — an advisory `merge` with
-         `values: null` — so a page business rule targeting it still converts. Apply it as given:
-         with no payload there is nothing to merge, and the mobile template's own configuration stands.
-         Never fill such an entry in from the source element's values.
+         an EMPTY `values` object (`{}`, never null) — so a page business rule targeting it still
+         converts. Apply it as given: with no payload there is nothing to merge, and the mobile
+         template's own configuration stands. Never fill such an entry in from the source element's
+         values, and never strip the empty object.
      If the mobile list template already provides the List / ListItem elements, configure
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
@@ -239,10 +246,10 @@ FLOW
      field's `valueChange`/`updated`): supported requests are kept (remapped when the mobile name
      differs). A component whose request the mobile app does NOT support is not inserted at all — it
      was already DROPPED (see its `droppedElements` entry), so you never see it here. Do NOT re-add or
-     hand-edit these bindings — paste values as-is. Then add ONLY
-     what pendingBindings names (see the field above):
-       • the value binding (control, or value for lookups) — type-specific, so it is not prebuilt;
-         (the row of a grid → crt.List insert is NOT one of these — see the next paragraph.)
+     hand-edit these bindings — paste values as-is. There is NOTHING to add: the value binding is in
+     `values` too, under `control`, which is the same wire name on both web and mobile (the mobile
+     runtime reads the JSON key `control`; a Dart field named `value` is what it deserializes INTO, and
+     reading that field name as the wire name is what once made the converter withhold the binding).
      A grid → crt.List INSERT arrives with its row ALREADY BUILT: values carries the
      crt.ListItem under itemLayout (title = the first grid column, body = the rest) AND every source
      property the grid carried, each already shaped to what the mobile component accepts. Paste it as-is;
@@ -257,8 +264,6 @@ FLOW
      for those not-prebuilt parts. validate-page is the backstop — it
      rejects an insert that drops a required property (e.g. a field caption, or a lookup-path
      attribute's type) and update-page refuses to save.
-   - relocate-children — do NOT recreate this container; its children are placed in parentName
-     instead (each child has its own entry whose parentName already points there).
    (There is no `drop` operation. An element that did not convert is not something to apply, so it is
    NOT in viewConfigDiff at all — it is in `guide.droppedElements`, with a coded reason. Report those; apply
    none of them. get-guidance `freedom-page-mobile-reason-codes` has every code and what to say about
@@ -304,13 +309,22 @@ FLOW
    Freedom UI Mobile Designer for final layout review.
 
 ─────────────────────────────────────────────────────────────
-COMPONENT CLASSIFICATION (5 categories — in componentSuggestions.category)
+COMPONENT CLASSIFICATION (componentSuggestions.category)
 ─────────────────────────────────────────────────────────────
-- directMapping          : same component type exists on mobile — carry it over as-is.
-- withAdaptation         : transferred, but layout/properties need adjusting.
-- alternativeAvailable   : maps to a different mobile type (e.g. crt.Checkbox → crt.Toggle).
-- unsupported            : NOT available on mobile; replace it or configure manually.
-- requiresManualDecision : unknown/custom or ambiguous UX; decide with the user.
+Five values, and they ship in PascalCase exactly as written here — compare against these strings, not
+against a camelCase spelling. Each says what the conversion DID, so this is a report, never a plan:
+- DirectMapping          : converted under this SAME type. Nothing to decide.
+- AlternativeAvailable   : converted under a DIFFERENT mobile type (a web grid ships as a finished
+                           crt.List), which suggestedMobileTypes names. Also the label when nothing
+                           converted and the rules name something to use instead.
+- WithAdaptation         : transferred, but layout/properties need adjusting. A judgement no operation
+                           carries, so only a conversion rule can declare it.
+- Unsupported            : no operation was emitted for any instance, for a type the WEB registry
+                           knows. Replace it or configure it manually.
+- RequiresManualDecision : the same for a type unknown to BOTH registries — probably custom; decide
+                           with the user.
+A type present in the mobile registry is NOT evidence that anything converted: read the category, not
+the registry.
 
 ─────────────────────────────────────────────────────────────
 DATA SECTIONS — modelConfigDiff / viewModelConfigDiff (paste, don't rebuild)

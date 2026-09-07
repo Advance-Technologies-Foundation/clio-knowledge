@@ -39,12 +39,17 @@ flow itself.
 NOT LOSS — report it, and re-insert NOTHING
   drop-inherited-chrome        Chrome inherited from the source page's own TEMPLATE, which the mobile
                                template provides natively (title container, back/save/cancel/close).
-                               params.name; params.scope and params.target when it was an action the
-                               converter considered retargeting. Re-adding it duplicates a native
-                               element.
-  drop-excluded-by-rule        A POSITIONAL exclusion the converter applied by rule: params.webType is
-                               banned from params.hostType[params.slot] (params.host names the
-                               instance). The same type OUTSIDE that position converts normally, so
+                               params.targetParent + params.targetSlot name where the mobile template
+                               provides that native element; params.scope when it was inside a
+                               non-converting scope. The two are SEPARATE keys on purpose: if you ever
+                               re-add the element, a parentName takes params.targetParent alone — a
+                               dotted "Parent.slot" string is accepted by the applier and saves the
+                               element at the viewConfig root, outside every container. Re-adding it
+                               duplicates a native element.
+  drop-excluded-by-rule        A POSITIONAL exclusion the converter applied by rule: this record's own
+                               webType is banned from params.hostType[params.slot] (params.host names
+                               the instance; params.slot is absent when the ban is on the host's
+                               default child collection). The same type OUTSIDE that position converts normally, so
                                seeing it dropped in one place and kept in another on the same page is
                                correct, not an inconsistency. It is NOT conversion loss: do NOT
                                re-insert the component — not into that host, not anywhere else on the
@@ -58,9 +63,9 @@ NOT LOSS — report it, and re-insert NOTHING
                                housekeeping: do not re-create it, do not re-parent anything into it, and
                                do not ask the user about it.
   drop-container-no-mobile-equivalent
-                               A CONTAINER whose params.webType is absent from the mobile registry: the
+                               A CONTAINER whose own webType is absent from the mobile registry: the
                                wrapper is not recreated, but its CHILDREN are — each one is in
-                               viewConfigDiff already re-parented to params.target, so the branch is
+                               viewConfigDiff already re-parented to params.newParent, so the branch is
                                FLATTENED, not lost. Contrast drop-type-not-in-mobile-registry below: same
                                cause on a LEAF, where it IS loss. Say the layout wrapper is gone if that
                                matters, and author NOTHING — re-creating it would insert a parent the diff
@@ -68,26 +73,37 @@ NOT LOSS — report it, and re-insert NOTHING
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is
-                               lost. Say so.
+                               lost. Say so. params.scope when the component sat inside a
+                               non-converting scope container. Do not confuse it with
+                               drop-request-unsupported below — there the ELEMENT survives and only its
+                               binding is removed.
   drop-unknown-request         params.request is in NEITHER the conversion map nor the bundled set. clio
                                cannot claim it is unavailable on mobile, only that it does not know it —
                                so if that custom request IS implemented on mobile, the action can be
                                re-added by hand. Offer that.
   drop-type-not-in-mobile-registry
-                               params.webType has no mobile counterpart at all. The one cause you could
-                               also have derived, from `componentSuggestions[].category = "unsupported"`.
+                               this record's own webType has no mobile counterpart at all. No params:
+                               a param that echoes a field the record already carries is a second place
+                               for one fact to drift.
 
 A CONVERSION-RULES DEFECT — report the name, do not work around it
-  drop-target-missing          params.target is absent from the mobile template, so the element could not
-                               be placed. params.scope when it was inside a non-converting scope. This is
-                               a rules-file problem, not a page problem: a rule retargets into a
-                               container the target template does not have.
+  drop-target-missing          params.missingParent is absent from the mobile template, so the element
+                               could not be placed. params.scope when it was inside a non-converting
+                               scope. This is a rules-file problem, not a page problem: a rule retargets
+                               into a container the target template does not have. The key is
+                               missingParent, not target: it is the one parent name in this vocabulary
+                               that does NOT exist, so it must never be pasted into an operation.
 
 INSIDE A NON-CONVERTING SCOPE — nothing to do
   drop-no-rule-in-scope        No conversion rule matched this component inside params.scope.
   drop-not-an-action-in-scope  Inside params.scope and not itself a placeable action (no convertible
                                `clicked` of its own). Its nested actions were still flattened, so they
                                appear on their own.
+  drop-non-converting-scope    The scope CONTAINER itself (the one the codes above name in params.scope).
+                               The rules declare it non-converting, so it produces no mobile element by
+                               design and each of its children is reported separately. No params — this
+                               record's own webName IS the scope. Nothing to do: report it, author
+                               nothing.
 
 
 AN ACTION BINDING — requestConversions.droppedRequests[] / flaggedRequests[]
