@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.93",
+  "libraryVersion": "1.13.94",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -70,6 +70,7 @@
       "feature-toggle",
       "feature-toggle-tests",
       "freedom-page-web-to-mobile-conversion",
+      "freedom-page-mobile-reason-codes",
       "home-page",
       "identity-assertion",
       "indicator-widget",
@@ -208,6 +209,7 @@
       "docs://knowledge/com.creatio.clio/feature-toggle",
       "docs://knowledge/com.creatio.clio/feature-toggle-tests",
       "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
+      "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
       "docs://knowledge/com.creatio.clio/home-page",
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
@@ -943,6 +945,23 @@
       ],
       "sourcePath": "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md",
       "bundlePath": "resources/freedom-page-web-to-mobile-conversion.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "freedom-page-mobile-reason-codes",
+      "title": "Freedom UI mobile conversion: reason codes",
+      "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
+      "topicId": "creatio.freedom-page-mobile-reason-codes",
+      "role": "guidance",
+      "requiredFeatures": [
+        "mobile-page-converter"
+      ],
+      "uri": "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
+      "legacyUris": [
+        "docs://mcp/guides/freedom-page-mobile-reason-codes"
+      ],
+      "sourcePath": "guidance/mcp/guides/platform/mobile/web-to-mobile-reason-codes.md",
+      "bundlePath": "resources/freedom-page-mobile-reason-codes.md",
       "mediaType": "text/plain"
     },
     {
