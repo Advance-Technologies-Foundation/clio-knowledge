@@ -1,9 +1,10 @@
-clio MCP process-data-elements guide — record triggers, Read data, Modify data and their filters
+clio MCP process-data-elements guide — record triggers, Read data and Modify data
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of starting a process from a record event, the Read data and Modify data elements, and the record filter all three share.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
+This article is the authoritative owner of starting a process from a record event and of the Read data
+and Modify data elements. The `filter` all three carry is owned by `process-data-source-filters`: every
+element here says WHETHER it takes one and what that means for it, and that article says what a filter
+may contain.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
 - When the goal is "run a process when a record is saved / added / changed / deleted" (e.g. on a page
@@ -30,7 +31,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   INDEPENDENT of `filter`: `changedColumns` narrows WHICH columns count as a change, `filter` narrows WHICH
   records qualify — combine them freely.
 - To fire the trigger ONLY for records matching a condition (e.g. only when Name = "Start"), add a
-  `filter` to the signalStart element (full shape in "Data source filters" below):
+  `filter` to the signalStart element (full shape in the "Data source filters" section of
+  `process-data-source-filters`):
     { "name": "RunButtonPressedSignal", "type": "signalStart", "caption": "Run button is pressed",
       "signal": { "entity": "UsrTestRunButton", "on": "modified" },
       "filter": { "object": "UsrTestRunButton",
@@ -49,6 +51,14 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   Partial update: omit `changedColumns` to clear column tracking (fire on any change), omit `on` to keep the
   current change type, and include `entity` only to retarget the trigger object (retargeting clears any
   filter bound to the old entity).
+  MUST, on a live process: two of those WIDEN the trigger silently, and neither is reported as an error.
+  Omitting `changedColumns` clears column tracking, so the process fires on ANY change to the record
+  rather than on the columns it tracked. Including `entity` clears the record filter, so the process
+  fires on every record of the new object rather than on the filtered subset (the change type itself is
+  unaffected -- `on` is one event and omitting it keeps the current one). Re-state `changedColumns` when
+  you meant to keep it, and re-send the filter with `setFilter` in the same operations array when you
+  retarget -- `process-data-source-filters` owns `setFilter`, and that op REPLACES the whole filter, so
+  read the current one back first.
 
 == Read data element (readData) — first-record mode ==
 - A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
@@ -75,8 +85,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   picker lists top-level columns only); read the whole record (omit `columns`) if you need them. `sort`
   makes "the first record" deterministic — without it the platform reads an arbitrary first record; single
   column only (multi-column ordering is designer-only), and the sort column must be top-level too.
-- WHICH records qualify is the element's separate `filter` block (full shape in "Data source filters"
-  below). Unlike a signalStart filter, a readData filter MAY reference `processParameter` /
+- WHICH records qualify is the element's separate `filter` block (full shape in the "Data source filters"
+  section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
+  reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
 - LIMITATION — a read record's individual COLUMN values are out of reach in practice, so "the record I
   just read has status X", the likeliest branch after a read, cannot be authored. NOT because the
@@ -99,7 +110,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   object is REFUSED while any other parameter still maps from the element (the refusal names each
   dependent — re-map or remove them first, the same block the designer applies); a retarget that proceeds
   clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
-  `setFilter`) in the same operations array. `describe-business-process` reads the whole block back
+  `setFilter`) in the same operations array. MUST, before any `setFilter` on a live process: `setFilter`
+  REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
+  back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
+  and the read-back shape. `describe-business-process` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
   create/modify. Read-back limits on a HUMAN-made element: a linked-object column is omitted from
   `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
@@ -151,84 +165,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   values yet, and a retarget is refused while another parameter still maps from the element. On ANY target change
   (FIRST configuration included) the stored record filter clears UNLESS its root already targets the incoming
   object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
-  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
+  target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`.
+  MUST: that `setFilter` REPLACES the element's whole filter — read the current one back with
+  `describe-business-process` and send it complete, or the records this element updates silently widen.
+  `process-data-source-filters` owns the op and its read-back. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
   process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
   `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.
   A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
   check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
   comes back as its raw `[#…#]` in `expression`).
-
-== Data source filters (signalStart trigger condition / readData + changeData record filter) ==
-- A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
-  the platform Terrasoft.FilterGroup — you NEVER hand-write the escaped filter JSON.
-- Usable today on a `signalStart` (restrict the record trigger), on a `readData` element (restrict which
-  records the read selects from) and on a `changeData` element (restrict which records are updated —
-  effectively mandatory there). Shape:
-    "filter": {
-      "object": "<EntityName>",        // root object; defaults to the signal entity if omitted
-      "logicalOperation": "and",       // "and" (default) | "or"
-      "conditions": [
-        { "column": "UsrName",      "comparison": "equal", "value": "Start" },
-        { "column": "Account.Code", "comparison": "equal", "value": "1" }   // dot-path traverses a lookup
-      ],
-      "groups": [                       // optional nested groups, each with its own logicalOperation
-        { "logicalOperation": "or", "conditions": [ /* ... */ ] }
-      ]
-    }
-- `column` is the entity COLUMN name (e.g. `UsrName`, not the caption "Name") and may be a dot-path
-  through lookups (`Account.Code`, `Account.Owner.Name`); the server resolves the column type from the
-  object's schema (so you don't supply types).
-- `comparison`: equal (default) | notEqual | greater | greaterOrEqual | less | lessOrEqual | contains |
-  notContains | startWith | notStartWith | endWith | notEndWith | isNull | isNotNull.
-- The right-hand value of a condition is exactly ONE of: `value` (a constant as a string — the server
-  types it by the column; for a Date/DateTime/Time column pass ISO-8601, e.g. `2026-05-01` or
-  `2026-05-01T12:00:00Z`), `processParameter` (a process parameter by name), `elementParameter`
-  ({ elementName, parameter } — another element's output; the parameter must EXIST on that element — a
-  `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }` is
-  refused, see the readData LIMITATION), `expression` (a raw token), or `macro` (a
-  relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
-- `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
-  macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
-  `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
-  (so `CurrentHalfYear`, `NextWeek`, `PreviousQuarter`, `CurrentHour`, … are ALL valid); **argument macros**
-  (require an integer `macroArgument`) `NextNDays` | `PreviousNDays` | `NextNHours` | `PreviousNHours` |
-  `NextNDaysOfYear` | `PreviousNDaysOfYear` | `DayOfYearTodayPlusDaysOffset`; **recurring "every year"**
-  `DayOfYearToday` (the ONLY DayOfYear macro that takes NO argument); **system / lookup** `CurrentUser` |
-  `CurrentUserContact`.
-- SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
-  `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
-  `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
-  instance exists, so a parameter / element output / meta-path reference has no value yet. The server
-  REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
-  parameter" option for signal starts). Parameter references ARE valid on a data-operation element filter —
-  the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
-  (e.g. filter the read by a process parameter's value) and on a `changeData` element, where the filter is
-  effectively MANDATORY (the runtime refuses to update with an empty one); on Add/Delete data they serialize
-  but the task itself is not buildable yet (see below).
-- `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
-  Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
-  `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value`; a `datePart` WITH a
-  `macro` is refused outright (a signalStart narrows the right side further — see above):
-  `{ "column": "CreatedOn", "datePart": "Year", "comparison": "equal", "value": "2026" }` reads
-  `Year(CreatedOn) = 2026`. `HourMinute` is the exception — it extracts the TIME-OF-DAY and compares it to a
-  `value` in `HH:mm[:ss]` form: `{ "column": "CreatedOn", "datePart": "HourMinute", "comparison": "equal",
-  "value": "14:30" }` reads `HourMinute(CreatedOn) = 14:30`. Combines with any comparison (`greaterOrEqual`,
-  …); it modifies the left side, so it is independent of the right-hand source choice (but do not use it with
-  a `macro`).
-- Groups nest to any depth: A AND (B OR C) = conditions:[A] + groups:[{ "logicalOperation":"or",
-  conditions:[B, C] }].
-- A `filter` on a `readData` element is end-to-end usable (pair it with the element's `readData` block —
-  see the "Read data element" section), and on a `changeData` element it is effectively MANDATORY — the
-  runtime refuses to update with an empty filter (see the "Modify data element" section). A `filter` on an
-  Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet, so
-  THEIR filters are not end-to-end usable in this increment.
-- On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
-  ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
-  `setFilter` REPLACES the element's whole filter (there is no add-one-condition op); to add a condition,
-  read the current filter first (below) and send the complete new filter.
-- `describe-business-process` reads a filter back: an element carries a decoded `filter` (the same
-  object / logicalOperation / conditions / groups shape) when it has one, so you can inspect it or
-  round-trip it into a `setFilter`. A parameter reference comes back as its raw meta-path `expression`.
-  A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
-  `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
