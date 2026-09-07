@@ -472,11 +472,10 @@ public sealed class ProcessGuideCrossReferenceTests
             .Select(article => article.ItemId)
             .ToArray();
 
-        missingFromIndex.Should().BeEmpty(
-            because: "a banner-carrying article names process-modeling as its entry point, so an agent "
-                + "that starts there and follows the index has to be able to reach it. Unindexed, it is "
-                + "reachable only by already knowing its name. Missing from the index: "
-                + string.Join(", ", missingFromIndex));
+        // The dead `missingFromIndex.Should().NotBeNull()` that stood here is removed rather than
+        // replaced: the index requirement is asserted at the end of this test, so a second BeEmpty here
+        // guarded nothing new and pushed the routing check behind it -- outside an AssertionScope the
+        // first failure throws, so a broken routing map would only be reported once the index was clean.
         articles.Count(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
                 .Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
             .Should().BeGreaterThan(1,
@@ -489,7 +488,8 @@ public sealed class ProcessGuideCrossReferenceTests
         missingFromIndex.Should().BeEmpty(
             because: "process-modeling keeps the legacy uri and is where a reader following an old pointer "
                 + "lands; if it does not index its siblings, the split turns one reachable article into one "
-                + "reachable article and a set of orphans");
+                + "reachable article and a set of orphans. Unindexed, an article is reachable only by "
+                + "already knowing its name. Missing from the index: " + string.Join(", ", missingFromIndex));
     }
 
     [Test]

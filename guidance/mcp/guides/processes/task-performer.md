@@ -45,8 +45,10 @@ LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON onl
 * another element's Contact/Guid output parameter;
 * `expression: "[#SysVariable.CurrentUserContact#]"` for "whoever started the process".
 A Lookup -> SysAdminUnit PARAMETER source is likewise REJECTED (incompatible reference object).
-A team is NEVER routed through OwnerId, and nothing refuses that write: OwnerId takes a Contact, so a
-role id lands in it and resolves to no person. Routing to a team is LAYER 1 above -- the element-level
-`performer` block with type "role".
+A team is NEVER routed through OwnerId, and both routes that can be checked refuse it: a role id in
+`value` by the reference-object guard above, a Lookup -> SysAdminUnit parameter source as an
+incompatible reference object. Both checks read the MAPPING, so a parameter or `expression` that only
+yields a role id at run time is past them and fails silently instead. Routing to a team is LAYER 1
+above -- the element-level `performer` block with type "role".
 Leaving both layers unset is NOT an unassigned task — at run time the task silently falls to the current
 user's contact (whoever started the process). There is no "nobody" state; omitting the performer is a choice.
