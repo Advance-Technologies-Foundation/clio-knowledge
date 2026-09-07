@@ -147,11 +147,15 @@ public sealed class ProcessGuideCrossReferenceTests
     /// whole suite green. Every other rule this change moved got a marker row, a payload pin or a
     /// survival test; this one had none.
     ///
-    /// Keyed on the convention's SUBJECT, not on its phrasing. The first version pinned "not a heading
-    /// to scroll to", which had it backwards in both directions: a rewrite that kept all three phrases
-    /// while saying "everything in backticks anywhere in the library is ordinary code" — the convention
-    /// inverted — stayed green, and restoring the wording the seven articles actually used ("not a
-    /// section to scroll to") turned it red. So the pin now requires the two words the rule is ABOUT.
+    /// Keyed on the convention's SUBJECT, not on its phrasing, and therefore blind to its POLARITY.
+    /// What it catches: the convention being deleted, or trimmed until it no longer mentions backticks,
+    /// siblings, or fetching. Deleting any one clause is red.
+    ///
+    /// What it does NOT catch, stated plainly because two review rounds have now claimed otherwise: a
+    /// convention rewritten to mean the opposite. "a sibling name in backticks is NOT a get-guidance
+    /// topic to fetch" contains every pinned clause — the fourth survives inside its own negation — and
+    /// runs green. A bag of subject words cannot see a negation, and the phrasings that would see one are
+    /// the phrasings a legitimate reword changes. This pin is a deletion alarm, not an agreement check.
     /// </summary>
     private static readonly string[] ReadingConventionClauses =
     [
@@ -358,10 +362,17 @@ public sealed class ProcessGuideCrossReferenceTests
     /// destructive; the first degrades a results list and the second is refused.
     ///
     /// Raised in review. Rather than reduce them to pointers — the parameter table is where an author
-    /// reads while building, and a bare pointer there costs a fetch — the copies are pinned to agree, the
-    /// way DestructiveRemovalClauses pins the other cross-article pair. The marker scan checks that a
-    /// mention names its owner; nothing checked that the two said the same thing, which is how the
-    /// category rule came to be narrowed in the owner and left broad in the restatement.
+    /// reads while building, and a bare pointer there costs a fetch — both copies are pinned to one
+    /// clause each. That is LESS than agreement, and the difference matters:
+    ///
+    /// it catches either copy losing or rewording its clause, which is how the category rule came to be
+    /// narrowed in the owner and left broad in the restatement. It does NOT catch a contradiction added
+    /// AROUND an intact clause — appending "except when the value is composed at run time, where
+    /// `expression` is the supported form" to the restatement leaves both substrings present and the
+    /// suite green — and it fails on a reword applied identically to BOTH copies, which is a legitimate
+    /// edit. So: a trim alarm on two specific sentences, not a check that the articles agree. Agreement
+    /// is still a reviewer's job, and CONTRIBUTING's carve-out does not cover either of these
+    /// restatements in the first place — neither is a destructive precondition.
     /// </summary>
     private static readonly (string Restating, string Owner, string Clause, string Because)[] RestatedRules =
     [

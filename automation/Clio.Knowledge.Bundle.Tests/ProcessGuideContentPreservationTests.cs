@@ -100,6 +100,15 @@ public sealed class ProcessGuideContentPreservationTests
     /// not merely somewhere in the article. The window this replaced was a character distance, which a
     /// reflow could widen or narrow without moving anything.
     ///
+    /// Three limits, measured rather than assumed, because the paragraph below used to claim the site
+    /// itself was load-bearing and it is not: (1) ANY item carrying both anchor and clause satisfies a
+    /// row, so a restatement added elsewhere in the article covers for the real instruction losing the
+    /// clause; (2) a blank line inside an anchor phrase drops that row out of the position check
+    /// silently, because the whole-article check above it collapses the break to a space; (3) losing a
+    /// bullet marker merges neighbouring items, so two catalog rows can cover for each other. Each was
+    /// reproduced green. What the rows DO catch is a clause trimmed from an intact item, and a clause
+    /// moved out of its item to the article tail — all seventeen, named individually.
+    ///
     /// An earlier version counted occurrences per article instead, and a count is not a location. Five
     /// mutations walked through it: move the second setFilter precondition out of its setElement bullet
     /// and re-add the phrase to the article's ownership preamble — count still 2, suite green; strip
