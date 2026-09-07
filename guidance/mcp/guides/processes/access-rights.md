@@ -38,14 +38,16 @@ check detects this one for you: it reads the process back after the operation an
 did not land, or when the read-back could not be obtained at all. Treat either warning as "the
 permissions were NOT changed". VERSION BOUNDARIES - there are TWO, and they are different questions:
   - the CrtProcessBuilder deployed on the ENVIRONMENT decides whether the block lands at all. Anything
-    older than `<TBD-PACKAGE-VERSION>` discards it. Check with `list-packages` and read the
-    CrtProcessBuilder row.
-  - the CLIO you are running decides whether you are TOLD. The read-back check ships in
-    `<TBD-CLIO-VERSION>` and later; an older clio emits no warning, so its silence proves nothing.
-    Check with `clio --version`.
-  Both placeholders are pending the release that carries this feature. Until they are filled in, do not
-  treat the absence of a warning as evidence: read the process back with `describe-business-process`
-  yourself.
+    older than `1.6.0.2` discards it - that is the first archive containing the element at all, and
+    every earlier one, 1.6.0.1 included, drops the block while still answering success. Check with
+    `list-packages` and read the CrtProcessBuilder row.
+  - the CLIO you are running decides whether you are TOLD. The read-back check ships in the same
+    release that starts bundling CrtProcessBuilder `1.6.0.2`, so a clio bundling an older archive
+    predates the check and emits no warning - its silence proves nothing. `install-process-builder`
+    installs whatever archive YOUR clio bundles, so a clio old enough to lack the check also installs
+    a package old enough to discard the block.
+  On a clio or an environment below those boundaries, do not treat the absence of a warning as
+  evidence: read the process back with `describe-business-process` yourself.
 But be precise about what that proves: `describe-business-process` is a process DEFINITION read. It
 confirms the `accessRights` block LANDED — the case above — and it proves NOTHING about whether any
 permission changed. It cannot see a record `filter` that matched zero records, a `remove` whose grantee

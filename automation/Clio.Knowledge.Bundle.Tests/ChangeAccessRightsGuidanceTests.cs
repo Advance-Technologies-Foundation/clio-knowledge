@@ -30,8 +30,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class ChangeAccessRightsGuidanceTests
 {
     private const string OwningArticle = "guidance/mcp/guides/processes/access-rights.md";
-    private const string EntryArticle = "guidance/mcp/guides/processes/process-modeling.md";
-    private const string FilterArticle = "guidance/mcp/guides/processes/data-elements.md";
+    private const string EntryArticle = "guidance/mcp/guides/processes/element-catalog.md";
+    private const string FilterArticle = "guidance/mcp/guides/processes/data-source-filters.md";
 
     [Test]
     [Description("The owning article publishes the payload shape an agent cannot build the element without.")]
@@ -89,10 +89,13 @@ public sealed class ChangeAccessRightsGuidanceTests
                 + "lands the block at all, and whether the CLIO it is running would tell it if not. A single "
                 + "boundary conflated them, so an agent could satisfy itself on the wrong one and read the absence "
                 + "of a warning as proof the revoke landed");
-        guide.Should().Contain("<TBD-CLIO-VERSION>",
-            because: "both boundaries are placeheld until the release carrying this feature exists, and the marker "
-                + "is deliberately greppable so it cannot ship unnoticed. If this ever fails, check that a REAL "
-                + "version replaced it rather than the sentence being quietly deleted");
+        guide.Should().Contain("1.6.0.2",
+            because: "the placeholders are filled now that the rebundle exists: 1.6.0.2 is the first archive "
+                + "carrying the element, and the clio boundary is stated as the release that starts bundling "
+                + "it, so neither boundary needs a number that does not exist yet");
+        guide.Should().NotContain("TBD",
+            because: "the markers were deliberately greppable so they could not ship unnoticed, and they are "
+                + "resolved - a reappearing TBD means a boundary went back to being unknown");
         guide.Should().Contain("MUST, before you apply any of this to a live environment",
             because: "CONTRIBUTING requires a removal-class instruction to carry its preconditions inline, "
                 + "and setElement can revoke permissions people currently rely on");
