@@ -80,9 +80,10 @@ section to scroll to.
       is refused outright: the contract cannot configure one. An element that already references a Classic UI
       page keeps that reference (re-asserting the SAME page is fine) and is edited within the fields both page
       types share.
-    * A PAGE CHANGE RECONCILES DATA SOURCES — this is the one rule here worth reading twice. The `dataSources`
-      you pass are the new page's WHOLE set: every data-source parameter the call does not re-declare is
-      REMOVED and reported (the same Warning line as a page parameter the page stopped declaring); a
+    * A PAGE CHANGE RECONCILES DATA SOURCES, from CrtProcessBuilder 1.6.0.1 — this is the one rule here worth
+      reading twice, and `modify-business-process` requires that version for it, so you either get this
+      behaviour or get refused before the call. The `dataSources` you pass are the new page's WHOLE set:
+      every data-source parameter the call does not re-declare is REMOVED and reported (the same Warning line as a page parameter the page stopped declaring); a
       re-declared one keeps the SAME parameter, so anything mapped from it stays valid; and the removal is
       REFUSED — naming the dependents — while any other parameter still maps from the parameter being dropped.
       Re-map or remove those first, or keep the element on its page. On the SAME page an omitted or partial
