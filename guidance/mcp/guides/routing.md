@@ -55,6 +55,8 @@ guards — it says whose rule it is and names that guide for the rest.
   - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
+  - the Approval element — the record under approval, who approves, delegation, the two notifications ->
+    name=process-approval
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
