@@ -1424,7 +1424,7 @@
     {
       "itemId": "process-preconfigured-page",
       "title": "Pre-configured page element",
-      "description": "Owns the Creatio Pre-configured page element (preconfiguredPage / PreconfiguredPageUserTask): why the page's completing buttons and data sources must be read with get-process-page-facts instead of invented, why at least one completing button is required on a build, the performer and the showPage rule that applies only to a user performer, the element parameter each data source carries the saved record id in, what a later setElement re-synchronizes and where drift is reported, and the Classic UI page limits.",
+      "description": "Owns the Creatio Pre-configured page element (preconfiguredPage / PreconfiguredPageUserTask): why the page's completing buttons and data sources must be read with get-process-page-facts instead of invented, why at least one completing button is required on a build, the performer and the showPage rule that applies only to a user performer, the element parameter each data source carries the saved record id in, what a page change does to the element's data sources, what a later setElement re-synchronizes and where drift is reported, and the Classic UI page limits.",
       "topicId": "creatio.process-preconfigured-page",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-preconfigured-page",
