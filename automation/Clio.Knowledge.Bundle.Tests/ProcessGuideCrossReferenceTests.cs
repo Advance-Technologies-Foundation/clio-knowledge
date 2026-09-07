@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using NUnit.Framework;
 
 namespace Clio.Knowledge.Bundle.Tests;
@@ -464,32 +465,39 @@ public sealed class ProcessGuideCrossReferenceTests
         // articles with their own routing rows, not sub-articles of the entry — so requiring the index to
         // list them would confuse "lives in the folder" with "is reached through this entry". An eighth
         // SPLIT article gets the banner and is therefore caught.
-        string[] missingFromIndex = articles
-            .Where(article => article.ItemId != entryItemId)
-            .Where(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
-                .Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
-            .Where(article => !entry.Contains($"`{article.ItemId}`", StringComparison.Ordinal))
-            .Select(article => article.ItemId)
-            .ToArray();
+        (string ItemId, string Text)[] read = [.. articles.Select(article =>
+            (article.ItemId, Text: ProcessGuideSet.Read(repositoryRoot, article.SourcePath)))];
+        string[] bannerCarrying = [.. read
+            .Where(article => article.Text.Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+        string[] missingFromIndex = [.. bannerCarrying
+            .Where(itemId => itemId != entryItemId)
+            .Where(itemId => !entry.Contains($"`{itemId}`", StringComparison.Ordinal))];
 
-        // The dead `missingFromIndex.Should().NotBeNull()` that stood here is removed rather than
-        // replaced: the index requirement is asserted at the end of this test, so a second BeEmpty here
-        // guarded nothing new and pushed the routing check behind it -- outside an AssertionScope the
-        // first failure throws, so a broken routing map would only be reported once the index was clean.
-        articles.Count(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
-                .Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
-            .Should().BeGreaterThan(1,
-                because: "the index requirement is keyed on the set banner, so a banner text change would "
-                    + "otherwise silently reduce this to asserting nothing");
-
-        missingFromRouting.Should().BeEmpty(
-            because: "routing is the only guidance pointer clio's MCP instructions carry, so an article it does "
-                + "not name is one an agent reaches only by already knowing it exists");
-        missingFromIndex.Should().BeEmpty(
-            because: "process-modeling keeps the legacy uri and is where a reader following an old pointer "
-                + "lands; if it does not index its siblings, the split turns one reachable article into one "
-                + "reachable article and a set of orphans. Unindexed, an article is reachable only by "
-                + "already knowing its name. Missing from the index: " + string.Join(", ", missingFromIndex));
+        // All three in ONE scope, so a run reports every broken thing rather than the first. Assertion
+        // ORDER was the previous attempt and it is the wrong shape: it left this banner meta-guard ahead
+        // of routing, so a changed banner still masked a broken routing map, and the difference only
+        // shows when two things break at once -- which is the case the mutations offered for it never
+        // ran. Each `because` names its own subject too: FluentAssertions reads the call site to name
+        // one, and in Release it rendered the routing failure against the previous statement's
+        // expression -- "Expected articles.Count(...) to be empty because routing is the only...".
+        using (new AssertionScope())
+        {
+            bannerCarrying.Should().HaveCountGreaterThan(1,
+                because: "bannerCarrying: the index requirement is keyed on the set banner, so a banner "
+                    + "text change would otherwise silently reduce it to asserting nothing");
+            missingFromRouting.Should().BeEmpty(
+                because: "missingFromRouting: routing is the only guidance pointer clio's MCP instructions "
+                    + "carry, so an article it does not name is one an agent reaches only by already knowing "
+                    + "it exists. Not named by routing: " + string.Join(", ", missingFromRouting));
+            missingFromIndex.Should().BeEmpty(
+                because: "missingFromIndex: a banner-carrying article names process-modeling as its entry "
+                    + "point, and process-modeling keeps the legacy uri, so it is where a reader following "
+                    + "an old pointer lands. Unindexed there, an article is reachable only by already "
+                    + "knowing its name, and the split turns one reachable article into one reachable "
+                    + "article and a set of orphans. Missing from the index: "
+                    + string.Join(", ", missingFromIndex));
+        }
     }
 
     [Test]

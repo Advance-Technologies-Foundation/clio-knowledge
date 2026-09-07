@@ -157,7 +157,8 @@ public sealed class ProcessGuideContentPreservationTests
         ("process-task-performer", "type \"role\" is THE way",
             "OwnerRole column and its Owner stays EMPTY",
             "the claim model. A reader who loses this reads the empty Owner back as an unassigned task and "
-            + "\"fixes\" it by routing the team through OwnerId, which this article says is REFUSED"),
+            + "\"fixes\" it by routing the team through OwnerId, which this article sends to LAYER 1 "
+            + "instead -- and only the Layer-2 sources that state a refusal will stop them"),
         ("process-task-performer", "Leaving both layers unset",
             "NOT an unassigned task",
             "leaving both layers unset silently assigns the process starter; there is no nobody state, and "
