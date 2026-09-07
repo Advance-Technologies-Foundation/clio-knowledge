@@ -218,10 +218,12 @@ public sealed class GuidanceMigrationTests
         // the cheapest way out of a red build is to drop the gate, which is precisely the outcome the
         // control exists to prevent. The go-live was a decision about the text in these articles;
         // the assertion says only that.
+        // Derived ONCE. Called inside the predicate it re-parsed the manifest and re-read every process
+        // article per resource in the library: 141 parses and 1,960 file opens for one test.
+        string[] goLive = ProcessGuideSet.GoLiveItemIds(repositoryRoot);
         JsonElement[] splitResources = source.RootElement.GetProperty("resources")
             .EnumerateArray()
-            .Where(resource => ProcessGuideSet.GoLiveItemIds(repositoryRoot)
-                .Contains(resource.GetProperty("itemId").GetString()))
+            .Where(resource => goLive.Contains(resource.GetProperty("itemId").GetString()))
             .ToArray();
         // Absence of the PROPERTY, not absence of one flag name. Matching only "process-designer" would
         // leave every other flag value free to hide one of them while this stayed green — a

@@ -35,8 +35,9 @@ public sealed class ProcessFormulaGuidanceTests
     /// The callActivity claim below is asserted HERE and not against <c>process-modeling.md</c>: ENG-96536
     /// moved the element catalog, and the sentence with it, out of the entry article. Left pointed at the
     /// entry, the NotContain would have passed on an article that no longer holds the sentence at all -
-    /// green, and guarding nothing. Nothing in this fixture reads the entry article any more, which is why
-    /// there is no constant for it to be pointed at by accident.
+    /// green, and guarding nothing. The sweep in the test below reads EVERY declared article, the entry
+    /// among them, so the false sentence is caught wherever in the set it is written; this constant is
+    /// only for the positive half, which has one right home.
     /// </summary>
     private const string ElementCatalogGuide = "guidance/mcp/guides/processes/element-catalog.md";
 
@@ -159,11 +160,6 @@ public sealed class ProcessFormulaGuidanceTests
                 + "only schema.FlowElements, so describe does NOT see them — wherever this sentence is "
                 + "written it tells a caller to expect a delete refusal naming a flow no read API will "
                 + "show. Found in: " + string.Join(", ", restating));
-        ReadGuide(ElementCatalogGuide).Should().NotContain("describe-business-process` and the delete guards do see them",
-            because: "a sub-process owns its own FlowElements collection and ProcessDescriber iterates only "
-                + "schema.FlowElements, so describe does NOT see them - and a caller told otherwise reads a "
-                + "delete refusal naming a flow no read API will show, which is the dead end this sentence "
-                + "claims to prevent");
         ReadGuide(ElementCatalogGuide).Should().Contain("the delete guards see them",
             because: "the true half has to survive the correction: the guards walk the recursive accessors, "
                 + "so a reference from inside a sub-process really does block a delete");

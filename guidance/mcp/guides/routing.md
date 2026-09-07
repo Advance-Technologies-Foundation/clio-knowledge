@@ -46,12 +46,12 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-perform-task
   - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
     name=process-task-performer
-  - a "Task category" field showing a raw Guid, a results dropdown offering the wrong set, or WHY a
-    category must be a constant rather than a formula -> name=process-task-category
+  - a "Task category" field showing a raw Guid, a results dropdown offering the wrong set, or HOW a
+    category or priority must be mapped -> name=process-task-category
   - an ActivityCategory / ActivityPriority mapping REFUSED ("a Lookup constant is a formula token, not a
     plain value", or a package-convergence message) -> name=process-perform-task for the refusal texts,
-    the remedy and the ids; do NOT follow the refusal's own advice to use `expression` -- see
-    name=process-task-category for what that silently degrades
+    the remedy and the ids; the fix the refusal itself suggests is not the safe one -- read
+    name=process-task-category before following it
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
     name=process-activity-connections

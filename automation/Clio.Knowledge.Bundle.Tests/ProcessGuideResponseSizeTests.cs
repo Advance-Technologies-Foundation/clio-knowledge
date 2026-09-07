@@ -57,7 +57,7 @@ public sealed class ProcessGuideResponseSizeTests
 
     /// <summary>
     /// Measured alongside the processes folder, because this change made it load-bearing FOR that
-    /// folder: eleven articles gave up their own copy of the reading convention for the one in
+    /// folder: seven articles gave up their own copy of the reading convention for the one in
     /// <c>routing</c>, so if routing stops arriving whole, every cross-article pointer in the set stops
     /// reading as a fetch. It is also the article every agent reads first, and it is under exactly the
     /// size pressure this fixture exists for — it grew 9,555 to 11,252 characters on this branch alone.
@@ -82,16 +82,27 @@ public sealed class ProcessGuideResponseSizeTests
                 + "a manifest that no longer declares it is a larger defect than any size");
 
         int size = ResponseSize(repositoryRoot, sourcePath!);
-        int threshold = (int)(MaxResponseCharacters * HeadroomThreshold);
+        int headroom = (int)(MaxResponseCharacters * HeadroomThreshold);
+        double share = (double)size / MaxResponseCharacters;
         TestContext.WriteLine(
-            $"{RoutingItemId,-32} {size,7:N0}  {(double)size / MaxResponseCharacters,6:P1} of budget");
+            $"{RoutingItemId,-32} {size,7:N0}  {share,6:P1} of budget"
+            + (size > headroom ? "   <-- over the headroom gate; split it"
+                : share >= ReportThreshold
+                    ? "   <-- approaching the headroom gate; plan the seam"
+                    : string.Empty));
 
-        size.Should().BeLessThanOrEqualTo(threshold,
+        size.Should().BeLessThanOrEqualTo(MaxResponseCharacters,
             because: "every article in the process set cites its siblings by name and relies on routing "
-                + "to say that a backticked name is a topic to fetch. If routing spills, that convention "
+                + "to say that a backticked name is a topic to fetch. If routing SPILLS, that convention "
                 + "reaches nobody and every pointer in the set reads as a heading the reader cannot find. "
                 + $"Split it at a domain boundary rather than raising the budget. It is {size:N0} against "
-                + $"a headroom gate of {threshold:N0}");
+                + $"a budget of {MaxResponseCharacters:N0}");
+
+        size.Should().BeLessThanOrEqualTo(headroom,
+            because: "routing is not spilling yet - this is the HOUSEKEEPING tier, kept separate so the "
+                + "two failures cannot be read as one. It says the next edit to the article every agent "
+                + "reads first has nowhere to land. Take a domain out of it now, while there is room to "
+                + $"do it deliberately. It is {size:N0} against a headroom gate of {headroom:N0}");
     }
 
     [Test]
@@ -284,12 +295,6 @@ public sealed class ProcessGuideResponseSizeTests
                 + "would carry the ENG-96212 defect with nothing watching");
     }
 
-    /// <summary>
-    /// Serialises the article the way the MCP server does — <see cref="JsonSerializer"/>'s default encoder
-    /// is the same JavaScriptEncoder the server uses, so backticks, angle brackets and every non-ASCII
-    /// character expand to their six-character escapes here exactly as they do on the wire. Measuring the
-    /// raw file instead would understate a dense article by more than a third.
-    /// </summary>
     /// <summary>The declared source path of one itemId, or null when the manifest does not declare it.</summary>
     private static string? ManifestSourcePath(string repositoryRoot, string itemId)
     {
@@ -302,6 +307,12 @@ public sealed class ProcessGuideResponseSizeTests
             .FirstOrDefault();
     }
 
+    /// <summary>
+    /// Serialises the article the way the MCP server does — <see cref="JsonSerializer"/>'s default encoder
+    /// is the same JavaScriptEncoder the server uses, so backticks, angle brackets and every non-ASCII
+    /// character expand to their six-character escapes here exactly as they do on the wire. Measuring the
+    /// raw file instead would understate a dense article by more than a third.
+    /// </summary>
     private static int ResponseSize(string repositoryRoot, string sourcePath) =>
         JsonSerializer.Serialize(ProcessGuideSet.Read(repositoryRoot, sourcePath)).Length + EnvelopeAllowance;
 }

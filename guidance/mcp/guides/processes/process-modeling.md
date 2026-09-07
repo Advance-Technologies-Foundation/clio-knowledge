@@ -26,8 +26,8 @@ owner -- read the one your task needs instead of guessing:
                                      what the runtime sets.
   * `process-task-performer`       - who performs a task: the element-level performer block (the only
                                      route to a TEAM) and OwnerId for one person.
-  * `process-task-category`        - WHY a category or priority MUST be a bare-Guid constant and MUST
-                                     NOT be a formula, and what degrades silently when it is one. Not
+  * `process-task-category`        - HOW a category or priority must be mapped, and what degrades
+                                     silently when it is not. Not
                                      needed to BUILD one -- `process-perform-task` carries the ids and
                                      the refusals. Read this when a field shows a raw Guid or a results
                                      dropdown offers the wrong set.

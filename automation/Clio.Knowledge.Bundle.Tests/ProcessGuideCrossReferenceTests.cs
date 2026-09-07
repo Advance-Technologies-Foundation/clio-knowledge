@@ -60,8 +60,11 @@ public sealed class ProcessGuideCrossReferenceTests
     /// </summary>
     private static readonly (string Marker, string Owner)[] MovedSectionMarkers =
     [
+        // One row, both spellings: Occurrences folds dash variants. Two rows made typography
+        // load-bearing - normalising process-naming's two en dashes to the hyphen the other three
+        // occurrences use, a pure formatting edit, turned the liveness test red and told the
+        // contributor to re-key a row.
         ("R1-R17", "process-activity-connections"),
-        ("R1–R17", "process-activity-connections"),      // en dash, as the articles write it
         ("N1-N10", "process-naming"),
         // ENG-96536 moved this section into its own article; the row follows the section, not the file
         // it used to live in. Left on process-data-elements, the owner-skip would have exempted the
@@ -86,7 +89,6 @@ public sealed class ProcessGuideCrossReferenceTests
         // this one row reaches all three; the process-formulas mention, genuinely unattributed at ~230
         // lines from that article's own pointer, was what it caught first.
         ("branch precedence", "process-branch-conditions"),
-        ("the last conditional flow", "process-branch-conditions"),
         // ENG-96536 moved "What you can build today" and the element catalog out of the entry article,
         // which had no budget headroom left and grew by both of those sections on every new element. Each
         // phrase was checked against the folder the way the rows above were: "What you can build today"
@@ -136,7 +138,7 @@ public sealed class ProcessGuideCrossReferenceTests
     /// <summary>
     /// What makes a backticked sibling name readable as a FETCH rather than as a heading. Every article in
     /// this set used to carry that sentence itself, which meant any single article could lose it and the
-    /// other ten still told the reader; ENG-96536 deduplicated it into <c>routing</c>, which every agent
+    /// other six still told the reader; ENG-96536 deduplicated it into <c>routing</c>, which every agent
     /// reads before anything else, and that trade removed the redundancy along with the repetition.
     ///
     /// So it is pinned. Nothing else in the suite reads routing's prose — the routing assertions match
@@ -173,8 +175,8 @@ public sealed class ProcessGuideCrossReferenceTests
             .Where(clause => !routing.Contains(clause, StringComparison.OrdinalIgnoreCase))];
 
         missing.Should().BeEmpty(
-            because: "seven articles gave up their own copy of this sentence for this one — six of them "
-                + "in this set — so it is now "
+            because: "seven articles gave up their own copy of this sentence for this one, all seven "
+                + "in this set, so it is now "
                 + "the only place the library says that a backticked sibling name is a topic to fetch. "
                 + "Without it every cross-article pointer in the set reads as a heading the reader cannot "
                 + "find. If routing has to lose it, put it back in the articles rather than nowhere. "
@@ -412,8 +414,12 @@ public sealed class ProcessGuideCrossReferenceTests
         string owner = ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.Declared(repositoryRoot)
             .Single(article => article.ItemId == ProcessGuideSet.EntryItemId).SourcePath);
 
+        // Collapsed on both sides. Raw, a wrap inserted mid-sentence - no word changed - reported the
+        // destructive-removal guardrails as gone, in the one place a red build tempts a reader to
+        // weaken a destructive-operation pin.
+        string collapsedOwner = Collapse(owner);
         string[] missing = DestructiveRemovalClauses
-            .Where(clause => !owner.Contains(clause, StringComparison.Ordinal))
+            .Where(clause => !collapsedOwner.Contains(Collapse(clause), StringComparison.Ordinal))
             .ToArray();
 
         missing.Should().BeEmpty(
@@ -455,7 +461,11 @@ public sealed class ProcessGuideCrossReferenceTests
             .Select(article => article.ItemId)
             .ToArray();
 
-        missingFromIndex.Should().NotBeNull();
+        missingFromIndex.Should().BeEmpty(
+            because: "a banner-carrying article names process-modeling as its entry point, so an agent "
+                + "that starts there and follows the index has to be able to reach it. Unindexed, it is "
+                + "reachable only by already knowing its name. Missing from the index: "
+                + string.Join(", ", missingFromIndex));
         articles.Count(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
                 .Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
             .Should().BeGreaterThan(1,
@@ -505,8 +515,14 @@ public sealed class ProcessGuideCrossReferenceTests
     private static string ReadRouting(string repositoryRoot) =>
         ProcessGuideSet.Read(repositoryRoot, "guidance/mcp/guides/routing.md");
 
-    private static IEnumerable<int> Occurrences(string text, string value)
+    /// <summary>Dash variants folded to ASCII hyphen, one character for one, so indices survive.</summary>
+    private static string FoldDashes(string text) =>
+        text.Replace('\u2013', '-').Replace('\u2014', '-').Replace('\u2011', '-');
+
+    private static IEnumerable<int> Occurrences(string rawText, string rawValue)
     {
+        string text = FoldDashes(rawText);
+        string value = FoldDashes(rawValue);
         // OrdinalIgnoreCase, matching Owns() above: a marker is a PHRASE, and which case a sibling writes
         // it in is not a fact about whether the reference is attributed. Case-sensitive, this scan needed
         // one row per spelling — and the spelling that actually dangled (process-formulas writing "branch

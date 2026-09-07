@@ -30,19 +30,6 @@ internal static class ProcessGuideSet
     internal const string EntryItemId = "process-modeling";
 
     /// <summary>
-    /// The articles the ENG-96132 go-live decision covers: the entry, plus every declared process article
-    /// that carries <see cref="SetBanner"/>. DERIVED, because the hand-written list this replaced covered
-    /// 11 of the 13 and the two it missed were re-gatable with the whole suite green — <c>process-formulas</c>
-    /// and <c>process-branch-conditions</c>, both banner-carrying, both indexed by the entry, both named by
-    /// routing as mandatory reading, and one of them itself the product of a split.
-    ///
-    /// The criterion the hand list stated was "extracted from a listed article", which is a fact about
-    /// history that nothing in the tree records. The banner is a fact about the tree, it means the same
-    /// thing — this article is reached through the entry, so gating it hides guidance the entry still
-    /// points at — and it maintains itself. A future process guide that legitimately documents a
-    /// restricted capability simply does not carry the banner, and is not in the set.
-    /// </summary>
-    /// <summary>
     /// The ids the go-live decision covers, written out. This is the EXTERNAL anchor for
     /// <see cref="GoLiveItemIds"/>, which is derived and therefore cannot police itself: an assertion
     /// that the derived set contains the derived set holds by construction, and every consumer of it
@@ -52,8 +39,12 @@ internal static class ProcessGuideSet
     /// `requiredFeatures` to an article while deleting its banner in the same commit did the same to the
     /// re-gating gate. Both were found in review, by mutation, not by this list.
     ///
-    /// So this list is asserted to be a SUBSET of the derived set, never equal to it. A split adds its
-    /// pieces to the derivation without an edit here, which is the property the derivation exists for;
+    /// So this list is only ever asserted to be a SUBSET of something derived, never equal to it -- and
+    /// the something differs by fixture, deliberately: the size gates assert it against
+    /// <see cref="Declared"/>, so an article that leaves the folder or the manifest is reported there,
+    /// while the re-gating gate asserts it against the banner-carrying resources, so an article that
+    /// leaves the derivation is reported there. A split adds its pieces to both without an edit here,
+    /// which is the property the derivation exists for;
     /// what this adds is that nothing already decided can leave quietly. When a split lands, add its
     /// pieces here too — until then they are in scope but not anchored, and that gap is the honest
     /// remainder rather than a claim.
@@ -75,6 +66,19 @@ internal static class ProcessGuideSet
         "process-activity-connections"
     ];
 
+    /// <summary>
+    /// The articles the ENG-96132 go-live decision covers: the entry, plus every declared process article
+    /// that carries <see cref="SetBanner"/>. DERIVED, because the hand-written list this replaced covered
+    /// 11 of the 13 and the two it missed were re-gatable with the whole suite green — <c>process-formulas</c>
+    /// and <c>process-branch-conditions</c>, both banner-carrying, both indexed by the entry, both named by
+    /// routing as mandatory reading, and one of them itself the product of a split.
+    ///
+    /// The criterion the hand list stated was "extracted from a listed article", which is a fact about
+    /// history that nothing in the tree records. The banner is a fact about the tree, it means the same
+    /// thing — this article is reached through the entry, so gating it hides guidance the entry still
+    /// points at — and it maintains itself. A future process guide that legitimately documents a
+    /// restricted capability simply does not carry the banner, and is not in the set.
+    /// </summary>
     internal static string[] GoLiveItemIds(string repositoryRoot) =>
         [EntryItemId, .. Declared(repositoryRoot)
             .Where(article => article.ItemId != EntryItemId)

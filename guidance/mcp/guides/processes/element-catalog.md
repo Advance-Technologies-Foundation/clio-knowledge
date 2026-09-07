@@ -113,8 +113,11 @@ Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/m
   signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
   BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6 in `process-naming`).
+  Timer start, message start and the intermediate catch/throw events are READ-ONLY here.
 Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
+  All four are READ-ONLY here as ELEMENTS -- see `process-branch-conditions`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
+  The DEFAULT flow is READ-ONLY here.
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use

@@ -96,7 +96,9 @@ public sealed class ProcessGuideContentPreservationTests
 
     /// <summary>
     /// One load-bearing clause per section ENG-96536 moved, each ANCHORED to the site it protects: the
-    /// clause has to sit within <see cref="AnchorWindow"/> collapsed characters of the anchor phrase.
+    /// clause has to sit in the SAME list item or paragraph as the anchor phrase (<see cref="ItemBoundary"/>),
+    /// not merely somewhere in the article. The window this replaced was a character distance, which a
+    /// reflow could widen or narrow without moving anything.
     ///
     /// An earlier version counted occurrences per article instead, and a count is not a location. Five
     /// mutations walked through it: move the second setFilter precondition out of its setElement bullet
