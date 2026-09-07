@@ -348,6 +348,62 @@ public sealed class ProcessGuideCrossReferenceTests
                 + string.Join("; ", unownable));
     }
 
+    /// <summary>
+    /// Pairs that state the same rule in two articles, with the clause each copy must carry. CONTRIBUTING
+    /// carves out ONE reason to restate a rule you do not own — a destructive precondition, kept next to
+    /// the instruction it guards — and <c>process-perform-task</c> restates two rules that are not that:
+    /// how a category value must be written, and that a team is not routed through OwnerId. Neither is
+    /// destructive; the first degrades a results list and the second is refused.
+    ///
+    /// Raised in review. Rather than reduce them to pointers — the parameter table is where an author
+    /// reads while building, and a bare pointer there costs a fetch — the copies are pinned to agree, the
+    /// way DestructiveRemovalClauses pins the other cross-article pair. The marker scan checks that a
+    /// mention names its owner; nothing checked that the two said the same thing, which is how the
+    /// category rule came to be narrowed in the owner and left broad in the restatement.
+    /// </summary>
+    private static readonly (string Restating, string Owner, string Clause, string Because)[] RestatedRules =
+    [
+        ("process-perform-task", "process-task-category",
+            "the mapping's source MUST be `value` and MUST NOT be `expression`",
+            "the category rule was narrowed in the owner and left broad in this table for a whole commit: "
+            + "the prohibition is on the mapping SOURCE, not on the macro, which the owner accepts as a "
+            + "value from CrtProcessBuilder 1.4.0.40"),
+        ("process-perform-task", "process-task-performer",
+            "A team is NEVER routed through OwnerId",
+            "the OwnerId/team boundary. If the restatement and the owner disagree about it, one of them "
+            + "sends the reader to write a role id into a Contact lookup")
+    ];
+
+    [Test]
+    [Description("A rule restated outside its owner still says what the owner says, so the two copies cannot drift.")]
+    public void ARuleRestatedOutsideItsOwner_ShouldStillAgreeWithTheOwner()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
+        string Body(string itemId) => Collapse(ProcessGuideSet.Read(repositoryRoot,
+            declared.Single(article => article.ItemId == itemId).SourcePath));
+
+        string[] undeclared = [.. RestatedRules
+            .SelectMany(pair => new[] { pair.Restating, pair.Owner })
+            .Distinct(StringComparer.Ordinal)
+            .Where(itemId => declared.All(article => article.ItemId != itemId))];
+        undeclared.Should().BeEmpty(
+            because: "a pair naming an article the manifest does not declare checks nothing. Not declared: "
+                + string.Join(", ", undeclared));
+
+        string[] drifted = [.. RestatedRules
+            .Where(pair => !(Body(pair.Restating).Contains(Collapse(pair.Clause), StringComparison.Ordinal)
+                && Body(pair.Owner).Contains(Collapse(pair.Clause), StringComparison.Ordinal)))
+            .Select(pair => $"{pair.Restating} and {pair.Owner} no longer both say \"{pair.Clause}\" — "
+                + pair.Because)];
+
+        drifted.Should().BeEmpty(
+            because: "CONTRIBUTING allows a restatement only where the reader needs the rule next to the "
+                + "instruction, and the price of that allowance is that the copies agree. Nothing else "
+                + "here compares them: the marker scan checks that a mention NAMES its owner, not that it "
+                + "says the same thing. " + string.Join("; ", drifted));
+    }
+
     [Test]
     [Description("The destructive-removal preconditions still exist in the article the sub-articles cite for them.")]
     public void DestructiveRemovalRules_ShouldSurviveInTheArticleThatOwnsThem()

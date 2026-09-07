@@ -42,6 +42,39 @@ internal static class ProcessGuideSet
     /// points at — and it maintains itself. A future process guide that legitimately documents a
     /// restricted capability simply does not carry the banner, and is not in the set.
     /// </summary>
+    /// <summary>
+    /// The ids the go-live decision covers, written out. This is the EXTERNAL anchor for
+    /// <see cref="GoLiveItemIds"/>, which is derived and therefore cannot police itself: an assertion
+    /// that the derived set contains the derived set holds by construction, and every consumer of it
+    /// was written that way. Measured against that: moving an article out of the processes folder — the
+    /// file and its `sourcePath` together — dropped it from the size contract, the citation scan, the
+    /// marker scan and the routing/index requirement with the whole suite green; and adding
+    /// `requiredFeatures` to an article while deleting its banner in the same commit did the same to the
+    /// re-gating gate. Both were found in review, by mutation, not by this list.
+    ///
+    /// So this list is asserted to be a SUBSET of the derived set, never equal to it. A split adds its
+    /// pieces to the derivation without an edit here, which is the property the derivation exists for;
+    /// what this adds is that nothing already decided can leave quietly. When a split lands, add its
+    /// pieces here too — until then they are in scope but not anchored, and that gap is the honest
+    /// remainder rather than a claim.
+    /// </summary>
+    internal static readonly string[] GoLiveFloor =
+    [
+        "process-modeling",
+        "process-element-catalog",
+        "process-naming",
+        "process-data-elements",
+        "process-data-source-filters",
+        "process-parameters",
+        "process-formulas",
+        "process-branch-conditions",
+        "process-perform-task",
+        "process-task-performer",
+        "process-task-category",
+        "process-send-email",
+        "process-activity-connections"
+    ];
+
     internal static string[] GoLiveItemIds(string repositoryRoot) =>
         [EntryItemId, .. Declared(repositoryRoot)
             .Where(article => article.ItemId != EntryItemId)

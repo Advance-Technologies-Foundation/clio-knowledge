@@ -243,10 +243,15 @@ public sealed class GuidanceMigrationTests
         processModeling.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
             because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
                 + "the guide the GA business-process tools name as mandatory reading");
-        splitResources.Should().HaveCount(ProcessGuideSet.GoLiveItemIds(repositoryRoot).Length,
-            because: "the scan below proves nothing unless it actually selected every article on the list — if "
-                + "one is renamed or moved and the filter stops matching it, a short result would report the "
-                + "gate decision as intact while guarding less of it than it claims");
+        // Against the WRITTEN floor. Counting the filtered set against the length of the set it was
+        // filtered BY cannot come up short, which review demonstrated: adding requiredFeatures to an
+        // article and deleting its banner in the same commit removed it from the derivation, so it left
+        // both the filter and the expected count, and the gate stayed green while the article went dark.
+        splitResources.Select(resource => resource.GetProperty("itemId").GetString())
+            .Should().Contain(ProcessGuideSet.GoLiveFloor,
+            because: "the scan below proves nothing unless it actually selected every article the go-live "
+                + "decision covers, and that list has to come from outside the derivation it checks — "
+                + "otherwise an article can leave the scope and the expectation in one edit");
         regatedArticles.Should().BeEmpty(
             because: "every article split out of process-modeling, directly or at one remove, carries the same "
                 + "go-live decision as the entry article; gating one hides part of that mandatory reading while "

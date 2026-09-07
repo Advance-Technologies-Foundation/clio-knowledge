@@ -55,20 +55,51 @@ public sealed class ProcessGuideResponseSizeTests
     /// </summary>
     private const string ProbeItemId = "esq-filter-parsing";
 
+    /// <summary>
+    /// Measured alongside the processes folder, because this change made it load-bearing FOR that
+    /// folder: eleven articles gave up their own copy of the reading convention for the one in
+    /// <c>routing</c>, so if routing stops arriving whole, every cross-article pointer in the set stops
+    /// reading as a fetch. It is also the article every agent reads first, and it is under exactly the
+    /// size pressure this fixture exists for — it grew 9,555 to 11,252 characters on this branch alone.
+    ///
+    /// Raised in review, and it is the fixture's own reasoning turned on itself: the scope comment says
+    /// articles elsewhere are "recorded as measurement, not as a commitment", which was fine while
+    /// nothing here depended on one of them.
+    /// </summary>
+    private const string RoutingItemId = "routing";
+
     private const int ProbeDriftTolerance = 2_000;
+
+    [Test]
+    [Description("The routing article fits in one response too, because this set now depends on it: the reading convention lives there and nowhere else.")]
+    public void TheRoutingArticle_ShouldFitInOneGetGuidanceResponse()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string? sourcePath = ManifestSourcePath(repositoryRoot, RoutingItemId);
+
+        sourcePath.Should().NotBeNull(
+            because: "routing is mandatory reading and the only place the reading convention now lives; "
+                + "a manifest that no longer declares it is a larger defect than any size");
+
+        int size = ResponseSize(repositoryRoot, sourcePath!);
+        int threshold = (int)(MaxResponseCharacters * HeadroomThreshold);
+        TestContext.WriteLine(
+            $"{RoutingItemId,-32} {size,7:N0}  {(double)size / MaxResponseCharacters,6:P1} of budget");
+
+        size.Should().BeLessThanOrEqualTo(threshold,
+            because: "every article in the process set cites its siblings by name and relies on routing "
+                + "to say that a backticked name is a topic to fetch. If routing spills, that convention "
+                + "reaches nobody and every pointer in the set reads as a heading the reader cannot find. "
+                + $"Split it at a domain boundary rather than raising the budget. It is {size:N0} against "
+                + $"a headroom gate of {threshold:N0}");
+    }
 
     [Test]
     [Description("The article the response budget was measured on has not drifted far enough to make the measurement meaningless.")]
     public void TheArticleTheBudgetWasMeasuredOn_ShouldStillResembleThatMeasurement()
     {
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        using JsonDocument manifest = JsonDocument.Parse(
-            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
-        string? sourcePath = manifest.RootElement.GetProperty("resources")
-            .EnumerateArray()
-            .Where(resource => resource.GetProperty("itemId").GetString() == ProbeItemId)
-            .Select(resource => resource.GetProperty("sourcePath").GetString())
-            .FirstOrDefault();
+        string? sourcePath = ManifestSourcePath(repositoryRoot, ProbeItemId);
 
         sourcePath.Should().NotBeNull(
             because: $"the budget is derived from one observation taken on '{ProbeItemId}'; if the "
@@ -149,14 +180,16 @@ public sealed class ProcessGuideResponseSizeTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
-        // A superset check, not a count. A count floor accepted a derivation that
-        // had lost several articles — 11 named, 15 declared, so four could leave the measured set and
-        // still clear the floor. Naming them means the article that left is the one the failure reports.
+        // Against the WRITTEN floor, not against the derived set. Contain(GoLiveItemIds(root)) was the
+        // first attempt and holds by construction — GoLiveItemIds is derived from Declared — so review
+        // showed it green while `git mv`-ing an article out of the folder, with its `sourcePath`, took
+        // that article out of this contract entirely.
         declared.Select(article => article.ItemId)
-            .Should().Contain(ProcessGuideSet.GoLiveItemIds(repositoryRoot),
-            because: "the set is derived from the manifest, so an article that stops matching the "
-                + "derivation is one this contract silently stops measuring — and the go-live articles are "
-                + "the ones whose delivery was decided, so they are the floor");
+            .Should().Contain(ProcessGuideSet.GoLiveFloor,
+            because: "these ids are the articles whose delivery was decided, written down rather than "
+                + "derived, so an edit that moves one out of the measured folder or off the manifest "
+                + "cannot also move the expectation. An article missing here is one this contract has "
+                + "silently stopped measuring");
 
         (string ItemId, int Size)[] measured = declared
             .Select(article => (article.ItemId, Size: ResponseSize(repositoryRoot, article.SourcePath)))
@@ -199,10 +232,9 @@ public sealed class ProcessGuideResponseSizeTests
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
         declared.Select(article => article.ItemId)
-            .Should().Contain(ProcessGuideSet.GoLiveItemIds(repositoryRoot),
-            because: "the set is derived from the manifest, so an article that stops matching the "
-                + "derivation is one this contract silently stops measuring — see the same floor on the "
-                + "delivery gate above");
+            .Should().Contain(ProcessGuideSet.GoLiveFloor,
+            because: "the written floor, for the reason given on the delivery gate above: a floor derived "
+                + "from the same source it polices cannot notice the source shrinking");
 
         int threshold = (int)(MaxResponseCharacters * HeadroomThreshold);
         (string ItemId, int Size)[] crowded = declared
@@ -258,6 +290,18 @@ public sealed class ProcessGuideResponseSizeTests
     /// character expand to their six-character escapes here exactly as they do on the wire. Measuring the
     /// raw file instead would understate a dense article by more than a third.
     /// </summary>
+    /// <summary>The declared source path of one itemId, or null when the manifest does not declare it.</summary>
+    private static string? ManifestSourcePath(string repositoryRoot, string itemId)
+    {
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        return manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Where(resource => resource.GetProperty("itemId").GetString() == itemId)
+            .Select(resource => resource.GetProperty("sourcePath").GetString())
+            .FirstOrDefault();
+    }
+
     private static int ResponseSize(string repositoryRoot, string sourcePath) =>
         JsonSerializer.Serialize(ProcessGuideSet.Read(repositoryRoot, sourcePath)).Length + EnvelopeAllowance;
 }

@@ -55,12 +55,12 @@ leaf rather than through `process-modeling`.
                       meaningful `caption` — the Title falls back to the caption when Recommendation is empty,
                       which makes a good caption a free safety net.
   OwnerId             Lookup -> Contact. THE PERFORMER ("Who performs the task?"), for ONE named person.
-                      A TEAM is never routed through OwnerId -- that needs the element-level `performer`
+                      A team is NEVER routed through OwnerId -- that needs the element-level `performer`
                       block. Both layers, their accepted sources and their refusals are owned by
                       `process-task-performer`; read it before you answer "who".
   ActivityCategory    Lookup -> ActivityCategory. Task category. Required by the designer UI.
-                      MUST be a bare record Guid in `value`, and the mapping's source MUST be `value`
-                      and never `expression` -- the expression form degrades the allowed-results list
+                      MUST be a bare record Guid in `value`: the mapping's source MUST be `value` and
+                      MUST NOT be `expression` -- the expression form degrades the allowed-results list
                       silently. (An already-composed `[#Lookup...#]` passed as a `value` is fine from
                       CrtProcessBuilder 1.4.0.40.) `process-task-category` owns that rule and its
                       evidence.
