@@ -1422,17 +1422,6 @@
       "mediaType": "text/plain"
     },
     {
-      "itemId": "process-approval",
-      "title": "Approval element",
-      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome that cannot be branched on without a gateway.",
-      "topicId": "creatio.process-approval",
-      "role": "guidance",
-      "uri": "docs://knowledge/com.creatio.clio/process-approval",
-      "legacyUris": [
-        "docs://mcp/guides/process-approval"
-      ],
-      "sourcePath": "guidance/mcp/guides/processes/approval.md",
-      "bundlePath": "resources/process-approval.md",
       "itemId": "process-preconfigured-page",
       "title": "Pre-configured page element",
       "description": "Owns the Creatio Pre-configured page element (preconfiguredPage / PreconfiguredPageUserTask): why the page's completing buttons and data sources must be read with get-process-page-facts instead of invented, why at least one completing button is required on a build, the performer and the showPage rule that applies only to a user performer, the element parameter each data source carries the saved record id in, what a later setElement re-synchronizes and where drift is reported, and the Classic UI page limits.",
