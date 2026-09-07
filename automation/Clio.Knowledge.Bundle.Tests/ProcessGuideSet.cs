@@ -20,21 +20,72 @@ internal static class ProcessGuideSet
     private const string ProcessFolder = "guidance/mcp/guides/processes/";
 
     /// <summary>
-    /// Articles ENG-96212 split <c>process-modeling</c> into, entry article first. Named explicitly
-    /// because the go-live decision (ENG-96132) and the naming-rule scans are about THESE seven, not
-    /// about whatever else the folder later holds — see <see cref="Declared"/> for the derived set that
-    /// the size contract uses.
+    /// The line every member of the process guide set opens with. It is how an article declares that
+    /// <c>process-modeling</c> is its entry point, which is what obliges the entry to index it — and what
+    /// makes it mandatory reading reached through that entry.
     /// </summary>
-    internal static readonly string[] SplitItemIds =
+    internal const string SetBanner = "Part of the process guide set.";
+
+    /// <summary>The entry article. Stable: it keeps the original itemId, uri and legacyUris.</summary>
+    internal const string EntryItemId = "process-modeling";
+
+    /// <summary>
+    /// The ids the go-live decision covers, written out. This is the EXTERNAL anchor for
+    /// <see cref="GoLiveItemIds"/>, which is derived and therefore cannot police itself: an assertion
+    /// that the derived set contains the derived set holds by construction, and every consumer of it
+    /// was written that way. Measured against that: moving an article out of the processes folder — the
+    /// file and its `sourcePath` together — dropped it from the size contract, the citation scan, the
+    /// marker scan and the routing/index requirement with the whole suite green; and adding
+    /// `requiredFeatures` to an article while deleting its banner in the same commit did the same to the
+    /// re-gating gate. Both were found in review, by mutation, not by this list.
+    ///
+    /// So this list is only ever asserted to be a SUBSET of something derived, never equal to it -- and
+    /// the something differs by fixture, deliberately: the size gates assert it against
+    /// <see cref="Declared"/>, so an article that leaves the folder or the manifest is reported there,
+    /// while the re-gating gate asserts it against the banner-carrying resources, so an article that
+    /// leaves the derivation is reported there. A split adds its pieces to both without an edit here,
+    /// which is the property the derivation exists for;
+    /// what this adds is that nothing already decided can leave quietly. When a split lands, add its
+    /// pieces here too — until then they are in scope but not anchored, and that gap is the honest
+    /// remainder rather than a claim.
+    /// </summary>
+    internal static readonly string[] GoLiveFloor =
     [
         "process-modeling",
+        "process-element-catalog",
         "process-naming",
         "process-data-elements",
+        "process-data-source-filters",
         "process-parameters",
+        "process-formulas",
+        "process-branch-conditions",
         "process-perform-task",
+        "process-task-performer",
+        "process-task-category",
+        "process-open-edit-page",
         "process-send-email",
         "process-activity-connections"
     ];
+
+    /// <summary>
+    /// The articles the ENG-96132 go-live decision covers: the entry, plus every declared process article
+    /// that carries <see cref="SetBanner"/>. DERIVED, because the hand-written list this replaced covered
+    /// 11 of the 13 and the two it missed were re-gatable with the whole suite green — <c>process-formulas</c>
+    /// and <c>process-branch-conditions</c>, both banner-carrying, both indexed by the entry, both named by
+    /// routing as mandatory reading, and one of them itself the product of a split.
+    ///
+    /// The criterion the hand list stated was "extracted from a listed article", which is a fact about
+    /// history that nothing in the tree records. The banner is a fact about the tree, it means the same
+    /// thing — this article is reached through the entry, so gating it hides guidance the entry still
+    /// points at — and it maintains itself. A future process guide that legitimately documents a
+    /// restricted capability simply does not carry the banner, and is not in the set.
+    /// </summary>
+    internal static string[] GoLiveItemIds(string repositoryRoot) =>
+        [EntryItemId, .. Declared(repositoryRoot)
+            .Where(article => article.ItemId != EntryItemId)
+            .Where(article => Read(repositoryRoot, article.SourcePath)
+                .Contains(SetBanner, StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
 
     internal sealed record Article(string ItemId, string SourcePath);
 
@@ -53,17 +104,6 @@ internal static class ProcessGuideSet
             .Select(resource => new Article(
                 resource.GetProperty("itemId").GetString()!,
                 resource.GetProperty("sourcePath").GetString()!))];
-    }
-
-    /// <summary>The seven split articles' source paths, derived, in <see cref="SplitItemIds"/> order.</summary>
-    internal static string[] SplitPaths(string repositoryRoot)
-    {
-        Article[] declared = Declared(repositoryRoot);
-        return [.. SplitItemIds.Select(itemId =>
-            declared.SingleOrDefault(article => article.ItemId == itemId)?.SourcePath
-                ?? throw new InvalidOperationException(
-                    $"bundle-source.json declares no guidance resource '{itemId}'; the ENG-96212 split "
-                    + "articles must each stay a declared get-guidance topic."))];
     }
 
     /// <summary>Every itemId the manifest declares, for resolving a pointer to a servable topic.</summary>

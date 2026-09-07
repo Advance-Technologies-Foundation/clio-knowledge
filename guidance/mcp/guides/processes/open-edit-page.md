@@ -1,11 +1,14 @@
 clio MCP process-open-edit-page guide — the Open edit page element
 
+Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+
 == What this article owns ==
 This article owns the Open edit page element: its `openEditPage` block, every field in it, the rule for
-WHEN to choose this element over its neighbours, and the limits. The build lifecycle, the descriptor
-shape and the element catalog live in `process-modeling`; naming rules for the caption and code live in
-`process-naming`; the record filter this element shares with the data elements lives in
-`process-data-elements`. Do not infer a rule that lives in one of those from what this article says.
+WHEN to choose this element over its neighbours, and the limits. The build lifecycle and the descriptor
+shape live in `process-modeling`; the element catalog and what is buildable today live in
+`process-element-catalog`; naming rules for the caption and code live in
+`process-naming`; the record filter this element shares with the data elements is owned by
+`process-data-source-filters`. Do not infer a rule that lives in one of those from what this article says.
 
 == The element and its block ==
 The Open edit page element (`openEditPage` / OpenEditPageUserTask) shows a record's edit page to a user and
@@ -166,10 +169,12 @@ configuration is stored — the completion conditions and this column both refer
 stranded column leaves the designer's field empty with the list still switched on. Swapping in another page of the
 SAME object (the Classic-to-Freedom move) is fine: every reference stays valid. The refusal names the way out —
 supply a column of the new object, or `enabled: false`; for the conditions, `clearFilter` before the retarget.
-**State this limitation to the user before building one:** the conditional flows that would ROUTE those results are
-not buildable from this contract yet (see the "NOT yet buildable" list in `process-modeling`), so the process carries the result list and
-branches on it only after a human wires the flows in the designer. Building it is still useful — the list and the
-column are the part a human cannot infer — but promising working branches would be wrong.
+**State this to the user before building one:** this contract builds the result list and the column, not the
+routing. The flows themselves are reachable — add them plain, then set each condition with
+`modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op; gateway ELEMENTS and
+default flows stay unbuildable, see `process-element-catalog`). Whether a condition can read THIS element's
+result parameter is NOT measured here, so do not promise working branches until you have set one. The list and
+the column are the part a human cannot infer, and they are what this element contributes.
 `priority` takes an `ActivityPriority` lookup NAME (`Medium`) or its record id; an unknown name is refused rather
 than defaulted, because the designer marks the field required and a defaulted priority is indistinguishable from a
 chosen one. It reads back as the name with the stored id alongside.
