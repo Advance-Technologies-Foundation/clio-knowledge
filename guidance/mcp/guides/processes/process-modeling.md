@@ -33,6 +33,10 @@ owner -- read the one your task needs instead of guessing:
                                      dropdown offers the wrong set.
   * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
                                      the rule for when to choose it over its neighbours.
+  * `process-perform-task`         - the Perform task element: its parameter table, the performer
+                                     layers, and what the runtime sets.
+  * `process-access-rights`        - the Change access rights element: the `accessRights` block,
+                                     permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
   * `process-approval`             - the Approval element: who approves, the record under approval,
@@ -117,7 +121,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
    `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), and a sendEmail
+   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
+   access to whoever it names, on live records, and the element reports nothing at run time; show the user
+   the target object, the record `filter` and every grantee with its operations and level, and get an
+   explicit yes before sending (see `process-access-rights` for the partial-update, collection-replace and
+   object-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
    Activity's "Connected to" links (see `process-activity-connections`)).

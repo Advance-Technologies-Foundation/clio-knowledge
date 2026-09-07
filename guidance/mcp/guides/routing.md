@@ -54,6 +54,8 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-task-category before following it
   - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
+  - grant or revoke RECORD permissions from a process (the Change access rights element) ->
+    name=process-access-rights
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
@@ -88,4 +90,4 @@ guards — it says whose rule it is and names that guide for the rest.
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
   - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
-- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access -> name=record-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
