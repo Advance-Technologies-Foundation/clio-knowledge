@@ -119,8 +119,9 @@ EXPLICITLY asks not to show values (then set `display: false` or omit `dataLabel
 
 ## Style (theme)
 
-The card theme is set by the SURFACE's guide, not here: `dashboard-and-home-page-layout` for dashboards and home
-pages (plain-white / `config.theme` "without-fill"), `desktop-page` for desktops (glassmorphism).
+The card theme is set by the SURFACE's guide, not here: `dashboard-and-home-page-layout` for dashboards
+(plain-white / `config.theme` "without-fill") and home pages (a FILLED card — "full-fill", or
+"partial-fill" to match the page's other charts), `desktop-page` for desktops (glassmorphism).
 This also covers a `tsfunnel`/funnel chart — it is a chart-widget series. If the user explicitly
 names a different style/theme in the prompt, use that instead.
 
@@ -132,11 +133,12 @@ the user gives none.
 - Insert the chart with a UNIQUE view-element `name` via `update-page` in APPEND mode; this
   preserves the widgets already on the page. The chart self-fetches its data, so the
   `modelConfigDiff` stays empty.
-- SIZE FLOOR — never ship a tiny chart. In a `crt.GridContainer` set `layoutConfig.rowSpan` >= 6
-  (platform default 9; funnels 15). In a `crt.FlexContainer` the parent uses `FlexLayoutConfig` —
-  set `layoutConfig.height` >= 350 (px) so the flex child doesn't collapse. The same floor applies
-  to list/pivot widgets. Metric TILES are exempt (they stay ~3 rows). A GAUGE is NOT exempt: it draws
-  an arc, not a number, and needs its own height — see `dashboard-and-home-page-layout`.
+- SIZE FLOOR — never ship a tiny chart. In a `crt.GridContainer` set `layoutConfig.rowSpan` >= 6 on
+  a DASHBOARD (platform default 9; funnels 15); a HOME PAGE runs 4-6 rows with a floor of 4. In a
+  `crt.FlexContainer` the parent uses `FlexLayoutConfig` — set `layoutConfig.height` >= 350 (px) so
+  the flex child doesn't collapse. The same floor applies to list/pivot widgets. Metric TILES are
+  exempt (they stay ~3 rows on a dashboard, 2 on a home page). A GAUGE is NOT exempt: it draws an
+  arc, not a number, and needs its own height — see `dashboard-and-home-page-layout`.
   EXCEPTION — on a DESKTOP page (`CentralAreaDesktopTemplate`) the desktop sizing rule replaces
   this floor: every widget (charts included) may be as short as 3 rows, targeting <= 10 rows total.
   See `desktop-page`.

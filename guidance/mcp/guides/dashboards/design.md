@@ -7,7 +7,7 @@ not part of working a record. To CREATE a dashboard page (the `BaseDashboardTemp
 link-back properties) read `dashboard-creation`.
 
 For the GENERAL layout, sizing, grouping, and styling of analytical widgets — the 12-column grid,
-the metric-band-then-chart-grid skeleton, per-widget-type sizes, the plain-white card style, worked
+the metric-band-then-chart-grid skeleton, per-surface sizes and card themes, worked
 patterns, and the finish checklist — read `dashboard-and-home-page-layout`. Those rules apply to a dashboard exactly
 as to any other analytics surface; this guide does not restate them. This guide adds only what is
 unique to a dashboard: the `DashboardDS` binding below.

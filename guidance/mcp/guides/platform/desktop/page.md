@@ -81,9 +81,10 @@ WIDGET SIZING ON A DESKTOP (this OVERRIDES the chart-widget size floor)
   space. 3 rows is the crowded-case minimum, not the default size.
 
 WIDGET CARD THEME
-Desktop widgets use the glassmorphism card, NOT the plain-white card of dashboards/home pages: set
-`config.theme` "glassmorphism" and `layout.color` "transparent". (Dashboards and home pages use
-plain-white — see `dashboard-and-home-page-layout`.) If the user names a different theme, use that.
+Desktop widgets use the glassmorphism card, NOT the themes dashboards and home pages use: set
+`config.theme` "glassmorphism" and `layout.color` "transparent". (A dashboard is plain-white
+throughout and a home page fills its chart cards — see `dashboard-and-home-page-layout`.) If the user
+names a different theme, use that.
 
 WIDTH & LAYOUT — size and pack widgets to fill the grid (hero + supporting hierarchy)
 Avoid BOTH bad extremes: (1) every widget in ONE row of equal narrow columns — squeezes a

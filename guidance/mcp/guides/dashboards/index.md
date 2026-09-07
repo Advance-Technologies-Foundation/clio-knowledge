@@ -7,7 +7,7 @@ Pick the dashboard guide that matches the task (a dashboard is a page inheriting
   (`DashboardsEntitySchemaName`, `DashboardsElementName`, `DashboardsClientUnitSchemaUId`),
   including how to retrieve each value -> get-guidance name=dashboard-creation
 - LAY OUT / size / group / style the analytical widgets — the 12-column grid, the
-  metric-band-then-chart-grid skeleton, per-widget-type sizes, the plain-white card style ->
+  metric-band-then-chart-grid skeleton, per-surface sizes and card themes ->
   get-guidance name=dashboard-and-home-page-layout
 - FILTER a dashboard's widgets by its page data (the hidden `DashboardDS` source) ->
   get-guidance name=dashboard-design
