@@ -52,6 +52,8 @@ guards — it says whose rule it is and names that guide for the rest.
     plain value", or a package-convergence message) -> name=process-perform-task for the refusal texts,
     the remedy and the ids; the fix the refusal itself suggests is not the safe one -- read
     name=process-task-category before following it
+  - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
+    edit mode, optionally gated on a completion condition -> name=process-open-edit-page
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
     name=process-activity-connections

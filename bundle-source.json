@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.94",
+  "libraryVersion": "1.13.95",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -100,6 +100,7 @@
       "process-perform-task",
       "process-task-performer",
       "process-task-category",
+      "process-open-edit-page",
       "process-send-email",
       "process-activity-connections",
       "process-script-task",
@@ -242,6 +243,7 @@
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-task-performer",
       "docs://knowledge/com.creatio.clio/process-task-category",
+      "docs://knowledge/com.creatio.clio/process-open-edit-page",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1222,7 +1224,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-send-email and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-open-edit-page, process-send-email and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1371,6 +1373,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/task-category.md",
       "bundlePath": "resources/process-task-category.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-open-edit-page",
+      "title": "Open edit page element",
+      "description": "Owns the Creatio Open edit page element (openEditPage / OpenEditPageUserTask) -- the step that shows a record's edit page to a user and waits. Covers the page and the object and record type DERIVED from it, the add and edit modes and what each one requires, pre-filled column values and their value sources, the record to open, recommendation and hint, the performer and the show-page flag that follows it, the Log activity gate and what it actually gates, the result column, and the completion condition and the filter it is paired with. Also owns the two rules that decide WHEN to choose this element over its neighbours, why an omitted block is not the same as a disabled one, and why background mode is set on demand here rather than by the general signal-started rule.",
+      "topicId": "creatio.process-open-edit-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-open-edit-page",
+      "legacyUris": [
+        "docs://mcp/guides/process-open-edit-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/open-edit-page.md",
+      "bundlePath": "resources/process-open-edit-page.md",
       "mediaType": "text/plain"
     },
     {
