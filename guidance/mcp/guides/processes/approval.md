@@ -96,10 +96,14 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   recipient — an address is a person, not a formatting detail.
 - The visa schema, its master column and the section are DERIVED from `object` server-side (with the
   platform's `SysApproval` fallback when the object has no approval settings) and are never caller input.
-- **The outcome cannot be branched on.** Approved / rejected / canceled arrives in the element's
-  `ResultParameter` output, but routing it needs a gateway and conditional flows, which are not buildable —
-  see "What you can build today" in `process-modeling`. So `approval` gives you a configured approval STEP,
-  not an approval FLOW. Say so when you build one, and note the outcome set is three values, not two.
+- **The outcome CAN be branched on, and no gateway is involved.** Approved / rejected / canceled arrives in
+  the element's `ResultParameter` output, and an element output parameter is referenceable from a flow
+  condition as `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]` — take both UIds from
+  `describe-business-process`, which reports them but assembles no ready-made token (see "Referencing a
+  parameter" in `process-formulas`). So build the outgoing flows plain and then give each its condition with
+  `modify-business-process` -> `setFlowCondition`; `flows[].kind` is still refused on the build path, which
+  is why this is two steps rather than one (see `process-branch-conditions`). Note the outcome set is THREE
+  values, not two — a two-way Approved/Rejected split silently drops the canceled case.
 
 == Modifying an existing Approval element ==
 - `modify-business-process` → `setElement` with an `approval` block reconfigures it IN PLACE; only the

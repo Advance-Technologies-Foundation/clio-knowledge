@@ -41,8 +41,14 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # The logger is not decoration, and it carries more weight than it did: the 90% gate was removed
+      # because it blocked two open pull requests that were doing nothing wrong, so this table ("X of
+      # budget", and which article is approaching it) is now the ONLY early warning before the delivery
+      # limit. It is written to the test output, which the default console logger drops -- without this
+      # it prints on nobody's screen and the first person to see an article near the limit is whoever's
+      # build goes red. Documented in CONTRIBUTING for local runs.
       - name: Run the producer contract suite
-        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release
+        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release --logger "console;verbosity=detailed"
 
       # Everything above is hermetic: it judges this revision alone. This step is the one thing that
       # cannot be a test, because the question is about history — whether the published bytes moved
