@@ -33,6 +33,10 @@ leaf rather than through `process-modeling`.
   configurable through its `openEditPage` block — page, editing mode, pre-filled values, the record to open,
   performer, Log activity, result column and completion condition. `process-open-edit-page` owns the
   contract, the rule for choosing this element, and its limits.
+- Approval: `approval` (the Approval element / ApprovalUserTask) is BUILDABLE and configurable through its
+  `approval` block — the object and the record under approval, who approves, and the two notifications with
+  their email templates. It is a configured approval STEP, not a FLOW: branching on the verdict needs a
+  gateway. `process-approval` owns the contract and its limits.
 - `preconfiguredPage` — Pre-configured page: shows a Freedom UI page to a user and resumes when the user
   presses a completing button, and is the only page element that can hand a user a purpose-built page.
   CRITICAL before you build one: the page's buttons and data sources are FACTS to read, not values to
@@ -88,9 +92,11 @@ leaf rather than through `process-modeling`.
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
-`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`.)
+`readData`/ReadDataUserTask. THREE user tasks have their own dedicated build type and must NOT be built as
+a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
+(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`;
+`openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; and `approvalUserTask` ->
+`type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus

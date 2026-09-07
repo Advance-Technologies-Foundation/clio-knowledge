@@ -35,6 +35,8 @@ owner -- read the one your task needs instead of guessing:
                                      the rule for when to choose it over its neighbours.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
+  * `process-approval`             - the Approval element: who approves, the record under approval,
+                                     and the two notifications.
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
                                      completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
@@ -136,6 +138,14 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   compile. This bullet scopes compilation to the PROCESS; other configuration schemas (source code,
   business objects, DCM, value lists, and a CUSTOM user-task schema — the custom user-task compile
   rule is in `process-element-catalog`) carry their own compile obligations and are NOT covered here.
+
+== Set what was asked for, and nothing else ==
+- An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
+  behaviour nobody chose (a flag left out keeps the platform's value, not always the falsy one) and erases
+  the "not decided" signal — describe reports what is WRITTEN, so absence means "not set", never "off".
+- Required fields need no guessing: the server REFUSES and names what is missing. When what it names is a
+  BUSINESS decision the request did not make — who approves, who performs, whom to notify — ASK. A value
+  carried over from a process you built earlier in the session is a guess wearing the clothes of context.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
