@@ -29,6 +29,9 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
     element acts on -> name=process-data-elements
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
+  - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
+  - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
+    name=process-branch-conditions (and name=process-formulas for the expression itself)
   - the Perform task element — a human step, who performs it, its parameter table -> name=process-perform-task
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
