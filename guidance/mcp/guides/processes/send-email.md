@@ -2,8 +2,6 @@ clio MCP process-send-email guide — the Send email element (EmailTemplateUserT
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the Send email element in custom-message mode.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == Element: Send email (sendEmail -> EmailTemplateUserTask) ==
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
@@ -29,7 +27,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   setup completes) — plus the card's auto-mode-only `senderValidator`.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
-  the contact's email at send time; an entity-COLUMN recipient is reachable IN THIS CONTRACT only as a raw
+  the contact's email at send time; an entity-COLUMN recipient would need a raw `expression` carrying a
+  three-segment meta-path whose column UId nothing reports, so it is NOT authorable today (ENG-91844) —
+  route the column through a process parameter instead. What remains reachable here is a raw
   `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".
@@ -39,7 +39,9 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   and over a named Contact: the setting is what an administrator can change afterwards without reopening the
   process, while a hard-coded address silently keeps mailing the old destination. Discover the code with
   `list-sys-settings` (pass `search-pattern` — the unfiltered catalog is hundreds of rows), and create the
-  setting with `create-sys-setting` when it does not exist yet rather than falling back to a literal. When a
+  setting with `create-sys-setting` when it does not exist yet rather than falling back to a literal — and
+  then SET ITS VALUE. A setting that exists with no value throws at run time, so
+  creating one and leaving it empty ships a process that saves clean and fails on the first send. When a
   request names a recipient by ROLE rather than by address ("notify HR", "tell support"), treat a system
   setting as the expected answer and offer it explicitly — an option set of literal / contact / parameter
   omits the one source that survives a change of staff. The HTML body is stored verbatim;

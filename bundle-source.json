@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.73",
+  "libraryVersion": "1.13.95",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -90,14 +90,21 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-element-catalog",
       "process-naming",
       "process-data-elements",
+      "process-data-source-filters",
       "process-parameters",
+      "process-formulas",
+      "process-branch-conditions",
       "process-perform-task",
+      "process-task-performer",
+      "process-task-category",
       "process-send-email",
       "process-preconfigured-page",
       "process-activity-connections",
       "process-script-task",
+      "product-telemetry",
       "record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
@@ -226,14 +233,21 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-element-catalog",
       "docs://knowledge/com.creatio.clio/process-naming",
       "docs://knowledge/com.creatio.clio/process-data-elements",
+      "docs://knowledge/com.creatio.clio/process-data-source-filters",
       "docs://knowledge/com.creatio.clio/process-parameters",
+      "docs://knowledge/com.creatio.clio/process-formulas",
+      "docs://knowledge/com.creatio.clio/process-branch-conditions",
       "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-task-performer",
+      "docs://knowledge/com.creatio.clio/process-task-category",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
+      "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
@@ -1210,7 +1224,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the four process tools, the create-business-process descriptor, what is buildable today (Simple/Signal start, end, user tasks, the fully configurable Send email element, and sequence flows -- gateway ELEMENTS, conditional and default flows, and timers are NOT buildable), the intent-to-running-process recipe, the safety rules for modifying an existing process, and the element catalog that maps a palette data-id to what it does. Routes onward to the six articles that own the rest: process-naming, process-data-elements, process-parameters, process-perform-task, process-send-email and process-activity-connections. Each of the seven is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-send-email, process-preconfigured-page and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1219,6 +1233,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-element-catalog",
+      "title": "Process element catalog",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, and the conditional BRANCH built by setting a condition on a plain flow AFTER the flow exists -- while gateway ELEMENTS, default flows, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule. Split out of process-modeling, which keeps the lifecycle around it.",
+      "topicId": "creatio.process-element-catalog",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
+      "legacyUris": [
+        "docs://mcp/guides/process-element-catalog"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/element-catalog.md",
+      "bundlePath": "resources/process-element-catalog.md",
       "mediaType": "text/plain"
     },
     {
@@ -1237,8 +1265,8 @@
     },
     {
       "itemId": "process-data-elements",
-      "title": "Process data elements and record filters",
-      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, the Modify data element target and column values, and the data-source filter that all three share: column dot-paths, the comparison set, the right-hand value sources, the complete relative-date macro vocabulary, the datePart left-hand modifier, and the signal-start restriction that forbids parameter references before an instance exists.",
+      "title": "Process data elements",
+      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
       "topicId": "creatio.process-data-elements",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-elements",
@@ -1250,9 +1278,23 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-data-source-filters",
+      "title": "Process data source filters",
+      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the five right-hand value sources (value, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only a constant, a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
+      "topicId": "creatio.process-data-source-filters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-data-source-filters",
+      "legacyUris": [
+        "docs://mcp/guides/process-data-source-filters"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/data-source-filters.md",
+      "bundlePath": "resources/process-data-source-filters.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros that are the one formula an author may write rather than copy.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -1264,9 +1306,37 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-formulas",
+      "title": "Process formulas",
+      "description": "Owns the vocabulary the platform's expression interpreter actually accepts for an `expression` mapping source and for a flow condition (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; an environment below clio's enforced floor is refused up front), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - and the length bound clio still applies. Branch mechanics moved to `process-branch-conditions`.",
+      "topicId": "creatio.process-formulas",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-formulas",
+      "legacyUris": [
+        "docs://mcp/guides/process-formulas"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/formulas.md",
+      "bundlePath": "resources/process-formulas.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-branch-conditions",
+      "title": "Process branch conditions",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: turning a plain flow into a conditional one in place with setFlowCondition, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "topicId": "creatio.process-branch-conditions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
+      "legacyUris": [
+        "docs://mcp/guides/process-branch-conditions"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/branch-conditions.md",
+      "bundlePath": "resources/process-branch-conditions.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-perform-task",
       "title": "Perform task element",
-      "description": "Owns the Creatio Perform task element (performTask / ActivityUserTask): what it produces and when the process resumes, the full table of settable parameters with the shared *Period unit enum, the parameters the runtime sets that must never be written as targets, and the two performer layers -- the element-level performer block that assigns to a role or a manager, and OwnerId for one person. Also states why the Activity type is always Task expressed through a category, and why Approval is not this element.",
+      "description": "Owns the Creatio Perform task element (performTask / ActivityUserTask): what it produces and when the process resumes, the full table of settable parameters with the shared *Period unit enum, the parameters the runtime sets that must never be written as targets, the CurrentActivityId adoption trap, and that the Connected-to lookups are connections rather than mappings. Also states why the Activity type is always Task expressed through a category, WHICH category id to use for a call, why the retired CallUserTask is a dead end, and why Approval is not this element. WHO performs the task is owned by process-task-performer; HOW a category or priority value must be written, by process-task-category.",
       "topicId": "creatio.process-perform-task",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-perform-task",
@@ -1275,6 +1345,34 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
       "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-task-performer",
+      "title": "Process task performer",
+      "description": "Owns \"Who performs the task?\" for a Creatio Perform task, on both layers. Layer 1 is the element-level performer block (from CrtProcessBuilder 1.3.1.1), the ONLY route to a TEAM: type role stores the role on the Activity's own OwnerRole column and leaves Owner EMPTY -- the claim model, not an unassigned task -- and the role is checked to exist, so a typo'd name, an invented Guid, a USER's SysAdminUnit id and an ambiguous name are all refused; type manager resolves the contact's manager at RUN time and raises there when it has none; type user takes a bare Contact Guid or a current-user-contact formula. Layer 2 is the OwnerId parameter, for one named person only, with its four accepted sources and its refusal of a SysAdminUnit reference. Also states that the block is refused on every element except performTask, and that leaving BOTH layers unset silently assigns the process starter rather than nobody. Split out of process-perform-task.",
+      "topicId": "creatio.process-task-performer",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-task-performer",
+      "legacyUris": [
+        "docs://mcp/guides/process-task-performer"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/task-performer.md",
+      "bundlePath": "resources/process-task-performer.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-task-category",
+      "title": "Process task category and priority",
+      "description": "Owns WHY a task element's ActivityCategory and ActivityPriority MUST be a bare record Guid in value, stored as a ConstValue, and MUST NOT be mapped from `expression`: the allowed-results list the task page and the designer result dropdown offer is computed from the category only when its source is ConstValue, so an `expression` source sets the column and silently degrades that list -- and Activity.AllowedResult is the wrong place to look for it, deriving from conditional flows instead. Also owns the DisplayValue story: a localizable string serialized into the schema RESOURCES rather than beside Value, shown verbatim when non-empty, and from CrtProcessBuilder 1.4.0.40 resolved and stored by the server, which also decodes an already-composed lookup macro and reports the resolved name as read-only valueDisplay. Not needed to BUILD a task: process-perform-task owns the parameter itself -- the ids, the two Call rows, and the two refusals a caller sees when the environment is behind.",
+      "topicId": "creatio.process-task-category",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-task-category",
+      "legacyUris": [
+        "docs://mcp/guides/process-task-category"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/task-category.md",
+      "bundlePath": "resources/process-task-category.md",
       "mediaType": "text/plain"
     },
     {
@@ -1331,6 +1429,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
       "bundlePath": "resources/process-script-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "product-telemetry",
+      "title": "Product telemetry",
+      "description": "Owns the product telemetry event vocabulary: the flow-agnostic stages (workflow_started, plan_presented, plan_approved, build_started, work_item_completed, workflow_completed, workflow_failed, ...), the `workflow` field that identifies which flow emitted one, the bounded `variant` qualifier, the deprecated app-creation-specific names, and the get-telemetry-consent / send-telemetry / withdraw-telemetry-consent consent mechanics. Per-flow emission points stay in the consumer repository's contract.",
+      "topicId": "creatio.product-telemetry",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/product-telemetry",
+      "legacyUris": [
+        "docs://mcp/guides/product-telemetry"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/product-telemetry.md",
+      "bundlePath": "resources/product-telemetry.md",
       "mediaType": "text/plain"
     },
     {
