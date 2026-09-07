@@ -195,10 +195,12 @@ Reach for another element ONLY on a positive signal for it:
 - **Pre-configured page** — the request names a SPECIFIC existing custom page to open as-is ("open the onboarding
   checklist page"). A wish for a nicer layout is not this signal; a named page is.
 Two things follow from that asymmetry and both matter more than they look:
-1. **Neither alternative is buildable through this contract** (only Open edit page is). So routing a
-   record-editing request to one of them does not produce a different-but-working process — it produces NOTHING,
-   and the user is left with a request you could have fulfilled. Never pick them for work Open edit page can do;
-   if one is genuinely required, say so plainly and stop, rather than silently substituting another element.
+1. **Only one alternative is buildable through this contract.** Auto-generated page is NOT: routing a
+   record-editing request to it produces NOTHING, and the user is left with a request you could have fulfilled —
+   if it is genuinely required, say so plainly and stop rather than silently substituting another element.
+   Pre-configured page IS buildable (`process-preconfigured-page` owns it), but only against an EXISTING Freedom UI
+   page whose buttons and data sources are read as facts first — so it is the right choice on its own signal above,
+   never a substitute for Open edit page on a record's columns.
 2. **Do not ask the user which element to use.** Choosing the BPMN element is the modelling decision they
    delegated by asking for a process. Asking which OBJECT or COLUMN is meant is fine and often right; asking
    "should this be an Open edit page or an Auto-generated page?" hands back the job. When two readings are

@@ -65,7 +65,8 @@ internal static class ProcessGuideSet
         "process-open-edit-page",
         "process-send-email",
         "process-approval",
-        "process-activity-connections"
+        "process-activity-connections",
+        "process-preconfigured-page"
     ];
 
     /// <summary>

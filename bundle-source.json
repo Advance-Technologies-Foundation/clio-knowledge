@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.96",
+  "libraryVersion": "1.13.97",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -103,6 +103,7 @@
       "process-open-edit-page",
       "process-send-email",
       "process-approval",
+      "process-preconfigured-page",
       "process-activity-connections",
       "process-script-task",
       "product-telemetry",
@@ -247,6 +248,7 @@
       "docs://knowledge/com.creatio.clio/process-open-edit-page",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-approval",
+      "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/product-telemetry",
@@ -1226,7 +1228,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1417,6 +1419,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/approval.md",
       "bundlePath": "resources/process-approval.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-preconfigured-page",
+      "title": "Pre-configured page element",
+      "description": "Owns the Creatio Pre-configured page element (preconfiguredPage / PreconfiguredPageUserTask): why the page's completing buttons and data sources must be read with get-process-page-facts instead of invented, why at least one completing button is required on a build, the performer and the showPage rule that applies only to a user performer, the element parameter each data source carries the saved record id in, what a page change does to the element's data sources, what a later setElement re-synchronizes and where drift is reported, and the Classic UI page limits.",
+      "topicId": "creatio.process-preconfigured-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-preconfigured-page",
+      "legacyUris": [
+        "docs://mcp/guides/process-preconfigured-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/preconfigured-page.md",
+      "bundlePath": "resources/process-preconfigured-page.md",
       "mediaType": "text/plain"
     },
     {

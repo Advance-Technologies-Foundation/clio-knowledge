@@ -37,6 +37,8 @@ owner -- read the one your task needs instead of guessing:
                                      HTML body and its process macros.
   * `process-approval`             - the Approval element: who approves, the record under approval,
                                      and the two notifications.
+  * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
+                                     completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R17 connection rules.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
