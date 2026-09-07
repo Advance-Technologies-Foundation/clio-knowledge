@@ -100,6 +100,7 @@
       "process-perform-task",
       "process-task-performer",
       "process-task-category",
+      "process-open-edit-page",
       "process-send-email",
       "process-preconfigured-page",
       "process-activity-connections",
@@ -243,6 +244,7 @@
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-task-performer",
       "docs://knowledge/com.creatio.clio/process-task-category",
+      "docs://knowledge/com.creatio.clio/process-open-edit-page",
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
@@ -1224,7 +1226,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-send-email, process-preconfigured-page and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-preconfigured-page and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1376,9 +1378,23 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-open-edit-page",
+      "title": "Open edit page element",
+      "description": "Owns the Creatio Open edit page element (openEditPage / OpenEditPageUserTask) -- the step that shows a record's edit page to a user and waits. Covers the page and the object and record type DERIVED from it, the add and edit modes and what each one requires, pre-filled column values and their value sources, the record to open, recommendation and hint, the performer and the show-page flag that follows it, the Log activity gate and what it actually gates, the result column, and the completion condition and the filter it is paired with. Also owns the two rules that decide WHEN to choose this element over its neighbours, why an omitted block is not the same as a disabled one, and why background mode is set on demand here rather than by the general signal-started rule.",
+      "topicId": "creatio.process-open-edit-page",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-open-edit-page",
+      "legacyUris": [
+        "docs://mcp/guides/process-open-edit-page"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/open-edit-page.md",
+      "bundlePath": "resources/process-open-edit-page.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, sender resolution and why a missing sender fails at run time rather than at save, recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, the auto-mode mandatory fields (sender, to, subject, body) and the missing-body run-time trap, sender resolution -- why a missing sender fails at run time rather than at save while a malformed sender (a SysSettings formula) fails the build, the ranked recipient sources (system setting first, constant address last) and the matching sender discipline (discover configured mailboxes, reuse before creating a record, state the reason), recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",

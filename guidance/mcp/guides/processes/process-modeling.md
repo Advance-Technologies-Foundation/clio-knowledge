@@ -31,6 +31,8 @@ owner -- read the one your task needs instead of guessing:
                                      needed to BUILD one -- `process-perform-task` carries the ids and
                                      the refusals. Read this when a field shows a raw Guid or a results
                                      dropdown offers the wrong set.
+  * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
+                                     the rule for when to choose it over its neighbours.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
