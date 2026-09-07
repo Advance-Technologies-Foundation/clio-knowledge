@@ -129,7 +129,9 @@ FLOW
 4. Build the mobile body (plain JSON: viewConfigDiff / viewModelConfigDiff / modelConfigDiff)
    by iterating elementMap. For each entry act on its operation:
    - merge — the element is provided by the mobile template (a "twin", e.g. Tabs→Tabs,
-     FeedTabContainer→FeedContainer). REUSE the existing mobileName; do NOT insert it. (Insert
+     FeedTabContainer→FeedContainer, GeneralInfoTab→GeneralInfoTab,
+     GeneralInfoTabContainer→GeneralTabContainer). REUSE the existing
+     mobileName; do NOT insert it. (Insert
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
      also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
      as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
@@ -154,9 +156,15 @@ FLOW
      get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
      When elementMap[].index is present, add it to the insert op at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
-     web tab, below); otherwise omit index and append. On a tabbed record page EVERY web tab inserts
-     as its OWN new mobile tab under Tabs (no general-tab collapse); the web wrapper's non-tab
-     (side/profile) content fills the mobile general tab's grid, EXCEPT the profile island itself:
+     web tab, below); otherwise omit index and append. On a tabbed record page every web tab the PAGE
+     authored inserts as its OWN new mobile tab under Tabs. The web TEMPLATE's own
+     general-information tab is the exception: it is a MERGE twin (GeneralInfoTab→GeneralInfoTab), so
+     no second general tab is ever inserted, and its content grid is a separate merge twin
+     (GeneralInfoTabContainer→GeneralTabContainer). Content lands where the WEB page put it — in
+     GeneralTabContainer if the page kept that grid, in GeneralInfoTab if it removed it. Both are
+     valid receivers: take parentName as given and do not normalise one shape into the other.
+     The web card wrapper's non-tab (side/profile) content fills the mobile general tab's content GRID
+     (CardContentWrapper→GeneralTabContainer), EXCEPT the profile island itself:
      it merges into the template's profile Area card rather than landing in that grid — its children
      go INSIDE that Area card, never directly into the general tab's grid, and it must NOT be left
      empty. Take both container names from guide.containerMap, which already carries the pair for the

@@ -29,6 +29,9 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
     element acts on -> name=process-data-elements
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
+  - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
+  - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
+    name=process-branch-conditions (and name=process-formulas for the expression itself)
   - the Perform task element — a human step, who performs it, its parameter table -> name=process-perform-task
   - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
@@ -47,6 +50,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
+- Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
@@ -58,6 +62,7 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
+  - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
   - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access -> name=record-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
