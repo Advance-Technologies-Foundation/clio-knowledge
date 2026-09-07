@@ -13,7 +13,16 @@ section to scroll to.
   CRITICAL: the page's buttons and data sources are FACTS you must read first, not values you may invent —
   a page inherits its buttons from its template chain, so they are only knowable from the merged page and
   the server cannot see them. Call `get-process-page-facts --schema-name <page>` and pass its
-  `completingButtonCandidates` / `dataSources` entries through unchanged.
+  `completingButtonCandidates` / `dataSources` entries through unchanged. This is ENFORCED, not advice:
+  clio checks both against the page and REFUSES a name the page does not have — on a build and on a
+  `setElement` alike — because neither mistake fails visibly. An invented button is stored as a tag no
+  button on the page ever raises; an invented data source makes the completing button abandon the
+  completion. Either way the process builds green, saves green, reads back `inSync: true`, and the step
+  then waits forever.
+    * An EMPTY `completingButtonCandidates` is NOT a clean answer, and it arrives with `success: true`
+      plus a `warnings` line saying so: either the page genuinely has no buttons, or its merged bundle had
+      a shape the projection did not recognise. Verify in the page designer before building on that page —
+      an element with no completing button can never finish at run time.
     * `{"type":"preconfiguredPage","name":"ApproveRequest","caption":"Approve the request","preconfiguredPage":{
       "page":"UsrRequestReview_FormPage",
       "performer":{"type":"user|manager|role","contact":"…","role":"…","showPage":true},
@@ -33,6 +42,12 @@ section to scroll to.
       validation in the designer and then hang forever at run time, which nothing downstream catches.
       Choose from the candidates the facts tool returned. (On `setElement` the same omission still means
       "keep the buttons the element already has" — the refusal is build-only.)
+    * A NAME THE PAGE DOES NOT CARRY is refused; a name it carries which is not a completing CANDIDATE is
+      only a warning. The asymmetry is deliberate: the candidate rule admits a handler issuing a completing
+      request or declaring none, and a custom button that finishes the step in its own code satisfies
+      neither while being perfectly legitimate — so refusing it would block correct work on a heuristic.
+      Read the warning: it says the step will wait after that button is pressed unless the button's own code
+      completes it.
     * `performer` OMITTED on a build defaults to the CURRENT USER — the server writes the same performer the
       designer's card does for a new element, so you do not have to send one. Send it when the task belongs
       to somebody else.
@@ -61,8 +76,17 @@ section to scroll to.
       name the PREVIOUS page's buttons, so the operation is refused rather than carried across — re-read
       `get-process-page-facts` for the new page first. Changing `page` to a Classic UI page is refused
       outright: the contract cannot configure one. An element that already references a Classic UI page keeps
-      that reference (re-asserting the SAME page is fine) and is edited within the fields both page types share. `dataSources` have no removal path through this contract,
-      so a page change carries the previous page's data-source parameters forward as inert leftovers.
+      that reference (re-asserting the SAME page is fine) and is edited within the fields both page types share.
+    * `dataSources` have no removal path through this contract, and the leftover that produces is NOT inert
+      — this is the one rule here worth reading twice. SUPPLYING a source the new page does not declare is
+      refused (the FACTS rule above). OMITTING `dataSources` means "leave alone", so the PREVIOUS page's
+      data-source parameter is carried forward, and the step can then never finish: at run time the stored
+      source name is resolved against the page the element is now on, resolves to nothing, and the
+      completion is abandoned silently — the page stays open with no error and no validation message, and
+      the instance never leaves `Running`. `describe-business-process` still reports that source and still
+      reports `inSync: true`, so NOTHING downstream shows it. Consequence for you: a retarget onto a page
+      with FEWER data sources cannot be made correct through this contract. Say so, and build a new element
+      on the new page instead of editing the old one.
     * RE-SYNC: any `setElement` touching the element re-reads the page and reconciles its parameters —
       added ones appear, values and mappings for unchanged ones survive, a renamed parameter keeps its
       value, and a parameter whose data type changed loses its value and is reported. This mirrors the
@@ -78,7 +102,11 @@ section to scroll to.
     * DRIFT IS REPORTED as `message-type: "Warning"` entries in `execution-log-messages` — on a MODIFY and on a
       BUILD alike. There is NO separate `warnings` field on the response, so looking for one and finding nothing
       is not evidence there were none. A cleared value, a removed parameter, a rename, and a page that could not
-      be read each raise one line naming the element and the parameters. Read them: the operation SUCCEEDS, so a
+      be read each raise one line naming the element and the parameters. clio adds its own validation
+      warnings to the same channel: a button that exists but is not a completing candidate, a data source the
+      page declares outside its page-scoped entity sources, and an `entitySchemaName` that disagrees with the
+      page's own (that last one still completes the step — the parameter is simply typed to the wrong
+      entity's primary column, so the record id never arrives). Read them: the operation SUCCEEDS, so a
       mapping invalidated by a page change is visible ONLY there. A page that could not be read removes NOTHING —
       the element keeps a stale parameter list rather than a pruned one, and the line says so.
     * Creating a Pre-configured page on a CLASSIC UI page is not supported. An element that already
