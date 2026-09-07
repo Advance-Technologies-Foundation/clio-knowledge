@@ -193,13 +193,16 @@ article from what this one says; read that article.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
   lost). Warn the user before editing a process with a curated diagram.
-- You MUST read `isActiveVersion` from the describe output before ANY modify: a modify edits the ONE
-  schema you named and a process can be a family of them. FALSE means the graph you hold is not the one
-  the runtime executes, so the save succeeds and production does not change. TRUE means the edit is
-  irreversible -- the previous graph is gone and nothing brings it back -- so get explicit confirmation,
-  and offer `modify-business-process-as-new-version`, which applies the SAME operations to a new version
-  and leaves the running one untouched. `process-versions` owns every other outcome, the identity rules
-  and what to ask before activating.
+- You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
+  ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
+  way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
+  overwrite is the one the runtime executes, so get explicit confirmation, and offer
+  `modify-business-process-as-new-version` instead -- the SAME operations against a new version, or an
+  EMPTY operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not
+  the one that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that
+  member, or report the standing and ask. `process-versions` owns every other outcome, the identity
+  rules and what to ask before activating.
+
 == Element catalog (data-id -> label -> purpose) ==
 (The `data-id` strings below are the vocabulary for `validate-process-graph` and for reasoning about /
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events

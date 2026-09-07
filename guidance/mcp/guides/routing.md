@@ -38,8 +38,9 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading, which one the runtime runs, editing or launching a process
-    that has versions, or a rollback request -> name=process-versions
+  - which VERSION of a process you are reading, which one the runtime runs, editing or launching ANY
+    existing process, or a rollback request -> name=process-versions; add name=process-modeling for the
+    operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
