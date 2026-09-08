@@ -143,8 +143,11 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
     in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
     diff between two processes says nothing at all about their labels. Below 1.6.0.8 the field is
-    DISCARDED silently on write and absent on read, which is not the same as null: null means this flow
-    has no label, a missing key means the server never reported any. clio reads the flows back after a
-    successful write and warns about a label that is not what is drawn.
+    DISCARDED silently on write and absent on read — and ABSENT IS AMBIGUOUS: measured on a 1.6.0.8
+    stand, the server omits `label` for a flow that carries none exactly as an older server omits it
+    for every flow, so the two are the same bytes. An all-unlabelled read is therefore NOT evidence
+    that a designer-authored process has no labels; check the installed `CrtProcessBuilder` version
+    (`list-packages`, `get-info`) before believing it. The WRITE side needs no such check: clio reads
+    the flows back after a successful write and warns about a label that is not what is drawn.
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own article (`process-activity-connections`) and no naming surface at all.
