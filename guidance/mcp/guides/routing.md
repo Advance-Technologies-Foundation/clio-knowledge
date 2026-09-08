@@ -61,7 +61,7 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-approval
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
     sources are read facts, never invented -> name=process-preconfigured-page
-  - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
+  - the "Connected to" links of the activity a task creates, and the R1-R18 connection rules ->
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe

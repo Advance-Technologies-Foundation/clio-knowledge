@@ -54,7 +54,7 @@ public sealed class ProcessGuideContentPreservationTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         string article = ProcessGuideSet.Read(repositoryRoot, ConnectionRulesArticle);
 
-        string[] missing = Enumerable.Range(1, 17)
+        string[] missing = Enumerable.Range(1, 18)
             .Select(number => $"R{number}")
             .Where(rule => !Regex.IsMatch(article, $@"(?m)^{rule}\s"))
             .ToArray();

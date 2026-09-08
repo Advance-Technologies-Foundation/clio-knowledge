@@ -74,11 +74,20 @@ leaf rather than through `process-modeling`.
   already does). `describe-business-process` reports the effective value per element, so it round-trips.
 - A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
   "Data source filters" section of `process-data-source-filters`).
-- A CONDITIONAL BRANCH: build a plain flow, then turn it into a conditional one with
-  `modify-business-process` + `setFlowCondition`. No gateway element is involved — see
-  `process-branch-conditions`.
+- BRANCHING, declared where the flow is declared. `flows[]` takes `kind` (`sequence` | `conditional` |
+  `default`) and, on a conditional flow, its `condition`. The older two-step route — build the flow
+  plain, then `setFlowCondition` — still works and is what you use on a flow that ALREADY exists, but
+  do not reach for it when creating: it saves the process once with a flow that does not yet branch.
+  See `process-branch-conditions`.
+- `exclusiveGateway` (XOR) and `parallelGateway` (AND) ELEMENTS. A gateway is OPTIONAL for branching —
+  the platform synthesizes one for a conditional flow whose source is an ordinary activity, which is
+  what 485 of the 1 406 conditional flows in the shipped product do — so the element is about the
+  diagram being readable, not about making the branch work. Three rules apply to the flows leaving a
+  gateway element, none of them visible in the descriptor schema; `process-branch-conditions` owns
+  them.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
-  in a build descriptor: gateway ELEMENTS, default flows, timer/message start, intermediate events,
+  in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
+  intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
@@ -144,10 +153,12 @@ Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/m
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
   BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6 in `process-naming`).
   Timer start, message start and the intermediate catch/throw events are READ-ONLY here.
-Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
-  All four are READ-ONLY here as ELEMENTS -- see `process-branch-conditions`.
+Gateways: `exclusiveGateway` (XOR, BUILDABLE), `parallelGateway` (AND, BUILDABLE),
+  `inclusiveGateway` (OR, read-only), `eventBasedGateway` (read-only) -- see
+  `process-branch-conditions`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
-  The DEFAULT flow is READ-ONLY here.
+  All three are BUILDABLE: declare the kind with the flow (`flows[].kind`, plus `flows[].condition`
+  on a conditional one) rather than drawing it and setting it afterwards.
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
