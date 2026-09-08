@@ -80,7 +80,7 @@ Specifically, NEVER:
 Instead, report the limitation explicitly to the user. Use this shape:
   - What was requested.
   - Why mobile cannot do it (cite the rule: e.g. "validators are not supported
-    on mobile", "crt.DataGrid is web-only", "page body must not declare
+    on mobile", "crt.HtmlEditor is web-only", "page body must not declare
     handlers").
   - The closest supported alternative, if any (e.g. entity-level business rule
     via `create-entity-business-rules`, an OOTB converter from the allowed list,
@@ -377,8 +377,12 @@ Web components WILL NOT WORK on mobile — they are not loaded by the mobile run
 and will result in a broken page (blank slot, runtime error, or silent no-op).
 This is a hard platform boundary, not a styling difference:
   - Mobile and web have separate component registries and separate runtimes.
-  - A component name that exists on web (e.g. `crt.Checkbox`, `crt.DataGrid`)
+  - A component name that exists on web (e.g. `crt.HtmlEditor`, `crt.ColorPicker`)
     is NOT automatically available on mobile even if it sounds generic.
+  - The converse also holds, and it is the newer trap: a type CAN be in the mobile
+    catalog and still have no element in the mobile DESIGNER, so a page using it
+    renders in the app but cannot be opened for editing. Presence in the catalog is
+    necessary, not sufficient.
   - Do NOT copy `type` values from a web page body into a mobile page body.
 
 MANDATORY before inserting any component into a mobile page:
@@ -395,9 +399,14 @@ Key mobile-specific types:
                          crt.QuickFilter children of its `items`.
 
 NOT available in mobile (web-only):
-  crt.DataGrid, crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
-  crt.ColorPicker, crt.TagSelect, crt.MultiSelect, crt.IFrame,
+  crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
+  crt.ColorPicker, crt.TagSelect, crt.MultiSelect,
   crt.Chat, crt.Dashboards
+
+In the mobile catalog but with NO mobile Designer element — the app renders them, the
+Designer cannot open a page that uses them, and the web→mobile converter maps them to a
+mobile-idiomatic alternative instead (crt.DataGrid → crt.List):
+  crt.DataGrid, crt.IFrame
 
 VERIFY, DON'T DOWNGRADE. Neither list above is exhaustive — `get-component-info
 schema-type: "mobile"` is the authoritative source for what runs on mobile. A type
