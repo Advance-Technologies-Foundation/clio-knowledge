@@ -31,8 +31,18 @@ owner -- read the one your task needs instead of guessing:
                                      needed to BUILD one -- `process-perform-task` carries the ids and
                                      the refusals. Read this when a field shows a raw Guid or a results
                                      dropdown offers the wrong set.
+  * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
+                                     the rule for when to choose it over its neighbours.
+  * `process-perform-task`         - the Perform task element: its parameter table, the performer
+                                     layers, and what the runtime sets.
+  * `process-access-rights`        - the Change access rights element: the `accessRights` block,
+                                     permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
+  * `process-approval`             - the Approval element: who approves, the record under approval,
+                                     and the two notifications.
+  * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
+                                     completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R18 connection rules.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
@@ -111,7 +121,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
    `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), and a sendEmail
+   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
+   access to whoever it names, on live records, and the element reports nothing at run time; show the user
+   the target object, the record `filter` and every grantee with its operations and level, and get an
+   explicit yes before sending (see `process-access-rights` for the partial-update, collection-replace and
+   object-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
    Activity's "Connected to" links (see `process-activity-connections`)).
@@ -132,6 +147,14 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   compile. This bullet scopes compilation to the PROCESS; other configuration schemas (source code,
   business objects, DCM, value lists, and a CUSTOM user-task schema — the custom user-task compile
   rule is in `process-element-catalog`) carry their own compile obligations and are NOT covered here.
+
+== Set what was asked for, and nothing else ==
+- An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
+  behaviour nobody chose (a flag left out keeps the platform's value, not always the falsy one) and erases
+  the "not decided" signal — describe reports what is WRITTEN, so absence means "not set", never "off".
+- Required fields need no guessing: the server REFUSES and names what is missing. When what it names is a
+  BUSINESS decision the request did not make — who approves, who performs, whom to notify — ASK. A value
+  carried over from a process you built earlier in the session is a guess wearing the clothes of context.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.

@@ -12,10 +12,14 @@ is the one contract all three share, which is why it reads as its own subject.
 - A `filter` declares, high-level, WHICH records a filtered element acts on. The server serializes it to
   the platform Terrasoft.FilterGroup — you NEVER hand-write the escaped filter JSON.
 - Usable today on a `signalStart` (restrict the record trigger), on a `readData` element (restrict which
-  records the read selects from) and on a `changeData` element (restrict which records are updated —
-  effectively mandatory there). Shape:
+  records the read selects from), on a `changeData` element (restrict which records are updated —
+  effectively mandatory there) and on a `changeAccessRights` element (which records get or lose
+  permissions — MANDATORY in effect too: with NO filter the runtime acts on EVERY record of the
+  object, and `process-access-rights` owns that hazard and the three filter states). Shape:
     "filter": {
-      "object": "<EntityName>",        // root object; defaults to the signal entity if omitted
+      "object": "<EntityName>",        // root object. Defaults to the signal entity on a signalStart ONLY;
+                                 // on readData / changeData / changeAccessRights it is REQUIRED
+                                 // and a filter without it is refused at build
       "logicalOperation": "and",       // "and" (default) | "or"
       "conditions": [
         { "column": "UsrName",      "comparison": "equal", "value": "Start" },
