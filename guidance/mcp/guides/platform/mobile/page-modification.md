@@ -379,10 +379,11 @@ This is a hard platform boundary, not a styling difference:
   - Mobile and web have separate component registries and separate runtimes.
   - A component name that exists on web (e.g. `crt.HtmlEditor`, `crt.ColorPicker`)
     is NOT automatically available on mobile even if it sounds generic.
-  - The converse also holds, and it is the newer trap: a type CAN be in the mobile
-    catalog and still have no element in the mobile DESIGNER, so a page using it
-    renders in the app but cannot be opened for editing. Presence in the catalog is
-    necessary, not sufficient.
+  - The converse also holds: a type CAN be in the mobile catalog and still have no
+    element of its own in the mobile DESIGNER palette, so it cannot be added by
+    hand there even though the app renders it (crt.ListItem is one - every OOTB
+    list template carries it). Presence in the catalog answers "will it run",
+    not "can it be placed in the Designer".
   - Do NOT copy `type` values from a web page body into a mobile page body.
 
 MANDATORY before inserting any component into a mobile page:
@@ -399,14 +400,9 @@ Key mobile-specific types:
                          crt.QuickFilter children of its `items`.
 
 NOT available in mobile (web-only):
-  crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
-  crt.ColorPicker, crt.TagSelect, crt.MultiSelect,
+  crt.DataGrid, crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
+  crt.ColorPicker, crt.TagSelect, crt.MultiSelect, crt.IFrame,
   crt.Chat, crt.Dashboards
-
-In the mobile catalog but with NO mobile Designer element — the app renders them, the
-Designer cannot open a page that uses them, and the web→mobile converter maps them to a
-mobile-idiomatic alternative instead (crt.DataGrid → crt.List):
-  crt.DataGrid, crt.IFrame
 
 VERIFY, DON'T DOWNGRADE. Neither list above is exhaustive — `get-component-info
 schema-type: "mobile"` is the authoritative source for what runs on mobile. A type
