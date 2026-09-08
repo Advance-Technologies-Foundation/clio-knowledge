@@ -14,6 +14,11 @@ Target the record with entity=<EntitySchemaName> + record-id=<guid> (both requir
   package moves to another environment); it covers re-applying them on the target vs shipping them
   as a package data binding.
 
+To change record permissions from INSIDE a running business process rather than now, that is the
+Change access rights element — read `get-guidance name=process-access-rights`. This article owns the
+permission model and the direct grant/revoke path; note the level vocabularies differ (`granted`/`delegated`
+here, `permit`/`delegate`/`restrict` there).
+
 Grantee is a SysAdminUnit GUID (a role or user id). Resolve a name to its id yourself (e.g. execute-esq
 on SysAdminUnit by Name) — names are NOT unique, so the tools take the id, not a name.
 set-record-rights args: grantee=<guid>, operation=read|edit|delete, level=granted|delegated
