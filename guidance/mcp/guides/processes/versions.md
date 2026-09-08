@@ -203,7 +203,7 @@ The new version is created INACTIVE. Creating it changes NOTHING about what the 
 That is not a limitation to work around -- it is the point, and it is why the two tools are separate.
 
 Both write tools require the `CrtProcessBuilder` package on the target environment from
-1.4.15.1 onward; an environment behind that is refused up front, naming
+1.6.1.0 onward; an environment behind that is refused up front, naming
 both versions, with `install-process-builder` as the remedy. That refusal means the ENVIRONMENT is
 behind -- it is not a statement about the process you named.
 
