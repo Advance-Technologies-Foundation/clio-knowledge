@@ -67,8 +67,16 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
 
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
-uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form — but the
-four wrong shapes do not all fail the same way, and the difference matters:
+uses one. A parameter is referenced by its **UId**, never by its name.
+
+> **ONE EXCEPTION, and it is narrow:** a `flows[].condition` on `create-business-process` takes the NAME
+> — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
+> not exist yet. That is the only surface with a name-based form. A `mappings[].expression`, a filter, a
+> condition set through `modify-business-process` and everything else on this page still take the UId,
+> and the failures below are what a name gets you there. See `process-branch-conditions`.
+
+Outside that exception there is no name-based form — and the four wrong shapes do not all fail the same
+way, which matters:
 
 - a bare `Price` is REFUSED naming the identifier: `Formula value error: Parameter "Price" not found`.
 - `[Price]` is REFUSED too, but does NOT name it — it faults on the bracket:

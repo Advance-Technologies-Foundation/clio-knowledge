@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.98",
+  "libraryVersion": "1.13.99",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1244,7 +1244,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, and the conditional BRANCH built by setting a condition on a plain flow AFTER the flow exists -- while gateway ELEMENTS, default flows, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule. Split out of process-modeling, which keeps the lifecycle around it.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, all three FLOW KINDS declared with the flow (flows[].kind plus flows[].condition), and the exclusive and parallel gateway ELEMENTS -- while the inclusive and event-based gateway elements, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule. Split out of process-modeling, which keeps the lifecycle around it.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1258,7 +1258,7 @@
     {
       "itemId": "process-naming",
       "title": "Process naming rules (N1-N10)",
-      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R17 connection rules and none of these -- so they are authoring obligations, not validated ones.",
+      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R18 connection rules and none of these -- so they are authoring obligations, not validated ones.",
       "topicId": "creatio.process-naming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-naming",
@@ -1328,7 +1328,7 @@
     {
       "itemId": "process-branch-conditions",
       "title": "Process branch conditions",
-      "description": "Owns the CONDITION on a conditional flow as a branching construct: turning a plain flow into a conditional one in place with setFlowCondition, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
       "topicId": "creatio.process-branch-conditions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
@@ -1454,7 +1454,7 @@
     {
       "itemId": "process-activity-connections",
       "title": "Activity connections (\"Connected to\")",
-      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R17 connection rules, which are about sequence flows and not about these links.",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R18 connection rules as a NUMBERED CATALOG - the ids validate-process-graph reports - which are about sequence flows and not about these links. Where a rule also needs authoring advice, that advice is owned elsewhere and cited: the gateway flow rules R7, R11 and R14 are written up for authors in process-branch-conditions.",
       "topicId": "creatio.process-activity-connections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",

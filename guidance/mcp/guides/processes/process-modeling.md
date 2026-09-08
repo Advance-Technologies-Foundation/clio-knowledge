@@ -44,7 +44,7 @@ owner -- read the one your task needs instead of guessing:
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
                                      completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
-                                     and the R1-R17 connection rules.
+                                     and the R1-R18 connection rules.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -72,7 +72,7 @@ article from what this one says; read that article.
     false, and NOT permission: a non-user-task element, an unresolvable user-task schema and a user task
     outside the supported six all report `null`. `setConnections` is refused on `false` AND on `null`; only
     `true` means it is accepted.
-  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R17
+  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R18
     (the rules themselves are in `process-activity-connections`).
 
 == Descriptor (create-business-process) ==
@@ -114,7 +114,7 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
+   setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
    changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
