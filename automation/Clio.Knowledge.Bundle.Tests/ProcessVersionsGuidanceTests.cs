@@ -155,8 +155,12 @@ public sealed class ProcessVersionsGuidanceTests
             because: "an agent that assumes the edit went live reports the work as done while the old graph still runs");
         guide.Should().Contain("you MAY choose the package",
             because: "the next sentence offers the package argument, so 'you cannot choose or predict it' was wrong in the one component the agent controls");
-        guide.Should().Contain("Which package the platform picks when you omit the argument is NOT",
-            because: "an unstated default cannot be reported to a user, and package placement has deployment consequences");
+        guide.Should().Contain("the version goes to the SOURCE's package",
+            because: "the default IS established and is the source's package, always - the article previously said it was unestablished, mirroring a server docblock that promised a design-package fallback ResolveTargetPackage never implemented. Package placement has deployment consequences, so a guessed default is worse than a stated one");
+        guide.Should().Contain("no design-package fallback",
+            because: "the wrong default is the one an agent would infer from the platform designer's own behaviour, so it is refused by name rather than merely left unmentioned");
+        guide.Should().Contain("ONE AT A TIME",
+            because: "these two tools are the shape an agent fans out - 'take a restore point of these six processes' - and a parallel burst of schema writes trips IIS rapid-fail and takes the app pool down, which is an environment outage rather than a refused call. Nothing else in the chain states the rule");
     }
 
     [Test]

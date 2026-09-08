@@ -190,22 +190,30 @@ The `operations` array is EXACTLY the one `modify-business-process` takes -- sam
 descriptors, same order-and-abort rule. Read `process-modeling` for the operation reference; nothing
 about it changes because the destination is a version.
 
-What you get back: the new version's `versionSchemaUId`, the `versionName` the PLATFORM composed (root
-name + package + number, per V4 -- you cannot choose the number or the composed name, though you MAY
-choose the package), the version NUMBER it allocated, `isActiveVersion` (false), the family root UId,
-and the applied-operation count. Which package the platform picks when you omit the argument is NOT
-established, so do not report a placement you inferred from the request: the composed `versionName`
-carries the package name (V4), and a family entry reports `packageUId`. A version need not land in the
-root's package -- V4's cross-package families are the evidence for that -- so a family spread over
-packages is normal rather than a mistake.
+What you get back is PROSE, not a keyed object -- unlike the read half, where a backticked name IS a
+response key. One sentence names the created version's schema UId, the name the PLATFORM composed (root +
+package + number, per V4 -- you MAY choose the package, never the number or the composed name), the number
+allocated, that it is not active, the family root UId and the applied-operation count. Read those out of the sentence; do not parse it for field names,
+which are server-side and never reach you.
+
+Omit `package-name` and the version goes to the SOURCE's package -- always, with no design-package
+fallback, so a package that refuses edits is refused rather than redirected. A version need not land in
+the root's package (V4's cross-package families), so a family spread over packages is normal.
 
 The new version is created INACTIVE. Creating it changes NOTHING about what the environment executes.
 That is not a limitation to work around -- it is the point, and it is why the two tools are separate.
 
 Both write tools require the `CrtProcessBuilder` package on the target environment from
-1.6.1.0 onward; an environment behind that is refused up front, naming
-both versions, with `install-process-builder` as the remedy. That refusal means the ENVIRONMENT is
-behind -- it is not a statement about the process you named.
+1.6.1.0 onward -- the version the two operations first exist in. An environment behind that is refused up
+front, naming the version the operation NEEDS, with `install-process-builder` as the remedy; one that
+clears the floor but is older than the archive this clio carries is refused too, naming BOTH versions.
+Either way the ENVIRONMENT is behind -- it says nothing about the process you named.
+
+Issue these writes ONE AT A TIME, never as a parallel batch. Both are schema writes, and "take a restore
+point of these six processes" is one instruction and six of them -- but concurrent schema writes on a .NET
+Framework stand trip IIS rapid-fail and take the app pool down, so the failure is an environment outage
+and six ambiguous transport errors rather than a call you can retry. The database half of the race is
+handled (two writers on one number are refused after the save); the load is not.
 
 == Ask once, then behave predictably ==
 Two questions, asked ONCE, at the first edit of a session:
@@ -254,6 +262,11 @@ Activating an earlier version IS the rollback, and it is bounded:
 Operations apply in order and any failure aborts the whole call. When the failure happens BEFORE the
 save, nothing is written at all: there is no half-created version, no draft, and nothing to clean up.
 Retry the corrected call -- do not go looking for wreckage from the failed one.
+
+That is structural: the clone is registered nowhere until the save, so a pre-save refusal leaves nothing
+any lookup can reach. If a pre-save failure claims a partial schema may still shadow the process you
+named, that message is wrong -- a CrtProcessBuilder defect up to 1.6.1.0, fixed in 1.6.1.1. Believe this
+section, and delete nothing on its advice.
 
 That holds for a failure the tool REPORTED. A call that never answered reported nothing, so it is not
 that case: the platform allocates the version number and by V6 an accidental extra version is
