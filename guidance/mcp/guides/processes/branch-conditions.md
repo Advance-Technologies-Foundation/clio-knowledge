@@ -116,6 +116,13 @@ Two consequences worth having before you build:
   gateway: a `parallelGateway` or `eventBasedGateway` starts or selects every branch itself, takes
   `sequence` ONLY, and refuses a `default` — it has no fallback to give because it never chooses. Off an
   ORDINARY element the fallback is a single plain flow.
+  **A fallback catches an unmatched VALUE, not a missing one.** An unset numeric parameter does not
+  arrive as "no value" — it arrives as its type's default, and for Integer that is `0`
+  (`IntegerDataValueType.DefValue`). So a gateway whose first branch is `[#Amount#] < 100` takes that
+  branch when nothing was passed, and a `default` written to catch the empty case never fires. Measured
+  on a stand: four runs of one three-way gateway routed 50, 500 and 5000 correctly and routed the
+  no-value run to `< 100`. Nothing errors, so the branch is silently unreachable rather than broken.
+  Test the empty case explicitly, or make the first condition exclude the default value.
   ONE either way: a conditional branch beside TWO flows that have none is refused, because the platform
   drops one of them and runs the other alongside the branch the condition chose. Refused on BOTH
   paths, from the 1.6.0.3 archive on: the check lives in the flow-kind rules, which `addFlow` and
@@ -123,6 +130,12 @@ Two consequences worth having before you build:
   validation — `process-modeling` is right that the modify path runs none; this refusal is a
   different mechanism that happens to guard the same shape, which is why modify is not the hole
   here that it is for the structural rules.
+- **A diverging gateway with no fallback still BUILDS — the warning does not block it.**
+  `validate-process-graph` reports R7/R9 and `create-business-process` saves the process anyway, so a
+  clean build is NOT evidence that the conditions cover every case. Only a run is. What the warning
+  predicts is exact — on a stand, an unmatched value produced `status: error` and a
+  `SysProcessLog.ErrorDescription` reading "None of the conditions were met after the element ...",
+  word for word what R7 said it would — but the prediction arrives as advice, not as a refusal.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
   outgoing flow is taken. That is a parallel split, silently.
