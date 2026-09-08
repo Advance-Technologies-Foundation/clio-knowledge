@@ -4,7 +4,8 @@ Part of the process guide set. `process-modeling` is the entry point and indexes
 This article is the authoritative owner of starting a process from a record event and of the Read data
 and Modify data elements. The `filter` all three carry is owned by `process-data-source-filters`: every
 element here says WHETHER it takes one and what that means for it, and that article says what a filter
-may contain.
+may contain. The Change access rights element consumes the same
+filter; see `process-access-rights`.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
 - When the goal is "run a process when a record is saved / added / changed / deleted" (e.g. on a page
