@@ -132,11 +132,18 @@ public sealed class ProcessNamingRuleTests
         ("falls back to THE ELEMENT CODE as the caption",
             "N4 is a hard MUST-set, and this is the probed consequence of ignoring it: the omitted caption is not "
             + "a friendly default but the raw code on the diagram, which is how Start1 reaches a reviewer"),
-        ("NOT YET BUILDABLE",
-            $"{RuleNumbers[^1]} documents flow labels ahead of the buildable slice; without the marker it reads "
-            + "as available now"),
-        ("ENG-91853",
-            $"{RuleNumbers[^1]}'s not-yet-buildable marker must name the dependency that would make it buildable"),
+        ("flows[].label",
+            $"{RuleNumbers[^1]} is now a rule about a REAL field, and the field name is what a caller acts "
+            + "on - the not-yet-buildable marker this replaces was correct until CrtProcessBuilder 1.6.0.8"),
+        ("1.6.0.8",
+            $"{RuleNumbers[^1]} must name the version that carries the field: below it the label is DISCARDED "
+            + "silently on write, so a caller who cannot see the floor reads their own payload as the fault"),
+        ("84.9%",
+            $"the corpus share is what makes {RuleNumbers[^1]} a rule rather than a preference - without it "
+            + "\"label your branches\" is one opinion against another"),
+        ("READ BEFORE YOU WRITE",
+            $"{RuleNumbers[^1]}'s read-before-write instruction: a flow caption lives in the schema "
+            + "RESOURCES, so this field is the only way to learn a human's label exists before overwriting it"),
         ("SEQUENCE FLOWS",
             "the disambiguation: \"connections\" in the E2E stories' \"names, codes and connections\" means "
             + "sequence flows, NOT the Activity \"Connected to\" links, which are a different feature"),

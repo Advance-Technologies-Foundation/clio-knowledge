@@ -1,7 +1,7 @@
 clio MCP process-naming guide — name a business process, its elements and its parameters
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, and parameter codes.
+This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, parameter codes, and sequence-flow labels.
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
@@ -15,6 +15,7 @@ Field map — each rule below names the descriptor field it governs:
   element code     -> `elements[].name` — also the flow `source`/`target` and the mapping `elementName` handle
   parameter code   -> `parameters[].name`
   parameter label  -> `parameters[].caption`
+  flow label       -> `flows[].label` (and `label` on the `addFlow` / `setFlow` operations)
 N1  Process `caption`: SENTENCE CASE — first word capitalized, the rest lower case except proper nouns.
     "Corporate customer onboarding", NOT "Corporate Customer Onboarding".
 N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrAccount_Onboard`,
@@ -117,18 +118,33 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     choice: this catalog governs NAMES, so a structural difference between two runs is OUT OF SCOPE
     here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
     reason no naming rule can fix.
-N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flow, so this rule cannot be
-    applied yet by any route. Recorded here so the catalog is complete, the same way the R1–R18 header in
-    `process-activity-connections` separates the full catalog from the buildable slice. When labels land:
-    label a conditional flow with the decision outcome it represents (`Budget > 10 000` — a
-    human-readable caption, not the condition's own text), and label the default flow explicitly rather
-    than leaving it blank.
-    Do not read this rule as a statement about FLOWS. Only the LABEL is missing, and ENG-91853 is the
-    reason that is now the ONLY thing missing rather than one of four: it added `kind` and `condition`
-    to `flows[]`, so a conditional flow, a DEFAULT flow and the `exclusiveGateway` / `parallelGateway`
-    ELEMENTS are all buildable in one call. It did NOT add a label field, so this rule stays
-    NOT YET BUILDABLE and is waiting on work nobody has scheduled — do not read the reference as a
-    promise that it is coming. See `process-branch-conditions` for which conditions can be written on
-    the build path by name and which still need the modify step.
+N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not optional advice. A label is the
+    text the designer draws ON the connector, and it is the difference between a decision a reader can
+    follow and two identical unlabelled arrows they have to open one by one. Measured over the 1 710
+    shipped 7.8.0 schemas containing flows: 84.9% of conditional flows carry a label (1 193 of 1 405)
+    and 25.5% of default flows do (193 of 757), against 0.7% of plain sequence flows (50 of 7 599). So
+    LABEL EVERY CONDITIONAL AND DEFAULT ARM, and leave an ordinary continuation bare — a label on every
+    flow is as much noise as no labels at all.
+    Name the OUTCOME in the reader's language, never the condition. The shipped corpus is business
+    phrases, verbatim: `Information received`, `Create order`, `User Not Found`, `Proceed to order`,
+    `If job does not exist`, `Prediction enabled` / `Prediction disabled`, `Closed with negative
+    result`, `no record found`, `Distribute later`, `Complete`, `Default flow`, and plain `Yes` / `No`.
+    Repeating the expression is the thing to avoid: it is already one click away on the flow itself, and
+    `Budget > 10 000` on the connector tells a no-code reader nothing the diagram did not already imply.
+    Sentence case, like an element caption (N3).
+    Available on all three write routes — `flows[].label` on `create-business-process`, and `label` on
+    `addFlow` / `setFlow` — from `CrtProcessBuilder` **1.6.0.8**. On `setFlow` the three states differ
+    and the difference matters: OMITTING the field keeps whatever label the flow has, an EMPTY string
+    clears it, and text replaces it. Omitting is what you want on any edit that is not about the label,
+    because a modify normally lands on a designer-authored process where the 84.9% above is the label
+    you would be erasing. Since `kind` is mandatory on `setFlow`, relabelling alone means passing the
+    kind the flow ALREADY has — a no-op for the kind that still applies the label.
+    READ BEFORE YOU WRITE. `describe-business-process` reports each flow's `label`, and that field is
+    the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
+    in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
+    diff between two processes says nothing at all about their labels. Below 1.6.0.8 the field is
+    DISCARDED silently on write and absent on read, which is not the same as null: null means this flow
+    has no label, a missing key means the server never reported any. clio reads the flows back after a
+    successful write and warns about a label that is not what is drawn.
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own article (`process-activity-connections`) and no naming surface at all.

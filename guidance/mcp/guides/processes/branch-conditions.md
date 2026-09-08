@@ -18,12 +18,27 @@ the server expands it, because on create the UId does not exist yet. Both are sp
 A branch is a flow with a CONDITION, and you DECLARE it where you declare the flow:
 
     "flows": [
-      { "source": "Check", "target": "Approve", "kind": "conditional", "condition": "..." },
-      { "source": "Check", "target": "Reject",  "kind": "default" }
+      { "source": "Check", "target": "Approve", "kind": "conditional", "condition": "...",
+        "label": "Approved" },
+      { "source": "Check", "target": "Reject",  "kind": "default", "label": "Everything else" }
     ]
 
 `kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
-`condition`. The same two fields are on `addFlow`.
+`condition`. The same fields are on `addFlow`.
+
+**LABEL BOTH ARMS.** `flows[].label` is the text the designer draws ON the connector, and on a branch it
+is not decoration: without it a two-branch decision renders as two identical unlabelled arrows and a
+reader has to open each one's properties to tell them apart. It is what the shipped product does —
+84.9% of its conditional flows carry a label (1 193 of 1 405) and 25.5% of its default flows do,
+against 0.7% of plain sequence flows — so label the arms and leave an ordinary continuation bare.
+
+Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
+`Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
+because it is already one click away on the flow itself. `process-naming` N10 owns this rule, the
+full corpus figures and the three-state contract on `setFlow` (omitted keeps, empty clears, text
+replaces); `flows[].label` needs `CrtProcessBuilder` 1.6.0.8, and below it the field is discarded
+silently. `describe-business-process` reports each flow's `label`, which is the only way to learn
+that a designer's label exists — a flow's caption lives in the schema RESOURCES, not the metadata.
 
 **ON THE BUILD PATH, WRITE THE NAME.** This is the one exception to the UId rule above and it exists
 because it has to: on `create-business-process` the UIds do not exist yet — the parameters and elements
