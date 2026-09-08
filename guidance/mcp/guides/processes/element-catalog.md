@@ -127,7 +127,8 @@ Gateways: `exclusiveGateway` (XOR, BUILDABLE), `parallelGateway` (AND, BUILDABLE
   `inclusiveGateway` (OR, read-only), `eventBasedGateway` (read-only) -- see
   `process-branch-conditions`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
-  The DEFAULT flow is READ-ONLY here.
+  All three are BUILDABLE: declare the kind with the flow (`flows[].kind`, plus `flows[].condition`
+  on a conditional one) rather than drawing it and setting it afterwards.
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use

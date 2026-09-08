@@ -217,7 +217,10 @@ R14 Default flow needs a sibling conditional flow only where the element actuall
     invalid: a CONVERGING or-gateway's single outgoing flow is a default one by construction, because the
     designer offers no plain flow out of an or-gateway at all. At most ONE default per element - a second
     is an error. Diverging Exclusive/Inclusive SHOULD have a default (warning, see R7).
-R15 No orphan/unreachable nodes; every flow needs a valid source and target.
+R15 No orphan/unreachable nodes; every flow needs a valid source and target, and no flow may connect
+    an element to ITSELF. Both halves refuse a self-loop: the build path names the element, and
+    `validate-process-graph` reports it under this same id. To repeat an element, route the flow back
+    through a gateway that decides whether to repeat it.
 R16 Sub-process (callActivity) target must begin with a Simple start; collection mapping => multi-instance.
 R17 (advisory) Add data one-record mode outputs only Id; chain a Read data for other fields.
 R18 A conditional flow may have at most ONE outgoing sibling that carries no condition. The platform
@@ -227,7 +230,8 @@ R18 A conditional flow may have at most ONE outgoing sibling that carries no con
     nothing matched. An ERROR, and the only rule here the shipped corpus does not contradict: 736
     sources carry a conditional flow beside an unconditional one, ZERO carry two, because the
     designer turns the second connection into a conditional rather than drawing it plain.
-    CrtProcessBuilder 1.4.0.64 refuses to build it. Two unconditional flows with NO conditional
+    CrtProcessBuilder refuses to build it, from the 1.6.0.3 archive on (the refusal was numbered
+    1.4.0.64 on the delivering branch, a number no release carries). Two unconditional flows with NO conditional
     sibling stay legal - that is the R12 parallel split.
 
 Quick can/can't (source -> target via sequence flow): start->{activity,gateway,intermediate,end} ok,

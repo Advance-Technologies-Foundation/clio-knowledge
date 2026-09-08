@@ -5,7 +5,7 @@ This article is the authoritative owner of the N1-N10 rules for the process capt
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
-pre-checks them — `validate-process-graph` enforces a subset of the R1–R17 connection rules (which live
+pre-checks them — `validate-process-graph` enforces a subset of the R1–R18 connection rules (which live
 in `process-activity-connections`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
 Designer, so a generated process has to read as though a person named it.)
 Field map — each rule below names the descriptor field it governs:
@@ -118,7 +118,7 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
     reason no naming rule can fix.
 N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flow, so this rule cannot be
-    applied yet by any route. Recorded here so the catalog is complete, the same way the R1–R17 header in
+    applied yet by any route. Recorded here so the catalog is complete, the same way the R1–R18 header in
     `process-activity-connections` separates the full catalog from the buildable slice. When labels land:
     label a conditional flow with the decision outcome it represents (`Budget > 10 000` — a
     human-readable caption, not the condition's own text), and label the default flow explicitly rather

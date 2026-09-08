@@ -34,7 +34,7 @@ owner -- read the one your task needs instead of guessing:
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
-                                     and the R1-R17 connection rules.
+                                     and the R1-R18 connection rules.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -62,7 +62,7 @@ article from what this one says; read that article.
     false, and NOT permission: a non-user-task element, an unresolvable user-task schema and a user task
     outside the supported six all report `null`. `setConnections` is refused on `false` AND on `null`; only
     `true` means it is accepted.
-  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R17
+  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R18
     (the rules themselves are in `process-activity-connections`).
 
 == Descriptor (create-business-process) ==

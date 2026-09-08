@@ -44,7 +44,7 @@ corner: of the 487 element-output conditions in the shipped corpus, 242 are colu
 > Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
 > condition stores, and `describe` reads back clean — but `ReadDataUserTask.HandleResult` assigns it only in
 > `function` mode with `FunctionType == Count`, and returns before it in every other mode. On anything clio
-> builds it stays 0, so `> 0` never fires and the fallback always runs. See `data-elements.md`.
+> builds it stays 0, so `> 0` never fires and the fallback always runs. See `process-data-elements`.
 
 `[#SysSettings.Code<Type>#]`, `[#Lookup.Schema.Record#]` and an already-written meta-path are passed
 through untouched. A name that resolves to nothing is refused before anything is saved, naming the flow
@@ -58,7 +58,12 @@ then `setFlowCondition` — is what you use on a flow that ALREADY exists, inclu
 one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`
 and (for a conditional one) `condition`.
 
-Both need `CrtProcessBuilder` 1.4.0.60 or newer; below it the build path takes a system setting only.
+Both need `CrtProcessBuilder` **1.6.0.3** or newer; below it the build path takes a system setting
+only. State the version that SHIPS the behaviour, not the one it first appeared under: the gateway
+line was numbered 1.4.0.58 through 1.4.0.70 while it was being built, and no released archive ever
+carried those numbers - a 1.5.0.0 minor was cut elsewhere and outranks all of them, so a 1.4.x floor
+is satisfied by a server carrying none of this. 1.6.0.3 is the first released archive with the whole
+line in it, and it is what clio's own [RequiresPackage] floor demands.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in
@@ -75,8 +80,11 @@ in the descriptor schema:
    nothing left to become. **Say `kind: "default"` explicitly** and you never read the notice.
 2. **At most one `default` per element.** It is "the branch taken when nothing matched", so two make
    that undecidable.
-3. **Out of a `parallelGateway`**, which starts every branch, all outgoing flows are plain `sequence`.
-   A condition there would be stored and never evaluated.
+3. **Out of a `parallelGateway`**, which starts every branch, all outgoing flows are plain `sequence`,
+   and the same holds for an `eventBasedGateway`, decided by which event arrives. A `conditional` or
+   `default` flow off either is REFUSED - the server names the gateway and tells you to use an
+   exclusive one. It is not stored and quietly ignored; that is the reason the refusal gives, not
+   what happens if you try.
 
 What a condition must satisfy is in `process-formulas`, under WHAT IS CHECKED — it is validated as a formula whose target
 type is `bool`, so an integer is refused, and an empty one is refused because the platform stores it as
@@ -87,7 +95,8 @@ branching here and it is easy to miss: the platform treats any non-conditional f
 the default, and takes it only when no condition matched. So `if/else` off an activity is one `conditional`
 flow plus a plain one; you do not need a "default flow" element. Out of a GATEWAY element the plain flow does not
 stay plain: rule 1 above applies, and it is written as that gateway's `default` branch with a notice
-saying so. Declaration order does not change the outcome — it did until CrtProcessBuilder 1.4.0.65,
+saying so. Declaration order does not change the outcome — it did until the fix that shipped in
+1.6.0.3 (numbered 1.4.0.65 on the delivering branch),
 where declaring the conditional arm first (which the precedence advice below tells you to do) aborted
 the whole `create-business-process` call. Off a gateway, write the else branch as `kind: "default"` and
 the notice does not arise. R7 does NOT apply to this shape - not "is satisfied by it":
@@ -101,11 +110,19 @@ Two consequences worth having before you build:
 - **Give every branching element ONE fallback, and write it the way that element takes.** If no condition
   matches and there is no fallback, the run FAILS rather than falling through. Two mutually-negated
   conditions look safe and are not: when the parameter is null both are false and the process throws.
-  Off a GATEWAY the fallback is the `default` branch — write `kind: "default"`, or write `sequence` and
-  the server normalises it, because a gateway has no other kind of unconditional branch. Off an ORDINARY
-  element the fallback is a single plain flow.
+  Off a gateway that CHOOSES — `exclusiveGateway`, or a designer-made `inclusiveGateway` — the fallback
+  is the `default` branch: write `kind: "default"`, or write `sequence` and the server normalises it,
+  because such a gateway has no other kind of unconditional branch. This does NOT generalise to every
+  gateway: a `parallelGateway` or `eventBasedGateway` starts or selects every branch itself, takes
+  `sequence` ONLY, and refuses a `default` — it has no fallback to give because it never chooses. Off an
+  ORDINARY element the fallback is a single plain flow.
   ONE either way: a conditional branch beside TWO flows that have none is refused, because the platform
-  drops one of them and runs the other alongside the branch the condition chose.
+  drops one of them and runs the other alongside the branch the condition chose. Refused on BOTH
+  paths, from the 1.6.0.3 archive on: the check lives in the flow-kind rules, which `addFlow` and
+  `setFlow` go through exactly as the create path does. Do not read this as covered by graph
+  validation — `process-modeling` is right that the modify path runs none; this refusal is a
+  different mechanism that happens to guard the same shape, which is why modify is not the hole
+  here that it is for the structural rules.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
   outgoing flow is taken. That is a parallel split, silently.
