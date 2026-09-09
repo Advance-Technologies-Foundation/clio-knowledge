@@ -13,6 +13,9 @@ owner -- read the one your task needs instead of guessing:
                                      codes, parameter codes. Read it BEFORE you name anything.
   * `process-data-elements`        - start a process from a record event (signalStart), and the Read
                                      data and Modify data elements.
+  * `process-delete-data`          - the Delete data element: its one-field block, why its filter is
+                                     what decides whether it works at all, and the confirmation you owe
+                                     the user before building one. Read it BEFORE planning a delete.
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
