@@ -165,7 +165,9 @@ filter; see `process-access-rights`.
   designer's card reads the stored selection object as the MODE when no mode is stored, so a one-record
   element carrying one is a contradiction a later human save would resolve against you.
 - The `filter` is over the SELECTION object, and is effectively mandatory in `selection` mode: without one the
-  element iterates EVERY record of that object. In `one` mode the element applies no filter at all.
+  element iterates EVERY record of that object. In `one` mode the element applies no filter at all. BOTH
+  mismatches WARN, never refuse: `selection` with no filter warns it adds one record per record of the ENTIRE
+  object (issue `setFilter`); `one` WITH a filter warns it is inert but KEPT for a later switch to `selection`.
 - `values` may be OMITTED or empty — unlike `changeData`, whose values-less element the runtime skips. An
   Add data element with no values still inserts a row of the target object's defaults. A REQUIRED column of
   the target object left unset is reported as a WARNING on the response, not refused, because a business rule
