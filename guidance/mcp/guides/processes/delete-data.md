@@ -28,9 +28,23 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
       user decide whether to check in the UI first;
   (c) a condition uses a macro or a comparison the read tool cannot express — count what you CAN and say
       the real number will be smaller or larger, and which way.
+- NAME THE OBJECT THE WAY THE DESIGNER NAMES IT. This is the one place NOT to simplify. The object picker
+  on the Delete data card offers, alphabetically interleaved with the business objects and visually
+  identical to them, the platform's junction tables — folder membership, section folders, object tags:
+  `"Cases" object in folder`, `"Content block" object tag`, `"Duplicates rule" in tag`, and hundreds more
+  (observed live in the picker, 2026-09-09). An element pointed at one of those deletes MEMBERSHIP ROWS — the fact that a
+  record sits in a folder or carries a tag — and NOT the records themselves. The two readings are one
+  dropdown row apart and the process runs green either way.
+  So: quote the object's caption verbatim, and never shorten it. `"Lookup" object in folder` is NOT
+  "Lookup". When the target IS a junction object, say in the same breath what actually gets deleted:
+  "this removes the folder-membership rows, not the lookup records". The same rule binds a READ-BACK: an
+  element described from a process someone else built must be reported under the caption it stores, never
+  paraphrased into the business object it resembles.
 - THE CONFIRMATION MESSAGE. Write it in the user's own language, in their words, not in contract terms
-  (say "Leads", not "the Lead entity"; say the filter in prose, not as JSON). Include all five parts:
-    1. WHAT — the object, by its business name.
+  (say the filter in prose, not as JSON) — with the object name as the deliberate exception above.
+  Include all five parts:
+    1. WHAT — the object, under the caption the designer shows, plus what a row of it IS when that is not
+       obvious from the name.
     2. HOW MANY — the counted number today, or the named reason there is none.
     3. WHICH — the filter in one plain sentence.
     4. THE CONSEQUENCES — irreversible; dependent records go with them; it runs on EVERY execution of the
@@ -49,6 +63,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
     >
     > Do you want me to add it? I can narrow it first — for example only Leads with no activity in the last
     > year, or a dry run that reads and reports them instead of deleting.
+  And the same message when the target is a junction object — note that the first line does the work:
+    > **Object:** `"Lookup" object in folder` — these are folder-membership rows, not the lookup records
+    > themselves. Deleting them takes entries out of the folder; the lookup values survive.
+    > **Right now this matches:** 214 rows
+    > **Which ones:** those in the "Accounts" folder
+    >
+    > If you meant to delete the lookup records, this is the wrong object — say so and I will re-point it.
 - THE SERVER WARNS, on the two states it can verify. A build that configures a `deleteData` element with
   no `filter`, and a `setElement` retarget that CLEARED one, both come back with a warning in the response
   naming the element. Neither is a refusal — `addElement` then `setFilter` is a legitimate two-step — but
