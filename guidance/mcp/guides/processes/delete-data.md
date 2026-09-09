@@ -18,7 +18,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 - COUNT THE RECORDS FIRST. Do not ask the user to approve a filter they cannot picture. Translate the
   filter into a count-only read against the same object and report the NUMBER:
     read { entity: "Lead",
-           filters: { all: [ { field: "CreatedOn", op: "lt", value: "2025-09-03" },
+           filters: { all: [ { field: "CreatedOn", op: "lt", value: "2025-09-03T00:00:00Z" },
                              { field: "QualifyStatus/Name", op: "eq", value: "Disqualified" } ] },
            count: true, top: 0 }
     -> { total: 1847, value: [] }
@@ -28,6 +28,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   lookup is navigated by path (`QualifyStatus/Name`, or `QualifyStatus/Id` for an id) rather than by the
   scalar `QualifyStatusId`. Getting this wrong is not a silent miss — `read` errors — but it is the step
   where the count is most often abandoned, and the count is the part that makes the confirmation real.
+  DATES are the one form worth writing out: `read` quotes and escapes ordinary strings, so a bare
+  `2025-09-03` against a DateTime column can reach OData quoted and fail. Send the full ISO instant as
+  above, and read `/datetime-guide` before composing anything more involved than a single comparison —
+  `read`'s own description points there for a reason.
   A count is one cheap request and it is what turns an approval into an informed one. Three cases where you
   cannot produce a number — say WHICH one applies rather than skipping the count silently:
   (a) the filter references a process parameter or a trigger output (e.g. a `signalStart` element's
