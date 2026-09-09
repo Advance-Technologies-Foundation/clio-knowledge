@@ -96,8 +96,9 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
-  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
+  sub-process, the Add-data target object + values (a `filter` on THAT task is serialized
+  but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and
+  `deleteData`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
