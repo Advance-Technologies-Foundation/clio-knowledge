@@ -158,7 +158,9 @@ filter; see `process-access-rights`.
   (row count stays 1 — what "first record" means). Under the `FeatureReadDataUserTaskEntityReadOldMode`
   feature that flag changes how many rows the element reads, and the drift is INVISIBLE to
   `describe-business-process` (unset parameters are omitted) — a builder-made and a human-touched element
-  look identical there. Nothing to do about it at build time; know it when diagnosing a stand.
+  look identical there. You cannot SEE it, but you can clear it: ANY `setElement.readData` update clears that
+  pair unless the element is in collection mode, mode change or not. So the repair for a human-touched
+  element is to re-send its `readData` block (even unchanged in substance) rather than to hunt the flag.
   The same OK also writes `FunctionType = 0` on EVERY element, `first` and `collection` included, because the
   card saves the aggregation function unconditionally and defaults it to Count. Harmless — `ResultType` alone
   decides the mode, and `0` is what a non-function element would mean anyway — but a stored `FunctionType` on
