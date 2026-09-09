@@ -18,9 +18,10 @@ leaf rather than through `process-modeling`.
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
-  A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
-  columns, sort, plus a record `filter` (the block is in `process-data-elements`, the filter contract in
-  `process-data-source-filters`). A `changeData` element
+  A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `count` |
+  `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns, sort,
+  an `aggregation` function + column, plus a record `filter` (the block is in `process-data-elements`, the
+  filter contract in `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
   (same two owners). CAVEAT: Add data and Delete data still place an UNCONFIGURED
   element — their target object and values cannot be set yet, so those steps do nothing useful until a
@@ -108,10 +109,11 @@ a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full cus
 `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
-    a `filter` — see `process-data-elements` for the block and `process-data-source-filters` for the
-    filter. The other read modes (collection / count /
-    aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
+    FIRST-RECORD, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
+    object, mode, columns, sort, aggregation) plus a `filter` — see `process-data-elements` for the block
+    and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" | "count" |
+    "aggregation"`. The COLLECTION mode remains designer-only until ENG-96504: requesting it is refused,
+    and describe reports a designer-made one as `mode: "collection"`.
 - `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
     The element builds, but its target object and column values do NOT yet — see the caveat near
     the top of this guide.
