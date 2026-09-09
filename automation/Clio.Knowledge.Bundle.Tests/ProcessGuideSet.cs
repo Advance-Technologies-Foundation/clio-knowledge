@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using NUnit.Framework;
 
 namespace Clio.Knowledge.Bundle.Tests;

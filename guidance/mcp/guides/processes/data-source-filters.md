@@ -79,7 +79,7 @@ is the one contract all three share, which is why it reads as its own subject.
   effectively MANDATORY — the runtime refuses to update with an empty filter (see the "Modify data
   element" section of `process-data-elements`). On a `deleteData` element it is mandatory for the same
   reason and carries the added weight that whatever it selects is DELETED, irreversibly, on every run —
-  see the "Delete data element" section of `process-data-elements` for the confirmation duty that goes
+  see `process-delete-data` for the confirmation duty that goes
   with writing one. A `filter` on an
   Add-data task is serialized too, but that task's target object / values are not buildable yet
   (`process-element-catalog` owns that, and this sentence is only true while it says so), so ITS

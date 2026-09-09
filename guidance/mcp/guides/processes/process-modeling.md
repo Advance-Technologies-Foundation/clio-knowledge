@@ -127,7 +127,7 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    partial-update and source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
    retarget clears the record filter, and an element left without one deletes nothing and fails at run
    time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
-   yes before sending, the same duty a build carries (see `process-data-elements`), `accessRights` on a Change access rights element only — MUST: a supplied
+   yes before sending, the same duty a build carries (see `process-delete-data`), `accessRights` on a Change access rights element only — MUST: a supplied
    `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
    access to whoever it names, on live records, and the element reports nothing at run time; show the user
    the target object, the record `filter` and every grantee with its operations and level, and get an

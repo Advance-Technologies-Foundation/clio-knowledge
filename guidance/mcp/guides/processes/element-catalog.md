@@ -27,7 +27,7 @@ leaf rather than through `process-modeling`.
   and nothing else, because the record `filter` is what decides which records are destroyed. It is the one
   data element whose filter is not merely recommended: with none the runtime deletes nothing and fails.
   DESTRUCTIVE — count the matching records, name the object and what the filter selects, and get an
-  explicit yes BEFORE you build it; `process-data-elements` carries the message template.
+  explicit yes BEFORE you build it; `process-delete-data` carries the message template.
   CAVEAT: Add data still places an UNCONFIGURED
   element — its target object and values cannot be set yet, so that step does nothing useful until a
   human configures it in the designer. Say so when you use one; do not present such a result as a working
@@ -133,7 +133,7 @@ System actions (palette group "System actions"):
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData`
-    block (target object — the only field it has) plus a `filter` — see `process-data-elements` for the
+    block (target object — the only field it has) plus a `filter` — see `process-delete-data` for the
     block and the confirmation duty, `process-data-source-filters` for the filter. Unlike Modify data there
     is no mode flag: the runtime always applies the filter and throws its empty-filter error without one,
     so a filterless element deletes nothing and fails rather than deleting everything. DESTRUCTIVE and
