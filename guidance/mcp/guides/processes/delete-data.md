@@ -17,11 +17,20 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   element. Never add a `deleteData` element to fill a gap the user did not ask for.
 - COUNT THE RECORDS FIRST. Do not ask the user to approve a filter they cannot picture. Translate the
   filter into a count-only read against the same object and report the NUMBER:
-    read { entity: "Lead",
-           filters: { all: [ { field: "CreatedOn", op: "lt", value: "2025-09-03T00:00:00Z" },
-                             { field: "QualifyStatus/Name", op: "eq", value: "Disqualified" } ] },
-           count: true, top: 0 }
+  Two tools can do it, and their count shapes are NOT interchangeable. Use whichever the environment
+  offers; `odata-read` is the one that ships with these process tools.
+    odata-read { environment-name: "<env>", entity: "Lead",
+                 filters: { all: [ { field: "MovedToFinalStateOn", op: "lt", value: "2025-09-03T00:00:00Z" },
+                                   { field: "QualifyStatus/Name", op: "eq", value: "Disqualified" } ] },
+                 select: ["Id"], count: true, top: 1 }
+    -> { "count": 1, "total-count": 1847 }        <- read total-count, NOT count
+  `count` is the size of the page you asked for; **`total-count`** is the answer. And `top` must be 1-100:
+  `top: 0` is REJECTED with success:false, not silently corrected — so the count-only trick from other
+  tools does not transfer. Ask for one row and ignore it.
+    read { entity: "Lead", filters: { all: [ … same conditions … ] }, count: true, top: 0 }
     -> { total: 1847, value: [] }
+  The `read` tool (the Creatio data MCP server, when the environment has it) is the opposite: there `top: 0`
+  is the documented count-only form and the total comes back as `total`.
   TRANSLATE the conditions, do not paste them: a process filter condition is
   `{ column, comparison, value }`, `read` takes `{ field, op, value }` — `column` -> `field`,
   `comparison` -> `op` (`equal` -> `eq`, `less` -> `lt`, `greater` -> `gt`, `contains` -> `contains`), and a
