@@ -83,9 +83,12 @@ filter; see `process-access-rights`.
     reports such an element honestly as `mode: "collection"`.
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
     MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element and describe lists
-    both, but `ResultRowsCount` is how many ROWS the query returned — a count or aggregation query returns ONE
-    aggregate row, so it is `1` no matter what the answer is (and `1` even when nothing matched and
-    `ResultCount` is `0`). Mapping it gives a constant, with nothing at run time to say so.
+    both, but they answer different questions: `ResultCount` is the aggregate the element computed, while
+    `ResultRowsCount` is how many ROWS the query returned. Read from the platform sources (not yet confirmed by a
+    stand run): a function-mode query selects a single aggregate column with no grouping, so `ResultRowsCount`
+    reports `1` rather than the count — the sibling `ReadEntityCollectionItemsUserTask` assigns exactly that
+    literal on its own function path. Either way `ResultCount` is the one the runtime fills with the answer;
+    mapping the other gives a value that does not track the data, with nothing at run time to say so.
   * `aggregation` — `"aggregation": { "function": "sum" | "avg" | "min" | "max", "column": "Amount" }` is
     REQUIRED. The OUTPUT is chosen by the column's TYPE, exactly as the runtime writes it: an Integer column →
     `ResultIntegerFunction`; a Float / Money column → `ResultFloatFunction`; a Date / Date-time / Time column
