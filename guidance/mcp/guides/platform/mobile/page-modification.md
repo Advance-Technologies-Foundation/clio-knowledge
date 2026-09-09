@@ -379,11 +379,11 @@ This is a hard platform boundary, not a styling difference:
   - Mobile and web have separate component registries and separate runtimes.
   - A component name that exists on web (e.g. `crt.HtmlEditor`, `crt.ColorPicker`)
     is NOT automatically available on mobile even if it sounds generic.
-  - The converse also holds: a type CAN be in the mobile catalog and still have no
-    element of its own in the mobile DESIGNER palette, so it cannot be added by
-    hand there even though the app renders it (crt.ListItem is one - every OOTB
-    list template carries it). Presence in the catalog answers "will it run",
-    not "can it be placed in the Designer".
+  - Catalog presence answers "will the app render it", which is not the same
+    question as "can I place it in the mobile Designer". Some types are reachable
+    only as part of another element - a list row, a menu entry - and the catalog
+    does not say which. When that distinction matters for a page you are about to
+    author, confirm it in the Designer rather than inferring it from the catalog.
   - Do NOT copy `type` values from a web page body into a mobile page body.
 
 MANDATORY before inserting any component into a mobile page:
