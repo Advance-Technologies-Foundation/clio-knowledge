@@ -56,7 +56,7 @@ guards — it says whose rule it is and names that guide for the rest.
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
   - grant or revoke RECORD permissions from a process (the Change access rights element) ->
     name=process-access-rights
-  - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
+  - the Send email element — mode, sender, recipients, subject, HTML body macros or an email template -> name=process-send-email
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data

@@ -38,7 +38,8 @@ owner -- read the one your task needs instead of guessing:
   * `process-access-rights`        - the Change access rights element: the `accessRights` block,
                                      permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
-                                     HTML body and its process macros.
+                                     HTML body and its process macros, or an email template
+                                     and the record its macros resolve against.
   * `process-approval`             - the Approval element: who approves, the record under approval,
                                      and the two notifications.
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the

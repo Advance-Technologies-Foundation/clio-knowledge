@@ -1,19 +1,69 @@
 clio MCP process-send-email guide — the Send email element (EmailTemplateUserTask)
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of the Send email element in custom-message mode.
+This article is the authoritative owner of the Send email element in both of its message modes — a custom
+message and a template message.
 
 == Element: Send email (sendEmail -> EmailTemplateUserTask) ==
-- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), CUSTOM MESSAGE only (email
-  TEMPLATES are not supported — say so if the user asks for one). The `email` block configures everything:
+- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), in either of the designer's two
+  message modes — a CUSTOM MESSAGE (an HTML `body` you write) or a TEMPLATE MESSAGE (an existing email
+  `template` the platform renders; see TEMPLATE MODE below). The `email` block configures everything:
   `{ "name": "SendWelcomeEmail", "type": "sendEmail", "caption": "Send the welcome email", "email": {
+     "messageSource"?: "custom"|"template",
      "mode": "auto"|"manual", "sender": "<MailboxSyncSettings record id OR a sender email address configured
      on the environment>", "subject": "plain text", "body": "<html>…</html>", "bodyFormat": "html",
+     "template"?: "<email template name or record id>", "templateEntity"?: { one of {"processParameter": "<Lookup
+       parameter>"} | {"sourceElement": "<element>", "sourceElementParameter": "<output, e.g. ResultEntity>"} |
+       {"expression": "[#…#]"} },
      "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |
        {"expression": "[#…#]", "referenceSchema": "Contact"} , … ],
      "importance": "none"|"normal"|"high"|"low", "ignoreErrors": true|false,
      "performer": { "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's
        contact>", "role"?: "<SysAdminUnit role name or record id>", "showPage"?: true|false } } }`.
+  TEMPLATE MODE (CrtProcessBuilder with ENG-95986; build/describe/modify stand-verified on dev-local 10.1.503,
+  2026-09-09): `template` names an existing template by NAME, by `EmailTemplate` record id, or as the
+  `[#Lookup…#]` macro describe echoes. The server resolves it at BUILD against the templates of type "Email
+  template" (the set the designer's picker offers) and REFUSES, naming the template: an unknown name (`no
+  email template is named '<name>'`), an id no row carries, another type (`is not an email template` — a CHAT
+  template is one), and an AMBIGUOUS name (`more than one email template is named '<name>'. Pass the record
+  id of the one you mean.`). It is stored TOGETHER with the mode (`BodyTemplateType="0"` + `EmailTemplateId`),
+  never one without the other — the trap below is why. `template` and `body`/`bodyFormat` in one block
+  are REFUSED (`mutually exclusive`). `messageSource` is optional: omitted, the mode follows the content
+  (`template` → template, `body` → custom) or, with neither, stays what the element has; sent, it must agree
+  with the content. Macros are resolved by the PLATFORM at send time — process data is NOT injected into the
+  template text, and the custom mode's `[[param:…]]` macros mean nothing here. PERSONALIZATION NEEDS AN
+  OBJECT: a template resolves its macros against ONE record of the object it was authored against ("Macro
+  source" in Message templates), supplied as `templateEntity` — a Lookup process parameter, an element output
+  such as a `readData` element's `ResultEntity`, or an expression. For an object-bound template
+  `templateEntity` is REQUIRED (`is authored against '<Object>', so it needs a 'templateEntity'` — every macro
+  would render empty and nothing downstream would say so); for a template WITHOUT an object it is REFUSED
+  (`has no macro source object`); a source of another object is refused when both are known. On a stock 10.1
+  environment 33 of the 38 templates have NO object, so a template picked by name usually cannot be
+  personalized — READ `templateObject` from describe (or the template's Object column) before promising
+  personalized text, and offer a custom message with body macros when the fitting template has none.
+  CHOOSING A TEMPLATE: resolve it from the lookup (`odata-read` on `EmailTemplate` — `Id`, `Name`, `Object`,
+  `TemplateType`); when several could fit, or none is named and nothing obviously matches,
+  ASK the user which template to use or offer a custom message — never guess, because the stored value is
+  an id and a wrong choice is undetectable afterwards. `subject` in
+  template mode is an OVERRIDE — the runtime uses the element's subject when set and the template's own
+  otherwise (`EmailTemplateUserTaskMessageProvider.GetEmailContent`, `CrtProcessDesigner` 7.8.0) — so OMIT it
+  to send the template's subject. The template's language follows the first Contact-typed recipient
+  (`EmailTemplateUserTaskMultiLanguageV2`); nothing to author. SWITCHING MODES through `setElement` clears
+  what the other mode owns, so describe stays re-appliable: a `template` (or `messageSource:"template"`) on a
+  custom element clears `Body` and a constant `Subject` you do not re-supply (the designer LEAVES the body;
+  the server clears it so a described template element never carries a body refused beside a template); a
+  `body` (or `messageSource:"custom"`) on a template element clears the template and its macro source, as the
+  designer's card does on save. A `subject` sent ALONE never
+  changes the mode — a template element keeps its template (the pre-ENG-95986 server flipped it to custom;
+  fixed) — except on an element with NO mode yet, where it still selects custom. `templateEntity` alone
+  rebinds the macro source of the template the element carries. READ-BACK: describe reports `messageSource`,
+  `template` (the id, re-appliable as is), `templateDisplay` (the name), `templateObject` (null when none) and
+  `templateEntity` (re-appliable as a `processParameter`/`sourceElement`/`expression`); in template mode
+  `hasBody` is false and `body` null even when a stale body is stored. clio WARNS after a build or modify when
+  a sent `template` does not read back — a CrtProcessBuilder that predates template mode discarded it while
+  answering success: `install-process-builder` and re-apply. A REAL SEND was NOT run for this guidance (no
+  mailbox on the stand): the send-time rules above are read from the platform sources, and the fallback for a
+  template without `EmailTemplateLang` rows under MultiLanguageV2 is unverified — say so.
   Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
   a design-time required field: the server saves without one, the designer's card validates `Sender` only
   while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a
@@ -25,16 +75,22 @@ This article is the authoritative owner of the Send email element in custom-mess
   `exchange_process_send_error_v2.feature` (RND-T26743: auto mode with `Sender` = a `Guid.Empty` formula
   SAVES with no validation dialog and fails only at run time; RND-T26744 `@ft_SkipSenderValidation`: the same
   setup completes) — plus the card's auto-mode-only `senderValidator`.
-  AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four.
-  That is an AUTHORING rule, not a tool contract — neither the build nor the platform save enforces any of
-  them (the designer itself saves an auto element with unfilled required fields after a warning dialog —
-  designer specimen capture), so every omission surfaces only at RUN time, on a process that
-  built green. The `body` omission is the trap that motivates the rule: the build reports success,
-  `describe-business-process` reports success too — `hasBody:false` is the ONLY trace, so read the element
-  back and check it — and the run fails with `Localizable template not found for record
-  00000000-0000-0000-0000-000000000000` (reported on ENG-95979; the mechanism is in the applier source:
-  `subject` or `body` writes `BodyTemplateType="1"` — custom message — so a subject-only element points at
-  a body template that does not exist). Note the asymmetry: an explicitly EMPTY `body` (`""` or whitespace)
+  AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four (in
+  template mode the `template` stands in for `body`). That is an AUTHORING rule, not a tool contract —
+  neither the build nor the platform save enforces any of them (the designer itself saves an auto element
+  with unfilled required fields after a warning dialog — designer specimen capture), so every omission
+  surfaces only at RUN time, on a process that built green. The MESSAGE omission is the trap that motivates
+  the rule: an element given neither a `body` nor a `template` (options and recipients only) builds green and
+  describes green — `hasBody:false` is the ONLY trace (with `messageSource:null` and `template:null` beside
+  it), so read the element back and check it — and the run fails with
+  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (reported on ENG-95979). The mechanism, from the platform
+  sources (`CrtProcessDesigner` 7.8.0, read 2026-09-09): the runtime dispatches on `BodyTemplateType`, an
+  Integer with no default, so an element whose mode was never written RUNS in TEMPLATE mode with no template,
+  and that text is the template provider's (`EmailTemplateUserTaskMessageProvider.GetEmailContent`) — it is
+  NOT produced by a custom-message element; an earlier version of this guide attributed it to "subject or
+  body writes `BodyTemplateType="1"`", which cannot produce it. A subject-only element with no mode still
+  selects the custom mode (`BodyTemplateType="1"`) and then fails differently — with no body to send.
+  Note the asymmetry: an explicitly EMPTY `body` (`""` or whitespace)
   IS rejected at build (`requires a non-empty 'email.body'`); only an OMITTED one slips through.
   `sender` is resolved at BUILD time and takes exactly three shapes: a `MailboxSyncSettings` record id
   (a GUID), the `[#Lookup.{objectUId}.{recordId}#]` macro that describe echoes back (round-trip), or a

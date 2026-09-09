@@ -94,4 +94,45 @@ public sealed class SendEmailGuidanceTests
 
     private static string ReadGuide() =>
         ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), Article);
+
+	[Test]
+	[Description("Template mode (ENG-95986) is taught with its contract, its refusals, the object requirement, the subject override and the choose-or-ask rule - and the guide no longer says templates are unsupported.")]
+	public void Guide_ShouldTeachTemplateMode_AndDropTheUnsupportedClaim()
+	{
+		string guide = ReadGuide();
+
+		guide.Should().NotContain("TEMPLATES are not supported",
+			because: "ENG-95986 ships the template message mode; the old claim would make an agent refuse a request the tool now serves");
+		guide.Should().Contain("TEMPLATE MODE",
+			because: "the mode needs its own owner section rather than a clause inside the custom-message rules");
+		guide.Should().Contain("`template` and `body`/`bodyFormat` in one block\n  are REFUSED",
+			because: "one element carries one message; an agent that sends both gets a build refusal it must be able to predict");
+		guide.Should().Contain("more than one email template is named",
+			because: "an ambiguous template name is refused rather than resolved by precedence, and the agent must recognise the text");
+		guide.Should().Contain("`templateEntity` is REQUIRED",
+			because: "an object-bound template without a macro source renders every macro empty; the refusal is the agent's cue to bind a record");
+		guide.Should().Contain("33 of the 38 templates have NO object",
+			because: "on a stock environment most templates cannot be personalized, and an agent must check before promising it");
+		guide.Should().Contain("ASK the user which template to use",
+			because: "the stored value is an id, so a guessed template is undetectable afterwards - asking is the rule (ENG-96034 AC 4 mirrored)");
+		guide.Should().Contain("`subject` in\n  template mode is an OVERRIDE",
+			because: "omitting the subject sends the template's own; an agent that always sends one silently overrides every template");
+		guide.Should().Contain("A `subject` sent ALONE never\n  changes the mode",
+			because: "the pre-fix server flipped a template element to custom on a subject-only update; the guide must state the fixed behaviour");
+	}
+
+	[Test]
+	[Description("The missing-message trap keeps its error text but is now explained from the platform's mode dispatch - the text belongs to the template provider, not to a custom-message element.")]
+	public void Guide_ShouldExplainTheMissingMessageTrapFromTheModeDispatch()
+	{
+		string guide = ReadGuide();
+
+		guide.Should().Contain("RUNS in TEMPLATE mode with no template",
+			because: "an unset BodyTemplateType reads as 0, which is the template provider - the mechanism behind the run-time text (CrtProcessDesigner 7.8.0 sources, 2026-09-09)");
+		guide.Should().Contain("`hasBody:false` is the ONLY trace (with `messageSource:null` and `template:null` beside",
+			because: "describe now reports the mode, so the pre-run check has three fields to read instead of one");
+		guide.Should().NotContain("so a subject-only element points at\n  a body template that does not exist",
+			because: "that explanation attributed the template provider's text to a custom-message element and was wrong");
+	}
+
 }
