@@ -182,11 +182,12 @@ filter; see `process-access-rights`.
   nothing else.
 - Change an EXISTING element in place with the `setElement` op's `addData` field: omit `source` to keep the
   target, omit `mode` to keep the adding mode, omit `values` to keep the assignments (a supplied array
-  REPLACES the whole set). Four transitions are REFUSED rather than half-applied: a `source` retarget needs
+  REPLACES the whole set). Five transitions are REFUSED rather than half-applied: a `source` retarget needs
   `values` in the same update (the stored ones name the old entity's columns) and is refused while another
   parameter still maps from the element — which the `RecordId` mapping above makes common, so expect it;
-  switching to `selection` needs `selection`; and switching to `one` clears the selection object and is
-  refused while a stored value still uses `selectionColumn` unless `values` is re-supplied. On ANY change of
+  switching to `selection` needs `selection`; and switching to `one` (which clears the selection object)
+  or retargeting `selection` is refused while a stored `selectionColumn` would strand — re-supply
+  `values`. On ANY change of
   the target or the selection the stored record filter clears unless it already targets the incoming
   selection object — issue a `setFilter` in the same operations array when it cleared.
 - `describe-business-process` reads the block back with the EFFECTIVE mode, i.e. what the designer's card
