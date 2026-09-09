@@ -146,11 +146,15 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     because a modify normally lands on a designer-authored process where the 84.9% above is the label
     you would be erasing. Since `kind` is mandatory on `setFlow`, relabelling alone means passing the
     kind the flow ALREADY has — a no-op for the kind that still applies the label.
-    `removeFlow` takes `source` and `target` ONLY. It resolves the flow by that pair, so a `kind`,
-    `condition` or `label` carried over from a `describe` is REFUSED rather than ignored — and the
-    refusal ABORTS THE WHOLE BATCH, which is atomic. That is deliberate and not tidiness: where two
-    flows join the same pair, honouring the removal while ignoring a `kind` would delete a flow the
-    caller did not name. Strip those three fields when you remove.
+    `removeFlow` takes `source` and `target` ONLY, and `setFlowCondition` takes those plus a
+    `condition`. Both resolve the flow by the PAIR, so a `kind` (or, on `removeFlow`, a `condition`)
+    carried over from a `describe` is REFUSED rather than ignored — and the refusal ABORTS THE WHOLE
+    BATCH, which is atomic. Deliberate, not tidiness: where two flows join the same pair, honouring
+    the edit while ignoring a `kind` acts on a flow the caller did not name. Strip those fields.
+    **Version-dependent, so do not rely on it as a backstop:** the `removeFlow` refusal ships from
+    `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**. Below those the
+    extra fields are accepted and silently dropped, and clio does no client-side check — so stripping
+    them yourself is the whole protection on an environment that is behind.
     READ BEFORE YOU WRITE. `describe-business-process` reports each flow's `label`, and that field is
     the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
     in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
