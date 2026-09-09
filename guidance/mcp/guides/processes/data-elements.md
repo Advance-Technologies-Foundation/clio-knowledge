@@ -152,6 +152,10 @@ filter; see `process-access-rights`.
   feature that flag changes how many rows the element reads, and the drift is INVISIBLE to
   `describe-business-process` (unset parameters are omitted) — a builder-made and a human-touched element
   look identical there. Nothing to do about it at build time; know it when diagnosing a stand.
+  The same OK also writes `FunctionType = 0` on EVERY element, `first` and `collection` included, because the
+  card saves the aggregation function unconditionally and defaults it to Count. Harmless — `ResultType` alone
+  decides the mode, and `0` is what a non-function element would mean anyway — but a stored `FunctionType` on
+  a `first` element is a human fingerprint, not a corrupted mode.
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
