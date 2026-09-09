@@ -91,9 +91,15 @@ filter; see `process-access-rights`.
   Omit `mode` at create for `first`; omit it on a `setElement` update to KEEP the element's current mode.
   Changing the mode through `setElement` is a real conversion: the previous mode's parameters are cleared, the
   result flag moves to the new mode's output, and the column selection / sort are cleared on entering count /
-  aggregation. Converting a designer-made collection element to a buildable mode also clears its collection
-  parameters and empties `ResultCompositeObjectList`'s item properties (the platform rebuilds them only WHILE in
-  collection mode — the designer clears them the same way).
+  aggregation. The record `filter` is KEPT — it is the one block every mode carries (the designer shows "How to
+  filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
+  retarget clears the filter. Converting a designer-made collection element to a buildable mode also clears its
+  collection parameters and empties `ResultCompositeObjectList`'s item properties (the platform rebuilds them
+  only WHILE in collection mode — the designer clears them the same way).
+  Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
+  output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
+  `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output stops resolving — re-read
+  the element with `describe-business-process` after such a change and re-point anything that consumed it.
 - `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
   list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
   supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own
@@ -129,8 +135,9 @@ filter; see `process-access-rights`.
   REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
   back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
   and the read-back shape. `describe-business-process` reads the whole block back
-  (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
-  create/modify. Read-back limits on a HUMAN-made element: a linked-object column is omitted from
+  (`source`, `mode`, `columns` as names, `sort`, and `aggregation` as `{function, column}` in aggregation
+  mode), so anything the builder made round-trips into create/modify. Read-back limits on a HUMAN-made
+  element: a linked-object column is omitted from
   `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
   runtime's ORDER BY actually ranks first — while any further ACTIVE secondary sort entries are not
   reported, and a `sort` write replaces the whole stored order. So for such an element the described
