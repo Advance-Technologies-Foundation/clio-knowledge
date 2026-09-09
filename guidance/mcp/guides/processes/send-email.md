@@ -61,12 +61,11 @@ message and a template message.
   `templateEntity` (re-appliable as a `processParameter`/`sourceElement`/`expression`); in template mode
   `hasBody` is false and `body` null even when a stale body is stored. clio WARNS after a build or modify when
   a sent `template` does not read back — a CrtProcessBuilder that predates template mode discarded it while
-  answering success: `install-process-builder` and re-apply. RUN-VERIFIED on dev-local 10.1.503 (2026-09-09,
-  MANUAL mode, which renders the same content into the email activity): the template subject and body
-  macros resolve against the `templateEntity` record, the `subject` override wins, a template without
-  `EmailTemplateLang` rows still renders under MultiLanguageV2, and a macro whose VALUE is empty on that
-  record stays LITERAL in the text (`[#Owner.Name#]` on a case with no owner) — so check the record carries
-  what the template names. Only the auto-mode SMTP send itself was not run (no mailbox on the stand).
+  answering success: `install-process-builder` and re-apply. RUN-VERIFIED on dev-local 10.1.503 (2026-09-09, MANUAL
+  mode — same rendering, read off the email activity): macros resolve against the `templateEntity` record, the
+  `subject` override wins, a template without `EmailTemplateLang` rows still renders, and a macro whose VALUE is
+  empty on that record stays LITERAL (`[#Owner.Name#]` on a case with no owner) — check the record carries what
+  the template names. Only the auto-mode SMTP hop itself was not run (no mailbox on the stand).
   Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
   a design-time required field: the server saves without one, the designer's card validates `Sender` only
   while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a
