@@ -122,7 +122,14 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     text the designer draws ON the connector, and it is the difference between a decision a reader can
     follow and two identical unlabelled arrows they have to open one by one. Measured over the 1 710
     shipped 7.8.0 schemas containing flows: 84.9% of conditional flows carry a label (1 193 of 1 405)
-    and 25.5% of default flows do (193 of 757), against 0.7% of plain sequence flows (50 of 7 599). So
+    and 25.5% of default flows do (193 of 757), against 0.7% of plain sequence flows (50 of 7 599).
+    (Population, stated because the number invites over-reading. Those are the 1 710 schemas whose
+    metadata is JSON and which contain flows; the 1 405 is conditional flows within them. Other rules
+    quote 1 406 from a scan of every schema - a denominator difference, not a disagreement. NOT counted:
+    389 further 7.8.0 schemas holding their metadata in the legacy key-value format, carrying roughly
+    2 280 sequence and 138 conditional flows, of which 364 are entity-EVENT processes embedded in an
+    entity schema rather than anything built in the designer. Counting them would push the sequence
+    share further DOWN, since auto-generated plumbing carries no labels.) So
     LABEL EVERY CONDITIONAL AND DEFAULT ARM, and leave an ordinary continuation bare — a label on every
     flow is as much noise as no labels at all.
     Name the OUTCOME in the reader's language, never the condition. The shipped corpus is business
@@ -139,6 +146,11 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     because a modify normally lands on a designer-authored process where the 84.9% above is the label
     you would be erasing. Since `kind` is mandatory on `setFlow`, relabelling alone means passing the
     kind the flow ALREADY has — a no-op for the kind that still applies the label.
+    `removeFlow` takes `source` and `target` ONLY. It resolves the flow by that pair, so a `kind`,
+    `condition` or `label` carried over from a `describe` is REFUSED rather than ignored — and the
+    refusal ABORTS THE WHOLE BATCH, which is atomic. That is deliberate and not tidiness: where two
+    flows join the same pair, honouring the removal while ignoring a `kind` would delete a flow the
+    caller did not name. Strip those three fields when you remove.
     READ BEFORE YOU WRITE. `describe-business-process` reports each flow's `label`, and that field is
     the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
     in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
