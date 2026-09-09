@@ -33,7 +33,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, or modify data ->
+  - start a process on a record add/modify/delete, read data, add data, or modify data ->
     name=process-data-elements
   - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
