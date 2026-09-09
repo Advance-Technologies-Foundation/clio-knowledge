@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using NUnit.Framework;
 
 namespace Clio.Knowledge.Bundle.Tests;
@@ -32,7 +33,7 @@ public sealed class ProcessGuideCrossReferenceTests
 
     /// <summary>
     /// A <c>== ... ==</c> heading, which may wrap over several physical lines. Singleline is what lets
-    /// the dot cross the newline; without it the four-line R1-R17 heading is absent from the index and a
+    /// the dot cross the newline; without it the four-line R1-R18 heading is absent from the index and a
     /// legitimate self-citation of that section reads as dangling.
     /// </summary>
     private static readonly Regex Heading = new(
@@ -40,12 +41,6 @@ public sealed class ProcessGuideCrossReferenceTests
         RegexOptions.Multiline | RegexOptions.Singleline | RegexOptions.Compiled);
 
     private static readonly Regex ArticleName = new(@"`(process-[a-z-]+)`", RegexOptions.Compiled);
-
-    /// <summary>
-    /// The line every sub-article of the split opens with. It is how an article declares that
-    /// <c>process-modeling</c> is its entry point, which is what makes the entry obliged to index it.
-    /// </summary>
-    private const string SetBanner = "Part of the process guide set.";
 
     /// <summary>
     /// The token routing uses to name a guide. The dot is INSIDE the class: the manifest declares dotted
@@ -57,7 +52,7 @@ public sealed class ProcessGuideCrossReferenceTests
 
     /// <summary>
     /// Section markers distinctive enough to name one owner. The quoted-citation scan cannot see these:
-    /// the reference that survived it read "the same way the R1-R17 header separates the full catalog from
+    /// the reference that survived it read "the same way the R1-R18 header separates the full catalog from
     /// the buildable slice" — no quotes, no locator word, and the header had moved to another article.
     ///
     /// The destructive-operation rows are the other end of a safety citation: two articles instruct
@@ -66,11 +61,58 @@ public sealed class ProcessGuideCrossReferenceTests
     /// </summary>
     private static readonly (string Marker, string Owner)[] MovedSectionMarkers =
     [
-        ("R1-R17", "process-activity-connections"),
-        ("R1–R17", "process-activity-connections"),      // en dash, as the articles write it
+        // One row, both spellings: Occurrences folds dash variants. Two rows made typography
+        // load-bearing - normalising process-naming's two en dashes to the hyphen the other three
+        // occurrences use, a pure formatting edit, turned the liveness test red and told the
+        // contributor to re-key a row.
+        ("R1-R18", "process-activity-connections"),
         ("N1-N10", "process-naming"),
-        ("Naming and codes", "process-naming"),
-        ("Data source filters", "process-data-elements")
+        // ENG-96536 moved this section into its own article; the row follows the section, not the file
+        // it used to live in. Left on process-data-elements, the owner-skip would have exempted the
+        // article that no longer defines it while the one that does went unwatched.
+        ("Data source filters", "process-data-source-filters"),
+        // ENG-95891 split process-branch-conditions out of process-formulas and added no marker row, so
+        // this guard stayed silent about the newest split for the whole of that work. Both phrases were
+        // checked against the folder before being added: each occurs in exactly one non-owner article.
+        // "parallel split" was the obvious third and is deliberately NOT here - activity-connections
+        // carries it inside BPMN rule R12 ("multiple outgoing sequence flows = implicit parallel split"),
+        // a different subject, and a marker cannot tell the two apart.
+        // Was ("CONDITION on a conditional flow", ...), which matched NOTHING in the folder — it was
+        // keyed on the manifest description's wording rather than on anything an article says, so the
+        // row read as a guard while guarding nothing.
+        //
+        // Its replacement had to survive a second question: not "does it match" but "can it FAIL". The
+        // folder writes this phrase three ways — the owner heads its section BRANCH PRECEDENCE IS FLOW
+        // ORDER, the entry article's index writes "branch precedence", process-formulas writes "branch
+        // PRECEDENCE" — and a case-sensitive row on the index spelling matched only the index, whose
+        // bullet label sits ~60 characters above it by construction, so the window could never be
+        // missing the owner. It matched, and it could not fail. Occurrences is OrdinalIgnoreCase now, so
+        // this one row reaches all three; the process-formulas mention, genuinely unattributed at ~230
+        // lines from that article's own pointer, was what it caught first.
+        ("branch precedence", "process-branch-conditions"),
+        // ENG-96536 moved "What you can build today" and the element catalog out of the entry article,
+        // which had no budget headroom left and grew by both of those sections on every new element. Each
+        // phrase was checked against the folder the way the rows above were: "What you can build today"
+        // occurs in one non-owner (activity-connections, where the validation-pass-is-not-buildable caveat
+        // cites the slice), and lower-case "element catalog" in two (the entry's own index and recipe, and
+        // N6 in process-naming). The owner's capitalised heading "Element catalog" matches this row too —
+        // Occurrences is OrdinalIgnoreCase — and is harmless only because the owner is skipped. A
+        // non-owner writing the capitalised form WILL be required to name the owner, which is correct.
+        ("What you can build today", "process-element-catalog"),
+        ("element catalog", "process-element-catalog"),
+        // The perform-task split shipped with no rows, and that is precisely how a stale pointer got
+        // through it: process-formulas kept sending readers to `process-perform-task` for the
+        // allowed-results degradation after the rule moved to `process-task-category`, and no scan in
+        // this file could see an unquoted pointer with no locator word. These two rows are what makes
+        // that class of miss red rather than reviewable.
+        ("allowed-results", "process-task-category"),
+        // Keyed on "element-level `performer`" and NOT on "Who performs the task", which was the first
+        // choice and is a tripwire: its one non-owner occurrence sits 185 characters from the owner name
+        // in a 220-character window, so inserting 46 characters of unrelated prose into the same
+        // parameter row reported it as unattributed when the article names the owner right below. Slack
+        // is 120 characters on this phrase (the window less the 76-character gap and the 24-character
+        // owner token — the earlier note said 144 by forgetting the token); the tightest other row is 87.
+        ("element-level `performer`", "process-task-performer")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
@@ -93,6 +135,58 @@ public sealed class ProcessGuideCrossReferenceTests
         "validate-process-graph",
         "confirm destructive removals with the user"
     ];
+
+    /// <summary>
+    /// What makes a backticked sibling name readable as a FETCH rather than as a heading. Every article in
+    /// this set used to carry that sentence itself, which meant any single article could lose it and the
+    /// other six still told the reader; ENG-96536 deduplicated it into <c>routing</c>, which every agent
+    /// reads before anything else, and that trade removed the redundancy along with the repetition.
+    ///
+    /// So it is pinned. Nothing else in the suite reads routing's prose — the routing assertions match
+    /// `name=` tokens only — and routing is itself a get-guidance article under the same size pressure as
+    /// any other, so a trim for length would take the convention out of the library entirely with the
+    /// whole suite green. Every other rule this change moved got a marker row, a payload pin or a
+    /// survival test; this one had none.
+    ///
+    /// Keyed on the convention's SUBJECT, not on its phrasing, and therefore blind to its POLARITY.
+    /// What it catches: the convention being deleted, or trimmed until it no longer mentions backticks,
+    /// siblings, or fetching. Deleting any one clause is red.
+    ///
+    /// What it does NOT catch, stated plainly because two review rounds have now claimed otherwise: a
+    /// convention rewritten to mean the opposite. "a sibling name in backticks is NOT a get-guidance
+    /// topic to fetch" contains every pinned clause — the fourth survives inside its own negation — and
+    /// runs green. A bag of subject words cannot see a negation, and the phrasings that would see one are
+    /// the phrasings a legitimate reword changes. This pin is a deletion alarm, not an agreement check.
+    /// </summary>
+    private static readonly string[] ReadingConventionClauses =
+    [
+        "READING CONVENTION",
+        "backticks",
+        "sibling",
+        "get-guidance topic to fetch"
+    ];
+
+    [Test]
+    [Description("The reading convention survives in routing, which is the only copy of it left.")]
+    public void TheReadingConvention_ShouldSurviveInRouting()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string routing = Collapse(ReadRouting(repositoryRoot));
+
+        // OrdinalIgnoreCase: which case the convention writes SIBLING GUIDE in is not a fact about
+        // the rule, and pinning it that way is how the first version of this pin came to reject a
+        // faithful reword.
+        string[] missing = [.. ReadingConventionClauses
+            .Where(clause => !routing.Contains(clause, StringComparison.OrdinalIgnoreCase))];
+
+        missing.Should().BeEmpty(
+            because: "seven articles gave up their own copy of this sentence for this one, all seven "
+                + "in this set, so it is now "
+                + "the only place the library says that a backticked sibling name is a topic to fetch. "
+                + "Without it every cross-article pointer in the set reads as a heading the reader cannot "
+                + "find. If routing has to lose it, put it back in the articles rather than nowhere. "
+                + "Missing: " + string.Join(", ", missing));
+    }
 
     [Test]
     [Description("Every quoted section citation resolves in its own article or names the article that owns it.")]
@@ -169,7 +263,12 @@ public sealed class ProcessGuideCrossReferenceTests
 
         foreach (ProcessGuideSet.Article article in ProcessGuideSet.Declared(repositoryRoot))
         {
-            string text = ProcessGuideSet.Read(repositoryRoot, article.SourcePath);
+            // Collapsed, because these markers are PHRASES and the articles are hard-wrapped: a marker
+            // that a line break can split is a marker an ordinary reflow disarms silently. Found the way
+            // everything here is found - a reflow while fixing ENG-95891's stale pointer moved "the last
+            // conditional flow" across a wrap, the occurrence count went to zero, and the test passed
+            // because it was no longer scanning anything.
+            string text = Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath));
             foreach ((string marker, string owner) in MovedSectionMarkers)
             {
                 if (article.ItemId == owner)
@@ -198,14 +297,141 @@ public sealed class ProcessGuideCrossReferenceTests
     }
 
     [Test]
+    [Description("Every moved-section marker still matches in an article that does NOT own it, which is "
+        + "the only place the scan it feeds can report anything - so no row can be reworded into a guard "
+        + "that cannot fail while the suite stays green.")]
+    public void EveryMovedSectionMarker_ShouldStillMatchOutsideItsOwner()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
+        string[] articles = [.. declared
+            .Select(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath)))];
+        // The PROCESS-folder ids, not DeclaredItemIds. The owner-skip this protects
+        // (ProcessGuides_ShouldNameTheOwningArticle_WhenReferencingAMovedSection) iterates only the
+        // articles Declared() yields, so an owner that is a real manifest id from somewhere else in the
+        // library — a renamed row, or a copy-paste from another folder — is never skipped, and every
+        // legitimate mention of that phrase gets reported instead. Checking against all 140 ids would
+        // clear exactly that case and catch only a misspelling.
+        HashSet<string> processItemIds = [.. declared.Select(article => article.ItemId)];
+
+        // Not a vacuous-pass guard — an empty scan CONDEMNS every row here rather than clearing it,
+        // because a marker matches nowhere in an empty set. It is here so that failure reports the
+        // derivation as the cause instead of listing every marker as dead.
+        articles.Should().NotBeEmpty(because: "a scan over no articles would report every row as dead");
+
+        // OUTSIDE THE OWNER, deliberately. A first version of this test asked only whether the phrase
+        // occurred anywhere in the set, and that is not the invariant: the scan this list feeds skips the
+        // owner, so a row whose OWNER writes the phrase looks alive here while guarding nothing. Measured
+        // on the row this change added: rewording the single non-owner occurrence of "What you can build
+        // today" left every test in this fixture green, because the owner's own heading still matched.
+        //
+        // It does forbid a row aimed at a phrase nobody has written yet. That is the trade taken on
+        // purpose: an unfalsifiable row is indistinguishable from a broken one, and this fixture exists
+        // because a check that reassures is worse than no check. ("Naming and codes", process-naming) was
+        // dropped for exactly this reason — zero non-owner occurrences, and references to that article
+        // are already watched by ("N1-N10", process-naming), which has seven.
+        string[] dead = [.. MovedSectionMarkers
+            .Where(row => !declared
+                .Where(article => article.ItemId != row.Owner)
+                .Any(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))
+                    .Contains(row.Marker, StringComparison.OrdinalIgnoreCase)))
+            .Select(row => $"'{row.Marker}' (owner {row.Owner})")];
+        string[] unownable = [.. MovedSectionMarkers
+            .Where(row => !processItemIds.Contains(row.Owner))
+            .Select(row => $"'{row.Marker}' names owner {row.Owner}")];
+
+        dead.Should().BeEmpty(
+            because: "the scan below skips a marker's OWNER, so a row that matches only inside its owner "
+                + "has no article left to report and cannot fail — it reads as coverage and is none. That "
+                + "has happened here twice already: a row keyed on manifest wording no article uses, and a "
+                + "row whose one non-owner match was the entry index's own continuation line, which sits "
+                + "sixty characters under the bullet that names the owner by construction. Re-key the row "
+                + "to what a sibling now writes, or drop it. Unfalsifiable: "
+                + string.Join("; ", dead));
+        unownable.Should().BeEmpty(
+            because: "an owner outside the scanned set cannot be skipped as the owner, so the row scans the "
+                + "article that DEFINES the section as if it were borrowing it — and every legitimate "
+                + "mention of the phrase is then reported. Found: "
+                + string.Join("; ", unownable));
+    }
+
+    /// <summary>
+    /// Pairs that state the same rule in two articles, with the clause each copy must carry. CONTRIBUTING
+    /// carves out ONE reason to restate a rule you do not own — a destructive precondition, kept next to
+    /// the instruction it guards — and <c>process-perform-task</c> restates two rules that are not that:
+    /// how a category value must be written, and that a team is not routed through OwnerId. Neither is
+    /// destructive; the first degrades a results list and the second is refused.
+    ///
+    /// Raised in review. Rather than reduce them to pointers — the parameter table is where an author
+    /// reads while building, and a bare pointer there costs a fetch — both copies are pinned to one
+    /// clause each. That is LESS than agreement, and the difference matters:
+    ///
+    /// it catches either copy losing or rewording its clause, which is how the category rule came to be
+    /// narrowed in the owner and left broad in the restatement. It does NOT catch a contradiction added
+    /// AROUND an intact clause — appending "except when the value is composed at run time, where
+    /// `expression` is the supported form" to the restatement leaves both substrings present and the
+    /// suite green — and it fails on a reword applied identically to BOTH copies, which is a legitimate
+    /// edit. So: a trim alarm on two specific sentences, not a check that the articles agree. Agreement
+    /// is still a reviewer's job, and CONTRIBUTING's carve-out does not cover either of these
+    /// restatements in the first place — neither is a destructive precondition.
+    /// </summary>
+    private static readonly (string Restating, string Owner, string Clause, string Because)[] RestatedRules =
+    [
+        ("process-perform-task", "process-task-category",
+            "the mapping's source MUST be `value` and MUST NOT be `expression`",
+            "the category rule was narrowed in the owner and left broad in this table for a whole commit: "
+            + "the prohibition is on the mapping SOURCE, not on the macro, which the owner accepts as a "
+            + "value from CrtProcessBuilder 1.4.0.40"),
+        ("process-perform-task", "process-task-performer",
+            "A team is NEVER routed through OwnerId",
+            "the OwnerId/team boundary. If the restatement and the owner disagree about it, one of them "
+            + "sends the reader to write a role id into a Contact lookup")
+    ];
+
+    [Test]
+    [Description("A rule restated outside its owner still says what the owner says, so the two copies cannot drift.")]
+    public void ARuleRestatedOutsideItsOwner_ShouldStillAgreeWithTheOwner()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
+        string Body(string itemId) => Collapse(ProcessGuideSet.Read(repositoryRoot,
+            declared.Single(article => article.ItemId == itemId).SourcePath));
+
+        string[] undeclared = [.. RestatedRules
+            .SelectMany(pair => new[] { pair.Restating, pair.Owner })
+            .Distinct(StringComparer.Ordinal)
+            .Where(itemId => declared.All(article => article.ItemId != itemId))];
+        undeclared.Should().BeEmpty(
+            because: "a pair naming an article the manifest does not declare checks nothing. Not declared: "
+                + string.Join(", ", undeclared));
+
+        string[] drifted = [.. RestatedRules
+            .Where(pair => !(Body(pair.Restating).Contains(Collapse(pair.Clause), StringComparison.Ordinal)
+                && Body(pair.Owner).Contains(Collapse(pair.Clause), StringComparison.Ordinal)))
+            .Select(pair => $"{pair.Restating} and {pair.Owner} no longer both say \"{pair.Clause}\" — "
+                + pair.Because)];
+
+        drifted.Should().BeEmpty(
+            because: "CONTRIBUTING allows a restatement only where the reader needs the rule next to the "
+                + "instruction, and the price of that allowance is that the copies agree. Nothing else "
+                + "here compares them: the marker scan checks that a mention NAMES its owner, not that it "
+                + "says the same thing. " + string.Join("; ", drifted));
+    }
+
+    [Test]
     [Description("The destructive-removal preconditions still exist in the article the sub-articles cite for them.")]
     public void DestructiveRemovalRules_ShouldSurviveInTheArticleThatOwnsThem()
     {
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string owner = ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.SplitPaths(repositoryRoot)[0]);
+        string owner = ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.Declared(repositoryRoot)
+            .Single(article => article.ItemId == ProcessGuideSet.EntryItemId).SourcePath);
 
+        // Collapsed on both sides. Raw, a wrap inserted mid-sentence - no word changed - reported the
+        // destructive-removal guardrails as gone, in the one place a red build tempts a reader to
+        // weaken a destructive-operation pin.
+        string collapsedOwner = Collapse(owner);
         string[] missing = DestructiveRemovalClauses
-            .Where(clause => !owner.Contains(clause, StringComparison.Ordinal))
+            .Where(clause => !collapsedOwner.Contains(Collapse(clause), StringComparison.Ordinal))
             .ToArray();
 
         missing.Should().BeEmpty(
@@ -222,12 +448,15 @@ public sealed class ProcessGuideCrossReferenceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         string routing = ReadRouting(repositoryRoot);
         ProcessGuideSet.Article[] articles = ProcessGuideSet.Declared(repositoryRoot);
-        string entryItemId = ProcessGuideSet.SplitItemIds[0];
+        string entryItemId = ProcessGuideSet.EntryItemId;
         string entry = ProcessGuideSet.Read(repositoryRoot,
             articles.Single(article => article.ItemId == entryItemId).SourcePath);
 
         string[] missingFromRouting = articles
-            .Where(article => !routing.Contains($"name={article.ItemId}", StringComparison.Ordinal))
+            // A word boundary, because Contains is a prefix test: with process-task-performer-legacy
+            // also declared, its row would report process-task-performer as routed while that article
+            // has no row of its own.
+            .Where(article => !RoutedNames(routing).Contains(article.ItemId))
             .Select(article => article.ItemId)
             .ToArray();
         // Which articles the ENTRY must index is decided by the articles themselves: a sub-article
@@ -236,28 +465,39 @@ public sealed class ProcessGuideCrossReferenceTests
         // articles with their own routing rows, not sub-articles of the entry — so requiring the index to
         // list them would confuse "lives in the folder" with "is reached through this entry". An eighth
         // SPLIT article gets the banner and is therefore caught.
-        string[] missingFromIndex = articles
-            .Where(article => article.ItemId != entryItemId)
-            .Where(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
-                .Contains(SetBanner, StringComparison.Ordinal))
-            .Where(article => !entry.Contains($"`{article.ItemId}`", StringComparison.Ordinal))
-            .Select(article => article.ItemId)
-            .ToArray();
+        (string ItemId, string Text)[] read = [.. articles.Select(article =>
+            (article.ItemId, Text: ProcessGuideSet.Read(repositoryRoot, article.SourcePath)))];
+        string[] bannerCarrying = [.. read
+            .Where(article => article.Text.Contains(ProcessGuideSet.SetBanner, StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+        string[] missingFromIndex = [.. bannerCarrying
+            .Where(itemId => itemId != entryItemId)
+            .Where(itemId => !entry.Contains($"`{itemId}`", StringComparison.Ordinal))];
 
-        missingFromIndex.Should().NotBeNull();
-        articles.Count(article => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
-                .Contains(SetBanner, StringComparison.Ordinal))
-            .Should().BeGreaterThan(1,
-                because: "the index requirement is keyed on the set banner, so a banner text change would "
-                    + "otherwise silently reduce this to asserting nothing");
-
-        missingFromRouting.Should().BeEmpty(
-            because: "routing is the only guidance pointer clio's MCP instructions carry, so an article it does "
-                + "not name is one an agent reaches only by already knowing it exists");
-        missingFromIndex.Should().BeEmpty(
-            because: "process-modeling keeps the legacy uri and is where a reader following an old pointer "
-                + "lands; if it does not index its siblings, the split turns one reachable article into one "
-                + "reachable article and a set of orphans");
+        // All three in ONE scope, so a run reports every broken thing rather than the first. Assertion
+        // ORDER was the previous attempt and it is the wrong shape: it left this banner meta-guard ahead
+        // of routing, so a changed banner still masked a broken routing map, and the difference only
+        // shows when two things break at once -- which is the case the mutations offered for it never
+        // ran. Each `because` names its own subject too: FluentAssertions reads the call site to name
+        // one, and in Release it rendered the routing failure against the previous statement's
+        // expression -- "Expected articles.Count(...) to be empty because routing is the only...".
+        using (new AssertionScope())
+        {
+            bannerCarrying.Should().HaveCountGreaterThan(1,
+                because: "bannerCarrying: the index requirement is keyed on the set banner, so a banner "
+                    + "text change would otherwise silently reduce it to asserting nothing");
+            missingFromRouting.Should().BeEmpty(
+                because: "missingFromRouting: routing is the only guidance pointer clio's MCP instructions "
+                    + "carry, so an article it does not name is one an agent reaches only by already knowing "
+                    + "it exists. Not named by routing: " + string.Join(", ", missingFromRouting));
+            missingFromIndex.Should().BeEmpty(
+                because: "missingFromIndex: a banner-carrying article names process-modeling as its entry "
+                    + "point, and process-modeling keeps the legacy uri, so it is where a reader following "
+                    + "an old pointer lands. Unindexed there, an article is reachable only by already "
+                    + "knowing its name, and the split turns one reachable article into one reachable "
+                    + "article and a set of orphans. Missing from the index: "
+                    + string.Join(", ", missingFromIndex));
+        }
     }
 
     [Test]
@@ -287,18 +527,74 @@ public sealed class ProcessGuideCrossReferenceTests
     private static bool Owns(string[] headings, string cited) =>
         headings.Any(heading => heading.Contains(cited, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>The exact `name=` tokens routing declares, so a longer id cannot satisfy a shorter one.</summary>
+    private static HashSet<string> RoutedNames(string routing) =>
+        [.. RoutingName.Matches(routing).Select(match => match.Groups[1].Value.TrimEnd('.', '-'))];
+
     private static string ReadRouting(string repositoryRoot) =>
         ProcessGuideSet.Read(repositoryRoot, "guidance/mcp/guides/routing.md");
 
-    private static IEnumerable<int> Occurrences(string text, string value)
+    /// <summary>Dash variants folded to ASCII hyphen, one character for one, so indices survive.</summary>
+    private static string FoldDashes(string text) =>
+        text.Replace('\u2013', '-').Replace('\u2014', '-').Replace('\u2011', '-');
+
+    private static IEnumerable<int> Occurrences(string rawText, string rawValue)
     {
-        for (int index = text.IndexOf(value, StringComparison.Ordinal);
+        string text = FoldDashes(rawText);
+        string value = FoldDashes(rawValue);
+        // OrdinalIgnoreCase, matching Owns() above: a marker is a PHRASE, and which case a sibling writes
+        // it in is not a fact about whether the reference is attributed. Case-sensitive, this scan needed
+        // one row per spelling — and the spelling that actually dangled (process-formulas writing "branch
+        // PRECEDENCE" where the index writes "branch precedence") was the one no row had.
+        for (int index = text.IndexOf(value, StringComparison.OrdinalIgnoreCase);
              index >= 0;
-             index = text.IndexOf(value, index + value.Length, StringComparison.Ordinal))
+             index = text.IndexOf(value, index + value.Length, StringComparison.OrdinalIgnoreCase))
         {
             yield return index;
         }
     }
 
     private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();
+
+    /// <summary>
+    /// The manifest description a catalog listing shows for one guidance topic. Read from
+    /// <c>bundle-source.json</c> rather than retyped, so a rewritten description is measured, not assumed.
+    /// </summary>
+    private static string ManifestDescription(string repositoryRoot, string itemId)
+    {
+        using System.Text.Json.JsonDocument manifest = System.Text.Json.JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        return manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(resource => resource.GetProperty("itemId").GetString() == itemId)
+            .GetProperty("description").GetString()!;
+    }
+
+    [Test]
+    [Description("The manifest's entry-article description indexes the same articles the entry article itself does. Both are indexes an agent picks a guide from - one it reads inside get-guidance, one it scans in the catalog beforehand - and only the article's copy was checked by anything. ENG-95891 split an eighth article out, updated the article's index and the counts in this sentence once for process-formulas, then split again and left the sentence naming seven; nothing went red, and an agent reading the catalog never learns process-branch-conditions exists.")]
+    public void ManifestEntryDescription_ShouldIndexEveryArticleTheEntryArticleIndexes()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        ProcessGuideSet.Article[] articles = ProcessGuideSet.Declared(repositoryRoot);
+        string entryItemId = ProcessGuideSet.EntryItemId;
+        string entry = ProcessGuideSet.Read(repositoryRoot,
+            articles.Single(article => article.ItemId == entryItemId).SourcePath);
+        string description = ManifestDescription(repositoryRoot, entryItemId);
+
+        string[] indexedByArticle = [.. articles
+            .Where(article => article.ItemId != entryItemId)
+            .Where(article => entry.Contains($"`{article.ItemId}`", StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+
+        indexedByArticle.Length.Should().BeGreaterThan(1,
+            because: "the requirement is derived from what the entry article names, so an index that stopped "
+                + "naming its siblings would otherwise reduce this test to asserting nothing");
+        indexedByArticle
+            .Where(itemId => !description.Contains(itemId, StringComparison.Ordinal))
+            .Should().BeEmpty(
+                because: "the entry article indexes these and the manifest description does not, so the two "
+                    + "indexes disagree about what the set contains - and the catalog is the one an agent "
+                    + "reads BEFORE deciding which guide to fetch, so an article missing from it is one that "
+                    + "has to be already known to be found");
+    }
 }

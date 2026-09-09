@@ -2,22 +2,49 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 == Which process article to read ==
 This article is the ENTRY POINT. It owns the build lifecycle: what the tools are, what the
-descriptor looks like, what is buildable today, the recipe, the safety rules for editing an
-existing process, and the element catalog. Everything else has its own article and its own
-authoritative owner -- read the one your task needs instead of guessing:
+descriptor looks like, the recipe, and the safety rules for editing an existing process. What is
+buildable today and the element catalog moved to `process-element-catalog`: this article had no
+budget headroom left, and both of those sections grow with every element the platform gains while
+the lifecycle around them does not. Everything else has its own article and its own authoritative
+owner -- read the one your task needs instead of guessing:
+  * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
+                                     and the element catalog (data-id -> label -> purpose).
   * `process-naming`               - N1-N10: the process caption and code, element captions and
                                      codes, parameter codes. Read it BEFORE you name anything.
-  * `process-data-elements`        - start a process from a record event (signalStart), the Read
-                                     data and Modify data elements, and the record filters all
-                                     three share.
+  * `process-data-elements`        - start a process from a record event (signalStart), and the Read
+                                     data and Modify data elements.
+  * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
+                                     right-hand value sources, the relative-date macro vocabulary and
+                                     the signal-start restriction.
   * `process-parameters`           - process parameters, element-parameter mappings, type
                                      compatibility, and the date/time/lookup default macros.
+  * `process-formulas`             - the `expression` mapping source and the formula
+                                    vocabulary both it and a condition use
+  * `process-branch-conditions`    - the condition on a conditional flow: setting one,
+                                    branch precedence, and the parallel-split hazard
+  * `process-perform-task`         - the Perform task element: what it produces, its parameter table and
+                                     what the runtime sets.
+  * `process-task-performer`       - who performs a task: the element-level performer block (the only
+                                     route to a TEAM) and OwnerId for one person.
+  * `process-task-category`        - HOW a category or priority must be mapped, and what degrades
+                                     silently when it is not. Not
+                                     needed to BUILD one -- `process-perform-task` carries the ids and
+                                     the refusals. Read this when a field shows a raw Guid or a results
+                                     dropdown offers the wrong set.
+  * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
+                                     the rule for when to choose it over its neighbours.
   * `process-perform-task`         - the Perform task element: its parameter table, the performer
                                      layers, and what the runtime sets.
+  * `process-access-rights`        - the Change access rights element: the `accessRights` block,
+                                     permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
                                      HTML body and its process macros.
+  * `process-approval`             - the Approval element: who approves, the record under approval,
+                                     and the two notifications.
+  * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
+                                     completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
-                                     and the R1-R17 connection rules.
+                                     and the R1-R18 connection rules.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -45,59 +72,8 @@ article from what this one says; read that article.
     false, and NOT permission: a non-user-task element, an unresolvable user-task schema and a user task
     outside the supported six all report `null`. `setConnections` is refused on `false` AND on `null`; only
     `true` means it is accepted.
-  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R17
+  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R18
     (the rules themselves are in `process-activity-connections`).
-
-== What you can build today (create-business-process) ==
-- NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
-  first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
-- Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
-- Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `deleteData`->DeleteDataUserTask,
-  `performTask`->ActivityUserTask).
-  A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
-  columns, sort, plus a record `filter` (see `process-data-elements`). A `changeData` element
-  is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter` (see
-  `process-data-elements`). A `deleteData` element is CONFIGURABLE via its `deleteData` block — the target
-  object, plus the record `filter` that decides what gets deleted; it is DESTRUCTIVE, so name the object and
-  the records and get the user's confirmation before you plan one in (see `process-data-elements`).
-  CAVEAT: Add data still places an UNCONFIGURED element — its target object and values cannot be set yet, so
-  that step does nothing useful until a human configures it in the designer. Say so when you use one; do not
-  present such a result as a working data operation.
-- Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
-  configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
-  manual-mode performer. `process-send-email` owns the contract and its limits.
-- Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
-- `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
-  four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
-  impossible requirement). Verified against the designer's own property pages (`CrtProcessDesigner`,
-  2026-08-21): `ProcessTerminateEventPropertiesPage`, `ProcessTimerStartEventPropertiesPage`,
-  `IntermediateThrowMessagePropertiesPage` and `SendEmailUserTaskPropertiesPage` each apply a schema-diff
-  `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
-  background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
-  element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
-  which does not. For a SIGNAL-STARTED process set the flag on every element that offers it — the trigger fires
-  with no one waiting at a screen, so there is nothing for inline execution to return to. The designer gates the control on
-  `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
-  so on an environment with that feature off the control is absent everywhere and there is nothing to set;
-  change it later on an EXISTING element with the `setElement` op
-  (`{ "op": "setElement", "elementName": "NotifyAccountOwner", "elementUpdate": { "useBackgroundMode": false } }`):
-  `true` runs it asynchronously via the background scheduler, `false` inline. OMIT it to keep the element
-  kind's own default, which mirrors the visual designer's palette — a `signalStart` defaults to background
-  mode, so a signal-started process runs asynchronously and its effects appear a moment after the record is
-  saved. The platform ANDs the flag with the global `UseBackgroundProcessMode` setting (on by default), so
-  with that setting off background mode is inactive regardless — and since the platform then does not
-  persist the flag at all, `useBackgroundMode: true` is REJECTED with a clear error on such an environment
-  instead of being silently dropped. `false` is always accepted (inline execution is what that environment
-  already does). `describe-business-process` reports the effective value per element, so it round-trips.
-- A data source `filter` on a `signalStart` to restrict WHICH records fire the trigger (see the
-  "Data source filters" section of `process-data-elements`).
-- NOT yet buildable: gateways, conditional/default flows, timer/message start, intermediate events,
-  sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
-  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
-  collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
-  Use the catalog below to reason about a solution and to READ existing processes
-  (`describe-business-process`); don't expect to build those types in this increment.
 
 == Descriptor (create-business-process) ==
 {
@@ -123,6 +99,9 @@ article from what this one says; read that article.
   failure those rules exist to prevent, and an example is what a model copies first.
 
 == Build recipe (intent -> running process) ==
+Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
+today and what it does not, and a plan built around something it cannot build fails only at build
+time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
@@ -135,11 +114,22 @@ article from what this one says; read that article.
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setElement / setConnections / clearConnections — same parameter/mapping/filter/signal/readData/
-   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
+   signal/readData/
+   changeData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
-   element kind, `readData` / `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), and a sendEmail
+   element that OFFERS it (four kinds remove the control — see the element catalog in
+   `process-element-catalog`), `readData` /
+   `changeData` on the matching data element only (see `process-data-elements` for their
+   partial-update and source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
+   retarget clears the record filter, and an element left without one deletes nothing and fails at run
+   time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
+   yes before sending, the same duty a build carries (see `process-data-elements`), `accessRights` on a Change access rights element only — MUST: a supplied
+   `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
+   access to whoever it names, on live records, and the element reports nothing at run time; show the user
+   the target object, the record `filter` and every grantee with its operations and level, and get an
+   explicit yes before sending (see `process-access-rights` for the partial-update, collection-replace and
+   object-retarget rules), and a sendEmail
    element's `email` block (a partial update; to/cc/bcc recipients MATCH-OR-APPEND — a new address is added,
    an identical one is a no-op, and none can be removed); setConnections/clearConnections bind and unbind an
    Activity's "Connected to" links (see `process-activity-connections`)).
@@ -158,8 +148,16 @@ article from what this one says; read that article.
   and a `userTask` carrying an after-activity-save script. Everything else — add/read/modify data,
   formulas, connections, signals, and USING an already-compiled user task — is applied and runs with no
   compile. This bullet scopes compilation to the PROCESS; other configuration schemas (source code,
-  business objects, DCM, value lists, and a CUSTOM user-task schema — see the user-task note below) carry
-  their own compile obligations and are NOT covered here.
+  business objects, DCM, value lists, and a CUSTOM user-task schema — the custom user-task compile
+  rule is in `process-element-catalog`) carry their own compile obligations and are NOT covered here.
+
+== Set what was asked for, and nothing else ==
+- An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
+  behaviour nobody chose (a flag left out keeps the platform's value, not always the falsy one) and erases
+  the "not decided" signal — describe reports what is WRITTEN, so absence means "not set", never "off".
+- Required fields need no guessing: the server REFUSES and names what is missing. When what it names is a
+  BUSINESS decision the request did not make — who approves, who performs, whom to notify — ASK. A value
+  carried over from a process you built earlier in the session is a guess wearing the clothes of context.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
 - ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
@@ -171,53 +169,15 @@ article from what this one says; read that article.
   operations array, then re-describe and clean up any leftover references to the removed element.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateways, conditional/default flows,
+- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
   sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. Treat such a process as high-risk:
+  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+  even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
+  conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
+  gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate
+  used to be, which describe reports as `kind: "sequence"` on both, reading exactly like "condition
+  cleared, as asked". Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
   lost). Warn the user before editing a process with a curated diagram.
-
-== Element catalog (data-id -> label -> purpose) ==
-(The `data-id` strings below are the vocabulary for `validate-process-graph` and for reasoning about /
-reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
-`startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
-`userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask. Send email is the ONE user task with its own dedicated build type:
-`emailTemplateUserTask` -> `type:"sendEmail"` (NOT a generic `userTask`) — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`.)
-System actions (palette group "System actions"):
-- `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
-    a `filter` — see `process-data-elements`. The other read modes (collection / count /
-    aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
-- `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
-- `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
-    element's `changeData` block (target object + column values) plus a `filter` — see
-    `process-data-elements`.
-- `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData` block
-    (target object) plus a `filter`, which is MANDATORY in effect — the runtime deletes nothing and fails
-    without one. DESTRUCTIVE: confirm the object and the selected records with the user first — see
-    `process-data-elements`.
-- `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
-- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
-  - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
-    IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
-- `webService`        Call web service — call a registered service; outputs Success + Http status code.
-- `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance over a collection.
-- `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
-User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialog,
-  `openEditPageUserTask` Open edit page, `autoGeneratedPageUserTask` Auto-generated page,
-  `preconfiguredPageUserTask` Pre-configured page, `emailTemplateUserTask` Send email, `approvalUserTask` Approval.
-Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
-  signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
-  catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
-  BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6).
-Gateways: `exclusiveGateway` (OR), `parallelGateway` (AND), `inclusiveGateway` (OR), `eventBasedGateway`.
-Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
-- Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
-  its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
-  exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
-  it. Merely REFERENCING an already-compiled user task by `userTaskName` needs nothing. (This is a
-  user-task-schema obligation, separate from the in-process compile note under `scriptTask` above.)

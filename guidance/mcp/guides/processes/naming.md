@@ -2,12 +2,10 @@ clio MCP process-naming guide — name a business process, its elements and its 
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, and parameter codes.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
-pre-checks them — `validate-process-graph` enforces a subset of the R1–R17 connection rules (which live
+pre-checks them — `validate-process-graph` enforces a subset of the R1–R18 connection rules (which live
 in `process-activity-connections`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
 Designer, so a generated process has to read as though a person named it.)
 Field map — each rule below names the descriptor field it governs:
@@ -88,8 +86,9 @@ N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO auton
     caption and a code disagree, the caption is the input and the code is what is wrong.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
     `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
-    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in `process-modeling`
-    lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API builds today is Terminate.
+    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in
+    `process-element-catalog` lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API
+    builds today is Terminate.
     SCOPE: the rule forbids only a code that ASSERTS a type — `EndNormal` on a Terminate end, or
     `Terminate…` on an element that is not one. It does NOT ban the `End<Reason>` shape N5 prescribes:
     `EndOnboardingStarted` names the REASON, not the type, and is correct on a Terminate end. Read the
@@ -118,11 +117,18 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     choice: this catalog governs NAMES, so a structural difference between two runs is OUT OF SCOPE
     here rather than approved here, and two runs whose parameter sets differ stay hard to diff for a
     reason no naming rule can fix.
-N10 Sequence-flow labels — NOT YET BUILDABLE (conditional and default flows are outside the buildable
-    slice; ENG-91853 is the ticket that extends it). Recorded here so the catalog is complete, the same
-    way the R1–R17 header in `process-activity-connections` separates the full catalog from the
-    buildable slice. When they land: label a
-    conditional flow with the decision outcome it represents (`Budget > 10 000`), and label the default
-    flow explicitly rather than leaving it blank.
+N10 Sequence-flow labels — NOT YET BUILDABLE. There is no label field on a flow, so this rule cannot be
+    applied yet by any route. Recorded here so the catalog is complete, the same way the R1–R18 header in
+    `process-activity-connections` separates the full catalog from the buildable slice. When labels land:
+    label a conditional flow with the decision outcome it represents (`Budget > 10 000` — a
+    human-readable caption, not the condition's own text), and label the default flow explicitly rather
+    than leaving it blank.
+    Do not read this rule as a statement about FLOWS. Only the LABEL is missing, and ENG-91853 is the
+    reason that is now the ONLY thing missing rather than one of four: it added `kind` and `condition`
+    to `flows[]`, so a conditional flow, a DEFAULT flow and the `exclusiveGateway` / `parallelGateway`
+    ELEMENTS are all buildable in one call. It did NOT add a label field, so this rule stays
+    NOT YET BUILDABLE and is waiting on work nobody has scheduled — do not read the reference as a
+    promise that it is coming. See `process-branch-conditions` for which conditions can be written on
+    the build path by name and which still need the modify step.
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own article (`process-activity-connections`) and no naming surface at all.
