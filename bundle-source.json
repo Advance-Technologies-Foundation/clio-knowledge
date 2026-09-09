@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.13.100",
+  "libraryVersion": "1.14.1",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -106,6 +106,7 @@
       "process-approval",
       "process-preconfigured-page",
       "process-activity-connections",
+      "process-versions",
       "process-script-task",
       "product-telemetry",
       "record-rights",
@@ -252,6 +253,7 @@
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
+      "docs://knowledge/com.creatio.clio/process-versions",
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
@@ -1230,7 +1232,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page and process-activity-connections. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections and process-versions. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1463,6 +1465,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/activity-connections.md",
       "bundlePath": "resources/process-activity-connections.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-versions",
+      "title": "Process versions",
+      "description": "Owns the Creatio process VERSION model and the version fields of describe-business-process: a version is a separate schema rather than a revision, the family is flat with the root as every member's parent, at most one member is the active version the runtime executes, a running instance stays on the version it started on so a rollback affects only later runs, and deleting a version does not exist. States that versionhood can never be inferred from a schema Name, which identity to pass for the version that runs, and how to launch one. Owns the WRITE half too: modify-business-process-as-new-version carries the edits and produces the version in ONE call (an empty operations array is a snapshot), set-active-business-process-version makes a member actual and is the rollback gesture, the two are never chained: activation needs its own request, the session policy is agent behaviour rather than a request field, and a rejected edit saves nothing while a saved version cannot be taken back.",
+      "topicId": "creatio.process-versions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-versions",
+      "legacyUris": [
+        "docs://mcp/guides/process-versions"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/versions.md",
+      "bundlePath": "resources/process-versions.md",
       "mediaType": "text/plain"
     },
     {
