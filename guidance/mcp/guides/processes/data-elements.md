@@ -96,8 +96,12 @@ filter; see `process-access-rights`.
     because the runtime writes NO result for it, silently. `columns` and `sort` are refused in count /
     aggregation (the runtime ignores both there, so accepting them would be a silent no-op).
   Omit `mode` at create for `first`; omit it on a `setElement` update to KEEP the element's current mode.
-  Changing the mode through `setElement` is a real conversion: the previous mode's parameters are cleared, the
-  result flag moves to the new mode's output, and the column selection / sort are cleared on entering count /
+  Changing the mode through `setElement` is a real conversion, and it is REFUSED while any other parameter still
+  maps FROM the element — the refusal names each dependent. Each mode produces a different output parameter, so a
+  mapping that names the current one would survive pointing at a parameter the runtime no longer fills; the
+  designer reverts the same edit for the same reason. Re-map or remove the dependents first (or remove and re-add
+  the element). A conversion that proceeds clears the previous mode's parameters, moves the
+  result flag to the new mode's output, and clears the column selection / sort on entering count /
   aggregation. The record `filter` is KEPT — it is the one block every mode carries (the designer shows "How to
   filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
   retarget clears the filter. Converting a designer-made collection element to a buildable mode also clears its
