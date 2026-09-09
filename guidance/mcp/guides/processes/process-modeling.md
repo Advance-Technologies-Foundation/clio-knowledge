@@ -53,14 +53,17 @@ article from what this one says; read that article.
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
+  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `deleteData`->DeleteDataUserTask,
+  `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
   columns, sort, plus a record `filter` (see `process-data-elements`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter` (see
-  `process-data-elements`). CAVEAT: Add data and Delete data still place an UNCONFIGURED
-  element — their target object and values cannot be set yet, so those steps do nothing useful until a
-  human configures them in the designer. Say so when you use one; do not present such a result as a working
-  data operation.
+  `process-data-elements`). A `deleteData` element is CONFIGURABLE via its `deleteData` block — the target
+  object, plus the record `filter` that decides what gets deleted; it is DESTRUCTIVE, so name the object and
+  the records and get the user's confirmation before you plan one in (see `process-data-elements`).
+  CAVEAT: Add data still places an UNCONFIGURED element — its target object and values cannot be set yet, so
+  that step does nothing useful until a human configures it in the designer. Say so when you use one; do not
+  present such a result as a working data operation.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
   manual-mode performer. `process-send-email` owns the contract and its limits.
@@ -193,7 +196,10 @@ System actions (palette group "System actions"):
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements`.
-- `deleteDataUserTask` Delete data — delete matched records.
+- `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData` block
+    (target object) plus a `filter`, which is MANDATORY in effect — the runtime deletes nothing and fails
+    without one. DESTRUCTIVE: confirm the object and the selected records with the user first — see
+    `process-data-elements`.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication).
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
