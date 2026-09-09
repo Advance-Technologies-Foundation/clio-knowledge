@@ -92,12 +92,19 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
     > **Which ones:** those in the "Accounts" folder
     >
     > If you meant to delete the lookup records, this is the wrong object — say so and I will re-point it.
-- THE SERVER WARNS, on the two states it can verify. A build that configures a `deleteData` element with
-  no `filter`, and a `setElement` retarget that CLEARED one, both come back with a warning in the response
-  naming the element. Neither is a refusal — `addElement` then `setFilter` is a legitimate two-step — but
-  both describe a step that, as saved, deletes nothing and fails on its first run. Do not report such a
-  build as a working delete: finish it with a `setFilter`, or say plainly that the element is incomplete.
-  The warnings say nothing about whether the user agreed to anything; that part is still yours.
+- THE SERVER WARNS, on the two states it can verify: an element left with no target object, and one left
+  with no record filter that selects anything. Neither is a refusal — `addElement` then `setFilter` is a
+  legitimate two-step — but both describe a step that, as saved, deletes nothing and fails on its first run.
+  Do not report such a build as a working delete: finish it with a `setFilter`, or say plainly that the
+  element is incomplete. The warnings say nothing about whether the user agreed to anything; that part is
+  still yours.
+  * The check runs ONCE, at the end of your request, against the element as your last operation leaves it.
+    So a filter supplied later in the SAME operations array silences it completely — a warning you get is a
+    warning that is still true when the call returns, not a snapshot of some moment in the middle. Do not
+    dismiss one as "probably stale from an earlier op": that was the behaviour of an older
+    `CrtProcessBuilder`, and against a current one a warning means the element really is unable to run.
+  * If you get one anyway, the honest move is the same as always — read the element back with
+    `describe-business-process` and say what you actually see.
 - RULES FOR THE EXCHANGE:
   * A vague reply is not a yes. "ok go on", "whatever you think" -> ask once more, plainly.
   * If the filter CHANGES after the user agreed, confirm again — consent was for the old set, not this one.
