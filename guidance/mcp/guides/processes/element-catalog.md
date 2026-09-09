@@ -17,14 +17,17 @@ leaf rather than through `process-modeling`.
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
+  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `addData`->AddDataUserTask,
+  `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
   columns, sort, plus a record `filter` (the block is in `process-data-elements`, the filter contract in
   `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
-  (same two owners). CAVEAT: Add data and Delete data still place an UNCONFIGURED
-  element — their target object and values cannot be set yet, so those steps do nothing useful until a
-  human configures them in the designer. Say so when you use one; do not present such a result as a working
+  (same two owners). An `addData` element is CONFIGURABLE via its `addData` block in BOTH modes — Add one
+  record and Add selection (target object, adding mode, selection object, column values including `Column
+  from this selection`), plus a record `filter` over the SELECTION object. CAVEAT: Delete data still places
+  an UNCONFIGURED element — its target object cannot be set yet, so that step does nothing useful until a
+  human configures it in the designer. Say so when you use one; do not present such a result as a working
   data operation.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
@@ -112,9 +115,8 @@ System actions (palette group "System actions"):
     a `filter` — see `process-data-elements` for the block and `process-data-source-filters` for the
     filter. The other read modes (collection / count /
     aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
-- `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
-    The element builds, but its target object and column values do NOT yet — see the caveat near
-    the top of this guide.
+- `addDataUserTask`   Add data     — create record(s) in background; BUILDABLE via the `addData` block in
+                                     both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
 - `changeAdminRightsUserTask` Change access rights - grant/revoke record permissions on matched
     records. BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
@@ -126,8 +128,9 @@ System actions (palette group "System actions"):
     so a clean build does NOT mean the element will do anything - check the filter and the entries.
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements` for the block and `process-data-source-filters` for the filter.
-- `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
-    BUILDS, but its target object and values do NOT yet — see the caveat near the top of this guide. Its
+- `deleteDataUserTask` Delete data — delete matched records. The element BUILDS, but its target object
+    and values do NOT yet — see the caveat near the top of this guide. (Add data no longer shares this
+    limitation: it is configurable via its `addData` block.) Its
     `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
     object is unset: do not report the element as a working delete.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
