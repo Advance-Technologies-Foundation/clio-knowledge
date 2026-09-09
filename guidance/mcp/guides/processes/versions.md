@@ -70,7 +70,7 @@ V7  A schema Name tells you NOTHING about whether a process is a version, which 
 
 == Reading the standing ==
 `describe-business-process` carries the version fields beside the graph from clio
-<CLIO-READBACK-VERSION-TBD> onward. Check by BEHAVIOUR rather than by number, because the behaviour is
+8.1.0.122 onward. Check by BEHAVIOUR rather than by number, because the behaviour is
 the stronger test and the one you can perform: no version keys AND no `versionReadWarning` in the
 response means the clio you are talking to does not report version standing at all -- so it is
 unknowable from here, and upgrading clio is the fix rather than re-describing. That is one of three
