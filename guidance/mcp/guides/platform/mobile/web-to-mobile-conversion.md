@@ -23,11 +23,18 @@ Creatio or disk. The guide contains:
     withAdaptation / alternativeAvailable / unsupported / requiresManualDecision), the
     suggested mobile type(s), and a primaryWebMerge note for many→one mappings.
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
-    merge / insert / drop / relocate-children). Iterate this to build the body; it already
-    encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
+    merge / insert / drop / relocate-children). Iterate this IN ORDER and apply EVERY entry; it
+    already encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
     re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
     parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
     IS AUTHORITATIVE in HARD MOBILE RULES.
+    ONE webName CAN CARRY TWO ENTRIES. It is normally one entry per source element, but a STRUCTURAL
+    twin (the web element converts into a DIFFERENT mobile component, crt.DataGrid → crt.List) emits
+    TWO under the SAME webName: FIRST the element that REPLACED the web one (the List), THEN the named
+    element the mobile template provides in its single-object slot, carrying the row (the crt.ListItem).
+    Never key, group or de-duplicate elementMap by webName, and never stop at the first entry for a
+    name — the second entry is where the row lives, and dropping it is exactly how a converted list
+    arrives blank.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED

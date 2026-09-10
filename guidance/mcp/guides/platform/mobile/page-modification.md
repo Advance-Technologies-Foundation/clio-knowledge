@@ -404,6 +404,15 @@ NOT available in mobile (web-only):
   crt.ColorPicker, crt.TagSelect, crt.MultiSelect, crt.IFrame,
   crt.Chat, crt.Dashboards
 
+  CUTOVER DEPENDENCY — ENG-91859. That list is correct for the catalog served TODAY, which still
+  carries the 46 mobile types extracted from the web monorepo. Two entries are catalog facts, not
+  runtime facts: `crt.DataGrid` and `crt.IFrame` DO exist in the Flutter runtime, and they leave
+  this list on the day ENG-91859 publishes the runtime-derived catalog. Keep them here until then;
+  the rule below already covers the transition — check `get-component-info schema-type: "mobile"`
+  and use what the catalog actually serves. The exact list is pinned by a bundle test so it cannot
+  drift silently, but no test can observe the publication, so revisiting this block is part of
+  ENG-91859's cutover.
+
 VERIFY, DON'T DOWNGRADE. Neither list above is exhaustive — `get-component-info
 schema-type: "mobile"` is the authoritative source for what runs on mobile. A type
 existing on web does NOT make it web-only: if it IS in the mobile catalog it IS
