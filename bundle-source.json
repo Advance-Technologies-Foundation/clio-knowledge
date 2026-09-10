@@ -1064,7 +1064,7 @@
     {
       "itemId": "package-dependencies",
       "title": "Package dependencies",
-      "description": "Canonical MCP guidance for managing Creatio package dependencies: the schema-designer \"could not be opened in package\" recovery via add-package-dependency (missing dependency on the owner of the extended object's upper layer), why clio reports the ranked candidate packages but never adds one for you, how to read the unfiltered-list and no-evidence qualifications, the post-save verification reload that is NOT a missing dependency, the symmetric remove-package-dependency cleanup, and the anti-patterns (no writes into the owning managed package, no raw SQL/OData/DataService dependency edits).",
+      "description": "Canonical MCP guidance for managing Creatio package dependencies: the schema-designer 'GetSchemaDesignItem returned an HTML error page' recovery via add-package-dependency (missing dependency on the owner of the extended object's upper layer), the symmetric remove-package-dependency cleanup, and the anti-patterns (no writes into the owning managed package, no raw SQL/OData/DataService dependency edits).",
       "topicId": "creatio.package-dependencies",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/package-dependencies",
