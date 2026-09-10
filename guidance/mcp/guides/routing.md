@@ -25,6 +25,8 @@ guards — it says whose rule it is and names that guide for the rest.
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
+  - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
+  - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
