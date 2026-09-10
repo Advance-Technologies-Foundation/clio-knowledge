@@ -5,8 +5,6 @@ This article is the authoritative owner of the `expression` mapping source, the 
 platform's interpreter accepts - which a flow condition uses too - how a parameter is referenced inside a
 formula, and what the server validates and refuses. The BRANCH itself, including precedence and the
 hazard of clearing the last one, belongs to `process-branch-conditions`.
-A rule that lives in another article is cited by its article NAME and never repeated here, so a
-name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 == Formulas (`expression` sources and flow conditions) ==
 
 A formula is NOT C#, and knowing what it actually is stops most wrong guesses. Creatio evaluates it with an
@@ -69,8 +67,16 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |
 
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
-uses one. A parameter is referenced by its **UId**, never by its name. There is no name-based form — but the
-four wrong shapes do not all fail the same way, and the difference matters:
+uses one. A parameter is referenced by its **UId**, never by its name.
+
+> **ONE EXCEPTION, and it is narrow:** a `flows[].condition` on `create-business-process` takes the NAME
+> — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
+> not exist yet. That is the only surface with a name-based form. A `mappings[].expression`, a filter, a
+> condition set through `modify-business-process` and everything else on this page still take the UId,
+> and the failures below are what a name gets you there. See `process-branch-conditions`.
+
+Outside that exception there is no name-based form — and the four wrong shapes do not all fail the same
+way, which matters:
 
 - a bare `Price` is REFUSED naming the identifier: `Formula value error: Parameter "Price" not found`.
 - `[Price]` is REFUSED too, but does NOT name it — it faults on the bracket:
@@ -118,7 +124,9 @@ no literal form). A LOOKUP is NOT one of them: its default is a bare record Guid
 preferred route and the only one an ActivityUserTask category accepts — see `process-parameters`.
 On an ActivityUserTask's `ActivityCategory` specifically, reaching for `expression` with `[#Lookup…#]`
 instead saves and compiles and then silently degrades the element's allowed-results list — see
-`process-perform-task`. Elsewhere the macro form is legitimate; on a lookup DEFAULT the bare Guid is
+`process-task-category`, which owns that rule, why `Activity.AllowedResult` is the wrong place to look
+for the degradation, and what to do on a package too old to accept the constant. Elsewhere the macro
+form is legitimate; on a lookup DEFAULT the bare Guid is
 simply the better route. For an Integer or Float parameter it is equally the route whenever the
 value has to be computed. Do NOT evaluate the arithmetic yourself and store the result as a constant: it
 reads as success and silently replaces an expression that recomputes with a number that never will.
@@ -234,7 +242,8 @@ here, each of which references its parameters by UId meta-path like everything e
 
 == Conditional flows and branch conditions ==
 
-Moved to its own guide: `get-guidance name=process-branch-conditions`. It owns turning a plain flow
-into a conditional one, what a condition may contain, branch PRECEDENCE, the activity-result case, and
+Moved to its own guide, `process-branch-conditions` (`get-guidance name=process-branch-conditions`).
+It owns turning a plain flow into a conditional one, what a condition may contain, branch PRECEDENCE,
+the activity-result case, and
 the parallel-split hazard of clearing the last condition. This guide owns the formula vocabulary both
 use.
