@@ -82,6 +82,12 @@ leaf rather than through `process-modeling`.
   plain, then `setFlowCondition` — still works and is what you use on a flow that ALREADY exists, but
   do not reach for it when creating: it saves the process once with a flow that does not yet branch.
   See `process-branch-conditions`.
+- A flow LABEL, the text the designer draws on the connector: `flows[].label` on the build path, and
+  a `label` argument on the flow-EDIT operations. Label every conditional and default arm and leave a
+  plain continuation bare — that is what the shipped product does. `process-naming` N10 owns the
+  wording rule, the measured figures, the compatibility note and the EDIT contract, and go there
+  before editing one: an empty `label` clears a designer's caption, so the edit route is not
+  described here rather than described without its preconditions.
 - `exclusiveGateway` (XOR) and `parallelGateway` (AND) ELEMENTS. A gateway is OPTIONAL for branching —
   the platform synthesizes one for a conditional flow whose source is an ordinary activity, which is
   what 485 of the 1 406 conditional flows in the shipped product do — so the element is about the
@@ -162,7 +168,10 @@ Gateways: `exclusiveGateway` (XOR, BUILDABLE), `parallelGateway` (AND, BUILDABLE
   `process-branch-conditions`.
 Flows: sequence (default `connect`), conditional (setup -> conditionalConnection), default (setup -> defaultConnection).
   All three are BUILDABLE: declare the kind with the flow (`flows[].kind`, plus `flows[].condition`
-  on a conditional one) rather than drawing it and setting it afterwards.
+  on a conditional one) rather than drawing it and setting it afterwards. Each also takes
+  `flows[].label`, the connector text — the member first shipped in `CrtProcessBuilder` 1.6.0.8 and is
+  reported by `describe-business-process`. Read that as provenance, not as a check to run: see
+  `process-naming` N10 for why a version number cannot tell you whether an archive carries it.
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
