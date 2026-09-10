@@ -13,7 +13,7 @@ message and a template message.
      "mode": "auto"|"manual", "sender": "<MailboxSyncSettings record id OR a sender email address configured
      on the environment>", "subject": "plain text", "body": "<html>…</html>", "bodyFormat": "html",
      "template"?: "<email template name or record id>", "templateEntity"?: { one of {"processParameter": "<Lookup
-       parameter>"} | {"sourceElement": "<element>", "sourceElementParameter": "<output, e.g. ResultEntity>"} |
+       parameter>"} | {"sourceElement": "<element>", "sourceElementParameter": "<Lookup/Guid output, e.g. RecordId>"} |
        {"expression": "[#…#]"} },
      "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |
        {"expression": "[#…#]", "referenceSchema": "Contact"} , … ],
@@ -33,8 +33,11 @@ message and a template message.
   with the content. Macros are resolved by the PLATFORM at send time — process data is NOT injected into the
   template text, and the custom mode's `[[param:…]]` macros mean nothing here. PERSONALIZATION NEEDS AN
   OBJECT: a template resolves its macros against ONE record of the object it was authored against ("Macro
-  source" in Message templates), supplied as `templateEntity` — a Lookup process parameter, an element output
-  such as a `readData` element's `ResultEntity`, or an expression. For an object-bound template
+  source" in Message templates), supplied as `templateEntity` — a Lookup process parameter, a Lookup/Guid
+  element output such as a `signalStart` element's `RecordId`, or an expression. A `readData` element's
+  `ResultEntity` is the WHOLE record (Entity-typed) and is REFUSED as a source (`is not a Lookup or Guid
+  parameter`) — reach the read record through an `expression` addressing its `Id` column instead. For an
+  object-bound template
   `templateEntity` is REQUIRED (`is authored against '<Object>', so it needs a 'templateEntity'` — every macro
   would render empty and nothing downstream would say so); for a template WITHOUT an object it is REFUSED
   (`has no macro source object`); a source of another object is refused when both are known. On a stock 10.1
