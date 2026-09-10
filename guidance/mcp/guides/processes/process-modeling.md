@@ -166,6 +166,13 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   mappings TARGETING it, but does NOT re-join the flow across the gap, and mappings/values READING the
   removed element's outputs may survive as dangling references. Add the bridging `addFlow` in the same
   operations array, then re-describe and clean up any leftover references to the removed element.
+- **`removeFlow` takes `source` and `target` ONLY — MUST strip `kind` and `condition` first.** It
+  resolves the flow by the PAIR, so a field carried over from a `describe` is REFUSED rather than
+  ignored, and the refusal ABORTS THE WHOLE BATCH, which is atomic — every other operation in the
+  array is rolled back with it. Version-dependent, so not a backstop: the refusal ships from
+  `CrtProcessBuilder` **1.6.0.10**, below it the extra fields are accepted and silently dropped, and
+  clio does no client-side check. `process-branch-conditions` owns the same rule for `setFlow` and
+  `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
