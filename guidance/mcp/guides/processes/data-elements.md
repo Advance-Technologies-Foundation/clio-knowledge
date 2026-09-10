@@ -138,7 +138,7 @@ filter; see `process-access-rights`.
         "mode": "one",                                         // optional — "one" is the default
         "values": [
           { "column": "Name", "value": "New contact" },
-          { "column": "AccountId", "processParameter": "AccountParameter" }
+          { "column": "Account", "processParameter": "AccountParameter" }
         ] } }
 - Add a record PER SELECTION RECORD (the bulk mode). `selection` names the object being iterated, the
   element's `filter` says WHICH of its records qualify, and `selectionColumn` maps a column of each new
@@ -149,8 +149,8 @@ filter; see `process-access-rights`.
         "mode": "selection",
         "selection": "Contact",                                // REQUIRED in selection mode
         "values": [
-          { "column": "ParticipantId", "selectionColumn": "Id" },        // from THIS selection record
-          { "column": "ActivityId", "processParameter": "ActivityParameter" }
+          { "column": "Participant", "selectionColumn": "Id" },       // from THIS selection record
+          { "column": "Activity", "processParameter": "ActivityParameter" }
         ] },
       "filter": { "object": "Contact",                         // the filter is over the SELECTION object
         "conditions": [ { "column": "Type", "comparison": "equal", "value": "Employee" } ] } }
@@ -203,7 +203,7 @@ filter; see `process-access-rights`.
         "values": [                                            // REQUIRED at create: one entry per column
           { "column": "JobTitle", "value": "Manager" },        // plain constant — TEXT columns ONLY (see below)
           { "column": "Notes", "processParameter": "NoteTextParameter" }, // a process parameter's value
-          { "column": "AccountId", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
+          { "column": "Account", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
         ] },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
