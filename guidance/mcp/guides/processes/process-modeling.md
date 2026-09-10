@@ -45,6 +45,8 @@ owner -- read the one your task needs instead of guessing:
                                      completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R18 connection rules.
+  * `process-versions`             - the version model, which member runs, and how to write a version.
+                                     Read it BEFORE editing or launching ANY existing process.
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -164,6 +166,13 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   mappings TARGETING it, but does NOT re-join the flow across the gap, and mappings/values READING the
   removed element's outputs may survive as dangling references. Add the bridging `addFlow` in the same
   operations array, then re-describe and clean up any leftover references to the removed element.
+- **`removeFlow` takes `source` and `target` ONLY — MUST strip `kind` and `condition` first.** It
+  resolves the flow by the PAIR, so a field carried over from a `describe` is REFUSED rather than
+  ignored, and the refusal ABORTS THE WHOLE BATCH, which is atomic — every other operation in the
+  array is rolled back with it. Version-dependent, so not a backstop: the refusal ships from
+  `CrtProcessBuilder` **1.6.0.10**, below it the extra fields are accepted and silently dropped, and
+  clio does no client-side check. `process-branch-conditions` owns the same rule for `setFlow` and
+  `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
@@ -178,3 +187,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 - Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
   branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
   lost). Warn the user before editing a process with a curated diagram.
+- You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
+  ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
+  way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
+  overwrite is the one the runtime executes, so get explicit confirmation, and offer
+  `modify-business-process-as-new-version` instead -- the SAME operations against a new version, or an
+  EMPTY operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not
+  the one that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that
+  member, or report the standing and ask. `process-versions` owns every other outcome, the identity
+  rules and what to ask before activating.
