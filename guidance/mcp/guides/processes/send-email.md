@@ -20,8 +20,7 @@ message and a template message.
      "importance": "none"|"normal"|"high"|"low", "ignoreErrors": true|false,
      "performer": { "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's
        contact>", "role"?: "<SysAdminUnit role name or record id>", "showPage"?: true|false } } }`.
-  TEMPLATE MODE (CrtProcessBuilder with ENG-95986; build/describe/modify stand-verified on dev-local 10.1.503,
-  2026-09-09): `template` names an existing template by NAME, by `EmailTemplate` record id, or as the
+  TEMPLATE MODE (CrtProcessBuilder 1.6.2.1 or newer): `template` names an existing template by NAME, by `EmailTemplate` record id, or as the
   `[#Lookup…#]` macro describe echoes. The server resolves it at BUILD against the templates of type "Email
   template" (the set the designer's picker offers) and REFUSES, naming the template: an unknown name (`no
   email template is named '<name>'`), an id no row carries, another type (`is not an email template` — a CHAT
@@ -34,11 +33,9 @@ message and a template message.
   template text, and the custom mode's `[[param:…]]` macros mean nothing here. PERSONALIZATION NEEDS AN
   OBJECT: a template resolves its macros against ONE record of the object it was authored against ("Macro
   source" in Message templates), supplied as `templateEntity` — a Lookup process parameter, a Lookup/Guid
-  element output such as a `signalStart` element's `RecordId`, or an expression. A `readData` element's
-  `ResultEntity` is the WHOLE record (Entity-typed) and is REFUSED as a source (`is not a Lookup or Guid
-  parameter`) — reach the read record through an `expression` addressing its `Id` column instead. For an
-  object-bound template
-  `templateEntity` is REQUIRED (`is authored against '<Object>', so it needs a 'templateEntity'` — every macro
+  element output such as a `signalStart` element's `RecordId`, or an expression (a `readData` element's
+  `ResultEntity` is the WHOLE record and is REFUSED: address its `Id` column through an `expression`). For an
+  object-bound template `templateEntity` is REQUIRED (`is authored against '<Object>', so it needs a 'templateEntity'` — every macro
   would render empty and nothing downstream would say so); for a template WITHOUT an object it is REFUSED
   (`has no macro source object`); a source of another object is refused when both are known. On a stock 10.1
   environment 33 of the 38 templates have NO object, so a template picked by name usually cannot be
@@ -49,8 +46,7 @@ message and a template message.
   ASK the user which template to use or offer a custom message — never guess, because the stored value is
   an id and a wrong choice is undetectable afterwards. `subject` in
   template mode is an OVERRIDE — the runtime uses the element's subject when set and the template's own
-  otherwise (`EmailTemplateUserTaskMessageProvider.GetEmailContent`, `CrtProcessDesigner` 7.8.0) — so OMIT it
-  to send the template's subject. The template's language follows the first Contact-typed recipient
+  otherwise, so OMIT it to send the template's subject. The template's language follows the first Contact-typed recipient
   (`EmailTemplateUserTaskMultiLanguageV2`); nothing to author. SWITCHING MODES through `setElement` clears
   what the other mode owns, so describe stays re-appliable: a `template` (or `messageSource:"template"`) on a
   custom element clears `Body` and a constant `Subject` you do not re-supply (the designer LEAVES the body;
@@ -64,11 +60,11 @@ message and a template message.
   `templateEntity` (re-appliable as a `processParameter`/`sourceElement`/`expression`); in template mode
   `hasBody` is false and `body` null even when a stale body is stored. clio WARNS after a build or modify when
   a sent `template` does not read back — a CrtProcessBuilder that predates template mode discarded it while
-  answering success: `install-process-builder` and re-apply. RUN-VERIFIED on dev-local 10.1.503 (2026-09-09, MANUAL
-  mode — same rendering, read off the email activity): macros resolve against the `templateEntity` record, the
-  `subject` override wins, a template without `EmailTemplateLang` rows still renders, and a macro whose VALUE is
-  empty on that record stays LITERAL (`[#Owner.Name#]` on a case with no owner) — check the record carries what
-  the template names. Only the auto-mode SMTP hop itself was not run (no mailbox on the stand).
+  answering success: `install-process-builder` and re-apply. RUN-VERIFIED on dev-local in BOTH send modes (manual:
+  read off the email activity; auto: delivered through the Exchange Listener endpoint to an SMTP sink): macros
+  resolve against the `templateEntity` record, the `subject` override wins, a template without `EmailTemplateLang`
+  rows still renders, and a macro whose VALUE is empty on that record stays LITERAL (`[#Owner.Name#]` on a case
+  with no owner), so check the record carries what the template names.
   Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
   a design-time required field: the server saves without one, the designer's card validates `Sender` only
   while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a
