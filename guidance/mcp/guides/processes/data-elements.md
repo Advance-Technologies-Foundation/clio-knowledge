@@ -106,7 +106,10 @@ filter; see `process-access-rights`.
   filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
   retarget clears the filter. Converting a designer-made collection element to a buildable mode also clears its
   collection parameters and empties `ResultCompositeObjectList`'s item properties (the platform rebuilds them
-  only WHILE in collection mode — the designer clears them the same way).
+  only WHILE in collection mode — the designer clears them the same way). This is a real, tested conversion, not
+  an offhand claim: `ReadDataConfigBinderTests.Apply_ShouldConvertCollectionToFirst_ClearingCollectionParametersAndItemProperties`
+  exercises `ReadDataConfigBinder.Apply` on a `ResultType: EntityCollection` element with a mode-only update and
+  asserts it succeeds — a `setElement.readData` update naming a buildable mode is NOT the same as remove+recreate.
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
   output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output stops resolving — re-read

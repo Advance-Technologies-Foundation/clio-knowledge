@@ -19,8 +19,9 @@ leaf rather than through `process-modeling`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `count` |
-  `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns, sort,
-  an `aggregation` function + column, plus a record `filter` (the block is in `process-data-elements`, the
+  `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns and
+  sort (`first` ONLY — refused for `count`/`aggregation`), an `aggregation` function + column (`aggregation`
+  ONLY), plus a record `filter` (the block is in `process-data-elements`, the
   filter contract in `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
   (same two owners). CAVEAT: Add data and Delete data still place an UNCONFIGURED
@@ -116,7 +117,8 @@ a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full cus
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
-    object, mode, columns, sort, aggregation) plus a `filter` — see `process-data-elements` for the block
+    object, mode, columns/sort — `first` ONLY, refused for `count`/`aggregation` — and aggregation —
+    `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
     and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" | "count" |
     "aggregation"`. The COLLECTION mode remains designer-only until ENG-96504: requesting it is refused,
     and describe reports a designer-made one as `mode: "collection"`.
