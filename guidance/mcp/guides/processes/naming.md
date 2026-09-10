@@ -138,32 +138,23 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     result`, `no record found`, `Distribute later`, `Complete`, `Default flow`, and plain `Yes` / `No`.
     Repeating the expression is the thing to avoid: it is already one click away on the flow itself, and
     `Budget > 10 000` on the connector tells a no-code reader nothing the diagram did not already imply.
-    Sentence case, like an element caption (N3).
-    Available on all three write routes — `flows[].label` on `create-business-process`, and `label` on
-    `addFlow` / `setFlow` — from `CrtProcessBuilder` **1.6.0.8**. On `setFlow` the three states differ
-    and the difference matters: OMITTING the field keeps whatever label the flow has, an EMPTY string
-    clears it, and text replaces it. Omitting is what you want on any edit that is not about the label,
-    because a modify normally lands on a designer-authored process where the 84.9% above is the label
-    you would be erasing. Since `kind` is mandatory on `setFlow`, relabelling alone means passing the
-    kind the flow ALREADY has — a no-op for the kind that still applies the label.
-    `removeFlow` takes `source` and `target` ONLY, and `setFlowCondition` takes those plus a
-    `condition`. Both resolve the flow by the PAIR, so a `kind` (or, on `removeFlow`, a `condition`)
-    carried over from a `describe` is REFUSED rather than ignored — and the refusal ABORTS THE WHOLE
-    BATCH, which is atomic. Deliberate, not tidiness: where two flows join the same pair, honouring
-    the edit while ignoring a `kind` acts on a flow the caller did not name. Strip those fields.
-    **Version-dependent, so do not rely on it as a backstop:** the `removeFlow` refusal ships from
-    `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**. Below those the
-    extra fields are accepted and silently dropped, and clio does no client-side check — so stripping
-    them yourself is the whole protection on an environment that is behind.
+    The field is `flows[].label` on `create-business-process` and a `label` argument on `addFlow` /
+    `setFlow`; the member first shipped in `CrtProcessBuilder` **1.6.0.8**. Read that as provenance, not
+    as a check to run: an archive cut from a line that never carried the member can hold a HIGHER number
+    and still discard the field, so a version cannot tell you whether the capability is there. This rule
+    owns the WORDING; `process-branch-conditions` owns the flow-EDIT contract — the three states of the
+    `label` argument, what a relabel must echo back, and the pair-addressing refusals — and
+    `process-modeling` owns `removeFlow`. Go there before editing a flow: an EMPTY `label` CLEARS a
+    designer's caption.
     READ BEFORE YOU WRITE. `describe-business-process` reports each flow's `label`, and that field is
     the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
     in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
-    diff between two processes says nothing at all about their labels. Below 1.6.0.8 the field is
-    DISCARDED silently on write and absent on read — and ABSENT IS AMBIGUOUS: measured on a 1.6.0.8
-    stand, the server omits `label` for a flow that carries none exactly as an older server omits it
-    for every flow, so the two are the same bytes. An all-unlabelled read is therefore NOT evidence
-    that a designer-authored process has no labels; check the installed `CrtProcessBuilder` version
-    (`list-packages`, `get-info`) before believing it. The WRITE side needs no such check: clio reads
-    the flows back after a successful write and warns about a label that is not what is drawn.
+    diff between two processes says nothing at all about their labels. An archive predating the member
+    DISCARDS it silently on write and reports nothing on read — and ABSENT IS AMBIGUOUS: measured on a
+    1.6.0.8 stand, the server omits `label` for a flow that carries none exactly as an archive without
+    the member omits it for every flow, so the two are the same bytes. An all-unlabelled read is
+    therefore NOT evidence that a designer-authored process has no labels, and the installed version
+    cannot settle it either, for the reason above. Treat an all-absent read as uninformative rather
+    than as proof.
     "Connections" in a naming review means these SEQUENCE FLOWS. The Activity "Connected to" links are a
     different feature with its own article (`process-activity-connections`) and no naming surface at all.

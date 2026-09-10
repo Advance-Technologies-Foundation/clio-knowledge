@@ -28,17 +28,18 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 
 **LABEL BOTH ARMS.** `flows[].label` is the text the designer draws ON the connector, and on a branch it
 is not decoration: without it a two-branch decision renders as two identical unlabelled arrows and a
-reader has to open each one's properties to tell them apart. It is what the shipped product does —
-84.9% of its conditional flows carry a label (1 193 of 1 405) and 25.5% of its default flows do,
-against 0.7% of plain sequence flows — so label the arms and leave an ordinary continuation bare.
+reader has to open each one's properties to tell them apart. It is what the shipped product does on the
+large majority of its conditional flows and a quarter of its default ones, and almost never on a plain
+sequence flow — so label the arms and leave an ordinary continuation bare. `process-naming` N10 carries
+the measured figures and their population.
 
 Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
 `Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
-because it is already one click away on the flow itself. `process-naming` N10 owns this rule, the
-full corpus figures and the three-state contract on `setFlow` (omitted keeps, empty clears, text
-replaces); `flows[].label` needs `CrtProcessBuilder` 1.6.0.8, and below it the field is discarded
-silently. `describe-business-process` reports each flow's `label`, which is the only way to learn
-that a designer's label exists — a flow's caption lives in the schema RESOURCES, not the metadata.
+because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule in
+full. EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
+caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
+`describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
+human's label is there to be erased.
 
 **ON THE BUILD PATH, WRITE THE NAME.** This is the one exception to the UId rule above and it exists
 because it has to: on `create-business-process` the UIds do not exist yet — the parameters and elements
@@ -46,9 +47,9 @@ are made by that same call — so `flows[].condition` takes a name and the serve
 everything exists.
 
     { "source": "Check", "target": "Approve", "kind": "conditional",
-      "condition": "[#Amount#] > 100" }                              // a process parameter
+      "condition": "[#Amount#] > 100", "label": "Approved" }        // a process parameter
     { "source": "Check", "target": "Escalate", "kind": "conditional",
-      "condition": "[#Priority#] == \"High\"" }                       // and another
+      "condition": "[#Priority#] == \"High\"", "label": "Escalated" } // and another
 
 `[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
 before you rely on it. A `readData` in `first` mode, the only mode clio builds, exposes exactly one output
@@ -70,8 +71,28 @@ neither, and the entire call is aborted.
 **ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
 exists, so `describe-business-process` reports every UId. The two-step route — build the flow plain,
 then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
-one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`
-and (for a conditional one) `condition`.
+one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`,
+(for a conditional one) `condition`, and an optional `label`.
+
+The `label` argument has THREE states and the difference is destructive: OMITTING it keeps whatever
+label the flow has, an EMPTY string CLEARS it, and text replaces it. Omitting is what you want on any
+edit that is not about the label, because a modify normally lands on a designer-authored process where
+most conditional flows already carry a human's wording. Since `kind` is mandatory, RELABELLING ALONE
+means passing the kind the flow already has — and on a CONDITIONAL flow you must pass its existing
+`condition` back too, or the call is refused: `kind: conditional` with no condition is rejected before
+anything is written, because an omitted condition would be stored as the literal `true` and make the
+branch always taken. So read the flow first and echo both fields. `process-naming` N10 owns the WORDING
+rule and the corpus figures.
+
+`removeFlow` takes `source` and `target` ONLY, and `setFlowCondition` takes those plus a `condition`.
+Both resolve the flow by the PAIR, so a `kind` (or, on `removeFlow`, a `condition`) carried over from a
+`describe` is REFUSED rather than ignored — and the refusal ABORTS THE WHOLE BATCH, which is atomic.
+Deliberate, not tidiness: where two flows join the same pair, honouring the edit while ignoring a
+`kind` acts on a flow the caller did not name. **MUST strip `kind` and `condition` before a
+`removeFlow`.** Version-dependent, so do not rely on it as a backstop: the `removeFlow` refusal ships
+from `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**; below those the
+extra fields are accepted and silently dropped, clio does no client-side check, and stripping them
+yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule in full.
 
 Both need `CrtProcessBuilder` **1.6.0.3** or newer; below it the build path takes a system setting
 only. State the version that SHIPS the behaviour, not the one it first appeared under: the gateway
