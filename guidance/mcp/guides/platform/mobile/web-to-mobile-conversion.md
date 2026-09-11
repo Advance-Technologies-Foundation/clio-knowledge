@@ -23,11 +23,18 @@ Creatio or disk. The guide contains:
     withAdaptation / alternativeAvailable / unsupported / requiresManualDecision), the
     suggested mobile type(s), and a primaryWebMerge note for many→one mappings.
   - elementMap — per NAMED ELEMENT, the exact instance-level decision (operation =
-    merge / insert / drop / relocate-children). Iterate this to build the body; it already
-    encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
+    merge / insert / drop / relocate-children). Iterate this IN ORDER and apply EVERY entry; it
+    already encodes merge-vs-insert, the mobile parent, survivability and caption resources. Do NOT
     re-derive placement from containerMap + componentSuggestions, and do NOT override the entry's
     parentName/propertyName with get-component-info's parent/container advice — see ELEMENT PLACEMENT
     IS AUTHORITATIVE in HARD MOBILE RULES.
+    ONE webName CAN CARRY TWO ENTRIES. It is normally one entry per source element, but a STRUCTURAL
+    twin (the web element converts into a DIFFERENT mobile component, crt.DataGrid → crt.List) emits
+    TWO under the SAME webName: FIRST the element that REPLACED the web one (the List), THEN the named
+    element the mobile template provides in its single-object slot, carrying the row (the crt.ListItem).
+    Never key, group or de-duplicate elementMap by webName, and never stop at the first entry for a
+    name — the second entry is where the row lives, and dropping it is exactly how a converted list
+    arrives blank.
   - mobileContracts — for each suggested mobile type: allowedProperties + example +
     designerDefaults, so you can build the component's values inline.
   - modelConfigDiff / viewModelConfigDiff — READY-TO-PASTE diffs. BOTH are a set of FOCUSED
@@ -135,7 +142,7 @@ FLOW
      vs merge is the #1 mistake — the template already contains these elements.) A merge entry MAY
      also carry a prebuilt mobileValues — paste it onto the merged element verbatim, deterministically,
      as part of this same step (no separate confirmation beyond Gate M — a mechanical property fill-in,
-     not a new decision). A merge carries prebuilt mobileValues in two twin shapes:
+     not a new decision). A merge carries prebuilt mobileValues in three twin shapes:
        • whitelist twin — the rule declares carryProperties (e.g. FolderTree→FolderTreeActions carrying
          sourceSchemaName/rootSchemaName): only those keys are carried.
        • same-component twin — the mobile template provides the SAME component the page changed, either
@@ -147,10 +154,17 @@ FLOW
          default (an unset attachments recordColumnName stays the mobile default RecordId); a template
          component the page did not change gets no elementMap entry at all. Paste the carried mobileValues
          as-is — never add the omitted defaults yourself; the mobile element already supplies them.
+       • structural twin — the template-provided element is a DIFFERENT component from the web one
+         (crt.DataGrid → crt.List). What the conversion rules declare for the target is a SEPARATE NAMED
+         ELEMENT the template already provides in a single-object slot, so it arrives as its OWN merge
+         entry rather than on the parent: a grid → list conversion yields a merge on the List (usually
+         with no values of its own) AND a merge on the template's crt.ListItem carrying the row
+         (title + body). Apply both by name.
      If the mobile list template already provides the List / ListItem elements, configure
-     them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
-     second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
-     ListItem is a separate named element).
+     them by MERGE-BY-NAME — the row goes on the ListItem element, and the converter now PREBUILDS it
+     as that element's own entry (see the structural twin above). Do NOT insert a second crt.List, and
+     do NOT put itemLayout inside a merge of the parent List (silent no-op; ListItem is a separate
+     named element, and its slot already holds it).
    - insert — add mobileType under parentName/propertyName (propertyName defaults to "items"). Use the
      entry's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
      get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
@@ -187,9 +201,10 @@ FLOW
      A grid → crt.List INSERT arrives with its row ALREADY BUILT: mobileValues carries the
      crt.ListItem under itemLayout (title = the first grid column, body = the rest) AND every source
      property the grid carried, each already shaped to what the mobile component accepts. Paste it as-is;
-     do NOT rebuild the row and do NOT strip properties. This is prebuilt only for an INSERT — when the
-     mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
-     configure by merge-by-name (see the merge branch).
+     do NOT rebuild the row and do NOT strip properties. When the mobile list TEMPLATE already provides
+     the List/ListItem elements the row is prebuilt too, but it arrives as a MERGE entry on the
+     ListItem element instead of inside the List's values (see the structural twin in the merge
+     branch) — either way you paste it, never rebuild it.
      The mobileValues carry every localized string verbatim as #ResourceString(key)# tokens — both a
      top-level caption AND nested ones (e.g. config.title, text.template). Register them ALL: pass
      guide.resourceStrings (a { key: en-US text } map covering the whole converted body) to update-page
@@ -313,11 +328,13 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 - LIST ROW (grid → crt.List + crt.ListItem): the row lives on a crt.ListItem in the crt.List's
   itemLayout — title = the FIRST grid column, body = every other column in source order.
   For an INSERT the converter has already built the row into mobileValues; paste it, do NOT rebuild it.
-  It is NOT prebuilt when the mobile list TEMPLATE already provides the List/ListItem elements: then
-  configure the row by MERGE-BY-NAME onto the ListItem element (title + body). NEVER insert a second
-  crt.List, and NEVER put itemLayout inside a merge of the parent List — crt.List is not a container and
+  When the mobile list TEMPLATE already provides the List/ListItem elements, the row is prebuilt as its
+  OWN merge entry on the ListItem element (title + body) — apply it by name. NEVER insert a second
+  crt.List, and NEVER put itemLayout inside a merge of the parent List: crt.List is not a container and
   itemLayout is an input, so addressing it as a child slot makes the client answer "is not a container
-  for other items" and the WHOLE schema fails to build (ListItem is a separate named element). When you
+  for other items" and the WHOLE schema fails to build, while putting it in the parent's merge VALUES is
+  a silent no-op — the differ discards a merge property whose slot already holds a named element, and
+  every OOTB mobile list template fills that slot with a ListItem. When you
   build the row, a title is a plain "$Binding" STRING; the { "value": "$Binding" } shape is for body
   entries only — using it for the title renders an empty Title column while the body looks correct.
   A title binds only a DIRECT TEXT column of the collection's entity — a lookup column, or a
