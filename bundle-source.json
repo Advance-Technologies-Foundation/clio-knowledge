@@ -2278,7 +2278,7 @@
     {
       "itemId": "sys-settings",
       "title": "System settings MCP operations",
-      "description": "Canonical MCP guidance for the Creatio sys-settings CRU surface: tool order, supported value-type-names and aliases, Lookup resolution, SecureText masking, Date/Time TZ caveat, and Binary (write-only, via value-file-path) upload.",
+      "description": "Canonical MCP guidance for the Creatio sys-settings CRU surface: tool order, supported value-type-names and aliases, Lookup resolution, SecureText masking, Date/Time TZ caveat, and Binary file upload and exact-byte readback through clio-run when the download contract is available.",
       "topicId": "creatio.sys-settings",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-settings",
