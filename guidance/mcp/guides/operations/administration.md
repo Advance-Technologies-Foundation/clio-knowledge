@@ -57,11 +57,20 @@ and rejects multiple matching children. Never call SaveChiefsRole repeatedly: it
 A manager group cannot be moved to a different parent by update. Creating a missing manager group
 for an external-user parent is currently unsupported by this tool; existing groups can be inspected.
 
+Functional roles must be parented by another functional role or the built-in All employees
+(a29a3ba5-4b0d-de11-9a51-005056c00008) / All external users
+(720b771c-e7a7-4f31-9cfb-52cd21c3739f) anchor. The native functional tree excludes arbitrary
+organizational parents, making their functional children invisible. The external anchor appears
+when PortalUserManagementV2 is enabled. Keep the connection domain consistent when updating.
+
 ## Create and maintain users
 
 1. Resolve an existing Contact and verify the intended login is not already used. User creation needs
    a Contact GUID; it does not create a Contact or silently adopt an existing account.
-2. Place the initial secret in an environment variable available to the executing Clio/MCP process.
+2. Have the operator provision a temporary account password in a process variable named
+   `CLIO_ADMIN_PASSWORD_<SUFFIX>`, where SUFFIX uses uppercase letters, digits or underscores.
+   This dedicated namespace is an explicit opt-in; never copy unrelated credentials into it.
+   The variable must be available to the executing Clio/MCP process and removed after use.
    Pass only its name as password-env. Do not put a password in tool arguments, CLI arguments,
    examples, files, logs, comments or evidence. An agent must not echo the variable's value.
 3. Call manage-user action=create with a new id, user-login, contact-id, password-env and the intended
