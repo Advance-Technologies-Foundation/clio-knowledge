@@ -220,3 +220,6 @@ used, verify text/contrast against the accessibility/contrast guidance.
   (~3); each gauge is 6 (floor 5) so its arc is not squashed.
 - Multi-topic surfaces are split into labeled sections, each = metric band + chart row.
 - Titles and value colors use theme defaults (red only for overdue/negative).
+
+For a List widget's binding and clone/repair contract, MUST read `list-widget` and fetch
+`get-component-info` for its runtime assembly documentation.
