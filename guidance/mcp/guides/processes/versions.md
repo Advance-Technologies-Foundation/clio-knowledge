@@ -1,9 +1,11 @@
 clio MCP process-versions guide — read which version of a process you are looking at, and which one runs
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of the version MODEL and of what this build can and cannot do
-with it. A rule that lives in another article is cited by its article NAME and never repeated here, so
-a name in backticks is a get-guidance topic to fetch, not a section to scroll to.
+This article is the authoritative owner of the version MODEL and of the version fields of
+`describe-business-process`. CREATING a version and making one actual live in
+`process-version-writes`; this article is what that one assumes you have read. A rule that lives in
+another article is cited by its article NAME and never repeated here, so a name in backticks is a
+get-guidance topic to fetch, not a section to scroll to.
 
 == The model (V1-V7) ==
 (These are PLATFORM facts, not authoring rules. Nothing you write changes them, and every one of them
@@ -89,7 +91,14 @@ The fields:
   `versionRootSchemaUId`    - the family key.
   `versions[]`              - the family, ascending by version, each entry carrying `schemaUId`,
                               `name`, `caption`, `version`, `isActiveVersion`, `isRoot`, `packageUId`
-                              and `enabled`.
+                              and `enabled`, and on a clio that carries it a `packageName` beside
+                              `packageUId`. Read it CONDITIONALLY, because both shapes are in the
+                              field today: when a name is there, use it -- a person asking where a
+                              version lives is asking for the name, not the GUID. When it is not,
+                              resolve the name yourself rather than reading a GUID out loud, and check
+                              `versionReadWarning` first: a clio that carries the field says there
+                              when it could not read the package names at all, and that is a different
+                              answer from a build that never returns them.
   `activeVersionSource`     - which authority answered.
   `versionsTruncatedAt`     - present only when the family was longer than the list published.
   `versionReadWarning`      - present only when the standing could NOT be established.
@@ -111,7 +120,7 @@ Three outcomes, and only the first two are ordinary:
     code. In every state do NOT fall back to the graph you happen to be holding, and do not redirect by
     an `activeVersionSchemaUId` that is not in the response.
 
-Four traps in those fields, each of which reads as good news if you skip it:
+Traps in those fields, each of which reads as good news if you skip it:
   * ABSENT is not zero, and zero is not "unversioned" either. `version: 0` is a real answer, but it says
     only THIS IS THE FAMILY ROOT -- and by V2 the root of a versioned family reports 0 as well, with no
     warning, which is the very row `process-name` hands you most often. So `version: 0` alone NEVER
@@ -132,6 +141,9 @@ Four traps in those fields, each of which reads as good news if you skip it:
   * `enabled` on a family entry is FAMILY state, not per-version state. The platform keys
     enable/disable on the root schema, so every member reports the same value; a disabled family is
     disabled whichever member you read.
+  * `IsMaxVersion` is deliberately not surfaced, so do not go looking for a "latest" flag. The library
+    view computes it with a lexicographic MAX over a character column across an asymmetric pool, and two
+    versions of one root created in different packages BOTH report true.
 
 == Choosing an identity ==
 `describe-business-process` takes exactly one of three, and on a versioned process they do not mean
@@ -143,9 +155,23 @@ the same thing:
   `process-caption` - the ACTIVE version. A caption is shared by every member of a family, so it is
                       resolved to the one that runs. When a caption matches several DISTINCT processes,
                       or when no active version can be established, the call is refused with the
-                      candidate codes rather than answering for an arbitrary one.
+                      candidate codes rather than answering for an arbitrary one -- except when it
+                      matches more than the resolver can rank into one family, which is refused
+                      naming none and asks for the exact code.
 So: `process-caption` when you want what runs, `process-uid` when you want a specific member, and
 `process-name` only when you know it is the member you mean.
+
+Do NOT tell a builder to prefer the CODE over the caption for the question "what runs". That advice
+inverts this section, and it has been given: in an ENG-94374 test session the assistant wrote "resolving
+this process by its caption is ambiguous and silently picks v2 ... if you script anything against it,
+use the schema code, not the caption". Both halves are wrong. Caption -> ACTIVE is the designed
+resolution, not a silent pick; and the code resolves to ONE schema, which for the name a builder knows
+is the root -- usually not the member the runtime executes. An ambiguous caption is REFUSED, with the
+candidate codes, precisely so that nothing is picked silently: a refusal you can act on is the opposite
+of a hazard.
+Where a CODE is genuinely required -- `run-process`, a run-process button's `processName`, a script
+task -- take it from `activeVersionName`, not from the code you were handed. Those articles say "never
+the caption" about THEIR field, which is true and is not a statement about how to identify a process.
 `get-process-signature` and `generate-process-model` apply the SAME resolution, but they do not have
 these three arguments: each takes ONE value that is a code or a caption, and it is the caption reading
 of that single argument which resolves to the active version. So the policy is one; the argument shapes
@@ -159,140 +185,13 @@ base name. Read `isActiveVersion` from `describe-business-process` and launch th
 standing is UNKNOWN or because no active version was established, launch NOTHING: report the standing
 and ask which code to run. Do not fall back to the code you are already holding -- on a versioned
 process that is usually the root, which is usually not the one that runs.
-Whether the launch endpoint itself folds a non-active code onto the active version is NOT established.
-Do not rely on it either way: pass the active version's code explicitly, which is correct whatever the
-endpoint does. `run-process` refuses a display caption, and the refusal names the code it resolved to
--- which on a clio carrying this feature is the ACTIVE version's code. That resolution is code-read, not
-run: like the fold above it has not been exercised end to end, so treat the code in a refusal as a lead
-to verify with `describe-business-process`, not as an answer to paste into a launch.
-
-== Writing a version, and making it actual ==
-Evidence for this section and the three that follow, graded the way V1-V7 are: the two operations are
-SOURCE-READ from clio's implementation of them (ENG-94374 stories 16-17) and were NOT exercised on a
-stand -- no version was created and none was activated, because neither can be undone (V6). So the
-failure paths especially -- the read-back, the swallowed sibling deactivation, the one-transaction
-re-save, and what a rejected call leaves -- are code-read, not measured: report a divergence rather
-than working around it. What WAS observed is the product side, in the designer (2026-09-04): the two
-Save affordances and the prompt the platform raises after a version is created.
-Two tools, and they answer two different questions. Never treat them as one gesture.
-  `modify-business-process-as-new-version`  applies edits to a NEW VERSION of a process instead of to
-                                            the running one. This is the product's
-                                            `Save new version (Ctrl+Alt+N)`.
-  `set-active-business-process-version`     makes one member of a family the ACTUAL one. This is
-                                            `Set as actual version` in the designer's ACTIONS menu, and
-                                            it is the rollback gesture.
-There is NO separate "create a version" step, and looking for one is the first wrong turn. ONE call
-carries the edits AND produces the version; an EMPTY operations array is how you take a plain snapshot
-of the source before editing it in place. So "make a restore point" and "put this change in a new
-version" are the same tool, differing only in whether you pass operations.
-
-The `operations` array is EXACTLY the one `modify-business-process` takes -- same vocabulary, same
-descriptors, same order-and-abort rule. Read `process-modeling` for the operation reference; nothing
-about it changes because the destination is a version.
-
-What you get back is PROSE, not a keyed object -- unlike the read half, where a backticked name IS a
-response key. One sentence names the created version's schema UId, the name the PLATFORM composed (root +
-package + number, per V4 -- you MAY choose the package, never the number or the composed name), the number
-allocated, that it is not active, the family root UId and the applied-operation count. Read those out of the sentence; do not parse it for field names,
-which are server-side and never reach you.
-
-Omit `package-name` and the version goes to the SOURCE's package -- always, with no design-package
-fallback, so a package that refuses edits is refused rather than redirected. A version need not land in
-the root's package (V4's cross-package families), so a family spread over packages is normal.
-
-The new version is created INACTIVE. Creating it changes NOTHING about what the environment executes.
-That is not a limitation to work around -- it is the point, and it is why the two tools are separate.
-
-Both write tools require the `CrtProcessBuilder` package on the target environment from
-1.6.1.0 onward -- the version the two operations first exist in. An environment behind that is refused up
-front, naming the version the operation NEEDS, with `install-process-builder` as the remedy; one that
-clears the floor but is older than the archive this clio carries is refused too, naming BOTH versions.
-Either way the ENVIRONMENT is behind -- it says nothing about the process you named.
-
-Issue these writes ONE AT A TIME, never as a parallel batch. Both are schema writes, and "take a restore
-point of these six processes" is one instruction and six of them -- but concurrent schema writes on a .NET
-Framework stand trip IIS rapid-fail and take the app pool down, so the failure is an environment outage
-and six ambiguous transport errors rather than a call you can retry. The database half of the race is
-handled (two writers on one number are refused after the save); the load is not.
-
-== Ask once, then behave predictably ==
-Two questions, asked ONCE, at the first edit of a session:
-  1. Do edits go to the CURRENT version, or to a NEW one?
-  2. Once a new version exists, do you want it made the ACTUAL one?
-Then hold those answers for the rest of the session and say what you did in EVERY reply -- "edited the
-current version", "saved version 3, the running one is unchanged", "version 3 is now actual". A builder
-who has to re-derive which of those happened has lost the thing versioning was for.
-
-The two answers do NOT carry the same authority, and this paragraph decides any sentence that seems
-to say otherwise. Q1 is a ROUTING answer: it picks which tool every later edit uses, and picking a
-tool changes nothing on the environment by itself. Q2 is a PREFERENCE, not a consent: it decides
-whether you OFFER activation once a version exists, and it authorises no call. Every
-`set-active-business-process-version` call needs its own request, naming the version to be made actual
-and the environment -- a session answer is never that request, per `core-rules`, where an answer given
-earlier in the session is not standing consent for a high-impact write. Before each such call, say
-which version becomes actual and that the call re-saves the whole family; call it on the answer to
-THAT, not on the answer to Q2.
-
-That policy is YOUR behaviour, not a field on any request. Neither tool takes a "session mode", and no
-call inherits anything from a previous one: every call states its own destination, and nothing is
-carried over from the last one. So "the user said new versions from now on" changes which tool you
-reach for -- it never changes what a call means.
-
-Never activate on your own initiative. After creating a version the product ASKS, in its own prompt,
-whether to make it the actual one -- in the designer, with the person answering -- so chaining
-activation onto a create is not a convenience, it is taking a decision the product hands to the user.
-Call `set-active-business-process-version` because the user asked for it.
-
-== What a rollback does, and what it does not ==
-Activating an earlier version IS the rollback, and it is bounded:
-  * It reaches NEW instances only. Instances already running stay on the version they started with and
-    finish on it (V5). A long-lived process keeps executing the old graph after the call, and that is
-    correct rather than a failure to report.
-  * It DELETES nothing (V6). The version you rolled back from stays in the family forever, visible and
-    readable. "Roll back" here means activating an earlier member, never removing a newer one -- and if
-    a builder asks you to delete the bad version, the answer is that no operation anywhere does it, not
-    that you are missing a permission.
-  * It is reported from a READ-BACK, not from the request. The platform logs and SWALLOWS a failure to
-    deactivate a sibling, so the tool re-reads the family afterwards; a mismatch FAILS and names the
-    version the environment really reports as actual. Trust that name over the one you asked for.
-  * It re-saves EVERY member of the family in one transaction -- a write nobody asked for by name,
-    reported as a warning. Nothing about the other members' graphs changes.
-
-== A rejected edit saves nothing ==
-Operations apply in order and any failure aborts the whole call. When the failure happens BEFORE the
-save, nothing is written at all: there is no half-created version, no draft, and nothing to clean up.
-Retry the corrected call -- do not go looking for wreckage from the failed one.
-
-That is structural: the clone is registered nowhere until the save, so a pre-save refusal leaves nothing
-any lookup can reach. If a pre-save failure claims a partial schema may still shadow the process you
-named, that message is wrong -- a CrtProcessBuilder defect up to 1.6.1.0, fixed in 1.6.1.1. Believe this
-section, and delete nothing on its advice.
-
-That holds for a failure the tool REPORTED. A call that never answered reported nothing, so it is not
-that case: the platform allocates the version number and by V6 an accidental extra version is
-permanent, so re-describe the family and compare `versions[]` before re-sending anything. `core-rules`
-owns the write-timeout rule. Activation is the same decision for a different reason -- it re-saves
-every member of the family in one transaction, so its cost grows with the family and a slow answer is
-not a failed one: settle it by re-reading the family with `describe-business-process`, which is the
-authority for what is actual anyway, rather than by re-issuing the call.
-
-The opposite case is the one to read carefully: once the save has succeeded the version EXISTS, and a
-failure reported after that point still names it, because it cannot be taken back (V6). The message
-says which case it is. When it names a version, that version is really on the environment.
-
-Then there is the version you created and no longer want: it is permanent and inert (V6), so make
-another version actual instead.
-
-== What this build still cannot do ==
-  * Nothing MIGRATES a running instance between versions (V5). No tool, no product gesture.
-  * Nothing DELETES a version (V6).
-  * `IsMaxVersion` is deliberately not surfaced. The library view computes it with a lexicographic MAX
-    over a character column across an asymmetric pool, and two versions of one root created in
-    different packages BOTH report true -- so it is not a usable "latest" signal and is left out rather
-    than passed on.
-  * Copying a process under a new name is NOT a version and never was: a copy is a new ROOT with its
-    own family, it does not become what the runtime executes, and it leaves the original running. Do
-    not offer it as an equivalent.
+Measured on a stand (2026-09-11): a launch resolves to the ACTIVE version and the process log records the
+run against it, not against the root whose name is the familiar one. Whether the endpoint would fold a
+NON-active code onto the active version is still not established, and you never need to know: pass the
+active version's code explicitly and the answer is the same either way. `run-process` refuses a display
+caption, and the refusal names the code it resolved to -- on a clio carrying this feature that is the
+active version's code, but treat it as a lead to confirm with `describe-business-process` rather than an
+answer to paste into a launch.
 
 == File design mode ==
 Under file design mode a process is absent from the process library until it has been loaded from the
@@ -301,9 +200,10 @@ file system into the database and published. Until then the version fields degra
 read as "this process has no versions".
 
 == Where the other rules live ==
-  * consent for a high-impact write, and what an earlier answer does NOT authorise -> `core-rules`
-  * naming a process, its elements and its parameters -> `process-naming`
-  * building and editing a process at all             -> `process-modeling`
-  * what a described element or parameter contains    -> `process-modeling`, then the article it routes to
-This article owns only the version model, the version fields and the two write operations. It does not
-restate the descriptor, the element catalog (`process-element-catalog`) or the connection rules.
+  * creating a version, making one actual, rolling back -> `process-version-writes`
+  * consent before a high-impact write -- launching one is one -> `core-rules`
+  * naming a process, its elements and its parameters    -> `process-naming`
+  * building and editing a process at all                -> `process-modeling`
+  * what a described element or parameter contains       -> `process-modeling`, then the article it routes to
+This article owns the version model and the version fields, and nothing else. It does not restate the
+descriptor, the element catalog (`process-element-catalog`) or the connection rules.
