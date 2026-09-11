@@ -10,19 +10,24 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// list, WHICH of two real shapes the record-page case wants — the catalog's own worked example builds a
 /// list over a per-entity file entity (<c>ContactFile</c>) as a <c>list</c>, while the platform's creation
 /// flow produces <c>SysFile</c> / <c>RecordId</c> / <c>gallery</c> with a companion <c>AttachmentListDS</c>
-/// and no handlers. Neither failure is visible at save time: an <c>insert</c> over a component the template
-/// already ships returns <c>success: true</c> and renders it twice, and a missing companion data source
-/// renders the list empty and never issues a query.
+/// and an empty handlers array. Neither mistake is rejected at save time, because <c>update-page</c>
+/// validates the diff it is sent rather than the merged result.
 ///
 /// For <c>crt.Feed</c> the catalog's documentation DOES already give the record-feed combination — the
 /// measurement confirms it rather than filling a gap, and the fixture says so, because claiming a gap
 /// that is not there is the duplication CONTRIBUTING asks contributors to rule out.
 ///
 /// So the VALUES are the deliverable, and they are measured rather than derived — lab scenario of
-/// 2026-09-11 on stand <c>eng96655</c>, page <c>UsrSourceCodes_FormPage</c>, read through <c>get-page</c>.
-/// This fixture keeps that measured set, the merge-vs-insert rule, and the routing that reaches them from
-/// drifting back out; a canonical value silently edited to a plausible-looking one would otherwise ship
-/// green and reintroduce the defect verbatim.
+/// 2026-09-11 on an internal Creatio Studio stand, read through <c>get-page</c>: the creation-flow page
+/// <c>UsrSourceCodes_FormPage</c>, its parent <c>PageWithTabsFreedomTemplate</c> (the MERGE path), and
+/// <c>PageWithTopAreaAndTabsFreedomTemplate</c>, which ships neither component (the INSERT path). The
+/// stand ALIAS is deliberately not asserted here: this is a public repository, the alias means nothing to
+/// that audience, and pinning it in a test is what makes generalising the article break the suite.
+///
+/// This fixture keeps that measured set, the merge-vs-insert rule, the INSERT-path deliverables an
+/// inserted gallery is useless without — the tab toolbar that carries the upload button above all — and
+/// the routing that reaches them, from drifting back out; a canonical value silently edited to a
+/// plausible-looking one would otherwise ship green and reintroduce the defect verbatim.
 /// </summary>
 [TestFixture]
 public sealed class StandardComponentsGuidanceTests
@@ -83,6 +88,78 @@ public sealed class StandardComponentsGuidanceTests
                 because: "the attachments list reads files, and SysFile is the measured entity")
             .And.Contain("\"scope\": \"viewElement\"",
                 because: "the companion data source is view-element scoped, not the page data source");
+        guidance.Should().Contain("MERGE path: an overlay on the declaration the template already carries",
+                because: "the one-attribute block is what the measured page carries ON TOP of the "
+                    + "template's declaration; presented as the whole data source it under-specifies "
+                    + "every insert that copies it")
+            .And.Contain("INSERT path: the full declaration",
+                because: "the insert path has no template declaration underneath, so the full "
+                    + "four-attribute form is the deliverable there")
+            .And.Contain("\"CreatedOn\": { \"path\": \"CreatedOn\" }")
+            .And.Contain("\"CreatedBy\": { \"path\": \"CreatedBy\" }")
+            .And.Contain("\"path\": \"Size\"");
+    }
+
+    [Test]
+    [Description("Keeps the tab toolbar in the INSERT-path deliverables — without it an inserted gallery has no control that uploads a file.")]
+    public void StandardComponentsGuidance_ShouldNameTheTemplateSuppliedAttachmentsToolbar()
+    {
+        // Arrange
+        string guidance = ReadGuide();
+
+        // Assert
+        guidance.Should().Contain("AttachmentAddButton",
+                because: "the upload control lives in the tab container's tools slot, not on the file "
+                    + "list, so an insert that stops at the component ships a gallery nobody can add to")
+            .And.Contain("\"request\": \"crt.UploadFileRequest\"")
+            .And.Contain("\"viewElementName\": \"AttachmentList\"",
+                because: "the upload request has to name the list element it uploads into")
+            .And.Contain("AttachmentRefreshButton")
+            .And.Contain("\"request\": \"crt.LoadDataRequest\"")
+            .And.Contain("\"dataSourceName\": \"AttachmentListDS\"",
+                because: "the refresh request reloads the companion data source by name");
+    }
+
+    [Test]
+    [Description("Keeps the collection attribute at its measured shape — five child attributes and the sorting, not the single column the view config declares.")]
+    public void StandardComponentsGuidance_ShouldCarryTheFullCollectionAttribute()
+    {
+        // Arrange
+        string guidance = ReadGuide();
+
+        // Assert
+        guidance.Should().Contain("\"AttachmentListDS_Name\"")
+            .And.Contain("\"AttachmentListDS_CreatedOn\"")
+            .And.Contain("\"AttachmentListDS_CreatedBy\"")
+            .And.Contain("\"AttachmentListDS_Size\"")
+            .And.Contain("\"AttachmentListDS_Id\"",
+                because: "primaryColumnName resolves through this child attribute, so a Name-only "
+                    + "collection breaks row identity as well as the tile content")
+            .And.Contain("\"columnName\": \"CreatedOn\", \"direction\": \"desc\"",
+                because: "newest-first ordering comes from sortingConfig, not from crt.FileList");
+    }
+
+    [Test]
+    [Description("Keeps the guide from contradicting the component catalog about Id and CardState, and keeps the unobserved consequences labelled as reasoning rather than asserted as behaviour.")]
+    public void StandardComponentsGuidance_ShouldNotAssertWhatItDidNotObserve()
+    {
+        // Arrange
+        string guidance = ReadGuide();
+
+        // Assert
+        guidance.Should().Contain("#PrimaryDataSourceName()#.Id",
+                because: "both measured templates declare the Id attribute — including the one shipping "
+                    + "neither component — so an insert must NOT file it as its own deliverable")
+            .And.NotContain("\"Id\": { \"modelConfig\": { \"path\": \"PDS.Id\" } }",
+                because: "listing that as an insert deliverable is what set this guide against "
+                    + "get-component-info, whose crt.Feed text says the platform provides $Id and "
+                    + "$CardState on edit pages");
+        guidance.Should().Contain("NOT OBSERVED",
+                because: "the duplicate-insert and missing-data-source consequences are reasoned from "
+                    + "structure; AGENTS.md forbids presenting them as verified behaviour")
+            .And.NotContain("renders the component twice",
+                because: "nobody watched a duplicated insert render, so the guide may name the hazard "
+                    + "but not the outcome");
     }
 
     [Test]
@@ -97,8 +174,6 @@ public sealed class StandardComponentsGuidanceTests
                 because: "the creation flow merges onto template-shipped containers rather than inserting")
             .And.Contain("You MUST NOT emit an `insert` for a component the template already ships",
                 because: "the platform does not correct it and update-page still reports success")
-            .And.Contain("renders the component twice",
-                because: "the consequence is what makes the rule worth obeying, and it is invisible at save time")
             .And.Contain("FeedTabContainer")
             .And.Contain("AttachmentsTabContainer");
     }
@@ -130,10 +205,16 @@ public sealed class StandardComponentsGuidanceTests
         string guidance = ReadGuide();
 
         // Assert
-        guidance.Should().Contain("eng96655",
-                because: "a prescriptive value set must name the observation it was measured from")
-            .And.Contain("UsrSourceCodes_FormPage")
-            .And.Contain("PageWithTabsFreedomTemplate");
+        guidance.Should().Contain("UsrSourceCodes_FormPage",
+                because: "a prescriptive value set must name the schema it was measured from — the "
+                    + "SCHEMA, not the stand alias it happened to be read on, which is meaningless to "
+                    + "the readers of a public repository and pins an internal name into the suite")
+            .And.Contain("PageWithTabsFreedomTemplate",
+                because: "the merge-vs-insert rule is a property of the parent template, so the template "
+                    + "the MERGE path was measured on has to be named")
+            .And.Contain("PageWithTopAreaAndTabsFreedomTemplate",
+                because: "the INSERT-path claims are measured on a template shipping neither component; "
+                    + "without naming it, STEP 5 reads as inference again");
         guidance.Should().NotContain("TBD",
             because: "a published body must not ship an unresolved version boundary");
     }
