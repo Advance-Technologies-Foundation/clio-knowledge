@@ -49,3 +49,9 @@ Anti-patterns
 - Do not treat `pkg-to-db` as an apply step for binding data, and do not report a binding as delivered on the strength of it.
 - Do not stop a binding task at local artifact verification when the task was to configure an environment. That leaves a valid, deployable artifact in the workspace while the environment stays unconfigured, and every command involved reports success.
 - Do not leave `DisplayValue` semantics implicit for non-null lookup or image-reference row payloads.
+
+FSM descriptor compatibility (Clio issue #1416)
+- The tested modern .NET Creatio FSM reader rejects `ReferenceSchemaName` in binding column descriptors. This is an observed compatibility boundary, not a claim about every Creatio version. Keep generator-only lookup hints out of `descriptor.json`; retain lookup `Value` and `DisplayValue` in `data.json`.
+- Before transferring older local bindings, inspect their column descriptors. Remove only `ReferenceSchemaName` and advance `ModifiedOnUtc`, preserving identity, rows, and localizations. Regeneration with a corrected Clio build replaces existing content: supply all intended rows and localizations again.
+- `pkg-to-db` imports package definitions, not data rows. Apply the data through package installation or the DB-first binding tools. Inspect item-level synchronization errors: older Clio may report completion when the server returned `success: true` with nonempty `errors`. A completion message alone is insufficient.
+- After applying the binding, read back the expected target rows and, for published MCP tools, verify `tools/list` and the intended call. Do not infer installed state from generated files.
