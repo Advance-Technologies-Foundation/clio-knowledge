@@ -99,10 +99,14 @@ Activating an earlier version IS the rollback, and it is bounded:
     correct rather than a failure to report.
   * ANY member is a valid target, the family ROOT included. "Go back to the original" IS activating
     the root, because the root is what ran before the family existed -- the PLATFORM accepts it and
-    reports it as actual afterwards like any other member (measured on CrtProcessBuilder 1.6.1.9,
-    ENG-94374), and no clio guard stands in the way either. Do not refuse it yourself, and do not offer
-    a copy or yet another version in its place. If a build you are talking to refuses it anyway, report
-    that refusal rather than working around it with a direct platform or OData call.
+    reports it as actual afterwards like any other member (measured on CrtProcessBuilder 1.6.1.9 and
+    again on 1.6.2.4, ENG-94374). Do not refuse it yourself, and do not offer a copy or yet another
+    version in its place.
+    One clio build says otherwise and is WRONG: up to and including 8.1.0.125 the
+    `set-active-business-process-version` description reads "it must be the version itself, not the
+    family root". That sentence is the defect; this article supersedes it, and there is no guard behind
+    it -- the call succeeds. If a build refuses the root at RUN time, that is a different thing: report
+    the refusal rather than working around it with a direct platform or OData call.
   * It DELETES nothing (V6). The version you rolled back from stays in the family forever, visible and
     readable. "Roll back" here means activating an earlier member, never removing a newer one -- and if
     a builder asks you to delete the bad version, the answer is that no operation anywhere does it, not

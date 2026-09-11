@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentAssertions;
@@ -439,6 +440,25 @@ public sealed class ProcessVersionsGuidanceTests
             because: "AGENTS.md forbids claiming behaviour is verified without its evidence, and the swallowed sibling deactivation is a state no prompt can provoke");
         writesGuide.Should().Contain("the family ROOT included",
             because: "activating the root is the go-back-to-the-original rollback, and the tool contract used to forbid it - a caller who believes that concludes the rollback is impossible (ENG-94374 manual testing)");
+
+        // D4, and it is the one correction of this round that had no pin at all - which is backwards,
+        // because it is the paragraph that already shipped WRONG once. The by-path scoping is the whole
+        // fix: the version path has been clean since 1.6.1.1 and the create path had not been fixed when
+        // this was written. Re-merging the two paths is the original defect, and the article itself
+        // invites the next edit ("no version is named here until it ships") without saying what to keep.
+        writesGuide.Should().Contain("`create-business-process` has NOT",
+            because: "the claim that was wrong was a whole-product one; only naming the path that still emits it makes the correction survive the next edit");
+        // Every mention, not a count: the article names the version twice on purpose - once grading the
+        // evidence and once making the correction - and both are correct because both name the path it is
+        // true of. What must never appear is the version without that path beside it, which is the
+        // whole-product claim D4 was.
+        Regex.Matches(writesGuide, Regex.Escape("1.6.1.1")).Should().OnlyContain(
+            match => writesGuide.Substring(Math.Max(0, match.Index - 260),
+                Math.Min(writesGuide.Length - Math.Max(0, match.Index - 260), 380))
+                .Contains("modify-business-process-as-new-version"),
+            because: "1.6.1.1 is true of the modify path and of nothing else, so a mention that does not name that path is the two paths being merged back together");
+        writesGuide.Should().Contain("no version is named here until it",
+            because: "naming a fix version before the archive ships is how this paragraph came to be wrong, and the rule has to outlive the person who learned it");
     }
 
     [Test]

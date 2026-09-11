@@ -91,11 +91,14 @@ The fields:
   `versionRootSchemaUId`    - the family key.
   `versions[]`              - the family, ascending by version, each entry carrying `schemaUId`,
                               `name`, `caption`, `version`, `isActiveVersion`, `isRoot`, `packageUId`
-                              and `enabled`. `packageUId` is the package identity, and it is all a
-                              released clio returns: no shipped build carries a package NAME beside
-                              it, so the absence of one is the shape of the response and never a
-                              statement that the package could not be named. Resolve the name yourself
-                              when a person asks where a version lives -- do not read a GUID out loud.
+                              and `enabled`, and on a clio that carries it a `packageName` beside
+                              `packageUId`. Read it CONDITIONALLY, because both shapes are in the
+                              field today: when a name is there, use it -- a person asking where a
+                              version lives is asking for the name, not the GUID. When it is not,
+                              resolve the name yourself rather than reading a GUID out loud, and check
+                              `versionReadWarning` first: a clio that carries the field says there
+                              when it could not read the package names at all, and that is a different
+                              answer from a build that never returns them.
   `activeVersionSource`     - which authority answered.
   `versionsTruncatedAt`     - present only when the family was longer than the list published.
   `versionReadWarning`      - present only when the standing could NOT be established.
@@ -117,7 +120,7 @@ Three outcomes, and only the first two are ordinary:
     code. In every state do NOT fall back to the graph you happen to be holding, and do not redirect by
     an `activeVersionSchemaUId` that is not in the response.
 
-Four traps in those fields, each of which reads as good news if you skip it:
+Traps in those fields, each of which reads as good news if you skip it:
   * ABSENT is not zero, and zero is not "unversioned" either. `version: 0` is a real answer, but it says
     only THIS IS THE FAMILY ROOT -- and by V2 the root of a versioned family reports 0 as well, with no
     warning, which is the very row `process-name` hands you most often. So `version: 0` alone NEVER
@@ -152,7 +155,9 @@ the same thing:
   `process-caption` - the ACTIVE version. A caption is shared by every member of a family, so it is
                       resolved to the one that runs. When a caption matches several DISTINCT processes,
                       or when no active version can be established, the call is refused with the
-                      candidate codes rather than answering for an arbitrary one.
+                      candidate codes rather than answering for an arbitrary one -- except when it
+                      matches more than the resolver can rank into one family, which is refused
+                      naming none and asks for the exact code.
 So: `process-caption` when you want what runs, `process-uid` when you want a specific member, and
 `process-name` only when you know it is the member you mean.
 
