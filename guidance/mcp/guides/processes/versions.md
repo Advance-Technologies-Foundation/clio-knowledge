@@ -90,13 +90,12 @@ The fields:
   `activeVersionSchemaUId`  - its UId, which identifies it unambiguously where the caption cannot.
   `versionRootSchemaUId`    - the family key.
   `versions[]`              - the family, ascending by version, each entry carrying `schemaUId`,
-                              `name`, `caption`, `version`, `isActiveVersion`, `isRoot`, `packageUId`,
-                              `packageName` and `enabled`. Name the package by `packageName` when you
-                              tell a person where a version lives; `packageUId` is the identity, not
-                              the answer to their question. `packageName` is ABSENT when the package
-                              could not be named -- which is not the same as the version having no
-                              package, and the warning says so when it happened to every member at
-                              once.
+                              `name`, `caption`, `version`, `isActiveVersion`, `isRoot`, `packageUId`
+                              and `enabled`. `packageUId` is the package identity, and it is all a
+                              released clio returns: no shipped build carries a package NAME beside
+                              it, so the absence of one is the shape of the response and never a
+                              statement that the package could not be named. Resolve the name yourself
+                              when a person asks where a version lives -- do not read a GUID out loud.
   `activeVersionSource`     - which authority answered.
   `versionsTruncatedAt`     - present only when the family was longer than the list published.
   `versionReadWarning`      - present only when the standing could NOT be established.
@@ -197,6 +196,7 @@ read as "this process has no versions".
 
 == Where the other rules live ==
   * creating a version, making one actual, rolling back -> `process-version-writes`
+  * consent before a high-impact write -- launching one is one -> `core-rules`
   * naming a process, its elements and its parameters    -> `process-naming`
   * building and editing a process at all                -> `process-modeling`
   * what a described element or parameter contains       -> `process-modeling`, then the article it routes to

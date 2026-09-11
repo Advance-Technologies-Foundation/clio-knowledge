@@ -3,18 +3,26 @@ clio MCP process-version-writes guide — save a change as a new version, and ro
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article owns the two WRITE operations on a process version family and what they do and do not
 change. The version MODEL they operate on — what a version is, what the family is, which member runs
-and how to read that standing — is `process-versions`, and this article assumes it: V1-V7 below are
-its numbered facts. A rule that lives in another article is cited by its article NAME and never
-repeated here.
+and how to read that standing — is `process-versions`, and this article assumes it. V1-V7 are that
+article's numbered facts, cited here by number and stated THERE: fetch it if a citation below is the
+first you have seen of one. A rule that lives in another article is cited by its article NAME and
+never repeated here.
 
 == Writing a version, and making it actual ==
 Evidence for this section and the three that follow, graded the way V1-V7 are: both operations were
-exercised END TO END on a stand (ENG-94374, 2026-09-11), and a three-member family was switched in every
-direction -- v2 -> v1 -> v0 -> v2 -- with exactly one member active at each hop and the process-library
-view agreeing independently. Numbering came out consecutive, every version was created inactive, and
-activation warned about the whole-family re-save before doing it. One failure path remains CODE-READ:
-the swallowed sibling deactivation, which is a state the platform hides and no prompt can provoke.
-Report a divergence there rather than working around it.
+exercised END TO END on a stand (CrtProcessBuilder 1.6.1.9, ENG-94374, 2026-09-11), and a three-member
+family was switched in every direction -- v2 -> v1 -> v0 -> v2 -- with exactly one member active at each
+hop and the process-library view agreeing independently. Numbering came out consecutive, every version
+was created inactive, and activation warned about the whole-family re-save before doing it. Those HAPPY
+paths, on that build, are the whole of what was measured.
+One failure path remains CODE-READ and can be nothing else: the swallowed sibling deactivation, which is
+a state the platform hides and no prompt can provoke. Report a divergence there rather than working
+around it. The FAILURE and REFUSAL claims in these sections were not provoked by that run and are
+SOURCE-READ as well -- the environment-floor refusal and the versions it names (the stand ran above the
+floor), the one-at-a-time rule and the duplicate-number race, the pre-save abort and its
+CrtProcessBuilder 1.6.1.1 attribution for `modify-business-process-as-new-version`, the verbatim
+package-refusal text, and the unanswered-call case. Act on them, but do not quote one to a user as
+measured behaviour.
 Two tools, and they answer two different questions. Never treat them as one gesture.
   `modify-business-process-as-new-version`  applies edits to a NEW VERSION of a process instead of to
                                             the running one. This is the product's
@@ -90,9 +98,11 @@ Activating an earlier version IS the rollback, and it is bounded:
     finish on it (V5). A long-lived process keeps executing the old graph after the call, and that is
     correct rather than a failure to report.
   * ANY member is a valid target, the family ROOT included. "Go back to the original" IS activating
-    the root, because the root is what ran before the family existed -- the platform accepts it and
-    reports it as actual afterwards like any other member (measured, ENG-94374). Do not refuse it, and
-    do not offer a copy or yet another version in its place.
+    the root, because the root is what ran before the family existed -- the PLATFORM accepts it and
+    reports it as actual afterwards like any other member (measured on CrtProcessBuilder 1.6.1.9,
+    ENG-94374), and no clio guard stands in the way either. Do not refuse it yourself, and do not offer
+    a copy or yet another version in its place. If a build you are talking to refuses it anyway, report
+    that refusal rather than working around it with a direct platform or OData call.
   * It DELETES nothing (V6). The version you rolled back from stays in the family forever, visible and
     readable. "Roll back" here means activating an earlier member, never removing a newer one -- and if
     a builder asks you to delete the bad version, the answer is that no operation anywhere does it, not

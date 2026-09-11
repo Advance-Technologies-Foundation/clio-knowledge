@@ -477,6 +477,22 @@ public sealed class ProcessVersionsGuidanceTests
             because: "activeVersionName has no stated presence rule, so an unconditional launch instruction leaves the agent starting the root on a live environment or starting nothing with no branch to follow");
         guide.Should().Contain("launch NOTHING: report the standing",
             because: "the terminal action here starts a business process in a customer environment, so the unknown-standing branch needs a stated stop");
+
+        // The D5 correction, which is the highest-value content fix of the ENG-94374 manual-test round and
+        // was the only one with no pin: a test session told a builder to prefer the schema CODE over the
+        // caption for "what runs", which inverts this very section. A rule that exists only as prose is one
+        // an edit can quietly reflow away.
+        guide.Should().Contain("Do NOT tell a builder to prefer the CODE over the caption",
+            because: "the wrong advice was actually given to a builder, so the article that owns identity has to forbid it by name rather than merely state the right rule");
+        guide.Should().Contain(Collapse("take it from `activeVersionName`"),
+            because: "where a code IS required the agent needs somewhere to get the RIGHT one, or the ban reads as a dead end and it falls back to the code it was handed");
+        guide.Should().Contain("is REFUSED, with the",
+            because: "an ambiguous caption is refused with the candidates, and calling that a 'silent pick' is the misreading the session made");
+
+        // The launching grade moved with the same run - it was 'not exercised end to end' and is now
+        // measured - so the claim and its evidence are pinned together.
+        guide.Should().Contain("Measured on a stand",
+            because: "AGENTS.md forbids claiming behaviour is verified without naming its evidence, and this sentence is the evidence for the launch resolution");
     }
 
     private static string Collapsed(string repositoryRoot, string sourcePath) =>

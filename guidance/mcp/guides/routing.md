@@ -73,7 +73,8 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-version-writes; add name=process-versions for the model it assumes and
     name=process-modeling for the operation reference
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
-    family root, and editing it edits a graph the runtime does not run
+    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
+    operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
