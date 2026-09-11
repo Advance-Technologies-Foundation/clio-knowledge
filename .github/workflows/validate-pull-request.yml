@@ -14,6 +14,11 @@ on:
   pull_request:
     branches:
       - master
+      # Sprint release branches too, for the reason stated above: a pull request the check never runs
+      # for reports no conclusion at all. ENG-95986 targeted nitro/sprint-3-release and sat with ZERO
+      # checks until this line existed - the same failure as a paths: filter, arrived at through the
+      # base branch instead of the changed files.
+      - 'nitro/**'
 
 permissions:
   contents: read
