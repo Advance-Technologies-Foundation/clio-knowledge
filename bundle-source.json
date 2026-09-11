@@ -103,6 +103,7 @@
       "process-open-edit-page",
       "process-access-rights",
       "process-send-email",
+      "process-send-email-template",
       "process-approval",
       "process-preconfigured-page",
       "process-activity-connections",
@@ -250,6 +251,7 @@
       "docs://knowledge/com.creatio.clio/process-open-edit-page",
       "docs://knowledge/com.creatio.clio/process-access-rights",
       "docs://knowledge/com.creatio.clio/process-send-email",
+      "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
@@ -1232,7 +1234,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections and process-versions. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-activity-connections and process-versions. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1414,7 +1416,7 @@
     {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in both message modes: a custom HTML body, or an existing email template by name or id with the record its macros resolve against (templateEntity) -- the template refusals, the subject override, mode switching and the template read-back. Covers auto and manual mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch, sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the body macros for parameter and element values, including the lookup column that renders a record Id.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",
@@ -1423,6 +1425,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/send-email.md",
       "bundlePath": "resources/process-send-email.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-send-email-template",
+      "title": "Send email template message",
+      "description": "Owns the Creatio Send email element's TEMPLATE message mode (CrtProcessBuilder 1.6.2.1 or newer): an existing email template by name or record id resolved at build against the Email template type, with the record its macros resolve against (templateEntity: a Lookup process parameter, a Lookup/Guid element output such as a signalStart RecordId, or an expression -- a readData ResultEntity is refused). States the refusals as the server emits them (unknown, wrong-type and ambiguous template, template beside body, object-bound template without a macro source, macro source on a template without an object), the 33-of-38 no-object fact and the read-before-promising rule, the choose-or-ask rule, the subject override, mode switching and what each switch clears, the read-back fields and clio's template-landed warning. Split out of process-send-email.",
+      "topicId": "creatio.process-send-email-template",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-send-email-template",
+      "legacyUris": [
+        "docs://mcp/guides/process-send-email-template"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/send-email-template.md",
+      "bundlePath": "resources/process-send-email-template.md",
       "mediaType": "text/plain"
     },
     {
