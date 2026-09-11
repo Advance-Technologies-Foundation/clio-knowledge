@@ -6,7 +6,11 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Content pins for the <c>process-versions</c> article (ENG-94374).
+/// Content pins for the <c>process-versions</c> and <c>process-version-writes</c> articles (ENG-94374).
+///
+/// They were one article until the read half filled 99.9% of the single-response budget, so a pin here
+/// names the half that owns the fact rather than "the guide": the version MODEL and the describe fields
+/// are the read article's, the two write operations and what they leave behind are the write article's.
 ///
 /// The article exists because an agent that assumes the ordinary "one schema, many revisions" shape
 /// explains and edits a graph nobody runs. Each fact pinned below is one an agent has to be told and
@@ -23,6 +27,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class ProcessVersionsGuidanceTests
 {
     private const string GuidePath = "guidance/mcp/guides/processes/versions.md";
+    private const string WritesGuidePath = "guidance/mcp/guides/processes/version-writes.md";
     private const string EntryArticlePath = "guidance/mcp/guides/processes/process-modeling.md";
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
 
@@ -117,7 +122,9 @@ public sealed class ProcessVersionsGuidanceTests
         ];
 
         // Act
-        string guide = Collapsed(repositoryRoot, GuidePath);
+        // Both halves: the read tools are named in one article and the two write tools in the other, and
+        // a wrong spelling has to be refused wherever it appears.
+        string guide = Collapsed(repositoryRoot, GuidePath) + " " + Collapsed(repositoryRoot, WritesGuidePath);
 
         // Assert
         foreach (string tool in instructedTools)
@@ -142,7 +149,7 @@ public sealed class ProcessVersionsGuidanceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
 
         // Act
-        string guide = Collapsed(repositoryRoot, GuidePath);
+        string guide = Collapsed(repositoryRoot, WritesGuidePath);
 
         // Assert
         guide.Should().Contain("There is NO separate \"create a version\" step",
@@ -171,7 +178,7 @@ public sealed class ProcessVersionsGuidanceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
 
         // Act
-        string guide = Collapsed(repositoryRoot, GuidePath);
+        string guide = Collapsed(repositoryRoot, WritesGuidePath);
 
         // Assert
         guide.Should().Contain("Two questions, asked ONCE",
@@ -205,7 +212,7 @@ public sealed class ProcessVersionsGuidanceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
 
         // Act
-        string guide = Collapsed(repositoryRoot, GuidePath);
+        string guide = Collapsed(repositoryRoot, WritesGuidePath);
 
         // Assert
         guide.Should().Contain("nothing is written at all",
@@ -233,7 +240,7 @@ public sealed class ProcessVersionsGuidanceTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
 
         // Act
-        string guide = Collapsed(repositoryRoot, GuidePath);
+        string guide = Collapsed(repositoryRoot, WritesGuidePath);
 
         // Assert
         guide.Should().Contain("It reaches NEW instances only.",
@@ -270,6 +277,14 @@ public sealed class ProcessVersionsGuidanceTests
         resource.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
             because: "the version model applies to every existing process, gated tools or not");
 
+        JsonElement writesResource = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == "process-version-writes");
+        writesResource.GetProperty("sourcePath").GetString().Should().Be(WritesGuidePath,
+            because: "the half that was split out is a separate declared body, not a section someone can reach by scrolling");
+        routing.Should().Contain("name=process-version-writes",
+            because: "an unrouted article is reachable only by already knowing it exists, and the write half is what a rollback request needs");
+
         int pointer = routing.IndexOf("name=process-versions", StringComparison.Ordinal);
         pointer.Should().BeGreaterThan(0,
             because: "routing is the only guidance pointer clio's MCP instructions carry, so an unrouted article is reachable only by already knowing it exists");
@@ -283,7 +298,7 @@ public sealed class ProcessVersionsGuidanceTests
 
         entryArticle.Should().Contain("`process-versions`",
             because: "the entry article indexes the set, and an article missing from the index is one a reader never learns to fetch");
-        entryDescription.Should().Contain("and process-versions.",
+        entryDescription.Should().Contain("process-versions and process-version-writes.",
             because: "the entry item's description enumerates what it routes to, so a new article has to join that list");
         entryDescription.Should().Contain("Each article in the set is sized",
             because: "the wording has to stay count-FREE. This pin used to demand a number, and the number went stale the first time master split an article out - which is the failure the count itself was supposed to prevent, arriving from the other direction. A phrase that names no quantity cannot go stale, and the enumeration above is what keeps the membership honest");
@@ -298,6 +313,7 @@ public sealed class ProcessVersionsGuidanceTests
 
         // Act
         string guide = Collapsed(repositoryRoot, GuidePath);
+        string writesGuide = Collapsed(repositoryRoot, WritesGuidePath);
         string entryArticle = Collapsed(repositoryRoot, EntryArticlePath);
 
         // Assert
@@ -314,12 +330,12 @@ public sealed class ProcessVersionsGuidanceTests
             clioBoundary.Groups[1].Value.Should().NotBe("8.1.0.118",
                 because: "that release is tagged and does NOT contain the read half, so it would tell every user on it that the fields are available");
         }
-        Match writeBoundary = Regex.Match(guide, "`CrtProcessBuilder` package on the target environment from (<[A-Z][A-Z0-9-]*TBD>|[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+) onward");
+        Match writeBoundary = Regex.Match(writesGuide, "`CrtProcessBuilder` package on the target environment from (<[A-Z][A-Z0-9-]*TBD>|[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+) onward");
         writeBoundary.Success.Should().BeTrue(
             because: "'the version that first carries these operations' is unfalsifiable, and every sibling in this folder names the CrtProcessBuilder number for the operations it gates");
 
-        int writeSection = guide.IndexOf("== Writing a version, and making it actual ==", StringComparison.Ordinal);
-        int nextSection = guide.IndexOf("== Ask once, then behave predictably ==", StringComparison.Ordinal);
+        int writeSection = writesGuide.IndexOf("== Writing a version, and making it actual ==", StringComparison.Ordinal);
+        int nextSection = writesGuide.IndexOf("== Ask once, then behave predictably ==", StringComparison.Ordinal);
         writeSection.Should().BeGreaterThan(0, because: "the write section is where the two tools are named");
         nextSection.Should().BeGreaterThan(writeSection, because: "the bound has to close the section it opens");
         writeBoundary.Index.Should().BeInRange(writeSection, nextSection,
@@ -383,6 +399,7 @@ public sealed class ProcessVersionsGuidanceTests
 
         // Act
         string guide = Collapsed(repositoryRoot, GuidePath);
+        string writesGuide = Collapsed(repositoryRoot, WritesGuidePath);
 
         // Assert
         foreach (string field in fields)
@@ -404,19 +421,24 @@ public sealed class ProcessVersionsGuidanceTests
         // are now clio operations, so the two claims that used to be pinned here are false and their
         // assertions are gone rather than softened. What is still a boundary is pinned instead - a
         // running instance cannot be migrated and a version cannot be deleted, both platform facts.
-        guide.Should().Contain("Nothing MIGRATES a running instance between versions",
+        writesGuide.Should().Contain("Nothing MIGRATES a running instance between versions",
             because: "an agent that believes a rollback moves work in flight promises a repair the platform cannot perform");
-        guide.Should().Contain("Nothing DELETES a version",
+        writesGuide.Should().Contain("Nothing DELETES a version",
             because: "the one gesture a builder asks for that no tool anywhere provides, so it has to be refused by name");
-        guide.Should().Contain("Save new version (Ctrl+Alt+N)",
+        writesGuide.Should().Contain("Save new version (Ctrl+Alt+N)",
             because: "refusing without naming where the product does it is half an answer, and this is the affordance a builder needs");
-        guide.Should().Contain("ASKS, in its own prompt",
+        writesGuide.Should().Contain("ASKS, in its own prompt",
             because: "the platform lets the person choose whether the new version becomes actual, so guidance must not present create and activate as one step");
 
-        guide.Should().Contain("SOURCE-READ from clio's implementation of them",
-            because: "the read half grades every fact V1-V7, so ungraded write-half claims read as measured - and these are the claims an agent uses to tell a user what a partially failed write left behind");
-        guide.Should().Contain("were NOT exercised on a stand",
-            because: "AGENTS.md forbids claiming behaviour is verified without identifying its evidence, and no version was created or activated on a stand");
+        // The grade MOVED on 2026-09-11: both operations were exercised end to end during this story's
+        // manual-testing round, so the two pins that demanded a source-read caveat now demand its
+        // evidence instead. What stays ungraded is the one failure the platform hides.
+        writesGuide.Should().Contain("exercised END TO END on a stand",
+            because: "the read half grades every fact V1-V7, so an ungraded write-half claim reads as measured whether or not it was - the grade is the thing being pinned, not the verdict");
+        writesGuide.Should().Contain("One failure path remains CODE-READ",
+            because: "AGENTS.md forbids claiming behaviour is verified without its evidence, and the swallowed sibling deactivation is a state no prompt can provoke");
+        writesGuide.Should().Contain("the family ROOT included",
+            because: "activating the root is the go-back-to-the-original rollback, and the tool contract used to forbid it - a caller who believes that concludes the rollback is impossible (ENG-94374 manual testing)");
     }
 
     [Test]
