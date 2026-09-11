@@ -63,7 +63,9 @@ filter; see `process-access-rights`.
 
 == Read data element (readData) — first / count / aggregation modes ==
 - A `readData` element reads from one object in one of THREE buildable modes (count and aggregation ship
-  from CrtProcessBuilder 1.6.0.9; before it only `first` built; the designer's fourth mode, `collection`, is
+  from CrtProcessBuilder 1.6.2.6 — not 1.6.0.9, an earlier pre-merge cut on the delivering feature branch
+  that was superseded before it ever shipped; before 1.6.2.6 only `first` built; the designer's fourth
+  mode, `collection`, is
   ENG-96504 and is refused here, see below). Configure it with the element's `readData` block:
     { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
       "readData": {
