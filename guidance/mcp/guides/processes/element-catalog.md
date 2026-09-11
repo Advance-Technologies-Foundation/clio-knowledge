@@ -29,7 +29,8 @@ leaf rather than through `process-modeling`.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
   body OR an existing email template (with the record its macros resolve against), options and the
-  manual-mode performer. `process-send-email` owns the contract and its limits.
+  manual-mode performer. `process-send-email` owns the element and the CUSTOM message;
+  `process-send-email-template` owns the TEMPLATE message and its limits.
 - Open edit page: `openEditPage` (the Open edit page element / OpenEditPageUserTask) is BUILDABLE and fully
   configurable through its `openEditPage` block — page, editing mode, pre-filled values, the record to open,
   performer, Log activity, result column and completion condition. `process-open-edit-page` owns the
@@ -110,7 +111,8 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. THREE user tasks have their own dedicated build type and must NOT be built as
 a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
-modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see `process-send-email`;
+modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
+`process-send-email`, and `process-send-email-template` for the template mode;
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; and `approvalUserTask` ->
 `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):

@@ -46,7 +46,8 @@ template read-back — is owned by `process-send-email-template`.
   surfaces only at RUN time, on a process that built green. The MESSAGE omission is the trap that motivates
   the rule: an element given neither a `body` nor a `template` (options and recipients only) builds green and
   describes green — `hasBody:false` is the ONLY trace, and `messageSource` and `template` are OMITTED from
-  the read-back (clio drops null fields), so their ABSENCE beside `hasBody:false` is the signal — not an older
+  the read-back (clio's describe has always dropped null fields — not something this contract changed), so
+  their ABSENCE beside `hasBody:false` is the signal — not an older
   server, which the template-landed warning in `process-send-email-template` covers — so read the element
   back and check it — and the run fails with
   `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (reported on ENG-95979). The mechanism, from the platform

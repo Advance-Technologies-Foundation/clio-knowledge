@@ -38,19 +38,30 @@ leaf rather than through `process-modeling`.
   CHOOSING A TEMPLATE: resolve it from the lookup (`odata-read` on `EmailTemplate` — `Id`, `Name`, `Object`,
   `TemplateType`); when several could fit, or none is named and nothing obviously matches,
   ASK the user which template to use or offer a custom message — never guess, because the stored value is
-  an id and a wrong choice is undetectable afterwards. `subject` in
-  template mode is an OVERRIDE — the runtime uses the element's subject when set and the template's own
-  otherwise, so OMIT it to send the template's subject. The template's language follows the first Contact-typed recipient
+  an id and a wrong choice is undetectable afterwards.
+  SUBJECT is an OVERRIDE in template mode: the runtime sends the element's subject when one is set and the
+  template's own otherwise, so OMIT it to send the template's subject. What CLEARS an override you stored
+  earlier: switching a custom element to a template, and CHANGING the template on an element that already
+  carries one — the designer's card clears the subject on both events, and without the second a swap would
+  send the old template's subject for the new one with nothing in describe to show it. What KEEPS it:
+  re-applying the SAME template, rebinding only `templateEntity`, and sending options alone. A `subject` in
+  the same block always wins over both. To go back to a template's own subject on an element that carries an
+  override, send `subject: ""` — the runtime treats an empty element subject as unset.
+  The template's language follows the first Contact-typed recipient
   (`EmailTemplateUserTaskMultiLanguageV2`); nothing to author. SWITCHING MODES through `setElement` clears
   what the other mode owns, so describe stays re-appliable: a `template` (or `messageSource:"template"`) on a
-  custom element clears `Body` and a constant `Subject` you do not re-supply (the designer LEAVES the body;
-  the server clears it so a described template element never carries a body refused beside a template); a
-  `body` (or `messageSource:"custom"`) on a template element clears the template and its macro source, as the
-  designer's card does on save. A `subject` sent ALONE never
-  changes the mode — a template element keeps its template (the pre-ENG-95986 server flipped it to custom;
-  fixed) — except on an element with NO mode yet, where it still selects custom. `templateEntity` alone
+  custom element clears `Body` (the designer LEAVES it; the server clears it so a described template element
+  never carries a body refused beside a template), and a stale body is cleared whenever the element ends up
+  in template mode; a `body` (or `messageSource:"custom"`) on a template element clears the template and its
+  macro source, as the designer's card does on save — but `messageSource:"custom"` with NO body sent and none
+  stored is REFUSED (`needs a 'body'`) rather than leaving an element with no message at all. A `subject`
+  sent ALONE never changes the mode — a template element keeps its template (the pre-ENG-95986 server
+  flipped it to custom; fixed), and so does an element with no stored mode that CARRIES a template, because
+  an unset mode runs as template mode; only an element with neither a mode nor a template selects custom.
+  `templateEntity` alone
   rebinds the macro source of the template the element carries. READ-BACK: describe reports `messageSource`,
-  `template` (the id, re-appliable as is), `templateDisplay` (the name), `templateObject` (OMITTED when none — clio drops null fields) and
+  `template` (the id, re-appliable as is), `templateDisplay` (the name), `templateObject` (OMITTED when none — clio's describe has always dropped null fields, so this is not
+  gated on a clio version) and
   `templateEntity` (re-appliable as a `processParameter`/`sourceElement`/`expression`); in template mode
   `hasBody` is false and `body` is omitted even when a stale body is stored. clio WARNS after a build or modify when
   a sent `template` does not read back — a CrtProcessBuilder that predates template mode discarded it while

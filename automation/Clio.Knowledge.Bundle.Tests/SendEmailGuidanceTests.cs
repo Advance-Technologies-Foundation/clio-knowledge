@@ -139,9 +139,13 @@ public sealed class SendEmailGuidanceTests
 			because: "on a stock environment most templates cannot be personalized, and an agent must check before promising it");
 		template.Should().Contain("ASK the user which template to use",
 			because: "the stored value is an id, so a guessed template is undetectable afterwards - asking is the rule (ENG-96034 AC 4 mirrored)");
-		template.Should().Contain("`subject` in\n  template mode is an OVERRIDE",
+		template.Should().Contain("SUBJECT is an OVERRIDE in template mode",
 			because: "omitting the subject sends the template's own; an agent that always sends one silently overrides every template");
-		template.Should().Contain("A `subject` sent ALONE never\n  changes the mode",
+		template.Should().Contain("CHANGING the template on an element that already\n  carries one",
+			because: "the server clears an override on a template SWAP too, as the designer's card does - an agent told only about mode switches would expect the old subject to survive and never see that it was sent for the new template");
+		template.Should().Contain("send `subject: \"\"`",
+			because: "the way BACK to a template's own subject has to be stated, or a stored override reads as permanent");
+		template.Should().Contain("A `subject`\n  sent ALONE never changes the mode",
 			because: "the pre-fix server flipped a template element to custom on a subject-only update; the guide must state the fixed behaviour");
 		template.Should().Contain("`templateObject` (OMITTED when none",
 			because: "clio's describe serializer drops null fields, so the read-back must be described in the shape the agent actually sees");
@@ -182,7 +186,7 @@ public sealed class SendEmailGuidanceTests
 
 		guide.Should().Contain("RUNS in TEMPLATE mode with no template",
 			because: "an unset BodyTemplateType reads as 0, which is the template provider - the mechanism behind the run-time text (CrtProcessDesigner 7.8.0 sources, 2026-09-09)");
-		guide.Should().Contain("`messageSource` and `template` are OMITTED from\n  the read-back (clio drops null fields)",
+		guide.Should().Contain("`messageSource` and `template` are OMITTED from\n  the read-back (clio's describe has always dropped null fields",
 			because: "clio's describe serializer uses WhenWritingNull, so an agent never sees messageSource:null; the check must name the absence");
 		ShouldNotClaim(guide, @"messageSource\s*:\s*null", "process-send-email",
 			because: "describing a null key the agent will never see sends it looking for the wrong signal");
