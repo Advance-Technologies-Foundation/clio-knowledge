@@ -189,8 +189,11 @@ RightsService and native role-licensing processes. Local lifecycle verification 
 10.1.585.0 on .NET 8/PostgreSQL. The external MCP AdministrationToolE2ETests covers account lifecycle,
 manager reuse, inherited functional membership and removal, delegation and IP-rule CRUD. Manual
 fresh-session probes covered password replacement, lockout recovery and IP denial with UseRestrictedIP
-enabled, followed by restored login after rule removal. This does not establish
-licensed distribution, IPv6 enforcement or behavior on every supported framework/version.
+enabled, followed by restored login after rule removal. AdministrationLicenseE2ETests verified
+licensed assignment/removal, capacity exhaustion and rejection, asynchronous role redistribution,
+manual preservation by default and explicit manual redistribution using disposable identities and
+an unused small package. Cleanup restored all seats. This does not establish IPv6 enforcement or
+behavior on every supported framework/version.
 
 For a handoff, record target environment name, created GUIDs, direct/effective membership readback,
 the action receipt, remaining license work and verification boundaries. Never include secrets.
