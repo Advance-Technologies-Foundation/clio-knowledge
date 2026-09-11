@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.14.7",
+  "libraryVersion": "1.14.9",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -19,9 +19,18 @@
       "configure-knowledge-feedback-policy",
       "get-guidance",
       "get-knowledge-feedback-policy",
-      "list-knowledge-examples"
+      "list-knowledge-examples",
+      "inspect-user",
+      "manage-user",
+      "inspect-role",
+      "manage-role",
+      "inspect-access",
+      "manage-access",
+      "inspect-license",
+      "manage-license"
     ],
     "itemIds": [
+      "administration",
       "agent-execution",
       "application-listener",
       "app-modeling",
@@ -169,6 +178,7 @@
       "when-to-use-requests"
     ],
     "resourceUris": [
+      "docs://knowledge/com.creatio.clio/administration",
       "docs://knowledge/com.creatio.clio/agent-execution",
       "docs://knowledge/com.creatio.clio/application-listener",
       "docs://knowledge/com.creatio.clio/app-modeling",
@@ -317,6 +327,20 @@
     ]
   },
   "resources": [
+    {
+      "itemId": "administration",
+      "title": "User and role administration",
+      "description": "Manage users, organizational and functional roles, manager groups, memberships, passwords and lockout, licenses, IP rules, delegation and system-operation permissions using native administration contracts.",
+      "topicId": "creatio.administration",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/administration",
+      "legacyUris": [
+        "docs://mcp/guides/administration"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/administration.md",
+      "bundlePath": "resources/administration.md",
+      "mediaType": "text/plain"
+    },
     {
       "itemId": "agent-execution",
       "title": "Agent execution",
