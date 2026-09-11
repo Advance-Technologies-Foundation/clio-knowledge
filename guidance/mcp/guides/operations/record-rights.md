@@ -5,6 +5,10 @@ with two tools — NOT with hand-written ESQ into the rights tables:
 - get-record-rights — list the current grants on one record.
 - set-record-rights — grant or revoke one (grantee, operation) grant. DESTRUCTIVE (applies immediately).
 
+For creating or maintaining the user/role grantee, manager groups, memberships, passwords, lockout,
+licenses, IP restrictions or system-operation permissions, read `get-guidance name=administration`.
+These are separate operations; changing a grantee's membership can change inherited record access.
+
 Target the record with entity=<EntitySchemaName> + record-id=<guid> (both required):
 - A normal entity record: entity=Contact record-id=<record Id>.
 - A DASHBOARD (or any client-unit schema): entity=SysSchemaAdminUnit record-id=<schema UId>.
