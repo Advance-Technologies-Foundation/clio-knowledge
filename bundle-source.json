@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.14.4",
+  "libraryVersion": "1.14.5",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1248,7 +1248,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, all three FLOW KINDS declared with the flow (flows[].kind plus flows[].condition) and each flow's diagram LABEL (flows[].label), and the exclusive and parallel gateway ELEMENTS -- while the inclusive and event-based gateway elements, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, all three FLOW KINDS declared with the flow (flows[].kind plus flows[].condition) and each flow's diagram LABEL (flows[].label), and the exclusive and parallel gateway ELEMENTS -- while the inclusive and event-based gateway elements, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data COLLECTION mode is NOT buildable (its count and aggregation modes are). Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1276,7 +1276,7 @@
     {
       "itemId": "process-data-elements",
       "title": "Process data elements",
-      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
+      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its three buildable modes (first-record; count, always ResultCount and taking no column; aggregation, a function/column pair with the type-driven output), and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
       "topicId": "creatio.process-data-elements",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-elements",
