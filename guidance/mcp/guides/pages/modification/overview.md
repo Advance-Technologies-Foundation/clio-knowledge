@@ -19,18 +19,19 @@ Canonical page modification flow
 Replacing-schema concept
 - When a Freedom UI designer saves changes to a page, Creatio creates a replacing schema in a "design package".
 - The replacing schema inherits from the original and contains only the diff applied by the designer.
-- The design package is NOT the same as the package that owns the original page schema.
+- The design package can differ from the package that owns the original page or the current most-derived vendor layer.
 - `get-page` and `update-page` automatically resolve the replacing schema through the design package.
-- The editable target is always `hierarchy[0]` — the most-derived schema in the hierarchy.
-- If no replacing schema exists, `hierarchy[0]` is the original schema and the design package is the original package.
+- `hierarchy[0]` is the current most-derived layer, not necessarily the editable target. It may belong to a read-only vendor package even when several vendor replacing layers already exist.
+- The editable body belongs to the schema in the backend-selected design package. If that schema does not exist yet, get-page supplies an empty replacing-body scaffold and the normal save path creates the replacement. The destination may be an existing customer package or a virtual customer package materialized on first save; do not copy the vendor body or construct a SaveSchema DTO manually.
 
 get-page response structure
-- `page` — metadata of the editable replacing schema: `schemaName`, `schemaUId`, `packageName`, `packageUId`, `parentSchemaName`.
+- `page` — current-leaf metadata: `schemaName`, `schemaUId`, `packageName`, `packageUId`, `parentSchemaName`. `packageName` may name a read-only vendor package that will NOT receive the write. Newer clio also exposes its explicit alias `currentLeafPackageName`; use the design-package fields below to understand the default destination.
 - `raw.body` — full JavaScript body of the replacing schema (with markers). Read-only reference; see the CRITICAL warning below before reusing it as the write payload.
 - `bundle` — read-only merged view across the full hierarchy. Do not send `bundle` or `bundle.viewConfig` as the body payload. (For the detailed bundle.json shape and jq recipes, read `page-modification-containers`.)
 
 Design-package resolution (trust the backend)
-- `get-page` returns `page.designPackageUId` — the package where `update-page` will save. `page.willCreateReplacingInDesignPackage: true` means a NEW replacing schema will be materialized on save (the package itself is virtual until then; the backend creates it from the cached `AppVirtualPackageInfo` at SaveSchema time).
+- `get-page` returns `page.designPackageUId` and best-effort `page.designPackageName`. The name can be absent when metadata is unavailable; older clio could not name a virtual package because it queried only stored packages. Absence of the name does not mean the vendor leaf is writable. Reads can fall back to the leaf if design resolution fails; normal `update-page` resolves its destination again and fails closed on resolution failure.
+- `page.willCreateReplacingInDesignPackage: true` means a NEW replacing schema will be created in the design package. It does not by itself mean a new package: an existing customer package can also lack that schema. When the destination is virtual, the backend materializes it during SaveSchema; vendor layers remain unchanged.
 - The backend resolves the design package deterministically from the locked schema's owning app via `SysPackageInInstalledApp` — there is no per-user "active app" to manage and no ambiguity between installed apps.
 - Do NOT pass `target-package-uid` in normal flows. The override exists for niche scenarios where you have already discovered a specific replacing schema (for example via `list-pages` filtered by name) and want to bypass hierarchy resolution; otherwise, omit it and let the backend pick.
 
