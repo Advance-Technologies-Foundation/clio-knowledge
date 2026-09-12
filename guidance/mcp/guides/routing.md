@@ -97,3 +97,5 @@ guards — it says whose rule it is and names that guide for the rest.
   - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+
+- Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
