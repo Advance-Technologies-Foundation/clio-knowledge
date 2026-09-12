@@ -64,6 +64,28 @@ IdentityService
 - The default `configurationMode` is `db-first`, but until direct DB seeding is fully proven the command
   falls back to the supported REST/sys-settings configuration path.
 
+Identity attachment and removal (experimental)
+- Evidence: [Clio lifecycle implementation and validation](https://github.com/Advance-Technologies-Foundation/clio/blob/fdb88217c65b1d31c1465f1a4d72cf8ebf11fd57/spec/identity-uninstall/identity-uninstall-validation.md).
+- Applicability: require the installed `uninstall-identity` contract from `get-tool-contract` and the
+  `deploy-identity` feature. Older clio versions without that contract do not implement this lifecycle.
+- Deployment records the resolved absolute folder, exact IIS target, application pool and base URL in
+  the environment's optional `IdentityService` component before creating artifacts. This includes
+  `noApp` and partial deployments. Empty fields mean no recorded identity; credentials or similar names
+  never establish local deletion authority. Overwrite reuses the recorded port unless explicitly overridden.
+- Invoke `uninstall-identity` with `environment-name` to retain CRM and its database. It clears only
+  matching CRM settings before stopping identity, removes the verified IIS target, unused pool and
+  folder, then empties the attachment and matching clio credentials. Other integrations remain.
+- Named `uninstall-creatio` prevalidates the attachment before destructive work, removes identity after
+  reading CRM connection configuration and before CRM IIS/database/files, and drops the CRM database
+  only in its normal stage. An identity failure stops CRM cleanup. Show both resolved targets within
+  the existing removal confirmation/reporting flow.
+- Preserve shared pools. Incomplete metadata, shared attachments, overlapping CRM folders, changed IIS
+  targets or conflicting virtual-directory mappings block cleanup. For older deployments without an
+  attachment, record verified details explicitly; do not discover deletion authority from a database.
+- A failed removal retains its attachment and cleanup checkpoint for retry, including when the IIS target
+  is already gone. `skip-crm-cleanup` is an explicit recovery option for unavailable authentication: it
+  leaves CRM settings untouched and reports a warning. Use it only when that consequence is authorized.
+
 Post-deploy readiness
 1. `reg-web-app` - register the freshly deployed instance as a named clio environment.
 2. `install-gate` - install the cliogate package into the new environment. Downstream workspace and
