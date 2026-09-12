@@ -66,8 +66,11 @@ IdentityService
 
 Identity attachment and removal (experimental)
 - Evidence: [Clio lifecycle implementation and validation](https://github.com/Advance-Technologies-Foundation/clio/blob/fdb88217c65b1d31c1465f1a4d72cf8ebf11fd57/spec/identity-uninstall/identity-uninstall-validation.md).
-- Applicability: require the installed `uninstall-identity` contract from `get-tool-contract` and the
-  `deploy-identity` feature. Older clio versions without that contract do not implement this lifecycle.
+- Applicability: verify that the installed contracts describe recorded identity attachments.
+  Deployment and standalone `uninstall-identity` require the `deploy-identity` feature and their
+  installed tool contracts. Named `uninstall-creatio` honors existing attachments even when that
+  feature is disabled; inspect its installed contract before removal. Older versions without
+  attachment support do not implement this lifecycle.
 - Deployment records the resolved absolute folder, exact IIS target, application pool and base URL in
   the environment's optional `IdentityService` component before creating artifacts. This includes
   `noApp` and partial deployments. Empty fields mean no recorded identity; credentials or similar names
@@ -80,7 +83,8 @@ Identity attachment and removal (experimental)
   only in its normal stage. An identity failure stops CRM cleanup. Show both resolved targets within
   the existing removal confirmation/reporting flow.
 - Preserve shared pools. Incomplete metadata, shared attachments, overlapping CRM folders, changed IIS
-  targets or conflicting virtual-directory mappings block cleanup. For older deployments without an
+  targets or conflicting virtual-directory mappings block cleanup. Unresolvable IIS paths must be
+  restored or their stale mappings corrected before retrying. For older deployments without an
   attachment, record verified details explicitly; do not discover deletion authority from a database.
 - A failed removal retains its attachment and cleanup checkpoint for retry, including when the IIS target
   is already gone. `skip-crm-cleanup` is an explicit recovery option for unavailable authentication: it
