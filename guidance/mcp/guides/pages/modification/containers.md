@@ -72,3 +72,6 @@ When the SAME diff inserts a NEW container (ANY `crt.*` container type), that co
     { "operation": "insert", "name": "ChildB", "parentName": "NewPanel", "propertyName": "items", "values": { /* ... */ } }
 ]
 ```
+
+For the data-bound `items` property on `crt.ListWidget` / `crt.DataGrid`, MUST read
+`list-widget` before applying any container-slot rule; that guide owns the distinction.

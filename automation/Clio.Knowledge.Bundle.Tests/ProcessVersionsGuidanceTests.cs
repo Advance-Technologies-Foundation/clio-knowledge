@@ -459,6 +459,14 @@ public sealed class ProcessVersionsGuidanceTests
             because: "1.6.1.1 is true of the modify path and of nothing else, so a mention that does not name that path is the two paths being merged back together");
         writesGuide.Should().Contain("no version is named here until it",
             because: "naming a fix version before the archive ships is how this paragraph came to be wrong, and the rule has to outlive the person who learned it");
+
+        // The SAME rule, applied to the clio side, where the first attempt broke it from the other
+        // direction: the D9 supersession was bounded by "up to and including <clio version>", which was
+        // already false when it was written - every release since carries the defective sentence, because
+        // the correction is unmerged. A ceiling inverts the correction for every reader past it.
+        Regex.Matches(writesGuide, "up to and including [0-9]+[.][0-9]+[.][0-9]+[.][0-9]+")
+            .Should().BeEmpty(
+                because: "a version CEILING on a defect claim ages into its own opposite; bound the clause by the FIX, which is what the sibling paragraph already does");
     }
 
     [Test]
