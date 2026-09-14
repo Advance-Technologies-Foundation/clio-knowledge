@@ -61,25 +61,61 @@ filter; see `process-access-rights`.
   retarget -- `process-data-source-filters` owns `setFilter`, and that op REPLACES the whole filter, so
   read the current one back first.
 
-== Read data element (readData) — first-record mode ==
-- A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
-  parameter (the whole record). Configure it with the element's `readData` block:
+== Read data element (readData) — first / count / aggregation modes ==
+- A `readData` element reads from one object in one of THREE buildable modes (count and aggregation ship
+  from CrtProcessBuilder 1.6.2.6 — not 1.6.0.9, an earlier pre-merge cut on the delivering feature branch
+  that was superseded before it ever shipped; before 1.6.2.6 only `first` built; the designer's fourth
+  mode, `collection`, is
+  ENG-96504 and is refused here, see below). Configure it with the element's `readData` block:
     { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
       "readData": {
         "source": "Contact",                                  // REQUIRED at create: the entity to read
-        "mode": "first",                                      // optional; "first" is the only buildable mode
-        "columns": ["Name", "Email"],                         // optional; omit or [] = read ALL columns
-        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"
+        "mode": "first",                                      // optional; first (default) | count | aggregation
+        "columns": ["Name", "Email"],                         // optional for first (omit or [] = ALL columns); refused for count / aggregation
+        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"; first only
       },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
-- `mode`: only `first` (first record of the sorted selection). The designer's other read modes —
-  collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. An element a
-  human configured in one of those modes CANNOT be converted to first-record through this API at all — an
-  explicit `"mode": "first"` is refused too, because the conversion would leave the element's collection
-  item parameters behind. Remove the element (`removeElement`) and add a new `readData` one instead —
-  under the destructive-removal rules in `process-modeling`, since the removal cascades to this
-  element's flows and mappings and the modify path will not warn you.
+- `mode` and what each one produces (the output is what `describe-business-process` marks `isResult: true`,
+  and what a downstream mapping's `sourceElementParameter` names):
+  * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
+  * `collection` — the designer's fourth mode (every matching record) is NOT buildable yet (ENG-96504).
+    Requesting it is refused naming the buildable set, and a designer-made collection element updated WITHOUT
+    a mode is refused too — pass a buildable mode to convert it, or edit it in the designer. `describe` still
+    reports such an element honestly as `mode: "collection"`.
+  * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
+    MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element and describe lists
+    both, but they answer different questions: `ResultCount` is the aggregate the element computed, while
+    `ResultRowsCount` is how many ROWS the query returned. Read from the platform sources (not yet confirmed by a
+    stand run): a function-mode query selects a single aggregate column with no grouping, so `ResultRowsCount`
+    reports `1` rather than the count — the sibling `ReadEntityCollectionItemsUserTask` assigns exactly that
+    literal on its own function path. Either way `ResultCount` is the one the runtime fills with the answer;
+    mapping the other gives a value that does not track the data, with nothing at run time to say so.
+  * `aggregation` — `"aggregation": { "function": "sum" | "avg" | "min" | "max", "column": "Amount" }` is
+    REQUIRED. The OUTPUT is chosen by the column's TYPE, exactly as the runtime writes it: an Integer column →
+    `ResultIntegerFunction`; a Float / Money column → `ResultFloatFunction`; a Date / Date-time / Time column
+    (min/max only) → `ResultDateTimeFunction`. Any other column type — and sum/avg over a date — is REFUSED,
+    because the runtime writes NO result for it, silently. `columns` and `sort` are refused in count /
+    aggregation (the runtime ignores both there, so accepting them would be a silent no-op).
+  Omit `mode` at create for `first`; omit it on a `setElement` update to KEEP the element's current mode.
+  Changing the mode through `setElement` is a real conversion, and it is REFUSED while any other parameter still
+  maps FROM the element — the refusal names each dependent. Each mode produces a different output parameter, so a
+  mapping that names the current one would survive pointing at a parameter the runtime no longer fills; the
+  designer reverts the same edit for the same reason. Re-map or remove the dependents first (or remove and re-add
+  the element). A conversion that proceeds clears the previous mode's parameters, moves the
+  result flag to the new mode's output, and clears the column selection / sort on entering count /
+  aggregation. The record `filter` is KEPT — it is the one block every mode carries (the designer shows "How to
+  filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
+  retarget clears the filter. Converting a designer-made collection element to a buildable mode also clears its
+  collection parameters and empties `ResultCompositeObjectList`'s item properties (the platform rebuilds them
+  only WHILE in collection mode — the designer clears them the same way). This is a real, tested conversion, not
+  an offhand claim: `ReadDataConfigBinderTests.Apply_ShouldConvertCollectionToFirst_ClearingCollectionParametersAndItemProperties`
+  exercises `ReadDataConfigBinder.Apply` on a `ResultType: EntityCollection` element with a mode-only update and
+  asserts it succeeds — a `setElement.readData` update naming a buildable mode is NOT the same as remove+recreate.
+  Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
+  output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
+  `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output stops resolving — re-read
+  the element with `describe-business-process` after such a change and re-point anything that consumed it.
 - `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
   list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
   supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own
@@ -115,8 +151,9 @@ filter; see `process-access-rights`.
   REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
   back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
   and the read-back shape. `describe-business-process` reads the whole block back
-  (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
-  create/modify. Read-back limits on a HUMAN-made element: a linked-object column is omitted from
+  (`source`, `mode`, `columns` as names, `sort`, and `aggregation` as `{function, column}` in aggregation
+  mode), so anything the builder made round-trips into create/modify. Read-back limits on a HUMAN-made
+  element: a linked-object column is omitted from
   `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
   runtime's ORDER BY actually ranks first — while any further ACTIVE secondary sort entries are not
   reported, and a `sort` write replaces the whole stored order. So for such an element the described
@@ -126,7 +163,13 @@ filter; see `process-access-rights`.
   (row count stays 1 — what "first record" means). Under the `FeatureReadDataUserTaskEntityReadOldMode`
   feature that flag changes how many rows the element reads, and the drift is INVISIBLE to
   `describe-business-process` (unset parameters are omitted) — a builder-made and a human-touched element
-  look identical there. Nothing to do about it at build time; know it when diagnosing a stand.
+  look identical there. You cannot SEE it, but you can clear it: ANY `setElement.readData` update clears that
+  pair unless the element is in collection mode, mode change or not. So the repair for a human-touched
+  element is to re-send its `readData` block (even unchanged in substance) rather than to hunt the flag.
+  The same OK also writes `FunctionType = 0` on EVERY element, `first` and `collection` included, because the
+  card saves the aggregation function unconditionally and defaults it to Count. Harmless — `ResultType` alone
+  decides the mode, and `0` is what a non-function element would mean anyway — but a stored `FunctionType` on
+  a `first` element is a human fingerprint, not a corrupted mode.
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
