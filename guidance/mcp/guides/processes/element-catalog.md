@@ -19,9 +19,11 @@ leaf rather than through `process-modeling`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `addData`->AddDataUserTask,
   `performTask`->ActivityUserTask).
-  A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
-  columns, sort, plus a record `filter` (the block is in `process-data-elements`, the filter contract in
-  `process-data-source-filters`). A `changeData` element
+  A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `count` |
+  `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns and
+  sort (`first` ONLY — refused for `count`/`aggregation`), an `aggregation` function + column (`aggregation`
+  ONLY), plus a record `filter` (the block is in `process-data-elements`, the
+  filter contract in `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
   (same two owners). An `addData` element is CONFIGURABLE via its `addData` block in BOTH modes — Add one
   record and Add selection (target object, adding mode, selection object, column values including `Column
@@ -30,8 +32,10 @@ leaf rather than through `process-modeling`.
   human configures it in the designer. Say so when you use one; do not present such a result as a working
   data operation.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
-  configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
-  manual-mode performer. `process-send-email` owns the contract and its limits.
+  configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
+  body OR an existing email template (with the record its macros resolve against), options and the
+  manual-mode performer. `process-send-email` owns the element and the CUSTOM message;
+  `process-send-email-template` owns the TEMPLATE message and its limits.
 - Open edit page: `openEditPage` (the Open edit page element / OpenEditPageUserTask) is BUILDABLE and fully
   configurable through its `openEditPage` block — page, editing mode, pre-filled values, the record to open,
   performer, Log activity, result column and completion condition. `process-open-edit-page` owns the
@@ -102,7 +106,7 @@ leaf rather than through `process-modeling`.
   sub-process, the DELETE-data target object + values (a `filter` on THAT task is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and
   `addData`), and the Read data
-  collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
+  COLLECTION mode (ENG-96504; its first-record, count and aggregation modes DO build — see the catalog entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
 
@@ -112,17 +116,20 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. THREE user tasks have their own dedicated build type and must NOT be built as
-a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`;
+a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
+modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
+`process-send-email`, and `process-send-email-template` for the template mode;
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; and `approvalUserTask` ->
 `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
-    a `filter` — see `process-data-elements` for the block and `process-data-source-filters` for the
-    filter. The other read modes (collection / count /
-    aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
-- `addDataUserTask`   Add data     — create record(s) in background; BUILDABLE via the `addData` block in
+    FIRST-RECORD, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
+    object, mode, columns/sort — `first` ONLY, refused for `count`/`aggregation` — and aggregation —
+    `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
+    and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" | "count" |
+    "aggregation"`. The COLLECTION mode remains designer-only until ENG-96504: requesting it is refused,
+    and describe reports a designer-made one as `mode: "collection"`.
+- `addDataUserTask`   Add data     – create record(s) in background; BUILDABLE via the `addData` block in
                                      both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
 - `changeAdminRightsUserTask` Change access rights - grant/revoke record permissions on matched
