@@ -174,7 +174,43 @@ Two consequences worth having before you build:
   word for word what R7 said it would — but the prediction arrives as advice, not as a refusal.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
-  outgoing flow is taken. That is a parallel split, silently.
+  outgoing flow is taken. That is a parallel split.
+
+  It is no longer a SILENT one at build time. `validate-process-graph` has always reported the shape as
+  an R12 warning, and from **CrtProcessBuilder 1.6.1.24** `create-business-process` and
+  `modify-business-process` raise a matching NOTICE — so a caller who skipped the pre-flight is no longer
+  told less than one who ran it. Both sides WARN rather than refuse, because the shape ships and runs: 74
+  non-gateway sources in the 7.8.0 corpus carry it, 33 of them on ordinary activities. Read the notice as
+  "confirm you meant a fan-out", not as a defect.
+
+  It is raised ONCE per request, over the graph that is actually saved — so a batch that builds the split
+  and then dissolves it (`addFlow` twice, then `setFlow kind:"conditional"`, which is the remedy below)
+  correctly reports nothing.
+
+  **How you fix it depends on how many branches there are, and the two answers are not variations of
+  one another.** With TWO plain flows, give either of them a condition and the one left plain becomes
+  the fallback. With THREE or more, that route is REFUSED — a `conditional` flow is rejected while two
+  or more siblings still carry no condition, in any order, so there is no first move — and the answer is
+  an `exclusiveGateway` element: route the flows through it and condition each of ITS outgoing flows,
+  leaving one `default`. A deciding gateway is exempt from the stray-branch rule, which is why
+  `[conditional, conditional, default]` is legal there and illegal on the activity.
+
+  Three caveats, each a way you would otherwise be told something untrue:
+
+  - **On a stand below 1.6.1.24, you do not get silence — you get a REFUSAL.** No `[RequiresPackage]`
+    floor was raised for this notice, but the floor is not what decides: clio refuses whenever the
+    environment records a package version *older than the one this clio ships*, whatever that version
+    is. So a clio carrying 1.6.1.24 answers `create-business-process`, `modify-business-process`,
+    `describe-business-process` **and `validate-process-graph`** with *"This clio carries
+    CrtProcessBuilder 1.6.1.24, but the target environment has X. Update the package in the target
+    environment and retry."* The pre-flight is gated too, so it is not a fallback. Run
+    `install-process-builder` — that is the whole remedy. The build is silent about the split only when
+    your clio ALSO predates 1.6.1.24, and then nothing reports it on that stand at all.
+  - **On modify it reports the sources your request TOUCHED**, not the whole graph. A split already
+    present in a designer-authored process you did not edit stays unreported here — `validate-process-graph`
+    is what reads the whole graph, and a clean modify is therefore not evidence of a clean process.
+  - **The notice covers plain flows only.** A `default` flow beside a plain one off an ordinary element
+    is an implicit split too, by exactly the same mechanism, and neither side reports that one.
 
 That second point is what makes CLEARING a condition the dangerous edit, and it is why the clear-condition
 operation is `setFlow` rather than remove-and-add. `setFlow` re-kinds the flow in place: it keeps the flow's
