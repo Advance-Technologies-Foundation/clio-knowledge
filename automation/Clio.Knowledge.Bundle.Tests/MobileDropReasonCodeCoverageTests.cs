@@ -71,6 +71,9 @@ public sealed class MobileDropReasonCodeCoverageTests
             "inside a non-converting scope: nothing to do, and nothing to report as broken"),
         ("drop-not-an-action-in-scope",
             "its nested actions were still flattened and appear on their own, so the element's own absence is expected"),
+        ("drop-non-converting-scope",
+            "the scope CONTAINER itself, which the codes above only name in params.scope — without an entry it was "
+                + "the one source element the response accounted for nowhere"),
 
         // ── an action binding ──
         ("drop-request-chrome-native",
