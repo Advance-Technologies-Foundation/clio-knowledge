@@ -1,13 +1,17 @@
 clio MCP page modification standard components guide
 
-This is a focused sub-guide of `page-modification`. It owns ONE thing: the canonical configuration of
-the two standard record-page components a Freedom UI FORM page is expected to carry — the record feed
-(`crt.Feed`) and the attachments list (`crt.FileList`) — and the MERGE-vs-INSERT decision that precedes
-writing either of them.
+This is a focused sub-guide of `page-modification`. It owns the canonical configuration of the standard
+record-page components a Freedom UI FORM page is expected to carry — the record feed (`crt.Feed`), the
+attachments list (`crt.FileList`) and the tag chips (`crt.TagSelect`) — and the MERGE-vs-INSERT decision
+that precedes writing the first two.
+
+Tags are a DIFFERENT SHAPE, and their section follows STEP 5. Read it before carrying anything from
+STEP 3 or STEP 4 across to them: the instructions there are deliberately the opposite.
 
 It does NOT own, and does not restate:
-- the property vocabulary of either component — `get-component-info` for `crt.Feed` / `crt.FileList` is
-  authoritative, and the COMPONENT-TYPE VERIFICATION step in `page-modification` is mandatory here too;
+- the property vocabulary of any of them — `get-component-info` for `crt.Feed` / `crt.FileList` /
+  `crt.TagSelect` is authoritative, and the COMPONENT-TYPE VERIFICATION step in `page-modification` is
+  mandatory here too;
 - how to pick a `parentName` — `page-modification-containers`;
 - how a `viewConfigDiff` entry is composed — `page-modification-components`;
 - the caption/resource rule for the grid column — `page-schema-resources` (it already names the
@@ -284,6 +288,50 @@ NOT yours on either path. Do NOT file these as insert deliverables:
   as `PDS.Id`, which is harmless and is not a thing to copy.
 - `$CardState`. Declared by both measured templates, and platform-provided per the same catalog text.
 
+TAGS — `crt.TagSelect`, and why nothing above applies to it
+An agent that has just read STEP 3 and STEP 4 will generalise to tags in exactly the wrong direction.
+Three measured differences:
+
+- **There is no merge-vs-insert decision.** Both measured templates ship `crt.TagSelect` — including the
+  one that ships NEITHER the feed nor the attachments list — always inside `CardToolsContainer`, always
+  in the same three-property form. It arrives with the record-page template:
+
+```jsonc
+{ "type": "crt.TagSelect", "recordId": "$Id", "name": "TagSelect" }
+```
+
+- **`recordId: "$Id"` is the whole contract, and you MUST keep it.** `get-component-info` for
+  `crt.TagSelect` names omitting it as its first pitfall: without `recordId` the preprocessor cannot
+  resolve the tag-to-record association and the component renders empty. That is the catalog's
+  statement, cited rather than re-observed here.
+- **You MUST NOT hand-wire `items`, `listItems` or the CRUD outputs** (`createTag`, `editTag`,
+  `deleteTag`, `addTagsInRecord`, `deleteTagInRecord`). The `crt.TagSelectPropertiesPanel` DESIGNER
+  PREPROCESSOR generates them, and the catalog warns that bypassing it makes every one of those outputs
+  yours to handle. This is the OPPOSITE of the attachments list, where the page really does carry the
+  collection attribute, the data source and the toolbar wiring (STEP 3 – STEP 5). Do not carry that
+  habit across.
+
+So there is NO tag data source to propagate. All three measured schemas declare only `AttachmentListDS`
+and `PDS`; none of them contains `listItems`, `tagInRecordSourceSchemaName`, or any tag data source at
+all. Only `recordId` reaches the schema. `tagInRecordSourceSchemaName` defaults to `"TagInRecord"` —
+override it only for a custom junction schema.
+
+Where a dead tag control actually comes from, and what this guide does NOT claim
+`TagInRecord`, the default, is entity-agnostic: it keys an association by `RecordId` (Guid) plus
+`RecordSchemaName` (text) against the `Tag` dictionary, which is itself scoped by an `EntitySchemaName`
+text column. On that path a record page needs NO per-object junction schema, and the absence of one is
+NOT evidence that the control is broken.
+
+A second, older model exists beside it: per-object junctions named `<Entity>InTag`, inheriting
+`BaseEntityInTag` and pointing at a per-object tag dictionary (`ContactInTag.Tag` → `ContactTag`). Around
+thirty of them exist on the measured stand.
+
+UNVERIFIED, and deliberately not made into an instruction: whether tags recorded under the older
+per-object model are reachable through the component's default `TagInRecord` path. If a migrated page
+shows an empty tag control, that question — not the page body — is where to look, and it needs its own
+investigation. This guide does NOT tell you to create an `<Entity>InTag` schema: the default path does
+not read one, and whether creating one is a migration step or a platform concern was not established.
+
 UNSUPPORTED: reproducing the feed or the attachments list out of primitive components (a `crt.DataGrid`
 over `SysFile`, a hand-built comment list). Neither is a substitute; both lose the platform behaviour
 the record page is expected to have.
@@ -316,9 +364,20 @@ Lab scenario, 2026-09-11, on an internal Creatio Studio stand, read-only via `ge
    `AttachmentList` attribute, no data sources at all — but `Id` and `CardState` ARE declared, which is
    what puts them on the not-yours list in STEP 5.
 
-NOT observed, and marked as such where they appear: what a page renders after a duplicated insert, and
-what a list missing its data source renders. Both are reasoned from the measured structure. No page was
-written and no migration was run for this guide — every call was read-only.
+For tags, the same three merged bundles: `crt.TagSelect` is present in ALL of them, always inside
+`CardToolsContainer` and always in the three-property form quoted above; none of the three declares a tag
+data source, `listItems`, or `tagInRecordSourceSchemaName`. The junction schemas were read on the same
+stand with `find-entity-schema` and `get-entity-schema-properties`: `TagInRecord` (package `CrtBase` —
+`RecordId`, `RecordSchemaName`, `Tag`, `TagRecordId`), `Tag` (carrying `EntitySchemaName`), and about
+thirty `<Entity>InTag` schemas inheriting `BaseEntityInTag`. `UsrSourceCodes` has no
+`UsrSourceCodesInTag`. Runtime settles nothing here in either direction: `TagInRecord` and `ContactInTag`
+both hold zero rows on that stand, so no tagging behaviour was observed.
+
+NOT observed, and marked as such where they appear: what a page renders after a duplicated insert, what
+a list missing its data source renders, and whether tags held under the older per-object model surface
+through the default `TagInRecord` path. All three are reasoned from the measured structure or cited from
+the component catalog. No page was written and no migration was run for this guide — every call was
+read-only.
 
 The `crt.Feed` / `crt.FileList` catalog responses quoted above were read from the same environment on
 the same date; `get-component-info` reported `resolvedFrom: "environment-superset"` with

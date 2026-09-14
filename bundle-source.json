@@ -1190,7 +1190,7 @@
     {
       "itemId": "page-modification-standard-components",
       "title": "Page modification standard components",
-      "description": "Standard record-page component sub-guide of the page-modification family: the canonical crt.Feed and crt.FileList value sets for a Freedom UI form page, the merge-vs-insert decision driven by what the parent template ships, the mandatory AttachmentListDS companion data source, and the pieces a template supplies that an insert must supply itself.",
+      "description": "Standard record-page component sub-guide of the page-modification family: the canonical crt.Feed and crt.FileList value sets for a Freedom UI form page, the merge-vs-insert decision driven by what the parent template ships, the mandatory AttachmentListDS companion data source, the pieces a template supplies that an insert must supply itself, and the contrasting crt.TagSelect case, which arrives with the template and is wired by a designer preprocessor rather than by the page.",
       "topicId": "creatio.page-modification-standard-components",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-standard-components",
