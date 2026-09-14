@@ -118,11 +118,8 @@ filter; see `process-access-rights`.
   retarget clears the filter. LEAVING collection additionally clears its top-N pair and empties
   `ResultCompositeObjectList`'s item properties, because the platform rebuilds those only WHILE the element is
   in collection mode — the designer clears them the same way, and a stale top-N is not inert: under
-  `FeatureReadDataUserTaskEntityReadOldMode` it still decides how many rows a `first` read takes. This is a
-  real, tested conversion, not an offhand claim:
-  `ReadDataConfigBinderTests.Apply_ShouldClearCollectionState_WhenLeavingTheMode`
-  exercises `ReadDataConfigBinder.Apply` on a collection element with a mode-only update and
-  asserts it succeeds — a `setElement.readData` update naming another mode is NOT the same as remove+recreate.
+  `FeatureReadDataUserTaskEntityReadOldMode` it still decides how many rows a `first` read takes. A
+  `setElement.readData` update naming another mode performs that conversion — it is NOT remove+recreate.
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
   output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output stops resolving — re-read
