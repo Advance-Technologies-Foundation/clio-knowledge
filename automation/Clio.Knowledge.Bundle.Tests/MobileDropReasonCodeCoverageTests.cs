@@ -79,6 +79,10 @@ public sealed class MobileDropReasonCodeCoverageTests
         ("drop-request-unsupported",
             "the binding is gone and THE COMPONENT STILL RENDERS; the element-level drop-unsupported-request "
                 + "means the whole component is gone, and confusing the two misstates what is on the page"),
+        ("drop-request-target-missing",
+            "the request TYPE converts and only its navigation TARGET is gone, so the remedy is about the "
+                + "destination rather than the action — and it fires ONLY for a definitional absence, which is "
+                + "what separates it from the softer verdicts that remove nothing"),
         ("drop-request-element-empty-container",
             "reconciliation after the empty-container pass; the container's own entry carries the detail"),
         ("drop-request-element-excluded",
