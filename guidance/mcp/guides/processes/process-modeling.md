@@ -128,8 +128,9 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` / `addData` on the matching data element only (see `process-data-elements` for their
-   partial-update, mode-switch and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `changeData` / `addData` on the matching data element only (see `process-data-elements` for readData
+   and changeData, `process-add-data` for addData — their partial-update, mode-switch and
+   source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
    `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
    access to whoever it names, on live records, and the element reports nothing at run time; show the user
    the target object, the record `filter` and every grantee with its operations and level, and get an

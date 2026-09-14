@@ -1,10 +1,10 @@
-clio MCP process-data-elements guide — record triggers, Read data, Modify data and Add data
+clio MCP process-data-elements guide — record triggers, Read data and Modify data
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of starting a process from a record event and of the Read data,
-Modify data and Add data elements. The `filter` all three carry is owned by `process-data-source-filters`: every
-element here says WHETHER it takes one and what that means for it, and that article says what a filter
-may contain. The Change access rights element consumes the same
+This article is the authoritative owner of starting a process from a record event and of the Read data
+and Modify data elements; Add data has its own article, `process-add-data`. The `filter` these elements
+carry is owned by `process-data-source-filters`: every element here says WHETHER it takes one and what
+that means for it, and that article says what a filter may contain. The Change access rights element consumes the same
 filter; see `process-access-rights`.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
@@ -172,9 +172,7 @@ filter; see `process-access-rights`.
   a `first` element is a human fingerprint, not a corrupted mode.
 
 == Add data element (addData) — MOVED ==
-- The Add data element now has its own article: read `process-add-data`. It outgrew this one, which has
-  to fit in a single get-guidance response. Everything about the `addData` block, both adding modes, the
-  value sources and the refused transitions lives there.
+- Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
