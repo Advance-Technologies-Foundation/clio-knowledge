@@ -81,18 +81,17 @@ filter; see `process-access-rights`.
   * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
   * `collection` — EVERY matching record, into TWO outputs: `ResultEntityCollection` (the raw list) and
     `ResultCompositeObjectList` (one column per selected column). Mirror the second into a `Collection` process
-    parameter (`parameters[]` `typeFromElement`, see `process-parameters`):
-    that per-column shape is the only thing a consumer can bind to; the raw list carries none of it.
-    `columns` is REQUIRED. An omitted selection is not "no columns": the runtime reads EVERY column of the
-    object, shaping the output after the whole entity. A column the collection cannot carry (Binary, say) is
-    REFUSED, because the runtime drops it from the query without a word and the shape would then advertise a
-    value that never arrives. `numberOfRecords` is the top-N: positive, refused
-    in every other mode (`first` reads one record, a function mode none), omit it to read every match — and
-    a top-N without a sort takes an arbitrary slice.
-    Entering the mode SHAPES the output at once, which is what lets a collection parameter
-    mirrored in the SAME `create-business-process` call find a shape rather than an empty list; re-selecting
-    re-shapes in place, keeping surviving item ids, so an existing mapping stays valid. Nothing CONSUMES a
-    collection yet (no iterator builds; one column out of the list needs ENG-91844).
+    parameter (`parameters[]` `typeFromElement`, see `process-parameters`): that per-column shape is the only
+    thing a consumer can bind to. `columns` is REQUIRED — an omitted selection is not "no columns": the runtime
+    reads EVERY column of the object. A column the collection cannot carry (Binary, say) is REFUSED: the
+    runtime drops it from the query without a word, so the shape would advertise a value that never arrives.
+    `numberOfRecords` is the top-N: positive, refused in every other mode. Omitting it KEEPS the stored one
+    (re-selecting columns must not turn a top-25 read into a read-everything one) and reads every match when
+    ENTERING the mode — and a top-N without a sort takes an arbitrary slice.
+    Entering SHAPES the output at once, which is what lets a collection parameter mirrored in the SAME
+    `create-business-process` call find a shape rather than an empty list; re-selecting re-shapes in place,
+    keeping surviving item ids. Nothing CONSUMES a collection yet (no iterator builds; one column out of the
+    list needs ENG-91844).
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
     MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element and describe lists
     both, but they answer different questions: `ResultCount` is the aggregate the element computed, while
