@@ -1,7 +1,7 @@
 clio MCP page-to-object binding guide
 
 Use this guide to BIND a page to an object: configure which Freedom UI page opens by default when a
-record of an object is opened, and which page is used when a record is added. In Creatio this is the
+record is opened through that object's page resolver, and which page is used when a record is added. In Creatio this is the
 object's "related pages" / "page settings" configuration. It is a different task from adding a
 related/child list to a page (see `related-list`): this guide is about WHICH page represents a record
 of the object, not about a detail shown inside a page.
@@ -10,7 +10,8 @@ The tools: `create-related-page-addon` (write) and `get-related-page-addon` (rea
 `create-related-page-addon` binds pages by writing the object's `RelatedPage` add-on through
 `AddonSchemaDesignerService`. One call performs the whole round-trip the Interface Designer does when
 you save related pages: read the (server auto-provisioned) add-on, replace its page list, save, reset
-the client script cache, and rebuild static content so the change is reflected in the UI.
+the client script cache, and rebuild static content. A successful write and read-back prove stored
+configuration, not that every grid, lookup link, or explicit page-opening request uses that binding.
 Because the write FULLY REPLACES the page set, READ FIRST with `get-related-page-addon` whenever the
 object may already have a configuration: it returns the current entries (raw UIds + resolved page/role
 names + flags + type-column-uid). Then modify that set and send the full set back — read → modify →
@@ -76,13 +77,44 @@ Discovery — resolve names before binding
 - Resolve page names with `list-pages` (filter by app `code` or `search-pattern`). Pass page SCHEMA
   NAMES; the tool resolves each to its `PageSchemaUId` for you.
 
+View-backed grids — inspect the navigation target before writing
+- A `Vw*` name is not a schema classification. Inspect `get-entity-schema-properties`: `db-view`
+  and `virtual` are independent flags. For virtual entities, also read `virtual-entities`; do not
+  apply virtual-entity rules merely because a name starts with `Vw`.
+- Do NOT add a binding to a view just because a grid uses it and `get-related-page-addon` returns
+  `pageCount: 0`. First inspect the original page's data source, primary column, clicked link or
+  request, and any explicit page override. Establish which entity and record Id the click actually
+  targets; a view row Id is not necessarily the underlying object's record Id. Inspect that target's
+  existing binding before choosing a change. Do not infer the target or the fallback cause from the
+  Classic page that happened to open.
+- Database views are not categorically unsupported. On a disposable Creatio Studio 10.1.585.0
+  instance (PostgreSQL, .NET 8.0.31; clio 8.1.0.126), `VwSysAdminUnit` reported `db-view: true`,
+  `virtual: false`. Its binding read back, appeared in the browser's entity page configuration after
+  logout/login, and a native Freedom UI grid link opened the bound Freedom form with the same record
+  Id; the form loaded the selected record's name. This verifies that path, not every view or version.
+- [Clio issue #1301](https://github.com/Advance-Technologies-Foundation/clio/issues/1301) reports a
+  different result for a campaign's `VwBulkEmailInCampaign` grid on Creatio 10.0.0.858 / PostgreSQL /
+  .NET Framework: a stored binding did not change navigation after re-login. That campaign path was
+  not reproduced by the Studio fixture above. The reporter's follow-up leaves the schema classification
+  and proposed real-object datasource workaround unverified. Do not turn this report into a blanket
+  view rejection or claim the workaround is tested.
+- If considering a real-object datasource instead, first prove the record identity and equivalent
+  relationship filters, columns, and access behavior. Test the original navigation path on a disposable
+  fixture before applying it elsewhere; do not rewrite a stock grid as an assumed fix.
+
 Typical flow
 1. `get-app-info` → object name + package name (and schema-name-prefix for any new pages).
 2. `list-pages` → the form page (and, if different, the add page) schema names for that object.
 3. `create-related-page-addon` with `entity-schema-name`, `package-name`, and a `pages` list marking the
    default page (`is-default: true`) and the add page (`is-add: true`). The same page may carry both.
-4. Reload the record in the browser to confirm the bound page opens (the tool already rebuilt static
-   content; no manual compile is needed).
+4. Read the binding back, then log out and log in again to refresh session page metadata. Open a record
+   from the ORIGINAL failing grid/link and verify both the selected page schema and record identity.
+   Opening a section list or navigating directly to the desired form is not equivalent proof. No manual
+   compile is needed for the add-on write.
+5. If that path still opens the wrong page, stop repeating binding writes. Capture the effective
+   entity/record target, page override, stored binding and post-login browser result; investigate the
+   navigation path. Restore the pre-test page set when abandoning an experiment (an empty list clears
+   ALL entries, so use it only when the pre-test set was empty).
 
 Errors
 - If the object, package, or any page name does not exist, the tool fails fast with a clear message
