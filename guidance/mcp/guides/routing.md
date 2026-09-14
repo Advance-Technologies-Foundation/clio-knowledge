@@ -67,8 +67,13 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading, which one the runtime runs, editing or launching ANY
-    existing process, or a rollback request -> name=process-versions; add name=process-modeling for the
+  - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
+    process -> name=process-versions
+  - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
+    name=process-version-writes; add name=process-versions for the model it assumes and
+    name=process-modeling for the operation reference
+  - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
+    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
@@ -95,4 +100,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
   - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
+- User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+
+- Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
