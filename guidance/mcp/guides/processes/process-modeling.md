@@ -13,6 +13,8 @@ owner -- read the one your task needs instead of guessing:
                                      codes, parameter codes. Read it BEFORE you name anything.
   * `process-data-elements`        - start a process from a record event (signalStart), and the Read
                                      data and Modify data elements.
+  * `process-add-data`             - the Add data element: both adding modes, the selection and its
+                                     filter, the column value sources, and the refused transitions.
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
@@ -122,12 +124,13 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
-   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   changeData/addData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `changeData` / `addData` on the matching data element only (see `process-data-elements` for readData
+   and changeData, `process-add-data` for addData — their partial-update, mode-switch and
+   source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
    `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
    access to whoever it names, on live records, and the element reports nothing at run time; show the user
    the target object, the record `filter` and every grantee with its operations and level, and get an

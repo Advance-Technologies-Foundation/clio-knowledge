@@ -2,9 +2,9 @@ clio MCP process-data-elements guide — record triggers, Read data and Modify d
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of starting a process from a record event and of the Read data
-and Modify data elements. The `filter` all three carry is owned by `process-data-source-filters`: every
-element here says WHETHER it takes one and what that means for it, and that article says what a filter
-may contain. The Change access rights element consumes the same
+and Modify data elements; Add data has its own article, `process-add-data`. The `filter` these elements
+carry is owned by `process-data-source-filters`: every element here says WHETHER it takes one and what
+that means for it, and that article says what a filter may contain. The Change access rights element consumes the same
 filter; see `process-access-rights`.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
@@ -171,6 +171,9 @@ filter; see `process-access-rights`.
   decides the mode, and `0` is what a non-function element would mean anyway — but a stored `FunctionType` on
   a `first` element is a human fingerprint, not a corrupted mode.
 
+== Add data element (addData) — MOVED ==
+- Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
+
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
     { "name": "UpdateContact", "type": "changeData", "caption": "Update the contact",
@@ -179,7 +182,7 @@ filter; see `process-access-rights`.
         "values": [                                            // REQUIRED at create: one entry per column
           { "column": "JobTitle", "value": "Manager" },        // plain constant — TEXT columns ONLY (see below)
           { "column": "Notes", "processParameter": "NoteTextParameter" }, // a process parameter's value
-          { "column": "AccountId", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
+          { "column": "Account", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
         ] },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
