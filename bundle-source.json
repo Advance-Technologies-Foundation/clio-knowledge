@@ -1296,9 +1296,6 @@
       "topicId": "creatio.process-add-data",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-add-data",
-      "legacyUris": [
-        "docs://mcp/guides/process-add-data"
-      ],
       "sourcePath": "guidance/mcp/guides/processes/add-data.md",
       "bundlePath": "resources/process-add-data.md",
       "mediaType": "text/plain"
