@@ -132,11 +132,23 @@ public sealed class ProcessNamingRuleTests
         ("falls back to THE ELEMENT CODE as the caption",
             "N4 is a hard MUST-set, and this is the probed consequence of ignoring it: the omitted caption is not "
             + "a friendly default but the raw code on the diagram, which is how Start1 reaches a reviewer"),
-        ("NOT YET BUILDABLE",
-            $"{RuleNumbers[^1]} documents flow labels ahead of the buildable slice; without the marker it reads "
-            + "as available now"),
-        ("ENG-91853",
-            $"{RuleNumbers[^1]}'s not-yet-buildable marker must name the dependency that would make it buildable"),
+        ("LABEL EVERY CONDITIONAL AND DEFAULT ARM",
+            $"the IMPERATIVE is the rule. This row used to pin the bare field name, which left the rule "
+            + "itself unguarded: {RuleNumbers[^1]} could be rewritten into its opposite while `flows[].label` "
+            + "survived and the suite stayed green"),
+        ("a version cannot tell you whether the capability is there",
+            $"{RuleNumbers[^1]} used to pin the bare literal 1.6.0.8 as the floor to check. A review showed "
+            + "no caller can be below it - clio refuses an environment running a package older than the one "
+            + "it ships - and that an archive from a line that never carried the member can hold a HIGHER "
+            + "number. This clause is what stops the number coming back as advice"),
+        ("84.9% of conditional flows carry a label",
+            $"the corpus share is what makes {RuleNumbers[^1]} a rule rather than a preference - without it "
+            + "\"label your branches\" is one opinion against another. Pinned WITH its sentence: a bare "
+            + "percentage survives a rewrite that inverts what it is a share OF"),
+        ("the only way to learn a human's label exists",
+            $"{RuleNumbers[^1]}'s read-before-write REASON, not its heading. The row used to pin "
+            + "\"READ BEFORE YOU WRITE\", which is a shout that survives losing the sentence that explains "
+            + "it: a flow caption lives in the schema RESOURCES, so a metadata diff shows nothing"),
         ("SEQUENCE FLOWS",
             "the disambiguation: \"connections\" in the E2E stories' \"names, codes and connections\" means "
             + "sequence flows, NOT the Activity \"Connected to\" links, which are a different feature"),

@@ -87,7 +87,15 @@ Forgetting the version bump cannot break a consumer, and no longer silently ship
 **Producer contract suite** compares the published bytes — `bundle-source.json` plus every body it
 declares — against the base branch, and fails while they differ and the derived sequence does not move.
 The comparison is a workflow step rather than a test, because it is a question about history; the test
-project stays runnable on a shallow clone. The full procedure, the identity rules, the signing-key
+project stays runnable on a shallow clone.
+
+The same check also refuses a published body that still carries an unresolved version boundary — a
+`<...TBD>` placeholder standing in for a release that does not exist yet. Writing one while an article
+is being drafted is fine and keeps `dotnet test` green; merging it is not, because merging publishes,
+and an agent reading the placeholder cannot tell whether the tool it gates is available on the
+environment it is about to write to. Replace it with the released version before asking for a merge.
+
+The full procedure, the identity rules, the signing-key
 handling, and the consumer-first key-rotation order are in
 [distribution/RELEASING.md](distribution/RELEASING.md).
 

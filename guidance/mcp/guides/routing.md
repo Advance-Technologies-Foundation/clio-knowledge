@@ -58,7 +58,10 @@ guards — it says whose rule it is and names that guide for the rest.
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
   - grant or revoke RECORD permissions from a process (the Change access rights element) ->
     name=process-access-rights
-  - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
+  - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
+    name=process-send-email
+  - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
+    against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
@@ -67,6 +70,9 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
+  - which VERSION of a process you are reading, which one the runtime runs, editing or launching ANY
+    existing process, or a rollback request -> name=process-versions; add name=process-modeling for the
+    operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
