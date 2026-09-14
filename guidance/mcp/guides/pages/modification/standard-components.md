@@ -1,17 +1,19 @@
 clio MCP page modification standard components guide
 
-This is a focused sub-guide of `page-modification`. It owns the canonical configuration of the standard
-record-page components a Freedom UI FORM page is expected to carry — the record feed (`crt.Feed`), the
-attachments list (`crt.FileList`) and the tag chips (`crt.TagSelect`) — and the MERGE-vs-INSERT decision
-that precedes writing the first two.
+This is a focused sub-guide of `page-modification`. It owns the canonical configuration of the two
+standard record-page components a Freedom UI FORM page is expected to carry — the record feed
+(`crt.Feed`) and the attachments list (`crt.FileList`) — and the MERGE-vs-INSERT decision that precedes
+writing either of them.
 
-Tags are a DIFFERENT SHAPE, and their section follows STEP 5. Read it before carrying anything from
-STEP 3 or STEP 4 across to them: the instructions there are deliberately the opposite.
+On the INSERT path you ALSO need `page-modification-template-supplied-parts`, which owns what the parent
+template was supplying and now is not: the tab containers, the attachments toolbar that carries the
+upload button, the collection attribute, and what you must NOT declare. The value sets below are not the
+whole deliverable there. That guide also owns TAG chips (`crt.TagSelect`) end to end — tags are a
+different shape and none of the rules below apply to them.
 
 It does NOT own, and does not restate:
-- the property vocabulary of any of them — `get-component-info` for `crt.Feed` / `crt.FileList` /
-  `crt.TagSelect` is authoritative, and the COMPONENT-TYPE VERIFICATION step in `page-modification` is
-  mandatory here too;
+- the property vocabulary of either component — `get-component-info` for `crt.Feed` / `crt.FileList` is
+  authoritative, and the COMPONENT-TYPE VERIFICATION step in `page-modification` is mandatory here too;
 - how to pick a `parentName` — `page-modification-containers`;
 - how a `viewConfigDiff` entry is composed — `page-modification-components`;
 - the caption/resource rule for the grid column — `page-schema-resources` (it already names the
@@ -36,7 +38,8 @@ describes a different case from the one a record page needs.
   `recordColumnName: "RecordId"`, `viewType: "gallery"` with `tileSize`, the data source named
   `AttachmentListDS`, and no upload binding on the component at all — the merged page declares an EMPTY
   `handlers` array. That is not the same as "no upload wiring": upload and refresh are buttons in the tab
-  container's `tools` toolbar, and on the INSERT path they are yours to supply (STEP 5).
+  container's `tools` toolbar, and on the INSERT path they are yours to supply — the block is in
+  `page-modification-template-supplied-parts`.
   Both shapes are real; only the second is the record-page attachments tab. An agent that follows the
   catalog example for a record page produces a list that works and does not match the platform, which is
   the drift this guide exists to stop.
@@ -50,7 +53,7 @@ reported behaviour:
   rejects it. What the record page then renders was not observed.
 - an `AttachmentList` without its companion `AttachmentListDS` data source has nothing for
   `primaryColumnName` or any column `code` to resolve against: every child attribute of the
-  `AttachmentList` collection binds to a `AttachmentListDS.<column>` path (STEP 5), so with the data
+  `AttachmentList` collection binds to a `AttachmentListDS.<column>` path, so with the data
   source absent the list has no query to issue.
 
 STEP 1 — MERGE or INSERT. Decide before writing anything.
@@ -59,7 +62,8 @@ The parent template, not the page, decides this.
 - You MUST use `"operation": "merge"` when the parent template already ships the component and its tab
   container. The template supplies the structure; the page supplies only the object-specific values.
 - You MUST use `"operation": "insert"` — with the SAME value set — when the template ships neither, and
-  you must then also supply every piece the template was supplying (STEP 5). The value sets in STEP 2 and
+  you must then also supply every piece the template was supplying — read
+  `page-modification-template-supplied-parts` before you write the body. The value sets in STEP 2 and
   STEP 3 are NOT the whole deliverable on that path.
 - You MUST NOT emit an `insert` for a component the template already ships. `update-page` checks the diff
   you send, not the merged result, so nothing corrects it and nothing reports it.
@@ -69,7 +73,7 @@ How to tell, without guessing: call `get-page` on a page built from that templat
 ships the feed exposes a container named `FeedTabContainer`; one that ships attachments exposes
 `AttachmentsTabContainer`. Absent container means absent component, and that is the INSERT path. While
 you are there, read `viewModelConfig.attributes` and `modelConfig.dataSources` in the same bundle: they
-are what STEP 5 is checked against.
+are what the INSERT-path inventory in `page-modification-template-supplied-parts` is checked against.
 
 STEP 2 — `crt.Feed`, canonical value set
 Merged onto (or inserted into) `FeedTabContainer`. Every property below is required; none of them has a
@@ -79,8 +83,8 @@ useful default.
 | --- | --- | --- |
 | `type` | `crt.Feed` | |
 | `feedType` | `"Record"` | The record-scoped feed. Not a free-form label — see `get-component-info` for the accepted set. |
-| `primaryColumnValue` | `"$Id"` | Binds the feed to the open record. `$Id` is supplied by the record-page template, on both the MERGE and the INSERT path — STEP 5. |
-| `cardState` | `"$CardState"` | Also template-supplied. It hides the post composer while the record is still in `Add` mode. |
+| `primaryColumnValue` | `"$Id"` | Binds the feed to the open record. `$Id` is supplied by the record-page template on BOTH paths — never declare it yourself. |
+| `cardState` | `"$CardState"` | Also template-supplied on both paths. It hides the post composer while the record is still in `Add` mode. |
 | `dataSourceName` | `"PDS"` | The page `primaryDataSourceName`. Use the page's actual value if it is not `PDS`. |
 | `entitySchemaName` | the page's own object | OBJECT-SPECIFIC. It MUST equal the `entitySchemaName` of the page's primary data source, never a copied literal. |
 
@@ -110,7 +114,7 @@ Merged onto (or inserted into) `AttachmentsTabContainer`.
 | Property | Value | Note |
 | --- | --- | --- |
 | `type` | `crt.FileList` | |
-| `masterRecordColumnValue` | `"$Id"` | The open record the files hang off. `$Id` is template-supplied — STEP 5. |
+| `masterRecordColumnValue` | `"$Id"` | The open record the files hang off. `$Id` is template-supplied on both paths. |
 | `recordColumnName` | `"RecordId"` | The `SysFile` column pointing back at the master record. |
 | `items` | `"$AttachmentList"` | The collection attribute the list binds to. |
 | `primaryColumnName` | `"AttachmentListDS_Id"` | Derived from the data-source name of STEP 4. |
@@ -180,8 +184,8 @@ only the one attribute its column reads. So the block below is an OVERLAY, not t
 ```
 
 On the INSERT path nothing declares it for you, so you MUST declare it whole. The merged bundle of a
-template that ships attachments carries FOUR attributes, and the collection's child attributes in STEP 5
-bind to all four:
+template that ships attachments carries FOUR attributes, and the collection attribute in
+`page-modification-template-supplied-parts` binds a child attribute to each of them:
 
 ```jsonc
 // INSERT path: the full declaration, as measured in the template's merged bundle
@@ -204,133 +208,6 @@ The data-source NAME is load-bearing: `AttachmentListDS` is what makes `Attachme
 `AttachmentListDS_Name` resolve. Renaming the data source means renaming both. `Id` is NOT among the
 declared attributes and does not need to be — the measured child attribute `AttachmentListDS_Id` binds to
 the path `AttachmentListDS.Id` regardless.
-
-STEP 5 — what the template supplies, and what an INSERT must supply itself
-Two templates were measured for this — one that ships both components and one that ships neither — and
-the difference between them IS this step. On the MERGE path the template provides all of it, which is why
-a page created from such a template carries the two value sets above and nothing else. On the INSERT path
-most of it becomes yours, and STEP 2 + STEP 3 alone are NOT a working deliverable.
-
-YOURS on the INSERT path:
-
-1. The tab containers themselves (`FeedTabContainer`, `AttachmentsTabContainer`). A container you insert
-   MUST initialize its content slot (`"items": []`), or the page fails at runtime with
-   `Item "<name>" is not a container for other items`. See `page-modification-containers`.
-
-2. The attachments tab's TOOLBAR. This is the one most easily missed, and an inserted gallery without it
-   has no control that uploads a file. The measured `AttachmentsTabContainer` carries a `tools` slot with
-   a header label and TWO buttons:
-
-```jsonc
-"tools": [{
-  "type": "crt.FlexContainer", "direction": "row", "alignItems": "center",
-  "name": "AttachmentsTabContainerHeaderContainer",
-  "items": [
-    { "type": "crt.Label", "caption": "#ResourceString(AttachmentsTabContainerCaption)#",
-      "labelType": "headline-3", "name": "AttachmentsTabContainerHeaderLabel" },
-    { "type": "crt.Button", "name": "AttachmentAddButton",
-      "caption": "#ResourceString(AttachmentAddButtonCaption)#",
-      "icon": "upload-button-icon", "iconPosition": "only-icon", "color": "default", "size": "medium",
-      "clicked": { "request": "crt.UploadFileRequest",
-                   "params": { "viewElementName": "AttachmentList" } } },
-    { "type": "crt.Button", "name": "AttachmentRefreshButton",
-      "caption": "#ResourceString(AttachmentRefreshButtonCaption)#",
-      "icon": "reload-button-icon", "iconPosition": "only-icon", "color": "default", "size": "medium",
-      "clicked": { "request": "crt.LoadDataRequest",
-                   "params": { "config": { "loadType": "reload" },
-                               "dataSourceName": "AttachmentListDS" } } }
-  ]
-}]
-```
-
-   `viewElementName` must name YOUR list element and `dataSourceName` YOUR data source, so renaming
-   either means editing here too. This is also where the "no handlers" contrast above resolves: the
-   upload is a declarative request binding on a button, not a handler — which is why the merged page's
-   `handlers` array is empty while the upload control still exists. The captions are resource keys;
-   `page-schema-resources` owns registering them.
-
-   `FeedTabContainer`'s `tools` carries only a header label. The feed needs no toolbar buttons.
-
-3. The `AttachmentList` collection attribute that `items: "$AttachmentList"` binds to — with FIVE child
-   attributes and a sorting config, not just the one column STEP 3 declares:
-
-```jsonc
-"AttachmentList": {
-  "isCollection": true,
-  "modelConfig": {
-    "path": "AttachmentListDS",
-    "sortingConfig": { "default": [{ "columnName": "CreatedOn", "direction": "desc" }] }
-  },
-  "viewModelConfig": { "attributes": {
-    "AttachmentListDS_Name":      { "modelConfig": { "path": "AttachmentListDS.Name" } },
-    "AttachmentListDS_CreatedOn": { "modelConfig": { "path": "AttachmentListDS.CreatedOn" } },
-    "AttachmentListDS_CreatedBy": { "modelConfig": { "path": "AttachmentListDS.CreatedBy" } },
-    "AttachmentListDS_Size":      { "modelConfig": { "path": "AttachmentListDS.Size" } },
-    "AttachmentListDS_Id":        { "modelConfig": { "path": "AttachmentListDS.Id" } }
-  } }
-}
-```
-
-   Cutting this down to `AttachmentListDS_Name` because STEP 3 declares a single Name column is the
-   mistake this item exists to prevent: `primaryColumnName` resolves through `AttachmentListDS_Id`, the
-   newest-first order comes from `sortingConfig` rather than from the component, and size/author/date are
-   available to the gallery tile only because they are declared here. The collection-attribute shape in
-   general is owned by `related-list` — read it rather than improvising one.
-
-4. `AttachmentListDS` itself, declared in full — STEP 4.
-
-NOT yours on either path. Do NOT file these as insert deliverables:
-
-- the `Id` attribute. Both measured templates declare it — including the one that ships neither component
-  — as `"Id": { "modelConfig": { "path": "#PrimaryDataSourceName()#.Id" } }`. `get-component-info` for
-  `crt.Feed` states the same from the other side: on edit pages the platform provides `$Id` and
-  `$CardState`, and no extra declaration is needed. The measured creation-flow page does re-declare `Id`
-  as `PDS.Id`, which is harmless and is not a thing to copy.
-- `$CardState`. Declared by both measured templates, and platform-provided per the same catalog text.
-
-TAGS — `crt.TagSelect`, and why nothing above applies to it
-An agent that has just read STEP 3 and STEP 4 will generalise to tags in exactly the wrong direction.
-Three measured differences:
-
-- **There is no merge-vs-insert decision.** Both measured templates ship `crt.TagSelect` — including the
-  one that ships NEITHER the feed nor the attachments list — always inside `CardToolsContainer`, always
-  in the same three-property form. It arrives with the record-page template:
-
-```jsonc
-{ "type": "crt.TagSelect", "recordId": "$Id", "name": "TagSelect" }
-```
-
-- **`recordId: "$Id"` is the whole contract, and you MUST keep it.** `get-component-info` for
-  `crt.TagSelect` names omitting it as its first pitfall: without `recordId` the preprocessor cannot
-  resolve the tag-to-record association and the component renders empty. That is the catalog's
-  statement, cited rather than re-observed here.
-- **You MUST NOT hand-wire `items`, `listItems` or the CRUD outputs** (`createTag`, `editTag`,
-  `deleteTag`, `addTagsInRecord`, `deleteTagInRecord`). The `crt.TagSelectPropertiesPanel` DESIGNER
-  PREPROCESSOR generates them, and the catalog warns that bypassing it makes every one of those outputs
-  yours to handle. This is the OPPOSITE of the attachments list, where the page really does carry the
-  collection attribute, the data source and the toolbar wiring (STEP 3 – STEP 5). Do not carry that
-  habit across.
-
-So there is NO tag data source to propagate. All three measured schemas declare only `AttachmentListDS`
-and `PDS`; none of them contains `listItems`, `tagInRecordSourceSchemaName`, or any tag data source at
-all. Only `recordId` reaches the schema. `tagInRecordSourceSchemaName` defaults to `"TagInRecord"` —
-override it only for a custom junction schema.
-
-Where a dead tag control actually comes from, and what this guide does NOT claim
-`TagInRecord`, the default, is entity-agnostic: it keys an association by `RecordId` (Guid) plus
-`RecordSchemaName` (text) against the `Tag` dictionary, which is itself scoped by an `EntitySchemaName`
-text column. On that path a record page needs NO per-object junction schema, and the absence of one is
-NOT evidence that the control is broken.
-
-A second, older model exists beside it: per-object junctions named `<Entity>InTag`, inheriting
-`BaseEntityInTag` and pointing at a per-object tag dictionary (`ContactInTag.Tag` → `ContactTag`). Around
-thirty of them exist on the measured stand.
-
-UNVERIFIED, and deliberately not made into an instruction: whether tags recorded under the older
-per-object model are reachable through the component's default `TagInRecord` path. If a migrated page
-shows an empty tag control, that question — not the page body — is where to look, and it needs its own
-investigation. This guide does NOT tell you to create an `<Entity>InTag` schema: the default path does
-not read one, and whether creating one is a migration step or a platform concern was not established.
 
 UNSUPPORTED: reproducing the feed or the attachments list out of primitive components (a `crt.DataGrid`
 over `SysFile`, a hand-built comment list). Neither is a substitute; both lose the platform behaviour
@@ -355,29 +232,18 @@ Lab scenario, 2026-09-11, on an internal Creatio Studio stand, read-only via `ge
    as is the one-attribute `AttachmentListDS` overlay in STEP 4; the page's own `viewModelConfig` declares
    only `UsrName` and `Id`, and its `handlers` array is empty.
 2. `PageWithTabsFreedomTemplate` — the MERGE-path template. It ships both tab containers, both components,
-   the `AttachmentsTabContainer` toolbar carrying `AttachmentAddButton` and `AttachmentRefreshButton`, the
-   `AttachmentList` collection attribute with its five child attributes and its `sortingConfig`, the
-   four-attribute `AttachmentListDS`, and `Id` / `CardState`. Everything STEP 5 calls template-supplied is
-   read from here, and its own `handlers` array is empty too.
+   the attachments tab toolbar, the `AttachmentList` collection attribute with its five child attributes
+   and its `sortingConfig`, the four-attribute `AttachmentListDS`, and `Id` / `CardState` — the inventory
+   `page-modification-template-supplied-parts` is built from. Its own `handlers` array is empty too.
 3. `PageWithTopAreaAndTabsFreedomTemplate` — a template that ships NEITHER component, read to pin the
    INSERT path down instead of inferring it: no `FeedTabContainer`, no `AttachmentsTabContainer`, no
-   `AttachmentList` attribute, no data sources at all — but `Id` and `CardState` ARE declared, which is
-   what puts them on the not-yours list in STEP 5.
+   `AttachmentList` attribute, no data sources at all — which is what establishes the INSERT path as a
+   real case rather than a hypothetical, and what
+   `page-modification-template-supplied-parts` measures its inventory against.
 
-For tags, the same three merged bundles: `crt.TagSelect` is present in ALL of them, always inside
-`CardToolsContainer` and always in the three-property form quoted above; none of the three declares a tag
-data source, `listItems`, or `tagInRecordSourceSchemaName`. The junction schemas were read on the same
-stand with `find-entity-schema` and `get-entity-schema-properties`: `TagInRecord` (package `CrtBase` —
-`RecordId`, `RecordSchemaName`, `Tag`, `TagRecordId`), `Tag` (carrying `EntitySchemaName`), and about
-thirty `<Entity>InTag` schemas inheriting `BaseEntityInTag`. `UsrSourceCodes` has no
-`UsrSourceCodesInTag`. Runtime settles nothing here in either direction: `TagInRecord` and `ContactInTag`
-both hold zero rows on that stand, so no tagging behaviour was observed.
-
-NOT observed, and marked as such where they appear: what a page renders after a duplicated insert, what
-a list missing its data source renders, and whether tags held under the older per-object model surface
-through the default `TagInRecord` path. All three are reasoned from the measured structure or cited from
-the component catalog. No page was written and no migration was run for this guide — every call was
-read-only.
+NOT observed, and marked as such where they appear: what a page renders after a duplicated insert, and
+what a list missing its data source renders. Both are reasoned from the measured structure. No page was
+written and no migration was run for this guide — every call was read-only.
 
 The `crt.Feed` / `crt.FileList` catalog responses quoted above were read from the same environment on
 the same date; `get-component-info` reported `resolvedFrom: "environment-superset"` with

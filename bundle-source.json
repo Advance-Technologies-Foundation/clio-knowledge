@@ -94,6 +94,7 @@
       "page-modification-field-contract",
       "page-modification-overview",
       "page-modification-standard-components",
+      "page-modification-template-supplied-parts",
       "page-schema-converters",
       "page-schema-creatio-devkit-common",
       "page-schema-handlers",
@@ -245,6 +246,7 @@
       "docs://knowledge/com.creatio.clio/page-modification-field-contract",
       "docs://knowledge/com.creatio.clio/page-modification-overview",
       "docs://knowledge/com.creatio.clio/page-modification-standard-components",
+      "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
       "docs://knowledge/com.creatio.clio/page-schema-converters",
       "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
       "docs://knowledge/com.creatio.clio/page-schema-handlers",
@@ -1201,6 +1203,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/pages/modification/standard-components.md",
       "bundlePath": "resources/page-modification-standard-components.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification-template-supplied-parts",
+      "title": "Page modification template-supplied parts",
+      "description": "What a Freedom UI record-page template supplies and what an explicit insert must supply itself: the tab containers, the attachments toolbar carrying the upload and refresh buttons, the AttachmentList collection attribute and its data source, the Id and CardState attributes that are never yours, and the crt.TagSelect tag chips, which arrive with the template and are wired by a designer preprocessor rather than by the page.",
+      "topicId": "creatio.page-modification-template-supplied-parts",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-template-supplied-parts"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/template-supplied-parts.md",
+      "bundlePath": "resources/page-modification-template-supplied-parts.md",
       "mediaType": "text/plain"
     },
     {
