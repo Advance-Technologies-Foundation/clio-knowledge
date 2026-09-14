@@ -28,7 +28,7 @@ public sealed class ReadDataCollectionGuidanceTests
                 + "buildable mode behind a paragraph");
         guide.Should().Contain("`ResultEntityCollection` (the raw list) and",
             because: "a collection element has TWO outputs and a mapping has to name the right one");
-        guide.Should().Contain("that per-column shape is the only thing a consumer can bind to",
+        guide.Should().Contain("per-column shape is the only\n    thing a consumer can bind to",
             because: "the raw list carries no shape, so an agent that mirrors it instead of ResultCompositeObjectList "
                 + "produces a parameter nothing can read");
         ReadCatalog().Should().Contain("\"collection\" | \"count\" | \"aggregation\"",
@@ -41,7 +41,7 @@ public sealed class ReadDataCollectionGuidanceTests
     {
         string guide = ReadGuide();
 
-        guide.Should().Contain("An omitted selection is not \"no columns\"",
+        guide.Should().Contain("an omitted selection is not \"no columns\"",
             because: "this is the trap: the runtime falls back to every column of the object, so an agent that "
                 + "omits the selection gets a shape it never asked for rather than an error");
         guide.Should().Contain("drops it from the query without a word",
@@ -55,12 +55,15 @@ public sealed class ReadDataCollectionGuidanceTests
     {
         string guide = ReadGuide();
 
-        guide.Should().Contain("refused\n    in every other mode",
+        guide.Should().Contain("`numberOfRecords` is the top-N: positive, refused",
             because: "`first` already reads one record and a function mode reads none, so a top-N there would be "
                 + "stored and ignored");
+        guide.Should().Contain("Omitting it KEEPS the stored one",
+            because: "an omitted top-N is 'keep', not 'clear' — a stand run caught the opposite, where re-selecting "
+                + "columns silently turned a top-25 read into a read-everything one");
         guide.Should().Contain("a top-N without a sort takes an arbitrary slice",
             because: "the pair is only meaningful together, and nothing at run time reports an unsorted top-N");
-        guide.Should().Contain("mirrored in the SAME `create-business-process` call find a shape",
+        guide.Should().Contain("`create-business-process` call find a shape rather than an empty list",
             because: "the write-time shaping is the whole reason this story exists — without it a same-call mirror "
                 + "copies an empty list and the build fails");
         guide.Should().Contain("LEAVING collection additionally clears its top-N pair",
