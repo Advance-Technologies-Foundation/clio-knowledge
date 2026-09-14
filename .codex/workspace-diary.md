@@ -218,3 +218,36 @@ Correction found while rewriting: the article still said a subject alone selects
 Decision (#3): the "OMITTED, not null" claim now says clio's describe has ALWAYS dropped null fields, so it is not gated on a clio version - the reviewer's open question was whether the sibling clio PR introduced it. It did not: `DescribeProcessCommand.OutputOptions` (WhenWritingNull) predates this branch and is untouched by its diff.
 Tests: the three pins that quoted the rewritten sentences were realigned, and two new ones added (the template-swap clear, and the `subject: ""` route back).
 Impact: 161 pass; the 2 DistributionPackage failures are the known local MSB4062 issue. Sizes: process-send-email 84.6%, process-send-email-template 36.0%.
+
+## 2026-09-14 - Splitting a guidance article, and the four things that gate it
+Context: ENG-92708's merge of nitro/sprint-3-release put process-data-elements 19% over the
+get-guidance response budget and CI went red twice, for two unrelated reasons.
+Discovery (the one worth carrying): TWO BRANCHES CAN EACH PASS THE SIZE GUARD AND FAIL TOGETHER.
+Measured with the guard itself - sprint-3 26,446 (95.2%), the feature branch 27,764 (99.9%, i.e. 29
+characters of headroom), merged 33,093 (119.1%). Neither side did anything wrong. Check the guard at
+MERGE time on any branch touching a shared article, not only when authoring.
+Decision: split at a section boundary (the guard refuses a budget raise by name) and split at YOUR OWN
+content's boundary - Add data was 21% of the article and belonged to this branch, so the seam did not
+restructure the readData work. Result 96.4%, then 95.9% after trimming only prose this branch had added.
+Discovery: wiring a NEW article is FIVE contracts, each enforced by its own test, none discoverable by
+reading the manifest: requirements.itemIds AND requirements.resourceUris must both match the resource
+list exactly; the ENTRY article must index it; the entry's MANIFEST DESCRIPTION must index it too; and
+every guidance resource must declare exactly one legacyUris entry. Nine failures, four rounds.
+Discovery: that last contract was written for MIGRATED articles ("every currently migrated v0 guidance
+route remains available") and does not fit an article authored after the migration - satisfying it meant
+declaring a v0 route that never existed, and BundleBuilder.cs:327 turns every declared legacy URI into a
+RESOLVABLE ROUTE, so the invented one was a route the library answers to and nothing published. Narrowed
+the rule to the migrated set via a WRITTEN-DOWN PostMigrationGuidance list, with the exception itself
+guarded (a post-migration article must declare NO route) so it cannot become a smuggling hatch.
+Discovery: the libraryVersion lines DIVERGED at 1.14.2 - sprint-3 and master have each independently
+used 1.14.3/4/5 since. Number reuse across the two lines is this repo's normal, so 1.14.6 on sprint-3 is
+not the collision it looks like. Verify before bumping; a version choice here went wrong once already.
+Method note: resolving these merges by extracting ours-vs-base additions and re-applying them onto theirs
+works, but it MISSES SHORT EDITS - a 15-word threshold silently dropped `addData` from a buildable-slice
+list, the same four-word edit an earlier merge of this branch also lost. Diff ours against the MERGED
+result afterwards; extraction-before is not enough on its own.
+Files: guidance/mcp/guides/processes/add-data.md, guidance/mcp/guides/processes/data-elements.md,
+guidance/mcp/guides/processes/process-modeling.md, guidance/mcp/guides/routing.md, bundle-source.json,
+automation/Clio.Knowledge.Bundle.Tests/GuidanceMigrationTests.cs
+Impact: the next article split has the checklist; the next shared-article merge knows to run the size
+guard before trusting a green branch.
