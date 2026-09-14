@@ -13,6 +13,8 @@ owner -- read the one your task needs instead of guessing:
                                      codes, parameter codes. Read it BEFORE you name anything.
   * `process-data-elements`        - start a process from a record event (signalStart), and the Read
                                      data and Modify data elements.
+  * `process-add-data`             - the Add data element: both adding modes, the selection and its
+                                     filter, the column value sources, and the refused transitions.
   * `process-delete-data`          - the Delete data element: its one-field block, why its filter is
                                      what decides whether it works at all, and the confirmation you owe
                                      the user before building one. Read it BEFORE planning a delete.
@@ -125,12 +127,13 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
-   changeData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
+   `changeData` / `addData` on the matching data element only (see `process-data-elements` for readData
+   and changeData, `process-add-data` for addData — their partial-update, mode-switch and
+   source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
    retarget clears the record filter, and an element left without one deletes nothing and fails at run
    time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
    yes before sending, the same duty a build carries (see `process-delete-data`), `accessRights` on a Change access rights element only — MUST: a supplied

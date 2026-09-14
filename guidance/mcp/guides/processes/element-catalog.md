@@ -18,7 +18,7 @@ leaf rather than through `process-modeling`.
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
-  `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
+  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `count` |
   `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns and
   sort (`first` ONLY — refused for `count`/`aggregation`), an `aggregation` function + column (`aggregation`
@@ -29,11 +29,10 @@ leaf rather than through `process-modeling`.
   and nothing else, because the record `filter` is what decides which records are destroyed. It is the one
   data element whose filter is not merely recommended: with none the runtime deletes nothing and fails.
   DESTRUCTIVE — count the matching records, name the object and what the filter selects, and get an
-  explicit yes BEFORE you build it; `process-delete-data` carries the message template.
-  CAVEAT: Add data still places an UNCONFIGURED
-  element — its target object and values cannot be set yet, so that step does nothing useful until a
-  human configures it in the designer. Say so when you use one; do not present such a result as a working
-  data operation.
+  explicit yes BEFORE you build it; `process-delete-data` carries the message template. An `addData`
+  element is CONFIGURABLE via its `addData` block in BOTH modes — Add one record and Add selection
+  (target object, adding mode, selection object, column values including `Column from this
+  selection`), plus a record `filter` over the SELECTION object.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
   body OR an existing email template (with the record its macros resolve against), options and the
@@ -106,9 +105,9 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  sub-process, the Add-data target object + values (a `filter` on THAT task is serialized
+  sub-process, the Add-data and Delete-data targets (a `filter` on THAT task is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and
-  `deleteData`), and the Read data
+  `addData`), and the Read data
   COLLECTION mode (ENG-96504; its first-record, count and aggregation modes DO build — see the catalog entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
@@ -132,9 +131,8 @@ System actions (palette group "System actions"):
     and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" | "count" |
     "aggregation"`. The COLLECTION mode remains designer-only until ENG-96504: requesting it is refused,
     and describe reports a designer-made one as `mode: "collection"`.
-- `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
-    The element builds, but its target object and column values do NOT yet — see the caveat near
-    the top of this guide.
+- `addDataUserTask`   Add data     – create record(s) in background; BUILDABLE via the `addData` block in
+                                     both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
 - `changeAdminRightsUserTask` Change access rights - grant/revoke record permissions on matched
     records. BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
