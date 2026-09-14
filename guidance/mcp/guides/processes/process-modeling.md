@@ -13,6 +13,8 @@ owner -- read the one your task needs instead of guessing:
                                      codes, parameter codes. Read it BEFORE you name anything.
   * `process-data-elements`        - start a process from a record event (signalStart), and the Read
                                      data and Modify data elements.
+  * `process-add-data`             - the Add data element: both adding modes, the selection and its
+                                     filter, the column value sources, and the refused transitions.
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
