@@ -67,8 +67,13 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading, which one the runtime runs, editing or launching ANY
-    existing process, or a rollback request -> name=process-versions; add name=process-modeling for the
+  - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
+    process -> name=process-versions
+  - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
+    name=process-version-writes; add name=process-versions for the model it assumes and
+    name=process-modeling for the operation reference
+  - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
+    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
