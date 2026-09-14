@@ -177,7 +177,7 @@ Two consequences worth having before you build:
   outgoing flow is taken. That is a parallel split.
 
   It is no longer a SILENT one at build time. `validate-process-graph` has always reported the shape as
-  an R12 warning, and from **CrtProcessBuilder 1.6.1.24** `create-business-process` and
+  an R12 warning, and from **CrtProcessBuilder 1.6.1.25** `create-business-process` and
   `modify-business-process` raise a matching NOTICE — so a caller who skipped the pre-flight is no longer
   told less than one who ran it. Both sides WARN rather than refuse, because the shape ships and runs: 74
   non-gateway sources in the 7.8.0 corpus carry it, 33 of them on ordinary activities. Read the notice as
@@ -197,15 +197,18 @@ Two consequences worth having before you build:
 
   Three caveats, each a way you would otherwise be told something untrue:
 
-  - **On a stand below 1.6.1.24, you do not get silence — you get a REFUSAL.** No `[RequiresPackage]`
+  - **On a stand below 1.6.1.25, you do not get silence — you get a REFUSAL.** No `[RequiresPackage]`
     floor was raised for this notice, but the floor is not what decides: clio refuses whenever the
     environment records a package version *older than the one this clio ships*, whatever that version
-    is. So a clio carrying 1.6.1.24 answers `create-business-process`, `modify-business-process`,
+    is. So a clio carrying 1.6.1.25 answers `create-business-process`, `modify-business-process`,
     `describe-business-process` **and `validate-process-graph`** with *"This clio carries
-    CrtProcessBuilder 1.6.1.24, but the target environment has X. Update the package in the target
+    CrtProcessBuilder 1.6.1.25, but the target environment has X. Update the package in the target
     environment and retry."* The pre-flight is gated too, so it is not a fallback. Run
     `install-process-builder` — that is the whole remedy. The build is silent about the split only when
-    your clio ALSO predates 1.6.1.24, and then nothing reports it on that stand at all.
+    your clio ALSO predates 1.6.1.25, so the two versions converge and nothing is refused — and on that
+    stand `validate-process-graph` still reports the shape as R12, which it always has. An
+    un-upgraded stand is exactly where the pre-flight earns its keep, not a stand where nothing can
+    see the split.
   - **On modify it reports the sources your request TOUCHED**, not the whole graph. A split already
     present in a designer-authored process you did not edit stays unreported here — `validate-process-graph`
     is what reads the whole graph, and a clean modify is therefore not evidence of a clean process.

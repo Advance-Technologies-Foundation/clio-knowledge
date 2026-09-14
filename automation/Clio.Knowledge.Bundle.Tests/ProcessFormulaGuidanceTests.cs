@@ -109,6 +109,12 @@ public sealed class ProcessFormulaGuidanceTests
         ("covers plain flows only",
             "a default flow beside a plain one is an implicit split by the same mechanism and NEITHER "
             + "side reports it - a negative an editor trims without any test going red"),
+        ("still reports the shape as R12",
+            "the sentence that closes the version caveat used to say nothing reports the split on an "
+            + "un-upgraded stand, which is false - an older clio converges with an older package, so "
+            + "nothing is refused and validate-process-graph's R12 fires exactly as it always has. An "
+            + "agent that believes the shape is undetectable there skips the one check that would find "
+            + "it, so the correction has to be pinned rather than left as prose"),
     ];
 
     [Test]
