@@ -61,28 +61,38 @@ filter; see `process-access-rights`.
   retarget -- `process-data-source-filters` owns `setFilter`, and that op REPLACES the whole filter, so
   read the current one back first.
 
-== Read data element (readData) — first / count / aggregation modes ==
-- A `readData` element reads from one object in one of THREE buildable modes (count and aggregation ship
+== Read data element (readData) — first / collection / count / aggregation modes ==
+- A `readData` element reads from one object in one of FOUR modes, all buildable (count and aggregation ship
   from CrtProcessBuilder 1.6.2.6 — not 1.6.0.9, an earlier pre-merge cut on the delivering feature branch
-  that was superseded before it ever shipped; before 1.6.2.6 only `first` built; the designer's fourth
-  mode, `collection`, is
-  ENG-96504 and is refused here, see below). Configure it with the element's `readData` block:
+  that was superseded before it ever shipped; collection ships with the version this guidance ships with;
+  before 1.6.2.6 only `first` built). Configure it with the element's `readData` block:
     { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
       "readData": {
         "source": "Contact",                                  // REQUIRED at create: the entity to read
-        "mode": "first",                                      // optional; first (default) | count | aggregation
-        "columns": ["Name", "Email"],                         // optional for first (omit or [] = ALL columns); refused for count / aggregation
-        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"; first only
+        "mode": "first",                                      // optional; first (default) | collection | count | aggregation
+        "columns": ["Name", "Email"],                         // optional for first (omit or [] = ALL columns); REQUIRED for collection; refused for count / aggregation
+        "numberOfRecords": 100,                               // collection only; a positive top-N of the sorted selection; omit to read them all
+        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"; first / collection only
       },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
 - `mode` and what each one produces (the output is what `describe-business-process` marks `isResult: true`,
   and what a downstream mapping's `sourceElementParameter` names):
   * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
-  * `collection` — the designer's fourth mode (every matching record) is NOT buildable yet (ENG-96504).
-    Requesting it is refused naming the buildable set, and a designer-made collection element updated WITHOUT
-    a mode is refused too — pass a buildable mode to convert it, or edit it in the designer. `describe` still
-    reports such an element honestly as `mode: "collection"`.
+  * `collection` — EVERY matching record, into TWO outputs: `ResultEntityCollection` (the raw list) and
+    `ResultCompositeObjectList` (one column per selected column). Mirror the second into a `Collection` process
+    parameter (`parameters[]` `typeFromElement`, see `process-parameters`):
+    that per-column shape is the only thing a consumer can bind to; the raw list carries none of it.
+    `columns` is REQUIRED. An omitted selection is not "no columns": the runtime reads EVERY column of the
+    object, shaping the output after the whole entity. A column the collection cannot carry (Binary, say) is
+    REFUSED, because the runtime drops it from the query without a word and the shape would then advertise a
+    value that never arrives. `numberOfRecords` is the top-N: positive, refused
+    in every other mode (`first` reads one record, a function mode none), omit it to read every match — and
+    a top-N without a sort takes an arbitrary slice.
+    Entering the mode SHAPES the output at once, which is what lets a collection parameter
+    mirrored in the SAME `create-business-process` call find a shape rather than an empty list; re-selecting
+    re-shapes in place, keeping surviving item ids, so an existing mapping stays valid. Nothing CONSUMES a
+    collection yet (no iterator builds; one column out of the list needs ENG-91844).
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
     MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element, but `describe`
     does NOT list `ResultRowsCount` on a builder- or designer-made count element (see the `describe` coverage
@@ -109,12 +119,14 @@ filter; see `process-access-rights`.
   result flag to the new mode's output, and clears the column selection / sort on entering count /
   aggregation. The record `filter` is KEPT — it is the one block every mode carries (the designer shows "How to
   filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
-  retarget clears the filter. Converting a designer-made collection element to a buildable mode also clears its
-  collection parameters and empties `ResultCompositeObjectList`'s item properties (the platform rebuilds them
-  only WHILE in collection mode — the designer clears them the same way). This is a real, tested conversion, not
-  an offhand claim: `ReadDataConfigBinderTests.Apply_ShouldConvertCollectionToFirst_ClearingCollectionParametersAndItemProperties`
-  exercises `ReadDataConfigBinder.Apply` on a `ResultType: EntityCollection` element with a mode-only update and
-  asserts it succeeds — a `setElement.readData` update naming a buildable mode is NOT the same as remove+recreate.
+  retarget clears the filter. LEAVING collection additionally clears its top-N pair and empties
+  `ResultCompositeObjectList`'s item properties, because the platform rebuilds those only WHILE the element is
+  in collection mode — the designer clears them the same way, and a stale top-N is not inert: under
+  `FeatureReadDataUserTaskEntityReadOldMode` it still decides how many rows a `first` read takes. This is a
+  real, tested conversion, not an offhand claim:
+  `ReadDataConfigBinderTests.Apply_ShouldClearCollectionState_WhenLeavingTheMode`
+  exercises `ReadDataConfigBinder.Apply` on a collection element with a mode-only update and
+  asserts it succeeds — a `setElement.readData` update naming another mode is NOT the same as remove+recreate.
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
   output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output STOPS BEING FILLED
