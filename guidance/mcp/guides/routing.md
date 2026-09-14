@@ -2,6 +2,12 @@ clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
 Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
+`esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
+how a guide points at a rule it does not own. Backticks around anything else are ordinary code:
+columns, ops, and page-body sections such as `handlers` or `converters` are not topics. Where a guide
+restates something another guide owns — a destructive precondition, kept next to the instruction it
+guards — it says whose rule it is and names that guide for the rest.
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -19,25 +25,56 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
+  - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
+  - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
-  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, what is buildable, the
-    recipe, the modify-safety rules, the element catalog). After it, read the ONE matching sub-guide:
+  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, the recipe, the
+    modify-safety rules). After it, read the ONE matching sub-guide:
+  - which elements exist, which of them `create-business-process` builds today, and the element catalog
+    (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, modify data, or restrict which records an
-    element acts on -> name=process-data-elements
+  - start a process on a record add/modify/delete, read data, or modify data ->
+    name=process-data-elements
+  - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
+    the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
-  - the Perform task element — a human step, who performs it, its parameter table -> name=process-perform-task
+  - the Perform task element — a human step, what it produces, its parameter table ->
+    name=process-perform-task
+  - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
+    name=process-task-performer
+  - a "Task category" field showing a raw Guid, a results dropdown offering the wrong set, or HOW a
+    category or priority must be mapped -> name=process-task-category
+  - an ActivityCategory / ActivityPriority mapping REFUSED ("a Lookup constant is a formula token, not a
+    plain value", or a package-convergence message) -> name=process-perform-task for the refusal texts,
+    the remedy and the ids; the fix the refusal itself suggests is not the safe one -- read
+    name=process-task-category before following it
+  - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
+    edit mode, optionally gated on a completion condition -> name=process-open-edit-page
+  - grant or revoke RECORD permissions from a process (the Change access rights element) ->
+    name=process-access-rights
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
-  - the "Connected to" links of the activity a task creates, and the R1-R17 connection rules ->
+  - the Approval element — the record under approval, who approves, delegation, the two notifications ->
+    name=process-approval
+  - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
+    sources are read facts, never invented -> name=process-preconfigured-page
+  - the "Connected to" links of the activity a task creates, and the R1-R18 connection rules ->
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
+  - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
+    process -> name=process-versions
+  - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
+    name=process-version-writes; add name=process-versions for the model it assumes and
+    name=process-modeling for the operation reference
+  - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
+    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
+    operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
@@ -62,5 +99,8 @@ Pick the domain, then the row (get-guidance name=...; an unknown name returns av
   - identity assertion / Identity Service V3 -> name=identity-assertion
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
-  - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
-- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access -> name=record-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
+- User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
+- Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+
+- Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget

@@ -3,6 +3,10 @@ clio MCP dashboard rights guide
 Read or change WHO can access a dashboard (read / edit / delete), for a NEW or an already-existing
 dashboard, and ship those grants with the dashboard's package.
 
+If the grantee must first be created, or its users/managers/functional memberships must change,
+read `get-guidance name=administration`. Use that native administration flow, then return here to
+grant dashboard access and bind its data. Creating a role does not grant dashboard access.
+
 A dashboard is a client-unit schema; access to it is a RECORD-LEVEL right on that schema. Address the
 dashboard as entity `SysSchemaAdminUnit` with `record-id` = the dashboard schema UId. Resolve the UId
 from the dashboard name with `execute-esq`: select `UId` where `Name = '<SchemaName>'` on

@@ -9,3 +9,8 @@ dist/
 **/bin/
 **/obj/
 .worktrees/
+
+# Test-run artifacts. `dotnet test --logger trx` writes them into the test project, where `git add -A`
+# picks them up; ignoring them is cheaper than noticing them in a diff.
+TestResults/
+*.trx

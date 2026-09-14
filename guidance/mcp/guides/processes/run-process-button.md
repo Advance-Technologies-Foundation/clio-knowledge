@@ -16,6 +16,10 @@ MANDATORY pre-write step
 - The button must reference the process CODE (schema name, e.g. `UsrProcess_e629820`) as
   `processName`, and every parameter key must be the parameter CODE (the `name` field from
   the signature) — NOT the display caption.
+- A code names ONE version of the process, so on a process that has versions the code you bind MUST be
+  the ACTIVE version's: get-process-signature echoes back whichever code it resolved, and the code a
+  builder hands you is usually the family root, which is usually not the version the runtime runs.
+  `process-versions` owns which identity resolves to the active version and how to read that standing.
 - CRITICAL: if a parameter key does not match a real parameter code, the Creatio core
   SILENTLY drops the value (it logs a warning and still returns success=true). There is no
   runtime error. So validate parameter codes against the signature BEFORE calling update-page.

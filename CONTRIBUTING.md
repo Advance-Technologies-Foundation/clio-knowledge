@@ -87,7 +87,15 @@ Forgetting the version bump cannot break a consumer, and no longer silently ship
 **Producer contract suite** compares the published bytes — `bundle-source.json` plus every body it
 declares — against the base branch, and fails while they differ and the derived sequence does not move.
 The comparison is a workflow step rather than a test, because it is a question about history; the test
-project stays runnable on a shallow clone. The full procedure, the identity rules, the signing-key
+project stays runnable on a shallow clone.
+
+The same check also refuses a published body that still carries an unresolved version boundary — a
+`<...TBD>` placeholder standing in for a release that does not exist yet. Writing one while an article
+is being drafted is fine and keeps `dotnet test` green; merging it is not, because merging publishes,
+and an agent reading the placeholder cannot tell whether the tool it gates is available on the
+environment it is about to write to. Replace it with the released version before asking for a merge.
+
+The full procedure, the identity rules, the signing-key
 handling, and the consumer-first key-rotation order are in
 [distribution/RELEASING.md](distribution/RELEASING.md).
 
@@ -101,6 +109,18 @@ Before opening a release-affecting pull request, run the producer contract suite
 
 ```bash
 dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj
+```
+
+That reports pass or fail. It does NOT print the per-article size table, and that table is the only
+early warning there is: an article between 80% and 100% of the response budget is green, by design,
+because gating that band blocked open pull requests that were doing nothing wrong. The table is
+written to the test output and needs a logger the default command does not attach, so an article
+sliding toward the limit is invisible under the line above. When you touch a process guide, run it
+this way and read the `of budget` lines -- an article marked `approaching the budget` should be split
+before it is grown further:
+
+```bash
+dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj --logger "console;verbosity=detailed"
 ```
 
 ## Guidance changes

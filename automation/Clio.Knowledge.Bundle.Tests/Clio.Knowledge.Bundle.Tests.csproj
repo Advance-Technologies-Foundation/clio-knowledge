@@ -5,6 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Doc comments are load-bearing in this project: they carry the evidence for each guard. Generating
+         the XML file is what makes the compiler parse them, so a duplicated <summary> (CS1571) or a
+         malformed tag (CS1570) is an error rather than something three review rounds have to notice.
+         CS1591 (member has no doc) stays off: absence is fine, a doc on the wrong member is the defect. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

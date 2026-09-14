@@ -43,6 +43,85 @@ public sealed class ProcessGuideResponseSizeTests
     private const int LargestObservedPass = 32_698;
 
     /// <summary>
+    /// The article that observation was taken on, and its size AT that observation. It lives in this
+    /// repository, outside the folder this fixture measures, and it has already drifted: it is 32,996
+    /// characters today, 298 past the figure the budget is derived from. So the anchor is recorded here
+    /// and checked, because "the largest response observed to return whole" stops meaning anything once
+    /// the article it was measured on is a different article.
+    ///
+    /// This does NOT hold the article at a size. It fails when the drift grows large enough that the
+    /// observation no longer describes anything real, and the fix then is to re-probe and re-date
+    /// <see cref="LargestObservedPass"/> — not to widen this tolerance.
+    /// </summary>
+    private const string ProbeItemId = "esq-filter-parsing";
+
+    /// <summary>
+    /// Measured alongside the processes folder, because this change made it load-bearing FOR that
+    /// folder: seven articles gave up their own copy of the reading convention for the one in
+    /// <c>routing</c>, so if routing stops arriving whole, every cross-article pointer in the set stops
+    /// reading as a fetch. It is also the article every agent reads first, and it is under exactly the
+    /// size pressure this fixture exists for — it grew 9,555 to 11,252 characters on this branch alone.
+    ///
+    /// Raised in review, and it is the fixture's own reasoning turned on itself: the scope comment says
+    /// articles elsewhere are "recorded as measurement, not as a commitment", which was fine while
+    /// nothing here depended on one of them.
+    /// </summary>
+    private const string RoutingItemId = "routing";
+
+    private const int ProbeDriftTolerance = 2_000;
+
+    [Test]
+    [Description("The routing article fits in one response too, because this set now depends on it: the reading convention lives there and nowhere else.")]
+    public void TheRoutingArticle_ShouldFitInOneGetGuidanceResponse()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string? sourcePath = ManifestSourcePath(repositoryRoot, RoutingItemId);
+
+        sourcePath.Should().NotBeNull(
+            because: "routing is mandatory reading and the only place the reading convention now lives; "
+                + "a manifest that no longer declares it is a larger defect than any size");
+
+        int size = ResponseSize(repositoryRoot, sourcePath!);
+        double share = (double)size / MaxResponseCharacters;
+        TestContext.WriteLine(
+            $"{RoutingItemId,-32} {size,7:N0}  {share,6:P1} of budget"
+            + (share >= ReportThreshold ? "   <-- approaching the budget; plan the seam" : string.Empty));
+
+        size.Should().BeLessThanOrEqualTo(MaxResponseCharacters,
+            because: "every article in the process set cites its siblings by name and relies on routing "
+                + "to say that a backticked name is a topic to fetch. If routing SPILLS, that convention "
+                + "reaches nobody and every pointer in the set reads as a heading the reader cannot find. "
+                + $"Split it at a domain boundary rather than raising the budget. It is {size:N0} against "
+                + $"a budget of {MaxResponseCharacters:N0}");
+    }
+
+    [Test]
+    [Description("The article the response budget was measured on has not drifted far enough to make the measurement meaningless.")]
+    public void TheArticleTheBudgetWasMeasuredOn_ShouldStillResembleThatMeasurement()
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string? sourcePath = ManifestSourcePath(repositoryRoot, ProbeItemId);
+
+        sourcePath.Should().NotBeNull(
+            because: $"the budget is derived from one observation taken on '{ProbeItemId}'; if the "
+                + "manifest no longer declares that article, the observation describes nothing and "
+                + "LargestObservedPass has to be re-probed on an article that exists");
+
+        int size = ResponseSize(repositoryRoot, sourcePath!);
+        TestContext.WriteLine(
+            $"budget probe {ProbeItemId,-24} {size,7:N0}  observed at {LargestObservedPass,7:N0}"
+            + $"  drift {size - LargestObservedPass,+7:N0}");
+
+        Math.Abs(size - LargestObservedPass).Should().BeLessThanOrEqualTo(ProbeDriftTolerance,
+            because: $"every number in this fixture is {LargestObservedPass:N0} multiplied twice — the "
+                + "budget by 0.85 — and that figure is one observation of "
+                + $"this one article on 2026-08-31. The article has since been edited freely, so once it "
+                + "is far from the size that was probed, nobody can say what was measured. Re-probe "
+                + "get-guidance against the published library and re-date LargestObservedPass; widening "
+                + "this tolerance instead keeps the number and discards its meaning");
+    }
+
+    /// <summary>
     /// The budget: 85% of the largest observed pass. The margin is part of the contract rather than slack
     /// in it, for three reasons. The observation is a single data point at a single moment; the real limit
     /// counts TOKENS, and a table- or backtick-dense article tokenizes worse per character than the prose
@@ -51,11 +130,19 @@ public sealed class ProcessGuideResponseSizeTests
     /// </summary>
     private const int MaxResponseCharacters = (int)(LargestObservedPass * 0.85);
 
-    // Where the set stands against that budget (2026-08-31): process-data-elements is the largest at
-    // roughly 27,000 characters, which is about 97% of it. That is deliberate rather than accidental —
-    // it is the article to split FIRST when this test goes red, at the seam between the record trigger
-    // and Read/Modify data on one side and the shared data-source filter on the other. Raising the budget
-    // instead would be trading a measured delivery guarantee for the convenience of not splitting.
+
+    /// <summary>
+    /// Where the reported line starts saying "watch this". It PRINTS and does not fail: an article at 88%
+    /// of budget still answers correctly, and a gate here blocked two open pull requests that were not
+    /// doing anything wrong — one of them by ten characters (#96, 25,023 against a 25,013 gate).
+    ///
+    /// The cost of printing rather than gating is recorded honestly, because it is the thing that went
+    /// wrong before: three articles walked from 87% to 99.4% while a warning nobody reads was the only
+    /// thing watching. What makes the print worth more than it was is the CI step now running with
+    /// --logger "console;verbosity=detailed", so the line reaches a reviewer instead of a swallowed
+    /// stdout. It is a warning, and it is documented as a warning.
+    /// </summary>
+    private const double ReportThreshold = 0.8;
 
     /// <summary>
     /// The get-guidance response wraps the article in a JSON envelope — feedback policy, name, uri,
@@ -84,9 +171,16 @@ public sealed class ProcessGuideResponseSizeTests
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         ProcessGuideSet.Article[] declared = ProcessGuideSet.Declared(repositoryRoot);
 
-        declared.Should().HaveCountGreaterThanOrEqualTo(ProcessGuideSet.SplitItemIds.Length,
-            because: "the set is derived from the manifest, and a derivation that selected nothing would "
-                + "report every article as within budget while measuring none of them");
+        // Against the WRITTEN floor, not against the derived set. Contain(GoLiveItemIds(root)) was the
+        // first attempt and holds by construction — GoLiveItemIds is derived from Declared — so review
+        // showed it green while `git mv`-ing an article out of the folder, with its `sourcePath`, took
+        // that article out of this contract entirely.
+        declared.Select(article => article.ItemId)
+            .Should().Contain(ProcessGuideSet.GoLiveFloor,
+            because: "these ids are the articles whose delivery was decided, written down rather than "
+                + "derived, so an edit that moves one out of the measured folder or off the manifest "
+                + "cannot also move the expectation. An article missing here is one this contract has "
+                + "silently stopped measuring");
 
         (string ItemId, int Size)[] measured = declared
             .Select(article => (article.ItemId, Size: ResponseSize(repositoryRoot, article.SourcePath)))
@@ -95,12 +189,17 @@ public sealed class ProcessGuideResponseSizeTests
 
         // Headroom is reported on a GREEN run, not only when it is gone. Without this the slide from 87%
         // to 97% to red is invisible, and the first person to see the number is whoever hits the failure —
-        // at the moment when raising the budget looks cheapest.
+        // at the moment when raising the budget looks cheapest. ONE tier, and it prints: the 90% gate this
+        // replaced blocked two open pull requests that were not doing anything wrong, #96 by ten
+        // characters. The delivery limit below is the only gate; this line is what makes the slide toward
+        // it visible, and the CI step runs the suite with the detailed logger so it is actually read.
         foreach ((string itemId, int size) in measured)
         {
             TestContext.WriteLine(
                 $"{itemId,-32} {size,7:N0}  {(double)size / MaxResponseCharacters,6:P1} of budget"
-                + (size > MaxResponseCharacters * 0.9 ? "   <-- approaching the limit; split it" : string.Empty));
+                + (size > MaxResponseCharacters * ReportThreshold
+                    ? "   <-- approaching the budget; plan the seam"
+                        : string.Empty));
         }
 
         (string ItemId, int Size)[] tooLarge = measured
@@ -134,6 +233,18 @@ public sealed class ProcessGuideResponseSizeTests
             because: "the size contract is derived from the manifest, so an article on disk that no resource "
                 + "declares is both unreachable through get-guidance and unmeasured by the test above — it "
                 + "would carry the ENG-96212 defect with nothing watching");
+    }
+
+    /// <summary>The declared source path of one itemId, or null when the manifest does not declare it.</summary>
+    private static string? ManifestSourcePath(string repositoryRoot, string itemId)
+    {
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        return manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Where(resource => resource.GetProperty("itemId").GetString() == itemId)
+            .Select(resource => resource.GetProperty("sourcePath").GetString())
+            .FirstOrDefault();
     }
 
     /// <summary>

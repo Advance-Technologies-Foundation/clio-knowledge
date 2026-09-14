@@ -41,8 +41,38 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # The logger is not decoration, and it carries more weight than it did: the 90% gate was removed
+      # because it blocked two open pull requests that were doing nothing wrong, so this table ("X of
+      # budget", and which article is approaching it) is now the ONLY early warning before the delivery
+      # limit. It is written to the test output, which the default console logger drops -- without this
+      # it prints on nobody's screen and the first person to see an article near the limit is whoever's
+      # build goes red. Documented in CONTRIBUTING for local runs.
       - name: Run the producer contract suite
-        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release
+        run: dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj -c Release --logger "console;verbosity=detailed"
+
+      # Also not a test, for a different reason: an article may legitimately carry an unresolved
+      # version boundary while it is being written, and a suite that failed on one could not be run
+      # locally during that work. What must never happen is PUBLISHING one, and merging publishes —
+      # so the token is refused here, at the last point before the merge, rather than in the suite.
+      # The warning this replaces was recorded inside a passing run, so the required check reported
+      # success with the placeholder still in agent-facing content.
+      # ProcessVersionsGuidanceTests keeps the pattern below and the tokens the articles carry in
+      # the same shape, so this gate cannot go blind to them.
+      - name: Refuse an unresolved version boundary in published content
+        run: |
+          set -euo pipefail
+          jq -r '.resources[].sourcePath' bundle-source.json > declared-bodies.txt
+          # Read with a loop rather than `mapfile`, for the same reason as the step below.
+          declared_bodies=()
+          while IFS= read -r declared_body; do
+            declared_bodies+=("${declared_body}")
+          done < declared-bodies.txt
+          rm -f declared-bodies.txt
+          if grep -nE '<[A-Z][A-Z0-9-]*TBD>' bundle-source.json "${declared_bodies[@]}"; then
+            echo "::error::A published body still carries an unresolved version boundary placeholder, listed above. Replace it with the released version that first carries the feature. Merging to master publishes this content, and an agent reading the placeholder cannot tell whether the tool it gates is available on the environment it is about to write to."
+            exit 1
+          fi
+          echo "No unresolved version boundary placeholder in published content."
 
       # Everything above is hermetic: it judges this revision alone. This step is the one thing that
       # cannot be a test, because the question is about history — whether the published bytes moved
