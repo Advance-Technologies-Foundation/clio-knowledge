@@ -118,6 +118,37 @@ Creatio or disk. The guide contains:
     and friends while declaring none of them). Inventing a key would REPLACE a localized column title
     with one hardcoded culture. If a token still renders raw on the device, the fix is the entity column
     or the source page's resources — not a key added here.
+  - requestConversions.unresolvedTargetRequests — actions whose request type converts but whose
+    NAVIGATION TARGET the converter could not confirm exists on mobile. Every entry keeps its CONTROL on
+    the page; what differs is what happened to the action and how confidently it was judged, and you
+    must read BOTH fields before saying anything to the user:
+      • `state: "missing"` + `bindingRemoved: true` — a DEFINITIONAL absence: the target is a web page,
+        which cannot open on mobile at all. The binding is already gone from `viewConfigDiff[].values`
+        and also appears in droppedRequests under `drop-request-target-missing`. Do NOT re-add it — it
+        would fail every time it is used. Tell the user the control is on the page without its action,
+        and offer the two real fixes: convert the target page to mobile, or repoint the action.
+      • `state: "missing"` + `bindingRemoved: false` — an environment READ reported the target absent
+        (an object with no default mobile page). A read cannot PROVE absence, so nothing was removed.
+        Report it and name the remedy — create the object's default mobile page — but never present it
+        as a certainty and never strip the binding yourself.
+      • `state: "unknown"` — the target was not verified at all (no reachable environment, or the probe
+        degraded). Nothing was removed and nothing is claimed. Ask the user; do NOT report a working
+        action as broken.
+    `targetKind` says which of the two kinds it is (a web page, or an object's default mobile page) and
+    therefore which remedy applies; `target` names it. `requestConversions.targetsProbed` false means
+    the whole question was never asked — an EMPTY list then means "not checked", not "all clear", and
+    `targetsNote` says why. Null/empty when every target resolved.
+  - webOnlySections — page sections the source declares that mobile has no place for (handlers,
+    validators, converters). REPORT ONLY: nothing here transfers, and re-implementing the behaviour is
+    an entity-level business-rule job, not a body change.
+  - dataSources — every data-source name the SOURCE page declares, all of them. Mobile carries them all;
+    this is not a "mobile supports one" list, and pruning it is how an attribute's path stops resolving
+    ("Item with the path … not found"). It is the same set as the keys of `modelConfig.dataSources`,
+    published separately so you can name them at the gate without reading the config.
+  - sourceTemplate — the web template the source page actually derives from, after climbing past
+    same-named replacing layers. It is what templateMatch was resolved against.
+  - suggestedTargetSchemaName — the mobile schema name to pass to create-page unless the user names
+    another. Derived from the source name; it is a suggestion, not a reservation.
   - dataSectionConflicts — one entry per template-owned data-section value the page changed that
     NEITHER diff can express, each with its `section` (which diff to hand-edit), `path` (segments),
     `entry` (the array element's name, when it has one) and `kind`. Null when there are none, which is
@@ -224,8 +255,9 @@ FLOW
      them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
      second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
      ListItem is a separate named element).
-   - insert — add mobileType under parentName/propertyName (propertyName defaults to "items"). Use the
-     entry's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
+   - insert — add the element under parentName/propertyName; its type is `values.type`, and
+     `propertyName` is ALWAYS present, even when it is the applier's own default `items`. Use the
+     operation's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
      get-component-info (see ELEMENT PLACEMENT IS AUTHORITATIVE in HARD MOBILE RULES).
      When viewConfigDiff[].index is present it is already on the operation, at that 0-based position VERBATIM
      (a positional element mapped above/below an anchor, e.g. above the mobile Tabs — or a converted
@@ -251,8 +283,10 @@ FLOW
      carries the type and EVERY source property the mobile component supports — never drop any of
      them. It also already carries the CONVERTED event-binding requests (a button's `clicked`, a
      field's `valueChange`/`updated`): supported requests are kept (remapped when the mobile name
-     differs). A component whose request the mobile app does NOT support is not inserted at all — it
-     was already DROPPED (see its `droppedElements` entry), so you never see it here. Do NOT re-add or
+     differs). A `crt.Button` whose request the mobile app does NOT support is not inserted at all — it
+     was already DROPPED (see its `droppedElements` entry), so you never see it here. Any OTHER
+     component type IS here even when its request was not supported: the component survives and only its
+     binding was dealt with — see REQUESTS in HARD MOBILE RULES for which of the two happened to it. Do NOT re-add or
      hand-edit these bindings — paste values as-is. There is NOTHING to add: the value binding is in
      `values` too, under `control`, which is the same wire name on both web and mobile (the mobile
      runtime reads the JSON key `control`; a Dart field named `value` is what it deserializes INTO, and
@@ -301,8 +335,9 @@ FLOW
    (a component the adaptive pass placed per breakpoint keeps that adaptive placement instead).
    Apply the inserts in element-map order (a parent always precedes its children) and do NOT reparent,
    reorder or re-place anything yourself, do NOT add an Area of your own, and do NOT touch a tab the mobile
-   template provides (it arrives as a merge twin and gets no layers). The synthesized entries have no
-   webName — they have no web counterpart. This structure is MANDATORY — do NOT ask whether to apply it,
+   template provides (it arrives as a merge twin and gets no layers). A synthesized layer has no source
+   counterpart at all, so its name appears in NEITHER `nameMap` nor `sourceStructure` — that absence is
+   how you recognise one; there is no field on the operation that says so. This structure is MANDATORY — do NOT ask whether to apply it,
    do NOT offer to keep the web structure instead, and do NOT treat it as a decision at the gate. STATE it
    in the plain-language plan as a fact ("the content of <tab> goes into one Area card, stacked in the web
    order"), the way you state which components transfer.
@@ -442,12 +477,23 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
   ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
   that does not remap to a supported one) is DROPPED (a `droppedElements` entry whose reason names the
-  request) — a dead button is not shipped. Other component types are NOT dropped for an unsupported
-  request (some legitimately use a system request absent from the list): their binding is kept verbatim
-  and flagged. A supported request is kept in
+  request) — a dead button is not shipped. NO OTHER component type is ever dropped over a request: some
+  legitimately use a system request absent from the list, and losing the component would lose valid UI.
+  What happens to that surviving component's BINDING depends on which of the two it is, and they are
+  opposite reports:
+    • the request is KNOWN-unsupported (the conversion rules name it and give no mobile counterpart) —
+      the binding is REMOVED and the component ships without that action, reported in
+      `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
+    • the request is UNKNOWN (in neither the map nor the bundled set — often a custom `usr.*`) — the
+      binding is KEPT VERBATIM and flagged in `requestConversions.flaggedRequests[]` under
+      `flag-request-unmapped`, for you to verify with the user.
+  A supported request is kept in
   viewConfigDiff[].values (the operation's name is already the mobile one) — paste the values verbatim.
-  guide.requestConversions is the advisory summary (convertedRequests / flaggedRequests); dropped
-  components appear in `droppedElements`. Tell the user which action components were removed.
+  guide.requestConversions has FOUR collections and you need all of them: convertedRequests,
+  droppedRequests (a binding lost — including on a component that SURVIVED, which is a loss
+  `droppedElements` by construction never shows), flaggedRequests, and unresolvedTargetRequests (see its
+  own field entry above). Tell the user which action components were removed AND which surviving
+  components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
   get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info

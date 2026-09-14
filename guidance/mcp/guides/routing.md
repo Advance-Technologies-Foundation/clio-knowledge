@@ -17,6 +17,8 @@ guards — it says whose rule it is and names that guide for the rest.
     Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
     to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
   - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
+  - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
+    requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page

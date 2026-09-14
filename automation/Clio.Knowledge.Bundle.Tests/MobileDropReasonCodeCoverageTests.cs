@@ -27,6 +27,9 @@ public sealed class MobileDropReasonCodeCoverageTests
     /// <summary>The article that owns the decode table; the routing guide sends a caller here by name.</summary>
     private const string CodeArticle = "guidance/mcp/guides/platform/mobile/web-to-mobile-reason-codes.md";
 
+    /// <summary>The MANDATORY read the tool's own description names; it cites codes inline and routes here.</summary>
+    private const string ConversionArticle = "guidance/mcp/guides/platform/mobile/web-to-mobile-conversion.md";
+
     /// <summary>
     /// Every code <c>ReasonCodes</c> declares in the clio repository
     /// (<c>clio/Command/McpServer/Tools/MobilePageConverter/MobilePageConversionGuideModels.cs</c>), paired
@@ -115,7 +118,7 @@ public sealed class MobileDropReasonCodeCoverageTests
     ];
 
     [Test]
-    [Description("Every reason code the converter can emit — for an element, an action binding, a page business rule or a skipped normalization — has an entry in the decode article, so no outcome reaches a caller unexplained.")]
+    [Description("Every reason code the converter can emit — for an element, an action binding, a page business rule or a skipped normalization — has its OWN DECODE ENTRY in the article, so no outcome reaches a caller unexplained.")]
     public void Article_ShouldDocumentEveryCodeTheConverterEmits()
     {
         // Arrange
@@ -123,29 +126,46 @@ public sealed class MobileDropReasonCodeCoverageTests
 
         // Act
         string[] undocumented = ConverterCodes
-            .Where(code => !article.Contains(code.Code))
+            .Where(code => !HasDecodeEntry(article, code.Code))
             .Select(code => $"{code.Code} ({code.Because})")
             .ToArray();
 
         // Assert
         undocumented.Should().BeEmpty(
-            because: "a code the converter emits but this article never names is a drop the caller cannot "
+            because: "a code the converter emits but this article never DECODES is a drop the caller cannot "
                 + "classify, and the article's own fallback then has it reported as unexplained loss");
     }
 
+    /// <summary>
+    /// True when the article opens a decode entry for <paramref name="code"/> — a line that STARTS with it,
+    /// at the table's two-space indent.
+    /// </summary>
+    /// <remarks>
+    /// Anchored rather than a bare <c>Contains</c>, because six of the codes are also CROSS-REFERENCED from
+    /// inside another entry's prose ("different from the element code drop-unsupported-request, where …").
+    /// A substring test is satisfied by that mention alone, so the whole decode entry for those six could be
+    /// deleted with the suite green — demonstrated by deleting the <c>drop-type-not-in-mobile-registry</c>
+    /// entry, which left only the cross-reference at the <c>drop-container-no-mobile-equivalent</c> entry and
+    /// still passed. The cross-references are worth keeping; they just must not stand in for an entry.
+    /// </remarks>
+    private static bool HasDecodeEntry(string article, string code) =>
+        Regex.IsMatch(article, $"^  {Regex.Escape(code)}(\\s|$)", RegexOptions.Multiline);
+
     [Test]
-    [Description("The decode article documents no reason code the converter cannot emit, so a caller never writes a branch for a case that never arrives.")]
+    [Description("NEITHER mobile conversion article names a reason code the converter cannot emit, so a caller never writes a branch for a case that never arrives — and a code renamed in clio cannot hide in the article the tool actually routes to.")]
     public void Article_ShouldNotDocumentACodeTheConverterNeverEmits()
     {
-        // Arrange
-        string article = ReadGuide(CodeArticle);
+        // Arrange — both articles, because the conversion guide names codes of its own and a rename that
+        // landed only there would otherwise be invisible: it is the MANDATORY read, the decode table is one
+        // hop further on, so a stale code there reaches more callers than a stale one here.
         HashSet<string> emitted = ConverterCodes.Select(code => code.Code).ToHashSet(StringComparer.Ordinal);
 
         // Act
-        string[] invented = Regex.Matches(article, @"(?:drop|flag|skip)-[a-z]+(?:-[a-z]+)*")
-            .Select(match => match.Value)
+        string[] invented = new[] { CodeArticle, ConversionArticle }
+            .SelectMany(path => Regex.Matches(ReadGuide(path), @"(?:drop|flag|skip)-[a-z]+(?:-[a-z]+)*")
+                .Select(match => $"{match.Value} ({path})"))
+            .Where(found => !emitted.Contains(found[..found.IndexOf(' ')]))
             .Distinct(StringComparer.Ordinal)
-            .Where(code => !emitted.Contains(code))
             .ToArray();
 
         // Assert

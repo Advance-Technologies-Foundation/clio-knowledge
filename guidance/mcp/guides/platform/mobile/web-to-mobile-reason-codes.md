@@ -111,8 +111,10 @@ AN ACTION BINDING — requestConversions.droppedRequests[] / flaggedRequests[]
 A binding lost because its ELEMENT was dropped carries THAT ELEMENT'S OWN CODE — one of the element
 codes above, with the same params — not a code of its own. The element is why the action is gone, so the
 two records say one thing in one vocabulary. Read such an entry as "see the element", and report the loss
-ONCE, not twice. The codes below are the cases the BINDING owns: the first two happen while the element
-itself survives, and the next two are reconciliation passes that ran after the binding was recorded.
+ONCE, not twice. The codes below are the cases the BINDING owns a code for. Do NOT read them as "the
+element survived" — `drop-request-chrome-native` is emitted for an element that WAS dropped (as
+inherited chrome), and it exists precisely because the mobile native that replaces it may or may not
+carry the same action. Each entry says which of the two it is; read the entry, not the position.
 
   drop-request-chrome-native   The element was dropped as inherited chrome and the mobile template's
                                native control carries its OWN action. READ THE ENTRY'S webRequest: when it
