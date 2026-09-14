@@ -45,8 +45,10 @@ owner -- read the one your task needs instead of guessing:
                                      completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R18 connection rules.
-  * `process-versions`             - the version model, which member runs, and how to write a version.
-                                     Read it BEFORE editing or launching ANY existing process.
+  * `process-versions`             - the version model, which member runs, and how to read that
+                                     standing. Read it BEFORE editing or launching ANY existing process.
+  * `process-version-writes`       - saving a change as a new version, taking a restore point, and
+                                     making a member actual (the rollback gesture).
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -194,5 +196,5 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   `modify-business-process-as-new-version` instead -- the SAME operations against a new version, or an
   EMPTY operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not
   the one that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that
-  member, or report the standing and ask. `process-versions` owns every other outcome, the identity
-  rules and what to ask before activating.
+  member, or report the standing and ask. `process-versions` owns every other outcome and the identity
+  rules; `process-version-writes` owns what to ask before activating.
