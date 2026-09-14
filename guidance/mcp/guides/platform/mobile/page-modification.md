@@ -80,7 +80,7 @@ Specifically, NEVER:
 Instead, report the limitation explicitly to the user. Use this shape:
   - What was requested.
   - Why mobile cannot do it (cite the rule: e.g. "validators are not supported
-    on mobile", "crt.DataGrid is web-only", "page body must not declare
+    on mobile", "crt.HtmlEditor is web-only", "page body must not declare
     handlers").
   - The closest supported alternative, if any (e.g. entity-level business rule
     via `create-entity-business-rules`, an OOTB converter from the allowed list,
@@ -377,8 +377,13 @@ Web components WILL NOT WORK on mobile — they are not loaded by the mobile run
 and will result in a broken page (blank slot, runtime error, or silent no-op).
 This is a hard platform boundary, not a styling difference:
   - Mobile and web have separate component registries and separate runtimes.
-  - A component name that exists on web (e.g. `crt.Checkbox`, `crt.DataGrid`)
+  - A component name that exists on web (e.g. `crt.HtmlEditor`, `crt.ColorPicker`)
     is NOT automatically available on mobile even if it sounds generic.
+  - Catalog presence answers "will the app render it", which is not the same
+    question as "can I place it in the mobile Designer". Some types are reachable
+    only as part of another element - a list row, a menu entry - and the catalog
+    does not say which. When that distinction matters for a page you are about to
+    author, confirm it in the Designer rather than inferring it from the catalog.
   - Do NOT copy `type` values from a web page body into a mobile page body.
 
 MANDATORY before inserting any component into a mobile page:
@@ -398,6 +403,15 @@ NOT available in mobile (web-only):
   crt.DataGrid, crt.HtmlEditor, crt.PasswordInput, crt.EncryptedInput,
   crt.ColorPicker, crt.TagSelect, crt.MultiSelect, crt.IFrame,
   crt.Chat, crt.Dashboards
+
+  CUTOVER DEPENDENCY — ENG-91859. That list is correct for the catalog served TODAY, which still
+  carries the 46 mobile types extracted from the web monorepo. Two entries are catalog facts, not
+  runtime facts: `crt.DataGrid` and `crt.IFrame` DO exist in the Flutter runtime, and they leave
+  this list on the day ENG-91859 publishes the runtime-derived catalog. Keep them here until then;
+  the rule below already covers the transition — check `get-component-info schema-type: "mobile"`
+  and use what the catalog actually serves. The exact list is pinned by a bundle test so it cannot
+  drift silently, but no test can observe the publication, so revisiting this block is part of
+  ENG-91859's cutover.
 
 VERIFY, DON'T DOWNGRADE. Neither list above is exhaustive — `get-component-info
 schema-type: "mobile"` is the authoritative source for what runs on mobile. A type
