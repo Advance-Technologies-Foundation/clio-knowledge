@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.3",
+  "libraryVersion": "1.15.4",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2311,7 +2311,7 @@
     {
       "itemId": "theming",
       "title": "Custom themes",
-      "description": "Guides creation, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes.",
+      "description": "Guides creation, reading, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes.",
       "topicId": "creatio.theming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/theming",

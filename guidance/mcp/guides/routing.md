@@ -99,7 +99,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - identity assertion / Identity Service V3 -> name=identity-assertion
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
-  - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
+  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 
