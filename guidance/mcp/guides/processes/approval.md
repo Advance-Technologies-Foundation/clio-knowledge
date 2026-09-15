@@ -96,23 +96,20 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   recipient — an address is a person, not a formatting detail.
 - The visa schema, its master column and the section are DERIVED from `object` server-side (with the
   platform's `SysApproval` fallback when the object has no approval settings) and are never caller input.
-- **The outcome CAN be branched on, and no gateway is involved.** Approved / rejected / canceled arrives in
-  the element's `ResultParameter` output, and an element output parameter is referenceable from a flow
-  condition as `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]` — take both UIds from
-  `describe-business-process`, which reports them but assembles no ready-made token (see "Referencing a
-  parameter" in `process-formulas`). So build the outgoing flows plain and then give each its condition with
-  `modify-business-process` -> `setFlowCondition`; `flows[].kind` is still refused on the build path, which
-  is why this is two steps rather than one (see `process-branch-conditions`). Note the outcome set is THREE
-  values, not two — a two-way Approved/Rejected split silently drops the canceled case.
-- **BUT THE DESIGNER WILL NOT SHOW THAT FORMULA.** This element's result SET is never empty by
-  configuration — the editor lists the final `VisaStatus` values, the same Positive / Negative / Canceled
-  set — so whenever the connector's source resolves to this one Approval, which is the ordinary shape, the
-  designer opens a result-selection editor and never a formula field. The branch is then only FINISHED by a
-  human ticking the results there. Until they do, the condition you set above is LIVE — the process really
-  does route on it — and their selection then supersedes it, after which `setFlowCondition` refuses the
-  connector.
-  `process-branch-conditions` owns the two gates, the failure, and what to tell the user BEFORE building;
-  read it first.
+- **The outcome CAN be branched on, and no gateway is involved.** Declare it WHERE YOU DECLARE THE
+  FLOW: give each outgoing flow `flows[].kind` `conditional` plus `flows[].results` with the captions
+  that select it. The set is exactly `Positive`, `Negative` and `Canceled` — the final `VisaStatus`
+  values — and use all THREE, because a two-way Approved/Rejected split silently drops the canceled
+  case. On a process that already exists the same thing is `modify-business-process` ->
+  `setFlowResults`. Both need `CrtProcessBuilder` 1.6.2.16.
+- **DO NOT BRANCH THIS ELEMENT WITH A FORMULA.** Its result SET is never empty by configuration — the
+  editor lists those same final `VisaStatus` values — so whenever the connector's source resolves to
+  this one Approval, which is the ordinary shape, the designer opens a result-selection editor and
+  never a formula field. A condition written there with `setFlowCondition` is NOT refused and it RUNS,
+  but no human can read or edit it: every checkbox reads unticked, the connector is marked invalid the
+  first time somebody opens its card, and the expression is rendered in neither page mode.
+  `process-activity-result-branches` owns the dialect, its refusals and what to tell the user BEFORE
+  building; read it first.
 
 == Modifying an existing Approval element ==
 - `modify-business-process` → `setElement` with an `approval` block reconfigures it IN PLACE; only the

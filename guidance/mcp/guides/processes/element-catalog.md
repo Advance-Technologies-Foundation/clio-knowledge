@@ -37,7 +37,7 @@ leaf rather than through `process-modeling`.
   `approval` block — the object and the record under approval, who approves, and the two notifications with
   their email templates. It is a configured approval STEP, not a FLOW: branching on the verdict is a
   conditional flow off the element and needs no gateway, but the designer edits that branch through a
-  result-selection editor — see `process-branch-conditions`. `process-approval` owns the contract and its
+  result-selection editor — see `process-activity-result-branches`. `process-approval` owns the contract and its
   limits.
 - `preconfiguredPage` — Pre-configured page: shows a Freedom UI page to a user and resumes when the user
   presses a completing button, and is the only page element that can hand a user a purpose-built page.
@@ -158,7 +158,7 @@ User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialo
   `preconfiguredPageUserTask` Pre-configured page, `emailTemplateUserTask` Send email, `approvalUserTask` Approval.
   Six of these ENUMERATE RESULTS, which changes how a branch leaving them is authored: Perform task, User
   dialog, Open edit page, Auto-generated page, Pre-configured page and Approval. A conditional flow off one
-  is edited in the designer as a result SELECTION rather than a formula — `process-branch-conditions` owns
+  is edited in the designer as a result SELECTION rather than a formula — `process-activity-result-branches` owns
   that rule, and no guide here owns User dialog or Auto-generated page, so treat a branch off either the
   same way.
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom

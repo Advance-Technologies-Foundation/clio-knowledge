@@ -170,9 +170,10 @@ stranded column leaves the designer's field empty with the list still switched o
 SAME object (the Classic-to-Freedom move) is fine: every reference stays valid. The refusal names the way out —
 supply a column of the new object, or `enabled: false`; for the conditions, `clearFilter` before the retarget.
 **State this to the user before building one:** this contract builds the result list and the column, not the
-routing. With `resultsByColumn` enabled AND its column set, the branch is not yours to finish: its connectors
-take the designer's RESULT-SELECTION editor and only a human writes the selection
-(`process-branch-conditions`, which says what to tell them). With the list off — or switched on with
+routing. With `resultsByColumn` enabled AND its column set, its connectors take the designer's
+RESULT-SELECTION editor and never a formula field, so write the branch with `flows[].results` /
+`setFlowResults` — a formula there is not refused and runs unreadably
+(`process-activity-result-branches`, which says what to tell them). With the list off — or switched on with
 `column: null` — the element enumerates nothing, so add the flows plain and set each condition
 with `modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op; gateway
 ELEMENTS and default flows stay unbuildable, see `process-element-catalog`). The list and

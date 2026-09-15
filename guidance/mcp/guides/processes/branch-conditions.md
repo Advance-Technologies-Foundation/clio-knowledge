@@ -241,28 +241,14 @@ fires above 100 and one that fires above 1000 resolve differently purely by whic
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
 
-One exception, and it decides the DIALECT rather than the order. When a connector's source enumerates
-ACTIVITY RESULTS, the designer edits it through a checkbox list headed `What is the result of an element
-"<name>"?` and never a formula field. Whether YOUR source enumerates them is answered by its own guide;
-`process-element-catalog` marks the elements that do at all. Measured on the 7.8.0 designer.
-
-- NO selection yet — every connector clio writes. The editor appears when the source resolves to exactly ONE
-  activity with a result parameter (ONE intervening gateway is walked through, via its non-conditional
-  incoming flows, one hop only — two chained gateways escape) AND that activity's result set is NON-EMPTY;
-  an empty set brings the formula field back. Nothing refuses you, and that is the trap: the formula saves
-  and RUNS (7.8.0 falls back to the stored expression) and the schema SAVES CLEAN, because element
-  validation runs only when a human opens that element's card. From the first save after somebody opens the
-  connector it is INVALID, raising "Required fields of some elements are not filled in" and showing the
-  formula in neither page mode — so a green save is not evidence the branch is finished. Only the designer
-  writes the selection: say BEFORE building that finishing it means ticking the results there.
-- A selection ALREADY made. The designer finds the activity by the UId recorded IN the selection, so the
-  topology test above is skipped and the connector keeps its editor however the diagram changes around it
-  — re-routing is not a way to recover such a branch. The selection also wins over any formula whatever the
-  flow order says, so this is not a race you control by ordering, and `setFlowCondition` refuses to write
-  onto one.
-
-`describe-business-process` reports `kind: "conditional"` with the `condition` text in BOTH states, so the
-text alone never says which one you are in; `branchesOnActivityResult` is the field that does.
+One exception, and it decides the DIALECT rather than the order: when a connector's source
+enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula,
+the designer offers no formula field there at all, and nothing refuses the formula you would
+otherwise write - it saves, it runs, and the connector is invalid the first time a human opens its
+card. `process-activity-result-branches` owns that dialect whole: how to write it with
+`flows[].results` and `setFlowResults`, how to read it back, and exactly when the checkbox editor
+appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
+edit page with results by column.
 
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
 `B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a

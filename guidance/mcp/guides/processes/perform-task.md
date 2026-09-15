@@ -116,8 +116,9 @@ leaf rather than through `process-modeling`.
                       editor for that connector — the designer opens that editor rather than a formula
                       field whenever this element's task category HAS result entries, which the stock
                       categories do, and a selected result makes the platform stop reading the formula.
-                      clio refuses THAT case only; with the selection still empty it writes the formula
-                      and nothing warns you. `process-branch-conditions` owns the rule. Affects 337 of
+                      Write the SELECTION instead — `flows[].results` on the build path,
+                      `setFlowResults` on the modify path — because nothing refuses a formula
+                      here and nothing warns you. `process-activity-result-branches` owns the rule. Affects 337 of
                       the 1 406 conditional flows shipped in 7.8.0. Say two things out loud, or the
                       owner finds them alone: once a human opens that connector's card the designer marks
                       it invalid and every later save raises "Required fields of some elements are not
