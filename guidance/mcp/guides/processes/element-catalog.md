@@ -17,20 +17,22 @@ leaf rather than through `process-modeling`.
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `addData`->AddDataUserTask,
-  `performTask`->ActivityUserTask).
+  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
+  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `count` |
   `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns and
   sort (`first` ONLY — refused for `count`/`aggregation`), an `aggregation` function + column (`aggregation`
   ONLY), plus a record `filter` (the block is in `process-data-elements`, the
   filter contract in `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
-  (same two owners). An `addData` element is CONFIGURABLE via its `addData` block in BOTH modes — Add one
-  record and Add selection (target object, adding mode, selection object, column values including `Column
-  from this selection`), plus a record `filter` over the SELECTION object. CAVEAT: Delete data still places
-  an UNCONFIGURED element — its target object cannot be set yet, so that step does nothing useful until a
-  human configures it in the designer. Say so when you use one; do not present such a result as a working
-  data operation.
+  (same two owners). A `deleteData` element is CONFIGURABLE via its `deleteData` block — the target object
+  and nothing else, because the record `filter` is what decides which records are destroyed. It is the one
+  data element whose filter is not merely recommended: with none the runtime deletes nothing and fails.
+  DESTRUCTIVE — count the matching records, name the object and what the filter selects, and get an
+  explicit yes BEFORE you build it; `process-delete-data` carries the message template. An `addData`
+  element is CONFIGURABLE via its `addData` block in BOTH modes — Add one record and Add selection
+  (target object, adding mode, selection object, column values including `Column from this
+  selection`), plus a record `filter` over the SELECTION object.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
   body OR an existing email template (with the record its macros resolve against), options and the
@@ -103,7 +105,7 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  sub-process, the DELETE-data target object + values (a `filter` on THAT task is serialized
+  sub-process, the Add-data and Delete-data targets (a `filter` on THAT task is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and
   `addData`), and the Read data
   COLLECTION mode (ENG-96504; its first-record, count and aggregation modes DO build — see the catalog entry below).
@@ -142,11 +144,13 @@ System actions (palette group "System actions"):
     so a clean build does NOT mean the element will do anything - check the filter and the entries.
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements` for the block and `process-data-source-filters` for the filter.
-- `deleteDataUserTask` Delete data — delete matched records. The element BUILDS, but its target object
-    and values do NOT yet — see the caveat near the top of this guide. (Add data no longer shares this
-    limitation: it is configurable via its `addData` block.) Its
-    `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
-    object is unset: do not report the element as a working delete.
+- `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData`
+    block (target object — the only field it has) plus a `filter` — see `process-delete-data` for the
+    block and the confirmation duty, `process-data-source-filters` for the filter. Unlike Modify data there
+    is no mode flag: the runtime always applies the filter and throws its empty-filter error without one,
+    so a filterless element deletes nothing and fails rather than deleting everything. DESTRUCTIVE and
+    irreversible, and it repeats on EVERY run — confirm the object and the selected records with the user
+    before you plan one in.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
     READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
     be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a

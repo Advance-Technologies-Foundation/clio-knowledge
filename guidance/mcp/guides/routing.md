@@ -36,6 +36,8 @@ guards — it says whose rule it is and names that guide for the rest.
   - start a process on a record add/modify/delete, read data, or modify data ->
     name=process-data-elements
   - add data (create records from a process, one or one per filtered selection) -> name=process-add-data
+  - DELETE records from inside a process -> name=process-delete-data (read it BEFORE planning the step:
+    the element is irreversible and the article carries the confirmation you owe the user)
   - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default

@@ -2,7 +2,7 @@ clio MCP process-data-elements guide — record triggers, Read data and Modify d
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of starting a process from a record event and of the Read data
-and Modify data elements; Add data has its own article, `process-add-data`. The `filter` these elements
+and Modify data elements; Add data has its own article, `process-add-data`; Delete data has `process-delete-data`. The `filter` these elements
 carry is owned by `process-data-source-filters`: every element here says WHETHER it takes one and what
 that means for it, and that article says what a filter may contain. The Change access rights element consumes the same
 filter; see `process-access-rights`.
@@ -222,3 +222,9 @@ filter; see `process-access-rights`.
   A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
   check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
   comes back as its raw `[#…#]` in `expression`).
+
+== Delete data element (deleteData) ==
+- Owned by its own article: `process-delete-data`. A `deleteData` element permanently deletes every record
+  its `filter` matches, every time the process runs, and the block that configures it has ONE field. Fetch
+  that article before you plan one in — it carries the count-first rule and the confirmation message you owe
+  the user, and neither is optional.

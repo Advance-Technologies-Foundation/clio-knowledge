@@ -57,10 +57,11 @@ is the one contract all three share, which is why it reads as its own subject.
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
   parameter" option for signal starts). Parameter references ARE valid on a data-operation element filter —
   the element runs inside a live process instance — and are end-to-end buildable on a `readData` element
-  (e.g. filter the read by a process parameter's value) and on a `changeData` element, where a filter is
-  effectively MANDATORY (`process-data-elements` owns that rule and states why); on Add/Delete data they serialize
-  but the task itself is not buildable yet (see below; `process-element-catalog` owns which elements are
-  buildable and is the article to re-read when that changes).
+  (e.g. filter the read by a process parameter's value), on a `changeData` element, where a filter is
+  effectively MANDATORY (`process-data-elements` owns that rule and states why), and on a `deleteData`
+  element, where it is mandatory for the same reason and decides what gets destroyed; on Add data the
+  filter serializes but the task itself is not buildable yet (see below; `process-element-catalog` owns
+  which elements are buildable and is the article to re-read when that changes).
 - `datePart` (optional, LEFT-hand modifier — NOT a right-hand source): extract a calendar/clock part from a
   Date/DateTime `column` and compare that part instead of the whole date. `Year` | `Month` | `Day` |
   `Week` | `Weekday` | `Hour` extract an INTEGER — pair with an integer `value`; a `datePart` WITH a
@@ -76,10 +77,13 @@ is the one contract all three share, which is why it reads as its own subject.
 - A `filter` on a `readData` element is end-to-end usable (pair it with the element's `readData` block —
   see the "Read data element" section of `process-data-elements`), and on a `changeData` element it is
   effectively MANDATORY — the runtime refuses to update with an empty filter (see the "Modify data
-  element" section of `process-data-elements`). A `filter` on an
-  Add/Delete-data task is serialized too, but those tasks' target object / values are not buildable yet
-  (`process-element-catalog` owns that, and this sentence is only true while it says so), so THEIR
-  filters are not end-to-end usable in this increment.
+  element" section of `process-data-elements`). On a `deleteData` element it is mandatory for the same
+  reason and carries the added weight that whatever it selects is DELETED, irreversibly, on every run —
+  see `process-delete-data` for the confirmation duty that goes
+  with writing one. A `filter` on an
+  Add-data task is serialized too, but that task's target object / values are not buildable yet
+  (`process-element-catalog` owns that, and this sentence is only true while it says so), so ITS
+  filter is not end-to-end usable in this increment.
 - On an EXISTING process, set/clear a filter via `modify-business-process` ops `setFilter`
   ({ op:"setFilter", elementName, filter }) and `clearFilter` ({ op:"clearFilter", elementName }).
   MUST: `setFilter` REPLACES the element's whole filter (there is no add-one-condition op), so to add a
