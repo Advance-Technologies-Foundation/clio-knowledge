@@ -125,7 +125,7 @@ modes (mode/sender/recipients/subject/body OR template + templateEntity/options/
 `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
+    FIRST-RECORD, COLLECTION, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
     object, mode, columns/sort — `first` / `collection`, refused for `count`/`aggregation` — a
     `numberOfRecords` top-N (`collection` ONLY) and aggregation —
     `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
