@@ -25,10 +25,13 @@ Creatio or disk. The guide contains:
     operations already carry the parent, including the tab layers this map does not model.
   - sourceStructure — the full resolved component tree (incl. components inherited from the
     base template), with name / type / parentName / isContainer.
-  - componentSuggestions — per source component TYPE, DERIVED from the finished viewConfigDiff: what
-    the conversion DID to that type's instances. A category, spelled exactly as it ships —
-    PascalCase: DirectMapping / AlternativeAvailable / WithAdaptation / Unsupported /
-    RequiresManualDecision — plus the mobile type(s) it resolved to. A type whose configuration shipped
+  - componentSuggestions — per source component TYPE: what the conversion DID to that type's
+    instances. A category, spelled exactly as it ships — PascalCase: DirectMapping /
+    AlternativeAvailable / WithAdaptation / Unsupported / RequiresManualDecision — plus the mobile
+    type(s) it resolved to. Four of the five are DERIVED from the finished viewConfigDiff and can be
+    checked against it. WithAdaptation is the exception: it is a judgement about adjustment that no
+    operation carries, so it is reachable only from a conversion rule that declares it — do not look
+    for an operation backing it. A type whose configuration shipped
     NESTED inside another element's values has no row at all: there is nothing to do about it. Report
     this section; never plan from it — the operations are the plan.
   - viewConfigDiff — THE MOBILE PAGE'S viewConfigDiff, ready to apply in order (operation =
@@ -328,12 +331,12 @@ FLOW
    would duplicate the operation). Just PRESENT it to the user in plain language ("fields in <container>
    stack on the phone, keep <n> columns on a tablet — adjust?"); they may change it or decline.
 5c. Tab body + Area (when guide.tabAreaLayers is present): every tab the CONVERTER creates already carries
-   its synthesized inserts in the element map — the tab-body grid, then its Area card — because on
+   its synthesized inserts in viewConfigDiff — the tab-body grid, then its Area card — because on
    mobile a tab's content lives in an Area card, not directly in the tab body. Each of that tab's
    top-level components (expansion panels included — a panel is an ordinary component here) already has
    parentName = the Area and a sequential single-column layoutConfig
    (a component the adaptive pass placed per breakpoint keeps that adaptive placement instead).
-   Apply the inserts in element-map order (a parent always precedes its children) and do NOT reparent,
+   Apply the inserts in viewConfigDiff order (a parent always precedes its children) and do NOT reparent,
    reorder or re-place anything yourself, do NOT add an Area of your own, and do NOT touch a tab the mobile
    template provides (it arrives as a merge twin and gets no layers). A synthesized layer has no source
    counterpart at all, so its name appears in NEITHER `nameMap` nor `sourceStructure` — that absence is
@@ -548,10 +551,10 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   paste values verbatim; do not hand-build adaptive. The mobile runtime reflows children by
   `row` / `column`. adaptiveLayout is a readable INDEX of what was baked in, not a proposal — the
   response carries no mechanism to decline it; report it at the gate as fact.
-- TAB BODY + AREA for every tab the CONVERTER creates is baked into the element map the same way, and
+- TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and
   unlike adaptiveLayout it is NOT a proposal: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
-  apply the map as it is. What the layers are is described once in the tabAreaLayers field entry
+  apply the operations as they are. What the layers are is described once in the tabAreaLayers field entry
   above; what to do with them, in FLOW step 5c.
 - SOME PROPERTIES ARE NORMALIZED, NOT CONVERTED: for certain element types the converter writes the
   mobile standard instead of translating the web page's own value. Do NOT restore the web value and do

@@ -80,7 +80,9 @@ GENUINE LOSS — tell the user what is gone
   drop-unknown-request         params.request is in NEITHER the conversion map nor the bundled set. clio
                                cannot claim it is unavailable on mobile, only that it does not know it —
                                so if that custom request IS implemented on mobile, the action can be
-                               re-added by hand. Offer that.
+                               re-added by hand. Offer that. params.scope is ALWAYS present, unlike on
+                               drop-unsupported-request above: this code is emitted from one site, and
+                               that site is the non-converting-scope path.
   drop-type-not-in-mobile-registry
                                this record's own webType has no mobile counterpart at all. No params:
                                a param that echoes a field the record already carries is a second place

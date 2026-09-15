@@ -82,11 +82,26 @@ public sealed class ExcludedComponentsDropGuidanceTests
             "dropped-here / kept-there on one page is correct and must not be reported as an inconsistency")
     ];
 
+    /// <summary>
+    /// The owner guides joined with a SEPARATOR, never concatenated bare.
+    /// </summary>
+    /// <remarks>
+    /// The rule split across two articles in this change, and every assertion here is a substring check.
+    /// Without a delimiter one file's tail and the next file's head form text that exists in neither article,
+    /// so a pinned fragment could be "found" spanning the seam and the guard would pass on guidance that is
+    /// not coherent anywhere. Not an active failure today — a latent one this restructuring introduced.
+    /// </remarks>
+    /// <summary>What goes BETWEEN the owner guides, so no pinned fragment can span the seam.</summary>
+    private const string Separator = "\n\n---\n\n";
+
+    private static string ReadOwnerGuides() =>
+        string.Join(Separator, OwnerGuides.Select(ReadGuide));
+
     [Test]
     [Description("Both reason shapes clio emits for a positional exclusion are taught by the guide, so neither kind of drop reaches an agent unexplained.")]
     public void Guide_ShouldTeachBothExcludedComponentsReasonShapes()
     {
-        string guide = Normalize(string.Concat(OwnerGuides.Select(ReadGuide)));
+        string guide = Normalize(ReadOwnerGuides());
 
         string[] missing = ReasonShapes
             .Where(shape => !guide.Contains(shape.Fragment))
@@ -102,7 +117,7 @@ public sealed class ExcludedComponentsDropGuidanceTests
     [Description("Every load-bearing clause of the positional-exclusion guidance is intact.")]
     public void Guide_ShouldKeepEveryLoadBearingClauseOfTheExclusionRule()
     {
-        string guide = Normalize(string.Concat(OwnerGuides.Select(ReadGuide)));
+        string guide = Normalize(ReadOwnerGuides());
 
         string[] dropped = LoadBearingClauses
             .Where(clause => !guide.Contains(clause.Fragment))
