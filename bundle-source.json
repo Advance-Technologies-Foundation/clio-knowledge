@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.4",
+  "libraryVersion": "1.15.5",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1358,7 +1358,7 @@
     {
       "itemId": "process-branch-conditions",
       "title": "Process branch conditions",
-      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable in the flows[] describe reports and carried by no priority field - the activity-result case, edited through a result-selection editor and not a formula field, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
       "topicId": "creatio.process-branch-conditions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
@@ -1456,7 +1456,7 @@
     {
       "itemId": "process-approval",
       "title": "Approval element",
-      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome that cannot be branched on without a gateway.",
+      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome, which is branched on without a gateway but is only finished by a human ticking the results in the designer.",
       "topicId": "creatio.process-approval",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-approval",
