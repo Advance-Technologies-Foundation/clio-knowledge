@@ -101,7 +101,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   that select it. The set is exactly `Positive`, `Negative` and `Canceled` — the final `VisaStatus`
   values — and use all THREE, because a two-way Approved/Rejected split silently drops the canceled
   case. On a process that already exists the same thing is `modify-business-process` ->
-  `setFlowResults`. Both need `CrtProcessBuilder` 1.6.2.16.
+  `setFlowResults`, whose rule `process-activity-result-branches` owns. Both need
+  `CrtProcessBuilder` 1.6.2.16.
 - **DO NOT BRANCH THIS ELEMENT WITH A FORMULA.** Its result SET is never empty by configuration — the
   editor lists those same final `VisaStatus` values — so whenever the connector's source resolves to
   this one Approval, which is the ordinary shape, the designer opens a result-selection editor and

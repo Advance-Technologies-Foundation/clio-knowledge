@@ -65,6 +65,10 @@ public sealed class ProcessGuideCrossReferenceTests
         // load-bearing - normalising process-naming's two en dashes to the hyphen the other three
         // occurrences use, a pure formatting edit, turned the liveness test red and told the
         // contributor to re-key a row.
+        // ENG-96389 split process-activity-result-branches out of process-branch-conditions. The row is
+        // added WITH the split rather than after it, which is the lesson the ENG-95891 note below
+        // records: that split added none, so this guard watched nothing for the whole of that work.
+        ("setFlowResults", "process-activity-result-branches"),
         ("R1-R18", "process-activity-connections"),
         ("N1-N10", "process-naming"),
         // ENG-96536 moved this section into its own article; the row follows the section, not the file
