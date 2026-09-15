@@ -22,6 +22,9 @@ owner -- read the one your task needs instead of guessing:
                                     vocabulary both it and a condition use
   * `process-branch-conditions`    - the condition on a conditional flow: setting one,
                                     branch precedence, and the parallel-split hazard
+  * `process-activity-result-branches`
+                                  - the OTHER branch dialect: a connector whose source enumerates
+                                    activity results takes a result SELECTION, never a formula
   * `process-perform-task`         - the Perform task element: what it produces, its parameter table and
                                      what the runtime sets.
   * `process-task-performer`       - who performs a task: the element-level performer block (the only

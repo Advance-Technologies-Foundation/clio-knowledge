@@ -46,6 +46,8 @@ guards — it says whose rule it is and names that guide for the rest.
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
+  - branch on WHICH RESULT an activity was completed with - an approval's verdict, a perform task's
+    result, a page's completing button - a SELECTION and not a formula -> name=process-activity-result-branches
   - the Perform task element — a human step, what it produces, its parameter table ->
     name=process-perform-task
   - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->

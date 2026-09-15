@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.10",
+  "libraryVersion": "1.15.11",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -107,6 +107,7 @@
       "process-parameters",
       "process-formulas",
       "process-branch-conditions",
+      "process-activity-result-branches",
       "process-perform-task",
       "process-task-performer",
       "process-task-category",
@@ -258,6 +259,7 @@
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-formulas",
       "docs://knowledge/com.creatio.clio/process-branch-conditions",
+      "docs://knowledge/com.creatio.clio/process-activity-result-branches",
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-task-performer",
       "docs://knowledge/com.creatio.clio/process-task-category",
@@ -1279,7 +1281,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1377,7 +1379,7 @@
     {
       "itemId": "process-branch-conditions",
       "title": "Process branch conditions",
-      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable through the flows[] describe reports and carried by no explicit priority field - the activity-result case where a stored condition is never evaluated, and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The formula vocabulary itself is `process-formulas`.",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable in the flows[] describe reports and carried by no priority field - and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The result-SELECTION dialect, not a formula, is `process-activity-result-branches`. The formula vocabulary itself is `process-formulas`.",
       "topicId": "creatio.process-branch-conditions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
@@ -1386,6 +1388,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/branch-conditions.md",
       "bundlePath": "resources/process-branch-conditions.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-activity-result-branches",
+      "title": "Branching on an activity result",
+      "description": "Owns the SECOND predicate dialect of a conditional flow: the result SELECTION a connector takes when its SOURCE enumerates activity results, which the designer edits as a checkbox list with no formula field at all. Covers writing it with flows[].results on the build path and setFlowResults on the modify path, the caption refusals that are the only way to discover an element's results, the asymmetric exclusion with a stored condition (results clears one), reading it back as results and resultsActivity, exactly when the checkbox editor appears (one gateway hop, exactly one activity with a result parameter, a non-empty result set), and the trap this article exists for - nothing refuses a formula there, it saves and RUNS, and the connector is then marked invalid the first time a human opens its card. Flow kinds, branch precedence, the gateway rules and clearing a condition belong to process-branch-conditions; the formula vocabulary to process-formulas.",
+      "topicId": "creatio.process-activity-result-branches",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-activity-result-branches",
+      "legacyUris": [
+        "docs://mcp/guides/process-activity-result-branches"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/activity-result-branches.md",
+      "bundlePath": "resources/process-activity-result-branches.md",
       "mediaType": "text/plain"
     },
     {
@@ -1475,7 +1491,7 @@
     {
       "itemId": "process-approval",
       "title": "Approval element",
-      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome that cannot be branched on without a gateway.",
+      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome, which is branched on without a gateway but is only finished by a human ticking the results in the designer.",
       "topicId": "creatio.process-approval",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-approval",

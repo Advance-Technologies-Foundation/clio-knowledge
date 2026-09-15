@@ -241,15 +241,15 @@ fires above 100 and one that fires above 1000 resolve differently purely by whic
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
 
-One exception, and it matters on a Perform-task element: a branch chosen by the activity's RESULT is
-evaluated BEFORE any formula branch, whatever the flow order says. So on an element that already has a
-result-driven branch, adding a formula branch does not put you in a race you control by ordering — the
-result branch wins. `describe` marks those with `branchesOnActivityResult: true`, and `setFlowCondition`
-refuses to write a condition onto one.
-
-A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
-`condition` text. That confirms what was STORED, not what will run: a flow with
-`branchesOnActivityResult: true` reports its text and ignores it.
+One exception, and it decides the DIALECT rather than the order: when a connector's source
+enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula,
+the designer offers no formula field there at all. While that connector carries NO selection yet,
+nothing refuses the formula you would otherwise write - it saves, it runs, and the connector is
+invalid the first time a human opens its card. Once a selection IS stored, a condition onto that flow
+is refused. `process-activity-result-branches` owns that dialect whole: how to write it with
+`flows[].results` and `setFlowResults`, how to read it back, and exactly when the checkbox editor
+appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
+edit page with results by column.
 
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
 `B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
