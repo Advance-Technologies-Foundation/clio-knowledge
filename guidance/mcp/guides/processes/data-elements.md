@@ -71,7 +71,6 @@ filter; see `process-access-rights`.
         "source": "Contact",                                  // REQUIRED at create: the entity to read
         "mode": "first",                                      // optional; first (default) | collection | count | aggregation
         "columns": ["Name", "Email"],                         // optional for first (omit or [] = ALL columns); REQUIRED for collection; refused for count / aggregation
-        "numberOfRecords": 100,                               // collection only; a positive top-N of the sorted selection; omit to read them all
         "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"; first / collection only
       },
       "filter": { "object": "Contact",
@@ -87,7 +86,8 @@ filter; see `process-access-rights`.
     runtime drops it from the query without a word, so the shape would advertise a value that never arrives.
     Both rules read the EFFECTIVE selection, so an update naming no columns is judged on the STORED one: a
     designer-made element holding such a column is refused until you re-send `columns` without it.
-    `numberOfRecords` is the top-N: positive, refused in every other mode. Omitting it KEEPS the stored one
+    `numberOfRecords` sits beside them in the same block and is the top-N: positive, refused in every other
+    mode, which is why the reference block above carries no example of it. Omitting it KEEPS the stored one
     (re-selecting columns must not turn a top-25 read into a read-everything one) and reads every match when
     ENTERING the mode — and a top-N without a sort takes an arbitrary slice. It cannot be REMOVED while the
     element stays in this mode (omitting keeps, 0 is refused): say so instead of retrying.

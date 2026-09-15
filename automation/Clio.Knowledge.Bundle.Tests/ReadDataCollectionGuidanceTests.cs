@@ -55,7 +55,7 @@ public sealed class ReadDataCollectionGuidanceTests
     {
         string guide = ReadGuide();
 
-        guide.Should().Contain("`numberOfRecords` is the top-N: positive, refused",
+        guide.Should().Contain("is the top-N: positive, refused in every other",
             because: "`first` already reads one record and a function mode reads none, so a top-N there would be "
                 + "stored and ignored");
         guide.Should().Contain("Omitting it KEEPS the stored one",
