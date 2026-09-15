@@ -108,17 +108,31 @@ public sealed class ResponseShapeFieldGuidanceTests
     }
 
     [Test]
-    [Description("No FLOW step tells the caller to apply an element map. ElementMapEntry is converter bookkeeping that is never serialized, so an instruction to iterate it in order cannot be followed — the response carries viewConfigDiff and no elementMap.")]
+    [Description("No step tells the caller to APPLY an element map. ElementMapEntry is converter bookkeeping that is never serialized, so an instruction to iterate it in order cannot be followed — the response carries viewConfigDiff and no elementMap. Naming the old field is fine and necessary in the back-compat clause; instructing the reader to work from it is not, so this forbids the instructions rather than the word.")]
     public void Guide_ShouldNeverInstructApplyingAnElementMap()
     {
         string guide = Normalize(ReadGuide(OwnerGuide));
 
         guide.Should().NotContain("element-map order",
             because: "the response carries no element map, so ordering by one is an instruction with no subject");
-        guide.Should().NotContain("elementMap",
-            because: "the wire field is viewConfigDiff; naming the removed one sends the caller looking for it");
         guide.Should().NotContain("inserts in the element map",
             because: "same instruction in prose form - the synthesized layers arrive in viewConfigDiff");
+        guide.Should().NotContain("baked into the element map",
+            because: "the third phrasing of the same instruction");
+    }
+
+    [Test]
+    [Description("The rename that carries the payload has a back-compat clause. constraints, diagnostics, nextSteps and parentExistsOnTemplate are all hedged for a reader on an older clio; elementMap was not, even though it is the field every instruction here depends on. Publishing this article before clio reaches users would otherwise tell an opted-in reader to paste a viewConfigDiff their response does not contain — and an empty one is ACCEPTED by validate-page, so the failure is a blank page rather than an error.")]
+    public void Guide_ShouldHedgeTheViewConfigDiffRename_ForAReaderOnAnOlderClio()
+    {
+        string guide = Normalize(ReadGuide(OwnerGuide));
+
+        guide.Should().Contain("OLDER clio returns them as `elementMap`",
+            because: "the reader has to be told which field to look for instead, by name");
+        guide.Should().Contain("mobileValues",
+            because: "the entry-level renames are part of the mapping and useless without it");
+        guide.Should().Contain("empty body because the field you expected is missing",
+            because: "the failure mode is silent - an empty viewConfigDiff validates and ships a blank page");
     }
 
     private static void AssertAllPresent((string Fragment, string Because)[] clauses, bool caseSensitive)

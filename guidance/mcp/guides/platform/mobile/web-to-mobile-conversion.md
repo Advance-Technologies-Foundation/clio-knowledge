@@ -177,6 +177,13 @@ Creatio or disk. The guide contains:
   flow is the FLOW section below and the conversion skill's gated steps. The guide carries facts about
   the page in front of you, and nothing that would fire the same way on every conversion. If a guide you
   are handed still has those arrays, it predates this and you may read them — but this article wins.
+  The same applies to the field this whole article tells you to paste. The operations live in
+  `viewConfigDiff`; an OLDER clio returns them as `elementMap`, whose entries carry `mobileName`,
+  `mobileValues` and `captionResource` instead of `name`, `values` and a `resourceStrings` key. If the
+  guide in front of you has `elementMap` and no `viewConfigDiff`, read the operations from there and map
+  those three names across — every rule in this article still applies. Do NOT report the absence as a
+  converter fault, and do NOT paste an empty body because the field you expected is missing: an empty
+  `viewConfigDiff` is accepted by validate-page and produces a page with nothing on it.
 
 ─────────────────────────────────────────────────────────────
 GATES — MANDATORY HARD STOPS (analysis-first: nothing is written until the developer approves)
@@ -328,8 +335,11 @@ FLOW
    in one column; tablet/desktop keep the web placement). A single-column grid gets no adaptive (the mobile
    client renders the plain layout). Nothing extra to apply — do NOT emit a separate merge for the
    container's adaptive (it is already inside the container's inserted values; a separate merge
-   would duplicate the operation). Just PRESENT it to the user in plain language ("fields in <container>
-   stack on the phone, keep <n> columns on a tablet — adjust?"); they may change it or decline.
+   would duplicate the operation). REPORT it to the user in plain language as a FACT of the conversion
+   ("fields in <container> stack on the phone and keep <n> columns on a tablet") — do NOT ask whether to
+   apply it. There is no field to decline it with: the values are already in the operations you pasted, so
+   a "no" has no represented outcome. The only change path is hand-editing those values before pasting,
+   and that is the developer's to take, not a question for the gate.
 5c. Tab body + Area (when guide.tabAreaLayers is present): every tab the CONVERTER creates already carries
    its synthesized inserts in viewConfigDiff — the tab-body grid, then its Area card — because on
    mobile a tab's content lives in an Area card, not directly in the tab body. Each of that tab's
@@ -551,8 +561,8 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   paste values verbatim; do not hand-build adaptive. The mobile runtime reflows children by
   `row` / `column`. adaptiveLayout is a readable INDEX of what was baked in, not a proposal — the
   response carries no mechanism to decline it; report it at the gate as fact.
-- TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and
-  unlike adaptiveLayout it is NOT a proposal: the tab body + Area card are the REQUIRED mobile
+- TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and is
+  no more a proposal than adaptiveLayout is: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
   apply the operations as they are. What the layers are is described once in the tabAreaLayers field entry
   above; what to do with them, in FLOW step 5c.
