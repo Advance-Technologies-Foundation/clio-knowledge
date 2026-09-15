@@ -11,8 +11,18 @@ A conditional flow carries its predicate in ONE OF TWO disjoint slots, and the f
 which - not you, and not the operation you reach for. When the source enumerates ACTIVITY RESULTS the
 designer edits that connector through a checkbox list headed `What is the result of an element
 "<name>"?` and offers no formula field at all. Everywhere else it offers a formula and no checkboxes.
-Whether YOUR source enumerates results is answered by its own guide; `process-element-catalog` marks
-the elements that do at all. Measured on the 7.8.0 designer.
+SIX element types do, and the list is closed: Perform task, User dialog, Open edit page, Auto-generated
+page, Pre-configured page and Approval (plus the retired Call). Each still has to be CONFIGURED into it -
+a Perform task whose category carries no result entries, or an Open edit page with the result list off,
+enumerates nothing and takes a formula. `process-element-catalog` marks them; each element's own guide
+says what its results are.
+
+SEND EMAIL IS NOT ONE, and it is the exception worth knowing because every server-side signal says
+otherwise. `EmailTemplateUserTask` really does declare the results of its activity category, so an
+implementation that asks the server would offer you a selection - but its properties page shows a FORMULA
+field, so a selection written there runs on results nobody can see, and opening the connector's card
+erases it. Use `condition` on a Send email branch. Measured over all 54 properties pages in the 7.8.0
+designer: exactly seven define the value hook, none inherits one, and the base answers empty.
 
 WRITE THE SELECTION, NOT A FORMULA. `flows[].results` on `create-business-process` and `setFlowResults`
 (`source` + `target` + a non-empty `results`) on `modify-business-process` take the result CAPTIONS -
@@ -66,6 +76,10 @@ the localizable result name with a raw database select and therefore answers in 
 on a stand whose culture is not the base one, the captions accepted and listed here may differ from the
 ones on screen. Pass the record id when they disagree.
 
-`describe-business-process` reports `kind: "conditional"` with the `condition` text in BOTH dialects, so
-the text alone never says which one you are in. `branchesOnActivityResult` says THAT a selection decides
-the branch; `results` says WHICH.
+Do NOT read `condition` to tell the dialects apart. The two slots are disjoint in practice as well as in
+principle: of the 344 conditional flows in the shipped 7.8.0 corpus that carry no formula, 337 are
+selection branches, and every conditional flow there carries a formula OR a result set, never both. The
+write path keeps it that way - `results` clears any stored expression. So a selection branch normally
+reports `condition: null`, and the rare flow carrying both is designer-authored leftovers whose
+expression the runtime ignores. `branchesOnActivityResult` says THAT a selection decides the branch;
+`results` says WHICH.
