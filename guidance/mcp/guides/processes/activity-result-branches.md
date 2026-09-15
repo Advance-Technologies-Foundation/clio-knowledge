@@ -30,7 +30,7 @@ card erases it. Use `condition` on a Send email branch.
 
 WRITE THE SELECTION, NOT A FORMULA. `flows[].results` on `create-business-process` and `setFlowResults`
 (`source` + `target` + a non-empty `results`) on `modify-business-process` take the result CAPTIONS -
-`["Positive"]` on an approval - or their record ids. From `CrtProcessBuilder` **1.6.2.16**; an older
+`["Positive"]` on an approval - or their record ids. From `CrtProcessBuilder` **1.6.2.18**; an older
 package has no build-path field and refuses the operation as unknown.
 
 - An UNKNOWN caption is refused WITH the set the element offers. That refusal is the only way to
@@ -38,9 +38,12 @@ package has no build-path field and refuses the operation as unknown.
   guessing, and never infer the set from the element's caption.
 - An AMBIGUOUS caption, two results sharing one name, is refused pointing at the record id. Result
   captions come from lookups a customer edits, and duplicates there are ordinary.
-- The two slots are MUTUALLY EXCLUSIVE on one flow, asymmetrically: writing `results` CLEARS a stored
-  condition. The platform reads the selection FIRST, so an expression left beside it would be
-  unreachable metadata that `describe` still reports as a live `condition`.
+- The two slots are MUTUALLY EXCLUSIVE on one flow, asymmetrically. Writing `results` CLEARS a stored
+  condition - the platform reads the selection FIRST, so an expression left beside it would be
+  unreachable metadata that `describe` still reports as a live `condition`. The other direction is
+  REFUSED rather than silent: `setFlowCondition` onto a flow that already carries a selection is
+  rejected, naming what the condition would do instead of storing it. So nothing refuses a formula on a
+  result-enumerating source while the connector is still EMPTY, and everything refuses one after.
 - There is no way to CLEAR a selection. A conditional flow carrying neither slot is stored as the
   literal `true` and is then always taken, so `setFlowResults` overwrites in place - call it again to
   change which results select the branch, and it keeps the flow's position, which is its precedence.
@@ -48,7 +51,7 @@ package has no build-path field and refuses the operation as unknown.
   shape - it removes a taken result from the list before drawing it - and the runtime would take both
   branches, a parallel split wearing the clothes of a decision.
 - `describe-business-process` reads the selection back as `results` plus `resultsActivity`, the element
-  whose results they are. Both are ABSENT below 1.6.2.16, which is the same bytes as a formula branch:
+  whose results they are. Both are ABSENT below 1.6.2.18, which is the same bytes as a formula branch:
   an all-absent read is not evidence that nothing in the process branches on a result.
 
 NOTHING REFUSES A FORMULA THERE, and that is the trap this article exists for. It saves, the schema
