@@ -11,18 +11,22 @@ A conditional flow carries its predicate in ONE OF TWO disjoint slots, and the f
 which - not you, and not the operation you reach for. When the source enumerates ACTIVITY RESULTS the
 designer edits that connector through a checkbox list headed `What is the result of an element
 "<name>"?` and offers no formula field at all. Everywhere else it offers a formula and no checkboxes.
-SIX element types do, and the list is closed: Perform task, User dialog, Open edit page, Auto-generated
-page, Pre-configured page and Approval (plus the retired Call). Each still has to be CONFIGURED into it -
-a Perform task whose category carries no result entries, or an Open edit page with the result list off,
+Among the elements clio BUILDS, six do: Perform task, User dialog, Open edit page, Auto-generated page,
+Pre-configured page and Approval (plus the retired Call). Each still has to be CONFIGURED into it - a
+Perform task whose category carries no result entries, or an Open edit page with the result list off,
 enumerates nothing and takes a formula. `process-element-catalog` marks them; each element's own guide
 says what its results are.
 
-SEND EMAIL IS NOT ONE, and it is the exception worth knowing because every server-side signal says
-otherwise. `EmailTemplateUserTask` really does declare the results of its activity category, so an
-implementation that asks the server would offer you a selection - but its properties page shows a FORMULA
-field, so a selection written there runs on results nobody can see, and opening the connector's card
-erases it. Use `condition` on a Send email branch. Measured over all 54 properties pages in the 7.8.0
-designer: exactly seven define the value hook, none inherits one, and the base answers empty.
+That list is NOT closed, and do not treat it as one. Other platform elements qualify - Copilot's Execute
+intent and lending's Application validation both do - and so does a CUSTOM user task, which does not need
+a page of its own: it can point at a platform one, as `CustomActivityUserTask` does. Ask the connector,
+not a list: if the designer shows a checkbox editor, it is this dialect.
+
+SEND EMAIL IS THE EXCEPTION IN THE OTHER DIRECTION, and it is worth knowing because every server-side
+signal says otherwise. `EmailTemplateUserTask` really does declare the results of its activity category,
+so an implementation that asks the SERVER would offer you a selection - but its properties page shows a
+FORMULA field, so a selection written there runs on results nobody can see, and opening the connector's
+card erases it. Use `condition` on a Send email branch.
 
 WRITE THE SELECTION, NOT A FORMULA. `flows[].results` on `create-business-process` and `setFlowResults`
 (`source` + `target` + a non-empty `results`) on `modify-business-process` take the result CAPTIONS -
