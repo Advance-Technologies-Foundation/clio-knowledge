@@ -85,9 +85,12 @@ filter; see `process-access-rights`.
     thing a consumer can bind to. `columns` is REQUIRED — an omitted selection is not "no columns": the runtime
     reads EVERY column of the object. A column the collection cannot carry (Binary, say) is REFUSED: the
     runtime drops it from the query without a word, so the shape would advertise a value that never arrives.
+    Both rules read the EFFECTIVE selection, so an update naming no columns is judged on the STORED one: a
+    designer-made element holding such a column is refused until you re-send `columns` without it.
     `numberOfRecords` is the top-N: positive, refused in every other mode. Omitting it KEEPS the stored one
     (re-selecting columns must not turn a top-25 read into a read-everything one) and reads every match when
-    ENTERING the mode — and a top-N without a sort takes an arbitrary slice.
+    ENTERING the mode — and a top-N without a sort takes an arbitrary slice. It cannot be REMOVED while the
+    element stays in this mode (omitting keeps, 0 is refused): say so instead of retrying.
     Entering SHAPES the output at once, which is what lets a collection parameter mirrored in the SAME
     `create-business-process` call find a shape rather than an empty list; re-selecting re-shapes in place,
     keeping surviving item ids. Nothing CONSUMES a collection yet (no iterator builds; one column out of the
@@ -180,10 +183,8 @@ filter; see `process-access-rights`.
   look identical there. You cannot SEE it, but you can clear it: ANY `setElement.readData` update clears that
   pair unless the element is in collection mode, mode change or not. So the repair for a human-touched
   element is to re-send its `readData` block (even unchanged in substance) rather than to hunt the flag.
-  The same OK also writes `FunctionType = 0` on EVERY element, `first` and `collection` included, because the
-  card saves the aggregation function unconditionally and defaults it to Count. Harmless — `ResultType` alone
-  decides the mode, and `0` is what a non-function element would mean anyway — but a stored `FunctionType` on
-  a `first` element is a human fingerprint, not a corrupted mode.
+  The same OK also writes `FunctionType = 0` on EVERY element, the card saving the function unconditionally.
+  Harmless — `ResultType` alone decides the mode — so read it as a human fingerprint, not a corrupted mode.
 
 == Add data element (addData) — MOVED ==
 - Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
