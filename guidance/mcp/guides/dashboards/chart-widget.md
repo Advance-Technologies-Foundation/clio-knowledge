@@ -71,8 +71,13 @@ Do NOT emit `waterfall` — it has no chart-widget series model and is not gener
 
 ## Filters
 
-- Static filters live in each series' `data.providing.filters.filter`; the filter/leaf contract
+- Classify the intent first — record-context vs pre-configured vs quick filter; the decision rule is in the
+  `indicator-widget` guidance and applies to every analytics widget.
+- Pre-configured (static) filters live in each series' `data.providing.filters.filter`; the filter/leaf contract
   is owned by the `esq-filters-frontend` guidance. Keep the filter-group envelope even when empty.
+- A runtime quick filter goes in the SAME `filters` object, as `filterAttributes`, and — because a chart fetches
+  per series — on EACH series you want filtered. Read `get-component-info` for `crt.ChartWidget` and for
+  `crt.QuickFilter` ("Target is an analytics widget") before wiring it.
 - "Filter by page data" on a record page is wiring you MUST author — see the next section.
 
 ## Filter by page data (record pages) — you MUST wire it
