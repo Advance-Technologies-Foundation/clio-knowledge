@@ -33,8 +33,10 @@ guards — it says whose rule it is and names that guide for the rest.
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, or modify data ->
+  - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
+  - READ records from inside a process (one record, a collection, a count or an aggregate) ->
+    name=process-read-data
   - add data (create records from a process, one or one per filtered selection) -> name=process-add-data
   - DELETE records from inside a process -> name=process-delete-data (read it BEFORE planning the step:
     the element is irreversible and the article carries the confirmation you owe the user)

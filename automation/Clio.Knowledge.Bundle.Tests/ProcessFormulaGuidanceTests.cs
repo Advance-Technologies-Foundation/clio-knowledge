@@ -30,6 +30,7 @@ public sealed class ProcessFormulaGuidanceTests
     private const string FormulaGuide = "guidance/mcp/guides/processes/formulas.md";
     private const string BranchGuide = "guidance/mcp/guides/processes/branch-conditions.md";
     private const string DataElementsGuide = "guidance/mcp/guides/processes/data-elements.md";
+    private const string ReadDataGuide = "guidance/mcp/guides/processes/read-data.md";
 
     /// <summary>
     /// The callActivity claim below is asserted HERE and not against <c>process-modeling.md</c>: ENG-96536
@@ -143,7 +144,8 @@ public sealed class ProcessFormulaGuidanceTests
     [Description("Two claims this work introduced are stated as platform absolutes and the platform disagrees. A sub-process does NOT hold its children in the schema's own FlowElements - ProcessSchemaSubProcess implements IProcessSchemaFlowElementsContainer and owns its own collection - so describe-business-process, which iterates schema.FlowElements, does not see them; the delete guards do, because they walk GetBaseElements/GetParametrizedElements recursively. And a read record's column IS reachable in three segments: on the flow-condition path TryGetParameterMapPath puts an EntityColumn segment into SubParameterMetaPath and carries it. Both absolutes read as CLOSED questions, which is exactly how a reader stops looking - the practical limit is that describe hands out no column UIds, not that the platform refuses.")]
     public void ProcessGuides_ShouldNotOverstateTwoPlatformLimits() {
         // Arrange
-        string dataElements = ReadGuide(DataElementsGuide);
+        // The two column-path claims moved with the Read data section into its own article.
+        string readData = ReadGuide(ReadDataGuide);
         // Swept over the whole declared set, not one file. This assertion was repointed once already
         // because the sentence MOVED articles, and a single-file NotContain is green the moment it moves
         // again — verified: inserting the false sentence into process-modeling or data-elements passed.
@@ -163,11 +165,11 @@ public sealed class ProcessFormulaGuidanceTests
         ReadGuide(ElementCatalogGuide).Should().Contain("the delete guards see them",
             because: "the true half has to survive the correction: the guards walk the recursive accessors, "
                 + "so a reference from inside a sub-process really does block a delete");
-        dataElements.Should().NotContain("referenceable from NOWHERE",
+        readData.Should().NotContain("referenceable from NOWHERE",
             because: "the flow-condition path parses a third segment - FillMatchedData routes EntityColumn "
                 + "into SubParameterMetaPath and TryGetParameterMapPath carries it - so the platform does not "
                 + "refuse what this calls impossible");
-        dataElements.Should().Contain("describe reports no column UIds",
+        readData.Should().Contain("describe reports no column UIds",
             because: "the real limit is discoverability, and it is the half a reader can act on: you cannot "
                 + "author a segment whose UId no read API hands you");
     }

@@ -14,7 +14,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class ReadDataCollectionGuidanceTests
 {
-    private const string Article = "guidance/mcp/guides/processes/data-elements.md";
+    private const string Article = "guidance/mcp/guides/processes/read-data.md";
     private const string Catalog = "guidance/mcp/guides/processes/element-catalog.md";
 
     [Test]
