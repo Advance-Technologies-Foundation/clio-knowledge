@@ -132,15 +132,6 @@ carry the same action. Each entry says which of the two it is; read the entry, n
                                whole component is gone. params.note carries the conversion rule author's
                                own remark when the rules file has one; show it as detail, branch on the
                                code.
-  drop-request-target-missing  The request TYPE converts, but its navigation TARGET cannot exist on mobile,
-                               so the binding was removed and THE COMPONENT STILL RENDERS. Emitted only for
-                               a DEFINITIONAL absence — a web page, which cannot open on mobile at all, and
-                               a verdict that needed no environment read. A target an environment read
-                               merely failed to confirm removes NOTHING: it is reported in
-                               requestConversions.unresolvedTargetRequests with state "unknown" and
-                               bindingRemoved false. params.targetKind + params.target name what to fix:
-                               repoint the action, convert the target page, or leave it and tell the user.
-                               Never re-add the binding as it was — it would fail every time it is used.
   drop-request-element-empty-container
                                The binding went with its container, which the empty-container pass
                                removed after the binding had been recorded. The container's own
