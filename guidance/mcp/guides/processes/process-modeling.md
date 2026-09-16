@@ -109,9 +109,20 @@ article from what this one says; read that article.
 Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
 today and what it does not, and a plan built around something it cannot build fails only at build
 time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
-1. Translate the request into a graph: one start event, the activities, the sequence flows, one or
+1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
+   ONE START PER TRIGGER the process must react to: a process that runs both when a record is ADDED
+   and when the same record is CHANGED carries TWO signal starts, not two processes and not one
+   trigger. Signal, timer and message starts may be several; the SIMPLE start — the manual launch —
+   may appear only once, because a second one is a second way to start the same process by hand with
+   nothing to tell them apart. Both `validate-process-graph` (R3) and `create-business-process`
+   enforce exactly that, and both used to refuse ANY second start: a process reacting to two triggers
+   was unbuildable, and the shape is one the platform itself ships (`PublishDraftToArticle` carries
+   two start signals). Requires CrtProcessBuilder 1.6.2.24 or later on the environment AND a clio carrying ENG-98559
+   (Advance-Technologies-Foundation/clio#1559): an older environment refuses the second start at build
+   time with "the process has more than one start event", and an older clio reports it as an R3 error
+   from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
