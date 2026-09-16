@@ -62,10 +62,9 @@ filter; see `process-access-rights`.
   read the current one back first.
 
 == Read data element (readData) — first / collection / count / aggregation modes ==
-- A `readData` element reads from one object in one of FOUR modes, all buildable (count and aggregation ship
-  from CrtProcessBuilder 1.6.2.6 — not 1.6.0.9, an earlier pre-merge cut on the delivering feature branch
-  that was superseded before it ever shipped; collection ships with the version this guidance ships with;
-  before 1.6.2.6 only `first` built). Configure it with the element's `readData` block:
+- A `readData` element reads from one object in one of FOUR modes, all buildable (count and aggregation from
+  CrtProcessBuilder 1.6.2.6 — not the earlier 1.6.0.9, a pre-merge cut that never shipped — and collection
+  from the version this guidance ships with). Configure it with the element's `readData` block:
     { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
       "readData": {
         "source": "Contact",                                  // REQUIRED at create: the entity to read
@@ -84,13 +83,12 @@ filter; see `process-access-rights`.
     thing a consumer can bind to. `columns` is REQUIRED — an omitted selection is not "no columns": the runtime
     reads EVERY column of the object. A column the collection cannot carry (Binary, say) is REFUSED: the
     runtime drops it from the query without a word, so the shape would advertise a value that never arrives.
-    Both rules read the EFFECTIVE selection, so an update naming no columns is judged on the STORED one: a
-    designer-made element holding such a column is refused until you re-send `columns` without it.
-    `numberOfRecords` sits beside them in the same block and is the top-N: positive, refused in every other
-    mode, which is why the reference block above carries no example of it. Omitting it KEEPS the stored one
-    (re-selecting columns must not turn a top-25 read into a read-everything one) and reads every match when
-    ENTERING the mode — and a top-N without a sort takes an arbitrary slice. It cannot be REMOVED while the
-    element stays in this mode (omitting keeps, 0 is refused): say so instead of retrying.
+    Both rules judge the EFFECTIVE selection, so an update naming no columns is judged on the STORED one — a
+    designer-made element can be refused over a column you never sent, until you re-send `columns` without it.
+    `numberOfRecords` is the top-N: positive, refused in every other mode, which is why the block above shows
+    none. Omitting it KEEPS the stored one (re-selecting columns must not turn a top-25 read into a
+    read-everything one) and reads every match when ENTERING the mode; it cannot be REMOVED while the element
+    stays here (0 is refused), and a top-N without a sort takes an arbitrary slice.
     Entering SHAPES the output at once, which is what lets a collection parameter mirrored in the SAME
     `create-business-process` call find a shape rather than an empty list; re-selecting re-shapes in place,
     keeping surviving item ids. Nothing CONSUMES a collection yet (no iterator builds; one column out of the
