@@ -107,6 +107,28 @@ public sealed class ResponseShapeFieldGuidanceTests
         AssertAllPresent(ResourceStringClauses, caseSensitive: true);
     }
 
+    // The list row. clio builds it on BOTH paths; the article said it was prebuilt for an INSERT only
+    // and handed the merge path back to the caller, which is how a converted section list shipped with
+    // no title and no body while nothing failed.
+    private static readonly (string Fragment, string Because)[] ListRowClauses =
+    [
+        ("THE CONVERTER BUILDS IT FOR YOU ON BOTH PATHS",
+            "the correction itself — an agent that believes the row is its job on the merge path writes one by hand or, more often, writes none"),
+        ("arrives as its OWN operation",
+            "where the row IS on the merge path: a merge on ListItem beside the advisory merge on List, not a value of the parent"),
+        ("NEVER put itemLayout inside a merge of the parent List",
+            "the neighbouring mistake: crt.List is not a container and itemLayout is an input, so addressing it as a child slot fails the WHOLE schema build"),
+        ("provides List but NO ListItem under it",
+            "the one case that IS still the caller's — naming it is what keeps the blanket claim above safe to act on")
+    ];
+
+    [Test]
+    [Description("The article states that the grid row is built by the converter on the merge path as well as the insert path, names the operation it arrives as, and still forbids folding itemLayout into the parent List's merge. It previously said the row was prebuilt for an INSERT only, which was true of clio and is no longer: a section list converted onto a template that already provides List/ListItem shipped one empty merge and no row at all.")]
+    public void Guide_ShouldSayTheConverterBuildsTheListRow_OnTheMergePathToo()
+    {
+        AssertAllPresent(ListRowClauses, caseSensitive: true);
+    }
+
     [Test]
     [Description("No step tells the caller to APPLY an element map. ElementMapEntry is converter bookkeeping that is never serialized, so an instruction to iterate it in order cannot be followed — the response carries viewConfigDiff and no elementMap. Naming the old field is fine and necessary in the back-compat clause; instructing the reader to work from it is not, so this forbids the instructions rather than the word.")]
     public void Guide_ShouldNeverInstructApplyingAnElementMap()
