@@ -189,18 +189,13 @@ leaf rather than through `process-modeling`.
 
 R1  Start event: no incoming flow; exactly one outgoing.
 R2  End event: no outgoing flow; one or more incoming.
-R3  At least one start event, and at most ONE SIMPLE start; every path reaches an end event.
-    Triggered starts - Signal, timer, message - may be SEVERAL: one per trigger the process must react
-    to, which is how a process runs both when a record is added and when the same record is changed.
-    The cap is on the SIMPLE start alone, the manual launch, because a second one is a second way to
-    start the same process by hand with nothing to tell them apart. The rule read "exactly one start
-    event" until ENG-98559: that refused a shape the platform itself ships (PublishDraftToArticle in
-    CrtKnowledgeManagementVersions carries two start signals) and the designer draws. Enforced per kind
-    by validate-process-graph from a clio carrying ENG-98559 (Advance-Technologies-Foundation/clio#1559)
-    and by create-business-process from CrtProcessBuilder 1.6.2.24. Both floors matter and they are
-    independent: an older ENVIRONMENT refuses the second start at build time with "the process has more
-    than one start event", while an older CLIO reports it as an R3 error from validate-process-graph, so
-    an agent reading this rule and calling that tool would be told the graph is invalid.
+R3  At least one start event, at most ONE SIMPLE start; every path reaches an end event. Signal, timer
+    and message starts may be SEVERAL - one per trigger - which is how one process runs both when a
+    record is added and when it is changed; only the manual launch is capped, a second one being a
+    second way to start by hand with nothing to tell them apart. Until ENG-98559 the rule read "exactly
+    one start event" and refused a shape the platform ships (PublishDraftToArticle has two start
+    signals). Two independent floors: CrtProcessBuilder 1.6.2.24 on the environment (older refuses the
+    build) and a clio carrying ENG-98559 (clio#1559; older reports an R3 error first).
 R4  Terminate end kills the whole instance; Simple end ends only its path.
 R5  Start triggers: Simple=user/run; Signal(object)=record add/modify/delete; custom signal=broadcast; message=directed; timer=schedule/CRON.
 R6  Diverging gateway: 1 in, >=2 out. Converging gateway: >=2 in, 1 out.
