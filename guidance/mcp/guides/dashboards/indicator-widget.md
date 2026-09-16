@@ -25,11 +25,12 @@ and never conflate them; when more than one is present they compose with AND:
 - **Pre-configured (static)** — a FIXED condition the creator sets now; the end user cannot change it at
   runtime. Signals: "only \<X\>", "restricted to", an explicit fixed value or set.
 - **Quick filter (interactive)** — the END USER chooses the value at runtime. Signals: "so users can choose",
-  "let the user pick", "selectable", "a \<X\> selector". Metric, chart, gauge, list and pivot widgets all
-  support it. NEVER silently emit a fixed filter for a quick-filter request.
+  "let the user pick", "selectable", "a \<X\> selector". A widget supports it when its own `get-component-info`
+  shows a `filterAttributes` slot — metric, chart, gauge, list, pivot, waterfall and pipeline-movement all do.
+  NEVER silently emit a fixed filter for a quick-filter request.
 
-If the wording MIXES signals ("add a Stage filter so users can choose ... such as Qualification, Proposal"),
-ask ONE clarifying question — fixed set or user-selectable — then proceed. Never guess silently.
+Wording that carries BOTH a fixed set and a user choice ("add a Stage filter so users can choose ... such as
+Qualification, Proposal") asks for both halves: the static filter over the listed set AND the quick-filter entry.
 
 Which config slot each kind lands in is owned by the widget's own documentation: read `get-component-info` for
 the widget, and for the chip side read it for `crt.QuickFilter` ("Target is an analytics widget").
