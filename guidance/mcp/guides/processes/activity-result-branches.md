@@ -11,10 +11,13 @@ A conditional flow carries its predicate in ONE OF TWO disjoint slots, and the f
 which - not you, and not the operation you reach for. When the source enumerates ACTIVITY RESULTS the
 designer edits that connector through a checkbox list headed `What is the result of an element
 "<name>"?` and offers no formula field at all. Everywhere else it offers a formula and no checkboxes.
-Among the elements clio BUILDS, six do: Perform task, User dialog, Open edit page, Auto-generated page,
-Pre-configured page and Approval (plus the retired Call). Each still has to be CONFIGURED into it - a
-Perform task whose category carries no result entries, or an Open edit page with the result list off,
-enumerates nothing and takes a formula. `process-element-catalog` marks them; each element's own guide
+Among the elements clio can BUILD, four do: Perform task, Open edit page, Pre-configured page and
+Approval. User dialog, Auto-generated page and the retired Call enumerate results too, but clio cannot
+build them - `process-element-catalog` is the authority on what is buildable, and it says so - which
+matters because planning a result branch off one of those fails at `addElement`, before this dialect is
+ever reached. Each of the four still has to be CONFIGURED into it - a Perform task whose category
+carries no result entries, or an Open edit page with the result list off, enumerates nothing and takes
+a formula. `process-element-catalog` marks them; each element's own guide
 says what its results are.
 
 That list is NOT closed, and do not treat it as one. Other platform elements qualify - Copilot's Execute
@@ -69,6 +72,23 @@ contain conditional flows in exactly this state, so expect to meet one in a proc
 The refusal is AUTHORING-only for that reason: an existing branch like this still describes, lays out
 and re-saves unchanged, and only a new formula on such a connector is refused - naming the deciding
 activity and listing what it offers, which is the same list `results` takes.
+
+WHICH DIALECT WINS AT RUN TIME, when a source has siblings of both kinds. A SELECTION branch is
+evaluated BEFORE any formula branch, whatever order the flows are written in - and this is a partition
+by dialect rather than a tie-break, so flow order cannot change it. `FlowConditionalGateway.Accept`
+walks the source's outgoing flows once and puts every flow carrying expression text into a SECOND list
+instead of evaluating it; the flows left - the selection branches - are evaluated in that first pass,
+and on an exclusive gateway the first one that matches returns immediately, before a single formula has
+been read. Only if no selection branch matched are the queued formulas processed at all.
+
+This matters because the authoring refusal is authoring-ONLY: shipped and designer-authored processes
+do carry both kinds of sibling off one source, and they still describe, lay out and re-save. When you
+MODIFY one, adding a formula sibling beside a result branch does not put you in a race you control by
+ordering - the result branch wins. `describe` marks those flows with `branchesOnActivityResult: true`.
+
+(This rule was briefly deleted from `process-branch-conditions` during ENG-91853 and restored here after
+a review caught its absence. It was nearly deleted a second time on the grounds that sibling precedence
+is array order - which is true WITHIN the formula dialect and says nothing about the partition above.)
 
 WHEN THE CHECKBOX EDITOR APPEARS, in the designer's own terms:
 

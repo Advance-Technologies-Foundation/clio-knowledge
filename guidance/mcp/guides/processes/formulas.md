@@ -115,7 +115,8 @@ describe contract has no such field on a parameter). `source: "ConstValue"` ther
 never stored as one and a constant went in instead. For a flow, the read-back is `kind: "conditional"` with
 the `condition` text — which on a connector whose source enumerates activity results cannot tell a live
 condition from one a result selection has superseded; `branchesOnActivityResult` is the field that can, and
-`process-branch-conditions` owns the rule. If a human is at a browser, `RoundUp([#PriceParameter#])` in the
+`process-activity-result-branches` owns that dialect whole - including which of the two wins at run
+time when a connector has both kinds of sibling. If a human is at a browser, `RoundUp([#PriceParameter#])` in the
 designer is the same confirmation in friendlier spelling.
 
 A COMPUTED DEFAULT for a parameter of ANY type is a mapping, not a `value`. `addParameter` / `setParameter`

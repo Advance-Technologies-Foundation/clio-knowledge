@@ -1491,7 +1491,7 @@
     {
       "itemId": "process-approval",
       "title": "Approval element",
-      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome, which is branched on without a gateway but is only finished by a human ticking the results in the designer.",
+      "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome, which is branched on without a gateway and is declared with flows[].results or setFlowResults rather than a formula - a condition on a verdict connector is refused, because the designer edits it as a result selection and offers no formula field.",
       "topicId": "creatio.process-approval",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-approval",

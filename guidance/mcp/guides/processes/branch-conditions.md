@@ -243,6 +243,8 @@ intent.
 
 One exception, and it decides the DIALECT rather than the order: when a connector's source
 enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula,
+a SELECTION branch off that source is also evaluated BEFORE any formula branch, whatever the flow
+order says - `process-activity-result-branches` carries the rule and the mechanism. And
 the designer offers no formula field there at all, and a condition written onto such a connector is
 REFUSED - it would save, run, and open as an empty panel no human can read. The refusal names the
 deciding activity and lists the results it offers. `process-activity-result-branches` owns that dialect whole: how to write it with
