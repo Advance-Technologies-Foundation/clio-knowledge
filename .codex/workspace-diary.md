@@ -251,3 +251,26 @@ guidance/mcp/guides/processes/process-modeling.md, guidance/mcp/guides/routing.m
 automation/Clio.Knowledge.Bundle.Tests/GuidanceMigrationTests.cs
 Impact: the next article split has the checklist; the next shared-article merge knows to run the size
 guard before trusting a green branch.
+
+## 2026-09-15 - ENG-98661: three documentation findings from the ENG-96503 manual-test pass
+Context: a manual QA pass on the merged ENG-96503 read-data count/aggregation feature (32 cases, all
+passing) surfaced six secondary findings; three of them are documentation-only and belong here (the other
+three are code fixes on a sibling crt-process-builder branch). The headline defect (aggregation over an
+empty selection) has an open "decision needed" not resolved this round.
+Decision: in guidance/mcp/guides/processes/data-elements.md - removed the false "describe lists both
+ResultCount and ResultRowsCount" claim (describe omits ResultRowsCount on a builder-/designer-made count
+element) and dropped the stale "not yet confirmed by a stand run" hedge on ResultRowsCount = 1 (now
+confirmed). Added a general note that describe reports only flagged/value-bearing parameters - an omitted
+one may still exist and be mappable, the root cause of the false claim above. Added that avg over an
+Integer column truncates the fraction (measured 5/10/17 -> 10, not 11): T-SQL's own AVG(int) behaviour, not
+the package's doing.
+Discovery (Medium, budget): the article was already near its single get-guidance-response size budget
+(EveryProcessArticle_ShouldFitInOneGetGuidanceResponse in Clio.Knowledge.Bundle.Tests) - the first wording
+pass pushed it to 102.6% and failed the producer contract suite. Tightened phrasing (no content dropped) to
+land at 100.8%... still failing at 28,020 vs a 27,793 budget; trimmed a second pass to pass. Any further
+addition to this article should budget for this headroom being gone - the next change here likely needs a
+split, not more prose.
+Files: guidance/mcp/guides/processes/data-elements.md, bundle-source.json
+Impact: libraryVersion bumped to 1.14.16. The next person editing this article should run
+`dotnet test automation/Clio.Knowledge.Bundle.Tests --logger "console;verbosity=detailed"` and read the
+`of budget` line for process-data-elements BEFORE writing prose, not after.

@@ -84,19 +84,22 @@ filter; see `process-access-rights`.
     a mode is refused too — pass a buildable mode to convert it, or edit it in the designer. `describe` still
     reports such an element honestly as `mode: "collection"`.
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
-    MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element and describe lists
-    both, but they answer different questions: `ResultCount` is the aggregate the element computed, while
-    `ResultRowsCount` is how many ROWS the query returned. Read from the platform sources (not yet confirmed by a
-    stand run): a function-mode query selects a single aggregate column with no grouping, so `ResultRowsCount`
-    reports `1` rather than the count — the sibling `ReadEntityCollectionItemsUserTask` assigns exactly that
-    literal on its own function path. Either way `ResultCount` is the one the runtime fills with the answer;
-    mapping the other gives a value that does not track the data, with nothing at run time to say so.
+    MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element, but `describe`
+    does NOT list `ResultRowsCount` on a builder- or designer-made count element (see the `describe` coverage
+    note below) — it still exists and is mappable. `ResultCount` is the aggregate the element computed;
+    `ResultRowsCount` is how many ROWS the query returned — confirmed on a stand at `1`, since a function-mode
+    query selects one aggregate column with no grouping (the sibling `ReadEntityCollectionItemsUserTask`
+    assigns the same literal on its own function path). `ResultCount` is what the runtime fills with the
+    answer; mapping the other gives a value that never tracks the data.
   * `aggregation` — `"aggregation": { "function": "sum" | "avg" | "min" | "max", "column": "Amount" }` is
     REQUIRED. The OUTPUT is chosen by the column's TYPE, exactly as the runtime writes it: an Integer column →
     `ResultIntegerFunction`; a Float / Money column → `ResultFloatFunction`; a Date / Date-time / Time column
     (min/max only) → `ResultDateTimeFunction`. Any other column type — and sum/avg over a date — is REFUSED,
     because the runtime writes NO result for it, silently. `columns` and `sort` are refused in count /
-    aggregation (the runtime ignores both there, so accepting them would be a silent no-op).
+    aggregation (the runtime ignores both there, so accepting them would be a silent no-op). `avg` over an
+    Integer column TRUNCATES the fraction — three values 5/10/17 (average 10.67) measured storing `10`, not
+    `11`: T-SQL's own `AVG(int)` integer-division, not the package's doing. Use Float / Money when the
+    fraction matters.
   Omit `mode` at create for `first`; omit it on a `setElement` update to KEEP the element's current mode.
   Changing the mode through `setElement` is a real conversion, and it is REFUSED while any other parameter still
   maps FROM the element — the refusal names each dependent. Each mode produces a different output parameter, so a
@@ -114,8 +117,11 @@ filter; see `process-access-rights`.
   asserts it succeeds — a `setElement.readData` update naming a buildable mode is NOT the same as remove+recreate.
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
   output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
-  `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output stops resolving — re-read
-  the element with `describe-business-process` after such a change and re-point anything that consumed it.
+  `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output STOPS BEING FILLED
+  (the parameter still exists and is still mappable) — re-read the element with `describe-business-process`
+  after such a change and re-point anything that consumed it.
+- `describe-business-process` reports only FLAGGED / value-bearing parameters. An omitted one may still
+  exist and be mappable (`ResultRowsCount` above) — omission means "not reported", never "does not exist".
 - `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
   list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
   supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own
