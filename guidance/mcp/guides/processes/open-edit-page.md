@@ -172,7 +172,7 @@ supply a column of the new object, or `enabled: false`; for the conditions, `cle
 **State this to the user before building one:** this contract builds the result list and the column, not the
 routing. With `resultsByColumn` enabled AND its column set, its connectors take the designer's
 RESULT-SELECTION editor and never a formula field, so write the branch with `flows[].results` /
-`setFlowResults` — a formula there is not refused and runs unreadably
+`setFlowResults` — a formula there is REFUSED, because it would run unreadably
 (`process-activity-result-branches`, which says what to tell them). With the list off — or switched on with
 `column: null` — the element enumerates nothing, so add the flows plain and set each condition
 with `modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op; gateway

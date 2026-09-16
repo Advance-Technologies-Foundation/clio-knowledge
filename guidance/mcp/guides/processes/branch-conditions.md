@@ -243,10 +243,9 @@ intent.
 
 One exception, and it decides the DIALECT rather than the order: when a connector's source
 enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula,
-the designer offers no formula field there at all. While that connector carries NO selection yet,
-nothing refuses the formula you would otherwise write - it saves, it runs, and the connector is
-invalid the first time a human opens its card. Once a selection IS stored, a condition onto that flow
-is refused. `process-activity-result-branches` owns that dialect whole: how to write it with
+the designer offers no formula field there at all, and a condition written onto such a connector is
+REFUSED - it would save, run, and open as an empty panel no human can read. The refusal names the
+deciding activity and lists the results it offers. `process-activity-result-branches` owns that dialect whole: how to write it with
 `flows[].results` and `setFlowResults`, how to read it back, and exactly when the checkbox editor
 appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
 edit page with results by column.

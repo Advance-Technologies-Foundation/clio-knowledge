@@ -41,9 +41,9 @@ package has no build-path field and refuses the operation as unknown.
 - The two slots are MUTUALLY EXCLUSIVE on one flow, asymmetrically. Writing `results` CLEARS a stored
   condition - the platform reads the selection FIRST, so an expression left beside it would be
   unreachable metadata that `describe` still reports as a live `condition`. The other direction is
-  REFUSED rather than silent: `setFlowCondition` onto a flow that already carries a selection is
-  rejected, naming what the condition would do instead of storing it. So nothing refuses a formula on a
-  result-enumerating source while the connector is still EMPTY, and everything refuses one after.
+  REFUSED rather than silent, and so is the formula in the first place: a condition written onto ANY
+  connector whose source enumerates results is rejected, whether or not a selection is already stored.
+  The refusal names the deciding activity and lists what it offers.
 - There is no way to CLEAR a selection. A conditional flow carrying neither slot is stored as the
   literal `true` and is then always taken, so `setFlowResults` overwrites in place - call it again to
   change which results select the branch, and it keeps the flow's position, which is its precedence.
@@ -54,13 +54,17 @@ package has no build-path field and refuses the operation as unknown.
   whose results they are. Both are ABSENT below 1.6.2.18, which is the same bytes as a formula branch:
   an all-absent read is not evidence that nothing in the process branches on a result.
 
-NOTHING REFUSES A FORMULA THERE, and that is the trap this article exists for. It saves, the schema
-saves CLEAN, and it RUNS - 7.8.0 falls back to the stored expression whenever the selection map is
-empty - so every automated signal says the branch is finished. It is not. Element validation runs only
-when a human opens that element's card; from the first save after somebody does, the connector is
-INVALID, raising "Required fields of some elements are not filled in", every checkbox reads unticked,
-and the expression is rendered in neither page mode. A green save is not evidence here, and no refusal
-will stop you: check the SOURCE element before reaching for `setFlowCondition`.
+A FORMULA THERE IS REFUSED, and the trap it prevents is why. Nothing about the formula fails: it saves,
+the schema saves CLEAN, and it RUNS - 7.8.0 falls back to the stored expression whenever the selection
+map is empty - so every automated signal would say the branch is finished. It is not. Element validation
+runs only when a human opens that element's card, and the connector then opens as an EMPTY panel with no
+formula field and nothing ticked, because the designer resolves it as a selection.
+
+The decisive evidence is what the designer itself will not do. Change type -> Conditional flow on such a
+connector offers the checkbox list and NO formula option at all - so a conditional flow carrying a live
+expression and an empty selection on a result-enumerating source is a state the platform's own UI cannot
+produce. It existed only because a write surface was permissive where the UI is not. The refusal names
+the deciding activity and lists what it offers, which is the same list `results` takes.
 
 WHEN THE CHECKBOX EDITOR APPEARS, in the designer's own terms:
 
@@ -72,10 +76,12 @@ WHEN THE CHECKBOX EDITOR APPEARS, in the designer's own terms:
   the topology test above is skipped and the connector keeps its editor however the diagram changes
   around it. Re-routing is not a way to recover such a branch.
 
-KNOWN GAP, stated so it does not surprise you: `setFlowResults` applies a NARROWER test than the
-designer. It reads the flow's IMMEDIATE source, so a connector leaving a GATEWAY is refused and the
-refusal points at `condition` - wrong for that shape, because the designer walks the hop and does show
-the checkbox list there. Finish a gateway-sourced result branch in the designer.
+A CONNECTOR LEAVING A GATEWAY works, and it is keyed on the activity BEHIND the gateway rather than on
+the gateway itself - which is what `resultsActivity` reports and why you must not assume the source.
+The walk is the designer's own and so are its limits: ONE hop, so two chained gateways fall back to a
+formula; a gateway's CONDITIONAL incoming flows are skipped, since a branch already decided is not what
+decides this one; and EXACTLY ONE upstream activity must enumerate results, because with two there is no
+single set to offer. Outside those, the gateway enumerates nothing and a formula is the right dialect.
 
 CAPTIONS AND CULTURE. For an approval the captions are resolved the way the designer resolves them and
 match what a human sees. For every other element they come from the platform's own seam, which reads

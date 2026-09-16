@@ -53,8 +53,8 @@ section to scroll to.
       that editor as soon as at least one COMPLETING button is stored (7.8.0 designer). On a Freedom page
       every stored button is one; a Classic-page element can store buttons that are not, and its set is
       then empty, which brings the formula field back. A formula written
-      there runs, nothing refuses it, and the designer marks the connector invalid and never shows the
-      text — write the completing buttons as `flows[].results` instead.
+      there is REFUSED: it would run while the designer showed an empty panel and never the text —
+      write the completing buttons as `flows[].results` instead.
       `process-activity-result-branches` owns the rule. Say so before building.
     * `performer` OMITTED on a build defaults to the CURRENT USER — the server writes the same performer the
       designer's card does for a new element, so you do not have to send one. Send it when the task belongs
