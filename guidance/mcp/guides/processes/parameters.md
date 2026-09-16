@@ -44,6 +44,24 @@ This article is the authoritative owner of process parameters, the mappings that
   that one message into a sentence naming the reference and the remedy.)
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
   describe-first and confirm-the-removal rules in `process-modeling` still apply.
+- A SUB-PROCESS element's parameters are not yours to declare, and that is the whole of its contract:
+  selecting the called process copies THAT process's parameters onto the element, and the platform
+  re-derives them on every design-time read. Three consequences worth carrying:
+  * only an `In` or `Variable` parameter can hold a value you map onto it. A mapping onto an `Out` or
+    `Internal` one is REFUSED naming the direction, because the platform clears it on the next read and
+    the loss would be silent. To USE an output, map FROM it — name the element and the parameter as the
+    SOURCE of a mapping onto a process parameter or another element's input
+  * values cross at RUN TIME by parameter NAME, over scalar parameters only, ignoring direction, and an
+    unmatched name is skipped with no exception and no log line. Requiredness is never validated on
+    either side. So a called process that gained, lost or renamed a parameter leaves the caller running
+    and quietly delivering nothing — which is why any `setElement` touching the element re-synchronizes
+    it and reports the drift, and why `subProcess: {resync: true}` exists
+  * a RENAME on the called process is followed automatically: the element parameter and its source are
+    paired through the schema's mapping row rather than by name, so the element's copy keeps its UId and
+    its value and only changes its name. Anything you wrote referring to the old name still has to be
+    updated
+  `describe-business-process` reports each parameter's `direction`, `isResult` and `isRequired`, so which
+  way a value travels is readable before you map it.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).

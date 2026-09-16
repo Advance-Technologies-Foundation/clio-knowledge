@@ -192,8 +192,20 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
-  sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+  timer/message/intermediate events), they survive a save untouched as data — but you CAN
+  still remove or rewire them by name and nothing will warn you.
+  The SUB-PROCESS element belongs on this list with its two halves separated, because they are
+  different claims. CREATING one is allowed and safe — `type:"subProcess"`, see
+  `process-element-catalog`. REWIRING an existing one — retargeting its called process, deleting it,
+  editing its parameters — stays high-risk, and the reasons are measurements rather than caution:
+  an element that is already multi-instance carries none of the called process's parameter names at all
+  (61 of the 416 shipped elements are in that state, so the case is common, not exotic); a retarget with
+  live dependents makes the process refuse to START later, blamed on the process rather than on the
+  edit; a retarget can strand a mapping row on an owner-created parameter, which saves green and is
+  dereferenced afterwards; and `validate-process-graph` carries no parameter or mapping rule at all, so
+  NONE of the above is caught by automation. The build path refuses each of them by name — which is
+  exactly why you should let it, rather than routing around a refusal you did not expect. Conditional
+  flows sit on this list on the same reasoning, one line down. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
   conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
   gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate
