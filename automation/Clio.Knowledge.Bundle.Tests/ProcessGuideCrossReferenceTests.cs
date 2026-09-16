@@ -33,7 +33,7 @@ public sealed class ProcessGuideCrossReferenceTests
 
     /// <summary>
     /// A <c>== ... ==</c> heading, which may wrap over several physical lines. Singleline is what lets
-    /// the dot cross the newline; without it the four-line R1-R18 heading is absent from the index and a
+    /// the dot cross the newline; without it the four-line R1-R20 heading is absent from the index and a
     /// legitimate self-citation of that section reads as dangling.
     /// </summary>
     private static readonly Regex Heading = new(
@@ -52,7 +52,7 @@ public sealed class ProcessGuideCrossReferenceTests
 
     /// <summary>
     /// Section markers distinctive enough to name one owner. The quoted-citation scan cannot see these:
-    /// the reference that survived it read "the same way the R1-R18 header separates the full catalog from
+    /// the reference that survived it read "the same way the R1-R20 header separates the full catalog from
     /// the buildable slice" — no quotes, no locator word, and the header had moved to another article.
     ///
     /// The destructive-operation rows are the other end of a safety citation: two articles instruct
@@ -73,7 +73,7 @@ public sealed class ProcessGuideCrossReferenceTests
         // this same change had moved out of it - a pointer to an article that only forwards again.
         // The setFlowResults row above could not catch it: the drifting reference names the FIELD.
         ("branchesOnActivityResult", "process-activity-result-branches"),
-        ("R1-R18", "process-activity-connections"),
+        ("R1-R20", "process-activity-connections"),
         ("N1-N10", "process-naming"),
         // ENG-96536 moved this section into its own article; the row follows the section, not the file
         // it used to live in. Left on process-data-elements, the owner-skip would have exempted the
