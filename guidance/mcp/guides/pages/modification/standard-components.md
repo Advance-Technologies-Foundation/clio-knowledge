@@ -148,12 +148,17 @@ How to decide, per object. Do NOT assume, and do NOT copy the shape off another 
    `reference-schema-name` is the object. It is conventionally the object's own name, and on the measured
    schema it is exactly that — but that is a wizard naming convention, not a contract, so read it.
 
+`get-component-info` says the same from its side, and always did: `recordColumnName` is "the column on
+the file entity that references the parent record", and its second named pitfall is a wrong one — "the
+file entity must have a lookup column back to the master entity (e.g. `Contact` on `ContactFile`)". The
+general rule was in the catalog; this guide is what pinned it to one entity.
+
 The existence check is the SIGNAL, not the proof. When a gallery comes up empty and you want the answer
 rather than an inference, count rows in both candidates — on the migrated object measured here the
-record's one attachment is a row in `UsrToMigrateFile` and `SysFile` carries none for that object, so the
-`SysFile` shape would have rendered empty over a record that demonstrably has an attachment. A
-`crt.RichTextEditor` on the same page corroborates it for free: its `filesStorage` block spells the same
-decision out in `entitySchemaName`, `recordEntitySchemaName` and `recordColumnName`.
+record's one attachment is a row in `UsrToMigrateFile` and `SysFile` carries none, so the `SysFile` shape
+would have rendered empty over a record that demonstrably has an attachment. A `crt.RichTextEditor` on
+the same page corroborates for free: its `filesStorage` block spells the decision out in
+`entitySchemaName`, `recordEntitySchemaName` and `recordColumnName`.
 
 | Property | Value | Note |
 | --- | --- | --- |
