@@ -196,8 +196,11 @@ R3  At least one start event, and at most ONE SIMPLE start; every path reaches a
     start the same process by hand with nothing to tell them apart. The rule read "exactly one start
     event" until ENG-98559: that refused a shape the platform itself ships (PublishDraftToArticle in
     CrtKnowledgeManagementVersions carries two start signals) and the designer draws. Enforced per kind
-    by validate-process-graph and by create-business-process from CrtProcessBuilder 1.6.2.19; an older
-    environment still refuses the second start with "the process has more than one start event".
+    by validate-process-graph from a clio carrying ENG-98559 (Advance-Technologies-Foundation/clio#1559)
+    and by create-business-process from CrtProcessBuilder 1.6.2.19. Both floors matter and they are
+    independent: an older ENVIRONMENT refuses the second start at build time with "the process has more
+    than one start event", while an older CLIO reports it as an R3 error from validate-process-graph, so
+    an agent reading this rule and calling that tool would be told the graph is invalid.
 R4  Terminate end kills the whole instance; Simple end ends only its path.
 R5  Start triggers: Simple=user/run; Signal(object)=record add/modify/delete; custom signal=broadcast; message=directed; timer=schedule/CRON.
 R6  Diverging gateway: 1 in, >=2 out. Converging gateway: >=2 in, 1 out.

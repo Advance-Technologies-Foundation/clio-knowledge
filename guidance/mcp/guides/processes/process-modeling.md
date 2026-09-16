@@ -116,8 +116,10 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    nothing to tell them apart. Both `validate-process-graph` (R3) and `create-business-process`
    enforce exactly that, and both used to refuse ANY second start: a process reacting to two triggers
    was unbuildable, and the shape is one the platform itself ships (`PublishDraftToArticle` carries
-   two start signals). Requires CrtProcessBuilder 1.6.2.19 or later; an older environment still
-   refuses the second start at build time with "the process has more than one start event".
+   two start signals). Requires CrtProcessBuilder 1.6.2.19 or later on the environment AND a clio carrying ENG-98559
+   (Advance-Technologies-Foundation/clio#1559): an older environment refuses the second start at build
+   time with "the process has more than one start event", and an older clio reports it as an R3 error
+   from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
