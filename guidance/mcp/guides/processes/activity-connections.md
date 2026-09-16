@@ -189,7 +189,15 @@ leaf rather than through `process-modeling`.
 
 R1  Start event: no incoming flow; exactly one outgoing.
 R2  End event: no outgoing flow; one or more incoming.
-R3  Exactly one top-level start event; every path reaches an end event.
+R3  At least one start event, and at most ONE SIMPLE start; every path reaches an end event.
+    Triggered starts - Signal, timer, message - may be SEVERAL: one per trigger the process must react
+    to, which is how a process runs both when a record is added and when the same record is changed.
+    The cap is on the SIMPLE start alone, the manual launch, because a second one is a second way to
+    start the same process by hand with nothing to tell them apart. The rule read "exactly one start
+    event" until ENG-98559: that refused a shape the platform itself ships (PublishDraftToArticle in
+    CrtKnowledgeManagementVersions carries two start signals) and the designer draws. Enforced per kind
+    by validate-process-graph and by create-business-process from CrtProcessBuilder 1.6.2.19; an older
+    environment still refuses the second start with "the process has more than one start event".
 R4  Terminate end kills the whole instance; Simple end ends only its path.
 R5  Start triggers: Simple=user/run; Signal(object)=record add/modify/delete; custom signal=broadcast; message=directed; timer=schedule/CRON.
 R6  Diverging gateway: 1 in, >=2 out. Converging gateway: >=2 in, 1 out.
