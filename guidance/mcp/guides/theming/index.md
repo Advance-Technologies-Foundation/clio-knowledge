@@ -5,6 +5,7 @@ Theming is one part of branding a Creatio environment (`get-guidance name=brandi
 - Choose the brand colours with guidance — see "Choosing the colours".
 - Create, restyle, or delete a theme on an environment — see "Which flow".
 - List existing themes — see "List themes".
+- Read an existing theme's content — see "Read a theme's content".
 - Apply a theme to the current user (or reset it) — see "Apply to the current user".
 - Get or set the default theme — see "Get / set the default theme".
 
@@ -60,13 +61,20 @@ No-code / server flow
 Use it when you have only a registered environment (no clio workspace/package); the theme is created and edited directly on the environment via the native ThemeService — no package files and no push. The theme CSS reaches the environment as text: reference hosted fonts with `@import`, or embed a licensed font inside ready-made CSS as an `@font-face` `data:` URI within the CSS size limit (see "Building the theme CSS").
 Prerequisites: the `CanCustomizeBranding` license and the `CanManageThemes` system operation — see "Checking access".
 1. Create with `create-theme` in brand mode — one call: do not call `build-theme` first and do not put CSS in the conversation. Pass the confirmed palette hexes (`primary`, plus any settled `secondary`/`accent`/`success`/`error`), the fonts (`heading-font`, `body-font`, `font-weights`), and the theme name as `caption`; the server builds the CSS and creates the theme in that same call. When the user hands you ready-made CSS instead, pass it as inline `css-content` in place of the brand inputs — exactly one of the two CSS sources per call, never both. `css-class-name` is optional (derived from the caption when omitted — see "Building the theme CSS"); `id` is optional — omit it to get an auto-generated id back, but pass an explicit `id` whenever a retry is possible: the create call is not idempotent, so after a transport timeout confirm with `list-themes` before retrying rather than calling again blindly; `package-name` is optional — omit it to use the environment's CurrentPackageId system setting, but when the theme is part of a branding operation pass the package that operation resolved (`get-guidance name=branding`) so the theme and the branding assets land in one package. After a successful create, apply it to the current user by default — see "Apply to the current user".
-2. Restyle with `update-theme` (by id; a full overwrite of caption + css-class-name + css-content; the package cannot be changed).
+2. Restyle with `update-theme` (by id; a full overwrite of caption + css-class-name + css-content; the package cannot be changed). When modifying an EXISTING theme — changing one colour, a font, or any single token — read its current content first with `get-theme` (see "Read a theme's content"), edit the returned CSS, and pass the result back as `css-content`; `update-theme` replaces the whole stylesheet, so whatever is not present in the CSS you pass is gone.
 3. Delete with `delete-theme` (by id; deleting an unknown id is an error). If you delete the theme that is currently the default, see "Get / set the default theme".
 4. Confirm the change with `list-themes`.
 
 List themes
 - List the custom themes on an environment with `list-themes`: it returns each theme's `id`, `caption`, `cssClassName`, and `cssFilePath`. Use it to confirm a theme is available and to find a theme's `id`.
 - An empty list means the environment has no custom themes, or the caller lacks the `CanCustomizeBranding` license.
+
+Read a theme's content — get-theme
+- Read an existing theme by its `id` with `get-theme`: it returns `{ success, id, caption, cssClassName, cssFilePath, cssContent, cssContentLength, error? }`, so one call gives you the theme's full current definition. `caption`, `cssClassName` and `cssContent` come back byte-for-byte and are reusable verbatim as `update-theme` arguments.
+- The content always reflects the current state: `get-theme` re-reads the theme catalog on every call, so a read right after an `update-theme` returns the new CSS.
+- Pass `output-file` to write the CSS to disk instead of returning it in the result (`cssContentLength` is still reported) — use it to keep a large theme out of the conversation and feed `update-theme --css-content-file` directly. The path must not already exist and must stay inside the workspace or the OS temp directory.
+- An unknown `id` is a clear in-tool error, not a protocol failure: the tool names the id and points at `list-themes`. When the whole catalog is empty the error also names the possibly missing `CanCustomizeBranding` license (see "List themes").
+- A read that cannot reach the theme's stylesheet fails rather than returning empty content — an empty body, an HTML error page and a JSON error envelope are each reported as an error naming the `cssFilePath`. So `cssContent` is never an empty string, and a failed read can never be fed back through `update-theme` to overwrite a real stylesheet with nothing. Relay the error and stop; do not fall back to rebuilding the theme from scratch.
 
 Apply to the current user — set-user-theme
 This applies a theme to the profile of the account clio is authenticated as — only that user, not everyone (that is the global default; see "Get / set the default theme"). It overwrites the account's current theme, so `set-user-theme` is a confirmed (destructive-annotated) write: the MCP host prompts to confirm before it runs, and on the lazy tool surface it is re-issued through `clio-run`. It stays safe and reversible — it touches only the caller's own profile, and `reset` restores the default.

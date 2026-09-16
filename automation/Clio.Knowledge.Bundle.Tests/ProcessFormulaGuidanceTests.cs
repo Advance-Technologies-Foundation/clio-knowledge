@@ -93,6 +93,28 @@ public sealed class ProcessFormulaGuidanceTests
             "nothing in the metadata carries a priority, so order is the only answer to 'which branch wins'"),
         ("setFlowCondition",
             "the operation that turns a plain flow into a conditional one in place is the article's subject"),
+        ("you do not get silence",
+            "the version gate is a REFUSAL, not a silence, and the article said the opposite: clio refuses "
+            + "whenever the environment records a package older than the one clio ships - floor or no floor "
+            + "- and the pre-flight offered as the fallback is gated the same way. An agent told to expect "
+            + "silence reads the refusal as a defect instead of running install-process-builder"),
+        ("not the whole graph",
+            "on modify the notice covers the sources the request touched; a split already in the process "
+            + "is unreported, so a clean modify does not mean a clean process - the same trap this article "
+            + "names elsewhere, one level down"),
+        ("With THREE or more, that route is REFUSED",
+            "the two-branch remedy is a dead end at three - a conditional flow is refused while two or "
+            + "more siblings carry none, in any order - and an agent that follows it gets an exception "
+            + "where the article promised a fix. The gateway route is the only one that works there"),
+        ("covers plain flows only",
+            "a default flow beside a plain one is an implicit split by the same mechanism and NEITHER "
+            + "side reports it - a negative an editor trims without any test going red"),
+        ("still reports the shape as R12",
+            "the sentence that closes the version caveat used to say nothing reports the split on an "
+            + "un-upgraded stand, which is false - an older clio converges with an older package, so "
+            + "nothing is refused and validate-process-graph's R12 fires exactly as it always has. An "
+            + "agent that believes the shape is undetectable there skips the one check that would find "
+            + "it, so the correction has to be pinned rather than left as prose"),
     ];
 
     [Test]

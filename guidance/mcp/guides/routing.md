@@ -17,6 +17,8 @@ guards — it says whose rule it is and names that guide for the rest.
     Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
     to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
   - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
+  - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
+    requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
@@ -44,6 +46,8 @@ guards — it says whose rule it is and names that guide for the rest.
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
+  - branch on WHICH RESULT an activity was completed with - an approval's verdict, a perform task's
+    result, a page's completing button - a SELECTION and not a formula -> name=process-activity-result-branches
   - the Perform task element — a human step, what it produces, its parameter table ->
     name=process-perform-task
   - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
@@ -63,7 +67,7 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-approval
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
     sources are read facts, never invented -> name=process-preconfigured-page
-  - the "Connected to" links of the activity a task creates, and the R1-R18 connection rules ->
+  - the "Connected to" links of the activity a task creates, and the R1-R20 connection rules ->
     name=process-activity-connections
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
@@ -99,7 +103,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - identity assertion / Identity Service V3 -> name=identity-assertion
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
-  - brand colours / fonts / custom themes (create, restyle, delete, list, set the default) -> name=theming
+  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 
