@@ -69,6 +69,10 @@ public sealed class ProcessGuideCrossReferenceTests
         // added WITH the split rather than after it, which is the lesson the ENG-95891 note below
         // records: that split added none, so this guard watched nothing for the whole of that work.
         ("setFlowResults", "process-activity-result-branches"),
+        // Added after a review found formulas.md pointing at process-branch-conditions for a rule
+        // this same change had moved out of it - a pointer to an article that only forwards again.
+        // The setFlowResults row above could not catch it: the drifting reference names the FIELD.
+        ("branchesOnActivityResult", "process-activity-result-branches"),
         ("R1-R18", "process-activity-connections"),
         ("N1-N10", "process-naming"),
         // ENG-96536 moved this section into its own article; the row follows the section, not the file
