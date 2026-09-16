@@ -261,10 +261,10 @@ FLOW
          converts. Apply it as given: with no payload there is nothing to merge, and the mobile
          template's own configuration stands. Never fill such an entry in from the source element's
          values, and never strip the empty object.
-     When the mobile list template already provides the List / ListItem elements, you get TWO
-     operations: an advisory `merge` on List (empty values — the template's own list config stands)
-     and a `merge` on ListItem carrying the built row (title + body). Paste both. Do NOT insert a
-     second crt.List and do NOT move the row onto the List operation (see LIST ROW).
+     A conversion rule may produce SEVERAL operations for ONE source element: the element's own
+     operation plus a `merge` onto each template-provided sub-element the rule declares — the list
+     row onto the template's ListItem is the shipped case. Paste ALL of them, in order; never invent
+     one, and never fold a sub-element's payload into its parent's operation (see LIST ROW).
    - insert — add the element under parentName/propertyName; its type is `values.type`, and
      `propertyName` is ALWAYS present, even when it is the applier's own default `items`. Use the
      operation's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
@@ -461,20 +461,19 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
   dropped by the differ.
 - LIST ROW (grid → crt.List + crt.ListItem): the row lives on a crt.ListItem in the crt.List's
-  itemLayout — title = the FIRST grid column, body = every other column in source order.
-  THE CONVERTER BUILDS IT FOR YOU ON BOTH PATHS; paste it, do NOT rebuild it. For an INSERT it is
-  inside the new element's values. When the mobile list TEMPLATE already provides the List/ListItem
-  elements the row arrives as its OWN operation — `merge` on ListItem, carrying title + body — beside
-  an advisory empty `merge` on List. NEVER insert a second crt.List, and NEVER put itemLayout inside a
-  merge of the parent List — crt.List is not a container and itemLayout is an input, so addressing it as
-  a child slot makes the client answer "is not a container for other items" and the WHOLE schema fails
-  to build (ListItem is a separate named element). The row is YOURS to build in exactly one case: the
-  template provides List but NO ListItem under it (or provides more than one, which the converter
-  refuses to choose between). You will see the List merge and no ListItem operation. Build it by
-  merge-by-name onto the row element the template does provide — never by folding itemLayout into the
-  List merge. When you build the row, a title is a plain "$Binding" STRING; the { "value": "$Binding" }
-  shape is for body entries only — using it for the title renders an empty Title column while the body
-  looks correct.
+  itemLayout — title = the FIRST grid column, body = every other column in source order. The
+  converter builds it on both paths from the grid's conversion rule; paste it, do NOT rebuild it. For
+  an INSERT it is inside the new element's values. When the mobile TEMPLATE already provides the
+  List/ListItem elements it arrives as its OWN declared operation — a `merge` onto the template's
+  row element — beside the advisory empty `merge` on List (one source element, several operations;
+  see the merge branch). NEVER insert a second crt.List, and NEVER put itemLayout inside a merge of
+  the parent List — crt.List is not a container and itemLayout is an input, so addressing it as a
+  child slot makes the client answer "is not a container for other items" and the WHOLE schema fails
+  to build (ListItem is a separate named element). When the template provides NO row element under
+  the List, or more than one, the converter emits nothing for it ON PURPOSE — you will see the List
+  merge and no row operation. Report that to the user rather than inventing one. A title is a plain
+  "$Binding" STRING; the { "value": "$Binding" } shape is for body entries only — using it for the
+  title renders an empty Title column while the body looks correct.
   A title binds only a DIRECT TEXT column of the collection's entity — a lookup column, or a
   ForwardReference projection of its display column, leaves the Title column empty. The converter does
   NOT select around this: the row leads with the first column whatever its type, so a grid whose first
