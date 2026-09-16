@@ -49,12 +49,13 @@ public sealed class MobileGuideResponseSizeTests
     /// move. Recorded here rather than absorbed, because a ratchet whose moves are not written down is
     /// just a number that keeps going up. Lowered again to 61,636 when the list-row rule was restated
     /// type-agnostically (one source element, several operations) and the per-type prose it replaced
-    /// came out; a ratchet goes DOWN as soon as the article does.
+    /// came out, then to 61,607 when the sub-element clause was restated as DERIVED from the rule's one
+    /// template rather than declared beside it; a ratchet goes DOWN as soon as the article does.
     /// </para>
     /// </summary>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 61_636),
+        ("freedom-page-web-to-mobile-conversion", 61_607),
         ("freedom-page-mobile-reason-codes", 17_776)
     ];
 

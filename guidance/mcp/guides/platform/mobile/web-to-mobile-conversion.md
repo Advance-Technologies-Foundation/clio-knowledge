@@ -262,8 +262,8 @@ FLOW
          template's own configuration stands. Never fill such an entry in from the source element's
          values, and never strip the empty object.
      A conversion rule may produce SEVERAL operations for ONE source element: the element's own
-     operation plus a `merge` onto each template-provided sub-element the rule declares — the list
-     row onto the template's ListItem is the shipped case. Paste ALL of them, in order; never invent
+     operation plus a `merge` onto each template-provided sub-element the rule's template shapes —
+     the list row onto the template's ListItem is the shipped case. Paste ALL of them, in order; never invent
      one, and never fold a sub-element's payload into its parent's operation (see LIST ROW).
    - insert — add the element under parentName/propertyName; its type is `values.type`, and
      `propertyName` is ALWAYS present, even when it is the applier's own default `items`. Use the
@@ -465,8 +465,7 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   converter builds it on both paths from the grid's conversion rule; paste it, do NOT rebuild it. For
   an INSERT it is inside the new element's values. When the mobile TEMPLATE already provides the
   List/ListItem elements it arrives as its OWN declared operation — a `merge` onto the template's
-  row element — beside the advisory empty `merge` on List (one source element, several operations;
-  see the merge branch). NEVER insert a second crt.List, and NEVER put itemLayout inside a merge of
+  row element — beside the advisory empty `merge` on List (see the merge branch). NEVER insert a second crt.List, and NEVER put itemLayout inside a merge of
   the parent List — crt.List is not a container and itemLayout is an input, so addressing it as a
   child slot makes the client answer "is not a container for other items" and the WHOLE schema fails
   to build (ListItem is a separate named element). When the template provides NO row element under
