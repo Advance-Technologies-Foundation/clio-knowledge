@@ -50,7 +50,14 @@ leaf rather than through `process-modeling`.
   process's parameters onto the element, so you never declare them. `resync` is a `setElement` field
   ONLY: it is REFUSED on `create-business-process` and on `addElement`, where nothing exists yet to
   re-synchronize against, and a modify batch is atomic so a refused `addElement` rolls the whole batch
-  back. `processName` takes the called
+  back.
+  THE BLOCK IS REQUIRED ON CREATE. An element that names no called process is refused BEFORE it is built,
+  on both write paths, because it would carry no parameters and could not run. That constrains the ORDER
+  of the work the "when" list below recommends: you cannot lay out a caller skeleton of empty stage
+  elements and point them at their processes afterwards. Create the called processes first, then the
+  caller. On `modify-business-process` the refusal aborts the whole atomic batch, so a skeleton built
+  that way loses every other operation in the array with it.
+  `processName` takes the called
   process's schema NAME or its display CAPTION as the process library shows it; a caption shared by two
   processes is REFUSED with the schema names listed rather than resolved to the first match.
   WHEN to reach for it, measured over 402 caller→callee edges in the shipped 7.8.0 corpus, because the
@@ -85,8 +92,9 @@ leaf rather than through `process-modeling`.
   can hold a value you write. A mapping onto an `Out` or `Internal` one is REFUSED naming the
   direction, because the platform clears it on the next read of the process and the loss would be
   silent. To USE an output, map FROM it.
-  RE-SYNC after the called process changes: any `setElement` touching the element re-synchronizes it and
-  reports the drift as warnings, and `subProcess: {resync: true}` asks for that and nothing else. It is
+  RE-SYNC after the called process changes: any `setElement` touching the element re-synchronizes it, and
+  `subProcess: {resync: true}` asks for that and nothing else. Its WARNINGS are not a drift report and an
+  empty list proves nothing - `process-parameters` says why, and what to do instead. It is
   worth doing rather than optional, because at run time values cross by parameter NAME and an unmatched
   name is skipped with NO exception and NO log line — a stale element keeps running and quietly
   delivers nothing. A parameter the called process RENAMED is matched through the schema's mapping row

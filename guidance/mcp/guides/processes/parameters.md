@@ -55,7 +55,14 @@ This article is the authoritative owner of process parameters, the mappings that
     unmatched name is skipped with no exception and no log line. Requiredness is never validated on
     either side. So a called process that gained, lost or renamed a parameter leaves the caller running
     and quietly delivering nothing — which is why any `setElement` touching the element re-synchronizes
-    it and reports the drift, and why `subProcess: {resync: true}` exists
+    it, and why `subProcess: {resync: true}` exists. THE REFRESH IS REAL; THE WARNINGS ARE NOT A DRIFT
+    REPORT. The server re-synchronizes every sub-process element when it LOADS the schema, so by the time
+    the operation runs there is nothing stale left to compare against: the warnings cover drift THIS
+    request causes — a retarget, or the first selection — and a re-sync after the called process changed
+    underneath a saved caller answers success with nothing to say. An empty warning list is NOT evidence
+    the caller is intact, and neither is `inSync: true` on a describe, which converged the element as it
+    read it. To find out what actually moved, read the called process with `get-process-signature` and
+    compare its parameters against what you mapped
   * a RENAME on the called process is followed automatically: the element parameter and its source are
     paired through the schema's mapping row rather than by name, so the element's copy keeps its UId and
     its value and only changes its name. Anything you wrote referring to the old name still has to be
@@ -90,7 +97,9 @@ This article is the authoritative owner of process parameters, the mappings that
   its value is a bare record Guid in `value`. The macro form is still the route for a CONSTANT lookup
   column on a `changeData` element, whose `value` is text-only; a column fed from the process uses
   `processParameter` or `sourceElement` — see `process-data-elements`.
-- UNBOUND element INPUT parameters are NOT listed by `describe-business-process` (it returns only
+- UNBOUND element INPUT parameters are NOT listed by `describe-business-process` — except on a SUB-PROCESS
+  element, whose whole parameter set is reported, because those parameters are the called process's own
+  contract rather than inherited task defaults — (it returns only
   value-bearing parameters and outputs) — absence from describe does NOT mean the parameter does not
   exist. Input parameter names come from the user task's schema (for a custom task, the parameters it
   was created with); a wrong `elementParameter` name fails the build with a clear error and nothing is
