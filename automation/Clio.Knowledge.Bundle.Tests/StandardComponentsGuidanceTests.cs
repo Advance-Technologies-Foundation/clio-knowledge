@@ -24,6 +24,19 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// stand ALIAS is deliberately not asserted here: this is a public repository, the alias means nothing to
 /// that audience, and pinning it in a test is what makes generalising the article break the suite.
 ///
+/// CORRECTION, 2026-09-16, and the reason
+/// <see cref="StandardComponentsGuidance_ShouldNotPrescribeASingleUnconditionalAttachmentsShape"/> now
+/// exists: those three schemas shared a blind spot. All of them belong to objects with no per-object file
+/// entity, so the article read one shape as THE shape and its table prescribed
+/// <c>recordColumnName: "RecordId"</c> over <c>SysFile</c> unconditionally. A live migration of a Classic
+/// section produced <c>recordColumnName: "UsrToMigrate"</c> over <c>UsrToMigrateFile</c>, and was RIGHT
+/// to: on that stand the record's attachment is a row in the per-object table and <c>SysFile</c> holds
+/// none for that object. An agent obeying the table would have pointed the gallery at a table with no
+/// rows for the record — and <c>update-page</c> would have reported success. The article already
+/// mentioned both shapes in prose; the prescriptive table did not branch, and the table is what gets
+/// copied. That is the failure this fixture now guards on both sides: the branch must stay decidable, and
+/// NEITHER absolute may come back.
+///
 /// This fixture keeps that measured set, the merge-vs-insert rule and the routing that reaches them from
 /// drifting back out; a canonical value silently edited to a plausible-looking one would otherwise ship
 /// green and reintroduce the defect verbatim.
@@ -71,13 +84,53 @@ public sealed class StandardComponentsGuidanceTests
 
         // Assert
         guidance.Should().Contain("\"masterRecordColumnValue\": \"$Id\"")
-            .And.Contain("\"recordColumnName\": \"RecordId\"")
             .And.Contain("\"items\": \"$AttachmentList\"")
             .And.Contain("\"primaryColumnName\": \"AttachmentListDS_Id\"")
             .And.Contain("\"code\": \"AttachmentListDS_Name\"")
             .And.Contain("\"dataValueType\": 28")
             .And.Contain("\"viewType\": \"gallery\"")
             .And.Contain("\"tileSize\": \"small\"");
+    }
+
+    [Test]
+    [Description("Keeps BOTH attachments shapes present and keeps the guide from prescribing either one unconditionally — the defect a live migration run exposed.")]
+    public void StandardComponentsGuidance_ShouldNotPrescribeASingleUnconditionalAttachmentsShape()
+    {
+        // Arrange
+        string guidance = ReadGuide();
+
+        // Assert — both value sets survive, complete, with the pair that belongs to each.
+        guidance.Should().Contain("\"recordColumnName\": \"RecordId\"",
+                because: "the shared-table shape is real and is what the Freedom creation flow produces")
+            .And.Contain("\"recordColumnName\": \"UsrToMigrate\"",
+                because: "the per-object shape is equally real and is what a migrated Classic section "
+                    + "produced; replacing one absolute with the other was the failure to avoid here")
+            .And.Contain("\"entitySchemaName\": \"UsrToMigrateFile\"",
+                because: "recordColumnName and the data source entity are ONE decision, so the "
+                    + "per-object branch has to carry both halves or it teaches the mismatch it warns "
+                    + "about");
+
+        // Assert — the branch is decidable, not left to the reader's judgement. A table that names a
+        // shape with no test to apply is what the old prose-near-the-top version already was, and an
+        // agent read straight past it to the prescriptive table.
+        guidance.Should().Contain("`parent-schema-name` is `File`",
+                because: "the existence of an <Entity>File inheriting File is the stated signal, and a "
+                    + "rule an agent cannot evaluate against a live environment is not a rule")
+            .And.Contain("`find-entity-schema`",
+                because: "the decision is made against the target environment rather than from memory")
+            .And.Contain("READ `recordColumnName` rather than spelling it",
+                because: "the per-object column is conventionally the object's own name, and a "
+                    + "convention asserted as a contract is the same class of defect one level down");
+
+        // Assert — the absolute is gone from the places an agent actually copies from.
+        guidance.Should().Contain("| `recordColumnName` | OBJECT-SPECIFIC",
+                because: "the property table is the thing an agent copies from, and it said `RecordId` "
+                    + "flatly. Naming the cell OBJECT-SPECIFIC is the correction; a bare NotContain on "
+                    + "the old row would pass again the moment the comparison table above it is the "
+                    + "only place the literal survives")
+            .And.NotContain("The `SysFile` column pointing back at the master record.",
+                because: "that note framed SysFile as THE file entity rather than one of two, and it is "
+                    + "the exact sentence the table's authority rested on");
     }
 
     [Test]
@@ -91,7 +144,8 @@ public sealed class StandardComponentsGuidanceTests
         guidance.Should().Contain("You MUST declare `AttachmentListDS` under",
                 because: "the list has no entity of its own; without the data source it renders empty")
             .And.Contain("\"entitySchemaName\": \"SysFile\"",
-                because: "the attachments list reads files, and SysFile is the measured entity")
+                because: "the shared-table entity stays quoted in full on the insert path — the "
+                    + "correction branches the entity, it does not delete the shape that was right")
             .And.Contain("\"scope\": \"viewElement\"",
                 because: "the companion data source is view-element scoped, not the page data source");
         guidance.Should().Contain("MERGE path: an overlay on the declaration the template already carries",
@@ -172,6 +226,12 @@ public sealed class StandardComponentsGuidanceTests
             .And.Contain("Both shapes are real",
                 because: "the catalog example is a different case, not a defect, and saying otherwise "
                     + "would set this guide against an authoritative source it does not own")
+            .And.Contain("the catalog example is NOT a different case",
+                because: "the divergence is presentation and wiring ONLY. On the file entity the "
+                    + "catalog's ContactFile / \"Contact\" pair is correct for the objects that have "
+                    + "one, and this guide was the side over-generalising — a correction that runs "
+                    + "against the article's own earlier framing has to be pinned, or it reverts to the "
+                    + "tidier wrong story")
             .And.Contain("the catalog's `documentation` already gives the record-feed combination",
                 because: "crt.Feed is NOT a gap — claiming one where the catalog already answers is the "
                     + "duplication CONTRIBUTING asks contributors to rule out first");
@@ -194,7 +254,14 @@ public sealed class StandardComponentsGuidanceTests
                     + "the MERGE path was measured on has to be named")
             .And.Contain("PageWithTopAreaAndTabsFreedomTemplate",
                 because: "the INSERT-path claims are measured on a template shipping neither component; "
-                    + "without naming it, STEP 5 reads as inference again");
+                    + "without naming it, STEP 5 reads as inference again")
+            .And.Contain("UsrToMigrateFreedom_FormPage",
+                because: "the per-object branch is measured on a real migration run, and a branch whose "
+                    + "evidence is not named is the kind of claim this suite exists to stop")
+            .And.Contain("`SysFile` holds 2,681 rows",
+                because: "the row counts are what make the two shapes DISJOINT rather than "
+                    + "interchangeable, and a figure dropped from the evidence turns the branch back "
+                    + "into a preference");
         guidance.Should().NotContain("TBD",
             because: "a published body must not ship an unresolved version boundary");
     }

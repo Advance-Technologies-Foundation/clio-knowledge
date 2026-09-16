@@ -18,13 +18,25 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// the ONLY thing that uploads a file and the single most omittable deliverable on the insert path; the
 /// five-child-attribute collection with its sorting; the <c>Id</c> / <c>CardState</c> attributes that are
 /// NEVER the page's to declare (asserting otherwise once set this guidance against the component
-/// catalog); and the tag rules, including the junction question that was deliberately left UNVERIFIED
-/// rather than turned into an instruction.
+/// catalog); and the tag rules.
 ///
-/// Measured read-only on an internal Creatio Studio stand (2026-09-11, tags 2026-09-14) across three
-/// merged bundles: a template that ships both components, a template that ships neither, and the
-/// creation-flow page built on the first. The stand ALIAS is deliberately not asserted — this is a
-/// public repository.
+/// THE TAG QUESTION IS NOW ANSWERED. It was left UNVERIFIED because the first stand could not settle it:
+/// <c>TagInRecord</c> and <c>ContactInTag</c> both held zero rows, so no tagging behaviour was visible
+/// either way. A migration run on a second stand supplied the missing case — a record whose three tags
+/// live in a per-object <c>UsrToMigrateInTag</c> junction while <c>TagInRecord</c> is empty across the
+/// whole table, under a template-supplied control that defaults to <c>TagInRecord</c>. So the guidance
+/// turned prescriptive, and the fixture splits accordingly:
+/// <see cref="TemplateSuppliedPartsGuidance_ShouldNotPrescribeCreatingATagJunction"/> keeps the ORIGINAL
+/// retraction (the default path needs no per-object junction — never tell anyone to create one), and
+/// <see cref="TemplateSuppliedPartsGuidance_ShouldOwnTheJunctionOverrideRule"/> keeps the NEW rule
+/// (when one already exists, <c>tagInRecordSourceSchemaName</c> must name it). The two are easy to
+/// collapse into each other by accident and they say opposite-looking things, which is exactly why they
+/// are asserted separately — and why the new rule is still pinned as NOT OBSERVED at the browser.
+///
+/// Measured read-only on internal Creatio Studio stands (2026-09-11, tags 2026-09-14, migration run
+/// 2026-09-16) across four merged bundles: a template that ships both components, a template that ships
+/// neither, the creation-flow page built on the first, and a migrated Classic section. The stand ALIAS is
+/// deliberately not asserted — this is a public repository.
 /// </summary>
 [TestFixture]
 public sealed class TemplateSuppliedPartsGuidanceTests
@@ -118,8 +130,8 @@ public sealed class TemplateSuppliedPartsGuidanceTests
     }
 
     [Test]
-    [Description("Keeps the tag junction question stated as unverified: the guide must not prescribe an <Entity>InTag schema it never established was needed.")]
-    public void TemplateSuppliedPartsGuidance_ShouldNotPrescribeTheTagJunctionItDidNotVerify()
+    [Description("Keeps the RETRACTION: tagging does not require a per-object junction, and the guide must never tell anyone to create one.")]
+    public void TemplateSuppliedPartsGuidance_ShouldNotPrescribeCreatingATagJunction()
     {
         // Arrange
         string guidance = ReadGuide();
@@ -130,12 +142,47 @@ public sealed class TemplateSuppliedPartsGuidanceTests
                     + "missing <Entity>InTag is not by itself evidence of a broken tag control")
             .And.Contain("BaseEntityInTag",
                 because: "the older per-object model has to be named for the distinction to be usable")
-            .And.Contain("UNVERIFIED",
-                because: "whether tags held under the older model surface through the default path was "
-                    + "not established, and the empty stand could not settle it either way")
-            .And.Contain("does NOT tell you to create an `<Entity>InTag` schema",
-                because: "writing a fix instruction nobody verified is the failure mode the review "
-                    + "round this guidance came out of was about");
+            .And.Contain("do NOT create an `<Entity>InTag` schema to make tagging work",
+                because: "the measurement that arrived is about pointing the control at a junction that "
+                    + "ALREADY exists; it is not licence to reintroduce the claim that tagging needs "
+                    + "one, which is the claim this guidance was corrected for once already");
+        guidance.Should().NotContain("requires a per-object junction",
+            because: "the default path genuinely needs none, and the retraction outlives the new "
+                + "instruction rather than being softened by it");
+    }
+
+    [Test]
+    [Description("Keeps the MEASURED junction rule: when an <Entity>InTag exists, the control has to be pointed at it or the chips render empty over real data.")]
+    public void TemplateSuppliedPartsGuidance_ShouldOwnTheJunctionOverrideRule()
+    {
+        // Arrange
+        string guidance = ReadGuide();
+
+        // Assert — the rule itself, and the shape an agent copies.
+        guidance.Should().Contain("\"tagInRecordSourceSchemaName\": \"UsrToMigrateInTag\"",
+                because: "the remedy is one property naming the junction, and a rule with no copyable "
+                    + "form is what the previous revision already was")
+            .And.Contain("leave the control exactly as the template shipped it",
+                because: "the no-junction branch must stay a positive instruction, or an agent adds the "
+                    + "override everywhere and points the control at a schema that does not exist");
+
+        // Assert — it is stated as measured, with the counts that make it so, and NOT as a hypothesis.
+        guidance.Should().Contain("`TagInRecord` holds 0 rows in the entire table",
+                because: "the earlier revision could settle nothing because both candidate tables were "
+                    + "empty; what changed is that one of them now holds the record's data and the "
+                    + "other is still empty, and that asymmetry IS the finding")
+            .And.Contain("`UsrToMigrateInTag` 3, all three with",
+                because: "three rows for the record under test is what turns 'the control might not see "
+                    + "these' into 'the control is reading an empty table while the data sits here'")
+            .And.NotContain("UNVERIFIED",
+                because: "the question this word guarded is now measured; leaving it in would tell an "
+                    + "agent to stop investigating at exactly the point where the answer begins");
+
+        // Assert — and the remedy is still honestly short of observed.
+        guidance.Should().Contain("NOT OBSERVED",
+            because: "nobody watched the override repopulate the chips. The cause is measured and the "
+                + "remedy is the catalog's, and shipping the second as if it were the first is the "
+                + "habit this repository keeps having to unlearn");
     }
 
     [Test]
@@ -152,7 +199,13 @@ public sealed class TemplateSuppliedPartsGuidanceTests
                 because: "the template that ships NEITHER component is what makes the insert column "
                     + "measured rather than inferred")
             .And.Contain("UsrSourceCodes_FormPage",
-                because: "the creation-flow page is what shows the page itself declaring none of it");
+                because: "the creation-flow page is what shows the page itself declaring none of it")
+            .And.Contain("UsrToMigrateFreedom_FormPage",
+                because: "the tag rules turned prescriptive on a live migration run, and the schema it "
+                    + "was measured on has to be named for the rule to be checkable")
+            .And.Contain("`duper taf`",
+                because: "the tag names are observed, not reasoned, and naming them is what "
+                    + "distinguishes this from the hypothesis it replaced");
         guidance.Should().NotContain("TBD",
             because: "a published body must not ship an unresolved version boundary");
     }

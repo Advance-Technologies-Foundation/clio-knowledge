@@ -112,9 +112,12 @@ YOURS on the INSERT path
    in general is owned by `related-list` — read it rather than improvising one.
 
 4. `AttachmentListDS` itself, declared in FULL — four attributes (`Name`, `CreatedOn`, `CreatedBy`,
-   `Size`) over `SysFile`, at `scope: "viewElement"`. The block is in
-   `page-modification-standard-components` STEP 4, which also explains why the short one-attribute form
-   you may have seen on a real page is a MERGE overlay rather than the whole data source.
+   `Size`) at `scope: "viewElement"`, over the file entity THIS OBJECT uses. Which entity that is
+   (`SysFile` or a per-object `<Entity>File`, paired with the matching `recordColumnName`) is decided in
+   `page-modification-standard-components` STEP 3 — it is not a constant, and an insert that hard-codes
+   one of the two builds a gallery over the wrong table. The block itself is in that guide's STEP 4, which
+   also explains why the short one-attribute form you may have seen on a real page is a MERGE overlay
+   rather than the whole data source.
 
 NOT yours on either path. Do NOT file these as insert deliverables:
 
@@ -125,7 +128,7 @@ NOT yours on either path. Do NOT file these as insert deliverables:
   as `PDS.Id`, which is harmless and is not a thing to copy.
 - `$CardState`. Declared by both measured templates, and platform-provided per the same catalog text.
 
-TAGS — `crt.TagSelect`, the part that is never yours to wire
+TAGS — `crt.TagSelect`, the part you may POINT but never WIRE
 Tags produce the same user-visible symptom as a broken attachments list — a control that is there and
 empty — and the instinct is to fix them the same way. That instinct is wrong in every particular. Three
 measured differences:
@@ -149,39 +152,74 @@ measured differences:
   collection attribute, the data source and the toolbar wiring — everything above this section. Do not
   carry that habit across.
 
-So there is NO tag data source to propagate. All three measured schemas declare only `AttachmentListDS`
-and `PDS`; none of them contains `listItems`, `tagInRecordSourceSchemaName`, or any tag data source at
-all. Only `recordId` reaches the schema. `tagInRecordSourceSchemaName` defaults to `"TagInRecord"` —
-override it only for a custom junction schema.
+So there is NO tag data source to propagate. All four measured schemas declare only `AttachmentListDS`
+and `PDS`; none of them contains `listItems` or any tag data source at all.
+`tagInRecordSourceSchemaName` defaults to `"TagInRecord"`, and it is the ONE tag property a page may
+legitimately have to add — see the next section. It is a schema NAME, not a data source and not a
+binding, so setting it does not reopen the hand-wiring prohibition above.
 
-Where a dead tag control actually comes from, and what this guide does NOT claim
-`TagInRecord`, the default, is entity-agnostic: it keys an association by `RecordId` (Guid) plus
-`RecordSchemaName` (text) against the `Tag` dictionary, which is itself scoped by an `EntitySchemaName`
-text column. On that path a record page needs NO per-object junction schema, and the absence of one is
-NOT evidence that the control is broken.
+Two tagging models exist, and the control reads only one of them
+This was recorded as an open question in an earlier revision. A migration run settled it, and the answer
+changed an instruction — read this section rather than the previous one you may remember.
 
-A second, older model exists beside it: per-object junctions named `<Entity>InTag`, inheriting
-`BaseEntityInTag` and pointing at a per-object tag dictionary (`ContactInTag.Tag` → `ContactTag`). Around
-thirty of them exist on the measured stand.
+- THE DEFAULT MODEL. `TagInRecord` (package `CrtBase`) is entity-agnostic: it keys an association by
+  `RecordId` (Guid) plus `RecordSchemaName` (text) against the `Tag` dictionary, which is itself scoped by
+  an `EntitySchemaName` text column. On this path a record page needs NO per-object junction schema, and
+  the absence of one is NOT evidence that the control is broken. That retraction stands unchanged:
+  do NOT create an `<Entity>InTag` schema to make tagging work.
+- THE OLDER PER-OBJECT MODEL. Junctions named `<Entity>InTag`, inheriting `BaseEntityInTag`, with an
+  `Entity` lookup to the object and a `Tag` lookup to a per-object dictionary `<Entity>Tag` inheriting
+  `BaseTag` (`ContactInTag.Tag` → `ContactTag`). The Classic section wizard creates these alongside the
+  object, so a Classic-era section typically has one — 40 such junction tables on the measured stand,
+  against zero for the object the Freedom creation flow produced. A migrated page inherits the object, and
+  the object brings its junction with it. Check, do not assume: step 1 below is the check.
 
-UNVERIFIED, and deliberately not made into an instruction: whether tags recorded under the older
-per-object model are reachable through the component's default `TagInRecord` path. If a migrated page
-shows an empty tag control, that question — not the page body — is where to look, and it needs its own
-investigation. This guide does NOT tell you to create an `<Entity>InTag` schema: the default path does
-not read one, and whether creating one is a migration step or a platform concern was not established.
+The control reads `tagInRecordSourceSchemaName`, which defaults to `TagInRecord`. So when an object
+carries an `<Entity>InTag`, its tags are in a table the default path never queries.
+
+THE RULE, and it is decidable before you look at a browser:
+
+1. Call `find-entity-schema` with `search-pattern: "<Entity>"` on the target environment.
+2. NO `<Entity>InTag` — leave the control exactly as the template shipped it. The default path is correct
+   and there is nothing to add.
+3. AN `<Entity>InTag` EXISTS — point the control at it. This is the one case the catalog means by
+   "Override only when your module uses a custom junction schema", and its own checklist says
+   `tagInRecordSourceSchemaName` must match the actual junction entity:
+
+```jsonc
+{ "type": "crt.TagSelect", "recordId": "$Id", "name": "TagSelect",
+  "tagInRecordSourceSchemaName": "UsrToMigrateInTag" }
+```
+
+Without it the chips come up empty on a record that HAS tags, which is indistinguishable at a glance from
+a record that has none — and `update-page` reports success either way. Migration builds nothing for the
+tag control, so nobody is prompted to notice.
+
+What was MEASURED, on a Classic section migrated to Freedom UI: the object carries both
+`UsrToMigrateInTag` (inheriting `BaseEntityInTag`) and `UsrToMigrateTag` (inheriting `BaseTag`); the
+junction holds 3 rows, all three for the record under test, naming the tags `duper taf`, `dsgsg` and
+`sgsg`; `TagInRecord` holds 0 rows in the entire table, as does the `Tag` dictionary; and the migrated
+page's control is the bare template-supplied form with no `tagInRecordSourceSchemaName`, so it resolves to
+`TagInRecord`. The data exists, the control is on the page, and the table it reads is empty.
+
+NOT OBSERVED, and do not report it as fixed until you have looked: that adding the override repopulates
+the chips. The cause above is measured; the remedy is the catalog's prescription applied to it, and the
+last step is still a reload of the record page in a browser.
 
 Verifying an INSERT
 `update-page` returning `success: true` proves nothing here — every omission in this guide saves cleanly,
 because `update-page` validates the diff you send rather than the merged result. Reload the record page
 and confirm in the browser: the attachments tab shows its gallery WITH the upload and refresh buttons, an
-upload actually lands, the newest file sorts first, and the tag control is where the template put it. A
-list showing a `crt-data-grid-placeholder` has not loaded YET — `related-list` owns the rule for telling
+upload actually lands, the newest file sorts first, and the tag control shows the tags the record
+ALREADY has rather than an empty strip. A list showing a `crt-data-grid-placeholder` has not loaded YET — `related-list` owns the rule for telling
 that apart from a failure, and you MUST apply it before reporting anything as broken.
 
 Evidence
-Lab scenario, 2026-09-11 and 2026-09-14, on an internal Creatio Studio stand, read-only via `get-page`,
-`get-component-info`, `find-entity-schema` and `get-entity-schema-properties`. Three schemas were read,
-each through the MERGED bundle rather than the page body.
+Two lab scenarios on internal Creatio Studio stands, read-only via `get-page`, `get-component-info`,
+`find-entity-schema`, `get-entity-schema-properties` and read-only SQL. The first (2026-09-11, tags
+2026-09-14) read three schemas through the MERGED bundle rather than the page body. The second
+(2026-09-16) read a REAL MIGRATION RUN, and it is what turned the tag question from an open one into an
+instruction.
 
 1. `PageWithTabsFreedomTemplate` — the template that SHIPS both components. Everything in the inventory
    above marked template-supplied is read from here: both tab containers, the `AttachmentsTabContainer`
@@ -197,20 +235,39 @@ each through the MERGED bundle rather than the page body.
    only `UsrName` and `Id`, and its `handlers` array is empty, which is what establishes that the toolbar,
    the collection attribute and `CardState` come from the template rather than from the page.
 
-For tags specifically: `crt.TagSelect` is present in ALL three, always inside `CardToolsContainer` and
-always in the three-property form quoted above; none of the three declares a tag data source, `listItems`
-or `tagInRecordSourceSchemaName`. The junction schemas were read on the same stand: `TagInRecord`
-(package `CrtBase` — `RecordId`, `RecordSchemaName`, `Tag`, `TagRecordId`), `Tag` (carrying
-`EntitySchemaName`), and about thirty `<Entity>InTag` schemas inheriting `BaseEntityInTag`.
-`UsrSourceCodes` has no `UsrSourceCodesInTag`. Runtime settles nothing in either direction:
-`TagInRecord` and `ContactInTag` both hold zero rows on that stand, so no tagging behaviour was observed.
+4. `UsrToMigrateFreedom_FormPage` (package `UsrToMigrateApp`, parent template
+   `PageWithTabsFreedomTemplate`) — a Classic section migrated to Freedom UI on a second stand, read
+   2026-09-16 on record `2c1ab91e-0895-4ec1-b394-d4edab9d87fa`. Its own body carries five `insert`
+   operations and `merge` for `AttachmentList` and `Feed`; its `handlers` array is empty; it declares no
+   tag anything. It is the fourth schema the tag rules are measured on, and the first on which the older
+   tagging model held data.
 
-NOT observed, and marked as such where it appears: whether tags held under the older per-object model
-surface through the default `TagInRecord` path. The catalog statements about `recordId` and about the
-preprocessor are cited from `get-component-info`, not re-derived here. `get-component-info` reported
-`resolvedFrom: "environment-superset"` with `resolvedTargetVersion: "latest"`, so the catalog was NOT
-version-pinned to that stand. No page was written and no migration was run for this guide — every call
-was read-only.
+For tags specifically: `crt.TagSelect` is present in ALL FOUR, always inside `CardToolsContainer` and
+always in the three-property form quoted above; none of the four declares a tag data source, `listItems`
+or `tagInRecordSourceSchemaName`. On the first stand: `TagInRecord` (package `CrtBase` — `RecordId`,
+`RecordSchemaName`, `Tag`, `TagRecordId`), `Tag` (carrying `EntitySchemaName`), about thirty
+`<Entity>InTag` schemas inheriting `BaseEntityInTag`, `UsrSourceCodes` with no `UsrSourceCodesInTag`, and
+`TagInRecord` and `ContactInTag` both empty — which is why that scenario could settle nothing.
+
+On the migration stand, measured 2026-09-16, it settles. `UsrToMigrate` has `UsrToMigrateInTag`
+(`parent-schema-name: "BaseEntityInTag"`, ZERO own columns — `Entity` → `UsrToMigrate` and `Tag` →
+`UsrToMigrateTag` are both inherited and re-pointed) and `UsrToMigrateTag`
+(`parent-schema-name: "BaseTag"`). Row counts, by SQL: `UsrToMigrateInTag` 3, all three with
+`EntityId = 2c1ab91e-0895-4ec1-b394-d4edab9d87fa`, joining to tags named `duper taf`, `dsgsg`, `sgsg`;
+`UsrToMigrateTag` 3; `TagInRecord` 0 across the whole table; `Tag` 0. 40 `<Entity>InTag` tables exist
+there. The catalog was re-read against that environment the same day and still says
+`tagInRecordSourceSchemaName` defaults to `TagInRecord` and is to be overridden for a custom junction
+schema, with a checklist item requiring it to match the actual junction entity.
+
+NOT observed, and marked as such where it appears: that setting `tagInRecordSourceSchemaName` to the
+per-object junction makes the chips render. The CAUSE is measured — data in one table, control reading
+another — and the remedy is the catalog's own instruction applied to that cause, but no page was written
+and no browser was opened, so the last step remains yours. The catalog statements about `recordId` and
+about the preprocessor are likewise cited from `get-component-info`, not re-derived here.
+`get-component-info` reported `resolvedFrom: "environment-superset"` with
+`resolvedTargetVersion: "latest"` on both stands, so the catalog was NOT version-pinned to either. No page
+was written by either scenario — every call was read-only. The migration of scenario 4 was performed by
+someone else and is read here as evidence, not produced here.
 
 Applicability: Freedom UI web FORM pages (`schema-type: "web"`). Mobile pages draw from a separate catalog
 and map these components under different names — read `mobile-page-modification` first. What a template

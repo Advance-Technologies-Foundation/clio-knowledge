@@ -1215,7 +1215,7 @@
     {
       "itemId": "page-modification-standard-components",
       "title": "Page modification standard components",
-      "description": "Standard record-page component sub-guide of the page-modification family: the canonical crt.Feed and crt.FileList value sets for a Freedom UI form page, the merge-vs-insert decision driven by what the parent template ships, the mandatory AttachmentListDS companion data source, the pieces a template supplies that an insert must supply itself, and the contrasting crt.TagSelect case, which arrives with the template and is wired by a designer preprocessor rather than by the page.",
+      "description": "Standard record-page component sub-guide of the page-modification family: the canonical crt.Feed and crt.FileList value sets for a Freedom UI form page, the merge-vs-insert decision driven by what the parent template ships, the per-object choice between the shared SysFile/RecordId file shape and a per-object <Entity>File shape, the mandatory AttachmentListDS companion data source, the pieces a template supplies that an insert must supply itself, and the contrasting crt.TagSelect case, which arrives with the template and is wired by a designer preprocessor rather than by the page.",
       "topicId": "creatio.page-modification-standard-components",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-standard-components",
@@ -1229,7 +1229,7 @@
     {
       "itemId": "page-modification-template-supplied-parts",
       "title": "Page modification template-supplied parts",
-      "description": "What a Freedom UI record-page template supplies and what an explicit insert must supply itself: the tab containers, the attachments toolbar carrying the upload and refresh buttons, the AttachmentList collection attribute and its data source, the Id and CardState attributes that are never yours, and the crt.TagSelect tag chips, which arrive with the template and are wired by a designer preprocessor rather than by the page.",
+      "description": "What a Freedom UI record-page template supplies and what an explicit insert must supply itself: the tab containers, the attachments toolbar carrying the upload and refresh buttons, the AttachmentList collection attribute and its data source, the Id and CardState attributes that are never yours, and the crt.TagSelect tag chips, which arrive with the template and are wired by a designer preprocessor rather than by the page but must have tagInRecordSourceSchemaName pointed at an <Entity>InTag junction when the object has one.",
       "topicId": "creatio.page-modification-template-supplied-parts",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
