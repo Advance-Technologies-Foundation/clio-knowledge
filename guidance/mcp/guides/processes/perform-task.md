@@ -19,8 +19,8 @@ leaf rather than through `process-modeling`.
   process must wait for a person to act outside the process.
 - DO NOT USE IT FOR approvals. Creatio has a dedicated Approval element that creates an Approval record (not an
   Activity), emails approver and author, supports delegation, and branches on the verdict. Perform task has no
-  approved/rejected semantics. Approval is not buildable from clio yet — say so rather than emulating it with a
-  task.
+  approved/rejected semantics. Approval IS buildable — `process-approval` owns it; use that element rather
+  than emulating it with a task.
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with
@@ -114,12 +114,16 @@ leaf rather than through `process-modeling`.
                       server-built `[Element:{uid}]` metapath, and resolves at run time). You can branch
                       on it with `setFlowCondition`, but ONLY while nothing is selected in the results
                       editor for that connector — the designer opens that editor rather than a formula
-                      field here, and a selected result makes the platform stop reading the formula.
-                      clio refuses it; `process-branch-conditions` owns the rule. Affects 337 of the 1 406
-                      conditional flows shipped in 7.8.0. Say two things out loud, or the owner finds
-                      them alone: the designer's save raises "Required fields of some elements are not
-                      filled in" naming that connector, and a human cannot see or edit the formula
-                      there.
+                      field whenever this element's task category HAS result entries, which the stock
+                      categories do, and a selected result makes the platform stop reading the formula.
+                      Write the SELECTION instead — `flows[].results` on the build path,
+                      `setFlowResults` on the modify path. A formula here is REFUSED, and the
+                      refusal lists the results the element offers. `process-activity-result-branches` owns the rule. Affects 337 of
+                      the 1 406 conditional flows shipped in 7.8.0. Say two things out loud, or the
+                      owner finds them alone: once a human opens that connector's card the designer marks
+                      it invalid and every later save raises "Required fields of some elements are not
+                      filled in" naming it (until then the schema saves clean), and a human cannot see or
+                      edit the formula there.
   CurrentActivityId   Guid. The created Activity's Id.
                       It is INVISIBLE in describe until bound — the name above is the only way to find it.
                       It resolves as a mapping SOURCE for a downstream element (verified end to end).

@@ -136,7 +136,7 @@ saying so. Declaration order does not change the outcome — it did until the fi
 where declaring the conditional arm first (which the precedence advice below tells you to do) aborted
 the whole `create-business-process` call. Off a gateway, write the else branch as `kind: "default"` and
 the notice does not arise. R7 does NOT apply to this shape - not "is satisfied by it":
-`process-activity-connections` owns R1-R18 and states why, and the difference is operational. The
+`process-activity-connections` owns R1-R20 and states why, and the difference is operational. The
 gateway is synthesized at generation time and never appears as a graph node, so there is no
 exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding
 elsewhere in the graph as already handled.
@@ -241,15 +241,18 @@ fires above 100 and one that fires above 1000 resolve differently purely by whic
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
 
-One exception, and it matters on a Perform-task element: a branch chosen by the activity's RESULT is
-evaluated BEFORE any formula branch, whatever the flow order says. So on an element that already has a
-result-driven branch, adding a formula branch does not put you in a race you control by ordering — the
-result branch wins. `describe` marks those with `branchesOnActivityResult: true`, and `setFlowCondition`
-refuses to write a condition onto one.
+One exception, and it decides the DIALECT rather than the order: when a connector's source
+enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula, the
+designer offers no formula field there at all, and a condition written onto such a connector is
+REFUSED - it would save, run, and open as an empty panel no human can read. The refusal names the
+deciding activity and lists the results it offers.
 
-A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
-`condition` text. That confirms what was STORED, not what will run: a flow with
-`branchesOnActivityResult: true` reports its text and ignores it.
+And at RUN TIME the same source answers the ordering question differently: a SELECTION branch is
+evaluated BEFORE any formula branch, whatever order the flows are written in.
+`process-activity-result-branches` owns that dialect whole - that ordering rule and the mechanism
+behind it, how to write the dialect with `flows[].results` and `setFlowResults`, how to read it back,
+and exactly when the checkbox editor appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
+edit page with results by column.
 
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
 `B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a

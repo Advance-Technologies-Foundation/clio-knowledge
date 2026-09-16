@@ -22,6 +22,9 @@ owner -- read the one your task needs instead of guessing:
                                     vocabulary both it and a condition use
   * `process-branch-conditions`    - the condition on a conditional flow: setting one,
                                     branch precedence, and the parallel-split hazard
+  * `process-activity-result-branches`
+                                  - the OTHER branch dialect: a connector whose source enumerates
+                                    activity results takes a result SELECTION, never a formula
   * `process-perform-task`         - the Perform task element: what it produces, its parameter table and
                                      what the runtime sets.
   * `process-task-performer`       - who performs a task: the element-level performer block (the only
@@ -44,7 +47,7 @@ owner -- read the one your task needs instead of guessing:
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
                                      completing buttons, the data sources and the record they carry.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
-                                     and the R1-R18 connection rules.
+                                     and the R1-R20 connection rules.
   * `process-versions`             - the version model, which member runs, and how to read that
                                      standing. Read it BEFORE editing or launching ANY existing process.
   * `process-version-writes`       - saving a change as a new version, taking a restore point, and
@@ -76,7 +79,7 @@ article from what this one says; read that article.
     false, and NOT permission: a non-user-task element, an unresolvable user-task schema and a user task
     outside the supported six all report `null`. `setConnections` is refused on `false` AND on `null`; only
     `true` means it is accepted.
-  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R18
+  * validate-process-graph  — pre-check a planned graph against the connection rules R1-R20
     (the rules themselves are in `process-activity-connections`).
 
 == Descriptor (create-business-process) ==
@@ -116,7 +119,7 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    nothing to tell them apart. Both `validate-process-graph` (R3) and `create-business-process`
    enforce exactly that, and both used to refuse ANY second start: a process reacting to two triggers
    was unbuildable, and the shape is one the platform itself ships (`PublishDraftToArticle` carries
-   two start signals). Requires CrtProcessBuilder 1.6.2.19 or later on the environment AND a clio carrying ENG-98559
+   two start signals). Requires CrtProcessBuilder 1.6.2.24 or later on the environment AND a clio carrying ENG-98559
    (Advance-Technologies-Foundation/clio#1559): an older environment refuses the second start at build
    time with "the process has more than one start event", and an older clio reports it as an R3 error
    from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
