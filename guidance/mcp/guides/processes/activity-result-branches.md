@@ -33,7 +33,7 @@ card erases it. Use `condition` on a Send email branch.
 
 WRITE THE SELECTION, NOT A FORMULA. `flows[].results` on `create-business-process` and `setFlowResults`
 (`source` + `target` + a non-empty `results`) on `modify-business-process` take the result CAPTIONS -
-`["Positive"]` on an approval - or their record ids. From `CrtProcessBuilder` **1.6.2.22**; an older
+`["Positive"]` on an approval - or their record ids. From `CrtProcessBuilder` **1.6.2.23**; an older
 package has no build-path field and refuses the operation as unknown.
 
 - An UNKNOWN caption is refused WITH the set the element offers. That refusal is the only way to
@@ -54,7 +54,7 @@ package has no build-path field and refuses the operation as unknown.
   shape - it removes a taken result from the list before drawing it - and the runtime would take both
   branches, a parallel split wearing the clothes of a decision.
 - `describe-business-process` reads the selection back as `results` plus `resultsActivity`, the element
-  whose results they are. Both are ABSENT below 1.6.2.22, which is the same bytes as a formula branch:
+  whose results they are. Both are ABSENT below 1.6.2.23, which is the same bytes as a formula branch:
   an all-absent read is not evidence that nothing in the process branches on a result.
 
 A FORMULA THERE IS REFUSED, and the trap it prevents is why. Nothing about the formula fails: it saves,
