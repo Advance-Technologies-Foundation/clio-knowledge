@@ -61,10 +61,14 @@ runs only when a human opens that element's card, and the connector then opens a
 formula field and nothing ticked, because the designer resolves it as a selection.
 
 The decisive evidence is what the designer itself will not do. Change type -> Conditional flow on such a
-connector offers the checkbox list and NO formula option at all - so a conditional flow carrying a live
-expression and an empty selection on a result-enumerating source is a state the platform's own UI cannot
-produce. It existed only because a write surface was permissive where the UI is not. The refusal names
-the deciding activity and lists what it offers, which is the same list `results` takes.
+connector offers the checkbox list and NO formula option at all - so nothing in the UI invites you to
+write a formula there, and a write surface that lets you is being more permissive than the product.
+
+That is a fact about what the designer OFFERS, not about what can exist. Shipped 7.8.0 content does
+contain conditional flows in exactly this state, so expect to meet one in a process you did not write.
+The refusal is AUTHORING-only for that reason: an existing branch like this still describes, lays out
+and re-saves unchanged, and only a new formula on such a connector is refused - naming the deciding
+activity and listing what it offers, which is the same list `results` takes.
 
 WHEN THE CHECKBOX EDITOR APPEARS, in the designer's own terms:
 
