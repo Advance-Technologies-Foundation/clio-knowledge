@@ -74,11 +74,15 @@ This article is the authoritative owner of process parameters, the mappings that
     1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names the reference sites
     still bound to a parameter the element no longer carries. In practice that means the sites the
     platform's own pre-save validation does NOT catch first - a stored blob such as a Modify-data
-    element's column bindings. A reference whose source is a formula or a mapping is refused by that
-    validation before the re-sync can report it, one site per attempt, which tells you there is a
-    problem without telling you where the rest of them are. That is the half a caller can act on. A RENAME is still invisible everywhere - the
-    mapping row keeps the parameter's UId, so every reference stays resolvable while the saved name goes
-    stale, and the designer misses it for the same reason. So the rule is procedural: after ANY change to
+    element's column bindings. A reference whose source is a formula or a mapping is
+    usually refused by that validation before the re-sync can report it - usually, because the refusal
+    sits behind a platform feature flag and safe-generation mode, so on an environment with it off the
+    notice reaches those sites too. When the refusal does fire it can name several sites in one message,
+    not only one. That is the half a caller can act on. A RENAME is not reported by
+    the re-sync at all - the mapping row keeps the parameter's UId, so every reference stays resolvable
+    and this notice has nothing to name, while the saved name goes stale; the designer misses it for the
+    same reason. `inSync: false` on a COMPILED caller is the one read that does show it, which is why it
+    is worth asking for. So the rule is procedural: after ANY change to
     a called process's parameters, re-save every caller (any `setElement` on the element re-synchronizes
     it and persists the result, and `subProcess: {resync: true}` asks for that alone). Do it because the
     callee changed, not because something looked wrong
