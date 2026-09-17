@@ -65,12 +65,14 @@ This article is the authoritative owner of process parameters, the mappings that
     element stays stale and `inSync: false` after a callee change is a real signal that a re-sync is
     owed - measured on a stand. For an UNCOMPILED process there is no runtime instance, describe falls
     back to the design instance, that one converges as it loads, and `true` then says nothing. THE
-    DESIGNER is the trap worth stating plainly: opening the caller's
-    call-activity card re-synchronizes the element as it renders, so after a callee renames a parameter
-    the card shows the NEW name with the mapping intact and looks entirely healthy - while the SAVED
-    schema, which is the one that runs, still carries the old name and delivers nothing. The one place a
-    person would go to check is the one place that cannot show the problem. Measured on a stand,
-    2026-09-17. What IS reported, from CrtProcessBuilder
+    DESIGNER is the trap worth stating plainly, and the reason is simpler than it looks: the call-activity
+    card renders each parameter by its CAPTION and never by its code. So after the callee renames a
+    parameter's CODE - the rename that breaks delivery, because the runtime binds by code - the caller's
+    card reads exactly as before: same caption, mapping present, nothing marked, while the SAVED schema
+    still carries the old code and delivers nothing. The one place a person would go to check is the one
+    place that cannot show that problem, whatever the card does about synchronizing. A CAPTION rename is
+    the opposite and does not mislead: the card picks up the new caption and shows the mapping row EMPTY,
+    which is a visible signal. Measured on a stand, 2026-09-17. What IS reported, from CrtProcessBuilder
     1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names the reference sites
     still bound to a parameter the element no longer carries. In practice that means the sites the
     platform's own pre-save validation does NOT catch first - a stored blob such as a Modify-data
