@@ -1534,6 +1534,7 @@
       "itemId": "process-version-writes",
       "title": "Process version writes",
       "description": "Owns the two WRITE operations on a Creatio process version family. modify-business-process-as-new-version carries the edits AND produces the version in ONE call -- there is no separate create step, and an empty operations array is how you take a plain restore point. set-active-business-process-version makes one member ACTUAL and is the rollback gesture: any member including the family ROOT, which is how you go back to the original. The two are never chained -- a new version is created INACTIVE and changes nothing about what runs, activation needs its own request naming the version, and a session answer is agent behaviour rather than a request field. Also owns what a rollback does and does not do (new instances only, deletes nothing, re-saves the whole family in one transaction, reported from a READ-BACK rather than echoed), that these writes go one at a time, and that a rejected edit saves nothing while a saved version can never be taken back. The MODEL is process-versions.",
+
       "topicId": "creatio.process-version-writes",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-version-writes",
