@@ -88,17 +88,20 @@ public sealed class ResponseShapeFieldGuidanceTests
     ];
 
     // unresolvedTargetRequests / requestConversions field set clio #1562 introduced. PR #174's review found
-    // the article silent on resolvedCandidateSchemaName, resolvedSourceType and recommendedAction, and stale
-    // on the collection count (it still said FOUR after missingTargetPages became a fifth); nothing pinned
-    // the fix, so the same drift could return unnoticed the way the FOUR count itself once did.
+    // the article silent on resolvedCandidateSchemaName and stale on the collection count (it still said
+    // FOUR after missingTargetPages became a fifth); nothing pinned the fix, so the same drift could return
+    // unnoticed the way the FOUR count itself once did. resolvedSourceType/recommendedAction were briefly
+    // documented here as always-null RESERVED fields — clio #1562 deleted both outright as dead wire surface
+    // (a settable-but-never-written property is not a contract), so the pin now checks the article says
+    // there is NO such field, not that one exists and is null.
     private static readonly (string Fragment, string Because)[] UnresolvedTargetRequestFields =
     [
         ("resolvedCandidateSchemaName",
             "the entity-default-mobile-page read's candidate web edit page; null when none was found, and never a schema to assume is on mobile"),
         ("resolvedSourceType",
-            "an always-null reserved field on the wire today; naming it stops an agent from treating its absence as a converter bug"),
+            "clio deleted this field outright; the article must say there is no such field, never that it exists and reads null"),
         ("recommendedAction",
-            "the second always-null reserved field, paired with resolvedSourceType so neither is read as populated"),
+            "clio deleted this field outright; the article must say there is no such field, never that it exists and reads null"),
         ("FIVE collections",
             "the count itself: missingTargetPages is the fifth, and a caller iterating requestConversions by this number would skip it if it silently reverted to FOUR"),
         ("missingTargetPages",
@@ -162,7 +165,7 @@ public sealed class ResponseShapeFieldGuidanceTests
     }
 
     [Test]
-    [Description("resolvedCandidateSchemaName, resolvedSourceType and recommendedAction are documented, and requestConversions is counted as FIVE collections including missingTargetPages. PR #174's review found the article silent on clio #1562's new fields and still saying FOUR; this pin is what that review itself was missing.")]
+    [Description("resolvedCandidateSchemaName is documented, resolvedSourceType/recommendedAction are documented as NOT existing on the wire, and requestConversions is counted as FIVE collections including missingTargetPages. PR #174's review found the article silent on clio #1562's new field and still saying FOUR; this pin is what that review itself was missing.")]
     public void Guide_ShouldDocumentTheClio1562UnresolvedTargetRequestFields()
     {
         AssertAllPresent(UnresolvedTargetRequestFields, caseSensitive: true);

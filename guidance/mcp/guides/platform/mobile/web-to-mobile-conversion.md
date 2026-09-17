@@ -131,13 +131,13 @@ Creatio or disk. The guide contains:
         only the target param — never rebuild from scratch, or other params silently vanish.
       • `missing` + `bindingRemoved: false` — a READ found the object's default mobile page absent. A
         read cannot PROVE absence, so nothing was removed; `originalBinding` is null.
-        `resolvedCandidateSchemaName` is that read's default WEB edit page (this `targetKind` +
-        `missing` only, else null) — a candidate, not a confirmed page. Report the absence and name
-        the remedy; never present as certain or strip.
+        `resolvedCandidateSchemaName` is that read's candidate WEB edit page (only for this
+        `targetKind`+`missing`, else null) — not confirmed. Report and name the remedy; never present
+        as certain or strip.
       • `unknown` — unverified (`bindingRemoved` always false). Ask the user to confirm.
     `targetKind` names which kind and so which remedy; `target` names it. `targetsProbed` false = never
-    asked (empty list is "not checked"); `targetsNote` says why. `resolvedSourceType` /
-    `recommendedAction` are null — reserved, ignore them.
+    asked (empty list is "not checked"); `targetsNote` says why. No `resolvedSourceType` /
+    `recommendedAction` field exists — the guide never classifies.
     `missingTargetPages` dedupes DISTINCT `web-page` targets with a `references[]` per control naming
     it; each reference carries its OWN `originalBinding` for a same-shared-page repoint.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
