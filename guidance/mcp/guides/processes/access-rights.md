@@ -6,7 +6,8 @@ This article is the authoritative owner of the Creatio **Change access rights** 
 (`changeAccessRights` / `ChangeAdminRightsUserTask`): its `accessRights` block, the permission entries,
 the three grantee kinds, and the read-back contract. `process-modeling` owns the build lifecycle and
 points here; `process-data-elements` owns the record `filter` shape this element consumes;
-`record-rights` owns the record-permission model itself (the `Sys<Entity>Right` storage and the direct
+`record-permissions` owns the stored-versus-runtime decision; read it when designing the permission model.
+`record-rights` owns persisted grants (the `Sys<Entity>Right` storage and the direct
 `get-record-rights` / `set-record-rights` path). Choose between them by WHEN the change happens: use
 `record-rights` for an ad-hoc grant or revoke you make now, and this element only when the change must
 happen inside a running process. Note the two surfaces spell levels differently — `record-rights` exposes

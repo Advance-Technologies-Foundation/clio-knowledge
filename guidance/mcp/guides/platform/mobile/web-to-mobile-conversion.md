@@ -261,10 +261,10 @@ FLOW
          converts. Apply it as given: with no payload there is nothing to merge, and the mobile
          template's own configuration stands. Never fill such an entry in from the source element's
          values, and never strip the empty object.
-     If the mobile list template already provides the List / ListItem elements, configure
-     them by MERGE-BY-NAME (the row goes on the ListItem element: title + body) — do NOT insert a
-     second crt.List and do NOT put itemLayout inside a merge of the parent List (silent no-op;
-     ListItem is a separate named element).
+     A conversion rule may produce SEVERAL operations for ONE source element: the element's own
+     operation plus a `merge` onto each template-provided sub-element the rule's template shapes —
+     the list row onto the template's ListItem is the shipped case. Paste ALL of them, in order; never invent
+     one, and never fold a sub-element's payload into its parent's operation (see LIST ROW).
    - insert — add the element under parentName/propertyName; its type is `values.type`, and
      `propertyName` is ALWAYS present, even when it is the applier's own default `items`. Use the
      operation's parentName VERBATIM — never substitute a parent the component "belongs in" by type or per
@@ -304,9 +304,8 @@ FLOW
      A grid → crt.List INSERT arrives with its row ALREADY BUILT: values carries the
      crt.ListItem under itemLayout (title = the first grid column, body = the rest) AND every source
      property the grid carried, each already shaped to what the mobile component accepts. Paste it as-is;
-     do NOT rebuild the row and do NOT strip properties. This is prebuilt only for an INSERT — when the
-     mobile list TEMPLATE already provides the List/ListItem elements, the row is still yours to
-     configure by merge-by-name (see the merge branch).
+     do NOT rebuild the row and do NOT strip properties. The row is built on the MERGE path too, as its
+     own operation — see LIST ROW under HARD MOBILE RULES.
      The values carry every localized string verbatim as #ResourceString(key)# tokens. Pass
      guide.resourceStrings to update-page `resources` in ONE call, exactly as given — do not hand-pick
      keys, do not register a #ResourceString(...)# token as a value, and do not add keys the map omits
@@ -462,15 +461,18 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   only in viewModelConfigDiff / modelConfigDiff; a viewConfigDiff insert that uses "path" is silently
   dropped by the differ.
 - LIST ROW (grid → crt.List + crt.ListItem): the row lives on a crt.ListItem in the crt.List's
-  itemLayout — title = the FIRST grid column, body = every other column in source order.
-  For an INSERT the converter has already built the row into values; paste it, do NOT rebuild it.
-  It is NOT prebuilt when the mobile list TEMPLATE already provides the List/ListItem elements: then
-  configure the row by MERGE-BY-NAME onto the ListItem element (title + body). NEVER insert a second
-  crt.List, and NEVER put itemLayout inside a merge of the parent List — crt.List is not a container and
-  itemLayout is an input, so addressing it as a child slot makes the client answer "is not a container
-  for other items" and the WHOLE schema fails to build (ListItem is a separate named element). When you
-  build the row, a title is a plain "$Binding" STRING; the { "value": "$Binding" } shape is for body
-  entries only — using it for the title renders an empty Title column while the body looks correct.
+  itemLayout — title = the FIRST grid column, body = every other column in source order. The
+  converter builds it on both paths from the grid's conversion rule; paste it, do NOT rebuild it. For
+  an INSERT it is inside the new element's values. When the mobile TEMPLATE already provides the
+  List/ListItem elements it arrives as its OWN declared operation — a `merge` onto the template's
+  row element — beside the advisory empty `merge` on List (see the merge branch). NEVER insert a second crt.List, and NEVER put itemLayout inside a merge of
+  the parent List — crt.List is not a container and itemLayout is an input, so addressing it as a
+  child slot makes the client answer "is not a container for other items" and the WHOLE schema fails
+  to build (ListItem is a separate named element). When the template provides NO row element under
+  the List, or more than one, the converter emits nothing for it ON PURPOSE — you will see the List
+  merge and no row operation. Report that to the user rather than inventing one. A title is a plain
+  "$Binding" STRING; the { "value": "$Binding" } shape is for body entries only — using it for the
+  title renders an empty Title column while the body looks correct.
   A title binds only a DIRECT TEXT column of the collection's entity — a lookup column, or a
   ForwardReference projection of its display column, leaves the Title column empty. The converter does
   NOT select around this: the row leads with the first column whatever its type, so a grid whose first
