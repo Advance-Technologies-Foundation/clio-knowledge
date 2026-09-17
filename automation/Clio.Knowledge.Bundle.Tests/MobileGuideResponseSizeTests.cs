@@ -39,10 +39,23 @@ public sealed class MobileGuideResponseSizeTests
     /// rounded up: the defect this guards is that the conversion article grew ~14.5 KB unnoticed, and a
     /// ceiling with headroom would let the next few KB through the same way. An edit that adds a line must
     /// therefore either shrink something else or move the number knowingly.
+    /// <para>
+    /// MOVED ONCE, deliberately: 61,244 -> 61,689. The article claimed the grid row was prebuilt for an
+    /// INSERT only and was the caller's job whenever the mobile template already provided List/ListItem.
+    /// clio now builds it on both paths, so the claim had become false in the direction that fails
+    /// silently — a converted section list shipped with no title and no body, and nothing reported it.
+    /// The correction cost ~800 chars; roughly half was paid back by deleting the duplicate statements of
+    /// the same rule that the edit itself had created (it was stated in three places). The rest is this
+    /// move. Recorded here rather than absorbed, because a ratchet whose moves are not written down is
+    /// just a number that keeps going up. Lowered again to 61,636 when the list-row rule was restated
+    /// type-agnostically (one source element, several operations) and the per-type prose it replaced
+    /// came out, then to 61,607 when the sub-element clause was restated as DERIVED from the rule's one
+    /// template rather than declared beside it; a ratchet goes DOWN as soon as the article does.
+    /// </para>
     /// </summary>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 61_244),
+        ("freedom-page-web-to-mobile-conversion", 61_607),
         ("freedom-page-mobile-reason-codes", 17_776)
     ];
 
