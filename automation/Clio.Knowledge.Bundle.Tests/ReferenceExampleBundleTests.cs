@@ -10,6 +10,11 @@ public sealed class ReferenceExampleBundleTests
     private static readonly ReferenceExampleExpectation[] RegisteredExamples =
     [
         new(
+            "atf.creatio.custom-process-element-reference",
+            "catalog/reference-examples/creatio-custom-process-element.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-custom-process-element-reference",
+            "ba663090c682b370594c9ba5962993d6b2a3b7b3"),
+        new(
             "atf.creatio.custom-mcp-tool-reference",
             "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-custom-mcp-tool-reference",

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.22",
+  "libraryVersion": "1.15.23",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -185,7 +185,10 @@
       "list-widget",
       "record-permissions",
       "record-permission-extensions",
-      "atf.creatio.record-permissions-reference"
+      "atf.creatio.record-permissions-reference",
+      "process-custom-elements",
+      "process-custom-element-families",
+      "atf.creatio.custom-process-element-reference"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -343,7 +346,10 @@
       "docs://knowledge/com.creatio.clio/list-widget",
       "docs://knowledge/com.creatio.clio/record-permissions",
       "docs://knowledge/com.creatio.clio/record-permission-extensions",
-      "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference"
+      "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference",
+      "docs://knowledge/com.creatio.clio/process-custom-elements",
+      "docs://knowledge/com.creatio.clio/process-custom-element-families",
+      "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference"
     ]
   },
   "resources": [
@@ -1024,7 +1030,7 @@
     {
       "itemId": "freedom-page-mobile-reason-codes",
       "title": "Freedom UI mobile conversion: reason codes",
-      "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
+      "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns â€” for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization â€” and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
       "requiredFeatures": [
@@ -1335,7 +1341,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "BPMN build lifecycle, tools, descriptor, recipe, and edit safety. Read process-element-catalog before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Also routes to process-custom-elements and process-custom-element-families. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -2259,7 +2265,7 @@
     {
       "itemId": "related-list",
       "title": "Related lists",
-      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies — no handler. Fetch the 'Expanded list' composite structure via get-component-info.",
+      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies â€” no handler. Fetch the 'Expanded list' composite structure via get-component-info.",
       "topicId": "creatio.related-list",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-list",
@@ -2455,7 +2461,7 @@
     {
       "itemId": "when-to-use-requests",
       "title": "When to use requests",
-      "description": "Canonical MCP guidance for wiring Freedom UI page actions to platform requests: when to reuse a built-in crt.*Request vs chain a handler vs author a usr.*Request, and the mandatory get-request-info catalog discipline — parameters as the only authorable keys (empty map = no params block), platform-injected baseParameters never in params, per-request documentation, and version scoping.",
+      "description": "Canonical MCP guidance for wiring Freedom UI page actions to platform requests: when to reuse a built-in crt.*Request vs chain a handler vs author a usr.*Request, and the mandatory get-request-info catalog discipline â€” parameters as the only authorable keys (empty map = no params block), platform-injected baseParameters never in params, per-request documentation, and version scoping.",
       "topicId": "creatio.when-to-use-requests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/when-to-use-requests",
@@ -2517,6 +2523,45 @@
       "uri": "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference",
       "sourcePath": "catalog/reference-examples/creatio-record-permissions.yaml",
       "bundlePath": "resources/atf.creatio.record-permissions-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "process-custom-elements",
+      "title": "Custom business process elements",
+      "description": "Create native user tasks with Classic parameter pages, explicit directions, DI and ErrorOr, packaged registration, and runtime validation.",
+      "topicId": "creatio.process-custom-elements",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-custom-elements",
+      "sourcePath": "guidance/mcp/guides/processes/process-custom-elements.md",
+      "bundlePath": "resources/process-custom-elements.md",
+      "mediaType": "text/plain",
+      "legacyUris": [
+        "docs://mcp/guides/process-custom-elements"
+      ]
+    },
+    {
+      "itemId": "process-custom-element-families",
+      "title": "Selectable custom process element families",
+      "description": "Build one toolbox element selecting separate task implementations and separate Classic parameter pages.",
+      "topicId": "creatio.process-custom-element-families",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-custom-element-families",
+      "sourcePath": "guidance/mcp/guides/processes/process-custom-element-families.md",
+      "bundlePath": "resources/process-custom-element-families.md",
+      "mediaType": "text/plain",
+      "legacyUris": [
+        "docs://mcp/guides/process-custom-element-families"
+      ]
+    },
+    {
+      "itemId": "atf.creatio.custom-process-element-reference",
+      "title": "Creatio custom process element reference",
+      "description": "Tested Format text and four-operation Arithmetic workspace with Classic panels, package SQL, DI, ErrorOr, unit and live process tests.",
+      "topicId": "atf.creatio.custom-process-element-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference",
+      "sourcePath": "catalog/reference-examples/creatio-custom-process-element.yaml",
+      "bundlePath": "resources/atf.creatio.custom-process-element-reference.yaml",
       "mediaType": "text/yaml"
     }
   ]
