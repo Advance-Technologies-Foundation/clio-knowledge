@@ -59,6 +59,12 @@ Creatio or disk. The guide contains:
     environment-derived flag is ABSENT rather than false — report that nothing was established, and do
     NOT tell the user the page is unregistered. isFormPage is read from the page itself and is present
     either way.
+  - existingMobilePages — mobile page(s) ALREADY covering the entity/page being converted (the
+    reuse-vs-convert-again fact): a `section` match comes from sectionRegistration's mobile-section
+    state, an `entity-default-mobile-page` match comes from the bound entity's MobileRelatedPage add-on.
+    Each entry carries schemaName, schemaUId, source. A match naming the schema THIS run is about to
+    create/update is excluded. Ask the developer to reuse or convert again when non-empty; empty means
+    the probe ran and found none, not that it did not run.
   - layoutResolution — set ONLY when the source page HAD components and the converted layout came out
     empty. A legitimately layout-less page and a conversion that lost everything look identical without
     it, so treat its presence as a STOP: report it and do not build a body. The usual cause is an
@@ -138,8 +144,14 @@ Creatio or disk. The guide contains:
     `targetKind` names which kind and so which remedy; `target` names it. `targetsProbed` false = never
     asked (empty list is "not checked"); `targetsNote` says why. No `resolvedSourceType` /
     `recommendedAction` field exists — the guide never classifies.
-    `missingTargetPages` dedupes DISTINCT `web-page` targets with a `references[]` per control naming
-    it; each reference carries its OWN `originalBinding` for a same-shared-page repoint.
+    `missingTargetPages` is the deduplicated queue of missing mobile pages to offer next. It now covers
+    BOTH kinds: every `web-page` target (queued unconditionally) and every `entity-default-mobile-page`
+    target verified `missing` (a `state: unknown` entity target stays reported-only in
+    `unresolvedTargetRequests`, never queued here). An entity row keys on `resolvedCandidateSchemaName`
+    when resolved, else the raw `target` name; a `web-page` row sharing that schema name collapses into
+    the SAME row, carrying references from both sources — `targetKind` on a collapsed row is `web-page`.
+    Each reference keeps its own `originalBinding` (null for an entity-only reference) to restore once
+    the target resolves.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
     validators, converters). REPORT ONLY: nothing here transfers, and re-implementing the behaviour is
     an entity-level business-rule job, not a body change.

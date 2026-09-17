@@ -40,9 +40,15 @@ public sealed class MobileGuideResponseSizeTests
     /// ceiling with headroom would let the next few KB through the same way. An edit that adds a line must
     /// therefore either shrink something else or move the number knowingly.
     /// </summary>
+    /// <remarks>
+    /// The conversion ceiling moved knowingly from 61,244 to 62,468 as the companion to clio #1562's
+    /// <c>existingMobilePages</c> field and the widened <c>missingTargetPages</c> aggregation (ENG-94839):
+    /// both are real, load-bearing wire facts a caller must be told about, not padding. Lower this back
+    /// only if a future split or trim genuinely shrinks the article below this size.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 61_244),
+        ("freedom-page-web-to-mobile-conversion", 62_468),
         ("freedom-page-mobile-reason-codes", 17_776)
     ];
 

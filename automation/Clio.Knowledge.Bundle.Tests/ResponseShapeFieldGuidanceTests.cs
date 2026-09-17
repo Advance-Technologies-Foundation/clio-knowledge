@@ -30,6 +30,12 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// next silent drift; <see cref="UnresolvedTargetRequestFields"/> and
 /// <see cref="BindingRemovedContract"/> exist so it is not.
 /// </para>
+/// <para>
+/// clio #1562 (ENG-94839), companion to toolkit #183, later moved missing-target dedup and the
+/// existing-mobile-page check server-side: <c>existingMobilePages</c> is a brand-new field, and
+/// <c>missingTargetPages</c> silently widened from web-page-only to also aggregating
+/// entity-default-mobile-page targets. <see cref="ExistingMobilePagesFields"/> pins both.
+/// </para>
 /// </remarks>
 [TestFixture]
 public sealed class ResponseShapeFieldGuidanceTests
@@ -108,6 +114,21 @@ public sealed class ResponseShapeFieldGuidanceTests
             "must be named among the requestConversions collections, not only in its own field entry, or an agent counting collections never finds it")
     ];
 
+    // guide.existingMobilePages and the widened missingTargetPages aggregation clio #1562 added
+    // (companion to toolkit #183, ENG-94839). Neither had a pin: existingMobilePages is a brand-new
+    // top-level field a caller must check before Gate M, and missingTargetPages silently went from
+    // web-page-only to covering entity-default-mobile-page targets too — a caller that assumed the old
+    // web-page-only scope would miss half the queue with no error to notice it by.
+    private static readonly (string Fragment, string Because)[] ExistingMobilePagesFields =
+    [
+        ("existingMobilePages",
+            "the reuse-vs-convert-again field; losing its entry would leave a caller searching for an existing mobile page by hand again"),
+        ("entity-default-mobile-page",
+            "one of the two existingMobilePages.source values and one of the two kinds missingTargetPages now aggregates; losing it collapses the vocabulary back to one kind"),
+        ("collapses into",
+            "the rule that a web-page target and an entity target sharing a schema name merge into ONE missingTargetPages row instead of two"),
+    ];
+
     // The two-repository vocabulary contract clio #1562 briefly broke: commit 6cab799 retired
     // drop-request-target-missing and stripped bindingRemoved from this article on the premise the
     // converter never removes a binding for a missing navigation target, then commit 268c2d5 reinstated
@@ -176,6 +197,13 @@ public sealed class ResponseShapeFieldGuidanceTests
     public void Guide_ShouldKeepTheBindingRemovedContract()
     {
         AssertAllPresent(BindingRemovedContract, caseSensitive: true);
+    }
+
+    [Test]
+    [Description("existingMobilePages is documented as its own field, and missingTargetPages is documented as covering entity-default-mobile-page targets (with the same-schema collapse rule), not only web-page ones. clio #1562 added both server-side as the companion to toolkit #183; nothing pinned them, so the same silent drift that hit resolvedCandidateSchemaName before PR #174 could recur unnoticed.")]
+    public void Guide_ShouldDocumentExistingMobilePagesAndTheWidenedMissingTargetPages()
+    {
+        AssertAllPresent(ExistingMobilePagesFields, caseSensitive: true);
     }
 
     [Test]
