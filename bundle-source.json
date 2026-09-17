@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.21",
+  "libraryVersion": "1.15.22",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -182,7 +182,10 @@
       "virtual-entities",
       "websocket-messaging",
       "when-to-use-requests",
-      "list-widget"
+      "list-widget",
+      "record-permissions",
+      "record-permission-extensions",
+      "atf.creatio.record-permissions-reference"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -337,7 +340,10 @@
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
-      "docs://knowledge/com.creatio.clio/list-widget"
+      "docs://knowledge/com.creatio.clio/list-widget",
+      "docs://knowledge/com.creatio.clio/record-permissions",
+      "docs://knowledge/com.creatio.clio/record-permission-extensions",
+      "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference"
     ]
   },
   "resources": [
@@ -2473,6 +2479,45 @@
       "sourcePath": "guidance/mcp/guides/dashboards/list-widget.md",
       "bundlePath": "resources/list-widget.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "record-permissions",
+      "title": "Record Permissions",
+      "description": "Unified decision guide for stored record grants, runtime/dynamic permission rules, process grant changes and real-user verification.",
+      "topicId": "creatio.record-permissions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/record-permissions",
+      "legacyUris": [
+        "docs://mcp/guides/record-permissions"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/record-permissions.md",
+      "bundlePath": "resources/record-permissions.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "record-permission-extensions",
+      "title": "Record Permission Extensions",
+      "description": "Validated native read/edit/delete permission-extension contracts, named activation, stored-grant combination modes, fallback behavior and bounded runtime verification.",
+      "topicId": "creatio.record-permission-extensions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/record-permission-extensions",
+      "legacyUris": [
+        "docs://mcp/guides/record-permission-extensions"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/record-permission-extensions.md",
+      "bundlePath": "resources/record-permission-extensions.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "atf.creatio.record-permissions-reference",
+      "title": "Creatio record permissions reference",
+      "description": "Executable native read/edit/delete permission model with stored-grant modes, real-user Entity/DataService E2E matrices, and safe disposable fixture lifecycle.",
+      "topicId": "atf.creatio.record-permissions-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference",
+      "sourcePath": "catalog/reference-examples/creatio-record-permissions.yaml",
+      "bundlePath": "resources/atf.creatio.record-permissions-reference.yaml",
+      "mediaType": "text/yaml"
     }
   ]
 }
