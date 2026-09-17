@@ -61,8 +61,15 @@ This article is the authoritative owner of process parameters, the mappings that
     request causes — a retarget, or the first selection — and a re-sync after the called process changed
     underneath a saved caller answers success with nothing to say. An empty warning list is NOT evidence
     the caller is intact, and neither is `inSync: true` on a describe, which converged the element as it
-    read it. To find out what actually moved, read the called process with `get-process-signature` and
-    compare its parameters against what you mapped
+    read it. NEITHER IS THE DESIGNER, and that is the trap worth stating plainly: opening the caller's
+    call-activity card re-synchronizes the element as it renders, so after a callee renames a parameter
+    the card shows the NEW name with the mapping intact and looks entirely healthy - while the SAVED
+    schema, which is the one that runs, still carries the old name and delivers nothing. The one place a
+    person would go to check is the one place that cannot show the problem. Measured on a stand,
+    2026-09-17. So there is no surface that reveals stale state; the rule is procedural instead - after
+    ANY change to a called process's parameters, re-save every caller (any `setElement` on the element
+    re-synchronizes it and persists the result, and `subProcess: {resync: true}` asks for that alone).
+    Do it because the callee changed, not because something looked wrong
   * a RENAME on the called process is followed automatically: the element parameter and its source are
     paired through the schema's mapping row rather than by name, so the element's copy keeps its UId and
     its value and only changes its name. Anything you wrote referring to the old name still has to be
