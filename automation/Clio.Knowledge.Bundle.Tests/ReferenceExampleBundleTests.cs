@@ -33,7 +33,12 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.websocket-reference",
             "catalog/reference-examples/creatio-websocket.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-websocket-reference",
-            "2d650b03c58553c934b71479c095fff669ad1049")
+            "2d650b03c58553c934b71479c095fff669ad1049"),
+        new(
+            "atf.creatio.record-permissions-reference",
+            "catalog/reference-examples/creatio-record-permissions.yaml",
+            "https://github.com/Advance-Technologies-Foundation/creatio-record-permissions-reference",
+            "72f6a8b2c9e08b2f2105166fe40cd69b57959b58")
     ];
 
     [Test]

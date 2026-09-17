@@ -1,0 +1,37 @@
+schemaVersion: 0
+id: atf.creatio.record-permissions-reference
+title: Creatio record permissions reference
+status: published
+primaryUseCase:
+  id: creatio-record-permission-extensions
+  summary: Implement and test native read, edit and delete predicates combined with stored record grants under actual non-administrator sessions.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-record-permissions-reference
+  revision: 72f6a8b2c9e08b2f2105166fe40cd69b57959b58
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/AtfRecordPermissions
+  implementation: packages/AtfRecordPermissions/Files/src/cs/Permissions/DocumentPermissions.cs
+  integrationTests: tests/AtfRecordPermissions.IntegrationTests/PermissionMatrixTests.cs
+  runner: scripts/Test-Live.ps1
+  evidence: docs/verification.md
+supportingCapabilities:
+  - record-permissions
+  - runtime-permission-extensions
+  - native-entity-permissions
+  - dataservice-permissions
+  - unit-testing
+  - live-creatio-testing
+compatibility:
+  status: example-declared
+  details: Live-verified on Creatio 10.1.585.0, .NET 8, PostgreSQL, single node, with clio 8.1.0.130. Other versions and access paths require revalidation.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - 120 real-user E2E tests and 2 focused unit tests passed; stored-grant read/grant/read/revoke/read also verified through clio MCP.
+  - Includes native Entity and DataService allow/deny matrices, distinct mutation predicates, same-session context changes, and missing/null/inactive fallback cases.
+  - The package contains privileged fixed-schema test controls; install the complete fixture only on an exclusive disposable environment.
+  - Does not certify delegation policy, conflicting stored grants, operation-denial precedence, browser UI, external users, web farms or performance.
+  - Registration makes this runnable reference discoverable; incidental example choices are not universal business policy.
