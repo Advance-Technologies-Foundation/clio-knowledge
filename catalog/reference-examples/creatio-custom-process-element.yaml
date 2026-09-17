@@ -1,0 +1,38 @@
+schemaVersion: 0
+id: atf.creatio.custom-process-element-reference
+title: Creatio custom process element reference
+status: published
+primaryUseCase:
+  id: creatio-custom-bpmn-elements
+  summary: Create custom process elements with Classic parameter pages, including one toolbox entry selecting four separate arithmetic user tasks and pages.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-custom-process-element-reference
+  revision: ba663090c682b370594c9ba5962993d6b2a3b7b3
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/UsrCustomProcessElement
+  unitTests: tests/UsrCustomProcessElement
+  integrationTests: tests/UsrCustomProcessElement.IntegrationTests
+  evidence: docs/lab-record.md
+supportingCapabilities:
+  - creatio-process-user-task
+  - classic-process-parameter-page
+  - explicit-parameter-directions
+  - dependency-injection
+  - error-or-result
+  - package-sql-registration
+  - unit-testing
+  - live-process-testing
+compatibility:
+  status: example-declared
+  details: Verified with Clio 8.1.0.130 and Creatio 10.1.585.0 on .NET 8 and PostgreSQL, including fresh non-FSM installation. SQL Server scripts are authored but untested.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - 27 unit and 10 live process cases passed. Browser acceptance covers separate pages, switching, persistence, and output-reference guards.
+  - The single-entry toolbox exclusion override uses an internal Classic designer method and requires upgrade regression testing.
+  - Typed process models use Single for the tested Float2 parameters; arbitrary decimal precision across that boundary is not established.
+  - A licensed Creatio environment and matching local platform/test dependencies are required; proprietary binaries are not distributed.
+  - Registration does not promote every example implementation choice to a cross-version platform guarantee.
