@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.14.16",
+  "libraryVersion": "1.14.17",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -92,6 +92,7 @@
       "process-modeling",
       "process-element-catalog",
       "process-naming",
+      "process-read-data",
       "process-add-data",
       "process-data-elements",
       "process-data-source-filters",
@@ -242,6 +243,7 @@
       "docs://knowledge/com.creatio.clio/process-modeling",
       "docs://knowledge/com.creatio.clio/process-element-catalog",
       "docs://knowledge/com.creatio.clio/process-naming",
+      "docs://knowledge/com.creatio.clio/process-read-data",
       "docs://knowledge/com.creatio.clio/process-add-data",
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-data-source-filters",
@@ -1238,7 +1240,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-activity-connections and process-versions. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-activity-connections and process-versions. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1289,6 +1291,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/data-elements.md",
       "bundlePath": "resources/process-data-elements.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-read-data",
+      "title": "Read data element",
+      "description": "Owns the Creatio Read data element (readData / ReadDataUserTask) -- the step that READS records. Covers all four buildable modes and the output each one fills (first-record into ResultEntity; collection into both the raw ResultEntityCollection and the shaped ResultCompositeObjectList a Collection process parameter mirrors; count, always ResultCount and taking no column; aggregation, a function/column pair whose output follows the column type), the column selection and sort, collection's own two refusals and its numberOfRecords top-N with the keep-on-omit rule, the write-time shaping that lets a mirror taken in the same call find a shape, and what a mode conversion clears. Split out of process-data-elements, which owns the record trigger and the sibling Modify data element.",
+      "topicId": "creatio.process-read-data",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-read-data",
+      "sourcePath": "guidance/mcp/guides/processes/read-data.md",
+      "bundlePath": "resources/process-read-data.md",
       "mediaType": "text/plain"
     },
     {

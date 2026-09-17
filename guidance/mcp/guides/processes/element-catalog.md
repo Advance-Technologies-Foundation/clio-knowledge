@@ -19,9 +19,10 @@ leaf rather than through `process-modeling`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
   `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
-  A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `count` |
-  `aggregation`; the designer's `collection` mode is ENG-96504 and refused for now), result columns and
-  sort (`first` ONLY — refused for `count`/`aggregation`), an `aggregation` function + column (`aggregation`
+  A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `collection` |
+  `count` | `aggregation`), result columns and
+  sort (`first` / `collection` — refused for `count`/`aggregation`; REQUIRED for `collection`), a
+  `numberOfRecords` top-N (`collection` ONLY), an `aggregation` function + column (`aggregation`
   ONLY), plus a record `filter` (the block is in `process-data-elements`, the
   filter contract in `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
@@ -107,8 +108,9 @@ leaf rather than through `process-modeling`.
     catalog below, where silence used to read as "buildable"),
   sub-process, the Add-data and Delete-data targets (a `filter` on THAT task is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and
-  `addData`), and the Read data
-  COLLECTION mode (ENG-96504; its first-record, count and aggregation modes DO build — see the catalog entry below).
+  `addData`), and a CONSUMER
+  of a read collection (no iterator element builds, and reading one column out of the list needs ENG-91844 — all
+  four Read data modes DO build, see the catalog entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
 
@@ -125,12 +127,14 @@ modes (mode/sender/recipients/subject/body OR template + templateEntity/options/
 `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
-    object, mode, columns/sort — `first` ONLY, refused for `count`/`aggregation` — and aggregation —
+    FIRST-RECORD, COLLECTION, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
+    object, mode, columns/sort — `first` / `collection`, refused for `count`/`aggregation` — a
+    `numberOfRecords` top-N (`collection` ONLY) and aggregation —
     `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
-    and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" | "count" |
-    "aggregation"`. The COLLECTION mode remains designer-only until ENG-96504: requesting it is refused,
-    and describe reports a designer-made one as `mode: "collection"`.
+    and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" |
+    "collection" | "count" | "aggregation"`. `collection` reads every match into `ResultEntityCollection`
+    and the shaped `ResultCompositeObjectList`, which a `Collection` process parameter mirrors; it requires
+    an explicit `columns` selection.
 - `addDataUserTask`   Add data     – create record(s) in background; BUILDABLE via the `addData` block in
                                      both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
