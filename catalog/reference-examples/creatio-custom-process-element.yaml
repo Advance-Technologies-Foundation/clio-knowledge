@@ -7,7 +7,7 @@ primaryUseCase:
   summary: Create custom process elements with Classic parameter pages, including one toolbox entry selecting four separate arithmetic user tasks and pages.
 source:
   repository: https://github.com/Advance-Technologies-Foundation/creatio-custom-process-element-reference
-  revision: ba663090c682b370594c9ba5962993d6b2a3b7b3
+  revision: 1c29f00f97cd6430852c4ff60ebb3a37b8adbddc
   defaultBranch: main
 entryPoints:
   overview: README.md
@@ -26,11 +26,12 @@ supportingCapabilities:
   - live-process-testing
 compatibility:
   status: example-declared
-  details: Verified with Clio 8.1.0.130 and Creatio 10.1.585.0 on .NET 8 and PostgreSQL, including fresh non-FSM installation. SQL Server scripts are authored but untested.
+  details: Creatio 10.1.585.0 on .NET 8 and PostgreSQL. Clio 8.1.0.130 installed v0.1.0 on a fresh non-FSM instance and v0.2.0 as an upgrade on that retained instance. SQL Server scripts are authored but untested.
 trust:
   publisher: Advance Technologies Foundation
   level: published
 notes:
+  - Version 0.2.0 corrects omitted formatter directions without changing parameter identities; its portable metadata contract guard covers all five tasks. The upgraded text output selector excludes Text and Prefix.
   - 27 unit and 10 live process cases passed. Browser acceptance covers separate pages, switching, persistence, and output-reference guards.
   - The single-entry toolbox exclusion override uses an internal Classic designer method and requires upgrade regression testing.
   - Typed process models use Single for the tested Float2 parameters; arbitrary decimal precision across that boundary is not established.
