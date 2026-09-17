@@ -93,7 +93,7 @@ leaf rather than through `process-modeling`.
   diagram being readable, not about making the branch work. Three rules apply to the flows leaving a
   gateway element, none of them visible in the descriptor schema; `process-branch-conditions` owns
   them.
-- `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.8**. Below that version the type is refused
+- `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.10**. Below that version the type is refused
   outright, naming the ones it does build. It computes ONE expression and writes the result into ONE
   parameter — see its catalog entry below for the block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
@@ -142,22 +142,24 @@ System actions (palette group "System actions"):
     `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
     object is unset: do not report the element as a working delete.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into ONE parameter.
-    BUILDABLE from CrtProcessBuilder **1.6.3.8** with a `formula` block:
+    BUILDABLE from CrtProcessBuilder **1.6.3.10** with a `formula` block:
     `{body, and exactly ONE of resultProcessParameter | elementName + elementParameter}`.
     Four things about it are not guessable from the schema:
-      * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). On
-        CREATE you may reference a process parameter by NAME — `[#Amount#]` — and the server expands it,
-        exactly as it does for a condition. On MODIFY it does not: pass the meta-path form
-        `describe-business-process` reports, or the platform answers `Formula value error: Expression
-        expected (at index 0)`, which names neither the element nor the reference.
+      * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). A process
+        parameter may be referenced by NAME — `[#Amount#]` — on EVERY route that writes a body: create,
+        `addElement` and `setElement` alike, because the expansion lives in the applier they all go
+        through. A body already in the meta-path form `describe-business-process` reports passes through
+        untouched, so echoing a read-back is safe.
       * BOTH the body and a target are required when the element is created, and naming two targets is
         refused rather than resolved by precedence. On modify the block is a PARTIAL update: a body-only
         edit keeps the target, a target-only edit keeps the expression.
       * the target is NOT a mapping and needs none of the mapping sources. The platform stores it as a
         map path on the element itself, which is why `describe-business-process` reports it under
-        `formula.target` — resolved back to names — rather than among the process mappings. A stored
-        target whose parameter no longer exists reads back as `formula.target.unresolved`: the element
-        still runs and writes into nothing.
+        `formula.target` — resolved back to names — rather than among the process mappings. A three-part
+        target (a COLUMN of an element parameter's record) reports that column as `entityColumnUId`,
+        because the process cannot name it. `formula.target.unresolved` means the stored path could not
+        be decoded into names — NOT that the element writes nowhere: the platform's reader accepts
+        shapes a read-back may not, so treat it as "not named here" and look at the raw path.
       * an element the DESIGNER built reads back the same way, so a described formula feeds straight
         into a build.
     Still true, and still the cheaper answer for a one-off value: a mapping with an `expression` source

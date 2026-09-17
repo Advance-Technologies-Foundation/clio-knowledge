@@ -179,10 +179,10 @@ public sealed class ProcessGuideContentPreservationTests
         // four was satisfied by four mentions anywhere and could not notice a fifth entry arriving
         // unmarked, which is what its own reason claimed to prevent.
         // formulaTask lost its READ-ONLY pin in ENG-92712: the element became buildable from
-        // CrtProcessBuilder 1.6.3.8, so the marker would now be a lie. What the entry must still carry is
+        // CrtProcessBuilder 1.6.3.10, so the marker would now be a lie. What the entry must still carry is
         // the floor - without it an agent on an older environment reads "buildable" and gets a refusal
         // naming types it did not ask about.
-        ("process-element-catalog", "`formulaTask`       Formula", "1.6.3.8",
+        ("process-element-catalog", "`formulaTask`       Formula", "1.6.3.10",
             "the version floor on the one entry in this catalog that CHANGED from read-only to buildable"),
         ("process-element-catalog", "`scriptTask`        Script task", "READ-ONLY here",
             "the per-entry marker on the entry whose C# pulls a compile in"),
