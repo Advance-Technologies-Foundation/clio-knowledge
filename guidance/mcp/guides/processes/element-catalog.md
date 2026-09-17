@@ -93,7 +93,7 @@ leaf rather than through `process-modeling`.
   diagram being readable, not about making the branch work. Three rules apply to the flows leaving a
   gateway element, none of them visible in the descriptor schema; `process-branch-conditions` owns
   them.
-- `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.12**. Below that version the type is refused
+- `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.14**. Below that version the type is refused
   outright, naming the ones it does build. It computes ONE expression and writes the result into ONE
   parameter — see its catalog entry below for the block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
@@ -142,7 +142,7 @@ System actions (palette group "System actions"):
     `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
     object is unset: do not report the element as a working delete.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into ONE parameter.
-    BUILDABLE from CrtProcessBuilder **1.6.3.12** with a `formula` block:
+    BUILDABLE from CrtProcessBuilder **1.6.3.14** with a `formula` block:
     `{body, and exactly ONE of resultProcessParameter | elementName + elementParameter}`.
     Four things about it are not guessable from the schema:
       * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). A process
