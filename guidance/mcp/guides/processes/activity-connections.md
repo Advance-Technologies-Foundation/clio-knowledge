@@ -178,7 +178,7 @@ leaf rather than through `process-modeling`.
   below are about sequence flows only.
 
 == Connection rules R1–R20 (validate-process-graph enforces the structural subset: R1–R3, R7–R15,
-   R17–R20; R4–R6 are semantic or not yet enforced — verify those yourself.
+   R17–R20; R4–R6 and R16 are semantic or enforced elsewhere — verify those yourself.
    Validation pass ≠ buildable: the rules cover the FULL catalog, but only the "What you can build
    today" slice in `process-element-catalog` can be built — conditional flows, DEFAULT flows and the
    exclusive and parallel gateway ELEMENTS are all in that slice now; inclusive and event-based
