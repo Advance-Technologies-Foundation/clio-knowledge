@@ -62,24 +62,30 @@ This article is the authoritative owner of process parameters, the mappings that
     underneath a saved caller answers success with nothing to say. An empty warning list is NOT evidence
     the caller is intact. `inSync` IS evidence - of a CODE change, which is the half that matters, since the runtime binds by code;
     it does not see a caption, because the element keeps its own copy of that. Which way it points depends
-    on what describe read: for a
-    COMPILED process it reads the runtime instance, which the platform does not converge, so a stale
-    element stays stale and `inSync: false` after a callee change is a real signal that a re-sync is
-    owed - measured on a stand. For an UNCOMPILED process there is no runtime instance, describe falls
-    back to the design instance, that one converges as it loads, and `true` then says nothing. And on a
+    on whether the process HAS a
+    runtime instance. With one, describe reads it, the platform does not converge it, a stale element
+    stays stale, and `inSync: false` is a real signal. Without one, describe falls back to the design
+    instance, which converges AS IT LOADS - the read erases the drift it was called to show - and `true`
+    says nothing. A runtime instance is produced by RUNNING the process: measured, against a control
+    differing only in that. Saving the schema does NOT produce one, and neither does compiling, so never
+    compile a process to make its drift visible. It is also ONE-DIRECTIONAL, and this is the sharp edge:
+    it asks whether every parameter the callee DECLARES is present on the element, so a callee that ADDS
+    one flips it to `false` while a callee that REMOVES one leaves it `true` - a dropped parameter is
+    invisible to `inSync`, measured. A code rename reads as an add plus a remove and does flip it. And on a
     MULTI-INSTANCE element `false` is permanent and means nothing at all - it carries collections and
     counters rather than the callee's parameter names, so the test can never pass and the re-sync `false`
     would call for is refused on it; check `multiInstance` before acting on `false`. THE
     DESIGNER is the trap worth stating plainly, and the reason is simpler than it looks: the call-activity
-    card renders each parameter by its CAPTION and never by its code. So after the callee renames a
-    parameter's CODE - the rename that breaks delivery, because the runtime binds by code - the caller's
-    card reads exactly as before: same caption, mapping present, nothing marked, while the SAVED schema
-    still carries the old code and delivers nothing. The one place a person would go to check is the one
-    place that cannot show that problem, whatever the card does about synchronizing. If the callee ALSO
-    renamed the caption the card swings the other way and alarms without cause - it shows the new caption
-    with the mapping row EMPTY, while the caller's stored mapping is intact and unchanged. So the card
-    misleads in both directions and NEITHER is data loss; do not re-map on the strength of an empty row,
-    check `describe` instead. Measured on a stand, 2026-09-17. What IS reported, from CrtProcessBuilder
+    card never shows a parameter's CODE. So after the callee renames a code - the rename that breaks
+    delivery, because the runtime binds by code - the caller's card reads exactly as before: same caption,
+    mapping present, nothing marked, while the SAVED schema still carries the old code and delivers
+    nothing. The one place a person would go to check is the one place that cannot show that problem.
+    Rename the code AND the caption and the card swings the other way, alarming without cause: new
+    caption, mapping row EMPTY, while the caller's stored mapping is intact and unchanged. A caption-only
+    rename misleads in neither direction - new caption, value kept. So the card is wrong in both
+    directions and NEITHER is data loss; do not re-map on the strength of an empty row, read `describe`
+    instead. Measured on a stand, 2026-09-17. No mechanism is established for WHY the row empties - it is
+    not caption-matching, which the caption-only reading rules out - so do not reason forward from one. What IS reported, from CrtProcessBuilder
     1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names the reference sites
     still bound to a parameter the element no longer carries. In practice that means the sites the
     platform's own pre-save validation does NOT catch first - a stored blob such as a Modify-data
@@ -90,8 +96,8 @@ This article is the authoritative owner of process parameters, the mappings that
     not only one. That is the half a caller can act on. A RENAME is not reported by
     the re-sync at all - the mapping row keeps the parameter's UId, so every reference stays resolvable
     and this notice has nothing to name, while the saved name goes stale; the designer misses it for the
-    same reason. `inSync: false` on a COMPILED caller is the one read that does show it, which is why it
-    is worth asking for. So the rule is procedural: after ANY change to
+    same reason. `inSync: false` on a caller that has been RUN is the one read that does show it, which
+    is why it is worth asking for. So the rule is procedural: after ANY change to
     a called process's parameters, re-save every caller (any `setElement` on the element re-synchronizes
     it and persists the result, and `subProcess: {resync: true}` asks for that alone). Do it because the
     callee changed, not because something looked wrong
