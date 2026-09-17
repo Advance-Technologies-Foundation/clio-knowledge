@@ -66,7 +66,10 @@ This article is the authoritative owner of process parameters, the mappings that
     COMPILED process it reads the runtime instance, which the platform does not converge, so a stale
     element stays stale and `inSync: false` after a callee change is a real signal that a re-sync is
     owed - measured on a stand. For an UNCOMPILED process there is no runtime instance, describe falls
-    back to the design instance, that one converges as it loads, and `true` then says nothing. THE
+    back to the design instance, that one converges as it loads, and `true` then says nothing. And on a
+    MULTI-INSTANCE element `false` is permanent and means nothing at all - it carries collections and
+    counters rather than the callee's parameter names, so the test can never pass and the re-sync `false`
+    would call for is refused on it; check `multiInstance` before acting on `false`. THE
     DESIGNER is the trap worth stating plainly, and the reason is simpler than it looks: the call-activity
     card renders each parameter by its CAPTION and never by its code. So after the callee renames a
     parameter's CODE - the rename that breaks delivery, because the runtime binds by code - the caller's
