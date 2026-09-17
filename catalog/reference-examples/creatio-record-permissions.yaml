@@ -7,7 +7,7 @@ primaryUseCase:
   summary: Implement and test native read, edit and delete predicates combined with stored record grants under actual non-administrator sessions.
 source:
   repository: https://github.com/Advance-Technologies-Foundation/creatio-record-permissions-reference
-  revision: 72f6a8b2c9e08b2f2105166fe40cd69b57959b58
+  revision: bed3d6da1319f2b550a85509fad9bfb63bd5f44e
   defaultBranch: main
 entryPoints:
   overview: README.md
@@ -30,7 +30,7 @@ trust:
   publisher: Advance Technologies Foundation
   level: published
 notes:
-  - 120 real-user E2E tests and 2 focused unit tests passed; stored-grant read/grant/read/revoke/read also verified through clio MCP.
+  - 120 real-user E2E tests, 2 focused unit tests and 4 denial-oracle contract tests passed; stored-grant read/grant/read/revoke/read also verified through clio MCP.
   - Includes native Entity and DataService allow/deny matrices, distinct mutation predicates, same-session context changes, and missing/null/inactive fallback cases.
   - The package contains privileged fixed-schema test controls; install the complete fixture only on an exclusive disposable environment.
   - Does not certify delegation policy, conflicting stored grants, operation-denial precedence, browser UI, external users, web farms or performance.

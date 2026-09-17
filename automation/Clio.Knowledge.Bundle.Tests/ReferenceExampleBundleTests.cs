@@ -38,7 +38,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.record-permissions-reference",
             "catalog/reference-examples/creatio-record-permissions.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-record-permissions-reference",
-            "72f6a8b2c9e08b2f2105166fe40cd69b57959b58")
+            "bed3d6da1319f2b550a85509fad9bfb63bd5f44e")
     ];
 
     [Test]
