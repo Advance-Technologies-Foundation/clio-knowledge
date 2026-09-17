@@ -60,7 +60,9 @@ This article is the authoritative owner of process parameters, the mappings that
     the operation runs there is nothing stale left to compare against: the warnings cover drift THIS
     request causes — a retarget, or the first selection — and a re-sync after the called process changed
     underneath a saved caller answers success with nothing to say. An empty warning list is NOT evidence
-    the caller is intact. `inSync` IS evidence, and which way depends on what describe read: for a
+    the caller is intact. `inSync` IS evidence - of a CODE change, which is the half that matters, since the runtime binds by code;
+    it does not see a caption, because the element keeps its own copy of that. Which way it points depends
+    on what describe read: for a
     COMPILED process it reads the runtime instance, which the platform does not converge, so a stale
     element stays stale and `inSync: false` after a callee change is a real signal that a re-sync is
     owed - measured on a stand. For an UNCOMPILED process there is no runtime instance, describe falls
@@ -70,9 +72,11 @@ This article is the authoritative owner of process parameters, the mappings that
     parameter's CODE - the rename that breaks delivery, because the runtime binds by code - the caller's
     card reads exactly as before: same caption, mapping present, nothing marked, while the SAVED schema
     still carries the old code and delivers nothing. The one place a person would go to check is the one
-    place that cannot show that problem, whatever the card does about synchronizing. A CAPTION rename is
-    the opposite and does not mislead: the card picks up the new caption and shows the mapping row EMPTY,
-    which is a visible signal. Measured on a stand, 2026-09-17. What IS reported, from CrtProcessBuilder
+    place that cannot show that problem, whatever the card does about synchronizing. If the callee ALSO
+    renamed the caption the card swings the other way and alarms without cause - it shows the new caption
+    with the mapping row EMPTY, while the caller's stored mapping is intact and unchanged. So the card
+    misleads in both directions and NEITHER is data loss; do not re-map on the strength of an empty row,
+    check `describe` instead. Measured on a stand, 2026-09-17. What IS reported, from CrtProcessBuilder
     1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names the reference sites
     still bound to a parameter the element no longer carries. In practice that means the sites the
     platform's own pre-save validation does NOT catch first - a stored blob such as a Modify-data
