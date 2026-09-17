@@ -130,11 +130,14 @@ Creatio or disk. The guide contains:
         target resolves, clone `originalBinding` (the removed `{ request, params }` VERBATIM) and swap
         only the target param — never rebuild from scratch, or other params silently vanish.
       • `missing` + `bindingRemoved: false` — a READ found the object's default mobile page absent. A
-        read cannot PROVE absence, so nothing was removed; `originalBinding` is null. Report and name
+        read cannot PROVE absence, so nothing was removed; `originalBinding` is null.
+        `resolvedCandidateSchemaName` is that read's default WEB edit page (this `targetKind` +
+        `missing` only, else null) — a candidate, not a confirmed page. Report the absence and name
         the remedy; never present as certain or strip.
       • `unknown` — unverified (`bindingRemoved` always false). Ask the user to confirm.
     `targetKind` names which kind and so which remedy; `target` names it. `targetsProbed` false = never
-    asked (empty list is "not checked"); `targetsNote` says why.
+    asked (empty list is "not checked"); `targetsNote` says why. `resolvedSourceType` /
+    `recommendedAction` are null — reserved, ignore them.
     `missingTargetPages` dedupes DISTINCT `web-page` targets with a `references[]` per control naming
     it; each reference carries its OWN `originalBinding` for a same-shared-page repoint.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
@@ -498,10 +501,10 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
       `flag-request-unmapped`, for you to verify with the user.
   A supported request is kept in
   viewConfigDiff[].values (the operation's name is already the mobile one) — paste the values verbatim.
-  guide.requestConversions has FOUR collections and you need all of them: convertedRequests,
-  droppedRequests (a binding lost — including on a component that SURVIVED, which is a loss
-  `droppedElements` by construction never shows), flaggedRequests, and unresolvedTargetRequests (see its
-  own field entry above). Tell the user which action components were removed AND which surviving
+  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost —
+  including on a component that SURVIVED, which is a loss `droppedElements` by construction never
+  shows), flaggedRequests, unresolvedTargetRequests, and missingTargetPages (both above). Tell the
+  user which action components were removed AND which surviving
   components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
