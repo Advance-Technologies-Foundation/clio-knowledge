@@ -22,6 +22,14 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <c>MobileDropReasonCodeCoverageTests</c>: a value renamed in clio fails THERE, a clause deleted here
 /// fails HERE.
 /// </para>
+/// <para>
+/// PR #174 added <c>resolvedCandidateSchemaName</c>, <c>resolvedSourceType</c>, <c>recommendedAction</c>
+/// and the corrected FIVE-collection count for clio #1562, and separately reinstated
+/// <c>bindingRemoved</c> / <c>drop-request-target-missing</c> after a brief retirement (commit 6cab799)
+/// that a review caught before merge. Neither had a pin, so the same review would be needed again on the
+/// next silent drift; <see cref="UnresolvedTargetRequestFields"/> and
+/// <see cref="BindingRemovedContract"/> exist so it is not.
+/// </para>
 /// </remarks>
 [TestFixture]
 public sealed class ResponseShapeFieldGuidanceTests
@@ -79,6 +87,38 @@ public sealed class ResponseShapeFieldGuidanceTests
             "the directive itself: an invented key REPLACES a localized column title with one hardcoded culture")
     ];
 
+    // unresolvedTargetRequests / requestConversions field set clio #1562 introduced. PR #174's review found
+    // the article silent on resolvedCandidateSchemaName, resolvedSourceType and recommendedAction, and stale
+    // on the collection count (it still said FOUR after missingTargetPages became a fifth); nothing pinned
+    // the fix, so the same drift could return unnoticed the way the FOUR count itself once did.
+    private static readonly (string Fragment, string Because)[] UnresolvedTargetRequestFields =
+    [
+        ("resolvedCandidateSchemaName",
+            "the entity-default-mobile-page read's candidate web edit page; null when none was found, and never a schema to assume is on mobile"),
+        ("resolvedSourceType",
+            "an always-null reserved field on the wire today; naming it stops an agent from treating its absence as a converter bug"),
+        ("recommendedAction",
+            "the second always-null reserved field, paired with resolvedSourceType so neither is read as populated"),
+        ("FIVE collections",
+            "the count itself: missingTargetPages is the fifth, and a caller iterating requestConversions by this number would skip it if it silently reverted to FOUR"),
+        ("missingTargetPages",
+            "must be named among the requestConversions collections, not only in its own field entry, or an agent counting collections never finds it")
+    ];
+
+    // The two-repository vocabulary contract clio #1562 briefly broke: commit 6cab799 retired
+    // drop-request-target-missing and stripped bindingRemoved from this article on the premise the
+    // converter never removes a binding for a missing navigation target, then commit 268c2d5 reinstated
+    // both once ENG-94839's review showed the "always keep" behavior violated AC-2. Nothing pinned the
+    // OWNER article's half of that reversal, so the same silent strip could recur without failing here —
+    // only MobileDropReasonCodeCoverageTests would notice, and only for the reason-codes article.
+    private static readonly (string Fragment, string Because)[] BindingRemovedContract =
+    [
+        ("bindingRemoved",
+            "the field this article branches state on; stripping it again would silently revert to the 'always keep' behavior that violated AC-2"),
+        ("drop-request-target-missing",
+            "the cross-reference from the OWNER article to the code that fires when bindingRemoved is true; losing it here decouples the two halves of the contract again")
+    ];
+
     [Test]
     [Description("Every componentSuggestions category ships in the article with the exact PascalCase spelling a caller branches on. A case change or a dropped entry re-records the digest silently.")]
     public void Guide_ShouldCarryEveryComponentSuggestionCategory_VerbatimAsItShips()
@@ -119,6 +159,20 @@ public sealed class ResponseShapeFieldGuidanceTests
             because: "same instruction in prose form - the synthesized layers arrive in viewConfigDiff");
         guide.Should().NotContain("baked into the element map",
             because: "the third phrasing of the same instruction");
+    }
+
+    [Test]
+    [Description("resolvedCandidateSchemaName, resolvedSourceType and recommendedAction are documented, and requestConversions is counted as FIVE collections including missingTargetPages. PR #174's review found the article silent on clio #1562's new fields and still saying FOUR; this pin is what that review itself was missing.")]
+    public void Guide_ShouldDocumentTheClio1562UnresolvedTargetRequestFields()
+    {
+        AssertAllPresent(UnresolvedTargetRequestFields, caseSensitive: true);
+    }
+
+    [Test]
+    [Description("bindingRemoved and its drop-request-target-missing cross-reference survive in the OWNER article. Commit 6cab799 stripped both on the premise the converter never removes this binding; commit 268c2d5 reinstated them once review showed that broke AC-2. A future edit reverting to the 'always keep' premise must fail here, not only in MobileDropReasonCodeCoverageTests.")]
+    public void Guide_ShouldKeepTheBindingRemovedContract()
+    {
+        AssertAllPresent(BindingRemovedContract, caseSensitive: true);
     }
 
     [Test]
