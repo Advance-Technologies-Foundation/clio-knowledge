@@ -217,8 +217,20 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed arrows are
   redrawn with it (process data intact, manual layout lost). That is not a side effect to work around —
   stored connector geometry is absolute canvas coordinates, so anything the engine did not recompute
-  would stay frozen where no shape stands any more. Warn the user before editing a process whose diagram
-  somebody curated by hand.
+  would stay frozen where no shape stands any more.
+- From CrtProcessBuilder 1.6.4.0 the server REFUSES an edit that would re-draw the diagram rather than
+  extend it, and answers with what it would have done instead. An OLDER server asks nothing and applies
+  it, so on one of those the warning above is the whole protection. Two cases reach the refusal: the
+  diagram is not the one the builder lays out, so somebody arranged it by hand (or an older version drew
+  it) and applying anything replaces that arrangement; or the edit changes which elements sit above
+  which, so the branches swap places — which is what making a branch the DEFAULT one does. Shifting
+  elements and inserting one between others are ordinary and never ask.
+  Nothing is written when it refuses, so there is no half-applied edit to undo. Show the user the sentence
+  it came back with and the elements it names, get an explicit yes, then re-send the SAME operations with
+  `confirm-layout-change`. Do NOT send that flag on the first attempt: the refusal exists so the person
+  whose diagram it is gets to decide, and a caller that always confirms has removed them from the
+  decision. `modify-business-process-as-new-version` asks the same question for the same reason — the
+  version is the diagram they will open next.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
