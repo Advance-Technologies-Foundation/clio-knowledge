@@ -227,8 +227,8 @@ R15 No orphan/unreachable nodes; every flow needs a valid source and target, and
     an element to ITSELF. Both halves refuse a self-loop: the build path names the element, and
     `validate-process-graph` reports it under this same id. To repeat an element, route the flow back
     through a gateway that decides whether to repeat it.
-R16 Sub-process (callActivity) target must begin with a Simple start; a collection mapping makes it
-    multi-instance. See `process-element-catalog`.
+R16 Sub-process (callActivity) target must begin with a Simple start. The BUILD path enforces it, not
+    this tool. See `process-element-catalog`.
 R17 (advisory) Add data one-record mode outputs only Id; chain a Read data for other fields.
 R18 A conditional flow may have at most ONE outgoing sibling that carries no condition. The platform
     synthesizes a gateway for any element that branches, and that gateway's fallback is every flow

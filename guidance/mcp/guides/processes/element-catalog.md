@@ -69,44 +69,38 @@ leaf rather than through `process-modeling`.
     notification send. Real but the minority case at 22 %, and it stays inside one package 84 % of the
     time
   * NOT to iterate a collection. That is multi-instance, 15 % of shipped usage, and it is REFUSED here
-    — see below, and say so before a user asks for it. Note the second half of R16: multi-instance is
-    DERIVED from mapping a collection onto the element and is declared nowhere, so nothing refuses the
-    mapping itself - the element simply stops mirroring the called process from then on
+    — say so before a user asks for it. It is a declared property of the element (`MultiInstanceOptions`,
+    reported as `subProcess.multiInstance`), not a side effect you can trip into from this contract: the
+    collection-to-loop conversion lives in the classic designer's client code, and nothing clio writes
+    produces one. What you meet here is an element that is ALREADY multi-instance, built in the designer
   FIVE refusals, each covering something the platform itself accepts in silence: a called process that
   does not exist or cannot be read; a process calling ITSELF (the platform writes the element and then
   synchronizes nothing, so it saves green with no parameters); a called process with no Simple start
   event (rule R16 — a signal, timer or message start is entered by its trigger and offers no entry
-  point a call can use - this is rule R16, and the BUILD path is the only thing that enforces it, since
-  a planned graph carries no reference to the called process); a RETARGET while another element or flow condition still reads from this one
+  point a call can use; the BUILD path is the only thing that enforces it, since a planned graph carries
+  no reference to the called process); a RETARGET while another element or flow condition still reads from this one
   (the platform would drop the parameters, leave those references dangling, save cleanly, and let the
   process refuse to START later, blamed on the process rather than on the edit); and any element that
   is already multi-instance — it carries an input collection, an output collection and three iteration
   counters INSTEAD of the called process's parameters, so every name you would map addresses nothing on
   it. Edit that one in the designer.
-  The NAMES to map against are the CALLED process's own process parameters: read them with
-  `get-process-signature process-name=<the called process>`, or by describing that process. The caller's
-  own `describe-business-process` reports the element's parameters too, so either route works - but the
-  called process is the authoritative one, and it is the only one available BEFORE the element exists.
-  VALUES are mapped in through the ordinary `mappings[]` / `addMapping` route by parameter name, and
-  outputs are read back the same way — with one rule of its own: only an `In` or `Variable` parameter
-  can hold a value you write. A mapping onto an `Out` or `Internal` one is REFUSED naming the
-  direction, because the platform clears it on the next read of the process and the loss would be
-  silent. To USE an output, map FROM it.
-  RE-SYNC after the called process changes: any `setElement` touching the element re-synchronizes it, and
-  `subProcess: {resync: true}` asks for that and nothing else. Its WARNINGS are not a drift report and an
-  empty list proves nothing - `process-parameters` says why, and what to do instead. It is
-  worth doing rather than optional, because at run time values cross by parameter NAME and an unmatched
-  name is skipped with NO exception and NO log line — a stale element keeps running and quietly
-  delivers nothing. A parameter the called process RENAMED is matched through the schema's mapping row
-  rather than by name, so the element's copy follows the rename and keeps its value; anything you wrote
-  referring to the old name has to be updated even though the binding survived.
+  The NAMES to map against are the CALLED process's own parameters: read them with
+  `get-process-signature process-name=<the called process>`, which is also the only route available
+  BEFORE the element exists. Everything else about those parameters - which directions accept a value,
+  how values cross at run time, what a re-sync does and what its warnings can and cannot tell you - is
+  owned by `get-guidance name=process-parameters` and is not restated here.
   DISCOVERY of which processes you may call is `execute-esq` over the `VwProcessLib` view —
-  `Name`, `Caption`, `Enabled`, `IsActiveVersion` and `HasStartEvent`, which pre-screens R16 for you.
+  `Name`, `Caption`, `Enabled`, `IsActiveVersion` and `HasStartEvent`. `HasStartEvent` NARROWS the list
+  but does not decide R16: the column is `EXISTS(element WHERE StartType = 1)`, and `StartType = Manual`
+  is what the platform writes for any UNWIRED element, so it is true of a process with no start event at
+  all. Necessary, not sufficient - a candidate that passes it can still be refused by the build.
   `odata-read` does NOT work on that view: it answers `success:false, "The operation was canceled"`, so
   a caller who tries OData first concludes discovery is impossible. Use ESQ.
   `describe-business-process` reports the element's `subProcess` block — `process`, `processUId`,
-  `processCaption`, `multiInstance`, and `inSync` - `true` on any element the read just converged, so
-  NOT drift evidence, and `null` when the process could not be read.
+  `processCaption`, `multiInstance`, and `inSync`. Read `inSync` for its two informative answers: `false`
+  means the element does not mirror the called process at all (which a multi-instance element never
+  does), and `null` means either that the process could not be read or that none is selected yet. `true`
+  is the ordinary answer - the read itself converged the element - so it is NOT drift evidence.
 - Routing between the three page elements (Open edit page, Pre-configured page, Auto-generated page) is
   owned by `process-open-edit-page` — read its ROUTING section before choosing; the Pre-configured page's own
   contract lives in `process-preconfigured-page`. NOTE `autoGeneratedPage`'s `Buttons` parameter uses a
