@@ -93,10 +93,13 @@ leaf rather than through `process-modeling`.
   diagram being readable, not about making the branch work. Three rules apply to the flows leaving a
   gateway element, none of them visible in the descriptor schema; `process-branch-conditions` owns
   them.
+- `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.4**. Below that version the type is refused
+  outright, naming the ones it does build. It computes ONE expression and writes the result into ONE
+  parameter — see its catalog entry below for the block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
-    `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
+    `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
   sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
@@ -138,11 +141,28 @@ System actions (palette group "System actions"):
     BUILDS, but its target object and values do NOT yet — see the caveat near the top of this guide. Its
     `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
     object is unset: do not report the element as a working delete.
-- `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
-    READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
-    be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a
-    mapping `expression` (see `process-formulas`). Compute a value with a mapping onto a process
-    parameter instead of asking for this element.
+- `formulaTask`       Formula      — compute a value (math/string/date/bool) into ONE parameter.
+    BUILDABLE from CrtProcessBuilder **1.6.3.4** with a `formula` block:
+    `{body, and exactly ONE of resultProcessParameter | elementName + elementParameter}`.
+    Four things about it are not guessable from the schema:
+      * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). On
+        CREATE you may reference a process parameter by NAME — `[#Amount#]` — and the server expands it,
+        exactly as it does for a condition. On MODIFY it does not: pass the meta-path form
+        `describe-business-process` reports, or the platform answers `Formula value error: Expression
+        expected (at index 0)`, which names neither the element nor the reference.
+      * BOTH the body and a target are required when the element is created, and naming two targets is
+        refused rather than resolved by precedence. On modify the block is a PARTIAL update: a body-only
+        edit keeps the target, a target-only edit keeps the expression.
+      * the target is NOT a mapping and needs none of the mapping sources. The platform stores it as a
+        map path on the element itself, which is why `describe-business-process` reports it under
+        `formula.target` — resolved back to names — rather than among the process mappings. A stored
+        target whose parameter no longer exists reads back as `formula.target.unresolved`: the element
+        still runs and writes into nothing.
+      * an element the DESIGNER built reads back the same way, so a described formula feeds straight
+        into a build.
+    Still true, and still the cheaper answer for a one-off value: a mapping with an `expression` source
+    computes a value without an element at all. Reach for this element when the computation deserves to
+    be visible on the diagram, or when the result must be written between two steps.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication). READ-ONLY here.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.

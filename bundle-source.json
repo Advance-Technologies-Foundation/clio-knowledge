@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.16",
+  "libraryVersion": "1.15.17",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1295,7 +1295,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, all three FLOW KINDS declared with the flow (flows[].kind plus flows[].condition) and each flow's diagram LABEL (flows[].label), and the exclusive and parallel gateway ELEMENTS -- while the inclusive and event-based gateway elements, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData block, all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive and parallel gateway ELEMENTS, and the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.4) -- while the inclusive and event-based gateway elements, timer/message and intermediate events, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1534,7 +1534,6 @@
       "itemId": "process-version-writes",
       "title": "Process version writes",
       "description": "Owns the two WRITE operations on a Creatio process version family. modify-business-process-as-new-version carries the edits AND produces the version in ONE call -- there is no separate create step, and an empty operations array is how you take a plain restore point. set-active-business-process-version makes one member ACTUAL and is the rollback gesture: any member including the family ROOT, which is how you go back to the original. The two are never chained -- a new version is created INACTIVE and changes nothing about what runs, activation needs its own request naming the version, and a session answer is agent behaviour rather than a request field. Also owns what a rollback does and does not do (new instances only, deletes nothing, re-saves the whole family in one transaction, reported from a READ-BACK rather than echoed), that these writes go one at a time, and that a rejected edit saves nothing while a saved version can never be taken back. The MODEL is process-versions.",
-
       "topicId": "creatio.process-version-writes",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-version-writes",
