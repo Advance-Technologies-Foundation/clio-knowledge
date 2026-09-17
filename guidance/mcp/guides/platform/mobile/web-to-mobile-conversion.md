@@ -122,24 +122,21 @@ Creatio or disk. The guide contains:
     with one hardcoded culture. If a token still renders raw on the device, the fix is the entity column
     or the source page's resources — not a key added here.
   - requestConversions.unresolvedTargetRequests — actions whose request type converts but whose
-    NAVIGATION TARGET the converter could not confirm exists on mobile. Every entry keeps BOTH its
-    CONTROL and its ACTION on the page — nothing here is ever removed, whichever kind or state the
-    entry carries — so a target that gets converted later still has a working action to re-point
-    instead of one that silently vanished when the guide was first built. `state` says only HOW
-    CONFIDENTLY the absence is reported, never what was done about it:
-      • `state: "missing"`, `targetKind` a web page — a DEFINITIONAL absence: the target cannot open
-        on mobile at all, and the verdict needed no environment read. Tell the user which action needs
-        a working target, and offer the two real fixes: convert the target page to mobile, or repoint
-        the action.
-      • `state: "missing"`, `targetKind` an object's default mobile page — an environment READ
-        reported the target absent. A read cannot PROVE absence, so report it and name the remedy —
-        create the object's default mobile page — but never present it as a certainty.
-      • `state: "unknown"` — the target was not verified at all (no reachable environment, or the probe
-        degraded). Ask the user to confirm; do NOT report a working action as broken.
-    `targetKind` says which of the two kinds it is (a web page, or an object's default mobile page) and
-    therefore which remedy applies; `target` names it. `requestConversions.targetsProbed` false means
-    the whole question was never asked — an EMPTY list then means "not checked", not "all clear", and
-    `targetsNote` says why. Null/empty when every target resolved.
+    NAVIGATION TARGET the converter could not confirm exists on mobile. Every entry keeps its CONTROL;
+    whether its ACTION stays is `bindingRemoved`, read together with `state`:
+      • `missing` + `bindingRemoved: true` — DEFINITIONAL: target is a web page, no read needed. Binding
+        is already gone from `viewConfigDiff[].values` and listed in `droppedRequests` under
+        `drop-request-target-missing`. Do NOT re-add as-is (empty `schemaName` still fails). Once the
+        target resolves, clone `originalBinding` (the removed `{ request, params }` VERBATIM) and swap
+        only the target param — never rebuild from scratch, or other params silently vanish.
+      • `missing` + `bindingRemoved: false` — a READ found the object's default mobile page absent. A
+        read cannot PROVE absence, so nothing was removed; `originalBinding` is null. Report and name
+        the remedy; never present as certain or strip.
+      • `unknown` — unverified (`bindingRemoved` always false). Ask the user to confirm.
+    `targetKind` names which kind and so which remedy; `target` names it. `targetsProbed` false = never
+    asked (empty list is "not checked"); `targetsNote` says why.
+    `missingTargetPages` dedupes DISTINCT `web-page` targets with a `references[]` per control naming
+    it; each reference carries its OWN `originalBinding` for a same-shared-page repoint.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
     validators, converters). REPORT ONLY: nothing here transfers, and re-implementing the behaviour is
     an entity-level business-rule job, not a body change.
