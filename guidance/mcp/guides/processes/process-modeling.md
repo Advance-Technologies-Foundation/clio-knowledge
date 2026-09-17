@@ -60,8 +60,15 @@ article from what this one says; read that article.
   needs, their parameters, and how they connect. The server-side ProcessDesignService package owns
   metadata serialization — you NEVER hand-author process metadata, filters, or column mappings.
 - The build is DECLARATIVE: you describe the process (elements + flows + parameters + mappings) and
-  clio builds + saves it in one call. Diagram layout is automatic (start leftmost, end rightmost, no
-  overlap) — do not set positions.
+  clio builds + saves it in one call. The diagram is drawn for you, and it is worth knowing HOW, because
+  the flow ORDER you declare is what decides it: columns come from distance to the start; each branch of
+  a split gets a row of its own, with the DEFAULT flow keeping the split's own row (otherwise the first
+  one you declared) and the rest stacked below in declaration order; a merge returns to the row of the
+  split it closes; an end event is drawn right after its last step, and pulled to the right edge only
+  when that row is empty. Connectors are drawn too — straight, L, Z or U shaped, with each branch of a
+  gateway leaving by a different point and loops travelling on a row of their own — so arrows neither
+  overlap each other nor cross the boxes between their ends. Do NOT set positions or connector geometry:
+  no argument carries them, and every save re-derives the whole picture.
 - Tools:
   * list-user-tasks         — the user-task palette (name + uid); pass a name as `userTaskName`.
     CAVEAT: it lists RETIRED schemas as equal peers with no marker — `CallUserTask`, `EmailUserTask` and
@@ -71,6 +78,12 @@ article from what this one says; read that article.
   * create-business-process — build a NEW process from a JSON descriptor, and save it.
   * modify-business-process — edit an EXISTING process by an ordered list of operations.
   * describe-business-process        — read a process back as a structured graph (verify / explain).
+    Also returns the DIAGRAM: `position` (a shape's top-left corner) and `size` per element, and
+    `geometry` per flow — `start`, `points[]`, `end`, `exitSide`, `entrySide`, i.e. where the connector
+    actually runs. That is what a question about the picture is answered from ("why does that arrow
+    cross the block"), and reading `size` is what lets you turn a position back into a ROW, since
+    elements of different heights share a row by its centre line. All three are read-only and absent on
+    a CrtProcessBuilder that predates them.
     Also returns, per element: `connections[]` (bound "Connected to" links, raw + decoded), `deprecated`
     (the user-task schema is retired), and `writesConnectionsAtRuntime` — where FALSE is the answer that
     matters: it marks a process whose connections persist and compile while writing nothing. FALSE has two
@@ -200,9 +213,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   used to be, which describe reports as `kind: "sequence"` on both, reading exactly like "condition
   cleared, as asked". Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
-- Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
-  branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
-  lost). Warn the user before editing a process with a curated diagram.
+- Every modify re-applies the automatic layout to the WHOLE diagram AND re-routes every connector: a
+  hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed arrows are
+  redrawn with it (process data intact, manual layout lost). That is not a side effect to work around —
+  stored connector geometry is absolute canvas coordinates, so anything the engine did not recompute
+  would stay frozen where no shape stands any more. Warn the user before editing a process whose diagram
+  somebody curated by hand.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
