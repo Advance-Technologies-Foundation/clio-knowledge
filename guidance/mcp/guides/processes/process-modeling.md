@@ -211,7 +211,7 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   produces no dynamic ones, so nobody has yet seen one survive (CrtProcessBuilder T-27, open). Do not
   add a check after every retarget on account of it. If a caller later reports a mapping that resolves
   to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
-  the stored metapath still matches a `uId` describe reports on that element. Conditional
+  the stored metapath still matches a `uid` describe reports on that element. Conditional
   flows sit on this list on the same reasoning, one line down. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
   conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
