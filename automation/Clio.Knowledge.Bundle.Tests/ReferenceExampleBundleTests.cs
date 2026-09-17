@@ -33,7 +33,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.localization-reference",
             "catalog/reference-examples/creatio-localization.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-localization-lab",
-            "273eb7531a8284b6072730b097769b95df56a02e"),
+            "2e65b3537c37bfb8b4264e3dc871828fb95c94c8"),
         new(
             "atf.creatio.websocket-reference",
             "catalog/reference-examples/creatio-websocket.yaml",
