@@ -60,16 +60,23 @@ This article is the authoritative owner of process parameters, the mappings that
     the operation runs there is nothing stale left to compare against: the warnings cover drift THIS
     request causes — a retarget, or the first selection — and a re-sync after the called process changed
     underneath a saved caller answers success with nothing to say. An empty warning list is NOT evidence
-    the caller is intact, and neither is `inSync: true` on a describe, which converged the element as it
-    read it. NEITHER IS THE DESIGNER, and that is the trap worth stating plainly: opening the caller's
+    the caller is intact. `inSync` IS evidence, and which way depends on what describe read: for a
+    COMPILED process it reads the runtime instance, which the platform does not converge, so a stale
+    element stays stale and `inSync: false` after a callee change is a real signal that a re-sync is
+    owed - measured on a stand. For an UNCOMPILED process there is no runtime instance, describe falls
+    back to the design instance, that one converges as it loads, and `true` then says nothing. THE
+    DESIGNER is the trap worth stating plainly: opening the caller's
     call-activity card re-synchronizes the element as it renders, so after a callee renames a parameter
     the card shows the NEW name with the mapping intact and looks entirely healthy - while the SAVED
     schema, which is the one that runs, still carries the old name and delivers nothing. The one place a
     person would go to check is the one place that cannot show the problem. Measured on a stand,
     2026-09-17. What IS reported, from CrtProcessBuilder
-    1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names every element,
-    process parameter, execution context or flow condition still bound to a parameter the element no
-    longer carries. That is the half a caller can act on. A RENAME is still invisible everywhere - the
+    1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names the reference sites
+    still bound to a parameter the element no longer carries. In practice that means the sites the
+    platform's own pre-save validation does NOT catch first - a stored blob such as a Modify-data
+    element's column bindings. A reference whose source is a formula or a mapping is refused by that
+    validation before the re-sync can report it, one site per attempt, which tells you there is a
+    problem without telling you where the rest of them are. That is the half a caller can act on. A RENAME is still invisible everywhere - the
     mapping row keeps the parameter's UId, so every reference stays resolvable while the saved name goes
     stale, and the designer misses it for the same reason. So the rule is procedural: after ANY change to
     a called process's parameters, re-save every caller (any `setElement` on the element re-synchronizes
