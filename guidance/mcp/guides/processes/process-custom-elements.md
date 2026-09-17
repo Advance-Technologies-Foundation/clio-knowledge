@@ -8,11 +8,44 @@ Tested with Clio 8.1.0.130 and Creatio 10.1.585.0, .NET 8, PostgreSQL, English c
 
 Use `list-knowledge-examples` or the catalog resource `atf.creatio.custom-process-element-reference` to obtain the immutable reference revision. The independent reference repository contains Format text, a four-operation Arithmetic family, source, package SQL, unit tests, typed process models, and a sanitized validation record. Clone the pinned revision; do not treat a mutable default branch as the verified artifact.
 
-## Existing tools and missing primitives
+## Discover the available primitives
 
 Read `core-rules`, discover the live contracts with `get-tool-contract`, and use `clio-run` for non-resident tools. Reuse `create-user-task` and `modify-user-task-parameters`. Both take an environment and absolute workspace path; preserve native schema and parameter identities when updating.
 
-The verified Clio version did not provide dedicated custom-element registration or Classic process-parameter-page scaffolding primitives. Author those package artifacts from the reference or the native designers; do not invent an MCP tool, use Freedom UI `create-page` for this panel, or replace the working user-task creation primitive with a new orchestrator. Future registration/page tools must be discovered from the live contract before use.
+The original Clio 8.1.0.130 reference predates dedicated registration/page tools. Discover `register-process-element` and `create-user-task-page` separately. Use the following workflow only when the running server exposes the matching contracts; otherwise author those package artifacts from the pinned reference or native designers. Never use Freedom UI `create-page` for this panel or replace independent user-task creation with a new orchestrator.
+
+The new contracts were verified against Clio source revisions for [registration](https://github.com/Advance-Technologies-Foundation/clio/commit/77a47d367c1e88876f7ccfd6afbb19d7c745114f), [Classic pages](https://github.com/Advance-Technologies-Foundation/clio/commit/031bb275d302bd715e44586bf3c149da6c818be5), and [parameter types/directions](https://github.com/Advance-Technologies-Foundation/clio/commit/f52b8cd65cae67642deb8c04ae9e9cb4e140b89c). A version with the older reference's tool contract need not expose these capabilities. Both new scaffold commands operate offline on an explicit workspace and package; deployment remains a separate step.
+
+Dispatch each through `clio-run`, passing its command name and an `args` object:
+
+```json
+{
+  "command": "create-user-task-page",
+  "args": {
+    "workspace-path": "<absolute workspace path>",
+    "package-name": "UsrExample",
+    "user-task-uid": "<existing task schema UId>",
+    "page-name": "UsrTaskPropertiesPage",
+    "caption": "Task parameters"
+  }
+}
+```
+
+This generates the native parent/FK11 association and editable input controls. Optional `culture` (default `en-US`) and `small-icon-path`, `large-icon-path`, `title-icon-path` arguments populate caption and task resource slots. Existing page associations/names/resources are refused; customize an existing page directly. The generated layout reserves input names `UserTaskContainer` and `EditorsContainer`. Icons must be static basic SVG shapes, at most 1 MiB each, without CSS, scripts, animation, external references, processing instructions or base-URL overrides. Omitted icon slots and unrelated resources are preserved.
+
+```json
+{
+  "command": "register-process-element",
+  "args": {
+    "workspace-path": "<absolute workspace path>",
+    "package-name": "UsrExample",
+    "user-task-uid": "<same task schema UId>",
+    "caption": "My process element"
+  }
+}
+```
+
+Registration generates separate package-owned PostgreSQL and SQL Server after-package scripts. Rerunning identical inputs preserves script identities/content; conflicting existing scripts are refused. The caption is the initial installed caption, not an update to an existing registration. PostgreSQL installation and forced script re-execution preserved one registration and its edited caption. SQL Server generation is covered by tests; its installation remains unverified.
 
 ## Artifact sequence
 
@@ -28,7 +61,11 @@ The verified Clio version did not provide dedicated custom-element registration 
 
 For these reference patterns, always expose `IsError` (Boolean, Out) and `ErrorMessage` (unlimited text, Out), plus the domain result (Out). Inputs are In. Set directions explicitly: leaving them unset behaved as Variable/bidirectional and offered inputs as outputs. Resulting is independent of direction; hiding an editor does not make a parameter output-only.
 
-Use `modify-user-task-parameters` with `set-parameter-directions` entries containing `parameter-name` and `direction`, according to the current contract. Do not remove and recreate a parameter just to change its direction. Exported metadata uses L12 values 0 In, 1 Out, 2 Variable; prefer the supported operation over raw edits. The reference uses native MaxSizeText metadata for unlimited ErrorMessage because the verified tool's Text choice did not expose that type. Preserve and verify the data-type identity when customizing it.
+Use `modify-user-task-parameters` with `set-parameter-directions` entries containing `parameter-name` and `direction`, according to the current contract. Do not remove and recreate a parameter just to change its direction. Exported metadata uses L12 values 0 In, 1 Out, 2 Variable; prefer the supported operation over raw edits. Where the live parameter contract supports it, use `Unlimited text` (native MaxSizeText/type 29) for ErrorMessage; `Text`/`String` remain the short text type. The original reference used native MaxSizeText metadata because its tool version did not expose that type.
+
+The direction-preserving implementation snapshots existing explicit workspace directions before saving, restores retained parameters, then applies explicit requested changes. This requires a linked FSM workspace even for unrelated edits when existing parameters have explicit directions. A failed import is not success: other parameter changes may already be saved. Follow the command's recovery instructions, import the corrected workspace, compile the affected task and verify native readback.
+
+Do not assume a reference export already has the required directions: v0.1.0's Format text metadata omits L12 for Text, Prefix and FormattedText. Explicitly set Text/Prefix to In and FormattedText/IsError/ErrorMessage to Out before using it as a direction example. Preserve schema/parameter UIds, then verify the installed task and saved process. The guide's contract takes precedence over this known export limitation.
 
 The handler returns `ErrorOr<T>`. Reset all outputs on each execution. Map expected errors to IsError=true, ErrorMessage, and a cleared domain result; complete the synchronous task normally so the process can branch. On success clear the error flag/message. Catch unexpected exceptions at the adapter boundary, log details server-side, and return a generic message rather than disclosing internals. Test subsequent success after failure. This is the reference's explicit error contract, not a claim that every Creatio user task must suppress exceptions.
 
@@ -58,6 +95,8 @@ Parameter `Group` is optional design-time organization. Nonempty localized group
 Set SmallSvgImage, LargeSvgImage, TitleSvgImage, and color in task properties. Export package resources with the actual image bytes; an unreferenced SVG file is insufficient. DCM has separate image/page properties outside this verification.
 
 Register by user-task schema UId in `SysProcessUserTask`, resolving the installed `SysSchema.UId`. Include an INSERT ... SELECT guarded by NOT EXISTS so repeated execution does not duplicate registrations. Place it after schema installation: the verified descriptors use InstallType=1, PostgreSQL DBEngineType=2, and SQL Server DBEngineType=0. Keep dialect scripts separate. An insert-only script preserves existing captions; a rename needs a deliberate upgrade. Do not use a manual database INSERT as a hidden deployment prerequisite.
+
+Name a single-package archive exactly `<package descriptor Name>.gz`. Put build labels in the containing directory, not the archive basename. Native package installation can report `Install information is empty` before running SQL when the name differs. Renaming identical bytes may reuse the same cached extraction, because the installer cache key is content-based. Regenerate a correctly named archive with a deliberately advanced package version/stamp instead of treating that error as a SQL failure.
 
 ## Acceptance and recovery
 

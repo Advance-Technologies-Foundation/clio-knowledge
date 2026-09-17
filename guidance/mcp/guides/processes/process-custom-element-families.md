@@ -17,6 +17,8 @@ Each task resolves its own typed DI handler returning ErrorOr<decimal>. Each has
 
 Each child page inherits a shared Classic selector page. The shared parent owns the operation collection, selection, confirmation, and replacement guard; the child owns its operation-specific MAPPING fields and help. Point each task's parameter-page association at its own child schema.
 
+When the live contract exposes the scaffold primitives described in `process-custom-elements`, create each task's initial parameter page independently. Customize the generated pages to inherit the shared selector schema while preserving their own parameter bindings. The primitive creates the basic native process-page parent; it does not create the family selector, retarget inheritance, or hide alternate toolbox entries for you.
+
 ## Native replacement
 
 1. Initialize the selector's `Terrasoft.Collection` during element loading and select the operation corresponding to the actual task schema. Preserve the parent's element-loading callback.
