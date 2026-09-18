@@ -4,7 +4,7 @@ Create a package-owned BPMN user task, a Classic parameter page, icons, and inst
 
 ## Applicability and reference
 
-Tested with Clio 8.1.0.130 and Creatio 10.1.585.0, .NET 8, PostgreSQL, English captions, synchronous BPMN tasks. SQL Server scripts are provided but untested. DCM, asynchronous waiting, older designers, and multilingual toolbox captions require separate validation. This is a tested reference pattern, not a cross-version promise for Classic designer internals.
+Tested with Clio 8.1.0.130 / Creatio 10.1.585.0 / .NET 8 / PostgreSQL, and Clio 8.1.0.131 / Creatio 10.1.784.0 / .NET Framework 4.8 / SQL Server 2025 Express. Both have non-FSM installation and live synchronous BPMN evidence with English captions. DCM, asynchronous waiting, older designers, and multilingual toolbox captions require separate validation. This is a tested reference pattern, not a cross-version promise for Classic designer internals.
 
 Use `list-knowledge-examples` or the catalog resource `atf.creatio.custom-process-element-reference` to obtain the immutable reference revision. The independent reference repository contains Format text, a four-operation Arithmetic family, source, package SQL, unit tests, typed process models, and a sanitized validation record. Clone the pinned revision; do not treat a mutable default branch as the verified artifact.
 
@@ -45,7 +45,7 @@ This generates the native parent/FK11 association and editable input controls. O
 }
 ```
 
-Registration generates separate package-owned PostgreSQL and SQL Server after-package scripts. Rerunning identical inputs preserves script identities/content; conflicting existing scripts are refused. The caption is the initial installed caption, not an update to an existing registration. PostgreSQL installation and forced script re-execution preserved one registration and its edited caption. SQL Server generation is covered by tests; its installation remains unverified.
+Registration generates separate package-owned PostgreSQL and SQL Server after-package scripts. Rerunning identical inputs preserves script identities/content; conflicting existing scripts are refused. The caption is the initial installed caption, not an update to an existing registration. Native installation and forced script re-execution preserved registration identities and captions on both databases. PostgreSQL additionally verified preservation of an edited caption. The pinned reference's installation record distinguishes its packaged scripts from the separately validated tool-generated MSSQL probe.
 
 ## Artifact sequence
 

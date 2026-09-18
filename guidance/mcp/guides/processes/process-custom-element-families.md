@@ -2,7 +2,7 @@
 
 This guide owns design-time selection between separate native user tasks behind one toolbox entry. Read `process-custom-elements` first for the artifact, error-output, registration, and testing contracts. Use the immutable `atf.creatio.custom-process-element-reference` catalog entry for the working Arithmetic family.
 
-Verified on Creatio 10.1.585.0, .NET 8, PostgreSQL and Clio 8.1.0.130. The Classic designer override below is version-sensitive internal behavior, not a documented cross-version API. Recheck it in the browser after an upgrade.
+Verified on Creatio 10.1.585.0 / .NET 8 / PostgreSQL with Clio 8.1.0.130, and 10.1.784.0 / .NET Framework 4.8 / SQL Server 2025 Express with Clio 8.1.0.131. The Classic designer override below is version-sensitive internal behavior, not a documented cross-version API. Recheck it in the browser after an upgrade.
 
 ## Structure
 
@@ -46,4 +46,4 @@ Keep a selector demonstration without downstream mappings separate from executio
 
 The reference passed 13 arithmetic unit cases and five arithmetic live cases, plus the text example's cases. Native Float2 generated decimal server properties but Single properties in the tested Clio process models; exact binary-representable test values do not prove arbitrary decimal precision across that boundary.
 
-Fresh PostgreSQL non-FSM installation verified packaged registration, one toolbox entry, the shipped division page, and all live cases. SQL Server installation, DCM, older designers, localization, and asynchronous execution remain unverified. No additional page-creation or registration MCP primitive is implemented by this reference.
+Non-FSM PostgreSQL and MSSQL installation verified packaged registration and all ten live cases. MSSQL also verified forced registration re-execution, one Arithmetic toolbox entry, and switching among four distinct pages. Save/reopen and output-reference guards retain PostgreSQL-only evidence. See the pinned reference's installation record for exact artifacts and boundaries. DCM, older designers, localization, and asynchronous execution remain unverified. No additional page-creation or registration MCP primitive is implemented by this reference.
