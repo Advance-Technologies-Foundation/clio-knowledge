@@ -220,7 +220,9 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed arrows are
   redrawn with it (process data intact, manual layout lost). That is not a side effect to work around —
   stored connector geometry is absolute canvas coordinates, so anything the engine did not recompute
-  would stay frozen where no shape stands any more.
+  would stay frozen where no shape stands any more. From 1.6.4.1 a caption the designer recorded a
+  position for is released with the rest and returns to the middle of what it names; an OLDER server
+  leaves it pinned, which strands a branch label at the coordinates the arrow used to pass through.
 - From CrtProcessBuilder 1.6.4.0 the server REFUSES an edit that would re-draw the diagram rather than
   extend it, and answers with what it would have done instead. An OLDER server asks nothing and applies
   it, so on one of those the warning above is the whole protection. Two cases reach the refusal: the
