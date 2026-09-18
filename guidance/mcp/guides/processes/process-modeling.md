@@ -223,19 +223,28 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   would stay frozen where no shape stands any more. From 1.6.4.1 a caption the designer recorded a
   position for is released with the rest and returns to the middle of what it names; an OLDER server
   leaves it pinned, which strands a branch label at the coordinates the arrow used to pass through.
-- From CrtProcessBuilder 1.6.4.0 the server REFUSES an edit that would re-draw the diagram rather than
-  extend it, and answers with what it would have done instead. An OLDER server asks nothing and applies
-  it, so on one of those the warning above is the whole protection. Two cases reach the refusal: the
-  diagram is not the one the builder lays out, so somebody arranged it by hand (or an older version drew
-  it) and applying anything replaces that arrangement; or the edit changes which elements sit above
-  which, so the branches swap places — which is what making a branch the DEFAULT one does. Shifting
-  elements and inserting one between others are ordinary and never ask.
-  Nothing is written when it refuses, so there is no half-applied edit to undo. Show the user the sentence
-  it came back with and the elements it names, get an explicit yes, then re-send the SAME operations with
-  `confirm-layout-change`. Do NOT send that flag on the first attempt: the refusal exists so the person
-  whose diagram it is gets to decide, and a caller that always confirms has removed them from the
-  decision. `modify-business-process-as-new-version` asks the same question for the same reason — the
-  version is the diagram they will open next.
+- From CrtProcessBuilder 1.6.5.0 the server REFUSES an in-place edit that would re-draw the diagram
+  rather than extend it. An OLDER server asks nothing and applies it, so on one of those the warning
+  above is the whole protection. Two cases reach the refusal: the diagram is not the one the builder lays
+  out, so somebody arranged it by hand (or an older version drew it) and applying anything replaces that
+  arrangement; or the edit changes which elements sit above which, so the branches swap places — which is
+  what making a branch the DEFAULT one does. Shifting elements and inserting one between others are
+  ordinary and never ask. Nothing is written when it refuses, so there is no half-applied edit to undo.
+  The refusal is not a yes/no on re-drawing — that question has no good answer, since no loses the edit
+  and yes loses the picture. It opens a TWO-question sequence, and BOTH answers are the user's:
+  1. Show them the sentence it came back with and the elements it names, and ask whether to apply the
+     edit as a NEW VERSION. On yes, send the SAME operations to
+     `modify-business-process-as-new-version`. That tool never refuses over layout — it reports how the
+     new version's diagram differs and creates it anyway — because refusing the remedy the other path
+     recommends would leave you with nowhere to go. Their process and its diagram are untouched.
+  2. The version is created NOT actual, so nothing runs differently yet, and its response says so on
+     every success. Ask the user to open it, look at the diagram, and say whether to make it actual;
+     only then call `set-active-business-process-version`. NEVER chain the two — a version is created
+     inactive precisely so they get to look first.
+  Re-drawing the process IN PLACE is the other answer and stays available: re-send the same operations
+  with `confirm-layout-change`. Offer it second and never send it on the first attempt — it is the
+  destructive one, and a caller that always confirms has taken the decision away from the person whose
+  diagram it is.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
