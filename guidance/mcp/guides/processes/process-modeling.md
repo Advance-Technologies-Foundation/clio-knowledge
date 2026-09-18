@@ -193,9 +193,28 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
-  sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+- If describe shows constructs the builder cannot create (inclusive and event-based gateways,
+  timer/message starts, intermediate events, formula and script tasks), they survive a save untouched as
+  data — but you CAN still remove or rewire them by name and nothing will warn you. Gateway ELEMENTS and
+  DEFAULT flows are no longer on that list: both are buildable, `process-branch-conditions` owns them.
+  The SUB-PROCESS element belongs on this list with its two halves separated, because they are
+  different claims. CREATING one is allowed and safe — `type:"subProcess"`, see
+  `process-element-catalog`. REWIRING an existing one — retargeting its called process, deleting it,
+  editing its parameters — stays high-risk, and the reasons are measurements rather than caution:
+  an element that is already multi-instance carries none of the called process's parameter names at all
+  (61 of the 416 shipped elements are in that state, so the case is common, not exotic); a retarget with
+  live dependents makes the process refuse to START later, blamed on the process rather than on the
+  edit; and `validate-process-graph` carries no parameter or mapping rule at all, so none of this is
+  caught by planning. The build path refuses those TWO by name — let it, rather than routing around a
+  refusal you did not expect. A third hazard has no guard on either side: a mapping row stranded on a
+  parameter the element itself owns, which the dependents check cannot see because it scans what OTHER
+  elements reference and skips the element being retargeted. Its standing is UNOBSERVED rather than
+  known — the platform prunes such a row itself for every non-dynamic parameter and this contract
+  produces no dynamic ones, so nobody has yet seen one survive (CrtProcessBuilder T-27, open). Do not
+  add a check after every retarget on account of it. If a caller later reports a mapping that resolves
+  to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
+  the stored metapath still matches a `uid` describe reports on that element. Conditional
+  flows sit on this list on the same reasoning, one line down. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
   conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
   gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate

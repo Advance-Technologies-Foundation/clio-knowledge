@@ -44,6 +44,66 @@ leaf rather than through `process-modeling`.
   CRITICAL before you build one: the page's buttons and data sources are FACTS to read, not values to
   invent — a page inherits its buttons from its template chain, so the server cannot see them. Call
   `get-process-page-facts --schema-name <page>` first. `process-preconfigured-page` owns the contract.
+- `subProcess` — Sub-process (the BPMN call activity): run ANOTHER process and pass values in and out
+  through THAT process's own parameters. The block is only `{processName | processUId, resync?}`, and
+  the shortness is the design: selecting the called process is what makes the PLATFORM copy that
+  process's parameters onto the element, so you never declare them. `resync` is a `setElement` field
+  ONLY: it is REFUSED on `create-business-process` and on `addElement`, where nothing exists yet to
+  re-synchronize against, and a modify batch is atomic so a refused `addElement` rolls the whole batch
+  back.
+  THE BLOCK IS REQUIRED ON CREATE. An element that names no called process is refused BEFORE it is built,
+  on both write paths, because it would carry no parameters and could not run. That constrains the ORDER
+  of the work the "when" list below recommends: you cannot lay out a caller skeleton of empty stage
+  elements and point them at their processes afterwards. Create the called processes first, then the
+  caller. On `modify-business-process` the refusal aborts the whole atomic batch, so a skeleton built
+  that way loses every other operation in the array with it.
+  `processName` takes the called
+  process's schema NAME or its display CAPTION as the process library shows it; a caption shared by two
+  processes is REFUSED with the schema names listed rather than resolved to the first match.
+  WHEN to reach for it, measured over 402 caller→callee edges in the shipped 7.8.0 corpus, because the
+  intuitive answer is the wrong way round:
+  * to break a long process into NAMED STAGES — 78 % of shipped called processes have exactly one
+    caller, and the extreme cases split a lifecycle into nine stages, one element each. Decomposition
+    is what this element is for in practice
+  * to SHARE a small, sharply named unit — an identification, a lookup, a calculation with outputs, a
+    notification send. Real but the minority case at 22 %, and it stays inside one package 84 % of the
+    time
+  * NOT to iterate a collection. That is multi-instance, 15 % of shipped usage, and it is REFUSED here
+    — say so before a user asks for it. It is a declared property of the element (`MultiInstanceOptions`,
+    reported as `subProcess.multiInstance`), not a side effect you can trip into from this contract: the
+    collection-to-loop conversion lives in the classic designer's client code, and nothing clio writes
+    produces one. What you meet here is an element that is ALREADY multi-instance, built in the designer
+  FIVE refusals, each covering something the platform itself accepts in silence: a called process that
+  does not exist or cannot be read; a process calling ITSELF (the platform writes the element and then
+  synchronizes nothing, so it saves green with no parameters); a called process with no Simple start
+  event (rule R16 — a signal, timer or message start is entered by its trigger and offers no entry
+  point a call can use; the BUILD path is the only thing that enforces it, since a planned graph carries
+  no reference to the called process); a RETARGET while another element or flow condition still reads from this one
+  (the platform would drop the parameters, leave those references dangling, save cleanly, and let the
+  process refuse to START later, blamed on the process rather than on the edit); and any element that
+  is already multi-instance — it carries an input collection, an output collection and three iteration
+  counters INSTEAD of the called process's parameters, so every name you would map addresses nothing on
+  it. Edit that one in the designer.
+  The NAMES to map against are the CALLED process's own parameters: read them with
+  `get-process-signature process-name=<the called process>`, which is also the only route available
+  BEFORE the element exists. Everything else about those parameters - which directions accept a value,
+  how values cross at run time, what a re-sync does and what its warnings can and cannot tell you - is
+  owned by `get-guidance name=process-parameters` and is not restated here.
+  DISCOVERY of which processes you may call is `execute-esq` over the `VwProcessLib` view —
+  `Name`, `Caption`, `Enabled`, `IsActiveVersion` and `HasStartEvent`. `HasStartEvent` NARROWS the list
+  but does not decide R16: the column is `EXISTS(element WHERE StartType = 1)`, and an unwired element
+  that declares no start kind of its own still reports `Manual`, so the column is true of a process with
+  no start event at all. Necessary, not sufficient - a candidate that passes it can still be refused by the build.
+  `odata-read` does NOT work on that view: it answers `success:false, "The operation was canceled"`, so
+  a caller who tries OData first concludes discovery is impossible. Use ESQ.
+  `describe-business-process` reports the element's `subProcess` block — `process`, `processUId`,
+  `processCaption`, `multiInstance`, and `inSync`. `inSync` can be real drift evidence, and three things
+  decide whether it is here: read it only WITH `multiInstance` (on a multi-instance element `false` is
+  permanent, means nothing, and the re-sync it would call for is REFUSED), `null` is unknown - the called
+  process could not be read, or none is selected yet - and `true` is vacuous against a callee declaring
+  no parameters, the test being one-directional. `process-parameters` owns this field and carries the
+  FOURTH, which is the one that decides whether `false` is evidence at all: WHEN the schema instance
+  describe read was built.
 - Routing between the three page elements (Open edit page, Pre-configured page, Auto-generated page) is
   owned by `process-open-edit-page` — read its ROUTING section before choosing; the Pre-configured page's own
   contract lives in `process-preconfigured-page`. NOTE `autoGeneratedPage`'s `Buttons` parameter uses a
@@ -98,7 +158,8 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
+  the EVENT and EXPANDED sub-process shapes (the CALL ACTIVITY is buildable - see above),
+  the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
   Use the catalog below to reason about a solution and to READ existing processes
@@ -148,8 +209,14 @@ System actions (palette group "System actions"):
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
     READ-ONLY here.
-- `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance
-    over a collection. READ-ONLY here — and its children live in its OWN element collection: the delete guards see them
+- `callActivity`      Sub-process  — run another process (must start with a Simple start).
+    BUILDABLE via `type:"subProcess"` — see "What you can build today". Two shapes are NOT: the
+    MULTI-INSTANCE form (the element run once per item of a collection), which every write path that
+    CONFIGURES the element refuses - an unrelated `setElement` on one is applied, its re-synchronization
+    skipped, and a warning says so - and which `describe` reports as `subProcess.multiInstance` so you
+    can see the refusal coming; and the EVENT
+    and EXPANDED sub-processes, which share the same platform class but call no other process. Its
+    CHILDREN are READ-ONLY here and live in the element's OWN collection: the delete guards see them
     (they walk recursively), `describe-business-process` and `setElement` do not, so a refusal can name a
     flow no read call shows you.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
