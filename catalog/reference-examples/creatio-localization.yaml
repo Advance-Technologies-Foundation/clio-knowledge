@@ -7,7 +7,7 @@ primaryUseCase:
   summary: Demonstrate schema-owned backend and Freedom UI localizable values through an injectable LocalizableString adapter, deterministic fallback cases, and stand-free plus live Creatio tests.
 source:
   repository: https://github.com/Advance-Technologies-Foundation/creatio-localization-lab
-  revision: 273eb7531a8284b6072730b097769b95df56a02e
+  revision: 2e65b3537c37bfb8b4264e3dc871828fb95c94c8
   defaultBranch: main
 entryPoints:
   overview: README.md
@@ -31,5 +31,7 @@ trust:
   level: published
 notes:
   - This is an educational reference workspace, not a package-wide localization registry.
-  - The pinned revision contains 19 stand-free tests with 100% line, branch, and method coverage plus 6 live Creatio tests.
+  - The pinned revision contains 19 stand-free tests with 100% line, branch, and method coverage plus 14 live Creatio tests, including native designer discovery and save/readback.
   - Registration does not promote every implementation choice to canonical Clio guidance.
+  - Normal backend strings include both B2 declarations and culture XML; XML-only and metadata-only keys are labeled diagnostics.
+  - The backend owner is UsrAtfLocalizationLabMessages; its original schema UId is preserved. See docs/localizable-metadata-validation.md for the rename and tested boundaries.

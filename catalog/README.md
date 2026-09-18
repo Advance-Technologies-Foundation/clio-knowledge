@@ -10,6 +10,7 @@ Registration makes an example discoverable. Validation, vetting, and recommendat
 
 | Example | Primary use case | Status |
 |---|---|---|
+| [Creatio custom process element reference](reference-examples/creatio-custom-process-element.yaml) | Classic parameter panels and selectable native user-task families | Published |
 | [Creatio custom MCP tool reference](reference-examples/creatio-custom-mcp-tool.yaml) | Custom C# MCP tool publishing and consumption | Published |
 | [Creatio localization reference](reference-examples/creatio-localization.yaml) | Schema-owned backend and Freedom UI localizable values | Published |
 | [Creatio Kafka reference](reference-examples/creatio-kafka.yaml) | Kafka integration with Creatio | Published |

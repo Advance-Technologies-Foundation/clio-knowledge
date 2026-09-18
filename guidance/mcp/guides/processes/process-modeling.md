@@ -7,6 +7,8 @@ buildable today and the element catalog moved to `process-element-catalog`: this
 budget headroom left, and both of those sections grow with every element the platform gains while
 the lifecycle around them does not. Everything else has its own article and its own authoritative
 owner -- read the one your task needs instead of guessing:
+  * `process-custom-elements`     - author custom user-task elements with Classic panels and registration.
+  * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
                                      and the element catalog (data-id -> label -> purpose).
   * `process-naming`               - N1-N10: the process caption and code, element captions and

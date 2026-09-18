@@ -1,0 +1,39 @@
+schemaVersion: 0
+id: atf.creatio.custom-process-element-reference
+title: Creatio custom process element reference
+status: published
+primaryUseCase:
+  id: creatio-custom-bpmn-elements
+  summary: Create custom process elements with Classic parameter pages, including one toolbox entry selecting four separate arithmetic user tasks and pages.
+source:
+  repository: https://github.com/Advance-Technologies-Foundation/creatio-custom-process-element-reference
+  revision: 1c29f00f97cd6430852c4ff60ebb3a37b8adbddc
+  defaultBranch: main
+entryPoints:
+  overview: README.md
+  package: packages/UsrCustomProcessElement
+  unitTests: tests/UsrCustomProcessElement
+  integrationTests: tests/UsrCustomProcessElement.IntegrationTests
+  evidence: docs/lab-record.md
+supportingCapabilities:
+  - creatio-process-user-task
+  - classic-process-parameter-page
+  - explicit-parameter-directions
+  - dependency-injection
+  - error-or-result
+  - package-sql-registration
+  - unit-testing
+  - live-process-testing
+compatibility:
+  status: example-declared
+  details: Creatio 10.1.585.0 on .NET 8 and PostgreSQL. Clio 8.1.0.130 installed v0.1.0 on a fresh non-FSM instance and v0.2.0 as an upgrade on that retained instance. SQL Server scripts are authored but untested.
+trust:
+  publisher: Advance Technologies Foundation
+  level: published
+notes:
+  - Version 0.2.0 corrects omitted formatter directions without changing parameter identities; its portable metadata contract guard covers all five tasks. The upgraded text output selector excludes Text and Prefix.
+  - 27 unit and 10 live process cases passed. Browser acceptance covers separate pages, switching, persistence, and output-reference guards.
+  - The single-entry toolbox exclusion override uses an internal Classic designer method and requires upgrade regression testing.
+  - Typed process models use Single for the tested Float2 parameters; arbitrary decimal precision across that boundary is not established.
+  - A licensed Creatio environment and matching local platform/test dependencies are required; proprietary binaries are not distributed.
+  - Registration does not promote every example implementation choice to a cross-version platform guarantee.
