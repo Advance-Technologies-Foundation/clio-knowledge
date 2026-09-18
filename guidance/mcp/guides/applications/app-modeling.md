@@ -94,11 +94,11 @@ Application modeling guardrails
 
 Git-first workspace: capture DB-first schemas before pushing
 - This rule owns the create -> capture -> review -> push ordering for a workspace deployed with `push-workspace`.
-- After DB-first creation with `create-entity-schema`, `create-lookup`, or `sync-schemas`, MUST capture the affected package with `pull-workspace` before the next push. Successful creation in Creatio does not mean the schema exists in Git.
+- After any DB-first schema creation (for example `create-entity-schema`, `create-lookup`, or `sync-schemas`), MUST capture the affected package with the canonical `restore-workspace` tool before the next push. `pull-workspace` is its CLI alias, not a separate MCP tool. Successful creation in Creatio does not mean the schema exists in Git.
 - Preserve uncommitted local work before pulling. Confirm the source environment, package selection, and destination workspace, then review the diff and verify the new schema's identity, metadata, and resources are present in the local package that will be published.
 - Only after that review, run `push-workspace` against the intended target. A package push from an older local snapshot can remove DB-only schemas absent from that snapshot; do not use it to capture server-side changes.
 - `export-schema` is useful for a separately reviewable single-schema transfer, but its standalone bundle is consumed by `import-schema`; merely exporting it does NOT update the workspace package or make a subsequent `push-workspace` safe. Pull the affected package before pushing it.
-- This recipe does not override an FSM workspace's deployment rules: when its instructions prohibit `push-workspace`, keep using the prescribed filesystem workflow.
+- This recipe does not override an FSM workspace's deployment rules: follow the local workspace `AGENTS.md` deployment section; when it prohibits `push-workspace`, keep using its prescribed filesystem workflow.
 - Read installed tool contracts for current arguments and defaults. Do not assume ordinary schemas are parentless by default or that creation accepts only one column.
 - Evidence and scope: the reporter's [Clio #1619 clarification](https://github.com/Advance-Technologies-Foundation/clio/issues/1619#issuecomment-5726093804) confirms the remaining ordering request on clio 8.1.0.130; the executable deletion safeguard is tracked separately in [Clio #1612](https://github.com/Advance-Technologies-Foundation/clio/issues/1612).
 
