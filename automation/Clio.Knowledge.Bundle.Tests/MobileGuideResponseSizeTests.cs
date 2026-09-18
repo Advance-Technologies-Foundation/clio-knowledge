@@ -52,11 +52,27 @@ public sealed class MobileGuideResponseSizeTests
     /// came out, then to 61,607 when the sub-element clause was restated as DERIVED from the rule's one
     /// template rather than declared beside it; a ratchet goes DOWN as soon as the article does.
     /// </para>
+    /// <para>
+    /// MOVED AGAIN, deliberately (ENG-96589): 61,607 -> 62,178 and 17,776 -> 18,713. The converter now
+    /// PRUNES properties the target mobile component does not declare, which adds one reason code and one
+    /// response section. Neither can go unwritten: an undecoded code reaches the caller through this
+    /// article's own fallback as unexplained loss, and a response section the conversion article does not
+    /// list is one the agent never reads. Both entries were cut to roughly half their first draft before
+    /// this move — the conversion entry carries five facts in six lines — so what is left is the floor,
+    /// not the draft.
+    /// </para>
+    /// <para>
+    /// STANDING PROBLEM, not caused by that move: freedom-page-web-to-mobile-conversion is 62,178 against
+    /// a SmallestObservedSpill of 50,351. It has been past that threshold for every move recorded above,
+    /// which means the article this repository marks MANDATORY is in the band where the response has been
+    /// observed to spill. Trimming at the margin no longer changes that; it needs a real split, and each
+    /// further move should be read as evidence for one rather than as headroom.
+    /// </para>
     /// </summary>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 61_607),
-        ("freedom-page-mobile-reason-codes", 17_776)
+        ("freedom-page-web-to-mobile-conversion", 62_178),
+        ("freedom-page-mobile-reason-codes", 18_713)
     ];
 
     /// <summary>
