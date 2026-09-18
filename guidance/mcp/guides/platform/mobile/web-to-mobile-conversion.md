@@ -110,6 +110,12 @@ Creatio or disk. The guide contains:
     Merge twins the mobile template provides are untouched. SILENT — never a gate question:
     state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
     value. Null only when no standard normalized or skipped anything at all.
+  - prunedProperties — per element, the TOP-LEVEL properties the converter removed because the target
+    mobile type does not declare them; nested keys are never pruned. Already in viewConfigDiff[].values,
+    and re-adding one is inert — the runtime ignores an undeclared property. SILENT, one aggregated
+    line, EXCEPT `bindings`: those carried an action, are also droppedRequests entries, and are loss.
+    Null also means the prune did not RUN (platform older than the runtime-derived catalog), so it
+    never asserts the page is clean.
   - resourceStrings — every localized string the SOURCE PAGE DECLARES for the tokens the converted body
     references (top-level captions AND nested ones like config.title / text.template), keyed by resource
     name and resolved to its en-US text. Register this whole map via update-page `resources`. A key whose
