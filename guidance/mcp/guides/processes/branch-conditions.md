@@ -242,13 +242,12 @@ most specific FIRST, and say which order you chose and why, because nothing but 
 intent.
 
 THE DIAGRAM NOW SHOWS THAT ORDER, which is the one place a human can read it. The layout in
-`process-modeling.md` draws a split's branches top to bottom in evaluation order, with one deliberate
+`process-modeling` draws a split's branches top to bottom in evaluation order, with one deliberate
 exception: the DEFAULT branch keeps the gateway's own row, because it is the path that runs when nothing
 matched and it is what the eye follows across the picture. So the conditional branches read downward in
 the order you declared them, and the default is on the spine rather than at the bottom. Two consequences
 worth knowing before you write: declare the main path first when a gateway has no default, and expect a
-gateway that GAINS a default later to move its existing branches down a row — the only edit that reorders
-a split's arms.
+gateway that GAINS a default later to move its existing branches down a row.
 
 One exception, and it decides the DIALECT rather than the order: when a connector's source
 enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula, the

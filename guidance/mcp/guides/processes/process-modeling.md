@@ -65,10 +65,12 @@ article from what this one says; read that article.
   a split gets a row of its own, with the DEFAULT flow keeping the split's own row (otherwise the first
   one you declared) and the rest stacked below in declaration order; a merge returns to the row of the
   split it closes; an end event is drawn right after its last step, and pulled to the right edge only
-  when that row is empty. Connectors are drawn too — straight, L, Z or U shaped, with each branch of a
-  gateway leaving by a different point and loops travelling on a row of their own — so arrows neither
-  overlap each other nor cross the boxes between their ends. Do NOT set positions or connector geometry:
-  no argument carries them, and every save re-derives the whole picture.
+  when that row is empty. Connectors are drawn too — straight, L, Z, U or a longer way round, with loops
+  on a row of their own. The guarantee is that no connector crosses a SHAPE it does not enter; arrows MAY
+  cross each other, run along one line, or leave a gateway by a vertex a sibling also uses (a fan-out of
+  two or three gets an exit point each, wider ones share the bottom vertex and separate at their own
+  rows). Do NOT set positions or connector geometry: no argument carries them, and every save re-derives
+  the whole picture.
 - Tools:
   * list-user-tasks         — the user-task palette (name + uid); pass a name as `userTaskName`.
     CAVEAT: it lists RETIRED schemas as equal peers with no marker — `CallUserTask`, `EmailUserTask` and
@@ -82,8 +84,9 @@ article from what this one says; read that article.
     `geometry` per flow — `start`, `points[]`, `end`, `exitSide`, `entrySide`, i.e. where the connector
     actually runs. That is what a question about the picture is answered from ("why does that arrow
     cross the block"), and reading `size` is what lets you turn a position back into a ROW, since
-    elements of different heights share a row by its centre line. All three are read-only and absent on
-    a CrtProcessBuilder that predates them.
+    elements of different heights share a row by its centre line. All three are read-only. `position` is always reported; `size` and
+    `geometry` are newer members, and `geometry` is ALSO absent for any flow the server stored no
+    geometry for, with `points[]` empty on a straight connector.
     Also returns, per element: `connections[]` (bound "Connected to" links, raw + decoded), `deprecated`
     (the user-task schema is retired), and `writesConnectionsAtRuntime` — where FALSE is the answer that
     matters: it marks a process whose connections persist and compile while writing nothing. FALSE has two
