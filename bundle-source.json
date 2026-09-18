@@ -2265,7 +2265,7 @@
     {
       "itemId": "related-list",
       "title": "Related lists",
-      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies â€” no handler. Fetch the 'Expanded list' composite structure via get-component-info.",
+      "description": "Guides adding Freedom UI related lists: scoping child records to the current page through declarative master-detail dependencies (no handler), and linking records that ALREADY exist through the platform record-selection window over a many-to-many junction object (add existing, opt-in, one handler). Covers add-new vs add-existing, multi-select, duplicate links, and row delete as unlink. Fetch the 'Expanded list' composite structure via get-component-info.",
       "topicId": "creatio.related-list",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-list",
