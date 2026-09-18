@@ -192,7 +192,7 @@ public sealed class ProcessGuideContentPreservationTests
         // ENG-92712: the element became buildable via type:"subProcess". What the entry must still carry
         // is the version floor — without it an agent on an older environment reads "buildable" and gets a
         // refusal naming types it did not ask about.
-        ("process-element-catalog", "`callActivity`      Sub-process", "__PKG_VERSION__",
+        ("process-element-catalog", "`callActivity`      Sub-process", "1.6.3.23",
             "the version floor on the entry that changed from read-only to buildable"),
         ("process-element-catalog", "Add the element", "NOT in a build descriptor",
             "the OTHER cannot-build fact, and the one a short form of this list dropped: the Connected-to "

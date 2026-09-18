@@ -96,7 +96,7 @@ leaf rather than through `process-modeling`.
 - `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.16**. Below that version the type is refused
   outright, naming the ones it does build. It computes ONE expression and writes the result into ONE
   parameter — see its catalog entry below for the block.
-- `subProcess` (Sub-process), from CrtProcessBuilder **__PKG_VERSION__**. Below that version the type is
+- `subProcess` (Sub-process), from CrtProcessBuilder **1.6.3.23**. Below that version the type is
   refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
   naming the callee is what copies that process's parameters onto the element — see its catalog entry
   below for the block.
@@ -176,7 +176,7 @@ System actions (palette group "System actions"):
     READ-ONLY here.
 - `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing
     values through THAT process's own parameters.
-    BUILDABLE from CrtProcessBuilder **__PKG_VERSION__** via `type:"subProcess"` with a `subProcess` block:
+    BUILDABLE from CrtProcessBuilder **1.6.3.23** via `type:"subProcess"` with a `subProcess` block:
     `{processName | processUId, resync}`. Not guessable from the schema:
       * naming the callee — `processName` (schema NAME or display CAPTION) or `processUId` — is what
         COPIES that process's parameters onto the element; that is the whole block. The element's own
