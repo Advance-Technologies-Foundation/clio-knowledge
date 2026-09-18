@@ -96,12 +96,16 @@ leaf rather than through `process-modeling`.
 - `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.16**. Below that version the type is refused
   outright, naming the ones it does build. It computes ONE expression and writes the result into ONE
   parameter — see its catalog entry below for the block.
+- `subProcess` (Sub-process), from CrtProcessBuilder **__PKG_VERSION__**. Below that version the type is
+  refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
+  naming the callee is what copies that process's parameters onto the element — see its catalog entry
+  below for the block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
     `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  sub-process, the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
+  the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
   but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
   collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
   Use the catalog below to reason about a solution and to READ existing processes
@@ -170,10 +174,45 @@ System actions (palette group "System actions"):
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
     READ-ONLY here.
-- `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance
-    over a collection. READ-ONLY here — and its children live in its OWN element collection: the delete guards see them
-    (they walk recursively), `describe-business-process` and `setElement` do not, so a refusal can name a
-    flow no read call shows you.
+- `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing
+    values through THAT process's own parameters.
+    BUILDABLE from CrtProcessBuilder **__PKG_VERSION__** via `type:"subProcess"` with a `subProcess` block:
+    `{processName | processUId, resync}`. Not guessable from the schema:
+      * naming the callee — `processName` (schema NAME or display CAPTION) or `processUId` — is what
+        COPIES that process's parameters onto the element; that is the whole block. The element's own
+        parameters are never declared here — they are DERIVED and re-derived on every design-time read, so
+        `describe-business-process` always reports the callee's current shape. Exactly one of the two is
+        required on CREATE; both together is fine while they agree and REFUSED when they do not. An
+        ambiguous caption is REFUSED with the matching schema names listed, never resolved to the first.
+      * values are mapped IN/OUT through the element's OWN parameters (which mirror the callee's) by the
+        ordinary `mappings[]` / `addMapping` route — with one rule of its own: only an `In` or `Variable`
+        parameter keeps a value, because the platform clears the rest on every synchronization.
+      * `resync: true` re-synchronizes against the ALREADY-called process without changing the selection —
+        the one way to ask for a pure refresh, since `setElement` refuses an update naming no field.
+        `resync: false` with no process named OPTS OUT of the re-sync `setElement` otherwise runs by
+        default. REFUSED on CREATE (nothing to refresh yet) and REFUSED combined with a `processName` /
+        `processUId` naming a DIFFERENT process (a resync and a retarget are different requests); naming
+        the process already called is accepted and does nothing surprising.
+      * REFUSALS, each stated as what to do instead: the named process is the one the element itself lives
+        in (self-reference) — point it elsewhere, or remove the element; retargeting while another
+        parameter or flow condition still reads from this element (live dependents) — remove or re-point
+        them first; the called process has no Simple start event (rule R16, enforced at BUILD time in this
+        element's own applier, not by `validate-process-graph` — see `process-activity-connections`) — add
+        one to it, or call a different process; an ambiguous caption or disagreeing `processName`/
+        `processUId` — see above; the element is already MULTI-INSTANCE — see NOT SUPPORTED.
+      * DESCRIBE reports the callee under `subProcess`: `process` (name, falling back to the raw UId if
+        deleted), `processUId`, `processCaption`, `multiInstance`, `inSync`. `inSync` checks ONE direction
+        only — every parameter the callee CURRENTLY declares is PRESENT on the element — and does NOT
+        detect the opposite drift, an extra now-stale parameter the callee no longer declares, because the
+        platform deliberately keeps one whenever something still maps into or out of it.
+    NOT SUPPORTED: MULTI-INSTANCE (running the callee once per item of a mapped collection — the element
+    then carries an input collection, an output collection and three counters instead of the callee's
+    parameters, so no name here addresses anything on it; edit it in the designer, or build a single-call
+    element), the EVENT sub-process and the EXPANDED (embedded) sub-process — both share this element's
+    platform class but call no other process, so neither takes this block. Any of the three's children, when
+    it has any, live in their OWN element collection: the delete guards see them (they walk it recursively),
+    while `describe-business-process` and `setElement` do not — so a refusal can name a flow no read call
+    shows you.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
 User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialog,
   `openEditPageUserTask` Open edit page (BUILDABLE via `type:"openEditPage"` — see "What you can build today"), `autoGeneratedPageUserTask` Auto-generated page,
