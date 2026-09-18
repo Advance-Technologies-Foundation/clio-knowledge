@@ -72,11 +72,11 @@ This article is the authoritative owner of process parameters, the mappings that
     it BEFORE changing the callee, or accept that the drift is no longer observable there. It is also ONE-DIRECTIONAL, and this is the sharp edge:
     it asks whether every parameter the callee DECLARES is present on the element, so a callee that ADDS
     one flips it to `false` while a callee that REMOVES one leaves it `true` - a dropped parameter is
-    invisible to `inSync`, measured - except on a MULTI-INSTANCE element, where the callee declaring no
-    parameters makes the test vacuously true. A code rename reads as an add plus a remove and does flip it. And on a
-    MULTI-INSTANCE element `false` is permanent and means nothing at all - it carries collections and
-    counters rather than the callee's parameter names, so the test can never pass and the re-sync `false`
-    would call for is refused on it; check `multiInstance` before acting on `false`. THE
+    invisible to `inSync`, measured. A code rename reads as an add plus a remove and does flip it. On a
+    MULTI-INSTANCE element `false` is permanent and means nothing - it carries collections and counters
+    rather than the callee's parameter names, so the test cannot be satisfied UNLESS the callee declares
+    no parameters at all, in which case it is vacuously `true`. Either way the re-sync `false` would call
+    for is refused there, so check `multiInstance` before acting on `false`. THE
     DESIGNER is the trap worth stating plainly, and the reason is simpler than it looks: the call-activity
     card never shows a parameter's CODE. So after the callee renames a code - the rename that breaks
     delivery, because the runtime binds by code - the caller's card reads exactly as before: same caption,
