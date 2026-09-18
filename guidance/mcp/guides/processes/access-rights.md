@@ -177,6 +177,13 @@ differently and only one of them is safe:
     through clio cannot reach it, though a designer-built element can. That refusal is a no-op guard —
     the same class as the non-administrated-object refusal — NOT a fail-open guard.
 
+`clearFilter` is what puts a live element into the first state above: it is the widest edit this
+surface offers, because it moves the element from narrowing — whatever the stored filter matched — to
+applying the change to EVERY record of its object with record permissions disabled. It carries no
+`accessRights` block at all, yet it demands the same confirmation one would (see setElement below).
+`setFilter` can never reach that state: it is not re-read, it always carries a full `object` plus that
+filter's conditions as a replacement, so a `setFilter` can only ever leave the element narrowing.
+
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
     "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
         "grantee": { "type": "role", "role": "Sales Department" } } ] },
@@ -194,12 +201,19 @@ MUST, before you apply any of this to a live environment: a supplied `add`, a `r
 clear, an `object` retarget, and a `setFilter`/`clearFilter` on this element all CHANGE OR DESTROY
 record permissions that people currently rely on — the filter is gated for the same reason as the
 rest: it decides WHICH records the change lands on, so widening it widens every entry at once,
-and the element reports nothing at run time about what it did. `add` belongs on that list in both
-directions: it REPLACES the whole collection, so it destroys every grant it does not restate, and it
-widens access to whoever it names. Show the user the target object, the record `filter` that decides
+and the element reports nothing at run time about what it did. Weigh a `level: "restrict"` entry the
+same way you weigh a `remove` entry — both read to the user as a revoke, `restrict` because it denies,
+`remove` because a deleted row reads as one even though it is not — so neither is the innocuous half of
+`add`/`remove`. `add` belongs on that list in both directions: it REPLACES the whole collection, so it
+destroys every grant it does not restate, and it widens access to whoever it names. So does `remove`:
+replacing that collection drops any entry you do not restate, including one that was itself revoking
+access — and dropping a `remove` entry BROADENS access exactly as dropping an `add` entry narrows it, so
+the replacement hazard cuts both ways. Show the user the target object, the record `filter` that decides
 WHICH records are affected, and every grantee with its operations and level, and get an explicit yes
 before sending the operation — the same destructive-confirmation rule `process-modeling` states for
-`removeElement` / `removeFlow` / `removeParameter`, which owns it in full.
+`removeElement` / `removeFlow` / `removeParameter`, which owns it in full. When the operations array
+carries ONLY a `clearFilter` — no `accessRights` block, no grantee to name — that checklist reduces to
+showing the element and the object whose filter is being cleared, and still getting an explicit yes.
 `{ "op": "setElement", "elementName": "GrantRights", "elementUpdate": { "accessRights": { … } } }`
 - A partial update: omitted fields keep their values.
 - A supplied `add`/`remove` REPLACES that whole collection — its previous grantee parameters are
@@ -208,7 +222,8 @@ before sending the operation — the same destructive-confirmation rule `process
   stored-but-undecodable collection as `[]` and reports a legacy `FilterEdit` selected-employees entry
   WITHOUT its filter (see Read-back), so a naive describe -> modify -> setElement round trip deletes entries
   that were never read back, and a re-sent `selectedEmployees` entry whose filter did not
-  decode now fails the WHOLE batch at build, since a grantee filter with no conditions is refused. Omit the collection to keep what is stored.
+  decode now fails the WHOLE batch at build, since a grantee filter with no conditions is refused. Omit
+  the field to keep what is there, or confirm the stored entries in the process designer first.
 - `[]` clears a collection. Clearing one is safe only while the OTHER still holds an entry —
   clearing both leaves a permanently dead element that still reports success.
 - On ANY object change, the FIRST configuration included, the stored record filter clears unless it
@@ -216,6 +231,10 @@ before sending the operation — the same destructive-confirmation rule `process
   `object`, in the same operations array: `setFilter` never validates its own `object` against the
   element, so one sent BEFORE the retarget is cleared by it (see `process-data-elements`).
 - A present-but-blank `object` is refused; omit it to keep the current target.
+- A clio carrying the read-back check also reads the process back after an operations array whose ONLY
+  operation is `clearFilter`, and warns on the resulting filter state of any Change access rights
+  element among the cleared elements — clearing a record filter makes that element act on EVERY record
+  of its object, so that batch is checked rather than waved through silently.
 
 == Read-back (describe-business-process) ==
 The element returns its `accessRights` block: `object` + `objectSchemaUId` (`object` is null when the
