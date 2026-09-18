@@ -186,11 +186,16 @@ System actions (palette group "System actions"):
         ambiguous caption is REFUSED with the matching schema names listed, never resolved to the first.
       * values are mapped IN/OUT through the element's OWN parameters (which mirror the callee's) by the
         ordinary `mappings[]` / `addMapping` route — with one rule of its own: only an `In` or `Variable`
-        parameter keeps a value, because the platform clears the rest on every synchronization.
+        parameter keeps a value, because the platform clears the rest on every synchronization, and a
+        mapping onto any other direction is REFUSED rather than written and silently lost. That clearing
+        is feature-gated at the platform and ON by default; on an environment where it has been turned
+        off the value would survive, and the refusal is still raised — the toggle is internal, so the
+        server cannot read it without reflecting on a non-public member.
       * `resync: true` re-synchronizes against the ALREADY-called process without changing the selection —
         the one way to ask for a pure refresh, since `setElement` refuses an update naming no field.
         `resync: false` with no process named OPTS OUT of the re-sync `setElement` otherwise runs by
-        default. REFUSED on CREATE (nothing to refresh yet) and REFUSED combined with a `processName` /
+        default. `resync: true` is REFUSED on CREATE (nothing to refresh yet); `resync: false` is accepted
+        and inert there. REFUSED combined with a `processName` /
         `processUId` naming a DIFFERENT process (a resync and a retarget are different requests); naming
         the process already called is accepted and does nothing surprising.
       * REFUSALS, each stated as what to do instead: the named process is the one the element itself lives

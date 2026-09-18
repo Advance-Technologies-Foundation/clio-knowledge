@@ -181,8 +181,12 @@ differently and only one of them is safe:
 surface offers, because it moves the element from narrowing — whatever the stored filter matched — to
 applying the change to EVERY record of its object with record permissions disabled. It carries no
 `accessRights` block at all, yet it demands the same confirmation one would (see setElement below).
-`setFilter` can never reach that state: it is not re-read, it always carries a full `object` plus that
-filter's conditions as a replacement, so a `setFilter` can only ever leave the element narrowing.
+`setFilter` is not re-read, because it always carries a full `object` plus that filter's conditions as a
+replacement — so on its own it can only leave the element narrowing. That holds only while nothing LATER in
+the same array retargets the element's `object`: a retarget clears a filter that does not already target the
+incoming object, so `[ {setFilter …}, {setElement {accessRights:{object:"Other"}}} ]` ends in the wide state
+with nothing warned, because the read-back is keyed on `clearFilter`. Send the `setFilter` AFTER the
+retarget.
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
     "accessRights": { "object": "Order", "add": [ { "operations": ["read"], "level": "permit",
@@ -231,9 +235,10 @@ showing the element and the object whose filter is being cleared, and still gett
   `object`, in the same operations array: `setFilter` never validates its own `object` against the
   element, so one sent BEFORE the retarget is cleared by it (see `process-data-elements`).
 - A present-but-blank `object` is refused; omit it to keep the current target.
-- A clio carrying the read-back check also reads the process back after an operations array whose ONLY
-  operation is `clearFilter`, and warns on the resulting filter state of any Change access rights
-  element among the cleared elements — clearing a record filter makes that element act on EVERY record
+- A clio carrying the read-back check also reads the process back after an operations array that CONTAINS
+  a `clearFilter` — a mixed batch counts, the check is keyed on the operation and not on the array being
+  a single one — and warns on the resulting filter state of any Change access rights element among the
+  cleared elements — clearing a record filter makes that element act on EVERY record
   of its object, so that batch is checked rather than waved through silently.
 
 == Read-back (describe-business-process) ==
