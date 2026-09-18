@@ -155,8 +155,9 @@ Wiring rules
   the page `primaryDataSourceName` (the data source whose `scope` is `page`). A detail can also be
   scoped to a non-id master column (e.g. `"PDS.Account"`) when the relationship runs through that
   column.
-- Leave `handlers: []`. The dependency is evaluated on first load and recomputed whenever the master
-  id changes, so switching the open record re-scopes the child list with no handler.
+- Leave `handlers: []` FOR SCOPING. The dependency is evaluated on first load and recomputed whenever the
+  master id changes, so switching the open record re-scopes the child list with no handler. Mechanism C below
+  adds a handler for the ADD action, not for the filter — the scoping itself stays handler-free either way.
 - The grid `items` binding and the panel/grid `viewConfigDiff` inserts are normal page edits — fetch
   the structure with `get-component-info composite="Expanded list"` (the canonical recipe), and see
   `page-modification-components` for `parentName`/`propertyName`/`index` placement and `get-component-info` for
@@ -237,9 +238,22 @@ guide describes over the JUNCTION entity:
 1. A `crt.Button` in the detail's toolbar whose `clicked` dispatches your own request, e.g.
    `{ "request": "usr.AddExistingSkillsRequest" }`. A custom `usr.*` name is correct here: the platform has
    no declarative request that both opens the window and writes the links, so a handler has to sit between.
+   This button REPLACES the "Expanded list" composite's default header add button — it does not coexist with
+   it. Either rebind the composite's own add button (point its `clicked` at the `usr.*` request) or remove it
+   and add the custom toolbar button in its place; do not leave both. The default button dispatches
+   `crt.CreateRecordRequest` over the JUNCTION entity, which has no registered add page, so clicking it throws
+   the same "There is no page for new or existing record" toast Mechanism A documents above — and the detail
+   would show two Add buttons instead of the single one the add-existing flow expects.
 2. A handler for that request which opens the window and, in `afterClosed`, writes the links.
 3. The junction data source + collection attribute + `dependencies` entry exactly as above, so the detail
    shows the linked records and the row delete action UNLINKS (see below).
+
+This is the first snippet in this guide that uses `sdk.*` (`sdk.HandlerChainService`, `sdk.Model`,
+`sdk.FilterGroup`, `sdk.ComparisonType`). That needs `"@creatio-devkit/common"` in the page's `SCHEMA_DEPS`,
+bound as `sdk` in `SCHEMA_ARGS` — read `get-guidance name=page-schema-handlers` and
+`name=page-schema-creatio-devkit-common` for the binding (an existing page may already bind the alias as
+`devkit`; use the existing alias, do not rename it). Without the binding the page fails at runtime with
+`sdk is not defined` while `update-page` still reports `success: true`.
 
 ```js
 // handlers — opens the selection window and links what the user picked
