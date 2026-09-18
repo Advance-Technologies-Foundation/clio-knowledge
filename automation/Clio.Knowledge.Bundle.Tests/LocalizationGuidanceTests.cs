@@ -75,7 +75,7 @@ public sealed class LocalizationGuidanceTests
             because: "Freedom UI authoring rules already have one canonical owner");
         guide.Should().Contain("https://github.com/Advance-Technologies-Foundation/creatio-localization-lab",
             because: "agents need the independent executable reference after it is published");
-        catalog.Should().Contain("revision: 273eb7531a8284b6072730b097769b95df56a02e",
+        catalog.Should().Contain("revision: 2e65b3537c37bfb8b4264e3dc871828fb95c94c8",
             because: "the catalog must pin the exact reviewed reference revision");
         revisionMatches.Should().ContainSingle(
             because: "the reference catalog must expose exactly one revision pointer");

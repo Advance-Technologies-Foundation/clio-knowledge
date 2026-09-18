@@ -13,7 +13,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.custom-process-element-reference",
             "catalog/reference-examples/creatio-custom-process-element.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-custom-process-element-reference",
-            "ba663090c682b370594c9ba5962993d6b2a3b7b3"),
+            "3ccd67fcca92ebed6e23c41f2ff3af997b880677"),
         new(
             "atf.creatio.custom-mcp-tool-reference",
             "catalog/reference-examples/creatio-custom-mcp-tool.yaml",
@@ -33,7 +33,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.localization-reference",
             "catalog/reference-examples/creatio-localization.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-localization-lab",
-            "273eb7531a8284b6072730b097769b95df56a02e"),
+            "2e65b3537c37bfb8b4264e3dc871828fb95c94c8"),
         new(
             "atf.creatio.websocket-reference",
             "catalog/reference-examples/creatio-websocket.yaml",

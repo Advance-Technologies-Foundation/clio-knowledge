@@ -2,7 +2,7 @@
 
 This guide owns design-time selection between separate native user tasks behind one toolbox entry. Read `process-custom-elements` first for the artifact, error-output, registration, and testing contracts. Use the immutable `atf.creatio.custom-process-element-reference` catalog entry for the working Arithmetic family.
 
-Verified on Creatio 10.1.585.0, .NET 8, PostgreSQL and Clio 8.1.0.130. The Classic designer override below is version-sensitive internal behavior, not a documented cross-version API. Recheck it in the browser after an upgrade.
+Verified on Creatio 10.1.585.0 / .NET 8 / PostgreSQL with Clio 8.1.0.130, and 10.1.784.0 / .NET Framework 4.8 / SQL Server 2025 Express with Clio 8.1.0.131. The Classic designer override below is version-sensitive internal behavior, not a documented cross-version API. Recheck it in the browser after an upgrade.
 
 ## Structure
 
@@ -16,6 +16,8 @@ Verified on Creatio 10.1.585.0, .NET 8, PostgreSQL and Clio 8.1.0.130. The Class
 Each task resolves its own typed DI handler returning ErrorOr<decimal>. Each has Result, IsError, and unlimited ErrorMessage outputs. Division rejects zero; the handlers report decimal overflow as an error. Do not replace these separate implementations with a runtime operation switch when demonstrating this pattern.
 
 Each child page inherits a shared Classic selector page. The shared parent owns the operation collection, selection, confirmation, and replacement guard; the child owns its operation-specific MAPPING fields and help. Point each task's parameter-page association at its own child schema.
+
+When the live contract exposes the scaffold primitives described in `process-custom-elements`, create each task's initial parameter page independently. Customize the generated pages to inherit the shared selector schema while preserving their own parameter bindings. The primitive creates the basic native process-page parent; it does not create the family selector, retarget inheritance, or hide alternate toolbox entries for you.
 
 ## Native replacement
 
@@ -44,4 +46,4 @@ Keep a selector demonstration without downstream mappings separate from executio
 
 The reference passed 13 arithmetic unit cases and five arithmetic live cases, plus the text example's cases. Native Float2 generated decimal server properties but Single properties in the tested Clio process models; exact binary-representable test values do not prove arbitrary decimal precision across that boundary.
 
-Fresh PostgreSQL non-FSM installation verified packaged registration, one toolbox entry, the shipped division page, and all live cases. SQL Server installation, DCM, older designers, localization, and asynchronous execution remain unverified. No additional page-creation or registration MCP primitive is implemented by this reference.
+Non-FSM PostgreSQL and MSSQL installation verified packaged registration and all ten live cases. MSSQL also verified forced registration re-execution, one Arithmetic toolbox entry, and switching among four distinct pages. Save/reopen and output-reference guards retain PostgreSQL-only evidence. See the pinned reference's installation record for exact artifacts and boundaries. DCM, older designers, localization, and asynchronous execution remain unverified. No additional page-creation or registration MCP primitive is implemented by this reference.

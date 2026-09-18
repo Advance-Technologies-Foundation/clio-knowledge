@@ -12,11 +12,30 @@ Scope: use when backend C# code needs user-visible text, when deciding which Cre
 
 ## Backend resource and lookup contract
 
+Normal backend strings MUST have both a schema metadata declaration and translated resource XML.
+Declare them in the owning source-code schema's `LocalizableStrings` collection (`B2` in exported
+metadata). Otherwise direct backend lookup can succeed while the string is absent from the designer
+and cannot be maintained there. Do not use successful lookup alone as acceptance.
+
+For a new declaration, use a unique stable `UId`, `A2` = the key name, `A3` = the creating schema UId,
+`A4` = the modifying schema UId, and `A5` = the originating package identity. For a new item owned by
+one source-code schema, `A3` and `A4` are that schema's UId. Preserve inherited identities; do not
+rewrite every inherited entry to the current schema. `B2` holds declarations, not translated text.
+Use the native designer when possible; when editing exported package metadata, follow its existing
+plain-JSON or diff representation rather than mixing the two formats.
+
 Persist a string item under the owning schema's resource folder using this exact item-name form:
 
 ```text
 LocalizableStrings.<Key>.Value
 ```
+
+Verify the normal keys in the source-code designer's **Localizable strings** collection, save and
+reopen the schema, and verify the same identities and translations. The native
+`SourceCodeSchemaDesignerService.GetSchema` / `SaveSchema` pair provides the corresponding service
+readback. Then assert runtime lookup in the default and secondary cultures with distinct values.
+Metadata alone does not supply text; a declared key with no resource value returns `null` in the
+tested reference. XML-only lookup is a diagnostic capability, not the normal authoring recipe.
 
 To add a secondary culture:
 
@@ -119,4 +138,6 @@ Run Creatio-backed tests after synchronizing and compiling the package. Assert s
 
 ## Verified boundary and reference lab
 
-The strict, fallback, missing-key, current-culture, Freedom UI metadata, and rendered page behaviors were live-verified on Creatio `10.1.585.0`, .NET 8, PostgreSQL. Use the independent reference repository at immutable commit `273eb7531a8284b6072730b097769b95df56a02e`: `https://github.com/Advance-Technologies-Foundation/creatio-localization-lab/tree/273eb7531a8284b6072730b097769b95df56a02e`.
+The strict, fallback, missing-key, current-culture, Freedom UI metadata, and rendered page behaviors were live-verified on Creatio `10.1.585.0`, .NET 8, PostgreSQL. Use the independent reference repository at immutable commit `2e65b3537c37bfb8b4264e3dc871828fb95c94c8`: `https://github.com/Advance-Technologies-Foundation/creatio-localization-lab/tree/2e65b3537c37bfb8b4264e3dc871828fb95c94c8`.
+
+The 2026-09-17 backend repair additionally verified normal B2 declarations, the XML-only/B2-only diagnostic boundary, and native source-code designer GetSchema -> SaveSchema -> GetSchema preservation in FSM with clio 8.1.0.130. The reference records 19 stand-free tests with 100% production coverage and 14 live tests. Configuration browser navigation was blocked, so this repair's designer evidence is service discovery/save/readback, not visual browser verification. See the pinned reference's docs/localizable-metadata-validation.md for deployment prerequisites and limitations.
