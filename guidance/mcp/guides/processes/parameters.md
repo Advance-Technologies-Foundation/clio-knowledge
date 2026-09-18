@@ -66,12 +66,14 @@ This article is the authoritative owner of process parameters, the mappings that
     runtime instance. With one, describe reads it, the platform does not converge it, a stale element
     stays stale, and `inSync: false` is a real signal. Without one, describe falls back to the design
     instance, which converges AS IT LOADS - the read erases the drift it was called to show - and `true`
-    says nothing. A runtime instance is produced by RUNNING the process: measured, against a control
-    differing only in that. Saving the schema does NOT produce one, and neither does compiling, so never
-    compile a process to make its drift visible. It is also ONE-DIRECTIONAL, and this is the sharp edge:
+    says nothing. What decides it is WHEN that instance was built: a freshly built one CONVERGES
+    as it is created, any reader triggers the build, and saving evicts it. So do NOT run, re-read or
+    compile the caller in order to expose drift - each of those builds a fresh instance and HIDES it. Read
+    it BEFORE changing the callee, or accept that the drift is no longer observable there. It is also ONE-DIRECTIONAL, and this is the sharp edge:
     it asks whether every parameter the callee DECLARES is present on the element, so a callee that ADDS
     one flips it to `false` while a callee that REMOVES one leaves it `true` - a dropped parameter is
-    invisible to `inSync`, measured. A code rename reads as an add plus a remove and does flip it. And on a
+    invisible to `inSync`, measured - except on a MULTI-INSTANCE element, where the callee declaring no
+    parameters makes the test vacuously true. A code rename reads as an add plus a remove and does flip it. And on a
     MULTI-INSTANCE element `false` is permanent and means nothing at all - it carries collections and
     counters rather than the callee's parameter names, so the test can never pass and the re-sync `false`
     would call for is refused on it; check `multiInstance` before acting on `false`. THE
@@ -96,8 +98,8 @@ This article is the authoritative owner of process parameters, the mappings that
     not only one. That is the half a caller can act on. A RENAME is not reported by
     the re-sync at all - the mapping row keeps the parameter's UId, so every reference stays resolvable
     and this notice has nothing to name, while the saved name goes stale; the designer misses it for the
-    same reason. `inSync: false` on a caller that has been RUN is the one read that does show it, which
-    is why it is worth asking for. So the rule is procedural: after ANY change to
+    same reason. `inSync: false` on a caller whose cached instance predates the change is the one read
+    that does show it, which is why it is worth asking for BEFORE touching anything. So the rule is procedural: after ANY change to
     a called process's parameters, re-save every caller (any `setElement` on the element re-synchronizes
     it and persists the result, and `subProcess: {resync: true}` asks for that alone). Do it because the
     callee changed, not because something looked wrong

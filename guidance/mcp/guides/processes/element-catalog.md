@@ -97,10 +97,8 @@ leaf rather than through `process-modeling`.
   `odata-read` does NOT work on that view: it answers `success:false, "The operation was canceled"`, so
   a caller who tries OData first concludes discovery is impossible. Use ESQ.
   `describe-business-process` reports the element's `subProcess` block — `process`, `processUId`,
-  `processCaption`, `multiInstance`, and `inSync`. `inSync` can be real drift evidence, and four things
-  decide whether it is - it reads the runtime instance only when the process HAS one, which RUNNING it
-  produces and neither saving nor compiling does (never compile to expose drift), and it is
-  ONE-DIRECTIONAL, so a callee that DROPS a parameter leaves it `true`; read it only WITH `multiInstance` (on a multi-instance element `false` is
+  `processCaption`, `multiInstance`, and `inSync`. `inSync` can be real drift evidence, and several things
+  decide whether it is; read it only WITH `multiInstance` (on a multi-instance element `false` is
   permanent, means nothing, and the re-sync it would call for is REFUSED), `null` is unknown - the called
   process could not be read, or none is selected yet - and `true` is vacuous against a callee declaring
   no parameters, the test being one-directional. `process-parameters` owns this field and carries the
