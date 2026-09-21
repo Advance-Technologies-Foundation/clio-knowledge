@@ -147,8 +147,10 @@ carry the same action. Each entry says which of the two it is; read the entry, n
                                the binding went with it and THE COMPONENT STILL RENDERS. Not
                                drop-request-unsupported: there the request has no mobile equivalent;
                                here the request converts fine and the component has no slot to fire it
-                               from. params.mobileType is the type consulted. Re-adding it does
-                               nothing — the runtime ignores an undeclared property. Say the action
+                               from. params.mobileType is the type consulted. Re-adding THIS one does
+                               nothing: an undeclared binding slot never fires. (That is specific to a
+                               binding — an undeclared LAYOUT property can be actively harmful, which is
+                               why prunedProperties exists at all.) Say the action
                                was on an element that cannot carry it; move it to one whose
                                mobileContracts[].allowedProperties lists the property.
   drop-request-element-empty-container
