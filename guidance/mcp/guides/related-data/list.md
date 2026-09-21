@@ -155,14 +155,15 @@ Wiring rules
   the page `primaryDataSourceName` (the data source whose `scope` is `page`). A detail can also be
   scoped to a non-id master column (e.g. `"PDS.Account"`) when the relationship runs through that
   column.
-- Leave `handlers: []`. The dependency is evaluated on first load and recomputed whenever the master
-  id changes, so switching the open record re-scopes the child list with no handler.
+- Leave `handlers: []` FOR SCOPING. The dependency is evaluated on first load and recomputed whenever the
+  master id changes, so switching the open record re-scopes the child list with no handler. Mechanism C below
+  adds a handler for the ADD action, not for the filter — the scoping itself stays handler-free either way.
 - The grid `items` binding and the panel/grid `viewConfigDiff` inserts are normal page edits — fetch
   the structure with `get-component-info composite="Expanded list"` (the canonical recipe), and see
   `page-modification-components` for `parentName`/`propertyName`/`index` placement and `get-component-info` for
   `columns`, `features`, and toolbar slots.
 
-Adding records to the detail — two mechanisms; page-based add/edit is the primary one
+Adding records to the detail — three mechanisms; page-based add/edit is the primary one
 This guide owns only the MECHANICS of each add mechanism. WHICH one to use is a UX/product decision —
 take it from the approved plan (Business Plan) and the `creatio-ui-guidelines` skill (`page-layout-and-controls.md`).
 Default for a detail: page-based add/edit (a mini add page + a full edit page). Use inline editing only
@@ -170,6 +171,9 @@ for simple line-item lists (a few short columns) or when the user explicitly ask
 a pattern, implement THAT one — do not downgrade a page-based detail to inline to save effort. The panel /
 grid / toolbar STRUCTURE comes from `get-component-info composite="Expanded list"`; this guide adds only the
 wiring below.
+
+A and B both create a NEW record; C links records that ALREADY exist through a selection window. A and B are
+the default pair; C is opt-in — pick it only when the task asks for existing records to be linked.
 
 Mechanism A (default) — page-based add: a header "Add" button opens a page
 - The "Expanded list" composite's header add button (`crt.CreateRecordRequest`) opens the child entity's
@@ -211,6 +215,125 @@ Mechanism B — inline grid add: edit rows in the grid (for simple line-item lis
   it must be in the collection so inline create inherits the open master (confirm via OData that the child's
   `...Id` equals the master Id after save).
 
+Mechanism C (opt-in) — add EXISTING records through a selection window (many-to-many via a link object)
+Mechanisms A and B both CREATE a record. This one LINKS records that already exist: the Add button opens
+the platform's record-selection window over the related object, the user picks one or several, and
+confirming creates the link (junction) records. It is OPT-IN — the default for an Add button stays
+"create a new record". Switch to it when the developer asks for it, or when the task plainly describes
+selecting/linking records that already exist ("add existing contacts", "link products to the order").
+
+Scope: a many-to-many relation implemented through a link (junction) object. Do NOT apply it to a direct
+lookup (one-to-many) relation: there "add existing" would move a child away from its current owner, which
+is a reassign scenario, not a link one.
+
+The window is opened by dispatching `crt.OpenSelectionWindowRequest` from a page handler. Two things about
+it are worth knowing before you look for it elsewhere:
+- it is NOT in the `get-request-info` catalog, so the catalog's absence is not evidence it does not exist;
+- `crt.OpenLookupPageRequest` is its DEPRECATED predecessor (the platform source says so in as many words).
+  Author the new name.
+
+Wire it in three pieces — a button, a handler, and the same `dependencies`-scoped grid the rest of this
+guide describes over the JUNCTION entity:
+
+1. A `crt.Button` in the detail's toolbar whose `clicked` dispatches your own request, e.g.
+   `{ "request": "usr.AddExistingSkillsRequest" }`. A custom `usr.*` name is correct here: the platform has
+   no declarative request that both opens the window and writes the links, so a handler has to sit between.
+   This button REPLACES the "Expanded list" composite's default header add button — it does not coexist with
+   it. Either rebind the composite's own add button (point its `clicked` at the `usr.*` request) or remove it
+   and add the custom toolbar button in its place; do not leave both. The default button dispatches
+   `crt.CreateRecordRequest` over the JUNCTION entity, which has no registered add page, so clicking it throws
+   the same "There is no page for new or existing record" toast Mechanism A documents above — and the detail
+   would show two Add buttons instead of the single one the add-existing flow expects.
+2. A handler for that request which opens the window and, in `afterClosed`, writes the links.
+3. The junction data source + collection attribute + `dependencies` entry exactly as above, so the detail
+   shows the linked records and the row delete action UNLINKS (see below).
+
+This is the first snippet in this guide that uses `sdk.*` (`sdk.HandlerChainService`, `sdk.Model`,
+`sdk.FilterGroup`, `sdk.ComparisonType`). That needs `"@creatio-devkit/common"` in the page's `SCHEMA_DEPS`,
+bound as `sdk` in `SCHEMA_ARGS` — read `get-guidance name=page-schema-handlers` and
+`name=page-schema-creatio-devkit-common` for the binding (an existing page may already bind the alias as
+`devkit`; use the existing alias, do not rename it). Without the binding the page fails at runtime with
+`sdk is not defined` while `update-page` still reports `success: true`.
+
+```js
+// handlers — opens the selection window and links what the user picked
+{
+    request: "usr.AddExistingSkillsRequest",
+    handler: async (request, next) => {
+        const masterId = await request.$context["Id"];
+        await sdk.HandlerChainService.instance.process({
+            type: "crt.OpenSelectionWindowRequest",
+            entitySchemaName: "UsrSkill",              // the RELATED object, not the junction
+            caption: "Select skills",
+            features: {
+                create: { enabled: false },            // no "New" button inside the window
+                select: { multiple: true, selectAll: false }
+            },
+            afterClosed: async (result) => {
+                if (result.canceled) {
+                    return;                            // cancelling must link nothing
+                }
+                const lookupValues = await result.getLookupValues();   // [{ value, displayValue }]
+                const linkModel = await sdk.Model.create("UsrProjectSkill");   // the JUNCTION entity
+                const linkedFilters = new sdk.FilterGroup();
+                await linkedFilters.addSchemaColumnFilterWithParameter(
+                    sdk.ComparisonType.Equal, "UsrProject", masterId);
+                const linkedRows = await linkModel.load({
+                    attributes: ["Id", "UsrSkill"],
+                    parameters: [{ type: sdk.ModelParameterType.Filter, value: linkedFilters }]
+                });
+                const linkedIds = (linkedRows || []).map(row => (row.UsrSkill && row.UsrSkill.value) || row.UsrSkill);
+                for (const lookupValue of lookupValues) {
+                    if (lookupValue && !linkedIds.includes(lookupValue.value)) {
+                        await linkModel.insert({ UsrProject: masterId, UsrSkill: lookupValue.value });
+                    }
+                }
+                await sdk.HandlerChainService.instance.process({
+                    type: "crt.LoadDataRequest",
+                    dataSourceName: "UsrProjectSkillDS",
+                    $context: request.$context,
+                    scopes: [...request.scopes]
+                });
+            },
+            $context: request.$context,
+            scopes: [...request.scopes]
+        });
+        return next?.handle(request);
+    }
+}
+```
+
+Rules that the runtime does NOT enforce for you:
+- `entitySchemaName` is the RELATED object (what the user picks), while the model you insert into is the
+  JUNCTION object. Passing the junction there lists link records instead of business records.
+- The window ALWAYS allows multi-select in this mode: `features.select.multiple: true`. (`features` is
+  marked internal in the platform type, but it is what the platform's own `BaseRelatedInMainRecordsHandler`
+  passes, so it is the supported shape in practice.)
+- `result.canceled` is the ONLY cancel signal. A handler that goes straight to `getLookupValues()` links
+  records after the user pressed Cancel — `getLookupValues()` returns an empty array on a cancelled window,
+  so the bug is silent rather than loud.
+- Nothing de-duplicates for you. Load the existing links for the open master and skip an already-linked id,
+  or picking the same record twice creates a second link record and the detail shows it twice.
+- Nothing refreshes the grid either. Dispatch `crt.LoadDataRequest` with the junction `dataSourceName` at
+  the end of `afterClosed`, or the linked records appear only after the next page load.
+- The master id must come from the page context (`await request.$context["Id"]`) OUTSIDE `afterClosed` —
+  read it once before opening the window and close over it.
+
+Unlinking is a plain delete of the JUNCTION row, which is what the grid's bulk delete already does when the
+grid is bound to the junction data source: `crt.DeleteRecordsRequest` with `dataSourceName` set to the
+junction data source. The related record itself is untouched. Do not add a custom "unlink" handler for this.
+
+Do NOT try to build the window by creating a page from `BaseLookupPageTemplate`. That template IS the
+selection window's schema, but a page created from it cannot be opened by `crt.OpenPageRequest`: it needs
+the lookup host context the platform supplies internally, so it renders BLANK with an Angular `NG0201`
+injector error while `create-page` and `update-page` both report success. The same happens to the
+out-of-the-box `AddEventAudiencePage` when it is opened that way, so this is a property of the template,
+not of your page. `create-page` also refuses the template outright today ("Template ... is not supported").
+
+Evidence (ENG-99702, Creatio 10.0.0.9xx, .NET Framework): a junction detail built exactly as above opened
+the modal window, linked two selected records, left the links unchanged on Cancel, created no duplicate when
+an already-linked record was picked again, and removed only the junction row on unlink.
+
 Reuse, don't duplicate
 - Do NOT create a new child schema when an existing child entity + relationship already models the
   detail. Reuse the existing entity and just wire the data source, collection attribute, and
@@ -246,6 +369,10 @@ Common mistakes (these are why a detail shows ALL records or none — or the pag
   registering the page (`related-page-binding`), passing `entityPageName`, or adding a section — see
   "Adding records to the detail, Mechanism A". Use inline add (Mechanism B) only when the plan calls for a
   simple line-item list, and then ensure the FK column is present in the grid collection.
+- Wiring the header add button to `crt.CreateRecordRequest` when the task asked for EXISTING records to be
+  linked. That opens an add page for one new record at a time; the multi-select selection window is
+  Mechanism C, and it is a handler, not a request binding.
+- Building the selection window as a page from `BaseLookupPageTemplate`. It renders blank — see Mechanism C.
 - Using a `...Id` path form for the FK column in `attributePath` — see `esq-filters-frontend` column-path
   normalization; use the bare reference column name.
 - Declaring the list broken because the grid container holds only `crt-data-grid-placeholder`. That

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.21",
+  "libraryVersion": "1.15.33",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -34,6 +34,7 @@
       "agent-execution",
       "application-listener",
       "app-modeling",
+      "sequences",
       "workplaces",
       "atf-repository-dev",
       "atf-repository-model-management",
@@ -94,6 +95,8 @@
       "page-modification-containers",
       "page-modification-field-contract",
       "page-modification-overview",
+      "page-modification-standard-components",
+      "page-modification-template-supplied-parts",
       "page-schema-converters",
       "page-schema-creatio-devkit-common",
       "page-schema-handlers",
@@ -179,13 +182,20 @@
       "virtual-entities",
       "websocket-messaging",
       "when-to-use-requests",
-      "list-widget"
+      "list-widget",
+      "record-permissions",
+      "record-permission-extensions",
+      "atf.creatio.record-permissions-reference",
+      "process-custom-elements",
+      "process-custom-element-families",
+      "atf.creatio.custom-process-element-reference"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
       "docs://knowledge/com.creatio.clio/agent-execution",
       "docs://knowledge/com.creatio.clio/application-listener",
       "docs://knowledge/com.creatio.clio/app-modeling",
+      "docs://knowledge/com.creatio.clio/sequences",
       "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
@@ -246,6 +256,8 @@
       "docs://knowledge/com.creatio.clio/page-modification-containers",
       "docs://knowledge/com.creatio.clio/page-modification-field-contract",
       "docs://knowledge/com.creatio.clio/page-modification-overview",
+      "docs://knowledge/com.creatio.clio/page-modification-standard-components",
+      "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
       "docs://knowledge/com.creatio.clio/page-schema-converters",
       "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
       "docs://knowledge/com.creatio.clio/page-schema-handlers",
@@ -331,7 +343,13 @@
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
-      "docs://knowledge/com.creatio.clio/list-widget"
+      "docs://knowledge/com.creatio.clio/list-widget",
+      "docs://knowledge/com.creatio.clio/record-permissions",
+      "docs://knowledge/com.creatio.clio/record-permission-extensions",
+      "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference",
+      "docs://knowledge/com.creatio.clio/process-custom-elements",
+      "docs://knowledge/com.creatio.clio/process-custom-element-families",
+      "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference"
     ]
   },
   "resources": [
@@ -389,6 +407,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/composable-app/application-listener.md",
       "bundlePath": "resources/application-listener.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "sequences",
+      "title": "Sales Engagement sequences",
+      "description": "Canonical workflow for sequence discovery, definitions, native enrollment, lifecycle, scheduling and package portability, with DataService-first operations and verified version bounds.",
+      "topicId": "creatio.sequences",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/sequences",
+      "legacyUris": [
+        "docs://mcp/guides/sequences"
+      ],
+      "sourcePath": "guidance/mcp/guides/sequences.md",
+      "bundlePath": "resources/sequences.md",
       "mediaType": "text/markdown"
     },
     {
@@ -998,7 +1030,7 @@
     {
       "itemId": "freedom-page-mobile-reason-codes",
       "title": "Freedom UI mobile conversion: reason codes",
-      "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
+      "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns â€” for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization â€” and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
       "requiredFeatures": [
@@ -1209,6 +1241,34 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "page-modification-standard-components",
+      "title": "Page modification standard components",
+      "description": "Standard record-page component sub-guide of the page-modification family: the canonical crt.Feed and crt.FileList value sets for a Freedom UI form page, the merge-vs-insert decision driven by what the parent template ships, the per-object choice between the shared SysFile/RecordId file shape and a per-object <Entity>File shape, the mandatory AttachmentListDS companion data source, the pieces a template supplies that an insert must supply itself, and the contrasting crt.TagSelect case, which arrives with the template and is wired by a designer preprocessor rather than by the page.",
+      "topicId": "creatio.page-modification-standard-components",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-standard-components",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-standard-components"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/standard-components.md",
+      "bundlePath": "resources/page-modification-standard-components.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modification-template-supplied-parts",
+      "title": "Page modification template-supplied parts",
+      "description": "What a Freedom UI record-page template supplies and what an explicit insert must supply itself: the tab containers, the attachments toolbar carrying the upload and refresh buttons, the AttachmentList collection attribute and its data source, the Id and CardState attributes that are never yours, and the crt.TagSelect tag chips, which arrive with the template and are wired by a designer preprocessor rather than by the page but must have tagInRecordSourceSchemaName pointed at an <Entity>InTag junction when the object has one.",
+      "topicId": "creatio.page-modification-template-supplied-parts",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
+      "legacyUris": [
+        "docs://mcp/guides/page-modification-template-supplied-parts"
+      ],
+      "sourcePath": "guidance/mcp/guides/pages/modification/template-supplied-parts.md",
+      "bundlePath": "resources/page-modification-template-supplied-parts.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "page-schema-converters",
       "title": "Page schema converters",
       "description": "Guides creation and editing of Freedom UI converters in raw page schema bodies.",
@@ -1281,7 +1341,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the five process tools, the create-business-process descriptor, the build recipe, and the safety rules for editing an existing process. What is buildable today and the element catalog belong to process-element-catalog, which the recipe requires as its own step before step 1 -- read it before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "BPMN build lifecycle, tools, descriptor, recipe, and edit safety. Read process-element-catalog before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Also routes to process-custom-elements and process-custom-element-families. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1295,7 +1355,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode on the elements that offer it, which elements take a readData/changeData configuration block, all three FLOW KINDS declared with the flow (flows[].kind plus flows[].condition) and each flow's diagram LABEL (flows[].label), and the exclusive and parallel gateway ELEMENTS -- while the inclusive and event-based gateway elements, timer/message and intermediate events, formulaTask, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData block, all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive and parallel gateway ELEMENTS, and the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) -- while the inclusive and event-based gateway elements, timer/message and intermediate events, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1534,7 +1594,6 @@
       "itemId": "process-version-writes",
       "title": "Process version writes",
       "description": "Owns the two WRITE operations on a Creatio process version family. modify-business-process-as-new-version carries the edits AND produces the version in ONE call -- there is no separate create step, and an empty operations array is how you take a plain restore point. set-active-business-process-version makes one member ACTUAL and is the rollback gesture: any member including the family ROOT, which is how you go back to the original. The two are never chained -- a new version is created INACTIVE and changes nothing about what runs, activation needs its own request naming the version, and a session answer is agent behaviour rather than a request field. Also owns what a rollback does and does not do (new instances only, deletes nothing, re-saves the whole family in one transaction, reported from a READ-BACK rather than echoed), that these writes go one at a time, and that a rejected edit saves nothing while a saved version can never be taken back. The MODEL is process-versions.",
-
       "topicId": "creatio.process-version-writes",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-version-writes",
@@ -2206,7 +2265,7 @@
     {
       "itemId": "related-list",
       "title": "Related lists",
-      "description": "Guides adding Freedom UI related lists and scoping child records to the current page through declarative master-detail dependencies — no handler. Fetch the 'Expanded list' composite structure via get-component-info.",
+      "description": "Guides adding Freedom UI related lists: scoping child records to the current page through declarative master-detail dependencies (no handler), and linking records that ALREADY exist through the platform record-selection window over a many-to-many junction object (add existing, opt-in, one handler). Covers add-new vs add-existing, multi-select, duplicate links, and row delete as unlink. Fetch the 'Expanded list' composite structure via get-component-info.",
       "topicId": "creatio.related-list",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/related-list",
@@ -2402,7 +2461,7 @@
     {
       "itemId": "when-to-use-requests",
       "title": "When to use requests",
-      "description": "Canonical MCP guidance for wiring Freedom UI page actions to platform requests: when to reuse a built-in crt.*Request vs chain a handler vs author a usr.*Request, and the mandatory get-request-info catalog discipline — parameters as the only authorable keys (empty map = no params block), platform-injected baseParameters never in params, per-request documentation, and version scoping.",
+      "description": "Canonical MCP guidance for wiring Freedom UI page actions to platform requests: when to reuse a built-in crt.*Request vs chain a handler vs author a usr.*Request, and the mandatory get-request-info catalog discipline â€” parameters as the only authorable keys (empty map = no params block), platform-injected baseParameters never in params, per-request documentation, and version scoping.",
       "topicId": "creatio.when-to-use-requests",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/when-to-use-requests",
@@ -2426,6 +2485,84 @@
       "sourcePath": "guidance/mcp/guides/dashboards/list-widget.md",
       "bundlePath": "resources/list-widget.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "record-permissions",
+      "title": "Record Permissions",
+      "description": "Unified decision guide for stored record grants, runtime/dynamic permission rules, process grant changes and real-user verification.",
+      "topicId": "creatio.record-permissions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/record-permissions",
+      "legacyUris": [
+        "docs://mcp/guides/record-permissions"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/record-permissions.md",
+      "bundlePath": "resources/record-permissions.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "record-permission-extensions",
+      "title": "Record Permission Extensions",
+      "description": "Validated native read/edit/delete permission-extension contracts, named activation, stored-grant combination modes, fallback behavior and bounded runtime verification.",
+      "topicId": "creatio.record-permission-extensions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/record-permission-extensions",
+      "legacyUris": [
+        "docs://mcp/guides/record-permission-extensions"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/record-permission-extensions.md",
+      "bundlePath": "resources/record-permission-extensions.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "atf.creatio.record-permissions-reference",
+      "title": "Creatio record permissions reference",
+      "description": "Executable native read/edit/delete permission model with stored-grant modes, real-user Entity/DataService E2E matrices, and safe disposable fixture lifecycle.",
+      "topicId": "atf.creatio.record-permissions-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference",
+      "sourcePath": "catalog/reference-examples/creatio-record-permissions.yaml",
+      "bundlePath": "resources/atf.creatio.record-permissions-reference.yaml",
+      "mediaType": "text/yaml"
+    },
+    {
+      "itemId": "process-custom-elements",
+      "title": "Custom business process elements",
+      "description": "Create native user tasks with Classic parameter pages, explicit directions, DI and ErrorOr, packaged registration, and runtime validation.",
+      "topicId": "creatio.process-custom-elements",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-custom-elements",
+      "sourcePath": "guidance/mcp/guides/processes/process-custom-elements.md",
+      "bundlePath": "resources/process-custom-elements.md",
+      "mediaType": "text/plain",
+      "legacyUris": [
+        "docs://mcp/guides/process-custom-elements"
+      ]
+    },
+    {
+      "itemId": "process-custom-element-families",
+      "title": "Selectable custom process element families",
+      "description": "Build one toolbox element selecting separate task implementations and separate Classic parameter pages.",
+      "topicId": "creatio.process-custom-element-families",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-custom-element-families",
+      "sourcePath": "guidance/mcp/guides/processes/process-custom-element-families.md",
+      "bundlePath": "resources/process-custom-element-families.md",
+      "mediaType": "text/plain",
+      "legacyUris": [
+        "docs://mcp/guides/process-custom-element-families"
+      ]
+    },
+    {
+      "itemId": "atf.creatio.custom-process-element-reference",
+      "title": "Creatio custom process element reference",
+      "description": "Tested Format text and four-operation Arithmetic workspace with Classic panels, package SQL, DI, ErrorOr, unit and live process tests.",
+      "topicId": "atf.creatio.custom-process-element-reference",
+      "role": "reference-example",
+      "uri": "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference",
+      "sourcePath": "catalog/reference-examples/creatio-custom-process-element.yaml",
+      "bundlePath": "resources/atf.creatio.custom-process-element-reference.yaml",
+      "mediaType": "text/yaml"
     }
   ]
 }

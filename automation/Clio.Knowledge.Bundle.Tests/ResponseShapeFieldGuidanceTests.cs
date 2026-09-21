@@ -171,6 +171,29 @@ public sealed class ResponseShapeFieldGuidanceTests
         AssertAllPresent(ResourceStringClauses, caseSensitive: true);
     }
 
+    // One source element, several operations. The article used to hardcode the case — "when the template
+    // provides List/ListItem you get TWO operations" — which was true, and useless for the next type whose
+    // rule declares a merge onto a template-provided sub-element. The general rule is what an agent needs;
+    // the list row is the worked example under LIST ROW.
+    private static readonly (string Fragment, string Because)[] ListRowClauses =
+    [
+        ("SEVERAL operations for ONE source element",
+            "the general rule — a conversion rule may declare merges onto template-provided sub-elements beside the element's own operation, for any type"),
+        ("Paste ALL of them, in order",
+            "the directive: an agent that pastes only the operation it recognises drops the sub-element's payload silently"),
+        ("never invent one",
+            "the converter emits nothing on purpose when the template provides no such sub-element (or more than one) — an invented merge onto a guessed name is the failure this forbids"),
+        ("NEVER put itemLayout inside a merge of the parent List",
+            "the worked example's mechanics: crt.List is not a container and itemLayout is an input, so addressing it as a child slot fails the WHOLE schema build")
+    ];
+
+    [Test]
+    [Description("The article states the general rule — a conversion rule may produce several operations for one source element, and every one of them is pasted, none invented — and keeps the list row as the worked example with its build-breaking prohibition intact. The previous wording hardcoded List/ListItem into the rule itself, which said nothing about the next type whose rule declares a merge onto a template-provided sub-element.")]
+    public void Guide_ShouldStateTheSeveralOperationsRule_TypeAgnostically_WithTheListRowAsExample()
+    {
+        AssertAllPresent(ListRowClauses, caseSensitive: true);
+    }
+
     [Test]
     [Description("No step tells the caller to APPLY an element map. ElementMapEntry is converter bookkeeping that is never serialized, so an instruction to iterate it in order cannot be followed — the response carries viewConfigDiff and no elementMap. Naming the old field is fine and necessary in the back-compat clause; instructing the reader to work from it is not, so this forbids the instructions rather than the word.")]
     public void Guide_ShouldNeverInstructApplyingAnElementMap()

@@ -62,5 +62,5 @@ REMOVING A DEPENDENCY (cleanup / rollback)
   should stay — only remove it when nothing in your package relies on the owner anymore.
 
 NOTES
-- A dependency change may report compilation-required; run compile-configuration to apply.
+- A dependency change may report compilation-required; follow the package-scoped compilation and activation policy in `core-rules` for the affected package.
 - Both operations need the same elevated package-management access as other package tools.
