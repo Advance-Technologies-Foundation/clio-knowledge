@@ -237,7 +237,7 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
 - Every modify re-applies the automatic layout to the WHOLE diagram AND re-routes every connector: a
   hand-arranged diagram is redrawn as generated rows and hand-routed arrows are redrawn with it
-  (process data intact, manual layout lost). From CrtProcessBuilder 1.6.5.6 the server REFUSES such an
+  (process data intact, manual layout lost). From CrtProcessBuilder 1.6.5.7 the server REFUSES such an
   edit rather than applying it, and the refusal opens a TWO-question sequence whose answers are both
   the user's — never send `confirm-layout-change` on the first attempt. `process-diagram-layout` owns
   the whole of this: what counts as a re-draw, the two questions in order, and what an OLDER server
