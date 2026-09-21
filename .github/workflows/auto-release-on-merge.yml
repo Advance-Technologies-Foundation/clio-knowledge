@@ -7,8 +7,14 @@ name: Auto-release on merge
 # This workflow never decides a version and never commits anything. The version is whatever the
 # merged pull request wrote into `bundle-source.json`, and it is the only number anyone maintains: the
 # monotonic generation `sequence` is derived from it at build time, so edited content can never ship
-# under a sequence a consumer already accepted. A merge that left `libraryVersion` alone has an
-# already published release, so it releases nothing and this run skips instead of failing.
+# under a sequence a consumer already accepted.
+#
+# A merge that left `libraryVersion` alone AND did not touch any published body ships nothing and
+# skips cleanly. A merge that left `libraryVersion` alone BUT changed published bodies is a mistake
+# (the PR-time validation missed it — usually a conflict resolution that kept the base version) and
+# this workflow now FAILS loudly in that case, so the mistake is visible immediately on the master
+# branch's Actions view instead of hiding until the next release cycle, and the follow-up bump-only
+# PR is obvious.
 on:
   push:
     branches:
@@ -36,6 +42,12 @@ jobs:
     steps:
       - name: Check out the merged commit
         uses: actions/checkout@v4
+        with:
+          # The "changed a published body without bumping libraryVersion" guard below compares this
+          # merged commit against the tag of the already-published release. The default single-commit
+          # fetch does not contain that tag, so we need the full history and its tags.
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Release the declared generation unless it already shipped
         env:
@@ -47,17 +59,78 @@ jobs:
           # is a previous failed attempt that was never visible, and the release workflow clears it.
           published="$(gh api "repos/${GITHUB_REPOSITORY}/releases" --paginate \
             --jq ".[] | select(.tag_name == \"${library_version}\" and .draft == false) | .id")"
-          if [ -n "${published}" ]; then
-            echo "Release ${library_version} is already published; this merge bumped no version, so nothing ships."
+          if [ -z "${published}" ]; then
+            # Dispatched rather than published by pushing the tag from here: a tag pushed with the
+            # default GITHUB_TOKEN does not start another workflow run, so the release job would never
+            # fire and no error would be reported anywhere. `workflow_dispatch` is the documented
+            # exception to that rule.
+            #
+            # The dispatched run builds `master` HEAD, which can differ from this merge commit when
+            # another merge lands in the same few seconds. Its own tag-versus-`libraryVersion` check
+            # still guarantees it never publishes a generation whose manifest disagrees with the tag.
+            gh workflow run release-bundle.yml --ref master -f library_version="${library_version}"
+            echo "Requested release ${library_version}; follow it in the Release knowledge bundle workflow."
             exit 0
           fi
-          # Dispatched rather than published by pushing the tag from here: a tag pushed with the
-          # default GITHUB_TOKEN does not start another workflow run, so the release job would never
-          # fire and no error would be reported anywhere. `workflow_dispatch` is the documented
-          # exception to that rule.
+          echo "Release ${library_version} is already published."
+          # ---------------------------------------------------------------------------------------
+          # Fail-fast against silent "merge without a bump".
           #
-          # The dispatched run builds `master` HEAD, which can differ from this merge commit when
-          # another merge lands in the same few seconds. Its own tag-versus-`libraryVersion` check
-          # still guarantees it never publishes a generation whose manifest disagrees with the tag.
-          gh workflow run release-bundle.yml --ref master -f library_version="${library_version}"
-          echo "Requested release ${library_version}; follow it in the Release knowledge bundle workflow."
+          # A previous incident (ENG-99702, merge 7089efd → run 35356450370) landed a real guide
+          # change on master but resolved a bundle-source.json merge conflict by keeping the version
+          # the previous PR had already released (1.15.32 → 1.15.32). The PR-time producer-contract
+          # check does catch that pattern, but that run was superseded by `cancel-in-progress: true`
+          # after the conflict-resolution push, and the required-check gate did not force a re-check.
+          # This workflow then honoured its "already published, skip" branch and exited 0 — leaving
+          # the new bytes on master with nothing shipping them for hours.
+          #
+          # The rule below closes the loop after the merge, when it is too late to block the merge
+          # itself but still early enough to make the mistake noisy: if any body the manifest names
+          # (plus bundle-source.json itself) differs between master and the already-published tag,
+          # fail loudly so the alert reaches the team on the master Actions view immediately, and a
+          # bump-only follow-up PR is obviously required.
+          # ---------------------------------------------------------------------------------------
+          # `--exact` ignores lightweight tags a fork might carry; the release workflow only ever
+          # pushes annotated tags, so this is what we compare against.
+          if ! git rev-parse --verify --quiet "refs/tags/${library_version}^{commit}" > /dev/null; then
+            echo "::error::Release ${library_version} is published on GitHub but tag ${library_version} is missing from this checkout. The fetch-tags step above did not receive it — refusing to skip silently, since without the tag the 'changed published content' guard cannot run."
+            exit 1
+          fi
+          # The published byte set is the manifest plus every body it declares — computed on both
+          # sides so a resource this merge added or dropped is compared too. Same shape as the
+          # validate-pull-request contract-suite check, deliberately, so the two guards describe the
+          # same "published surface".
+          {
+            echo bundle-source.json
+            jq -r '.resources[].sourcePath' bundle-source.json
+            git show "${library_version}:bundle-source.json" | jq -r '.resources[].sourcePath'
+          } | sort -u > published-paths.txt
+          # Read with a loop rather than `mapfile`, which needs bash 4 and is absent on some
+          # developer machines that run this script by hand.
+          published_paths=()
+          while IFS= read -r published_path; do
+            published_paths+=("${published_path}")
+          done < published-paths.txt
+          rm -f published-paths.txt
+          # `git diff --quiet` answers 0 for no change and 1 for a change, but anything else is a
+          # failure of the check itself. Reading it as "changed" would turn a broken invocation into a
+          # gate that always fails, so the third case is separated out explicitly.
+          set +e
+          git diff --quiet "${library_version}" HEAD -- "${published_paths[@]}"
+          diff_status=$?
+          set -e
+          case "${diff_status}" in
+            0)
+              echo "No published body moved since ${library_version} was released; this merge bumped no version and ships nothing. Skipping."
+              exit 0
+              ;;
+            1)
+              echo "::error::Published content changed on master but libraryVersion is still ${library_version}, and that version is already released — this auto-release run cannot ship the new bytes. Open a bump-only follow-up PR (increment libraryVersion in bundle-source.json). Files that would have shipped:"
+              git diff --name-only "${library_version}" HEAD -- "${published_paths[@]}" | sed 's/^/  - /' >&2
+              exit 1
+              ;;
+            *)
+              echo "::error::Comparing master against tag ${library_version} failed with status ${diff_status}."
+              exit 1
+              ;;
+          esac
