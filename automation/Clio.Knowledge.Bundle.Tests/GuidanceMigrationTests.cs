@@ -11,6 +11,28 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class GuidanceMigrationTests
 {
+    /// <summary>
+    /// Guidance articles authored AFTER the v0 migration, which therefore have no v0 route to preserve.
+    /// <para>WRITTEN DOWN rather than derived, for the reason the go-live floor is: an article joins this
+    /// set by a deliberate edit, not by a property of its own data that a later change could flip. The
+    /// alternative, relaxing the rule below to "at most one", would let a MIGRATED article silently lose
+    /// the route a v0 reader still follows.</para>
+    /// <para>The cost of getting this wrong is not cosmetic: the builder turns every declared legacy URI
+    /// into a resolvable route, so an invented one is a route the library actually serves and nothing ever
+    /// published. process-add-data was split out of process-data-elements and declared exactly such a URI
+    /// to satisfy the rule before it was narrowed.</para>
+    /// </summary>
+    private static readonly string[] PostMigrationGuidance =
+    [
+        "process-add-data",
+        "process-read-data"
+    ];
+
+    /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
+    /// assertion below is an expression tree, which cannot hold the `out` of a TryGetProperty.</summary>
+    private static int DeclaredLegacyUriCount(JsonElement resource) =>
+        resource.TryGetProperty("legacyUris", out JsonElement legacyUris) ? legacyUris.GetArrayLength() : 0;
+
    [Test]
     [Description("Verifies that publication reads only canonical human-authored knowledge rather than frozen oracle fixtures.")]
     public void BundleSource_ShouldPublishOnlyCanonicalKnowledgeFiles()
@@ -153,9 +175,16 @@ public sealed class GuidanceMigrationTests
                         libraryId,
                         resource.GetProperty("itemId").GetString()!),
                 because: "namespaced lookup must be exact and derivable without transport state");
-            resources.Where(resource => resource.GetProperty("role").GetString() == "guidance")
+            resources.Where(resource => resource.GetProperty("role").GetString() == "guidance"
+                    && !PostMigrationGuidance.Contains(resource.GetProperty("itemId").GetString()))
                 .Should().OnlyContain(resource => resource.GetProperty("legacyUris").GetArrayLength() == 1,
                     because: "every currently migrated v0 guidance route remains available as signed transition metadata");
+            // The exception is guarded rather than trusted: an article that never had a v0 route must declare
+            // NO legacy route, so naming one here cannot become a way to smuggle an invented one past the rule.
+            resources.Where(resource => PostMigrationGuidance.Contains(resource.GetProperty("itemId").GetString()))
+                .Should().OnlyContain(resource => DeclaredLegacyUriCount(resource) == 0,
+                    because: "an article authored after the migration has no v0 route to preserve, and a "
+                        + "declared one would be a route the library serves and never published");
             result.Manifest.Resources.Select(resource => resource.ItemId).Should().Equal(
                 resources.Select(resource => resource.GetProperty("itemId").GetString())
                     .OrderBy(itemId => itemId, StringComparer.Ordinal),
