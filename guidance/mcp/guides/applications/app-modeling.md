@@ -36,6 +36,7 @@ Preferred workflow
 - Canonical existing-app section flow: `list-apps` -> `get-app-info` -> `create-app-section` -> `get-app-info`.
 - Canonical existing-section metadata update flow: `list-apps` -> `get-app-info` -> `update-app-section`.
 - Canonical section discovery flow: `list-apps` -> `get-app-info` -> `list-app-sections`.
+- Before deleting a section, follow the section deletion safety rules in `get-guidance name=existing-app-maintenance`; older implementations can delete unrelated prefix-sharing schemas.
 - Canonical section delete flow: `list-apps` -> `get-app-info` -> `list-app-sections` -> `delete-app-section`.
 - `create-app` already performs internal Data Forge enrichment and returns optional `dataforge` diagnostics. Do not require a separate external Data Forge preflight for the standard create flow.
 - If Data Forge is unavailable or partially degraded, `create-app` still creates the app shell and reports degraded enrichment through warnings and coverage flags instead of failing the whole create path.
