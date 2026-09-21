@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.34",
+  "libraryVersion": "1.15.35",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1411,7 +1411,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Also owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side - values crossing by NAME with an unmatched name skipped silently, what inSync can and cannot see and which actions erase the drift before you can read it, the designer card whose parameter row has no code column, and the procedural re-sync rule - while the BUILD contract for that element (naming the callee, which directions keep a value, what resync refuses) is owned by process-element-catalog. Formulas themselves are owned by process-formulas.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Also owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side - the procedural re-sync rule and the request shapes that perform one, the full notice set a re-sync answers with, values crossing by NAME with an unmatched name skipped silently, what inSync can and cannot see, and the designer card whose parameter row has no code column - while the BUILD contract for that element (naming the callee, which directions keep a value, what resync refuses) is owned by process-element-catalog. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
