@@ -64,9 +64,12 @@ article from what this one says; read that article.
   the flow ORDER you declare is what decides it: columns come from distance to the start; each branch of
   a split gets a row of its own, with the DEFAULT flow keeping the split's own row (otherwise the first
   one you declared) and the rest stacked below in declaration order; a merge returns to the row of the
-  split it closes; an end event is drawn right after its last step, and pulled to the right edge only
-  when that row is empty. Connectors are drawn too — straight, L, Z, U or a longer way round, with loops
-  on a row of their own. The guarantee is that no connector crosses a SHAPE it does not enter; arrows MAY
+  split it closes; an end event is drawn beside whatever reaches it — one that a SINGLE flow reaches is
+  pulled to the right edge when that row is empty, and one that TWO branches reach is pulled back onto
+  the column of the deeper of them, so the branch above drops straight down onto it and the other
+  arrives at its left edge (an end three branches reach stays where the columns put it). Connectors are
+  drawn too — straight, L, Z, U or a longer way round, with loops on a row of their own. The guarantee
+  is that no connector crosses a SHAPE it does not enter; arrows MAY
   cross each other, run along one line, or leave a gateway by a vertex a sibling also uses (a fan-out of
   two or three gets an exit point each, wider ones share the bottom vertex and separate at their own
   rows). Do NOT set positions or connector geometry: no argument carries them, and every save re-derives
