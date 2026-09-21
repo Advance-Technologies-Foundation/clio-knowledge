@@ -183,7 +183,7 @@ System actions (palette group "System actions"):
         parameters are never declared here — they are DERIVED, and re-derived whenever the platform builds
         a schema instance, which is not every read, so describe can lag the callee (`process-parameters`).
         Exactly one of the two is required on CREATE; both together is fine while they agree and REFUSED
-        when they do not. An ambiguous caption is REFUSED with the matching schema names listed.
+        when they do not. An ambiguous caption is REFUSED with the names listed, never resolved to the first.
       * values are mapped IN/OUT through the element's OWN parameters (which mirror the callee's) by the
         ordinary `mappings[]` / `addMapping` route, with one rule: only an `In` or `Variable` parameter
         keeps a value — the platform clears the rest on every synchronization, so a mapping onto any other
