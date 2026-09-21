@@ -67,6 +67,10 @@ guards — it says whose rule it is and names that guide for the rest.
   - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
+  - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
+    activity, and how to build it -> name=process-element-catalog
+  - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
+    what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
     sources are read facts, never invented -> name=process-preconfigured-page
   - the "Connected to" links of the activity a task creates, and the R1-R20 connection rules ->
