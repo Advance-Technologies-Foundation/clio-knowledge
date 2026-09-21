@@ -107,6 +107,7 @@
 - Do NOT flatten a child-record requirement into a fake flat `columnPath` on the root. If there is no direct lookup path, it needs a backward reference.
 
 ## Values (`dataValueType`)
+- A leaf value is either a LITERAL written into the filter tree (a pre-configured / static filter) or, on an analytics widget or list, supplied at runtime from a page attribute (a quick filter — the tree stays empty and the value arrives through `filterAttributes`). Choose by the classified intent; never hardcode a literal for a request whose value the end user is meant to pick.
 - Each leaf value is wrapped in a `parameter` envelope — `{ "expressionType": 2, "parameter": { "dataValueType": <n>, "value": <v> } }` — and the `value` shape depends on the data type:
 - Text (1): `{ "expressionType": 2, "parameter": { "dataValueType": 1, "value": "Acme" } }`.
 - Integer (4): `value` is a JSON number, e.g. `5`.

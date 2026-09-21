@@ -45,8 +45,10 @@ leaf rather than through `process-modeling`.
   contract, the rule for choosing this element, and its limits.
 - Approval: `approval` (the Approval element / ApprovalUserTask) is BUILDABLE and configurable through its
   `approval` block — the object and the record under approval, who approves, and the two notifications with
-  their email templates. It is a configured approval STEP, not a FLOW: branching on the verdict needs a
-  gateway. `process-approval` owns the contract and its limits.
+  their email templates. It is a configured approval STEP, not a FLOW: branching on the verdict is a
+  conditional flow off the element and needs no gateway, but the designer edits that branch through a
+  result-selection editor — see `process-activity-result-branches`. `process-approval` owns the contract and its
+  limits.
 - `preconfiguredPage` — Pre-configured page: shows a Freedom UI page to a user and resumes when the user
   presses a completing button, and is the only page element that can hand a user a purpose-built page.
   CRITICAL before you build one: the page's buttons and data sources are FACTS to read, not values to
@@ -101,14 +103,19 @@ leaf rather than through `process-modeling`.
   diagram being readable, not about making the branch work. Three rules apply to the flows leaving a
   gateway element, none of them visible in the descriptor schema; `process-branch-conditions` owns
   them.
+- `formulaTask` (Formula), from CrtProcessBuilder **1.6.3.16**. Below that version the type is refused
+  outright, naming the ones it does build. It computes ONE expression and writes the result into ONE
+  parameter — see its catalog entry below for the block.
+- `subProcess` (Sub-process), from CrtProcessBuilder **1.6.3.26**. Below that version the type is
+  refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
+  naming the callee is what copies that process's parameters onto the element — see `process-sub-process`
+  for the block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
-    `formulaTask`, `scriptTask`, `webService` (each also marked READ-ONLY in the
+    `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  sub-process, the Add-data and Delete-data targets (a `filter` on THAT task is serialized
-  but not end-to-end usable — the buildable filters are `signalStart`, `readData`, `changeData` and
-  `addData`), and a CONSUMER
+  and a CONSUMER
   of a read collection (no iterator element builds, and reading one column out of the list needs ENG-91844 — all
   four Read data modes DO build, see the catalog entry below).
   Use the catalog below to reason about a solution and to READ existing processes
@@ -155,24 +162,51 @@ System actions (palette group "System actions"):
     so a filterless element deletes nothing and fails rather than deleting everything. DESTRUCTIVE and
     irreversible, and it repeats on EVERY run — confirm the object and the selected records with the user
     before you plan one in.
-- `formulaTask`       Formula      — compute a value (math/string/date/bool) into an output param.
-    READ-ONLY here: the element is NOT buildable, and it is the one entry in this catalog most likely to
-    be reached for by mistake, because formulas themselves ARE buildable — as a flow CONDITION and as a
-    mapping `expression` (see `process-formulas`). Compute a value with a mapping onto a process
-    parameter instead of asking for this element.
+- `formulaTask`       Formula      — compute a value (math/string/date/bool) into ONE parameter.
+    BUILDABLE from CrtProcessBuilder **1.6.3.16** with a `formula` block:
+    `{body, and exactly ONE of resultProcessParameter | elementName + elementParameter}`.
+    Four things about it are not guessable from the schema:
+      * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). A process
+        parameter may be referenced by NAME — `[#Amount#]` — on EVERY route that writes a body: create,
+        `addElement` and `setElement` alike, because the expansion lives in the applier they all go
+        through. A body already in the meta-path form `describe-business-process` reports passes through
+        untouched, so echoing a read-back is safe.
+      * BOTH the body and a target are required when the element is created, and naming two targets is
+        refused rather than resolved by precedence. On modify the block is a PARTIAL update: a body-only
+        edit keeps the target, a target-only edit keeps the expression.
+      * the target is NOT a mapping and needs none of the mapping sources. The platform stores it as a
+        map path on the element itself, which is why `describe-business-process` reports it under
+        `formula.target` — resolved back to names — rather than among the process mappings. A three-part
+        target (a COLUMN of an element parameter's record) reports that column as `entityColumnUId`,
+        because the process cannot name it. `formula.target.unresolved` means the stored path could not
+        be decoded into names — NOT that the element writes nowhere: the platform's reader accepts
+        shapes a read-back may not, so treat it as "not named here" and look at the raw path.
+      * an element the DESIGNER built reads back the same way, so a described formula feeds straight
+        into a build.
+    Still true, and still the cheaper answer for a one-off value: a mapping with an `expression` source
+    computes a value without an element at all. Reach for this element when the computation deserves to
+    be visible on the diagram, or when the result must be written between two steps.
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication). READ-ONLY here.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
     READ-ONLY here.
-- `callActivity`      Sub-process  — run another process (must start with a Simple start); multi-instance
-    over a collection. READ-ONLY here — and its children live in its OWN element collection: the delete guards see them
-    (they walk recursively), `describe-business-process` and `setElement` do not, so a refusal can name a
-    flow no read call shows you.
+- `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing
+    values through THAT process's own parameters. BUILDABLE from CrtProcessBuilder **1.6.3.26** via
+    `type:"subProcess"` with a `subProcess` block (`{processName | processUId, resync}`); the block, the
+    parameter mirroring/mapping rule, `resync`, the refusals and what is NOT supported (multi-instance,
+    event/expanded sub-processes) are owned by `process-sub-process`. Its EVENT and EXPANDED variants keep
+    their children in their OWN collection, which `describe-business-process` does not walk, but
+    the delete guards see them, walking it recursively so a reference from inside one still blocks a delete.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
 User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialog,
   `openEditPageUserTask` Open edit page (BUILDABLE via `type:"openEditPage"` — see "What you can build today"), `autoGeneratedPageUserTask` Auto-generated page,
   `preconfiguredPageUserTask` Pre-configured page, `emailTemplateUserTask` Send email, `approvalUserTask` Approval.
+  Six of these ENUMERATE RESULTS, which changes how a branch leaving them is authored: Perform task, User
+  dialog, Open edit page, Auto-generated page, Pre-configured page and Approval. A conditional flow off one
+  is edited in the designer as a result SELECTION rather than a formula — `process-activity-result-branches` owns
+  that rule, and no guide here owns User dialog or Auto-generated page, so treat a branch off either the
+  same way.
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
   signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the

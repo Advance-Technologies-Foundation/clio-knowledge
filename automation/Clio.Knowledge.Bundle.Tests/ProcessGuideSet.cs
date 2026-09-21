@@ -60,6 +60,7 @@ internal static class ProcessGuideSet
         "process-parameters",
         "process-formulas",
         "process-branch-conditions",
+        "process-activity-result-branches",
         "process-perform-task",
         "process-task-performer",
         "process-task-category",

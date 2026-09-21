@@ -1,9 +1,17 @@
 clio MCP record-rights guide
 
+For choosing between stored grants and runtime rules, MUST first read `record-permissions`.
+This article owns direct persisted-grant tools; it does not calculate complete effective access.
+For runtime predicates and their interaction with stored grants, read `record-permission-extensions`.
+
 Manage record-level access rights (who may read/edit/delete a specific record, or a dashboard)
 with two tools — NOT with hand-written ESQ into the rights tables:
 - get-record-rights — list the current grants on one record.
 - set-record-rights — grant or revoke one (grantee, operation) grant. DESTRUCTIVE (applies immediately).
+
+For creating or maintaining the user/role grantee, manager groups, memberships, passwords, lockout,
+licenses, IP restrictions or system-operation permissions, read `get-guidance name=administration`.
+These are separate operations; changing a grantee's membership can change inherited record access.
 
 Target the record with entity=<EntitySchemaName> + record-id=<guid> (both required):
 - A normal entity record: entity=Contact record-id=<record Id>.
@@ -16,7 +24,7 @@ Target the record with entity=<EntitySchemaName> + record-id=<guid> (both requir
 
 To change record permissions from INSIDE a running business process rather than now, that is the
 Change access rights element — read `get-guidance name=process-access-rights`. This article owns the
-permission model and the direct grant/revoke path; note the level vocabularies differ (`granted`/`delegated`
+direct stored grant/revoke path; note the level vocabularies differ (`granted`/`delegated`
 here, `permit`/`delegate`/`restrict` there).
 
 Grantee is a SysAdminUnit GUID (a role or user id). Resolve a name to its id yourself (e.g. execute-esq

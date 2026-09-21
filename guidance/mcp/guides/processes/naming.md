@@ -5,7 +5,7 @@ This article is the authoritative owner of the N1-N10 rules for the process capt
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
-pre-checks them — `validate-process-graph` enforces a subset of the R1–R18 connection rules (which live
+pre-checks them — `validate-process-graph` enforces a subset of the R1–R20 connection rules (which live
 in `process-activity-connections`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
 Designer, so a generated process has to read as though a person named it.)
 Field map — each rule below names the descriptor field it governs:
@@ -37,7 +37,12 @@ N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrA
     package name only to break a real collision, never as blanket disambiguation. NO autonumber, NO
     random suffix, NO GUID fragment — the designer's own `Process_3d0825b` shape is what this prevents.
 N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
-    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone.
+    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone. It matters
+    more now that the calling element is buildable (CrtProcessBuilder 1.6.3.26): the callee is named by
+    schema name or display caption, and an ambiguous caption is refused rather than guessed — see
+    `process-element-catalog` for that resolution rule — so a self-describing code is what makes the
+    reference unambiguous the first time. (The CALLER's element caption is N4's subject: name what the
+    call achieves, "Approve the discount", not the process it runs.)
 N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never leave it to a default.
     Sentence case, <= 60 characters, short enough to read inside the diagram box. The SHAPE follows what
     the element IS:

@@ -136,7 +136,7 @@ saying so. Declaration order does not change the outcome — it did until the fi
 where declaring the conditional arm first (which the precedence advice below tells you to do) aborted
 the whole `create-business-process` call. Off a gateway, write the else branch as `kind: "default"` and
 the notice does not arise. R7 does NOT apply to this shape - not "is satisfied by it":
-`process-activity-connections` owns R1-R18 and states why, and the difference is operational. The
+`process-activity-connections` owns R1-R20 and states why, and the difference is operational. The
 gateway is synthesized at generation time and never appears as a graph node, so there is no
 exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding
 elsewhere in the graph as already handled.
@@ -174,7 +174,46 @@ Two consequences worth having before you build:
   word for word what R7 said it would — but the prediction arrives as advice, not as a refusal.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
-  outgoing flow is taken. That is a parallel split, silently.
+  outgoing flow is taken. That is a parallel split.
+
+  It is no longer a SILENT one at build time. `validate-process-graph` has always reported the shape as
+  an R12 warning, and from **CrtProcessBuilder 1.6.2.10** `create-business-process` and
+  `modify-business-process` raise a matching NOTICE — so a caller who skipped the pre-flight is no longer
+  told less than one who ran it. Both sides WARN rather than refuse, because the shape ships and runs: 74
+  non-gateway sources in the 7.8.0 corpus carry it, 33 of them on ordinary activities. Read the notice as
+  "confirm you meant a fan-out", not as a defect.
+
+  It is raised ONCE per request, over the graph that is actually saved — so a batch that builds the split
+  and then dissolves it (`addFlow` twice, then `setFlow kind:"conditional"`, which is the remedy below)
+  correctly reports nothing.
+
+  **How you fix it depends on how many branches there are, and the two answers are not variations of
+  one another.** With TWO plain flows, give either of them a condition and the one left plain becomes
+  the fallback. With THREE or more, that route is REFUSED — a `conditional` flow is rejected while two
+  or more siblings still carry no condition, in any order, so there is no first move — and the answer is
+  an `exclusiveGateway` element: route the flows through it and condition each of ITS outgoing flows,
+  leaving one `default`. A deciding gateway is exempt from the stray-branch rule, which is why
+  `[conditional, conditional, default]` is legal there and illegal on the activity.
+
+  Three caveats, each a way you would otherwise be told something untrue:
+
+  - **On a stand below 1.6.2.10, you do not get silence — you get a REFUSAL.** No `[RequiresPackage]`
+    floor was raised for this notice, but the floor is not what decides: clio refuses whenever the
+    environment records a package version *older than the one this clio ships*, whatever that version
+    is. So a clio carrying 1.6.2.10 answers `create-business-process`, `modify-business-process`,
+    `describe-business-process` **and `validate-process-graph`** with *"This clio carries
+    CrtProcessBuilder 1.6.2.10, but the target environment has X. Update the package in the target
+    environment and retry."* The pre-flight is gated too, so it is not a fallback. Run
+    `install-process-builder` — that is the whole remedy. The build is silent about the split only when
+    your clio ALSO predates 1.6.2.10, so the two versions converge and nothing is refused — and on that
+    stand `validate-process-graph` still reports the shape as R12, which it always has. An
+    un-upgraded stand is exactly where the pre-flight earns its keep, not a stand where nothing can
+    see the split.
+  - **On modify it reports the sources your request TOUCHED**, not the whole graph. A split already
+    present in a designer-authored process you did not edit stays unreported here — `validate-process-graph`
+    is what reads the whole graph, and a clean modify is therefore not evidence of a clean process.
+  - **The notice covers plain flows only.** A `default` flow beside a plain one off an ordinary element
+    is an implicit split too, by exactly the same mechanism, and neither side reports that one.
 
 That second point is what makes CLEARING a condition the dangerous edit, and it is why the clear-condition
 operation is `setFlow` rather than remove-and-add. `setFlow` re-kinds the flow in place: it keeps the flow's
@@ -202,15 +241,18 @@ fires above 100 and one that fires above 1000 resolve differently purely by whic
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
 
-One exception, and it matters on a Perform-task element: a branch chosen by the activity's RESULT is
-evaluated BEFORE any formula branch, whatever the flow order says. So on an element that already has a
-result-driven branch, adding a formula branch does not put you in a race you control by ordering — the
-result branch wins. `describe` marks those with `branchesOnActivityResult: true`, and `setFlowCondition`
-refuses to write a condition onto one.
+One exception, and it decides the DIALECT rather than the order: when a connector's source
+enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula, the
+designer offers no formula field there at all, and a condition written onto such a connector is
+REFUSED - it would save, run, and open as an empty panel no human can read. The refusal names the
+deciding activity and lists the results it offers.
 
-A conditional flow reads back through `describe-business-process` as `kind: "conditional"` with its
-`condition` text. That confirms what was STORED, not what will run: a flow with
-`branchesOnActivityResult: true` reports its text and ignores it.
+And at RUN TIME the same source answers the ordering question differently: a SELECTION branch is
+evaluated BEFORE any formula branch, whatever order the flows are written in.
+`process-activity-result-branches` owns that dialect whole - that ordering rule and the mechanism
+behind it, how to write the dialect with `flows[].results` and `setFlowResults`, how to read it back,
+and exactly when the checkbox editor appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
+edit page with results by column.
 
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
 `B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a

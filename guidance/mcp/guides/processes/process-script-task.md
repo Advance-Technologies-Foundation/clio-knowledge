@@ -5,6 +5,7 @@ Use this guide when writing or repairing C# inside a ScriptTask of an existing C
 
 Inspect before authoring
 - Call `get-process-signature process-name=<code-or-caption> environment-name=<env>` first. Copy `processCode` and each parameter `name` returned by the environment; never derive a code from a display caption or copy the sample names below. If a caption is ambiguous, choose one of the returned candidate codes and call the tool again with that exact code.
+- That is a rule about not INVENTING a code, not a reason to avoid captions: a caption resolves to the ACTIVE version of a family while a code names one member, so on a versioned process the caption is the better thing to hand the tool. `process-versions` owns which identity means what.
 - Match each C# generic type to the parameter's declared CLR type. A Lookup parameter is a `Guid`, not its display text.
 
 Read and write process parameters
