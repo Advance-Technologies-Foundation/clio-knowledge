@@ -12,6 +12,14 @@ Check state before switching
 - Call `get-fsm-mode` before `set-fsm-mode`. Do not assume an environment's current mode from
   this session's history — another process or operator may have changed it since.
 
+Complete local package flow
+- Before export, identify the package and preserve any repository edits. Export is database-to-filesystem; `pkg-to-db` is filesystem-to-database. Neither direction is a merge of competing edits.
+- Enable FSM and verify its effective state. Unlock the intended editable package when required, complete `pkg-to-file-system`, and verify its `descriptor.json`, `Schemas/` and resources actually exist. A folder containing only generated source/binaries is not a complete editable package export.
+- Preserve the exported package in the intended repository before linking it. Check `repoPath`, package selection and resolved environment path with the link tool's dry run, then verify the resulting link target. Follow the unlink/export rules below whenever exporting again.
+- Edit the linked source and import package definitions with `clio pkg-to-db -e <ENV>`. Read the schema back to prove the expected edit reached the environment. This imports definitions, not package data rows; use the package installation/data-binding workflow for data.
+- Client-only edits require browser reload/readback, not a C# compile. For changed backend source use the workspace's supported build/deploy path and the activation cycle in `core-rules`; a successful metadata import does not build or activate a DLL. For disagreements read `backend-deployment-troubleshooting`.
+- Before deleting a disposable environment, remove its repository link and restore the real package directory so cleanup cannot traverse into preserved repository content.
+
 Turning FSM on/off (`set-fsm-mode`)
 - The two directions fail differently because the configuration write and the package
   load/export are not one atomic step:
@@ -58,3 +66,7 @@ Startup latency after switching FSM on
   `restart-by-environment-name` on an FSM environment), allow materially more time than a
   DB-mode environment before treating a non-responsive site as failed. Do not restart again to
   "unstick" it — restarting during this window compounds the wait instead of shortening it.
+
+Disposable acceptance
+- Creatio 10.1.585, .NET 8, PostgreSQL; clio source revision `e53009498`: switching on returned a partial-success error after writing configuration; a later `get-fsm-mode` reported on. After unlocking the package and completing export, schema metadata was present. Copied the exported package into a local repository, linked it with preparation already complete, edited one client schema on disk, ran `pkg-to-db`, and read the new body through `get-client-unit-schema`. Restored the physical package directory before teardown.
+- This proves switch recovery, complete export, link and definition import. It does not claim package data installation or backend DLL activation from `pkg-to-db`. Evidence: [clio #1638](https://github.com/Advance-Technologies-Foundation/clio/issues/1638).

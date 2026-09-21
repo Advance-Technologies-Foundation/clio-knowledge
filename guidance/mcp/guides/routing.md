@@ -132,3 +132,5 @@ guards — it says whose rule it is and names that guide for the rest.
 - SQL views exposed as entities, IsDBView, or packaging a database view -> name=db-view-entities
 
 - Entity CRUD access supplied by system operations (AdministratedByOperations / SysEntityRightByAdminOperation) -> name=entity-operation-access
+
+- Saved C# differs from running behavior, stale DLLs, or compilation diagnostics -> name=backend-deployment-troubleshooting
