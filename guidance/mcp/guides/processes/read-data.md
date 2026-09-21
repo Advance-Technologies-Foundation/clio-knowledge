@@ -94,18 +94,18 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
   reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- LIMITATION — a read record's individual COLUMN values are out of reach in practice, so "the record I
-  just read has status X", the likeliest branch after a read, cannot be authored. NOT because the
-  platform refuses a third segment — it parses one — but because describe reports no column UIds, so
-  there is nowhere to GET the one you would have to write. Author TWO segments
-  (`[#[Element:{uid}].[Parameter:{uid}]#]`) in a mapping, a `changeData` value or a filter condition.
+- A read record's individual COLUMN values ARE reachable in a flow condition — the platform parses a
+  third meta-path segment (`FillMatchedData` routes an `EntityColumn` segment into `SubParameterMetaPath`
+  and `TryGetParameterMapPath` carries it). describe reports no column UIds, but that is a
+  DISCOVERABILITY gap, not a refusal: `get-entity-schema-properties` supplies the UId describe does not.
+  `process-data-elements` owns the canonical column-in-branch-condition recipe (steps, verified evidence).
   One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
-  `[[element:Read.ResultEntity.Column]]`. The
-  element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
-  the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
-  that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
-  "element has no parameter". Entity-column access needs meta-path support (planned; ENG-91844). To key
-  work off a specific record today, use a `signalStart` trigger output (`RecordId`) or a process parameter.
+  `[[element:Read.ResultEntity.Column]]`. Outside a flow condition, the element's only output parameter
+  is `ResultEntity` (the whole record, `isResult:true` in describe); the record's columns are still NOT
+  element parameters, so a mapping, `changeData` value or filter condition that references them (e.g.
+  `sourceElementParameter: "Email"` on the read element) FAILS the build with "element has no parameter".
+  To key work off a specific record today, use a `signalStart` trigger output (`RecordId`) or a process
+  parameter.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",

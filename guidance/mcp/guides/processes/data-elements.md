@@ -69,6 +69,38 @@ filter; see `process-access-rights`.
 == Add data element (addData) — MOVED ==
 - Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
 
+== Reading a column of a Read data record in a branch condition ==
+- A COLUMN of a `readData` element's read record CAN be used in a branch condition, despite
+  `describe-business-process` reporting no column UIds. This article owns the canonical recipe (the
+  block and modes it applies to are `process-read-data`'s):
+  1. Call `get-entity-schema-properties` for `readData.source`, WITHOUT `package-name` to read the
+     merged schema. Match the column by `name` and take its `u-id` from `columns[]` — NOT a record Id.
+     Include that column in `readData.columns`, or omit the list to read all columns.
+  2. Call `describe-business-process` for the saved process. Take the read element's `uid` and its
+     `ResultEntity` parameter's `uid`; describe reports no column UIds, so use step 1 for the third.
+  3. On `modify-business-process`, use `setFlowCondition` with the existing flow's `source`, `target`
+     and `condition`. For a Boolean column, assemble the token with braces and dots exactly as shown:
+     `[#[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#] == true`.
+     Replace the angle-bracket placeholders with the discovered UIds. The read must precede the branch.
+     `process-branch-conditions` owns flow kinds and the required fallback. The create-time NAME form
+     cannot express this third segment: create the graph first, then modify its condition before running.
+  4. Describe again and require `kind: "conditional"` plus the exact condition text. Then run with
+     controlled matching and non-matching records and verify each branch's effect: save/read-back alone
+     proves authoring, NOT runtime routing. Do not infer missing-record behavior from those two cases.
+  Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;
+  [validation evidence](https://github.com/Advance-Technologies-Foundation/clio/issues/1645#issuecomment-5760323479).
+  Column UIds are discoverable through entity metadata even though process describe omits them — that
+  is a discoverability gap this recipe closes, not a platform refusal: `FillMatchedData` routes an
+  `EntityColumn` segment into `SubParameterMetaPath` and `TryGetParameterMapPath` carries it, so the
+  platform does not refuse a third segment.
+- LIMITATION — record columns are still NOT element parameters. A mapping or `changeData` value using
+  `sourceElementParameter: "Email"`, or a filter using `elementParameter.parameter: "Id"` on the read
+  element, still fails with "element has no parameter". `ResultEntity` is the whole record; the branch
+  recipe above does not make a column name a parameter or establish the raw-expression contract for
+  mappings, values or filters. For record targeting use a process parameter or `signalStart.RecordId`.
+  The separate Send email BODY macro reaches a column by NAME: `[[element:Read.ResultEntity.Column]]`;
+  `process-send-email` owns that form.
+
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
     { "name": "UpdateContact", "type": "changeData", "caption": "Update the contact",
@@ -96,9 +128,8 @@ filter; see `process-access-rights`.
     "filter": { "object": "Contact",
       "conditions": [ { "column": "Id", "comparison": "equal",
         "elementParameter": { "elementName": "RecordModifiedSignal", "parameter": "RecordId" } } ] }
-  LIMITATION: the record read by a preceding `readData` element is NOT referenceable here — its column
-  values (including `Id`) live inside the `ResultEntity` output, not as element parameters (see the
-  readData LIMITATION above; ENG-91844).
+  A read record's `Id` is NOT an element parameter: the `elementParameter` shorthand above cannot
+  name it on a `readData` element (see the readData LIMITATION above).
 - Change an EXISTING element in place with the `setElement` op's `changeData` field: omit `source` to keep
   the current target; a supplied `values` array REPLACES the whole assignment set. Retargeting `source` to a
   different object REQUIRES `values` for the new entity in the same update — the server REFUSES a values-less
