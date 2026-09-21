@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.43",
+  "libraryVersion": "1.15.44",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -195,7 +195,8 @@
       "process-custom-elements",
       "process-custom-element-families",
       "atf.creatio.custom-process-element-reference",
-      "shared-client-logic"
+      "shared-client-logic",
+      "db-view-entities"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -363,7 +364,8 @@
       "docs://knowledge/com.creatio.clio/process-custom-elements",
       "docs://knowledge/com.creatio.clio/process-custom-element-families",
       "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference",
-      "docs://knowledge/com.creatio.clio/shared-client-logic"
+      "docs://knowledge/com.creatio.clio/shared-client-logic",
+      "docs://knowledge/com.creatio.clio/db-view-entities"
     ]
   },
   "resources": [
@@ -2668,6 +2670,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/page-schema/shared-client-logic.md",
       "bundlePath": "resources/shared-client-logic.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "db-view-entities",
+      "title": "SQL views as Creatio entities",
+      "description": "SQL views as Creatio entities. Supported workflow, failure boundaries and disposable Creatio acceptance evidence.",
+      "topicId": "creatio.db-view-entities",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/db-view-entities",
+      "legacyUris": [
+        "docs://mcp/guides/db-view-entities"
+      ],
+      "sourcePath": "guidance/mcp/guides/backend/db-view-entities.md",
+      "bundlePath": "resources/db-view-entities.md",
       "mediaType": "text/plain"
     }
   ]
