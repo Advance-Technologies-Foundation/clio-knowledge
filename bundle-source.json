@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.33",
+  "libraryVersion": "1.15.40",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -81,6 +81,7 @@
       "feature-toggle-tests",
       "freedom-page-web-to-mobile-conversion",
       "freedom-page-mobile-reason-codes",
+      "fsm-mode",
       "home-page",
       "identity-assertion",
       "indicator-widget",
@@ -242,6 +243,7 @@
       "docs://knowledge/com.creatio.clio/feature-toggle-tests",
       "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
       "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
+      "docs://knowledge/com.creatio.clio/fsm-mode",
       "docs://knowledge/com.creatio.clio/home-page",
       "docs://knowledge/com.creatio.clio/identity-assertion",
       "docs://knowledge/com.creatio.clio/indicator-widget",
@@ -1045,6 +1047,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "fsm-mode",
+      "title": "File system mode (FSM)",
+      "description": "Canonical MCP guidance for switching a registered Creatio environment into and out of file system mode (get-fsm-mode/set-fsm-mode) and for combining that switch safely with link-from-repository-* package linking: the asymmetric on/off failure contract, automatic .NET Core/.NET8 restart handling, the unlink-before-export ordering rule, linked-package compile churn, and post-switch startup latency.",
+      "topicId": "creatio.fsm-mode",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/fsm-mode",
+      "legacyUris": [
+        "docs://mcp/guides/fsm-mode"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/fsm-mode.md",
+      "bundlePath": "resources/fsm-mode.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "home-page",
       "title": "Home page",
       "description": "Canonical MCP guidance for creating a Freedom UI home page (BaseHomePage) and making it a workplace's home page by binding SysWorkplace.HomePageUId as a package data binding.",
@@ -1369,7 +1385,7 @@
     {
       "itemId": "process-naming",
       "title": "Process naming rules (N1-N10)",
-      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, SEQUENCE-FLOW LABELS (flows[].label, reported by describe-business-process; the member first shipped in CrtProcessBuilder 1.6.0.8, which N10 records as provenance rather than a floor to check), and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R18 connection rules and none of these -- so they are authoring obligations, not validated ones.",
+      "description": "Owns the N1-N10 authoring rules for a Creatio business process: the process caption and the code that carries the environment schema-name prefix, element captions and the codes DERIVED from them, the sub-process and UserTask postfix rules, process parameter codes, SEQUENCE-FLOW LABELS (flows[].label, reported by describe-business-process; the member first shipped in CrtProcessBuilder 1.6.0.8, which N10 records as provenance rather than a floor to check), and the stability rule that makes two generations of one request diffable. Nothing pre-checks these rules -- validate-process-graph enforces a subset of the R1-R20 connection rules and none of these -- so they are authoring obligations, not validated ones.",
       "topicId": "creatio.process-naming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-naming",
@@ -1411,7 +1427,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Formulas themselves are owned by process-formulas.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Also owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side - the procedural re-sync rule and the request shapes that perform one, the full notice set a re-sync answers with, values crossing by NAME with an unmatched name skipped silently, what inSync can and cannot see, and the designer card whose parameter row has no code column - while the BUILD contract for that element (naming the callee, which directions keep a value, what resync refuses) is owned by process-element-catalog. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -1579,7 +1595,7 @@
     {
       "itemId": "process-activity-connections",
       "title": "Activity connections (\"Connected to\")",
-      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R18 connection rules as a NUMBERED CATALOG - the ids validate-process-graph reports - which are about sequence flows and not about these links. Where a rule also needs authoring advice, that advice is owned elsewhere and cited: the gateway flow rules R7, R11 and R14 are written up for authors in process-branch-conditions.",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R20 connection rules as a NUMBERED CATALOG - the ids validate-process-graph reports - which are about sequence flows and not about these links. Where a rule also needs authoring advice, that advice is owned elsewhere and cited: the gateway flow rules R7, R11 and R14 are written up for authors in process-branch-conditions.",
       "topicId": "creatio.process-activity-connections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
