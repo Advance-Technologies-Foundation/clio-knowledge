@@ -113,8 +113,7 @@ Creatio or disk. The guide contains:
   - propertyPruneApplied — whether undeclared properties were removed at all. BRANCH ON THIS: false means
     the gate refused (platform older than the runtime-derived catalog, or undeterminable), so a property
     mobile does not declare SURVIVING is expected, not a defect. True with no prunedProperties means the
-    page carried nothing undeclared. mobileRuntimeVersion beside it is provenance, published irregularly;
-    its absence says nothing about whether the prune ran.
+    page carried nothing undeclared.
   - prunedProperties — per element, the TOP-LEVEL properties removed because the target mobile type does
     not declare them; nested keys are never pruned. Already in viewConfigDiff[].values. Never re-add one:
     at best the runtime ignores it, at worst it breaks the page — an undeclared grid `rows` collapses the
