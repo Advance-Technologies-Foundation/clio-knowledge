@@ -7,6 +7,8 @@ buildable today and the element catalog moved to `process-element-catalog`: this
 budget headroom left, and both of those sections grow with every element the platform gains while
 the lifecycle around them does not. Everything else has its own article and its own authoritative
 owner -- read the one your task needs instead of guessing:
+  * `process-custom-elements`     - author custom user-task elements with Classic panels and registration.
+  * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
                                      and the element catalog (data-id -> label -> purpose).
   * `process-naming`               - N1-N10: the process caption and code, element captions and
@@ -16,7 +18,8 @@ owner -- read the one your task needs instead of guessing:
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
-  * `process-parameters`           - process parameters, element-parameter mappings, type
+  * `process-parameters`           - process parameters, element-parameter mappings, the SUB-PROCESS
+    element at RUN TIME (what crosses, what a re-sync reports, what `inSync` shows), type
                                      compatibility, and the date/time/lookup default macros.
   * `process-formulas`             - the `expression` mapping source and the formula
                                     vocabulary both it and a condition use
@@ -210,9 +213,33 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
-  sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+- If describe shows constructs the builder cannot create (inclusive and event-based gateways,
+  timer/message starts, intermediate events, `scriptTask`, `webService`; `process-element-catalog` owns
+  the full list), they survive a save untouched as data — but you CAN still remove or rewire them by name
+  and nothing will warn you. Gateway ELEMENTS, DEFAULT flows and the Formula element are no longer on
+  that list: all are buildable, `process-branch-conditions` and `process-element-catalog` own them.
+- The SUB-PROCESS element is NOT on that list — it is buildable (`type:"subProcess"`, from
+  CrtProcessBuilder 1.6.3.26, `process-element-catalog`) and the build path does warn you. It gets its
+  own caveat, on a different axis: CREATING one is safe, REWIRING an existing one — retargeting its
+  called process, deleting it, editing its parameters — is high-risk. The build path REFUSES two of the
+  hazards by name: an element that is already multi-instance, and a retarget while live dependents still
+  read from the element. Let those refusals stand rather than routing around them. Multi-instance is not
+  an edge case — 61 of the 416 sub-process elements in the shipped package corpus are in that state
+  (scanned 2026-09-12 over the local PackageStore, 1 099 package roots; recorded in the CrtProcessBuilder
+  repository as `docs/sub-process-element-capture.md`). What is NOT guarded: `validate-process-graph`
+  carries no parameter or mapping rule at all, so nothing here is caught by planning. And if a retarget
+  DOES go through — through the designer, which has no such guard — the platform removes the orphaned
+  parameters and flags every element that referenced them invalid, so the process refuses to START
+  later, blamed on the process rather than on the edit. That chain is read from platform source, not
+  measured through this tool, which refuses the retarget first. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
+  on a parameter the element itself owns. The dependents check does scan the element's own parameters
+  (from CrtProcessBuilder 1.6.3.26, the version that shipped this element), but it never reads
+  `schema.Mappings` - it walks stored VALUES and EXPRESSIONS - so a stranded row is not what it looks for. Nor does the
+  platform clean one up: its prune arm skips a parameter whose `CreatedInSchemaUId` is the CALLER's
+  schema, and that is exactly the owner-created parameter this hazard is about. Nobody has yet observed
+  the state (CrtProcessBuilder T-27, open) — but treat that as unobserved, not as prevented. If a caller later reports a mapping that resolves
+  to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
+  the stored metapath still matches a `uid` describe reports on that element. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
   conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
   gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate
@@ -223,10 +250,10 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed arrows are
   redrawn with it (process data intact, manual layout lost). That is not a side effect to work around —
   stored connector geometry is absolute canvas coordinates, so anything the engine did not recompute
-  would stay frozen where no shape stands any more. From 1.6.4.1 a caption the designer recorded a
+  would stay frozen where no shape stands any more. From 1.6.5.5 a caption the designer recorded a
   position for is released with the rest and returns to the middle of what it names; an OLDER server
   leaves it pinned, which strands a branch label at the coordinates the arrow used to pass through.
-- From CrtProcessBuilder 1.6.5.0 the server REFUSES an in-place edit that would re-draw the diagram
+- From CrtProcessBuilder 1.6.5.5 the server REFUSES an in-place edit that would re-draw the diagram
   rather than extend it. An OLDER server asks nothing and applies it, so on one of those the warning
   above is the whole protection. Two cases reach the refusal: the diagram is not the one the builder lays
   out, so somebody arranged it by hand (or an older version drew it) and applying anything replaces that
