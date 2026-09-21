@@ -40,8 +40,13 @@ guards — it says whose rule it is and names that guide for the rest.
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, or modify data ->
+  - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
+  - READ records from inside a process (one record, a collection, a count or an aggregate) ->
+    name=process-read-data
+  - add data (create records from a process, one or one per filtered selection) -> name=process-add-data
+  - DELETE records from inside a process -> name=process-delete-data (read it BEFORE planning the step:
+    the element is irreversible and the article carries the confirmation you owe the user)
   - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
@@ -65,11 +70,14 @@ guards — it says whose rule it is and names that guide for the rest.
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
   - grant or revoke RECORD permissions from a process (the Change access rights element) ->
     name=process-access-rights
-  - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
+  - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
+    name=process-send-email
+  - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
+    against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
-    activity, and how to build it -> name=process-element-catalog
+    activity, and how to build it -> name=process-sub-process
   - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
     what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data

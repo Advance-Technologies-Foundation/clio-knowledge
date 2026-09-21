@@ -13,8 +13,15 @@ owner -- read the one your task needs instead of guessing:
                                      and the element catalog (data-id -> label -> purpose).
   * `process-naming`               - N1-N10: the process caption and code, element captions and
                                      codes, parameter codes. Read it BEFORE you name anything.
-  * `process-data-elements`        - start a process from a record event (signalStart), and the Read
-                                     data and Modify data elements.
+  * `process-data-elements`        - start a process from a record event (signalStart), and the Modify
+                                     data element.
+  * `process-read-data`            - the Read data element: all four modes and their outputs, the column
+                                     selection and sort, the collection shape and its top-N.
+  * `process-add-data`             - the Add data element: both adding modes, the selection and its
+                                     filter, the column value sources, and the refused transitions.
+  * `process-delete-data`          - the Delete data element: its one-field block, why its filter is
+                                     what decides whether it works at all, and the confirmation you owe
+                                     the user before building one. Read it BEFORE planning a delete.
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
@@ -44,11 +51,17 @@ owner -- read the one your task needs instead of guessing:
   * `process-access-rights`        - the Change access rights element: the `accessRights` block,
                                      permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
-                                     HTML body and its process macros.
+                                     the custom HTML body and its process macros, and the
+                                     auto-mode checklist.
+  * `process-send-email-template`  - the Send email element's TEMPLATE message: the template and
+                                     the record its macros resolve against, the refusals, the
+                                     subject override, mode switching and the read-back.
   * `process-approval`             - the Approval element: who approves, the record under approval,
                                      and the two notifications.
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
                                      completing buttons, the data sources and the record they carry.
+  * `process-sub-process`          - the Sub-process element: naming the callee, the mirrored
+                                     parameters and mapping rule, resync, and its refusals.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R20 connection rules.
   * `process-versions`             - the version model, which member runs, and how to read that
@@ -137,12 +150,16 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
-   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData
+   and changeData, `process-read-data` for readData, `process-add-data` for addData — their partial-update, mode-switch and
+   source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
+   retarget clears the record filter, and an element left without one deletes nothing and fails at run
+   time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
+   yes before sending, the same duty a build carries (see `process-delete-data`), `accessRights` on a Change access rights element only — MUST: a supplied
    `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
    access to whoever it names, on live records, and the element reports nothing at run time; show the user
    the target object, the record `filter` and every grantee with its operations and level, and get an
