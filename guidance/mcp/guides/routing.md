@@ -30,6 +30,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
+  - reuse JavaScript helpers across Freedom UI web pages (client-unit schemas and AMD dependencies) -> name=shared-client-logic
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
@@ -42,8 +43,13 @@ guards — it says whose rule it is and names that guide for the rest.
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
-  - start a process on a record add/modify/delete, read data, or modify data ->
+  - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
+  - READ records from inside a process (one record, a collection, a count or an aggregate) ->
+    name=process-read-data
+  - add data (create records from a process, one or one per filtered selection) -> name=process-add-data
+  - DELETE records from inside a process -> name=process-delete-data (read it BEFORE planning the step:
+    the element is irreversible and the article carries the confirmation you owe the user)
   - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
@@ -67,11 +73,14 @@ guards — it says whose rule it is and names that guide for the rest.
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
   - grant or revoke RECORD permissions from a process (the Change access rights element) ->
     name=process-access-rights
-  - the Send email element — mode, sender, recipients, subject, HTML body macros -> name=process-send-email
+  - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
+    name=process-send-email
+  - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
+    against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
-    activity, and how to build it -> name=process-element-catalog
+    activity, and how to build it -> name=process-sub-process
   - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
     what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
@@ -122,3 +131,9 @@ guards — it says whose rule it is and names that guide for the rest.
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
+
+- SQL views exposed as entities, IsDBView, or packaging a database view -> name=db-view-entities
+
+- Entity CRUD access supplied by system operations (AdministratedByOperations / SysEntityRightByAdminOperation) -> name=entity-operation-access
+
+- Saved C# differs from running behavior, stale DLLs, or compilation diagnostics -> name=backend-deployment-troubleshooting

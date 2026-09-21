@@ -11,13 +11,18 @@ owner -- read the one your task needs instead of guessing:
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
                                      and the element catalog (data-id -> label -> purpose).
-  * `process-diagram-layout`       - how the diagram is drawn (columns, branch rows, end events,
-                                     connectors), what `describe` reports about the picture, and the
-                                     refusal an edit that would RE-DRAW a hand-arranged diagram gets.
+  * `process-diagram-layout`       - how the diagram and its connectors are drawn, and the re-draw refusal.
   * `process-naming`               - N1-N10: the process caption and code, element captions and
                                      codes, parameter codes. Read it BEFORE you name anything.
-  * `process-data-elements`        - start a process from a record event (signalStart), and the Read
-                                     data and Modify data elements.
+  * `process-data-elements`        - start a process from a record event (signalStart), and the Modify
+                                     data element.
+  * `process-read-data`            - the Read data element: all four modes and their outputs, the column
+                                     selection and sort, the collection shape and its top-N.
+  * `process-add-data`             - the Add data element: both adding modes, the selection and its
+                                     filter, the column value sources, and the refused transitions.
+  * `process-delete-data`          - the Delete data element: its one-field block, why its filter is
+                                     what decides whether it works at all, and the confirmation you owe
+                                     the user before building one. Read it BEFORE planning a delete.
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
@@ -47,11 +52,17 @@ owner -- read the one your task needs instead of guessing:
   * `process-access-rights`        - the Change access rights element: the `accessRights` block,
                                      permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
-                                     HTML body and its process macros.
+                                     the custom HTML body and its process macros, and the
+                                     auto-mode checklist.
+  * `process-send-email-template`  - the Send email element's TEMPLATE message: the template and
+                                     the record its macros resolve against, the refusals, the
+                                     subject override, mode switching and the read-back.
   * `process-approval`             - the Approval element: who approves, the record under approval,
                                      and the two notifications.
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
                                      completing buttons, the data sources and the record they carry.
+  * `process-sub-process`          - the Sub-process element: naming the callee, the mirrored
+                                     parameters and mapping rule, resync, and its refusals.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R20 connection rules.
   * `process-versions`             - the version model, which member runs, and how to read that
@@ -66,11 +77,8 @@ article from what this one says; read that article.
   needs, their parameters, and how they connect. The server-side ProcessDesignService package owns
   metadata serialization — you NEVER hand-author process metadata, filters, or column mappings.
 - The build is DECLARATIVE: you describe the process (elements + flows + parameters + mappings) and
-  clio builds + saves it in one call. Do NOT set positions or connector geometry: no argument carries
-  them, and every save re-derives the whole picture. You still DECIDE the picture, though — the flow
-  ORDER you declare is what the arrangement is computed from, so declare the main path first when
-  there is no default flow. `process-diagram-layout` owns the rules and is worth reading before you
-  plan a branched graph.
+  clio builds + saves it in one call. Diagram layout is automatic (start leftmost, end rightmost, no
+  overlap) — do not set positions.
 - Tools:
   * list-user-tasks         — the user-task palette (name + uid); pass a name as `userTaskName`.
     CAVEAT: it lists RETIRED schemas as equal peers with no marker — `CallUserTask`, `EmailUserTask` and
@@ -80,8 +88,6 @@ article from what this one says; read that article.
   * create-business-process — build a NEW process from a JSON descriptor, and save it.
   * modify-business-process — edit an EXISTING process by an ordered list of operations.
   * describe-business-process        — read a process back as a structured graph (verify / explain).
-    Also returns the DIAGRAM, read-only: `position` and `size` per element and `geometry` per flow.
-    `process-diagram-layout` owns what they mean and which of them a given server reports.
     Also returns, per element: `connections[]` (bound "Connected to" links, raw + decoded), `deprecated`
     (the user-task schema is retired), and `writesConnectionsAtRuntime` — where FALSE is the answer that
     matters: it marks a process whose connections persist and compile while writing nothing. FALSE has two
@@ -145,12 +151,16 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
-   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData
+   and changeData, `process-read-data` for readData, `process-add-data` for addData — their partial-update, mode-switch and
+   source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
+   retarget clears the record filter, and an element left without one deletes nothing and fails at run
+   time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
+   yes before sending, the same duty a build carries (see `process-delete-data`), `accessRights` on a Change access rights element only — MUST: a supplied
    `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
    access to whoever it names, on live records, and the element reports nothing at run time; show the user
    the target object, the record `filter` and every grantee with its operations and level, and get an
@@ -235,13 +245,9 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   used to be, which describe reports as `kind: "sequence"` on both, reading exactly like "condition
   cleared, as asked". Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
-- Every modify re-applies the automatic layout to the WHOLE diagram AND re-routes every connector: a
-  hand-arranged diagram is redrawn as generated rows and hand-routed arrows are redrawn with it
-  (process data intact, manual layout lost). From CrtProcessBuilder 1.6.5.8 the server REFUSES such an
-  edit rather than applying it, and the refusal opens a TWO-question sequence whose answers are both
-  the user's — never send `confirm-layout-change` on the first attempt. `process-diagram-layout` owns
-  the whole of this: what counts as a re-draw, the two questions in order, and what an OLDER server
-  does instead (nothing, so the warning is the only protection there).
+- Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
+  branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
+  lost). Warn the user before editing a process with a curated diagram.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to

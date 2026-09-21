@@ -17,18 +17,28 @@ leaf rather than through `process-modeling`.
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
-  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask, `performTask`->ActivityUserTask).
-  A `readData` element is CONFIGURABLE via its `readData` block — source object, first-record mode, result
-  columns, sort, plus a record `filter` (the block is in `process-data-elements`, the filter contract in
-  `process-data-source-filters`). A `changeData` element
+  (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
+  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
+  A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `collection` |
+  `count` | `aggregation`), result columns and
+  sort (`first` / `collection` — refused for `count`/`aggregation`; REQUIRED for `collection`), a
+  `numberOfRecords` top-N (`collection` ONLY), an `aggregation` function + column (`aggregation`
+  ONLY), plus a record `filter` (the block is in `process-data-elements`, the
+  filter contract in `process-data-source-filters`). A `changeData` element
   is CONFIGURABLE via its `changeData` block — target object + column values, plus a record `filter`
-  (same two owners). CAVEAT: Add data and Delete data still place an UNCONFIGURED
-  element — their target object and values cannot be set yet, so those steps do nothing useful until a
-  human configures them in the designer. Say so when you use one; do not present such a result as a working
-  data operation.
+  (same two owners). A `deleteData` element is CONFIGURABLE via its `deleteData` block — the target object
+  and nothing else, because the record `filter` is what decides which records are destroyed. It is the one
+  data element whose filter is not merely recommended: with none the runtime deletes nothing and fails.
+  DESTRUCTIVE — count the matching records, name the object and what the filter selects, and get an
+  explicit yes BEFORE you build it; `process-delete-data` carries the message template. An `addData`
+  element is CONFIGURABLE via its `addData` block in BOTH modes — Add one record and Add selection
+  (target object, adding mode, selection object, column values including `Column from this
+  selection`), plus a record `filter` over the SELECTION object.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
-  configurable through its `email` block — mode, sender, recipients, subject, HTML body, options and the
-  manual-mode performer. `process-send-email` owns the contract and its limits.
+  configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
+  body OR an existing email template (with the record its macros resolve against), options and the
+  manual-mode performer. `process-send-email` owns the element and the CUSTOM message;
+  `process-send-email-template` owns the TEMPLATE message and its limits.
 - Open edit page: `openEditPage` (the Open edit page element / OpenEditPageUserTask) is BUILDABLE and fully
   configurable through its `openEditPage` block — page, editing mode, pre-filled values, the record to open,
   performer, Log activity, result column and completion condition. `process-open-edit-page` owns the
@@ -98,16 +108,16 @@ leaf rather than through `process-modeling`.
   parameter — see its catalog entry below for the block.
 - `subProcess` (Sub-process), from CrtProcessBuilder **1.6.3.26**. Below that version the type is
   refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
-  naming the callee is what copies that process's parameters onto the element — see its catalog entry
-  below for the block.
+  naming the callee is what copies that process's parameters onto the element — see `process-sub-process`
+  for the block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
     `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  the Add/Delete-data target object + values (a `filter` on THOSE tasks is serialized
-  but not end-to-end usable — the buildable filters are `signalStart`, `readData` and `changeData`), and the Read data
-  collection / count / aggregation modes (only the first-record mode builds; the others are designer-only).
+  and a CONSUMER
+  of a read collection (no iterator element builds, and reading one column out of the list needs ENG-91844 — all
+  four Read data modes DO build, see the catalog entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
 
@@ -117,19 +127,23 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. THREE user tasks have their own dedicated build type and must NOT be built as
-a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full custom-message configuration
-(mode/sender/recipients/subject/body/options/performer; no email templates), see `process-send-email`;
+a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
+modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
+`process-send-email`, and `process-send-email-template` for the template mode;
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; and `approvalUserTask` ->
 `type:"approval"`, see `process-approval`.)
 System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
-    FIRST-RECORD mode is buildable via the element's `readData` block (source object, columns, sort) plus
-    a `filter` — see `process-data-elements` for the block and `process-data-source-filters` for the
-    filter. The other read modes (collection / count /
-    aggregation) remain designer-only; describe reports them as `mode: "collection"` / `"function"`.
-- `addDataUserTask`   Add data     — create record(s) in background; one-record mode returns only the Id.
-    The element builds, but its target object and column values do NOT yet — see the caveat near
-    the top of this guide.
+    FIRST-RECORD, COLLECTION, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
+    object, mode, columns/sort — `first` / `collection`, refused for `count`/`aggregation` — a
+    `numberOfRecords` top-N (`collection` ONLY) and aggregation —
+    `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
+    and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" |
+    "collection" | "count" | "aggregation"`. `collection` reads every match into `ResultEntityCollection`
+    and the shaped `ResultCompositeObjectList`, which a `Collection` process parameter mirrors; it requires
+    an explicit `columns` selection.
+- `addDataUserTask`   Add data     – create record(s) in background; BUILDABLE via the `addData` block in
+                                     both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
 - `changeAdminRightsUserTask` Change access rights - grant/revoke record permissions on matched
     records. BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
@@ -141,10 +155,13 @@ System actions (palette group "System actions"):
     so a clean build does NOT mean the element will do anything - check the filter and the entries.
     element's `changeData` block (target object + column values) plus a `filter` — see
     `process-data-elements` for the block and `process-data-source-filters` for the filter.
-- `deleteDataUserTask` Delete data — delete matched records. Like its Add-data twin the element
-    BUILDS, but its target object and values do NOT yet — see the caveat near the top of this guide. Its
-    `filter` is SERIALIZED, so the build is clean, but a scoped delete is UNSUPPORTED while the target
-    object is unset: do not report the element as a working delete.
+- `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData`
+    block (target object — the only field it has) plus a `filter` — see `process-delete-data` for the
+    block and the confirmation duty, `process-data-source-filters` for the filter. Unlike Modify data there
+    is no mode flag: the runtime always applies the filter and throws its empty-filter error without one,
+    so a filterless element deletes nothing and fails rather than deleting everything. DESTRUCTIVE and
+    irreversible, and it repeats on EVERY run — confirm the object and the selected records with the user
+    before you plan one in.
 - `formulaTask`       Formula      — compute a value (math/string/date/bool) into ONE parameter.
     BUILDABLE from CrtProcessBuilder **1.6.3.16** with a `formula` block:
     `{body, and exactly ONE of resultProcessParameter | elementName + elementParameter}`.
@@ -175,51 +192,12 @@ System actions (palette group "System actions"):
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
     READ-ONLY here.
 - `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing
-    values through THAT process's own parameters.
-    BUILDABLE from CrtProcessBuilder **1.6.3.26** via `type:"subProcess"` with a `subProcess` block:
-    `{processName | processUId, resync}`. Not guessable from the schema:
-      * naming the callee — `processName` (schema NAME or display CAPTION) or `processUId` — is what
-        COPIES that process's parameters onto the element; that is the whole block. The element's own
-        parameters are never declared here — they are DERIVED, and re-derived whenever the platform builds
-        a schema instance, which is not every read, so describe can lag the callee (`process-parameters`).
-        Exactly one of the two is required on CREATE; both together is fine while they agree and REFUSED
-        when they do not. An ambiguous caption is REFUSED with the names listed, never resolved to the first.
-      * values are mapped IN/OUT through the element's OWN parameters (which mirror the callee's) by the
-        ordinary `mappings[]` / `addMapping` route, with one rule: only an `In` or `Variable` parameter
-        keeps a value — the platform clears the rest on every synchronization, so a mapping onto any other
-        direction is REFUSED rather than written and silently lost. Direction is only half of what decides
-        survival — `process-parameters` has the other half. The clearing is feature-gated and ON by
-        default; where it is off the value would survive and the refusal still fires, because the toggle is
-        internal and the server cannot read it.
-      * `resync: true` re-synchronizes against the ALREADY-called process without changing the selection,
-        and is how you ASK for that refresh — not the only shape that performs one, see
-        `process-parameters`. A `setElement` carrying NO `subProcess` block does not write at all: it
-        reports whether a re-synchronization is OWED and leaves the element alone.
-        Deliberate: the write that refreshes is the same one that removes the element's parameters when
-        the platform cannot deliver the callee, so an edit that did not ask for it must not do that and
-        then save. `resync: true` REFUSES rather than saving when the copy does not land, so treat an
-        OWED notice as "send it once you have looked".
-        `resync: false` is accepted and inert everywhere, including on CREATE; `resync: true` is REFUSED
-        on CREATE, and REFUSED combined with a `processName`/`processUId` naming a DIFFERENT process (a
-        resync and a retarget are different requests); naming the one already called is accepted.
-      * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
-        another VERSION of it (self-reference — the runtime resolves the family's active version, so that
-        is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
-        from this element (live dependents) — remove or re-point them first; the called process has no
-        Simple start event (rule R16, enforced at BUILD time in this element's own applier, not by
-        `validate-process-graph` — see `process-activity-connections`) — add one to it, or call another;
-        an ambiguous caption or disagreeing `processName`/`processUId` — see above; the element is already
-        MULTI-INSTANCE — see NOT SUPPORTED.
-      * DESCRIBE reports the callee under `subProcess`: `process` (name, falling back to the raw UId if
-        deleted), `processUId`, `processCaption`, `multiInstance`, `inSync`. `inSync` is one-directional
-        and instance-dependent, so it is NOT a drift report — see `process-parameters`.
-    NOT SUPPORTED: MULTI-INSTANCE (the callee once per item of a collection — the element then carries
-    collections and counters instead of the callee's parameters, so no name here addresses anything on it;
-    edit it in the designer, and see `process-parameters`), and the EVENT and EXPANDED (embedded)
-    sub-processes, which share this platform class but call no other process. Their children live in their
-    OWN collection and the delete guards see them (they walk it recursively), while
-    `describe-business-process` and `setElement` do not — so a refusal can name a flow no read call shows
-    you.
+    values through THAT process's own parameters. BUILDABLE from CrtProcessBuilder **1.6.3.26** via
+    `type:"subProcess"` with a `subProcess` block (`{processName | processUId, resync}`); the block, the
+    parameter mirroring/mapping rule, `resync`, the refusals and what is NOT supported (multi-instance,
+    event/expanded sub-processes) are owned by `process-sub-process`. Its EVENT and EXPANDED variants keep
+    their children in their OWN collection, which `describe-business-process` does not walk, but
+    the delete guards see them, walking it recursively so a reference from inside one still blocks a delete.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
 User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialog,
   `openEditPageUserTask` Open edit page (BUILDABLE via `type:"openEditPage"` — see "What you can build today"), `autoGeneratedPageUserTask` Auto-generated page,
