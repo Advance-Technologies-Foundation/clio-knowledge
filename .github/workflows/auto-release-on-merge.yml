@@ -90,10 +90,19 @@ jobs:
           # fail loudly so the alert reaches the team on the master Actions view immediately, and a
           # bump-only follow-up PR is obviously required.
           # ---------------------------------------------------------------------------------------
-          # `--exact` ignores lightweight tags a fork might carry; the release workflow only ever
-          # pushes annotated tags, so this is what we compare against.
+          # Release tags here are lightweight: `release-bundle.yml` creates them through the
+          # Releases API (`tag_name` on the release, then `draft=false`) and never runs `git tag -a`.
+          # `refs/tags/<v>^{commit}` is used precisely because it resolves lightweight and annotated
+          # tags alike, so the check stays correct if that ever changes.
           if ! git rev-parse --verify --quiet "refs/tags/${library_version}^{commit}" > /dev/null; then
-            echo "::error::Release ${library_version} is published on GitHub but tag ${library_version} is missing from this checkout. The fetch-tags step above did not receive it — refusing to skip silently, since without the tag the 'changed published content' guard cannot run."
+            # The checkout snapshot is older than the `published` lookup above, and the release
+            # workflow only creates the tag when it flips the draft to published, so a release
+            # published in between leaves a correct state with no local tag. Refresh once before
+            # declaring the tag genuinely absent.
+            git fetch --no-tags origin "refs/tags/${library_version}:refs/tags/${library_version}" 2> /dev/null || true
+          fi
+          if ! git rev-parse --verify --quiet "refs/tags/${library_version}^{commit}" > /dev/null; then
+            echo "::error::Release ${library_version} is published on GitHub but tag ${library_version} cannot be resolved here, even after re-fetching it. Either the tag is genuinely absent on the remote, or the fetch-tags step above did not receive it — refusing to skip silently, since without the tag the 'changed published content' guard cannot run."
             exit 1
           fi
           # The published byte set is the manifest plus every body it declares — computed on both
