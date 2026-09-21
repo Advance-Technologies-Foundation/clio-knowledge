@@ -11,6 +11,9 @@ owner -- read the one your task needs instead of guessing:
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
                                      and the element catalog (data-id -> label -> purpose).
+  * `process-diagram-layout`       - how the diagram is drawn (columns, branch rows, end events,
+                                     connectors), what `describe` reports about the picture, and the
+                                     refusal an edit that would RE-DRAW a hand-arranged diagram gets.
   * `process-naming`               - N1-N10: the process caption and code, element captions and
                                      codes, parameter codes. Read it BEFORE you name anything.
   * `process-data-elements`        - start a process from a record event (signalStart), and the Read
@@ -63,20 +66,11 @@ article from what this one says; read that article.
   needs, their parameters, and how they connect. The server-side ProcessDesignService package owns
   metadata serialization — you NEVER hand-author process metadata, filters, or column mappings.
 - The build is DECLARATIVE: you describe the process (elements + flows + parameters + mappings) and
-  clio builds + saves it in one call. The diagram is drawn for you, and it is worth knowing HOW, because
-  the flow ORDER you declare is what decides it: columns come from distance to the start; each branch of
-  a split gets a row of its own, with the DEFAULT flow keeping the split's own row (otherwise the first
-  one you declared) and the rest stacked below in declaration order; a merge returns to the row of the
-  split it closes; an end event is drawn beside whatever reaches it — one that a SINGLE flow reaches is
-  pulled to the right edge when that row is empty, and one that TWO branches reach is pulled back onto
-  the column of the deeper of them, so the branch above drops straight down onto it and the other
-  arrives at its left edge (an end three branches reach stays where the columns put it). Connectors are
-  drawn too — straight, L, Z, U or a longer way round, with loops on a row of their own. The guarantee
-  is that no connector crosses a SHAPE it does not enter; arrows MAY
-  cross each other, run along one line, or leave a gateway by a vertex a sibling also uses (a fan-out of
-  two or three gets an exit point each, wider ones share the bottom vertex and separate at their own
-  rows). Do NOT set positions or connector geometry: no argument carries them, and every save re-derives
-  the whole picture.
+  clio builds + saves it in one call. Do NOT set positions or connector geometry: no argument carries
+  them, and every save re-derives the whole picture. You still DECIDE the picture, though — the flow
+  ORDER you declare is what the arrangement is computed from, so declare the main path first when
+  there is no default flow. `process-diagram-layout` owns the rules and is worth reading before you
+  plan a branched graph.
 - Tools:
   * list-user-tasks         — the user-task palette (name + uid); pass a name as `userTaskName`.
     CAVEAT: it lists RETIRED schemas as equal peers with no marker — `CallUserTask`, `EmailUserTask` and
@@ -86,13 +80,8 @@ article from what this one says; read that article.
   * create-business-process — build a NEW process from a JSON descriptor, and save it.
   * modify-business-process — edit an EXISTING process by an ordered list of operations.
   * describe-business-process        — read a process back as a structured graph (verify / explain).
-    Also returns the DIAGRAM: `position` (a shape's top-left corner) and `size` per element, and
-    `geometry` per flow — `start`, `points[]`, `end`, `exitSide`, `entrySide`, i.e. where the connector
-    actually runs. That is what a question about the picture is answered from ("why does that arrow
-    cross the block"), and reading `size` is what lets you turn a position back into a ROW, since
-    elements of different heights share a row by its centre line. All three are read-only. `position` is always reported; `size` and
-    `geometry` are newer members, and `geometry` is ALSO absent for any flow the server stored no
-    geometry for, with `points[]` empty on a straight connector.
+    Also returns the DIAGRAM, read-only: `position` and `size` per element and `geometry` per flow.
+    `process-diagram-layout` owns what they mean and which of them a given server reports.
     Also returns, per element: `connections[]` (bound "Connected to" links, raw + decoded), `deprecated`
     (the user-task schema is retired), and `writesConnectionsAtRuntime` — where FALSE is the answer that
     matters: it marks a process whose connections persist and compile while writing nothing. FALSE has two
@@ -247,34 +236,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   cleared, as asked". Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
 - Every modify re-applies the automatic layout to the WHOLE diagram AND re-routes every connector: a
-  hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed arrows are
-  redrawn with it (process data intact, manual layout lost). That is not a side effect to work around —
-  stored connector geometry is absolute canvas coordinates, so anything the engine did not recompute
-  would stay frozen where no shape stands any more. From 1.6.5.5 a caption the designer recorded a
-  position for is released with the rest and returns to the middle of what it names; an OLDER server
-  leaves it pinned, which strands a branch label at the coordinates the arrow used to pass through.
-- From CrtProcessBuilder 1.6.5.5 the server REFUSES an in-place edit that would re-draw the diagram
-  rather than extend it. An OLDER server asks nothing and applies it, so on one of those the warning
-  above is the whole protection. Two cases reach the refusal: the diagram is not the one the builder lays
-  out, so somebody arranged it by hand (or an older version drew it) and applying anything replaces that
-  arrangement; or the edit changes which elements sit above which, so the branches swap places — which is
-  what making a branch the DEFAULT one does. Shifting elements and inserting one between others are
-  ordinary and never ask. Nothing is written when it refuses, so there is no half-applied edit to undo.
-  The refusal is not a yes/no on re-drawing — that question has no good answer, since no loses the edit
-  and yes loses the picture. It opens a TWO-question sequence, and BOTH answers are the user's:
-  1. Show them the sentence it came back with and the elements it names, and ask whether to apply the
-     edit as a NEW VERSION. On yes, send the SAME operations to
-     `modify-business-process-as-new-version`. That tool never refuses over layout — it reports how the
-     new version's diagram differs and creates it anyway — because refusing the remedy the other path
-     recommends would leave you with nowhere to go. Their process and its diagram are untouched.
-  2. The version is created NOT actual, so nothing runs differently yet, and its response says so on
-     every success. Ask the user to open it, look at the diagram, and say whether to make it actual;
-     only then call `set-active-business-process-version`. NEVER chain the two — a version is created
-     inactive precisely so they get to look first.
-  Re-drawing the process IN PLACE is the other answer and stays available: re-send the same operations
-  with `confirm-layout-change`. Offer it second and never send it on the first attempt — it is the
-  destructive one, and a caller that always confirms has taken the decision away from the person whose
-  diagram it is.
+  hand-arranged diagram is redrawn as generated rows and hand-routed arrows are redrawn with it
+  (process data intact, manual layout lost). From CrtProcessBuilder 1.6.5.5 the server REFUSES such an
+  edit rather than applying it, and the refusal opens a TWO-question sequence whose answers are both
+  the user's — never send `confirm-layout-change` on the first attempt. `process-diagram-layout` owns
+  the whole of this: what counts as a re-draw, the two questions in order, and what an OLDER server
+  does instead (nothing, so the warning is the only protection there).
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to

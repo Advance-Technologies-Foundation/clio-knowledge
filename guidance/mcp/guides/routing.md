@@ -38,6 +38,9 @@ guards — it says whose rule it is and names that guide for the rest.
     modify-safety rules). After it, read the ONE matching sub-guide:
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
+  - where the diagram puts an element, how connectors are routed, what `describe` reports about the
+    picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
+    name=process-diagram-layout
   - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
   - start a process on a record add/modify/delete, read data, or modify data ->
     name=process-data-elements
