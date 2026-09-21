@@ -158,11 +158,10 @@ This article is the authoritative owner of process parameters, the mappings that
   its value is a bare record Guid in `value`. The macro form is still the route for a CONSTANT lookup
   column on a `changeData` element, whose `value` is text-only; a column fed from the process uses
   `processParameter` or `sourceElement` — see `process-data-elements`.
-- UNBOUND element INPUT parameters are NOT listed by `describe-business-process` — except on a SUB-PROCESS
-  element, whose whole parameter set is reported, because those parameters are the called process's own
-  contract rather than inherited task defaults — (it returns only
-  value-bearing parameters and outputs) — absence from describe does NOT mean the parameter does not
-  exist. Input parameter names come from the user task's schema (for a custom task, the parameters it
+- UNBOUND element INPUT parameters are NOT listed by `describe-business-process`: it returns only
+  value-bearing parameters and outputs, so absence from describe does NOT mean the parameter does not
+  exist. A SUB-PROCESS element is the exception — its WHOLE parameter set is reported, bound or not,
+  because those parameters are the called process's own contract rather than inherited task defaults. Input parameter names come from the user task's schema (for a custom task, the parameters it
   was created with); a wrong `elementParameter` name fails the build with a clear error and nothing is
   saved — never invent names silently.
 - To CHANGE a bound value, send `addMapping` again for the same target — it overwrites the binding in

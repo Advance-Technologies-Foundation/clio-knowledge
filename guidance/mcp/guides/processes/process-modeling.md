@@ -18,7 +18,8 @@ owner -- read the one your task needs instead of guessing:
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
-  * `process-parameters`           - process parameters, element-parameter mappings, type
+  * `process-parameters`           - process parameters, element-parameter mappings, the SUB-PROCESS
+    element at RUN TIME (what crosses, what a re-sync reports, what `inSync` shows), type
                                      compatibility, and the date/time/lookup default macros.
   * `process-formulas`             - the `expression` mapping source and the formula
                                     vocabulary both it and a condition use
@@ -194,19 +195,24 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - If describe shows constructs the builder cannot create (inclusive and event-based gateways,
-  timer/message starts, intermediate events, formula and script tasks), they survive a save untouched as
-  data — but you CAN still remove or rewire them by name and nothing will warn you. Gateway ELEMENTS and
-  DEFAULT flows are no longer on that list: both are buildable, `process-branch-conditions` owns them.
-  The SUB-PROCESS element belongs on this list with its two halves separated, because they are
-  different claims. CREATING one is allowed and safe — `type:"subProcess"`, see
-  `process-element-catalog`. REWIRING an existing one — retargeting its called process, deleting it,
-  editing its parameters — stays high-risk, and the reasons are measurements rather than caution:
-  an element that is already multi-instance carries none of the called process's parameter names at all
-  (61 of the 416 shipped elements are in that state, so the case is common, not exotic); a retarget with
-  live dependents makes the process refuse to START later, blamed on the process rather than on the
-  edit; and `validate-process-graph` carries no parameter or mapping rule at all, so none of this is
-  caught by planning. The build path refuses those TWO by name — let it, rather than routing around a
-  refusal you did not expect. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
+  timer/message starts, intermediate events, `scriptTask`, `webService`; `process-element-catalog` owns
+  the full list), they survive a save untouched as data — but you CAN still remove or rewire them by name
+  and nothing will warn you. Gateway ELEMENTS, DEFAULT flows and the Formula element are no longer on
+  that list: all are buildable, `process-branch-conditions` and `process-element-catalog` own them.
+- The SUB-PROCESS element is NOT on that list — it is buildable (`type:"subProcess"`, from
+  CrtProcessBuilder 1.6.3.26, `process-element-catalog`) and the build path does warn you. It gets its
+  own caveat, on a different axis: CREATING one is safe, REWIRING an existing one — retargeting its
+  called process, deleting it, editing its parameters — is high-risk. The build path REFUSES two of the
+  hazards by name: an element that is already multi-instance, and a retarget while live dependents still
+  read from the element. Let those refusals stand rather than routing around them. Multi-instance is not
+  an edge case — 61 of the 416 sub-process elements in the shipped package corpus are in that state
+  (scanned 2026-09-12 over the local PackageStore, 1 099 package roots; recorded in the CrtProcessBuilder
+  repository as `docs/sub-process-element-capture.md`). What is NOT guarded: `validate-process-graph`
+  carries no parameter or mapping rule at all, so nothing here is caught by planning. And if a retarget
+  DOES go through — through the designer, which has no such guard — the platform removes the orphaned
+  parameters and flags every element that referenced them invalid, so the process refuses to START
+  later, blamed on the process rather than on the edit. That chain is read from platform source, not
+  measured through this tool, which refuses the retarget first. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
   on a parameter the element itself owns. The dependents check does scan the element's own parameters
   (from CrtProcessBuilder 1.6.3.26, the version that shipped this element), but it reads parameter
   VALUES and flow conditions, not mapping rows, so a stranded row is not what it looks for. Nor does the
