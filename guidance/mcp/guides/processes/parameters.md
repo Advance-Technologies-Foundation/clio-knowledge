@@ -45,61 +45,73 @@ This article is the authoritative owner of process parameters, the mappings that
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
   describe-first and confirm-the-removal rules in `process-modeling` still apply.
 - A SUB-PROCESS element's parameters are the CALLED process's contract, copied onto the element and
-  re-derived on every design-time read. `process-element-catalog` owns the BUILD contract - how the
-  callee is named, which directions keep a value, what `resync` does and what it refuses. What that
-  contract cannot tell you is how the call behaves at RUN TIME, and how little of its drift is
-  observable:
-  * values cross by parameter NAME, over scalar parameters only, ignoring direction, and an unmatched
-    name is skipped with no exception and no log line. Requiredness is never validated on either side.
-    So a callee that gained, lost or renamed a parameter leaves the caller RUNNING and quietly
-    delivering nothing. To USE an output, map FROM it - name the element and the parameter as the SOURCE
-    of a mapping onto a process parameter or another element's input
-  * AN EMPTY WARNING LIST IS NOT EVIDENCE THE CALLER IS INTACT. The server re-synchronizes every
-    sub-process element when it LOADS the schema, so by the time an operation runs there is nothing
-    stale left to compare against: the warnings cover drift THIS request causes - a retarget, or the
-    first selection - and a re-sync after the callee changed underneath a saved caller answers success
-    with nothing to say
-  * `inSync` IS evidence - of a CODE change, which is the half that matters, since the runtime binds by
-    code; it does not see a caption, because the element keeps its own copy of that. Which way it points
-    depends on WHEN the schema instance behind the read was built. A freshly built one CONVERGES as it
-    is created, ANY reader triggers that build, and saving evicts it; where a runtime instance already
-    exists the platform does not converge it, a stale element stays stale, and `false` is a real signal.
-    So do NOT run, re-read or compile the caller in order to expose drift - each of those builds a fresh
-    instance and HIDES it. Read it BEFORE changing the callee, or accept that the drift is no longer
-    observable there
-  * `inSync` is ONE-DIRECTIONAL, and this is the sharp edge: it asks whether every parameter the callee
-    DECLARES is present on the element, so a callee that ADDS one flips it to `false` while a callee that
-    REMOVES one leaves it `true` - a dropped parameter is invisible to it, measured. A code rename reads
-    as an add plus a remove and does flip it. On a MULTI-INSTANCE element `false` is permanent and means
-    nothing: the element carries collections and counters rather than the callee's parameter names, so
-    the test cannot be satisfied unless the callee declares no parameters at all, and the re-sync `false`
-    would call for is refused there anyway. Check `multiInstance` before acting on `false`
-  * THE DESIGNER IS THE TRAP, and the reason is simpler than it looks: the call-activity card never shows
-    a parameter's CODE. So after the callee renames a code - the rename that breaks delivery, because the
-    runtime binds by code - the caller's card reads exactly as before: same caption, mapping present,
-    nothing marked, while the SAVED schema still carries the old code and delivers nothing. The one place
-    a person would go to check is the one place that cannot show the problem. Rename the code AND the
-    caption and the card swings the other way, alarming without cause: new caption, mapping row EMPTY,
-    while the stored mapping is intact. A caption-only rename misleads in neither direction. The card is
-    wrong in BOTH directions and NEITHER is data loss - do not re-map on the strength of an empty row,
-    read `describe-business-process` instead. Measured on a stand, 2026-09-17; no mechanism is
-    established for why the row empties, so do not reason forward from one
-  * what IS reported, from CrtProcessBuilder 1.6.3.7, is the CONSEQUENCE of a DROPPED parameter: a
-    re-synchronization names the reference sites still bound to a parameter the element no longer
-    carries. In practice those are the sites the platform's own pre-save validation does not catch first
-    - a stored blob such as a Modify-data element's column bindings. A reference whose source is a
-    formula or a mapping is usually refused by that validation first; usually, because the refusal sits
-    behind a platform feature flag and safe-generation mode, so where it is off the notice reaches those
-    sites too, and it can name several in one message
-  * a RENAME is not reported by the re-sync at all, and is followed automatically: the element parameter
-    and its source are paired through the schema's mapping row rather than by name, so the copy keeps its
-    UId and its value and only changes its name. Every reference stays resolvable and the notice above
-    has nothing to name, while anything you WROTE referring to the old name goes stale. `inSync: false`
-    on a caller whose instance predates the change is the one read that shows it
+  re-derived whenever the platform builds a schema instance. `process-element-catalog` owns the BUILD
+  contract - how the callee is named, which directions keep a value, what `resync` does and what it
+  refuses. What that contract cannot tell you is how the call behaves at RUN TIME, and how little of its
+  drift is observable:
+  * values cross by parameter NAME, and DIRECTION IS IGNORED when they do - the copy-back writes into
+    whatever element parameter carries the callee's name, including an `In` one. A name present on only
+    one side is SKIPPED with no exception and no log line, and so is a name that DOES match but whose
+    value fails conversion. Requiredness is never validated on either side. So a callee that gained,
+    lost or renamed a parameter leaves the caller RUNNING and quietly delivering nothing. A
+    COLLECTION-typed parameter crosses like any other - what does not cross is a member of a collection
+    ITEM's structure. To USE an output, map FROM it: name the element and the parameter as the SOURCE of
+    a mapping onto a process parameter or another element's input
+  * `inSync` compares NAMES and nothing else, CASE-INSENSITIVELY. It cannot see a caption change, and
+    not because the element keeps a caption of its own - the platform overwrites the element parameter's
+    caption, and eight further properties, from the callee on every synchronization - but because the
+    predicate reads only names. A CASE-ONLY code rename (`Amount` to `amount`) is a real change the
+    runtime binds on, and `inSync` stays `true`
+  * `inSync` is ONE-DIRECTIONAL: it asks whether every parameter the callee CURRENTLY declares is
+    PRESENT on the element. A callee that ADDS one flips it to `false`; a callee that REMOVES one leaves
+    it `true`, so a dropped parameter is invisible to it. On a MULTI-INSTANCE element `false` is
+    permanent and means nothing - the element carries two collections and three iteration counters
+    instead of the callee's parameter names, so the test cannot be satisfied unless the callee declares
+    no parameters at all, and the re-sync a `false` would call for is refused there anyway. Check
+    `multiInstance` before acting on `false`
+  * WHAT `inSync` CAN SHOW YOU DEPENDS ON THE CALLER'S CACHED SCHEMA INSTANCE, and it fails silently in
+    both directions. Drift is visible only while that cached instance PREDATES the callee's change. On a
+    COLD cache the first read BUILDS the instance and building CONVERGES it, so `true` on a first read
+    says nothing about the saved metadata. What erases the drift afterwards is eviction or a converging
+    path: saving or publishing the CALLER, a configuration compile, an application restart, and any
+    operation routed through the DESIGN instance, which re-synchronizes on every fetch. Two things do
+    NOT erase it, against expectation: re-reading, which hands back the same cached object, and RUNNING
+    the caller, which executes that same stale element - that IS the silent no-delivery failure, not a
+    way to clear it. Read `describe-business-process` BEFORE changing the callee where you can;
+    afterwards treat `inSync: true` as NO EVIDENCE rather than as "intact"
+  * what the re-sync REPORTS, from CrtProcessBuilder 1.6.3.7, is the CONSEQUENCE of a DROPPED parameter:
+    it names the reference sites still bound to a parameter the element no longer carries. In practice
+    those are the sites the platform's own pre-save validation does not catch first - a stored blob such
+    as a Modify-data element's column bindings. A reference whose source is a formula or a mapping is
+    usually refused by that validation before the re-sync can report it; usually, because the refusal
+    sits behind a platform feature flag and safe-generation mode, so where either is off the notice
+    reaches those sites too, and it can name several in one message
+  * a RENAME is followed automatically AND reported. The element parameter is paired to the callee's
+    through the mapping row's source UId rather than by name, so the element's copy keeps its own UId
+    while its name, caption, data type, direction and five other properties are overwritten from the
+    callee; whether its VALUE survives is decided separately by a provenance stamp, and the notice says
+    which happened. The rename notice fires for a rename the request itself observes. ACROSS requests it
+    usually stays silent - the design-time convergence already applied the new name before the diff was
+    taken - so silence here is not evidence either. Anything you WROTE naming the old parameter still
+    has to be updated by hand
+  * THE DESIGNER CARD cannot be used to check any of this. Its parameter ROW has no code column: a type
+    icon, a direction icon, the caption - or the CODE, when a parameter has no caption - and the mapping
+    value. Opening the card re-derives the element's parameters from the callee and carries the stored
+    values over BY NAME, because the re-derived copies get fresh UIds and the UId branch of that lookup
+    cannot match. So a CODE rename can leave the row EMPTY while the caller's stored mapping is intact,
+    and a caption-only rename never does. An empty row is therefore "the carry-over did not match", not
+    a statement about your data - do not re-map on the strength of one. But DO NOT SAVE the caller from
+    a card showing one either: re-deriving clears the element's mapping rows in memory, and saving
+    persists that. Close the card and read `describe-business-process`, which reports the binding under
+    the callee's CURRENT name. (One stand run, 2026-09-17, recorded the empty row only when the caption
+    was renamed alongside the code. Nothing in the client reads the caption when deciding this, so treat
+    that as an artefact of instance freshness rather than a caption rule.)
   * so the rule is procedural: after ANY change to a called process's parameters, re-synchronize every
-    caller with `subProcess: {resync: true}`. That is the ONLY call that writes - a `setElement` touching
-    the element for any other reason reports whether a re-synchronization is OWED and leaves the element
-    alone. Do it because the callee changed, not because something looked wrong
+    caller with `subProcess: {resync: true}`. A `setElement` carrying NO `subProcess` block does not
+    write - it reports whether a re-synchronization is OWED and leaves the element alone. Three shapes
+    DO write, and two of them are easy to send by accident: `{resync: true}`, a block naming the process
+    the element ALREADY calls, and an EMPTY `subProcess: {}` block, which is not read as a decline.
+    Send the explicit one, because you meant it - not because something looked wrong
   `describe-business-process` reports each parameter's `direction`, `isResult` and `isRequired`, so which
   way a value travels is readable before you map it.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.

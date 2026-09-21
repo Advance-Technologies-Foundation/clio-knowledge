@@ -208,10 +208,11 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   caught by planning. The build path refuses those TWO by name — let it, rather than routing around a
   refusal you did not expect. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
   on a parameter the element itself owns. The dependents check does scan the element's own parameters
-  from CrtProcessBuilder 1.6.3.19, but it reads parameter VALUES and flow conditions, not mapping rows,
-  so a stranded row is not what it looks for. Nobody has yet seen one survive — the platform prunes such
-  a row itself for every non-dynamic parameter and this contract produces no dynamic ones
-  (CrtProcessBuilder T-27, open). Do not add a check after every retarget on account of it. If a caller later reports a mapping that resolves
+  (from CrtProcessBuilder 1.6.3.26, the version that shipped this element), but it reads parameter
+  VALUES and flow conditions, not mapping rows, so a stranded row is not what it looks for. Nor does the
+  platform clean one up: its prune arm skips a parameter whose `CreatedInSchemaUId` is the CALLER's
+  schema, and that is exactly the owner-created parameter this hazard is about. Nobody has yet observed
+  the state (CrtProcessBuilder T-27, open) — but treat that as unobserved, not as prevented. If a caller later reports a mapping that resolves
   to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
   the stored metapath still matches a `uid` describe reports on that element. Conditional
   flows sit on this list on the same reasoning, one line down. CONDITIONAL flows belong on this list
