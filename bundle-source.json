@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.44",
+  "libraryVersion": "1.15.45",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -196,7 +196,8 @@
       "process-custom-element-families",
       "atf.creatio.custom-process-element-reference",
       "shared-client-logic",
-      "db-view-entities"
+      "db-view-entities",
+      "entity-operation-access"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -365,7 +366,8 @@
       "docs://knowledge/com.creatio.clio/process-custom-element-families",
       "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference",
       "docs://knowledge/com.creatio.clio/shared-client-logic",
-      "docs://knowledge/com.creatio.clio/db-view-entities"
+      "docs://knowledge/com.creatio.clio/db-view-entities",
+      "docs://knowledge/com.creatio.clio/entity-operation-access"
     ]
   },
   "resources": [
@@ -2684,6 +2686,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/db-view-entities.md",
       "bundlePath": "resources/db-view-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "entity-operation-access",
+      "title": "Entity access through system operations",
+      "description": "Entity access through system operations. Supported workflow, failure boundaries and disposable Creatio acceptance evidence.",
+      "topicId": "creatio.entity-operation-access",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/entity-operation-access",
+      "legacyUris": [
+        "docs://mcp/guides/entity-operation-access"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/entity-operation-access.md",
+      "bundlePath": "resources/entity-operation-access.md",
       "mediaType": "text/plain"
     }
   ]
