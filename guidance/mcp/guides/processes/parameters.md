@@ -44,69 +44,62 @@ This article is the authoritative owner of process parameters, the mappings that
   that one message into a sentence naming the reference and the remedy.)
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
   describe-first and confirm-the-removal rules in `process-modeling` still apply.
-- A SUB-PROCESS element's parameters are not yours to declare, and that is the whole of its contract:
-  selecting the called process copies THAT process's parameters onto the element, and the platform
-  re-derives them on every design-time read. Three consequences worth carrying:
-  * only an `In` or `Variable` parameter can hold a value you map onto it. A mapping onto an `Out` or
-    `Internal` one is REFUSED naming the direction, because the platform clears it on the next read and
-    the loss would be silent. To USE an output, map FROM it — name the element and the parameter as the
-    SOURCE of a mapping onto a process parameter or another element's input
-  * values cross at RUN TIME by parameter NAME, over scalar parameters only, ignoring direction, and an
-    unmatched name is skipped with no exception and no log line. Requiredness is never validated on
-    either side. So a called process that gained, lost or renamed a parameter leaves the caller running
-    and quietly delivering nothing — which is why any `setElement` touching the element re-synchronizes
-    it, and why `subProcess: {resync: true}` exists. THE REFRESH IS REAL; THE WARNINGS ARE NOT A DRIFT
-    REPORT. The server re-synchronizes every sub-process element when it LOADS the schema, so by the time
-    the operation runs there is nothing stale left to compare against: the warnings cover drift THIS
-    request causes — a retarget, or the first selection — and a re-sync after the called process changed
-    underneath a saved caller answers success with nothing to say. An empty warning list is NOT evidence
-    the caller is intact. `inSync` IS evidence - of a CODE change, which is the half that matters, since the runtime binds by code;
-    it does not see a caption, because the element keeps its own copy of that. Which way it points depends
-    on whether the process HAS a
-    runtime instance. With one, describe reads it, the platform does not converge it, a stale element
-    stays stale, and `inSync: false` is a real signal. Without one, describe falls back to the design
-    instance, which converges AS IT LOADS - the read erases the drift it was called to show - and `true`
-    says nothing. What decides it is WHEN that instance was built: a freshly built one CONVERGES
-    as it is created, any reader triggers the build, and saving evicts it. So do NOT run, re-read or
-    compile the caller in order to expose drift - each of those builds a fresh instance and HIDES it. Read
-    it BEFORE changing the callee, or accept that the drift is no longer observable there. It is also ONE-DIRECTIONAL, and this is the sharp edge:
-    it asks whether every parameter the callee DECLARES is present on the element, so a callee that ADDS
-    one flips it to `false` while a callee that REMOVES one leaves it `true` - a dropped parameter is
-    invisible to `inSync`, measured. A code rename reads as an add plus a remove and does flip it. On a
-    MULTI-INSTANCE element `false` is permanent and means nothing - it carries collections and counters
-    rather than the callee's parameter names, so the test cannot be satisfied UNLESS the callee declares
-    no parameters at all, in which case it is vacuously `true`. Either way the re-sync `false` would call
-    for is refused there, so check `multiInstance` before acting on `false`. THE
-    DESIGNER is the trap worth stating plainly, and the reason is simpler than it looks: the call-activity
-    card never shows a parameter's CODE. So after the callee renames a code - the rename that breaks
-    delivery, because the runtime binds by code - the caller's card reads exactly as before: same caption,
-    mapping present, nothing marked, while the SAVED schema still carries the old code and delivers
-    nothing. The one place a person would go to check is the one place that cannot show that problem.
-    Rename the code AND the caption and the card swings the other way, alarming without cause: new
-    caption, mapping row EMPTY, while the caller's stored mapping is intact and unchanged. A caption-only
-    rename misleads in neither direction - new caption, value kept. So the card is wrong in both
-    directions and NEITHER is data loss; do not re-map on the strength of an empty row, read `describe`
-    instead. Measured on a stand, 2026-09-17. No mechanism is established for WHY the row empties - it is
-    not caption-matching, which the caption-only reading rules out - so do not reason forward from one. What IS reported, from CrtProcessBuilder
-    1.6.3.7, is the CONSEQUENCE of a dropped parameter: a re-synchronization names the reference sites
-    still bound to a parameter the element no longer carries. In practice that means the sites the
-    platform's own pre-save validation does NOT catch first - a stored blob such as a Modify-data
-    element's column bindings. A reference whose source is a formula or a mapping is
-    usually refused by that validation before the re-sync can report it - usually, because the refusal
-    sits behind a platform feature flag and safe-generation mode, so on an environment with it off the
-    notice reaches those sites too. When the refusal does fire it can name several sites in one message,
-    not only one. That is the half a caller can act on. A RENAME is not reported by
-    the re-sync at all - the mapping row keeps the parameter's UId, so every reference stays resolvable
-    and this notice has nothing to name, while the saved name goes stale; the designer misses it for the
-    same reason. `inSync: false` on a caller whose cached instance predates the change is the one read
-    that does show it, which is why it is worth asking for BEFORE touching anything. So the rule is procedural: after ANY change to
-    a called process's parameters, re-save every caller (any `setElement` on the element re-synchronizes
-    it and persists the result, and `subProcess: {resync: true}` asks for that alone). Do it because the
-    callee changed, not because something looked wrong
-  * a RENAME on the called process is followed automatically: the element parameter and its source are
-    paired through the schema's mapping row rather than by name, so the element's copy keeps its UId and
-    its value and only changes its name. Anything you wrote referring to the old name still has to be
-    updated
+- A SUB-PROCESS element's parameters are the CALLED process's contract, copied onto the element and
+  re-derived on every design-time read. `process-element-catalog` owns the BUILD contract - how the
+  callee is named, which directions keep a value, what `resync` does and what it refuses. What that
+  contract cannot tell you is how the call behaves at RUN TIME, and how little of its drift is
+  observable:
+  * values cross by parameter NAME, over scalar parameters only, ignoring direction, and an unmatched
+    name is skipped with no exception and no log line. Requiredness is never validated on either side.
+    So a callee that gained, lost or renamed a parameter leaves the caller RUNNING and quietly
+    delivering nothing. To USE an output, map FROM it - name the element and the parameter as the SOURCE
+    of a mapping onto a process parameter or another element's input
+  * AN EMPTY WARNING LIST IS NOT EVIDENCE THE CALLER IS INTACT. The server re-synchronizes every
+    sub-process element when it LOADS the schema, so by the time an operation runs there is nothing
+    stale left to compare against: the warnings cover drift THIS request causes - a retarget, or the
+    first selection - and a re-sync after the callee changed underneath a saved caller answers success
+    with nothing to say
+  * `inSync` IS evidence - of a CODE change, which is the half that matters, since the runtime binds by
+    code; it does not see a caption, because the element keeps its own copy of that. Which way it points
+    depends on WHEN the schema instance behind the read was built. A freshly built one CONVERGES as it
+    is created, ANY reader triggers that build, and saving evicts it; where a runtime instance already
+    exists the platform does not converge it, a stale element stays stale, and `false` is a real signal.
+    So do NOT run, re-read or compile the caller in order to expose drift - each of those builds a fresh
+    instance and HIDES it. Read it BEFORE changing the callee, or accept that the drift is no longer
+    observable there
+  * `inSync` is ONE-DIRECTIONAL, and this is the sharp edge: it asks whether every parameter the callee
+    DECLARES is present on the element, so a callee that ADDS one flips it to `false` while a callee that
+    REMOVES one leaves it `true` - a dropped parameter is invisible to it, measured. A code rename reads
+    as an add plus a remove and does flip it. On a MULTI-INSTANCE element `false` is permanent and means
+    nothing: the element carries collections and counters rather than the callee's parameter names, so
+    the test cannot be satisfied unless the callee declares no parameters at all, and the re-sync `false`
+    would call for is refused there anyway. Check `multiInstance` before acting on `false`
+  * THE DESIGNER IS THE TRAP, and the reason is simpler than it looks: the call-activity card never shows
+    a parameter's CODE. So after the callee renames a code - the rename that breaks delivery, because the
+    runtime binds by code - the caller's card reads exactly as before: same caption, mapping present,
+    nothing marked, while the SAVED schema still carries the old code and delivers nothing. The one place
+    a person would go to check is the one place that cannot show the problem. Rename the code AND the
+    caption and the card swings the other way, alarming without cause: new caption, mapping row EMPTY,
+    while the stored mapping is intact. A caption-only rename misleads in neither direction. The card is
+    wrong in BOTH directions and NEITHER is data loss - do not re-map on the strength of an empty row,
+    read `describe-business-process` instead. Measured on a stand, 2026-09-17; no mechanism is
+    established for why the row empties, so do not reason forward from one
+  * what IS reported, from CrtProcessBuilder 1.6.3.7, is the CONSEQUENCE of a DROPPED parameter: a
+    re-synchronization names the reference sites still bound to a parameter the element no longer
+    carries. In practice those are the sites the platform's own pre-save validation does not catch first
+    - a stored blob such as a Modify-data element's column bindings. A reference whose source is a
+    formula or a mapping is usually refused by that validation first; usually, because the refusal sits
+    behind a platform feature flag and safe-generation mode, so where it is off the notice reaches those
+    sites too, and it can name several in one message
+  * a RENAME is not reported by the re-sync at all, and is followed automatically: the element parameter
+    and its source are paired through the schema's mapping row rather than by name, so the copy keeps its
+    UId and its value and only changes its name. Every reference stays resolvable and the notice above
+    has nothing to name, while anything you WROTE referring to the old name goes stale. `inSync: false`
+    on a caller whose instance predates the change is the one read that shows it
+  * so the rule is procedural: after ANY change to a called process's parameters, re-synchronize every
+    caller with `subProcess: {resync: true}`. That is the ONLY call that writes - a `setElement` touching
+    the element for any other reason reports whether a re-synchronization is OWED and leaves the element
+    alone. Do it because the callee changed, not because something looked wrong
   `describe-business-process` reports each parameter's `direction`, `isResult` and `isRequired`, so which
   way a value travels is readable before you map it.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.

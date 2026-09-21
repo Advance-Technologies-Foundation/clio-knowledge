@@ -178,11 +178,11 @@ leaf rather than through `process-modeling`.
   below are about sequence flows only.
 
 == Connection rules R1–R20 (validate-process-graph enforces the structural subset: R1–R3, R7–R15,
-   R17–R20; R4–R6 and R16 are semantic or enforced elsewhere — verify those yourself.
-   Validation pass ≠ buildable: the rules cover the FULL catalog, but only the "What you can build
-   today" slice in `process-element-catalog` can be built — conditional flows, DEFAULT flows and the
-   exclusive and parallel gateway ELEMENTS are all in that slice now; inclusive and event-based
-   gateways, timers and intermediate events are not. The exclusive gateway the platform
+   R17–R20; R4–R6 are semantic, verify yourself; R16 fires at build time, see its line below.
+   Validation pass ≠ buildable: only the "What you can build today" slice in `process-element-catalog`
+   can be built — conditional flows, DEFAULT flows, the exclusive/parallel gateway ELEMENTS and Sub-process
+   are all in that slice now; inclusive/event-based gateways, timers and intermediate events are not. The
+   exclusive gateway the platform
    synthesizes for a conditional branch is still a GENERATION-TIME construct and never appears as a
    graph node, so R7 and R14 do not apply to it: do not model one when you validate a planned branch,
    and do not report a process as violating them because it has one) ==
@@ -227,8 +227,8 @@ R15 No orphan/unreachable nodes; every flow needs a valid source and target, and
     an element to ITSELF. Both halves refuse a self-loop: the build path names the element, and
     `validate-process-graph` reports it under this same id. To repeat an element, route the flow back
     through a gateway that decides whether to repeat it.
-R16 Sub-process (callActivity) target must begin with a Simple start. The BUILD path enforces it, not
-    this tool. See `process-element-catalog`.
+R16 Sub-process (callActivity) target must begin with a Simple start; collection mapping => multi-instance.
+    Enforced at build time — see `callActivity` in `process-element-catalog`.
 R17 (advisory) Add data one-record mode outputs only Id; chain a Read data for other fields.
 R18 A conditional flow may have at most ONE outgoing sibling that carries no condition. The platform
     synthesizes a gateway for any element that branches, and that gateway's fallback is every flow

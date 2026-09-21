@@ -13,7 +13,7 @@ public sealed class ReferenceExampleBundleTests
             "atf.creatio.custom-process-element-reference",
             "catalog/reference-examples/creatio-custom-process-element.yaml",
             "https://github.com/Advance-Technologies-Foundation/creatio-custom-process-element-reference",
-            "1c29f00f97cd6430852c4ff60ebb3a37b8adbddc"),
+            "3ccd67fcca92ebed6e23c41f2ff3af997b880677"),
         new(
             "atf.creatio.custom-mcp-tool-reference",
             "catalog/reference-examples/creatio-custom-mcp-tool.yaml",

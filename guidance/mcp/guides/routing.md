@@ -86,6 +86,7 @@ guards — it says whose rule it is and names that guide for the rest.
     operation reference
   - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
+  - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies

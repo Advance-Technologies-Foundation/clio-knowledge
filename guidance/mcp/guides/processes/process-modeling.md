@@ -206,12 +206,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   live dependents makes the process refuse to START later, blamed on the process rather than on the
   edit; and `validate-process-graph` carries no parameter or mapping rule at all, so none of this is
   caught by planning. The build path refuses those TWO by name — let it, rather than routing around a
-  refusal you did not expect. A third hazard has no guard on either side: a mapping row stranded on a
-  parameter the element itself owns, which the dependents check cannot see because it scans what OTHER
-  elements reference and skips the element being retargeted. Its standing is UNOBSERVED rather than
-  known — the platform prunes such a row itself for every non-dynamic parameter and this contract
-  produces no dynamic ones, so nobody has yet seen one survive (CrtProcessBuilder T-27, open). Do not
-  add a check after every retarget on account of it. If a caller later reports a mapping that resolves
+  refusal you did not expect. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
+  on a parameter the element itself owns. The dependents check does scan the element's own parameters
+  from CrtProcessBuilder 1.6.3.19, but it reads parameter VALUES and flow conditions, not mapping rows,
+  so a stranded row is not what it looks for. Nobody has yet seen one survive — the platform prunes such
+  a row itself for every non-dynamic parameter and this contract produces no dynamic ones
+  (CrtProcessBuilder T-27, open). Do not add a check after every retarget on account of it. If a caller later reports a mapping that resolves
   to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
   the stored metapath still matches a `uid` describe reports on that element. Conditional
   flows sit on this list on the same reasoning, one line down. CONDITIONAL flows belong on this list
