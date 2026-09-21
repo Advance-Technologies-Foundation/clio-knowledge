@@ -142,7 +142,7 @@ public sealed class ProcessGuideContentPreservationTests
         // was satisfied by any two mentions anywhere, which is how deleting one of these bullets and
         // adding a mention to the preamble stayed green. CONTRIBUTING requires the precondition next to
         // the instruction, so the anchor is the instruction.
-        ("process-data-elements", "clears the columns, sort AND record filter",
+        ("process-read-data", "clears the columns, sort AND record filter",
             "REPLACES the element's whole filter",
             "the readData retarget instructs a setFilter on a live process and carries the precondition "
             + "inline; losing it widens the records the element reads with nothing to warn the reader"),

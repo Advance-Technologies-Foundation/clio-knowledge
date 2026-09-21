@@ -56,6 +56,7 @@ internal static class ProcessGuideSet
         "process-naming",
         "process-data-elements",
         "process-data-source-filters",
+        "process-delete-data",
         "process-parameters",
         "process-formulas",
         "process-branch-conditions",

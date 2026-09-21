@@ -196,3 +196,90 @@ Evidence: https://github.com/Advance-Technologies-Foundation/clio-knowledge/issu
 Validation: 160 producer contract tests passed; one-visible and all-hidden fixtures pass validate-page with resources and no warnings. Browser accessibility trees and screenshots establish the navigation result.
 Files: guidance/mcp/guides/pages/modification/components.md, bundle-source.json.
 Impact: Agents keep available tabs visible and use the parent's selection API without promising defaults override existing user state. Disposable environment removal remains required after merge.
+
+## 2026-09-09 - ENG-95986 send-email guidance: the template message mode, and the missing-message trap re-explained
+Context: ENG-95986 (epic ENG-92704) adds the designer's template message mode to the `sendEmail` element in CrtProcessBuilder; the `process-send-email` article said "email TEMPLATES are not supported", and the catalog, index and routing lines repeated the custom-only claim. The refinement (08.09) also found the article's explanation of the `Localizable template not found` trap wrong.
+Decision: Added a TEMPLATE MODE section to `process-send-email` as the owner: the `template` (name | id | describe macro) and `templateEntity` fields, the build-time refusals quoted as the server emits them (unknown / wrong-type / ambiguous template, template beside body, object-bound template without a macro source, macro source on a template without object), the 33-of-38 no-object fact with the read-before-promising rule, the choose-or-ask rule (mirrors ENG-96034 AC 4), the subject override, the language rule, mode switching, the read-back fields and clio's template-landed warning. Rewrote the AUTO-MODE CHECKLIST's trap paragraph: the text is the TEMPLATE provider's, so it belongs to an element whose mode was never written (an unset Integer reads as 0), not to "subject or body writes 1" - the earlier sentence is named as corrected rather than silently replaced. Catalog (2 places), entry index and routing line say "body OR template". `libraryVersion` 1.13.99 -> 1.13.100, then 1.14.1 after rebasing onto master `bb8b15d` (1.14.0, PR #136); item description extended. Two guidance tests added (`Guide_ShouldTeachTemplateMode_AndDropTheUnsupportedClaim`, `Guide_ShouldExplainTheMissingMessageTrapFromTheModeDispatch`).
+Discovery: Evidence is the `CrtProcessDesigner` 7.8.0 sources pulled from dev-local (10.1.503) on 2026-09-09 - `EmailUserTaskMessageProviderFactory` dispatches on `BodyTemplateType`, `EmailTemplateUserTaskMessageProvider.GetEmailContent` throws the text and applies the subject-override rule, `BaseEmailUserTaskMacrosHelper.FindSourceEntitySchema` reads the macro-source entity from the parameter's reference - plus build/describe/modify runs on dev-local with the ENG-95986 CrtProcessBuilder (payloads in `projects/ENG-95986-send-email-template-mode/payloads/`). A REAL SEND was not run (no mailbox on the stand); the article says so, and the MultiLanguageV2 fallback for templates without `EmailTemplateLang` rows is marked unverified. The article grew from 16.3 KB to ~22 KB; the set's size gate decides whether it must split.
+Files: guidance/mcp/guides/processes/send-email.md, guidance/mcp/guides/processes/element-catalog.md, guidance/mcp/guides/processes/process-modeling.md, guidance/mcp/guides/routing.md, bundle-source.json, automation/Clio.Knowledge.Bundle.Tests/SendEmailGuidanceTests.cs
+Impact: an agent asked for a templated notification builds it through `email.template` + `templateEntity`, refuses to guess a template, reads `templateObject` before promising personalization, and reads `messageSource` back as the pre-run check for the missing-message trap.
+
+## 2026-09-09 - ENG-95986 follow-up: template mode run-verified, the guide's "not run" caveat narrowed
+Context: the article shipped with "a real send was not run"; the template path was then executed on dev-local in manual mode (same message provider, result readable on the email activity).
+Decision: replaced the caveat with the verified facts - macros resolve against the `templateEntity` record, the subject override wins, a template without `EmailTemplateLang` rows renders (MultiLanguageV2 fallback), and an EMPTY macro value stays literal in the text (`[#Owner.Name#]` on a case with no owner) - a rule the agent needs when promising personalization. Only the SMTP hop remains unverified.
+Files: guidance/mcp/guides/processes/send-email.md, .codex/workspace-diary.md
+Impact: the guide's personalization advice now covers the record's DATA, not only the template's object.
+
+## 2026-09-11 - ENG-95986 review round (creatio-code-review on PR #142): the template mode gets its own article, the describe wire shape is stated, AC-8 is swept
+Context: dry-run review of 1c1d59c returned 7 findings. process-send-email sat at 99.8% of the one-response budget after the template block was added as a run-in paragraph and then fitted by trimming the RUN-VERIFIED claim's provenance - the opposite of CONTRIBUTING's split-not-trim rule.
+Decision (split): the TEMPLATE MODE block moved to `process-send-email-template` (`guidance/mcp/guides/processes/send-email-template.md`, its own `== Template message ==` section, set banner, N1-N10 pointer), declared in bundle-source.json (resources + requirements.itemIds + requirements.resourceUris) and in the entry's manifest description; process-modeling.md indexes it and routing.md routes to it. `process-send-email` keeps itemId/uri/legacyUris and cites the owner by NAME; its "the trap below" became a citation of `process-send-email`'s AUTO-MODE CHECKLIST. Sizes after: process-send-email 84.3%, process-send-email-template 32.0%. Provenance restored on the RUN-VERIFIED claim (manual 10.1.503/2026-09-09; auto 10.2.75/CrtProcessBuilder 1.6.2.x/2026-09-10).
+Decision (wire shape): clio's describe serializer drops null fields (DescribeProcessCommand.OutputOptions, WhenWritingNull), so the pre-run trap check now says `messageSource` and `template` are OMITTED - their absence beside `hasBody:false` is the signal - and READ-BACK says `templateObject`/`body` are omitted, not null. The pinned substring moved with it.
+Decision (evidence): the custom-provider corollary ("cannot produce it", "fails differently - with no body") is limited to what was observed: the text was seen on a no-mode element and traced to `EmailTemplateUserTaskMessageProvider.GetEmailContent`; the subject-only-no-mode run was not made and says so.
+Decision (AC-7): stated in both articles - the mode selects only the message; mode/sender/recipients/importance/ignoreErrors/performer are unchanged in both modes; `useBackgroundMode` is an element-level field outside the `email` block, not part of this contract.
+Tests: `TemplateGuide_ShouldOwnTemplateMode_AndTheEntryShouldRouteToIt` (section heading, regex-pinned CrtProcessBuilder floor >= 1.6.2.1, contract anchors, the OMITTED wording, the entry's name-citation and AC-7 clause); `NoProcessArticleOrManifestDescription_ShouldClaimTemplatesAreUnsupported` sweeps every declared process article and every manifest description with a whitespace-insensitive regex for the three shipped wordings; the trap test asserts the omitted-keys sentence and forbids `messageSource:null`, the old mechanism and "which cannot produce it" by normalised regex.
+Impact: 161 pass; the 2 DistributionPackage failures are the known local MSB4062 issue.
+
+## 2026-09-11 - ENG-95986 PR #142 review comments: the catalog names the new owner, the subject rule is its own paragraph, the wire-shape claim gets its provenance
+Context: PR #142 approved by b-horodyskyi with three Minors.
+Decision (#1): `element-catalog.md` cited only `process-send-email` for the template claim in both of its Send email rows; both now name `process-send-email-template` as the template owner, so every routing surface agrees after the split.
+Decision (#2): the SWITCHING MODES paragraph ran the subject-override rule and the mode-clearing rule together and read ambiguously. SUBJECT is now its own paragraph stating what CLEARS an override (a custom->template switch, and a template CHANGE - the server fix of the same day, mirroring the card's `change:EmailTemplateId` -> `_clearSubject`), what KEEPS it (the same template re-applied, a templateEntity-only rebind, options alone), that a subject in the same block always wins, and that `subject: ""` restores the template's own. SWITCHING MODES now covers Body/template clearing only, and gained the `messageSource:"custom"` needs-a-body refusal.
+Correction found while rewriting: the article still said a subject alone selects custom "on an element with NO mode yet". After the server's round-two fix that is only true when the element carries no TEMPLATE either - an unset mode runs as template mode, so a stored template is the element's mode. Stated.
+Decision (#3): the "OMITTED, not null" claim now says clio's describe has ALWAYS dropped null fields, so it is not gated on a clio version - the reviewer's open question was whether the sibling clio PR introduced it. It did not: `DescribeProcessCommand.OutputOptions` (WhenWritingNull) predates this branch and is untouched by its diff.
+Tests: the three pins that quoted the rewritten sentences were realigned, and two new ones added (the template-swap clear, and the `subject: ""` route back).
+Impact: 161 pass; the 2 DistributionPackage failures are the known local MSB4062 issue. Sizes: process-send-email 84.6%, process-send-email-template 36.0%.
+
+## 2026-09-14 - Splitting a guidance article, and the four things that gate it
+Context: ENG-92708's merge of nitro/sprint-3-release put process-data-elements 19% over the
+get-guidance response budget and CI went red twice, for two unrelated reasons.
+Discovery (the one worth carrying): TWO BRANCHES CAN EACH PASS THE SIZE GUARD AND FAIL TOGETHER.
+Measured with the guard itself - sprint-3 26,446 (95.2%), the feature branch 27,764 (99.9%, i.e. 29
+characters of headroom), merged 33,093 (119.1%). Neither side did anything wrong. Check the guard at
+MERGE time on any branch touching a shared article, not only when authoring.
+Decision: split at a section boundary (the guard refuses a budget raise by name) and split at YOUR OWN
+content's boundary - Add data was 21% of the article and belonged to this branch, so the seam did not
+restructure the readData work. Result 96.4%, then 95.9% after trimming only prose this branch had added.
+Discovery: wiring a NEW article is FIVE contracts, each enforced by its own test, none discoverable by
+reading the manifest: requirements.itemIds AND requirements.resourceUris must both match the resource
+list exactly; the ENTRY article must index it; the entry's MANIFEST DESCRIPTION must index it too; and
+every guidance resource must declare exactly one legacyUris entry. Nine failures, four rounds.
+Discovery: that last contract was written for MIGRATED articles ("every currently migrated v0 guidance
+route remains available") and does not fit an article authored after the migration - satisfying it meant
+declaring a v0 route that never existed, and BundleBuilder.cs:327 turns every declared legacy URI into a
+RESOLVABLE ROUTE, so the invented one was a route the library answers to and nothing published. Narrowed
+the rule to the migrated set via a WRITTEN-DOWN PostMigrationGuidance list, with the exception itself
+guarded (a post-migration article must declare NO route) so it cannot become a smuggling hatch.
+Discovery: the libraryVersion lines DIVERGED at 1.14.2 - sprint-3 and master have each independently
+used 1.14.3/4/5 since. Number reuse across the two lines is this repo's normal, so 1.14.6 on sprint-3 is
+not the collision it looks like. Verify before bumping; a version choice here went wrong once already.
+Method note: resolving these merges by extracting ours-vs-base additions and re-applying them onto theirs
+works, but it MISSES SHORT EDITS - a 15-word threshold silently dropped `addData` from a buildable-slice
+list, the same four-word edit an earlier merge of this branch also lost. Diff ours against the MERGED
+result afterwards; extraction-before is not enough on its own.
+Files: guidance/mcp/guides/processes/add-data.md, guidance/mcp/guides/processes/data-elements.md,
+guidance/mcp/guides/processes/process-modeling.md, guidance/mcp/guides/routing.md, bundle-source.json,
+automation/Clio.Knowledge.Bundle.Tests/GuidanceMigrationTests.cs
+Impact: the next article split has the checklist; the next shared-article merge knows to run the size
+guard before trusting a green branch.
+
+## 2026-09-15 - ENG-98661: three documentation findings from the ENG-96503 manual-test pass
+Context: a manual QA pass on the merged ENG-96503 read-data count/aggregation feature (32 cases, all
+passing) surfaced six secondary findings; three of them are documentation-only and belong here (the other
+three are code fixes on a sibling crt-process-builder branch). The headline defect (aggregation over an
+empty selection) has an open "decision needed" not resolved this round.
+Decision: in guidance/mcp/guides/processes/data-elements.md - removed the false "describe lists both
+ResultCount and ResultRowsCount" claim (describe omits ResultRowsCount on a builder-/designer-made count
+element) and dropped the stale "not yet confirmed by a stand run" hedge on ResultRowsCount = 1 (now
+confirmed). Added a general note that describe reports only flagged/value-bearing parameters - an omitted
+one may still exist and be mappable, the root cause of the false claim above. Added that avg over an
+Integer column truncates the fraction (measured 5/10/17 -> 10, not 11): T-SQL's own AVG(int) behaviour, not
+the package's doing.
+Discovery (Medium, budget): the article was already near its single get-guidance-response size budget
+(EveryProcessArticle_ShouldFitInOneGetGuidanceResponse in Clio.Knowledge.Bundle.Tests) - the first wording
+pass pushed it to 102.6% and failed the producer contract suite. Tightened phrasing (no content dropped) to
+land at 100.8%... still failing at 28,020 vs a 27,793 budget; trimmed a second pass to pass. Any further
+addition to this article should budget for this headroom being gone - the next change here likely needs a
+split, not more prose.
+Files: guidance/mcp/guides/processes/data-elements.md, bundle-source.json
+Impact: libraryVersion bumped to 1.14.16. The next person editing this article should run
+`dotnet test automation/Clio.Knowledge.Bundle.Tests --logger "console;verbosity=detailed"` and read the
+`of budget` line for process-data-elements BEFORE writing prose, not after.
