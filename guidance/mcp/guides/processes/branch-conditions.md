@@ -54,7 +54,9 @@ everything exists.
 `[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
 before you rely on it. A `readData` in `first` mode, the only mode clio builds, exposes exactly one output
 and it is a RECORD (`ResultEntity`). Testing one of its COLUMNS needs a third meta-path segment
-(`[EntityColumn:]`) that no name can express, so a column test goes through the modify path. That is not a
+(`[EntityColumn:]`) that the create-time name form cannot express, so a column test goes through the modify
+path. `process-data-elements` owns the recipe: discover the column UId with
+`get-entity-schema-properties`, then combine it with the element/parameter UIds from describe. That is not a
 corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
 
 > Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
@@ -69,7 +71,8 @@ guess: without it the platform answers `Formula value error: Expression expected
 neither, and the entire call is aborted.
 
 **ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
-exists, so `describe-business-process` reports every UId. The two-step route — build the flow plain,
+exists, so `describe-business-process` reports the element and parameter UIds (column UIds come from the
+`process-data-elements` recipe). The two-step route — build the flow plain,
 then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
 one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`,
 (for a conditional one) `condition`, and an optional `label`.

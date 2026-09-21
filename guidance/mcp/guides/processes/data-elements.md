@@ -90,18 +90,30 @@ filter; see `process-access-rights`.
   section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
   reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- LIMITATION — a read record's individual COLUMN values are out of reach in practice, so "the record I
-  just read has status X", the likeliest branch after a read, cannot be authored. NOT because the
-  platform refuses a third segment — it parses one — but because describe reports no column UIds, so
-  there is nowhere to GET the one you would have to write. Author TWO segments
-  (`[#[Element:{uid}].[Parameter:{uid}]#]`) in a mapping, a `changeData` value or a filter condition.
-  One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
-  `[[element:Read.ResultEntity.Column]]`. The
-  element's only output parameter is `ResultEntity` (the whole record, `isResult:true` in describe);
-  the record's columns are NOT element parameters, so a mapping, `changeData` value or filter condition
-  that references them (e.g. `sourceElementParameter: "Email"` on the read element) FAILS the build with
-  "element has no parameter". Entity-column access needs meta-path support (planned; ENG-91844). To key
-  work off a specific record today, use a `signalStart` trigger output (`RecordId`) or a process parameter.
+- A COLUMN of the read record CAN be used in a branch condition. This article owns the recipe:
+  1. Call `get-entity-schema-properties` for `readData.source`, WITHOUT `package-name` to read the
+     merged schema. Match the column by `name` and take its `u-id` from `columns[]` — NOT a record Id.
+     Include that column in `readData.columns`, or omit the list to read all columns.
+  2. Call `describe-business-process` for the saved process. Take the read element's `uid` and its
+     `ResultEntity` parameter's `uid`; describe reports no column UIds, so use step 1 for the third.
+  3. On `modify-business-process`, use `setFlowCondition` with the existing flow's `source`, `target`
+     and `condition`. For a Boolean column, assemble the token with braces and dots exactly as shown:
+     `[#[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#] == true`.
+     Replace the angle-bracket placeholders with the discovered UIds. The read must precede the branch.
+     `process-branch-conditions` owns flow kinds and the required fallback. The create-time NAME form
+     cannot express this third segment: create the graph first, then modify its condition before running.
+  4. Describe again and require `kind: "conditional"` plus the exact condition text. Then run with
+     controlled matching and non-matching records and verify each branch's effect: save/read-back alone
+     proves authoring, NOT runtime routing. Do not infer missing-record behavior from those two cases.
+  Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;
+  [validation evidence](https://github.com/Advance-Technologies-Foundation/clio/issues/1645#issuecomment-5760323479).
+- LIMITATION — record columns are NOT element parameters. A mapping or `changeData` value using
+  `sourceElementParameter: "Email"`, or a filter using `elementParameter.parameter: "Id"` on the read
+  element, still fails with "element has no parameter". `ResultEntity` is the whole record; the branch
+  recipe above does not make a column name a parameter or establish the raw-expression contract for
+  mappings, values or filters. For record targeting use a process parameter or `signalStart.RecordId`.
+  The separate Send email BODY macro reaches a column by NAME: `[[element:Read.ResultEntity.Column]]`;
+  `process-send-email` owns that form.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",
@@ -155,9 +167,8 @@ filter; see `process-access-rights`.
     "filter": { "object": "Contact",
       "conditions": [ { "column": "Id", "comparison": "equal",
         "elementParameter": { "elementName": "RecordModifiedSignal", "parameter": "RecordId" } } ] }
-  LIMITATION: the record read by a preceding `readData` element is NOT referenceable here — its column
-  values (including `Id`) live inside the `ResultEntity` output, not as element parameters (see the
-  readData LIMITATION above; ENG-91844).
+  A read record's `Id` is NOT an element parameter: the `elementParameter` shorthand above cannot
+  name it on a `readData` element (see the readData LIMITATION above).
 - Change an EXISTING element in place with the `setElement` op's `changeData` field: omit `source` to keep
   the current target; a supplied `values` array REPLACES the whole assignment set. Retargeting `source` to a
   different object REQUIRES `values` for the new entity in the same update — the server REFUSES a values-less
