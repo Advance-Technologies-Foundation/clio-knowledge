@@ -131,6 +131,7 @@ guards — it says whose rule it is and names that guide for the rest.
 - Record-level permission model, stored grants versus runtime/dynamic access rules, or permission-extension interfaces -> name=record-permissions
 - Runtime record-permission implementation, activation and combination modes -> name=record-permission-extensions
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+- Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysSchemaOperationRight layer), for any role — read with get-object-rights, grant/revoke with set-object-rights; making a portal section's object available to external users is one case -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
 

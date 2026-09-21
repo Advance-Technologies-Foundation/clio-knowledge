@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.51",
+  "libraryVersion": "1.15.52",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -131,6 +131,7 @@
       "process-script-task",
       "product-telemetry",
       "record-rights",
+      "object-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
       "reference.atf-repository-dev.provider-and-context",
@@ -306,6 +307,7 @@
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
+      "docs://knowledge/com.creatio.clio/object-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
@@ -1764,6 +1766,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/operations/record-rights.md",
       "bundlePath": "resources/record-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "object-rights",
+      "title": "Object rights",
+      "description": "Canonical MCP guidance for OBJECT operation permissions (the SysSchemaOperationRight / \"Object permissions\" layer): read a role's read/create/edit/delete on an entity with get-object-rights and grant or revoke it with set-object-rights, for ANY role. Covers the object-level vs record-level vs system-operation distinction; making a portal section's object available to external users is one use case.",
+      "topicId": "creatio.object-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/object-rights",
+      "legacyUris": [
+        "docs://mcp/guides/object-rights"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/object-rights.md",
+      "bundlePath": "resources/object-rights.md",
       "mediaType": "text/plain"
     },
     {
