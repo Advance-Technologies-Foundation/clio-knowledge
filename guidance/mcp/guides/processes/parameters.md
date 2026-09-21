@@ -49,8 +49,9 @@ This article is the authoritative owner of process parameters, the mappings that
   contract - how the callee is named, which directions keep a value, what `resync` refuses. This guide
   owns what the call does at RUN TIME and how little of it you can observe:
   * THE RULE: after any change to a called process's parameters, re-synchronize every caller with
-    `subProcess: {resync: true}`. A MULTI-INSTANCE caller is the exception - it is refused, and has to be
-    edited in the designer. Nothing here lists a process's callers: `execute-esq` over `VwProcessLib`
+    `subProcess: {resync: true}`. The exception is per ELEMENT, not per caller: a sub-process element that
+    is MULTI-INSTANCE is refused and has to be edited in the designer, while the ordinary elements on that
+    same caller still re-synchronize. Nothing here lists a process's callers: `execute-esq` over `VwProcessLib`
     gives you the candidates, then `describe` each and look for a `subProcess.process` naming it.
   * A `setElement` carrying NO `subProcess` block does not write THE ELEMENT - the rest of the edit is
     applied as asked, and the element is only reported on, as a re-synchronization OWED. Three shapes DO
@@ -58,11 +59,14 @@ This article is the authoritative owner of process parameters, the mappings that
     ALREADY called (`resync: false` does not decline it - that only declines when no process is named),
     and an EMPTY `subProcess: {}`. A block naming a DIFFERENT process is a retarget: it replaces the whole
     contract, and `process-element-catalog` owns its refusals.
-  * WHAT A RE-SYNCHRONIZATION COSTS, so you can weigh sending one: where the platform cannot deliver the
-    callee it removes the element's parameters AND DELETES THEIR MAPPING ROWS, flags every dependent
-    element invalid, and the replacements it creates carry NEW UIds - so re-selecting the process does not
-    restore the bindings. A re-sync that was not needed is otherwise safe, with one cost: it clears values
-    that came from the callee's own defaults, keeps the ones the caller wrote, and says so in its notices.
+  * WHAT A RE-SYNCHRONIZATION COSTS, so you can weigh sending one. Where the callee legitimately DROPPED a
+    parameter and the write LANDS, the platform removes that parameter AND DELETES ITS MAPPING ROW, flags
+    every element that referenced it invalid, and any replacement it creates carries a NEW UId - so
+    re-selecting the process afterwards does not restore the binding. Where the callee cannot be delivered
+    at all, the same removal happens in memory and is then DISCARDED with the refusal: nothing is saved,
+    and the refusal is the protection rather than the damage. A re-sync that was not needed is otherwise
+    safe, with one cost: it clears values that came from the callee's own defaults, keeps the ones the
+    caller wrote, and says so in its notices.
   * READ ALL THE NOTICES, not one. A re-sync answers with what the platform's diff moved - parameters
     ADDED, REMOVED, RENAMED, RETYPED, values CLEARED - separately with references left DANGLING (the sites
     still bound to a parameter the element no longer carries), and separately again if it SKIPPED the

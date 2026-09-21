@@ -214,14 +214,13 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   later, blamed on the process rather than on the edit. That chain is read from platform source, not
   measured through this tool, which refuses the retarget first. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
   on a parameter the element itself owns. The dependents check does scan the element's own parameters
-  (from CrtProcessBuilder 1.6.3.26, the version that shipped this element), but it reads parameter
-  VALUES and flow conditions, not mapping rows, so a stranded row is not what it looks for. Nor does the
+  (from CrtProcessBuilder 1.6.3.26, the version that shipped this element), but it never reads
+  `schema.Mappings` - it walks stored VALUES and EXPRESSIONS - so a stranded row is not what it looks for. Nor does the
   platform clean one up: its prune arm skips a parameter whose `CreatedInSchemaUId` is the CALLER's
   schema, and that is exactly the owner-created parameter this hazard is about. Nobody has yet observed
   the state (CrtProcessBuilder T-27, open) — but treat that as unobserved, not as prevented. If a caller later reports a mapping that resolves
   to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
-  the stored metapath still matches a `uid` describe reports on that element. Conditional
-  flows sit on this list on the same reasoning, one line down. CONDITIONAL flows belong on this list
+  the stored metapath still matches a `uid` describe reports on that element. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
   conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
   gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate
