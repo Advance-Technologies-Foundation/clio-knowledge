@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.44",
+  "libraryVersion": "1.15.45",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -192,7 +192,8 @@
       "atf.creatio.custom-process-element-reference",
       "shared-client-logic",
       "db-view-entities",
-      "entity-operation-access"
+      "entity-operation-access",
+      "backend-deployment-troubleshooting"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -357,7 +358,8 @@
       "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference",
       "docs://knowledge/com.creatio.clio/shared-client-logic",
       "docs://knowledge/com.creatio.clio/db-view-entities",
-      "docs://knowledge/com.creatio.clio/entity-operation-access"
+      "docs://knowledge/com.creatio.clio/entity-operation-access",
+      "docs://knowledge/com.creatio.clio/backend-deployment-troubleshooting"
     ]
   },
   "resources": [
@@ -2626,6 +2628,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/operations/entity-operation-access.md",
       "bundlePath": "resources/entity-operation-access.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "backend-deployment-troubleshooting",
+      "title": "Backend deployment troubleshooting",
+      "description": "Backend deployment troubleshooting. Supported workflow, failure boundaries and disposable Creatio acceptance evidence.",
+      "topicId": "creatio.backend-deployment-troubleshooting",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/backend-deployment-troubleshooting",
+      "legacyUris": [
+        "docs://mcp/guides/backend-deployment-troubleshooting"
+      ],
+      "sourcePath": "guidance/mcp/guides/operations/backend-deployment-troubleshooting.md",
+      "bundlePath": "resources/backend-deployment-troubleshooting.md",
       "mediaType": "text/plain"
     }
   ]
