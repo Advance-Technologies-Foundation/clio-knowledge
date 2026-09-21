@@ -120,3 +120,5 @@ guards — it says whose rule it is and names that guide for the rest.
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
+
+- SQL views exposed as entities, IsDBView, or packaging a database view -> name=db-view-entities
