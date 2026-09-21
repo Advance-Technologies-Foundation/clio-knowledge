@@ -110,15 +110,15 @@ Creatio or disk. The guide contains:
     Merge twins the mobile template provides are untouched. SILENT — never a gate question:
     state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
     value. Null only when no standard normalized or skipped anything at all.
-  - propertyPruneApplied — whether undeclared properties were removed at all. BRANCH ON THIS: false means
-    the gate refused (platform older than the runtime-derived catalog, or undeterminable), so a property
-    mobile does not declare SURVIVING is expected, not a defect. True with no prunedProperties means the
-    page carried nothing undeclared.
+  - propertyPruneApplied — whether undeclared properties were removed. BRANCH ON THIS: false means
+    the gate refused — platform older than the runtime-derived catalog, undeterminable, or you pinned
+    version=latest — a CATALOG, not a stand. A property mobile does not declare SURVIVING is
+    then expected, not a defect. True with no prunedProperties means the page carried nothing undeclared.
   - prunedProperties — per element, the TOP-LEVEL properties removed because the target mobile type does
-    not declare them; nested keys are never pruned. Already in viewConfigDiff[].values. Never re-add one:
-    at best the runtime ignores it, at worst it breaks the page — an undeclared grid `rows` collapses the
-    row track and the fields inside it never render. SILENT, one aggregated line, EXCEPT `bindings`, which
-    carried an ACTION: report one as LOST only where requestConversions.droppedRequests also names it. On
+    not declare them; nested keys are never pruned. Already in viewConfigDiff[].values. Never re-add one —
+    an undeclared grid `rows` collapses the row track and the fields inside it never render. SILENT, one
+    aggregated line, EXCEPT `bindings`, which carried an ACTION: report one as LOST only where
+    requestConversions.droppedRequests also names it. On
     a merge, and when no request record claimed it, clio files nothing there and neither should you.
   - resourceStrings — every localized string the SOURCE PAGE DECLARES for the tokens the converted body
     references (top-level captions AND nested ones like config.title / text.template), keyed by resource
