@@ -162,7 +162,7 @@ public sealed class ProcessFormulaGuidanceTests
     }
 
     [Test]
-    [Description("Two claims this work introduced are stated as platform absolutes and the platform disagrees. A sub-process does NOT hold its children in the schema's own FlowElements - ProcessSchemaSubProcess implements IProcessSchemaFlowElementsContainer and owns its own collection - so describe-business-process, which iterates schema.FlowElements, does not see them; the delete guards do, because they walk GetBaseElements/GetParametrizedElements recursively. And a read record's column IS reachable in three segments: on the flow-condition path TryGetParameterMapPath puts an EntityColumn segment into SubParameterMetaPath and carries it. Both absolutes read as CLOSED questions, which is exactly how a reader stops looking - the practical limit is that describe hands out no column UIds, not that the platform refuses.")]
+    [Description("Two claims this work introduced are stated as platform absolutes and the platform disagrees. A sub-process does NOT hold its children in the schema's own FlowElements - ProcessSchemaSubProcess implements IProcessSchemaFlowElementsContainer and owns its own collection - so describe-business-process, which iterates schema.FlowElements, does not see them; the delete guards do, because they walk GetBaseElements/GetParametrizedElements recursively. And a read record's column IS reachable in three segments: on the flow-condition path TryGetParameterMapPath puts an EntityColumn segment into SubParameterMetaPath and carries it. Both absolutes read as CLOSED questions, which is exactly how a reader stops looking - entity metadata supplies the column UIds that process describe omits.")]
     public void ProcessGuides_ShouldNotOverstateTwoPlatformLimits() {
         // Arrange
         string dataElements = ReadGuide(DataElementsGuide);
@@ -189,9 +189,16 @@ public sealed class ProcessFormulaGuidanceTests
             because: "the flow-condition path parses a third segment - FillMatchedData routes EntityColumn "
                 + "into SubParameterMetaPath and TryGetParameterMapPath carries it - so the platform does not "
                 + "refuse what this calls impossible");
-        dataElements.Should().Contain("describe reports no column UIds",
-            because: "the real limit is discoverability, and it is the half a reader can act on: you cannot "
-                + "author a segment whose UId no read API hands you");
+        dataElements.Should().Contain("get-entity-schema-properties",
+            because: "column UIds are discoverable through entity metadata even though process describe omits them");
+        dataElements.Should().Contain("[EntityColumn:{<columnUid>}]",
+            because: "the authoring recipe must include the third segment verified by the disposable runtime");
+        dataElements.Should().NotContain("there is nowhere to GET",
+            because: "that false discoverability claim prevented agents from authoring supported branches");
+        ReadGuide(BranchGuide).Should().Contain("process-data-elements",
+            because: "branch authors need the canonical column-discovery recipe");
+        ReadGuide(FormulaGuide).Should().Contain("process-data-elements",
+            because: "formula authors need the canonical column-discovery recipe");
     }
 
     [Test]
