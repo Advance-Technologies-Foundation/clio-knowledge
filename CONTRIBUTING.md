@@ -72,9 +72,12 @@ reported waits indefinitely instead of failing. Merge `master` into the branch; 
 with it and the check starts running.
 
 Merging to `master` publishes. The **Auto-release on merge** workflow reads `libraryVersion` from
-`bundle-source.json` and starts **Release knowledge bundle** for it, unless a release for that version
-is already published — in which case the merge ships nothing and the run reports the skip. So the
-publishing decision is made in the pull request, by what it writes into `bundle-source.json`.
+`bundle-source.json` and starts **Release knowledge bundle** for it. What happens when that version is
+already published — a clean skip when no published body moved, a failing run until a bump-only pull
+request lands when one did — is stated once in
+[`distribution/RELEASING.md`](distribution/RELEASING.md#who-can-publish-and-from-where), which owns
+that contract. So the publishing decision is made in the pull request, by what it writes into
+`bundle-source.json`.
 
 Every content change needs a new `libraryVersion` in `bundle-source.json`, and the release tag must
 equal it. That is the only generation number anyone maintains: the monotonic `sequence` a consumer
