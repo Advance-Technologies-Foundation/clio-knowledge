@@ -122,3 +122,5 @@ guards — it says whose rule it is and names that guide for the rest.
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
 
 - SQL views exposed as entities, IsDBView, or packaging a database view -> name=db-view-entities
+
+- Entity CRUD access supplied by system operations (AdministratedByOperations / SysEntityRightByAdminOperation) -> name=entity-operation-access
