@@ -69,16 +69,17 @@ This article is the authoritative owner of process parameters, the mappings that
     instead of the callee's parameter names, so the test cannot be satisfied unless the callee declares
     no parameters at all, and the re-sync a `false` would call for is refused there anyway. Check
     `multiInstance` before acting on `false`
-  * WHAT `inSync` CAN SHOW YOU DEPENDS ON THE CALLER'S CACHED SCHEMA INSTANCE, and it fails silently in
-    both directions. Drift is visible only while that cached instance PREDATES the callee's change. On a
-    COLD cache the first read BUILDS the instance and building CONVERGES it, so `true` on a first read
-    says nothing about the saved metadata. What erases the drift afterwards is eviction or a converging
-    path: saving or publishing the CALLER, a configuration compile, an application restart, and any
-    operation routed through the DESIGN instance, which re-synchronizes on every fetch. Two things do
-    NOT erase it, against expectation: re-reading, which hands back the same cached object, and RUNNING
-    the caller, which executes that same stale element - that IS the silent no-delivery failure, not a
-    way to clear it. Read `describe-business-process` BEFORE changing the callee where you can;
-    afterwards treat `inSync: true` as NO EVIDENCE rather than as "intact"
+  * WHAT `inSync` CAN SHOW YOU DEPENDS ON WHICH SCHEMA INSTANCE THE MANAGER HANDS BACK, and it fails
+    silently in both directions. `describe` never re-converges what it is given. An instance cached from
+    BEFORE the callee changed reports `false`, which is real evidence. Nothing you READ evicts it: a
+    second describe, and a RUN, both reuse the same cached object. But where no instance is cached the
+    first access BUILDS one, and whether that build converges depends on the PROCESS KIND - an
+    interpretable process converges as it builds and the evidence is gone, a compiled one does not. What
+    evicts a cached instance is saving or publishing the CALLER, a configuration compile and an
+    application restart; and any operation routed through the DESIGN instance re-synchronizes on every
+    fetch regardless. So do not reason from `inSync` in isolation. USE THE RECIPE, which is correct
+    whatever the process kind and harmful in none: save the caller, `describe` it once, change the
+    callee, `describe` again. Outside it, treat `inSync: true` as NO EVIDENCE rather than as "intact"
   * what the re-sync REPORTS, from CrtProcessBuilder 1.6.3.7, is the CONSEQUENCE of a DROPPED parameter:
     it names the reference sites still bound to a parameter the element no longer carries. In practice
     those are the sites the platform's own pre-save validation does not catch first - a stored blob such
