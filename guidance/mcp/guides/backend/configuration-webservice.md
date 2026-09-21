@@ -3,6 +3,7 @@ creatio-config-webservice
 Implement or review Creatio Configuration Web Services under package EntryPoints/WebServices folders such as packages/PkgOne/src/cs/EntryPoints/WebServices or packages/PkgOne/Files/src/cs/EntryPoints/WebServices. Use when creating endpoint classes, adding web methods, defining request/response DTO contracts, mapping custom HTTP status codes, documenting NET472 vs NETSTANDARD2_0 route differences, or wiring endpoint logic to package-level DI/application services. If the task includes tests, also use configuration-webservice-tests.
 
 Non-Negotiable Rules
+- For external-user routes or `SspServiceRoute` / `DefaultServiceRoute`, read `get-guidance name=portal-service-routing`.
 - Inherit BaseService, IReadOnlySessionState.
 - Add [ServiceContract] and [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Required)].
 - Mark request and response DTOs with [DataContract] and serialized members with [DataMember].

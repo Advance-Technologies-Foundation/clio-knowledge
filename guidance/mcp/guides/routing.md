@@ -123,6 +123,8 @@ guards — it says whose rule it is and names that guide for the rest.
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
   - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
+  - external users, external organizations, PortalAccount and organization membership -> name=external-organizations
+  - custom configuration web services for portal/external users, DefaultServiceRoute or SspServiceRoute -> name=portal-service-routing
 - Record-level permission model, stored grants versus runtime/dynamic access rules, or permission-extension interfaces -> name=record-permissions
 - Runtime record-permission implementation, activation and combination modes -> name=record-permission-extensions
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights

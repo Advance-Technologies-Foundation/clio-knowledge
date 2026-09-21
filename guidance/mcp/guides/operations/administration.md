@@ -4,6 +4,8 @@ Use this article to administer users, organizational and functional roles, manag
 memberships, licenses, IP access rules, delegation and system-operation permissions.
 Record/dashboard grants remain owned by `get-guidance name=record-rights` and
 `get-guidance name=dashboard-rights`; creating a grantee and granting record access are separate steps.
+External-organization affiliation and PortalAccount linkage belong to
+`get-guidance name=external-organizations`; read it before assigning users to an external organization.
 
 ## Discover the supported contract
 
