@@ -293,10 +293,8 @@ FLOW
      carries the type and EVERY source property the mobile component supports — never drop any of
      them. It also already carries the CONVERTED event-binding requests (a button's `clicked`, a
      field's `valueChange`/`updated`): supported requests are kept (remapped when the mobile name
-     differs). A `crt.Button` whose request the mobile app does NOT support is not inserted at all — it
-     was already DROPPED (see its `droppedElements` entry), so you never see it here. Any OTHER
-     component type IS here even when its request was not supported: the component survives and only its
-     binding was dealt with — see REQUESTS in HARD MOBILE RULES for which of the two happened to it. Do NOT re-add or
+     differs). A component DROPPED over its request is not here at all — see REQUESTS in HARD MOBILE
+     RULES for which kinds that happens to, and what became of a surviving component's binding. Do NOT re-add or
      hand-edit these bindings — paste values as-is. There is NOTHING to add: the value binding is in
      `values` too, under `control`, which is the same wire name on both web and mobile (the mobile
      runtime reads the JSON key `control`; a Dart field named `value` is what it deserializes INTO, and
@@ -490,9 +488,11 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   droppedRules[] did not convert (every referenced element drops) — report them.
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
-  ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
-  that does not remap to a supported one) is DROPPED (a `droppedElements` entry whose reason names the
-  request) — a dead button is not shipped. NO OTHER component type is ever dropped over a request: some
+  ARE handled for you. ONLY a `crt.Button` or a `crt.MenuItem` — the two kinds that exist for nothing
+  but firing an action — whose request the Creatio Mobile app does NOT support (and that does not remap
+  to a supported one) is DROPPED (a `droppedElements` entry whose reason names the request); a dead
+  control is not shipped, and neither is a menu button its menu items all left (`drop-action-no-request`).
+  NO OTHER component type is ever dropped over a request: some
   legitimately use a system request absent from the list, and losing the component would lose valid UI.
   What happens to that surviving component's BINDING depends on which of the two it is, and they are
   opposite reports:

@@ -52,11 +52,23 @@ public sealed class MobileGuideResponseSizeTests
     /// came out, then to 61,607 when the sub-element clause was restated as DERIVED from the rule's one
     /// template rather than declared beside it; a ratchet goes DOWN as soon as the article does.
     /// </para>
+    /// <para>
+    /// MOVED ONCE on the reason-codes article, deliberately: 17,776 -> 18,061 (ENG-96178, drop-action-no-request).
+    /// That article is a CLOSED DICTIONARY, so a new code the converter emits is growth in kind: trimming an
+    /// unrelated entry to pay for it would degrade guidance that is still correct in order to meet a byte
+    /// budget, which is not the trade this ratchet is defending. It was paid down as far as it honestly goes
+    /// first — the new entry is four lines rather than the eight its subject would support, the two request
+    /// codes were folded onto one shared statement of the component kinds they name, and the sentence
+    /// claiming drop-unknown-request is emitted from a single site came out because ENG-96178 made it false.
+    /// The residual 285 is the entry itself. The sibling conversion article took the same change to net ZERO
+    /// instead, by collapsing its duplicate statement of the drop rule into the pointer it already carried —
+    /// that one had a real seam, this one does not.
+    /// </para>
     /// </summary>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
         ("freedom-page-web-to-mobile-conversion", 61_607),
-        ("freedom-page-mobile-reason-codes", 17_776)
+        ("freedom-page-mobile-reason-codes", 18_061)
     ];
 
     /// <summary>

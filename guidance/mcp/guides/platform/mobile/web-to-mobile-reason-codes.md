@@ -62,6 +62,10 @@ NOT LOSS — report it, and re-insert NOTHING
   drop-empty-container         Every child dropped, so the converter removed the empty shell. Automatic
                                housekeeping: do not re-create it, do not re-parent anything into it, and
                                do not ask the user about it.
+  drop-action-no-request       A BUTTON or MENU ITEM left with nothing to do: no click request of its
+                               own, and every menu item under it removed. No params. Housekeeping, not
+                               loss — the actions are reported separately, so naming the button again
+                               counts one loss twice. Do NOT re-create it.
   drop-container-no-mobile-equivalent
                                A CONTAINER whose own webType is absent from the mobile registry: the
                                wrapper is not recreated, but its CHILDREN are — each one is in
@@ -73,16 +77,14 @@ NOT LOSS — report it, and re-insert NOTHING
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is
-                               lost. Say so. params.scope when the component sat inside a
-                               non-converting scope container. Do not confuse it with
-                               drop-request-unsupported below — there the ELEMENT survives and only its
-                               binding is removed.
+                               lost. Say so. The element is a BUTTON or MENU ITEM — the only two kinds
+                               dropped over a request. params.scope when it sat inside a non-converting
+                               scope container. Do not confuse it with drop-request-unsupported below —
+                               there the ELEMENT survives and only its binding is removed.
   drop-unknown-request         params.request is in NEITHER the conversion map nor the bundled set. clio
                                cannot claim it is unavailable on mobile, only that it does not know it —
                                so if that custom request IS implemented on mobile, the action can be
-                               re-added by hand. Offer that. params.scope is ALWAYS present, unlike on
-                               drop-unsupported-request above: this code is emitted from one site, and
-                               that site is the non-converting-scope path.
+                               re-added by hand. Offer that. Same two kinds, same params.scope rule.
   drop-type-not-in-mobile-registry
                                this record's own webType has no mobile counterpart at all. No params:
                                a param that echoes a field the record already carries is a second place

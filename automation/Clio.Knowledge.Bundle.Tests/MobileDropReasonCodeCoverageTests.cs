@@ -59,6 +59,10 @@ public sealed class MobileDropReasonCodeCoverageTests
             "the orphan cascade; it names the very elements a user asks about, so an exclusion must be matched on BOTH codes"),
         ("drop-empty-container",
             "housekeeping after every child was dropped; the shell must not be re-created"),
+        ("drop-action-no-request",
+            "a button or menu item left with nothing to do once its menu items went; the actions are already "
+                + "reported one by one, so without an entry the caller counts the same loss twice and re-creates "
+                + "a control that can only be pressed to no effect"),
         ("drop-container-no-mobile-equivalent",
             "the branch is FLATTENED, not lost — the children are in viewConfigDiff under a new parent; "
                 + "without an entry this benign case is reported as loss"),
