@@ -4,7 +4,7 @@ Part of the process guide set. `process-modeling` is the entry point and indexes
 This article is the authoritative owner of process parameters, the mappings that bind them, and the date/time/lookup default macros.
 
 == Parameters / mapping / formulas ==
-- Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup),
+- Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection),
   direction (In/Out/Variable/Internal), caption, description, or referenceSchema = an object name (e.g. City) to make
   it a Lookup to that object }, and an optional value (a constant default; NOT valid for Date / Date-time /
   Time — those defaults are formula macros, see the date macro rule below. A LOOKUP default takes a bare
@@ -15,15 +15,37 @@ This article is the authoritative owner of process parameters, the mappings that
   unsettable). A user-task
   element's own parameters come from the task. The same shape is
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
-  Boolean, Date, Date-time, Time, Guid, and Lookup — other types (composite / entity / file / ...) are not
+  Boolean, Date, Date-time, Time, Guid, Lookup, and Collection (a record collection, `CompositeObjectList`,
+  whose direction defaults to `Out` unless you set one) — other types (composite object / entity / file / ...) are not
   supported yet. Name a process parameter per N8 in `process-naming`.
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.
+  Mirroring a COLLECTION output (a `CompositeObjectList`, e.g. a Read data element's `ResultCompositeObjectList`)
+  reproduces the designer's "create parameter from element" artifact in ONE step: the per-column
+  `itemProperties` are copied (name, type, tag = the column UId — the DESIGN-TIME shape a consumer binds to;
+  a collection without it is an opaque list nothing can bind to), it is tagged `<element>.<parameter>`, and a mapping from that output into the new parameter is created, so
+  the parameter is never left unbound. `value` and `referenceSchema` are refused on a collection. So is a
+  mirror of a collection output that carries NO `itemProperties`: the result would be a bound, tagged,
+  unbindable empty shape, indistinguishable from a bare collection — the refusal names the source and the two
+  ways forward (shape the source first — a Read data element in `collection` mode with explicit `columns` —
+  or declare a bare `Collection` on purpose). The same refusal covers an output whose items carry no column UId in their `tag` — only a shape the platform stamped can be reproduced. A bare
+  `type: "Collection"` IS accepted (the designer's own type-menu entry) but carries NO shape — prefer the
+  mirror. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
+  with no item properties, which the mirror therefore refuses). `describe-business-process` reports a collection parameter's `tag` and
+  `itemProperties`; both are absent on a scalar and on a bare collection — feed a described collection back
+  through `typeFromElement` naming its source, never by re-typing the shape. Nothing CONSUMES a collection
+  yet (no multi-instance / sub-process element builds) — this is the producer-side contract only.
 - Edit a parameter with `setParameter` (parameterName + parameterUpdate: any of caption/description/code/
   direction/referenceSchema/value, applied in place — the UId and its references are preserved). A
   data-type change is rejected, and referenceSchema can only RE-TARGET a parameter that is already a
-  Lookup (it cannot convert a scalar to a Lookup). Do NOT set a Date / Date-time / Time default
+  Lookup (it cannot convert a scalar to a Lookup). On a COLLECTION parameter, `typeFromElement` +
+  `typeFromElementParameter` in `parameterUpdate` refresh its `itemProperties` from the output it was CREATED
+  from — the designer's Regenerate. The pair must equal the parameter's own `tag` AND the parameter must still be
+  bound to that output: a different source, a binding since moved elsewhere, or a bare (untagged) collection is
+  refused, and retargeting is `removeParameter` + `addParameter`. The `tag` and the binding are left untouched,
+  both sides must be collections, and a shapeless source is refused here too. Nothing re-mirrors automatically when the source element's columns change, so re-issue it
+  after a `setElement` that changed the element's `columns`. Do NOT set a Date / Date-time / Time default
   through setParameter `value` — those defaults are formula macros, not plain constants; use the
   mapping + `expression` path below (addMapping overwrites, so it edits a default exactly as it
   creates one). A Lookup default IS settable through `value` as a bare record Guid

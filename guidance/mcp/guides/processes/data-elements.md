@@ -1,10 +1,11 @@
-clio MCP process-data-elements guide — record triggers, Read data and Modify data
+clio MCP process-data-elements guide — record triggers and Modify data
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This article is the authoritative owner of starting a process from a record event and of the Read data
-and Modify data elements. The `filter` all three carry is owned by `process-data-source-filters`: every
-element here says WHETHER it takes one and what that means for it, and that article says what a filter
-may contain. The Change access rights element consumes the same
+This article is the authoritative owner of starting a process from a record event and of the Modify data
+element; Read data has its own article, `process-read-data`; Add data has `process-add-data`; Delete data
+has `process-delete-data`. The `filter` these elements
+carry is owned by `process-data-source-filters`: every element here says WHETHER it takes one and what
+that means for it, and that article says what a filter may contain. The Change access rights element consumes the same
 filter; see `process-access-rights`.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
@@ -61,36 +62,17 @@ filter; see `process-access-rights`.
   retarget -- `process-data-source-filters` owns `setFilter`, and that op REPLACES the whole filter, so
   read the current one back first.
 
-== Read data element (readData) — first-record mode ==
-- A `readData` element reads the FIRST record of a sorted selection into its `ResultEntity` output
-  parameter (the whole record). Configure it with the element's `readData` block:
-    { "name": "ReadNewestContact", "type": "readData", "caption": "Read newest contact",
-      "readData": {
-        "source": "Contact",                                  // REQUIRED at create: the entity to read
-        "mode": "first",                                      // optional; "first" is the only buildable mode
-        "columns": ["Name", "Email"],                         // optional; omit or [] = read ALL columns
-        "sort": { "column": "CreatedOn", "direction": "desc" } // optional; direction defaults to "asc"
-      },
-      "filter": { "object": "Contact",
-        "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
-- `mode`: only `first` (first record of the sorted selection). The designer's other read modes —
-  collection, count, aggregation — are NOT buildable yet and are REJECTED with a clear error. An element a
-  human configured in one of those modes CANNOT be converted to first-record through this API at all — an
-  explicit `"mode": "first"` is refused too, because the conversion would leave the element's collection
-  item parameters behind. Remove the element (`removeElement`) and add a new `readData` one instead —
-  under the destructive-removal rules in `process-modeling`, since the removal cascades to this
-  element's flows and mappings and the modify path will not warn you.
-- `columns` are TOP-LEVEL entity COLUMN names (not captions); an unknown name is rejected at build. Omit the
-  list (or pass `[]`) to read all columns. A dot-separated path into a linked object (`Owner.Name`) is NOT
-  supported and is rejected — such paths exist only in hand-authored metadata (the Read data card's own
-  picker lists top-level columns only); read the whole record (omit `columns`) if you need them. `sort`
-  makes "the first record" deterministic — without it the platform reads an arbitrary first record; single
-  column only (multi-column ordering is designer-only), and the sort column must be top-level too.
-- WHICH records qualify is the element's separate `filter` block (full shape in the "Data source filters"
-  section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
-  reference `processParameter` /
-  `elementParameter` — the element runs inside a live process instance.
-- A COLUMN of the read record CAN be used in a branch condition. This article owns the recipe:
+== Read data element (readData) — MOVED ==
+- Read `process-read-data`: the block, all four modes and their outputs, the column selection and sort,
+  the collection shape and its top-N, and what a mode conversion clears.
+
+== Add data element (addData) — MOVED ==
+- Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
+
+== Reading a column of a Read data record in a branch condition ==
+- A COLUMN of a `readData` element's read record CAN be used in a branch condition, despite
+  `describe-business-process` reporting no column UIds. This article owns the canonical recipe (the
+  block and modes it applies to are `process-read-data`'s):
   1. Call `get-entity-schema-properties` for `readData.source`, WITHOUT `package-name` to read the
      merged schema. Match the column by `name` and take its `u-id` from `columns[]` — NOT a record Id.
      Include that column in `readData.columns`, or omit the list to read all columns.
@@ -107,38 +89,17 @@ filter; see `process-access-rights`.
      proves authoring, NOT runtime routing. Do not infer missing-record behavior from those two cases.
   Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;
   [validation evidence](https://github.com/Advance-Technologies-Foundation/clio/issues/1645#issuecomment-5760323479).
-- LIMITATION — record columns are NOT element parameters. A mapping or `changeData` value using
+  Column UIds are discoverable through entity metadata even though process describe omits them — that
+  is a discoverability gap this recipe closes, not a platform refusal: `FillMatchedData` routes an
+  `EntityColumn` segment into `SubParameterMetaPath` and `TryGetParameterMapPath` carries it, so the
+  platform does not refuse a third segment.
+- LIMITATION — record columns are still NOT element parameters. A mapping or `changeData` value using
   `sourceElementParameter: "Email"`, or a filter using `elementParameter.parameter: "Id"` on the read
   element, still fails with "element has no parameter". `ResultEntity` is the whole record; the branch
   recipe above does not make a column name a parameter or establish the raw-expression contract for
   mappings, values or filters. For record targeting use a process parameter or `signalStart.RecordId`.
   The separate Send email BODY macro reaches a column by NAME: `[[element:Read.ResultEntity.Column]]`;
   `process-send-email` owns that form.
-- Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
-  and its flows):
-    { "op": "setElement", "elementName": "ReadNewestContact",
-      "elementUpdate": { "readData": { "sort": { "column": "ModifiedOn", "direction": "desc" } } } }
-  Partial update: omit `source` to keep the current source object, omit `columns`/`sort` to keep the
-  current selection/order, pass `columns: []` to reset to ALL columns. RETARGETING `source` to a different
-  object is REFUSED while any other parameter still maps from the element (the refusal names each
-  dependent — re-map or remove them first, the same block the designer applies); a retarget that proceeds
-  clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
-  `setFilter`) in the same operations array. MUST, before any `setFilter` on a live process: `setFilter`
-  REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
-  back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
-  and the read-back shape. `describe-business-process` reads the whole block back
-  (`source`, `mode`, `columns` as names, `sort`), so anything the builder made round-trips into
-  create/modify. Read-back limits on a HUMAN-made element: a linked-object column is omitted from
-  `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
-  runtime's ORDER BY actually ranks first — while any further ACTIVE secondary sort entries are not
-  reported, and a `sort` write replaces the whole stored order. So for such an element the described
-  block is narrower than what it really does — do not feed it back as a full replacement.
-- A HUMAN SAVE quietly changes a builder-made element's plumbing: opening the element card and clicking OK
-  always writes `ReadSomeTopRecords = true` + `NumberOfRecords`, which a builder-made element leaves unset
-  (row count stays 1 — what "first record" means). Under the `FeatureReadDataUserTaskEntityReadOldMode`
-  feature that flag changes how many rows the element reads, and the drift is INVISIBLE to
-  `describe-business-process` (unset parameters are omitted) — a builder-made and a human-touched element
-  look identical there. Nothing to do about it at build time; know it when diagnosing a stand.
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
@@ -148,7 +109,7 @@ filter; see `process-access-rights`.
         "values": [                                            // REQUIRED at create: one entry per column
           { "column": "JobTitle", "value": "Manager" },        // plain constant — TEXT columns ONLY (see below)
           { "column": "Notes", "processParameter": "NoteTextParameter" }, // a process parameter's value
-          { "column": "AccountId", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
+          { "column": "Account", "sourceElement": "RecordModifiedSignal", "sourceElementParameter": "RecordId" }
         ] },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
@@ -187,3 +148,9 @@ filter; see `process-access-rights`.
   A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
   check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
   comes back as its raw `[#…#]` in `expression`).
+
+== Delete data element (deleteData) ==
+- Owned by its own article: `process-delete-data`. A `deleteData` element permanently deletes every record
+  its `filter` matches, every time the process runs, and the block that configures it has ONE field. Fetch
+  that article before you plan one in — it carries the count-first rule and the confirmation message you owe
+  the user, and neither is optional.

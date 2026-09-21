@@ -106,8 +106,11 @@
       "process-modeling",
       "process-element-catalog",
       "process-naming",
+      "process-read-data",
+      "process-add-data",
       "process-data-elements",
       "process-data-source-filters",
+      "process-delete-data",
       "process-parameters",
       "process-formulas",
       "process-branch-conditions",
@@ -118,8 +121,10 @@
       "process-open-edit-page",
       "process-access-rights",
       "process-send-email",
+      "process-send-email-template",
       "process-approval",
       "process-preconfigured-page",
+      "process-sub-process",
       "process-activity-connections",
       "process-version-writes",
       "process-versions",
@@ -271,6 +276,8 @@
       "docs://knowledge/com.creatio.clio/process-modeling",
       "docs://knowledge/com.creatio.clio/process-element-catalog",
       "docs://knowledge/com.creatio.clio/process-naming",
+      "docs://knowledge/com.creatio.clio/process-read-data",
+      "docs://knowledge/com.creatio.clio/process-add-data",
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-data-source-filters",
       "docs://knowledge/com.creatio.clio/process-parameters",
@@ -281,10 +288,13 @@
       "docs://knowledge/com.creatio.clio/process-task-performer",
       "docs://knowledge/com.creatio.clio/process-task-category",
       "docs://knowledge/com.creatio.clio/process-open-edit-page",
+      "docs://knowledge/com.creatio.clio/process-delete-data",
       "docs://knowledge/com.creatio.clio/process-access-rights",
       "docs://knowledge/com.creatio.clio/process-send-email",
+      "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
+      "docs://knowledge/com.creatio.clio/process-sub-process",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-version-writes",
       "docs://knowledge/com.creatio.clio/process-versions",
@@ -1363,7 +1373,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "BPMN build lifecycle, tools, descriptor, recipe, and edit safety. Read process-element-catalog before planning a graph. Routes onward to the articles that own the rest: process-element-catalog, process-naming, process-data-elements, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-approval, process-preconfigured-page, process-activity-connections, process-versions and process-version-writes. Also routes to process-custom-elements and process-custom-element-families. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the process tools, the create-business-process descriptor, the build recipe, and the safety rules for an existing process. Read process-element-catalog before planning a graph. Routes onward: process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-activity-connections, process-versions and process-version-writes. Also routes to process-custom-elements and process-custom-element-families. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1377,7 +1387,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element, sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData block, all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive and parallel gateway ELEMENTS, and the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) -- while the inclusive and event-based gateway elements, timer/message and intermediate events, scriptTask, webService, sub-process, the Add/Delete-data target object and values, and the Read data collection/count/aggregation modes are NOT buildable. Also owns the element catalog itself: the data-id -> label -> purpose vocabulary validate-process-graph speaks and describe-business-process reports, its READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) and the Sub-process element (subProcess, from 1.6.3.26) -- while inclusive/event-based gateways, timer/message and intermediate events, scriptTask and webService remain read-only, and no iterator consumes a read collection. Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1405,7 +1415,7 @@
     {
       "itemId": "process-data-elements",
       "title": "Process data elements",
-      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its buildable first-record mode, and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
+      "description": "Owns starting a Creatio process from a record event (signalStart with added/modified/deleted, changedColumns, and the setSignal in-place edit), the Read data element in its three buildable modes (first-record; count, always ResultCount and taking no column; aggregation, a function/column pair with the type-driven output), and the Modify data element target and column values -- including that its filter is effectively mandatory because the runtime refuses to update with an empty one. States for each element WHETHER it takes a filter and what that means for it; what a filter may CONTAIN is owned by process-data-source-filters.",
       "topicId": "creatio.process-data-elements",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-elements",
@@ -1414,6 +1424,28 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/data-elements.md",
       "bundlePath": "resources/process-data-elements.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-read-data",
+      "title": "Read data element",
+      "description": "Owns the Creatio Read data element (readData / ReadDataUserTask) -- the step that READS records. Covers all four buildable modes and the output each one fills (first-record into ResultEntity; collection into both the raw ResultEntityCollection and the shaped ResultCompositeObjectList a Collection process parameter mirrors; count, always ResultCount and taking no column; aggregation, a function/column pair whose output follows the column type), the column selection and sort, collection's own two refusals and its numberOfRecords top-N with the keep-on-omit rule, the write-time shaping that lets a mirror taken in the same call find a shape, and what a mode conversion clears. Split out of process-data-elements, which owns the record trigger and the sibling Modify data element.",
+      "topicId": "creatio.process-read-data",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-read-data",
+      "sourcePath": "guidance/mcp/guides/processes/read-data.md",
+      "bundlePath": "resources/process-read-data.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-add-data",
+      "title": "Add data element",
+      "description": "Owns the Creatio Add data element (addData / AddDataUserTask) -- the step that CREATES records. Covers both adding modes (one record, and one record per record of a filtered selection), the target object, the selection object and the filter that scopes it, every value source the column assignments accept including the selection-only 'Column from this selection', the omit-or-empty values rule, the RecordId output and why describe does not list it, the five setElement.addData transitions that are refused rather than half-applied, and the notices a build raises instead of refusing. Split out of process-data-elements, which owns the sibling data elements and the record trigger.",
+      "topicId": "creatio.process-add-data",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-add-data",
+      "sourcePath": "guidance/mcp/guides/processes/add-data.md",
+      "bundlePath": "resources/process-add-data.md",
       "mediaType": "text/plain"
     },
     {
@@ -1501,6 +1533,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-delete-data",
+      "title": "Delete data element",
+      "description": "Owns the Creatio Delete data element (deleteData / DeleteDataUserTask): its one-field block -- the target object, because the record filter is what decides which records are destroyed -- the absence of any delete-everything mode (the runtime always applies the filter and raises its empty-filter error without one, so a filterless element deletes NOTHING and fails), the setElement retarget that clears a filter bound to the old object, the describe read-back, and the confirmation the agent owes the user before building one: count the matching records with a count-only read, state the object, the number, the filter in plain prose and the three consequences, and get an explicit yes. Also records the two states the server itself warns about -- a build with no filter, and a retarget that cleared one.",
+      "topicId": "creatio.process-delete-data",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-delete-data",
+      "legacyUris": [
+        "docs://mcp/guides/process-delete-data"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/delete-data.md",
+      "bundlePath": "resources/process-delete-data.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-access-rights",
       "title": "Change access rights element",
       "description": "Owns the Creatio Change access rights element (changeAccessRights / ChangeAdminRightsUserTask): the accessRights block shape, the add and remove permission entries, the read/edit/delete operations and the permit/delegate/restrict levels, the three grantee kinds (role, employee by contact, and selected employees via a Contact-rooted filter the runtime evaluates with record permissions disabled), the setElement replace-and-clear semantics, the describe read-back, and the one silent runtime no-op that is NOT refused at build time -- both collections empty -- and the opposite hazard, an element with NO record filter at all, which applies the change to EVERY record of the object (a filter that IS present but carries no conditions is the inert state, and a current package refuses it at build), on an element that has no output parameters to report any of them.",
@@ -1559,7 +1605,7 @@
     {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask) in custom-message mode -- email templates are not supported. Covers auto and manual mode, the auto-mode mandatory fields (sender, to, subject, body) and the missing-body run-time trap, sender resolution -- why a missing sender fails at run time rather than at save while a malformed sender (a SysSettings formula) fails the build, the ranked recipient sources (system setting first, constant address last) and the matching sender discipline (discover configured mailboxes, reuse before creating a record, state the reason), recipients and their match-or-append semantics with no removal path, the html-only body format, and the process macros that put parameter and element values into the body, including the lookup column that renders a record Id instead of a display value.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",
@@ -1568,6 +1614,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/send-email.md",
       "bundlePath": "resources/process-send-email.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-send-email-template",
+      "title": "Send email template message",
+      "description": "Owns the Creatio Send email element's TEMPLATE message mode (CrtProcessBuilder 1.6.2.1 or newer): an existing email template by name or record id resolved at build against the Email template type, with the record its macros resolve against (templateEntity: a Lookup process parameter, a Lookup/Guid element output such as a signalStart RecordId, or an expression -- a readData ResultEntity is refused). States the refusals as the server emits them (unknown, wrong-type and ambiguous template, template beside body, object-bound template without a macro source, macro source on a template without an object), the 33-of-38 no-object fact and the read-before-promising rule, the choose-or-ask rule, the subject override, mode switching and what each switch clears, the read-back fields and clio's template-landed warning. Split out of process-send-email.",
+      "topicId": "creatio.process-send-email-template",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-send-email-template",
+      "legacyUris": [
+        "docs://mcp/guides/process-send-email-template"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/send-email-template.md",
+      "bundlePath": "resources/process-send-email-template.md",
       "mediaType": "text/plain"
     },
     {
@@ -1596,6 +1656,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/preconfigured-page.md",
       "bundlePath": "resources/process-preconfigured-page.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-sub-process",
+      "title": "Sub-process element",
+      "description": "Owns the Creatio Sub-process element (callActivity, built via type:\"subProcess\", from CrtProcessBuilder 1.6.3.26): the subProcess block, naming the callee by processName or processUId, how the element's own mirrored parameters copy from the callee and are mapped in/out, the resync flag and when a re-synchronization is owed, the build-time and edit-time refusals, describe's read-back fields, and what is NOT supported (multi-instance, event and expanded sub-processes). Split out of process-element-catalog.",
+      "topicId": "creatio.process-sub-process",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-sub-process",
+      "legacyUris": [
+        "docs://mcp/guides/process-sub-process"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/sub-process.md",
+      "bundlePath": "resources/process-sub-process.md",
       "mediaType": "text/plain"
     },
     {
