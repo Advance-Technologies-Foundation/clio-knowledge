@@ -99,6 +99,7 @@ guards — it says whose rule it is and names that guide for the rest.
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
+  - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
