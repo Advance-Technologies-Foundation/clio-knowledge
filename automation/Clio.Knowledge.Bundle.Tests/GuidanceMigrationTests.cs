@@ -25,7 +25,9 @@ public sealed class GuidanceMigrationTests
     private static readonly string[] PostMigrationGuidance =
     [
         "process-add-data",
-        "process-read-data"
+        "process-read-data",
+        "portal-service-routing",
+        "external-organizations"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

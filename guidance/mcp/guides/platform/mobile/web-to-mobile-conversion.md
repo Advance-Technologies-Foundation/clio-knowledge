@@ -111,15 +111,15 @@ Creatio or disk. The guide contains:
     state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
     value. Null only when no standard normalized or skipped anything at all.
   - propertyPruneApplied — whether undeclared properties were removed. BRANCH ON THIS: false means the
-    registry served for this platform version is not the runtime-derived one, so a property mobile does not
+    registry served for this version is not the runtime-derived one, so a property mobile does not
     declare SURVIVING is expected, not a defect. True with no prunedProperties means the page carried
     nothing undeclared.
   - prunedProperties — per element, the TOP-LEVEL properties removed because the target mobile type does
-    not declare them; nested keys are never pruned. Already in viewConfigDiff[].values. Never re-add one —
-    an undeclared grid `rows` collapses the row track and the fields inside it never render. SILENT, one
-    aggregated line, EXCEPT `bindings`, which carried an ACTION: report one as LOST only where
-    requestConversions.droppedRequests also names it. On
-    a merge, and when no request record claimed it, clio files nothing there and neither should you.
+    not declare them; nested keys are never pruned. Already applied in viewConfigDiff[].values. Never re-add
+    one — an undeclared grid `rows` collapses the row track and the fields inside it never render. SILENT,
+    one aggregated line, EXCEPT `bindings`, which carried an ACTION: report one as LOST only where
+    requestConversions.droppedRequests also names it. On a merge, and when no request record claimed it,
+    clio files nothing there and neither should you.
   - resourceStrings — every localized string the SOURCE PAGE DECLARES for the tokens the converted body
     references (top-level captions AND nested ones like config.title / text.template), keyed by resource
     name and resolved to its en-US text. Register this whole map via update-page `resources`. A key whose

@@ -76,7 +76,7 @@ public sealed class MobileGuideResponseSizeTests
     /// reasons — there is one, and naming it takes less room than listing them did.
     /// </para>
     /// <para>
-    /// STANDING PROBLEM, not caused by any move above: freedom-page-web-to-mobile-conversion is 62,559 against
+    /// STANDING PROBLEM, not caused by any move above: freedom-page-web-to-mobile-conversion is 62,558 against
     /// a SmallestObservedSpill of 50,351. It has been past that threshold for every move recorded above,
     /// which means the article this repository marks MANDATORY is in the band where the response has been
     /// observed to spill. Trimming at the margin no longer changes that; it needs a real split, and each
@@ -85,7 +85,7 @@ public sealed class MobileGuideResponseSizeTests
     /// </summary>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_559),
+        ("freedom-page-web-to-mobile-conversion", 62_558),
         ("freedom-page-mobile-reason-codes", 18_912)
     ];
 
