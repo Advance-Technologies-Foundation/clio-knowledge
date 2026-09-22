@@ -115,9 +115,9 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  and a CONSUMER
-  of a read collection (no iterator element builds, and reading one column out of the list needs ENG-91844 — all
-  four Read data modes DO build, see the catalog entry below).
+  and reading one COLUMN out of a read collection (ENG-91844) — all
+  four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance
+  Sub-process element iterates one, once per item (see the `callActivity` entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
 

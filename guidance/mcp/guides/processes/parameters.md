@@ -74,9 +74,9 @@ This article is the authoritative owner of process parameters, the mappings that
   contract - how the callee is named, which directions keep a value, what `resync` refuses. This guide
   owns what the call does at RUN TIME and how little of it you can observe:
   * THE RULE: after any change to a called process's parameters, re-synchronize every caller with
-    `subProcess: {resync: true}`. The exception is per ELEMENT, not per caller: a sub-process element that
-    is MULTI-INSTANCE is refused and has to be edited in the designer, while the ordinary elements on that
-    same caller still re-synchronize. Nothing here lists a process's callers: `execute-esq` over `VwProcessLib`
+    `subProcess: {resync: true}`. No per-element exception: a MULTI-INSTANCE element takes the
+    same request - de-converted, re-synchronized, re-converted around the same five. Skip one and its
+    per-item values, bound by NAME, quietly stop arriving. Nothing here lists a process's callers: `execute-esq` over `VwProcessLib`
     gives you the candidates, then `describe` each and look for a `subProcess.process` naming it.
   * A `setElement` carrying NO `subProcess` block does not write THE ELEMENT - the rest of the edit is
     applied as asked, and the element is only reported on, as a re-synchronization OWED. Three shapes DO
