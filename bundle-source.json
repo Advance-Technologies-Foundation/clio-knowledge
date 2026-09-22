@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.47",
+  "libraryVersion": "1.15.49",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -199,7 +199,10 @@
       "shared-client-logic",
       "db-view-entities",
       "entity-operation-access",
-      "backend-deployment-troubleshooting"
+      "backend-deployment-troubleshooting",
+      "portal-service-routing",
+      "external-organizations",
+      "reference.portal-service-lab-validation"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -371,7 +374,10 @@
       "docs://knowledge/com.creatio.clio/shared-client-logic",
       "docs://knowledge/com.creatio.clio/db-view-entities",
       "docs://knowledge/com.creatio.clio/entity-operation-access",
-      "docs://knowledge/com.creatio.clio/backend-deployment-troubleshooting"
+      "docs://knowledge/com.creatio.clio/backend-deployment-troubleshooting",
+      "docs://knowledge/com.creatio.clio/portal-service-routing",
+      "docs://knowledge/com.creatio.clio/external-organizations",
+      "docs://knowledge/com.creatio.clio/reference.portal-service-lab-validation"
     ]
   },
   "resources": [
@@ -2733,6 +2739,40 @@
       "sourcePath": "guidance/mcp/guides/operations/backend-deployment-troubleshooting.md",
       "bundlePath": "resources/backend-deployment-troubleshooting.md",
       "mediaType": "text/plain"
+    },
+    {
+      "itemId": "portal-service-routing",
+      "title": "Custom configuration services for external users",
+      "description": "DefaultServiceRoute and SspServiceRoute selection, authenticated connection boundaries and verified route acceptance.",
+      "topicId": "creatio.portal-service-routing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/portal-service-routing",
+      "sourcePath": "guidance/mcp/guides/backend/portal-service-routing.md",
+      "bundlePath": "resources/portal-service-routing.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "external-organizations",
+      "title": "External users and external organizations",
+      "description": "External identity, PortalAccount linkage and role membership, with native setup and independent verification.",
+      "topicId": "creatio.external-organizations",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/external-organizations",
+      "sourcePath": "guidance/mcp/guides/operations/external-organizations.md",
+      "bundlePath": "resources/external-organizations.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "reference.portal-service-lab-validation",
+      "title": "Portal service and external organization lab validation",
+      "description": "Version-bounded runtime evidence for route selection, authenticated connections and native external organization affiliation.",
+      "topicId": "creatio.reference.portal-service-lab-validation",
+      "role": "reference",
+      "uri": "docs://knowledge/com.creatio.clio/reference.portal-service-lab-validation",
+      "legacyUris": [],
+      "sourcePath": "references/portal-service-lab-validation.md",
+      "bundlePath": "resources/references/portal-service-lab-validation.md",
+      "mediaType": "text/markdown"
     }
   ]
 }

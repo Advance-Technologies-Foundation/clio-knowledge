@@ -283,3 +283,10 @@ Files: guidance/mcp/guides/processes/data-elements.md, bundle-source.json
 Impact: libraryVersion bumped to 1.14.16. The next person editing this article should run
 `dotnet test automation/Clio.Knowledge.Bundle.Tests --logger "console;verbosity=detailed"` and read the
 `of budget` line for process-data-elements BEFORE writing prose, not after.
+
+## 2026-09-21 - Portal routing and external organization guidance
+Context: source-grounded guidance backed by an exclusive Creatio 10.1.585 .NET 8/PostgreSQL lab.
+Decision: portal-service-routing owns route/connection boundaries; external-organizations owns PortalAccount and membership; adjacent guides cross-link.
+Discovery: 31 live cases passed, including an unaffiliated external user whose Contact has an Account. Neither SSP routing nor contact employment establishes organization affiliation.
+Files: guidance/mcp/guides/backend/portal-service-routing.md, guidance/mcp/guides/operations/external-organizations.md, references/portal-service-lab-validation.md, bundle-source.json.
+Impact: proposed generation 1.15.48; preserves old URI inventory while adding new guide/reference identities without invented historical routes. Local lab retained; no public immutable reference release claimed.

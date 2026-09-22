@@ -36,10 +36,13 @@ Two consequences worth planning for, both of them yours to decide rather than th
 Connectors are computed and stored too — straight, L, Z, U or a longer way round, with loops on a row
 of their own.
 
-The guarantee is narrow and worth reading literally: no connector crosses a SHAPE it does not enter.
+The guarantee is narrow and worth reading literally: no connector crosses a SHAPE it does not enter,
+EXCEPT on a flow the server reports it could find no clear path for and left to the designer's own
+router. On that one the user's "this arrow goes through the block" is correct, not impossible.
 Arrows MAY cross each other, may run along one line, and may leave a gateway by a vertex a sibling also
-uses — a fan-out of two or three gets an exit point each, wider ones share the bottom vertex and
-separate at their own rows.
+uses: the TRUNK branch leaves by the right edge, every other branch shares the bottom vertex and they
+separate at their own rows. Two branches therefore look like one exit each only because there is one
+non-trunk branch to place; three already share.
 
 == Reading the diagram back ==
 `describe-business-process` returns the DIAGRAM as well as the graph: `position` (a shape's top-left

@@ -245,7 +245,7 @@ most specific FIRST, and say which order you chose and why, because nothing but 
 intent.
 
 THE DIAGRAM NOW SHOWS THAT ORDER, which is the one place a human can read it. The layout in
-`process-modeling` draws a split's branches top to bottom in evaluation order, with one deliberate
+`process-diagram-layout` draws a split's branches top to bottom in evaluation order, with one deliberate
 exception: the DEFAULT branch keeps the gateway's own row, because it is the path that runs when nothing
 matched and it is what the eye follows across the picture. So the conditional branches read downward in
 the order you declared them, and the default is on the spine rather than at the bottom. Two consequences
