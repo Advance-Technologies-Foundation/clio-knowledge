@@ -142,8 +142,9 @@ processes the request is.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call.
-5. Verify: `describe-business-process` (element types, user-task names, parameter sources + direction + isResult
-   — an output you can map FROM has `isResult:true` or `direction:"Out"`; the signal trigger). Verify through
+5. Verify: `describe-business-process` (element types, user-task names, parameter sources + direction + isOutput
+   — an output you can map FROM has `isOutput:true`; do not key on `isResult`, which a Read data element carries
+   in `first` mode only; the signal trigger). Verify through
    `describe-business-process`, not a raw `execute-esq`/`odata-read` of the process record (see the readiness
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /

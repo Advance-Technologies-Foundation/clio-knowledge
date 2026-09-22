@@ -27,8 +27,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
       },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
-- `mode` and what each one produces (the output is what `describe-business-process` marks `isResult: true`,
-  and what a downstream mapping's `sourceElementParameter` names):
+- `mode` and what each one produces (the output is what `describe-business-process` lists in `readData.outputs`
+  and marks `isOutput: true` — NOT `isResult`, which the designer sets on `ResultEntity` in `first` mode only, so
+  every other mode's output reads back `isResult: false` — and what a downstream mapping's
+  `sourceElementParameter` names):
   * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
   * `collection` — EVERY matching record, into TWO outputs: `ResultEntityCollection` (the raw list) and
     `ResultCompositeObjectList` (one column per selected column). Mirror the second into a `Collection` process
@@ -102,7 +104,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   `process-data-elements` owns both recipes (steps, verified evidence).
   One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
   `[[element:Read.ResultEntity.Column]]`. The element's only output parameter
-  is `ResultEntity` (the whole record, `isResult:true` in describe); the record's columns are still NOT
+  is `ResultEntity` (the whole record, `isOutput:true` in describe); the record's columns are still NOT
   element parameters, so a STRUCTURED reference to one (e.g. `sourceElementParameter: "Email"` on the
   read element) FAILS the build with "element has no parameter". To carry a column onward, put it into a
   process parameter with a formula (`process-data-elements`). To key work off a specific record, use a

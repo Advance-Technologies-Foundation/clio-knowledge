@@ -168,9 +168,11 @@ This article is the authoritative owner of process parameters, the mappings that
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter) |
   processParameter (a process parameter by name) | value (a constant) | expression (a raw formula).
   Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process` output an element parameter
-  is usable as a mapping source when `isResult: true` OR `direction: "Out"`. Most user-task outputs come back as
-  `isResult: true` with `direction: "Variable"` (the platform reports element params as Variable), so detect
-  outputs by `isResult`, NOT by `direction` alone.
+  is usable as a mapping source when `isOutput: true`. Detect outputs by THAT, not by `isResult` or `direction`:
+  `isOutput` is derived (for most elements from `isResult` OR `direction: "Out"`), and a Read data element's
+  outputs are derived from its MODE because the designer flags `isResult` on that element in `first` mode only —
+  its collection, count and aggregation outputs read back `isResult: false`, `direction: "Variable"` and
+  `isOutput: true`. The same names sit in the element's `readData.outputs`.
   Parameter-to-parameter mappings require COMPATIBLE TYPES (target-driven, mirroring the visual designer);
   incompatible pairs are rejected:
   * text -> text: any text source into a base-text target; Phone/Email/Web/Rich targets accept only the
