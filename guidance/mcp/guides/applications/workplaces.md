@@ -97,6 +97,29 @@ other:
 on a live insert and silently absent from a hand-built binding. Ship all three — see Ship every
 change as a data binding for the full per-table column set.
 
+## Portal / external-user workplaces
+A section that PORTAL (self-service / external) users must reach lives in a workplace granted to the
+EXTERNAL audience. The end-to-end portal-section flow (page binding, this placement, object-access
+grant) is owned by `portal-sections`; here are the two workplace specifics it relies on, on top of the
+internal flow above.
+- Audience — grant the workplace to the role **All external users**
+  (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`) with a `SysAdminUnitInWorkplace` row, exactly as
+  Grant / remove a role's access describes: it is the same write, just the external audience instead of
+  an internal role. A workplace no external role can see hides the section from portal navigation.
+  Confirm the audience with the user as always, and do NOT add `All external users` to a workplace that
+  also carries internal-only sections unless exposing those to external users is intended.
+- Type — `SysWorkplace.Type` (the `SysWorkplaceType` lookup) has `Portal`
+  (`111c7ff1-8224-45b0-a24e-fcc983fc0c70`) and `Self-service` (`a77fefc0-227d-4e21-9992-a9a7ee889e21`)
+  in addition to `General` and Limited internal. The platform defaults `Type` on a live insert (see
+  Client type), so to create a PORTAL-type workplace you must set `Type` EXPLICITLY on `odata-create`
+  AND carry it in the binding — a hand-built binding does not inherit it (same silent-empty trap as
+  `SysApplicationClientType`).
+  LIMIT — NOT isolated: whether portal visibility REQUIRES `Type = Portal`, or whether a `General`
+  workplace granted to `All external users` suffices, was not A/B-tested on a live stand (it needs a
+  portal-licensed external user). Until it is, prefer a dedicated `Portal`-type workplace for a portal
+  section — it is the platform's own categorization and the conservative choice — and treat the
+  General-workplace shortcut as unverified. Record which one you used so the result can be checked.
+
 ## Ship every change as a data binding
 Each operation below is TWO steps: write the live row (`odata-create` / `odata-update`), then mirror
 it into the target package so it transfers — `create-data-binding-db` for the FIRST bind of a row
