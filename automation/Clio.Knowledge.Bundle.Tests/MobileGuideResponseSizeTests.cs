@@ -56,12 +56,17 @@ public sealed class MobileGuideResponseSizeTests
     /// <remarks>
     /// The conversion ceiling moved knowingly from 61,244 to 62,468 as the companion to clio #1562's
     /// <c>existingMobilePages</c> field and the widened <c>missingTargetPages</c> aggregation (ENG-94839):
-    /// both are real, load-bearing wire facts a caller must be told about, not padding. Lower this back
-    /// only if a future split or trim genuinely shrinks the article below this size.
+    /// both are real, load-bearing wire facts a caller must be told about, not padding. Later trims across
+    /// this same branch brought the measured size back down to 61,607 without a matching ceiling edit.
+    /// Moved again, knowingly, to 61,733: PR #174's own review (Major) required stating that a DEFINITIONAL
+    /// web-page-missing action is listed in <c>convertedRequests</c> AND <c>unresolvedTargetRequests</c>
+    /// AND <c>missingTargetPages[].references</c> at once, so an agent does not report it as working just
+    /// because it also shows up converted. That sentence is the fix the review asked for, not padding.
+    /// Lower this back only if a future split or trim genuinely shrinks the article below this size.
     /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 61_607),
+        ("freedom-page-web-to-mobile-conversion", 61_733),
         ("freedom-page-mobile-reason-codes", 17_776)
     ];
 
