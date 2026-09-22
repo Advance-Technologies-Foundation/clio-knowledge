@@ -11,14 +11,23 @@ owner -- read the one your task needs instead of guessing:
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
                                      and the element catalog (data-id -> label -> purpose).
+  * `process-diagram-layout`       - how the diagram is drawn, and the re-draw refusal.
   * `process-naming`               - N1-N10: the process caption and code, element captions and
                                      codes, parameter codes. Read it BEFORE you name anything.
-  * `process-data-elements`        - start a process from a record event (signalStart), and the Read
-                                     data and Modify data elements.
+  * `process-data-elements`        - start a process from a record event (signalStart), and the Modify
+                                     data element.
+  * `process-read-data`            - the Read data element: all four modes and their outputs, the column
+                                     selection and sort, the collection shape and its top-N.
+  * `process-add-data`             - the Add data element: both adding modes, the selection and its
+                                     filter, the column value sources, and the refused transitions.
+  * `process-delete-data`          - the Delete data element: its one-field block, why its filter is
+                                     what decides whether it works at all, and the confirmation you owe
+                                     the user before building one. Read it BEFORE planning a delete.
   * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
                                      right-hand value sources, the relative-date macro vocabulary and
                                      the signal-start restriction.
-  * `process-parameters`           - process parameters, element-parameter mappings, type
+  * `process-parameters`           - process parameters, element-parameter mappings, the SUB-PROCESS
+    element at RUN TIME (what crosses, what a re-sync reports, what `inSync` shows), type
                                      compatibility, and the date/time/lookup default macros.
   * `process-formulas`             - the `expression` mapping source and the formula
                                     vocabulary both it and a condition use
@@ -43,11 +52,17 @@ owner -- read the one your task needs instead of guessing:
   * `process-access-rights`        - the Change access rights element: the `accessRights` block,
                                      permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
-                                     HTML body and its process macros.
+                                     the custom HTML body and its process macros, and the
+                                     auto-mode checklist.
+  * `process-send-email-template`  - the Send email element's TEMPLATE message: the template and
+                                     the record its macros resolve against, the refusals, the
+                                     subject override, mode switching and the read-back.
   * `process-approval`             - the Approval element: who approves, the record under approval,
                                      and the two notifications.
   * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
                                      completing buttons, the data sources and the record they carry.
+  * `process-sub-process`          - the Sub-process element: naming the callee, the mirrored
+                                     parameters and mapping rule, resync, and its refusals.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R20 connection rules.
   * `process-versions`             - the version model, which member runs, and how to read that
@@ -62,8 +77,7 @@ article from what this one says; read that article.
   needs, their parameters, and how they connect. The server-side ProcessDesignService package owns
   metadata serialization — you NEVER hand-author process metadata, filters, or column mappings.
 - The build is DECLARATIVE: you describe the process (elements + flows + parameters + mappings) and
-  clio builds + saves it in one call. Diagram layout is automatic (start leftmost, end rightmost, no
-  overlap) — do not set positions.
+  clio builds + saves it in one call. The diagram is drawn for you — do not set positions.
 - Tools:
   * list-user-tasks         — the user-task palette (name + uid); pass a name as `userTaskName`.
     CAVEAT: it lists RETIRED schemas as equal peers with no marker — `CallUserTask`, `EmailUserTask` and
@@ -127,7 +141,7 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
-4. `create-business-process(descriptor)` -> builds + saves in one call (layout is automatic).
+4. `create-business-process(descriptor)` -> builds + saves in one call.
 5. Verify: `describe-business-process` (element types, user-task names, parameter sources + direction + isResult
    — an output you can map FROM has `isResult:true` or `direction:"Out"`; the signal trigger). Verify through
    `describe-business-process`, not a raw `execute-esq`/`odata-read` of the process record (see the readiness
@@ -136,12 +150,16 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
    signal/readData/
-   changeData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
+   changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` on the matching data element only (see `process-data-elements` for their
-   partial-update and source-retarget rules), `accessRights` on a Change access rights element only — MUST: a supplied
+   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData
+   and changeData, `process-read-data` for readData, `process-add-data` for addData — their partial-update, mode-switch and
+   source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
+   retarget clears the record filter, and an element left without one deletes nothing and fails at run
+   time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
+   yes before sending, the same duty a build carries (see `process-delete-data`), `accessRights` on a Change access rights element only — MUST: a supplied
    `add`/`remove` REPLACES that whole collection, destroying every grant it does not restate while widening
    access to whoever it names, on live records, and the element reports nothing at run time; show the user
    the target object, the record `filter` and every grantee with its operations and level, and get an
@@ -193,18 +211,42 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- If describe shows constructs the builder cannot create (gateway ELEMENTS, default flows,
-  sub-process, timer/message/intermediate events), they survive a save untouched as data — but you CAN
-  still remove or rewire them by name and nothing will warn you. CONDITIONAL flows belong on this list
+- If describe shows constructs the builder cannot create (inclusive and event-based gateways,
+  timer/message starts, intermediate events, `scriptTask`, `webService`; `process-element-catalog` owns
+  the full list), they survive a save untouched as data — but you CAN still remove or rewire them by name
+  and nothing will warn you. Gateway ELEMENTS, DEFAULT flows and the Formula element are no longer on
+  that list: all are buildable, `process-branch-conditions` and `process-element-catalog` own them.
+- The SUB-PROCESS element is NOT on that list — it is buildable (`type:"subProcess"`, from
+  CrtProcessBuilder 1.6.3.26, `process-element-catalog`) and the build path does warn you. It gets its
+  own caveat, on a different axis: CREATING one is safe, REWIRING an existing one — retargeting its
+  called process, deleting it, editing its parameters — is high-risk. The build path REFUSES two of the
+  hazards by name: an element that is already multi-instance, and a retarget while live dependents still
+  read from the element. Let those refusals stand rather than routing around them. Multi-instance is not
+  an edge case — 61 of the 416 sub-process elements in the shipped package corpus are in that state
+  (scanned 2026-09-12 over the local PackageStore, 1 099 package roots; recorded in the CrtProcessBuilder
+  repository as `docs/sub-process-element-capture.md`). What is NOT guarded: `validate-process-graph`
+  carries no parameter or mapping rule at all, so nothing here is caught by planning. And if a retarget
+  DOES go through — through the designer, which has no such guard — the platform removes the orphaned
+  parameters and flags every element that referenced them invalid, so the process refuses to START
+  later, blamed on the process rather than on the edit. That chain is read from platform source, not
+  measured through this tool, which refuses the retarget first. A third hazard is UNOBSERVED rather than guarded: a mapping row stranded
+  on a parameter the element itself owns. The dependents check does scan the element's own parameters
+  (from CrtProcessBuilder 1.6.3.26, the version that shipped this element), but it never reads
+  `schema.Mappings` - it walks stored VALUES and EXPRESSIONS - so a stranded row is not what it looks for. Nor does the
+  platform clean one up: its prune arm skips a parameter whose `CreatedInSchemaUId` is the CALLER's
+  schema, and that is exactly the owner-created parameter this hazard is about. Nobody has yet observed
+  the state (CrtProcessBuilder T-27, open) — but treat that as unobserved, not as prevented. If a caller later reports a mapping that resolves
+  to nothing, that is the state to look for, and the test is whether the `[Parameter:{…}]` UId inside
+  the stored metapath still matches a `uid` describe reports on that element. CONDITIONAL flows belong on this list
   even though you CAN build one, and `process-branch-conditions` owns the detail: removing the last
   conditional flow off an element leaves it with plain flows only, the platform stops synthesizing the
   gateway, and EVERY outgoing flow is then taken — a parallel split where an approval or threshold gate
   used to be, which describe reports as `kind: "sequence"` on both, reading exactly like "condition
   cleared, as asked". Treat such a process as high-risk:
   prefer additive edits, do not remove or rewire those elements, and tell the user what you left alone.
-- Every modify re-applies the automatic layout to the WHOLE diagram: a hand-arranged multi-lane or
-  branched diagram is flattened into generated left-to-right rows (process data intact, manual layout
-  lost). Warn the user before editing a process with a curated diagram.
+- Every modify re-draws the WHOLE diagram, and where that would REPLACE an arrangement the server
+  REFUSES the edit and asks rather than flattening it. `process-diagram-layout` owns that refusal and
+  its two answers; read it before editing a process whose diagram matters.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to

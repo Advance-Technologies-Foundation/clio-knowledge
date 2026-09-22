@@ -96,6 +96,10 @@ unknown setting. Build the token yourself, in two steps:
    * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
    * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
+For a COLUMN inside a read element's `ResultEntity`, read `process-data-elements`: it owns discovering
+the column UId through `get-entity-schema-properties` and authoring the third segment on a branch
+condition. A missing column UId in describe does not make that condition unauthorable.
+
 Worked example — note the target is a FLOAT parameter: `Math.Ceiling` returns `decimal`, and a decimal
 result into an Integer parameter is refused by the result-type rule below. `describe-business-process`
 reports a process parameter `PriceParameter` with

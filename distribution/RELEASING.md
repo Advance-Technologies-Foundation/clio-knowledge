@@ -54,8 +54,12 @@ suite** check passed. Repository administrators can bypass that protection; noth
 
 **Auto-release on merge** runs on every push to `master`, reads `libraryVersion` from
 `bundle-source.json`, and starts **Release knowledge bundle** for that version. When a published
-release for the version already exists it skips and says so, so a merge that bumped no version ships
-nothing. It never chooses a version and never commits: the version comes from the merged pull request,
+release for the version already exists it looks at what the merge actually moved: if no published
+body differs from that release's tag it skips and says so, so a merge that bumped no version and
+changed no content ships nothing. If a published body *did* move under an already-published version
+the run **fails**, and keeps failing on every later push to `master` until a bump-only pull request
+lands — the merge shipped nothing and that has to stay visible rather than passing quietly. It never
+chooses a version and never commits: the version comes from the merged pull request,
 and everything else about the generation — the sequence, the packed transport version — is derived
 from it.
 

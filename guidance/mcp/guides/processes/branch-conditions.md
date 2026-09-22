@@ -54,7 +54,9 @@ everything exists.
 `[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
 before you rely on it. A `readData` in `first` mode, the only mode clio builds, exposes exactly one output
 and it is a RECORD (`ResultEntity`). Testing one of its COLUMNS needs a third meta-path segment
-(`[EntityColumn:]`) that no name can express, so a column test goes through the modify path. That is not a
+(`[EntityColumn:]`) that the create-time name form cannot express, so a column test goes through the modify
+path. `process-data-elements` owns the recipe: discover the column UId with
+`get-entity-schema-properties`, then combine it with the element/parameter UIds from describe. That is not a
 corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
 
 > Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
@@ -69,7 +71,8 @@ guess: without it the platform answers `Formula value error: Expression expected
 neither, and the entire call is aborted.
 
 **ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
-exists, so `describe-business-process` reports every UId. The two-step route — build the flow plain,
+exists, so `describe-business-process` reports the element and parameter UIds (column UIds come from the
+`process-data-elements` recipe). The two-step route — build the flow plain,
 then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
 one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`,
 (for a conditional one) `condition`, and an optional `label`.
@@ -240,6 +243,14 @@ two formula branches leave the same element, the FIRST whose condition is true i
 fires above 100 and one that fires above 1000 resolve differently purely by which was added first. Add the
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
+
+THE DIAGRAM NOW SHOWS THAT ORDER, which is the one place a human can read it. The layout in
+`process-diagram-layout` draws a split's branches top to bottom in evaluation order, with one deliberate
+exception: the DEFAULT branch keeps the gateway's own row, because it is the path that runs when nothing
+matched and it is what the eye follows across the picture. So the conditional branches read downward in
+the order you declared them, and the default is on the spine rather than at the bottom. Two consequences
+worth knowing before you write: declare the main path first when a gateway has no default, and expect a
+gateway that GAINS a default later to move its existing branches down a row.
 
 One exception, and it decides the DIALECT rather than the order: when a connector's source
 enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula, the

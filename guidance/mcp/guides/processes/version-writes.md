@@ -82,6 +82,15 @@ earlier in the session is not standing consent for a high-impact write. Before e
 which version becomes actual and that the call re-saves the whole family; call it on the answer to
 THAT, not on the answer to Q2.
 
+A layout refusal RE-OPENS Q1 for that one edit, whatever the session answer was. From CrtProcessBuilder
+1.6.5.14 `modify-business-process` refuses an edit that would re-draw the diagram rather than extend it,
+and the answer it offers is a new version -- so a session answer of "edit the current version" does not
+survive it. Put the refusal in front of the user, ask whether this edit should become a version, and on
+yes send the SAME operations to `modify-business-process-as-new-version`, which never refuses over
+layout. Q2 then follows normally, and matters MORE here than usual: the new version's diagram is laid
+out afresh, so "look at it before making it actual" is the whole point of asking.
+`process-diagram-layout` owns what counts as a re-draw.
+
 That policy is YOUR behaviour, not a field on any request. Neither tool takes a "session mode", and no
 call inherits anything from a previous one: every call states its own destination, and nothing is
 carried over from the last one. So "the user said new versions from now on" changes which tool you

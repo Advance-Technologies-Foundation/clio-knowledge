@@ -37,7 +37,12 @@ N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrA
     package name only to break a real collision, never as blanket disambiguation. NO autonumber, NO
     random suffix, NO GUID fragment — the designer's own `Process_3d0825b` shape is what this prevents.
 N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
-    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone.
+    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone. It matters
+    more now that the calling element is buildable (CrtProcessBuilder 1.6.3.26): the callee is named by
+    schema name or display caption, and an ambiguous caption is refused rather than guessed — see
+    `process-element-catalog` for that resolution rule — so a self-describing code is what makes the
+    reference unambiguous the first time. (The CALLER's element caption is N4's subject: name what the
+    call achieves, "Approve the discount", not the process it runs.)
 N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never leave it to a default.
     Sentence case, <= 60 characters, short enough to read inside the diagram box. The SHAPE follows what
     the element IS:
@@ -51,6 +56,15 @@ N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never l
     Prefer the plainest statement of the action or the outcome over a stylistic variant. The element CODE
     is derived from this caption (N5), so the caption is the only free choice in the pair and a reworded
     caption drags its code with it — which is why N9's stability rule reaches back to this one.
+    LENGTH HAS A SECOND, PHYSICAL REASON on a GATEWAY: the designer draws a caption UNDER the shape, wrapped
+    to roughly 22 characters a line, and the rows of the generated diagram are 130 px apart. A 55-px rhomb
+    plus three caption lines fills that gap, so a third line touches the connector label of the branch
+    leaving for the next row. Keep a gateway caption to TWO lines (~44 characters) and the picture stays
+    readable; nothing refuses a longer one, it just collides. The numbers are the CLIENT's, not estimates:
+    the wrap width (130 px) and the line box (14.39 px) were read off the running designer and the row
+    pitch off the shipped corpus, and all three are constants in `CrtProcessBuilder`
+    (`ProcessDesignConstants.Layout`); ~22 characters is 130 px through that package's own per-glyph width
+    table (`Layout/CaptionMetrics`), so it varies with the actual letters.
     This is the only text a no-code reviewer sees on the diagram, so an unset or padded caption is what
     makes a generated process unreviewable.
     EVERY element type accepts one — verified across the whole buildable slice, events included:
@@ -138,6 +152,12 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     result`, `no record found`, `Distribute later`, `Complete`, `Default flow`, and plain `Yes` / `No`.
     Repeating the expression is the thing to avoid: it is already one click away on the flow itself, and
     `Budget > 10 000` on the connector tells a no-code reader nothing the diagram did not already imply.
+    KEEP IT SHORT for a physical reason as well: the designer centres a connector's label on the middle of
+    the arrow, and several branches leaving one gateway put their labels on parallel segments about 65 px
+    apart. A label of roughly 20 characters sits inside that; a sentence spills across the neighbouring
+    arrow. The corpus phrases above are all in that range, which is not a coincidence. The 65 px is half
+    the 130-px row pitch measured on the shipped corpus (`ProcessDesignConstants.Layout.BranchStep`), and
+    ~20 characters is that width through the same per-glyph table as N4's figure.
     The field is `flows[].label` on `create-business-process` and a `label` argument on `addFlow` /
     `setFlow`; the member first shipped in `CrtProcessBuilder` **1.6.0.8**. Read that as provenance, not
     as a check to run: an archive cut from a line that never carried the member can hold a HIGHER number

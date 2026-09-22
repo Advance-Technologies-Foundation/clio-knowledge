@@ -67,7 +67,10 @@ public sealed class ReferenceGuidanceMigrationTests
         using JsonDocument source = ReadManifest(repositoryRoot);
 
         // Act
-        JsonElement[] references = ReferenceResources(source).ToArray();
+        JsonElement[] allReferences = ReferenceResources(source).ToArray();
+        JsonElement[] newReferences = allReferences.Where(resource =>
+            resource.GetProperty("itemId").GetString() == "reference.portal-service-lab-validation").ToArray();
+        JsonElement[] references = allReferences.Except(newReferences).ToArray();
         string[] legacyUris = references
             .SelectMany(resource => resource.GetProperty("legacyUris").EnumerateArray())
             .Select(uri => uri.GetString()!)
@@ -77,6 +80,10 @@ public sealed class ReferenceGuidanceMigrationTests
         // Assert
         references.Should().HaveCount(43,
             because: "the migration must preserve all 36 composable-app and seven web-service supporting references");
+        newReferences.Should().ContainSingle(
+            because: "the portal lab adds one new supporting reference without inventing a historical route");
+        newReferences[0].GetProperty("legacyUris").GetArrayLength().Should().Be(0,
+            because: "a newly published reference has no migrated URI");
         legacyUris.Should().Equal(ExpectedLegacyUris.OrderBy(uri => uri, StringComparer.Ordinal),
             because: "every former docs://mcp/references route needs an exact compatibility identity");
         references.Should().OnlyContain(resource =>
