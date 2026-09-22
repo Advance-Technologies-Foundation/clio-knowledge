@@ -110,10 +110,10 @@ Creatio or disk. The guide contains:
     Merge twins the mobile template provides are untouched. SILENT — never a gate question:
     state EACH section in the plan and the final report as ONE aggregated line. Never restore the web
     value. Null only when no standard normalized or skipped anything at all.
-  - propertyPruneApplied — whether undeclared properties were removed. BRANCH ON THIS: false means
-    the gate refused — platform older than the runtime-derived catalog, undeterminable, or you pinned
-    version=latest — a CATALOG, not a stand. A property mobile does not declare SURVIVING is
-    then expected, not a defect. True with no prunedProperties means the page carried nothing undeclared.
+  - propertyPruneApplied — whether undeclared properties were removed. BRANCH ON THIS: false means the
+    registry served for this platform version is not the runtime-derived one, so a property mobile does not
+    declare SURVIVING is expected, not a defect. True with no prunedProperties means the page carried
+    nothing undeclared.
   - prunedProperties — per element, the TOP-LEVEL properties removed because the target mobile type does
     not declare them; nested keys are never pruned. Already in viewConfigDiff[].values. Never re-add one —
     an undeclared grid `rows` collapses the row track and the fields inside it never render. SILENT, one

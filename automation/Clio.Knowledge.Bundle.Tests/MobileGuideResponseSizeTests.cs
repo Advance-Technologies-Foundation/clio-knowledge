@@ -71,9 +71,12 @@ public sealed class MobileGuideResponseSizeTests
     /// DOWN when a field stops shipping, not just when prose is tightened. Lowered again to 62,632 when the
     /// gate learned to refuse an explicit version=latest: the article had to name that third refusal case,
     /// and the clause was paid for by tightening the two entries around it rather than by moving the number.
+    /// Lowered once more to 62,559 when the version gate was dropped entirely: the prune now reads the loaded
+    /// registry rather than the stand's version, so the field list no longer has to enumerate three refusal
+    /// reasons — there is one, and naming it takes less room than listing them did.
     /// </para>
     /// <para>
-    /// STANDING PROBLEM, not caused by any move above: freedom-page-web-to-mobile-conversion is 62,632 against
+    /// STANDING PROBLEM, not caused by any move above: freedom-page-web-to-mobile-conversion is 62,559 against
     /// a SmallestObservedSpill of 50,351. It has been past that threshold for every move recorded above,
     /// which means the article this repository marks MANDATORY is in the band where the response has been
     /// observed to spill. Trimming at the margin no longer changes that; it needs a real split, and each
@@ -82,7 +85,7 @@ public sealed class MobileGuideResponseSizeTests
     /// </summary>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_632),
+        ("freedom-page-web-to-mobile-conversion", 62_559),
         ("freedom-page-mobile-reason-codes", 18_912)
     ];
 
