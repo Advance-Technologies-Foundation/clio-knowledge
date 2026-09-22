@@ -61,7 +61,7 @@ leaf rather than through `process-modeling`.
         one level down, where the contract lives. `null` there means the callee could not be read:
         UNKNOWN, never "out of sync".
     MULTI-INSTANCE — run the callee ONCE PER ITEM of a collection. BUILDABLE from CrtProcessBuilder
-    **1.6.6.11** through `subProcess.multiInstanceOptions` `{enabled?, executionMode?, ignoreErrors?}`.
+    **1.6.6.12** through `subProcess.multiInstanceOptions` `{enabled?, executionMode?, ignoreErrors?}`.
       * `enabled: true` converts, `false` de-converts. De-conversion is a DESTRUCTIVE write in SHAPE:
         the element stops carrying the five and carries the callee's parameters again, so every dotted
         name stops addressing anything. A value you MAPPED survives it — the mapping row pairs source and
