@@ -119,6 +119,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
+  - make a Freedom UI section reachable by PORTAL / self-service (external) users — the end-to-end flow that sequences page binding, workplace placement, and object-access grant for the All external users audience (deny-by-default) -> name=portal-sections
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
