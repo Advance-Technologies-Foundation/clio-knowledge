@@ -122,25 +122,26 @@ This article is the authoritative owner of process parameters, the mappings that
     A caller re-synchronized against the version you edited can therefore still call a different one, and
     nothing in a read tells you so - check which version of the callee is active before concluding that a
     correct re-sync fixed the delivery.
-  * `inSync` IS NOT A DRIFT REPORT. It compares NAMES and nothing else, CASE-INSENSITIVELY, in ONE
-    direction - whether every parameter the callee currently declares is PRESENT on the element. So it
-    catches an ADD, and misses a REMOVE, a caption change, and a CASE-ONLY code rename, which the runtime
-    does bind on. On a MULTI-INSTANCE element `false` is permanent and meaningless (the element carries
-    two collections and three iteration counters instead of the callee's names), so check `multiInstance`
-    first, then read `multiInstanceOptions.calleeInSync` — the SAME one-directional test asked one level
-    down, against the collections' item properties, where that element's contract lives. `false` there DOES
-    mean a re-synchronization is owed, and `subProcess.resync: true` is how to ask. And `true` can simply mean the read repaired the element on its way to you: materialising a
-    schema instance from metadata re-synchronizes every sub-process element on it, and so does every fetch
-    of the DESIGN instance - the path every write takes. Never read `true` as "intact".
+  * `inSync` IS NOT A DRIFT REPORT. It compares NAMES only, CASE-INSENSITIVELY, in ONE direction: whether
+    every parameter the callee declares is PRESENT on the element. So it catches an ADD, and misses a
+    REMOVE, a caption change, and a CASE-ONLY code rename, which the runtime does bind on. On a
+    MULTI-INSTANCE element it says nothing EITHER way: it reads the ROOT parameters, which there are the
+    five service ones, so it is `false` whenever the callee declares anything and VACUOUSLY TRUE when it
+    declares nothing - an `all` over an empty set. Check `multiInstance` first, then
+    `multiInstanceOptions.calleeInSync`: the same test one level down, in the collections' item
+    properties, where that element's contract lives. `false` there DOES mean a
+    re-synchronization is owed; ask with `subProcess.resync: true`. A `true` means nothing on its own -
+    besides the vacuous case, the read repairs the element on its way to you: materialising a schema
+    instance from metadata, and every fetch of the DESIGN instance, re-synchronizes every sub-process
+    element on it. Never read `true` as "intact".
   * A parameter on the element that the callee does NOT declare is not necessarily damage. One the CALLER
     created, with no mapping row, is a legitimate and permanent state: no re-synchronization removes it.
   * IF YOU NEED `inSync` AS EVIDENCE, use the recipe - save the caller, `describe` it once, change the
     callee, `describe` again - and know its limits. Step 1 is a WRITE that converges and persists the
     element, so it erases any drift that had already happened. The caller must not be saved again in
-    between, because a second save re-converges and re-persists it. And it can only ever reveal an ADD or
-    a non-case rename. If those limits do not fit, skip the recipe and just re-synchronize - its notices
-    are computed against the callee as the manager currently holds it, which a save of the CALLEE
-    refreshes.
+    between, because a second save re-converges and re-persists it. If those limits do not fit, skip the
+    recipe and just re-synchronize - its notices are computed against the callee as the manager currently
+    holds it, which a save of the CALLEE refreshes.
   * A RENAME is followed automatically. The element parameter is paired to the callee's through the
     mapping row's source UId rather than by name, so the element's copy keeps its own UId while its name,
     caption, data type, direction and five other properties are overwritten from the callee. Whether its
