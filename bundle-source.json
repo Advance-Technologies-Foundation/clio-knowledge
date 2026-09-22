@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.48",
+  "libraryVersion": "1.15.51",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -193,6 +193,7 @@
       "record-permission-extensions",
       "atf.creatio.record-permissions-reference",
       "process-custom-elements",
+      "process-diagram-layout",
       "process-custom-element-families",
       "atf.creatio.custom-process-element-reference",
       "shared-client-logic",
@@ -367,6 +368,7 @@
       "docs://knowledge/com.creatio.clio/record-permission-extensions",
       "docs://knowledge/com.creatio.clio/atf.creatio.record-permissions-reference",
       "docs://knowledge/com.creatio.clio/process-custom-elements",
+      "docs://knowledge/com.creatio.clio/process-diagram-layout",
       "docs://knowledge/com.creatio.clio/process-custom-element-families",
       "docs://knowledge/com.creatio.clio/atf.creatio.custom-process-element-reference",
       "docs://knowledge/com.creatio.clio/shared-client-logic",
@@ -1381,7 +1383,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the process tools, the create-business-process descriptor, the build recipe, and the safety rules for an existing process. Read process-element-catalog before planning a graph. Routes onward: process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-activity-connections, process-versions and process-version-writes. Also routes to process-custom-elements and process-custom-element-families. Each article in the set is sized to be read whole through get-guidance.",
+      "description": "Entry point for Creatio business-process work and owner of the build lifecycle: the process tools, the create-business-process descriptor, the build recipe, and the safety rules for an existing process. Read process-element-catalog before planning a graph. Routes onward: process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-activity-connections, process-versions and process-version-writes. Also routes to process-diagram-layout, process-custom-elements and process-custom-element-families. Each article in the set is sized to be read whole through get-guidance.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -2641,6 +2643,20 @@
       "mediaType": "text/plain",
       "legacyUris": [
         "docs://mcp/guides/process-custom-elements"
+      ]
+    },
+    {
+      "itemId": "process-diagram-layout",
+      "title": "Business process diagram layout",
+      "description": "How the generated diagram is arranged and routed, what describe-business-process reports about the picture, and the refusal an edit that would re-draw a hand-arranged diagram gets.",
+      "topicId": "creatio.process-diagram-layout",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-diagram-layout",
+      "sourcePath": "guidance/mcp/guides/processes/diagram-layout.md",
+      "bundlePath": "resources/process-diagram-layout.md",
+      "mediaType": "text/plain",
+      "legacyUris": [
+        "docs://mcp/guides/process-diagram-layout"
       ]
     },
     {
