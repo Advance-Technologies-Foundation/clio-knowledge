@@ -59,12 +59,11 @@ Creatio or disk. The guide contains:
     environment-derived flag is ABSENT rather than false — report that nothing was established, and do
     NOT tell the user the page is unregistered. isFormPage is read from the page itself and is present
     either way.
-  - existingMobilePages — mobile page(s) ALREADY covering the entity/page being converted (the
-    reuse-vs-convert-again fact): a `section` match comes from sectionRegistration's mobile-section
-    state, an `entity-default-mobile-page` match comes from the bound entity's MobileRelatedPage add-on.
-    Each entry carries schemaName, schemaUId, source. A match naming the schema THIS run is about to
-    create/update is excluded. Ask the developer to reuse or convert again when non-empty; empty means
-    the probe ran and found none, not that it did not run.
+  - existingMobilePages — mobile page(s) already covering the entity/page (reuse-vs-convert-again fact):
+    `section` comes from sectionRegistration's mobile-section state, `entity-default-mobile-page` from
+    the bound entity's MobileRelatedPage add-on. Each entry carries schemaName, schemaUId, source; the
+    schema THIS run would create/update is excluded. Ask to reuse or convert again when non-empty; empty
+    means none found, not unprobed.
   - layoutResolution — set ONLY when the source page HAD components and the converted layout came out
     empty. A legitimately layout-less page and a conversion that lost everything look identical without
     it, so treat its presence as a STOP: report it and do not build a body. The usual cause is an
@@ -127,31 +126,20 @@ Creatio or disk. The guide contains:
     and friends while declaring none of them). Inventing a key would REPLACE a localized column title
     with one hardcoded culture. If a token still renders raw on the device, the fix is the entity column
     or the source page's resources — not a key added here.
-  - requestConversions.unresolvedTargetRequests — actions whose request type converts but whose
-    NAVIGATION TARGET the converter could not confirm exists on mobile. Every entry keeps its CONTROL;
-    whether its ACTION stays is `bindingRemoved`, read together with `state`:
-      • `missing` + `bindingRemoved: true` — DEFINITIONAL: target is a web page, no read needed. The
-        request still converts and the binding STAYS in `viewConfigDiff[].values` — only its target param
-        (`params.schemaName`) is blanked to `""`, also listed in `droppedRequests` under
-        `drop-request-target-missing`. Not usable as-is (an empty `schemaName` still fails every tap).
-        No `originalBinding` field — once the target resolves, patch `params.schemaName` on the SAME
-        binding by `elementName`/`binding`; every other param was never touched.
-      • `missing` + `bindingRemoved: false` — a READ found the object's default mobile page absent. A
-        read cannot PROVE absence, so nothing changed on the binding. `resolvedCandidateSchemaName` is
-        that read's candidate WEB edit page (only for this `targetKind`+`missing`, else null) — not
-        confirmed. Report and name the remedy; never present as certain or strip.
-      • `unknown` — unverified (`bindingRemoved` always false). Ask the user to confirm.
-    `targetKind` names which kind and so which remedy; `target` names it. `targetsProbed` false = never
-    asked (empty list is "not checked"); `targetsNote` says why. No `resolvedSourceType` /
-    `recommendedAction` field exists — the guide never classifies.
-    `missingTargetPages` is the deduplicated queue of missing mobile pages to offer next. It now covers
-    BOTH kinds: every `web-page` target (queued unconditionally) and every `entity-default-mobile-page`
-    target verified `missing` (a `state: unknown` entity target stays reported-only in
-    `unresolvedTargetRequests`, never queued here). An entity row keys on `resolvedCandidateSchemaName`
-    when resolved, else the raw `target` name; a `web-page` row sharing that schema name collapses into
-    the SAME row, carrying references from both sources — `targetKind` on a collapsed row is `web-page`.
-    Each reference names its own `elementName`/`binding` to repoint: patch the existing binding's target
-    param once the target resolves; there is no snapshot field to restore from.
+  - requestConversions.unresolvedTargetRequests — actions whose request converts but whose NAVIGATION
+    TARGET could not be confirmed on mobile. The CONTROL always stays; `bindingRemoved` says whether the
+    binding's target param was blanked, read with `state`:
+      • `missing` + `bindingRemoved: true` — DEFINITIONAL (web page): request converts; `params.schemaName`
+        blanked to `""` (also `droppedRequests`/`drop-request-target-missing`). No `originalBinding`;
+        repoint by patching `params.schemaName` on that binding via `elementName`/`binding`.
+      • `missing` + `bindingRemoved: false` — a READ found no default mobile page; cannot PROVE absence,
+        so nothing changed. `resolvedCandidateSchemaName` is that read's unconfirmed WEB-page candidate.
+      • `unknown` — unverified; ask the user.
+    `targetKind`/`target` name the kind and remedy; `targetsProbed` false = never asked. No
+    `resolvedSourceType`/`recommendedAction`.
+    `missingTargetPages` dedupes both kinds (web-page always; entity-default-mobile-page only when
+    verified missing), keyed by `resolvedCandidateSchemaName` or `target`; a shared schema collapses
+    into one row (`web-page` wins). Repoint via each reference's `elementName`/`binding`.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
     validators, converters). REPORT ONLY: nothing here transfers, and re-implementing the behaviour is
     an entity-level business-rule job, not a body change.
@@ -515,11 +503,10 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
       `flag-request-unmapped`, for you to verify with the user.
   A supported request is kept in
   viewConfigDiff[].values (the operation's name is already the mobile one) — paste the values verbatim.
-  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost —
-  including on a component that SURVIVED, which is a loss `droppedElements` by construction never
-  shows), flaggedRequests, unresolvedTargetRequests, and missingTargetPages (both above). Tell the
-  user which action components were removed AND which surviving
-  components lost an action.
+  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
+  a SURVIVING component — a loss `droppedElements` never shows), flaggedRequests,
+  unresolvedTargetRequests, and missingTargetPages (both above). Tell the user which action components
+  were removed AND which surviving components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
   get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info
