@@ -64,14 +64,19 @@ redrawn with it (process data intact, manual layout lost).
 
 That is not a side effect to work around — stored connector geometry is absolute canvas coordinates, so
 anything the engine did not recompute would stay frozen where no shape stands any more. From
-CrtProcessBuilder 1.6.5.9 a caption the designer recorded a position for is released with the rest and
+CrtProcessBuilder 1.6.5.13 a caption the designer recorded a position for is released with the rest and
 returns to the middle of what it names; an OLDER server leaves it pinned, which strands a branch label
 at the coordinates the arrow used to pass through.
 
 == The refusal, and the two questions behind it ==
-From CrtProcessBuilder 1.6.5.9 the server REFUSES an in-place edit that would re-draw the diagram
+From CrtProcessBuilder 1.6.5.13 the server REFUSES an in-place edit that would re-draw the diagram
 rather than extend it. An OLDER server asks nothing and applies it, so on one of those the warning
 above is the whole protection.
+
+The refusal reaches a caller that DECLARED it can answer one, which clio does on every edit. A caller
+that cannot send `confirm-layout-change` at all is not refused - the server applies the edit and
+reports what it re-drew afterwards - because refusing one would leave it with no way to proceed at all,
+and the layout rules changed with this version, so most stored diagrams meet the condition.
 
 Two cases reach the refusal: the diagram is not the one the builder lays out, so somebody arranged it
 by hand (or an older version drew it) and applying anything replaces that arrangement; or the edit
