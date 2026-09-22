@@ -127,11 +127,12 @@ Creatio or disk. The guide contains:
     with one hardcoded culture. If a token still renders raw on the device, the fix is the entity column
     or the source page's resources — not a key added here.
   - requestConversions.unresolvedTargetRequests — actions whose request converts but whose NAVIGATION
-    TARGET could not be confirmed on mobile. The CONTROL always stays; `bindingRemoved` says whether the
+    TARGET could not be confirmed on mobile. The CONTROL stays; `bindingRemoved` says whether the
     binding's target param was blanked, read with `state`:
       • `missing` + `bindingRemoved: true` — DEFINITIONAL (web page): request converts; `params.schemaName`
-        blanked to `""` (also `droppedRequests`/`drop-request-target-missing`). No `originalBinding`;
-        repoint by patching `params.schemaName` on that binding via `elementName`/`binding`.
+        blanked to `""` (also `droppedRequests`/`drop-request-target-missing`). Not usable as-is (an empty
+        `schemaName` fails every tap). No `originalBinding`; repoint by patching `params.schemaName`
+        on that binding via `elementName`/`binding`.
       • `missing` + `bindingRemoved: false` — a READ found no default mobile page; cannot PROVE absence,
         so nothing changed. `resolvedCandidateSchemaName` is that read's unconfirmed WEB-page candidate.
       • `unknown` — unverified; ask the user.
