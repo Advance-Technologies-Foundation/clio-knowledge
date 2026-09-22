@@ -130,16 +130,16 @@ Creatio or disk. The guide contains:
   - requestConversions.unresolvedTargetRequests — actions whose request type converts but whose
     NAVIGATION TARGET the converter could not confirm exists on mobile. Every entry keeps its CONTROL;
     whether its ACTION stays is `bindingRemoved`, read together with `state`:
-      • `missing` + `bindingRemoved: true` — DEFINITIONAL: target is a web page, no read needed. Binding
-        is already gone from `viewConfigDiff[].values` and listed in `droppedRequests` under
-        `drop-request-target-missing`. Do NOT re-add as-is (empty `schemaName` still fails). Once the
-        target resolves, clone `originalBinding` (the removed `{ request, params }` VERBATIM) and swap
-        only the target param — never rebuild from scratch, or other params silently vanish.
+      • `missing` + `bindingRemoved: true` — DEFINITIONAL: target is a web page, no read needed. The
+        request still converts and the binding STAYS in `viewConfigDiff[].values` — only its target param
+        (`params.schemaName`) is blanked to `""`, also listed in `droppedRequests` under
+        `drop-request-target-missing`. Not usable as-is (an empty `schemaName` still fails every tap).
+        No `originalBinding` field — once the target resolves, patch `params.schemaName` on the SAME
+        binding by `elementName`/`binding`; every other param was never touched.
       • `missing` + `bindingRemoved: false` — a READ found the object's default mobile page absent. A
-        read cannot PROVE absence, so nothing was removed; `originalBinding` is null.
-        `resolvedCandidateSchemaName` is that read's candidate WEB edit page (only for this
-        `targetKind`+`missing`, else null) — not confirmed. Report and name the remedy; never present
-        as certain or strip.
+        read cannot PROVE absence, so nothing changed on the binding. `resolvedCandidateSchemaName` is
+        that read's candidate WEB edit page (only for this `targetKind`+`missing`, else null) — not
+        confirmed. Report and name the remedy; never present as certain or strip.
       • `unknown` — unverified (`bindingRemoved` always false). Ask the user to confirm.
     `targetKind` names which kind and so which remedy; `target` names it. `targetsProbed` false = never
     asked (empty list is "not checked"); `targetsNote` says why. No `resolvedSourceType` /
@@ -150,8 +150,8 @@ Creatio or disk. The guide contains:
     `unresolvedTargetRequests`, never queued here). An entity row keys on `resolvedCandidateSchemaName`
     when resolved, else the raw `target` name; a `web-page` row sharing that schema name collapses into
     the SAME row, carrying references from both sources — `targetKind` on a collapsed row is `web-page`.
-    Each reference keeps its own `originalBinding` (null for an entity-only reference) to restore once
-    the target resolves.
+    Each reference names its own `elementName`/`binding` to repoint: patch the existing binding's target
+    param once the target resolves; there is no snapshot field to restore from.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
     validators, converters). REPORT ONLY: nothing here transfers, and re-implementing the behaviour is
     an entity-level business-rule job, not a body change.

@@ -133,13 +133,13 @@ carry the same action. Each entry says which of the two it is; read the entry, n
                                own remark when the rules file has one; show it as detail, branch on the
                                code.
   drop-request-target-missing  The request TYPE converts, but its navigation TARGET cannot exist on mobile,
-                               so the binding was removed and THE COMPONENT STILL RENDERS. Emitted only for
-                               a DEFINITIONAL absence (a web page) whose verdict needed no environment read.
-                               A target a read merely failed to confirm removes NOTHING — reported instead
-                               with bindingRemoved false. params.targetKind + params.target name what to
-                               fix. Do NOT re-add the binding as it was; the finding's own originalBinding
-                               keeps the removed shape verbatim so a repoint can swap in the resolved
-                               mobile schema name instead of guessing the other params.
+                               so only the target param is blanked (params.schemaName = "") — the binding
+                               stays and THE COMPONENT STILL RENDERS. Emitted only for a DEFINITIONAL
+                               web-page absence (no environment read needed); a read that merely failed to
+                               confirm changes NOTHING — reported with bindingRemoved false.
+                               params.targetKind + params.target name the fix. The blanked binding is not
+                               usable as-is; there is no originalBinding to restore from — patch the SAME
+                               binding's target param by elementName/binding once it resolves.
   drop-request-element-empty-container
                                The binding went with its container, which the empty-container pass
                                removed after the binding had been recorded. The container's own
