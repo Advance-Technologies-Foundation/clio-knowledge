@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.63",
+  "libraryVersion": "1.15.64",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1397,7 +1397,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) and the Sub-process element (subProcess, from 1.6.3.26) -- while inclusive/event-based gateways, timer/message and intermediate events, scriptTask and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.12). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) and the Sub-process element (subProcess, from 1.6.3.26) -- while inclusive/event-based gateways, timer/message and intermediate events, scriptTask and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.13). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1671,7 +1671,7 @@
     {
       "itemId": "process-sub-process",
       "title": "Sub-process element",
-      "description": "Owns the Creatio Sub-process element (callActivity, built via type:\"subProcess\", from CrtProcessBuilder 1.6.3.26): the subProcess block, naming the callee by processName or processUId, how the element's own mirrored parameters copy from the callee and are mapped in/out, the resync flag and when a re-synchronization is owed, the build-time and edit-time refusals, describe's read-back fields, MULTI-INSTANCE (running the callee once per item of a collection, from 1.6.6.12 -- the options block, the shape change, the dotted per-item path and the output-collection refusal), and what is NOT supported (the event and expanded sub-processes). Split out of process-element-catalog.",
+      "description": "Owns the Creatio Sub-process element (callActivity, built via type:\"subProcess\", from CrtProcessBuilder 1.6.3.26): the subProcess block, naming the callee by processName or processUId, how the element's own mirrored parameters copy from the callee and are mapped in/out, the resync flag and when a re-synchronization is owed, the build-time and edit-time refusals, describe's read-back fields, MULTI-INSTANCE (running the callee once per item of a collection, from 1.6.6.13 -- the options block, the shape change, the dotted per-item path and the output-collection refusal), and what is NOT supported (the event and expanded sub-processes). Split out of process-element-catalog.",
       "topicId": "creatio.process-sub-process",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-sub-process",
