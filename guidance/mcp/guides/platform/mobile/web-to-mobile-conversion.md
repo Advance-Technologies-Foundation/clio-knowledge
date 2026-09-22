@@ -131,8 +131,8 @@ Creatio or disk. The guide contains:
     binding's target param was blanked, read with `state`:
       • `missing` + `bindingRemoved: true` — DEFINITIONAL (web page): request converts; `params.schemaName`
         blanked to `""` (also `droppedRequests`/`drop-request-target-missing`). Not usable as-is (an empty
-        `schemaName` fails every tap). No `originalBinding`; repoint by patching `params.schemaName`
-        on that binding via `elementName`/`binding`.
+        `schemaName` fails every tap); repoint by patching `params.schemaName` on that binding via
+        `elementName`/`binding`.
       • `missing` + `bindingRemoved: false` — a READ found no default mobile page; cannot PROVE absence,
         so nothing changed. `resolvedCandidateSchemaName` is that read's unconfirmed WEB-page candidate.
       • `unknown` — unverified; ask the user.
