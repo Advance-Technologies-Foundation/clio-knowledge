@@ -69,8 +69,10 @@ leaf rather than through `process-modeling`.
       * `executionMode` is the STRING `Sequential` or `Parallel`, case-insensitive. The raw metadata's
         `0`/`1` is REFUSED — a number read out of stored metadata would otherwise select the other mode in
         silence. Omitted on an update it is left as it is, never reset to `Sequential`. Parallel does not
-        by itself mean concurrent threads: it changes the generated flow topology, and concurrency comes
-        from the element's own `useBackgroundMode`.
+        by itself mean concurrent threads: it changes the generated flow topology. `useBackgroundMode` does
+        NOT buy concurrency either - each iteration goes onto the background job queue, whose continuations
+        are consumed under a per-process lock, so they are serialised and were measured SLOWER (1282 ms
+        against 105 ms for three iterations).
       * `ignoreErrors` changes only what happens AFTER a failed iteration; the failed-iteration counter is
         incremented either way.
       * THE SHAPE CHANGES, and every mapping afterwards depends on it. A converted element carries FIVE
