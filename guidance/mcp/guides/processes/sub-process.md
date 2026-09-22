@@ -52,20 +52,34 @@ leaf rather than through `process-modeling`.
       * DESCRIBE reports the callee under `subProcess`: `process` (name, falling back to the raw UId if
         deleted), `processUId`, `processCaption`, `multiInstance`, `inSync`, and — on a multi-instance
         element only — `multiInstanceOptions`. `inSync` is one-directional and instance-dependent, so it
-        is NOT a drift report — see `process-parameters`. On a MULTI-INSTANCE element it is FALSE BY
-        CONSTRUCTION and says nothing at all: it compares the callee against the element's ROOT
-        parameters, which there are the five service ones. Read `multiInstanceOptions.calleeInSync`
-        instead — the same one-directional test asked one level down, where the contract lives. `null`
-        there means the callee could not be read: UNKNOWN, never "out of sync".
+        is NOT a drift report — see `process-parameters`. On a MULTI-INSTANCE element it carries no
+        information at all, in EITHER direction: it compares the callee against the element's ROOT
+        parameters, which there are the five service ones, so it is `false` whenever the callee declares
+        anything and VACUOUSLY TRUE when the callee declares nothing (the test is an "all of the callee's
+        parameters are present" and an `all` over an empty set is true). Do not read a `true` there as
+        "in sync". Read `multiInstanceOptions.calleeInSync` instead — the same one-directional test asked
+        one level down, where the contract lives. `null` there means the callee could not be read:
+        UNKNOWN, never "out of sync".
     MULTI-INSTANCE — run the callee ONCE PER ITEM of a collection. BUILDABLE from CrtProcessBuilder
-    **1.6.6.8** through `subProcess.multiInstanceOptions` `{enabled?, executionMode?, ignoreErrors?}`.
-      * `enabled: true` converts, `false` de-converts. De-conversion is a DESTRUCTIVE write: the element's
-        parameter shape changes back, and a value mapped onto the callee's own parameters does not survive
-        the round trip.
+    **1.6.6.11** through `subProcess.multiInstanceOptions` `{enabled?, executionMode?, ignoreErrors?}`.
+      * `enabled: true` converts, `false` de-converts. De-conversion is a DESTRUCTIVE write in SHAPE:
+        the element stops carrying the five and carries the callee's parameters again, so every dotted
+        name stops addressing anything. A value you MAPPED survives it — the mapping row pairs source and
+        target by UId, and the de-conversion clones the item properties back out with their UIds and
+        their values, which is also what the server's own notice says. What does not come back is the
+        OUTPUT collection's non-`Out` items: each is a derived copy of an input item whose value the
+        platform had already cleared, and the original returns from the input side. Anything that read one
+        of the five — `OutputRecordCollection` or a counter — is left dangling by the de-conversion, and
+        the server NAMES those readers in a notice: re-point or remove them.
       * OMIT `enabled` on an element that is ALREADY multi-instance and the other two fields still apply —
-        that is how you change how it iterates without re-converting. Any other field on an element that
-        is NOT multi-instance is REFUSED rather than silently converting it: say `enabled: true` if that
-        is what you meant. A block naming NO field at all is refused too.
+        that is how you change how it iterates without re-converting. FIVE shapes are REFUSED rather than
+        accepted-and-ignored, and this is the whole list: a mode field on an element that is NOT
+        multi-instance and is not being converted (say `enabled: true` if that is what you meant — writing
+        an options object to hold the field would change how the element RUNS); a block naming NO field at
+        all; an `executionMode` that is not one of the two names, INCLUDING a blank string (an omitted
+        mode is `null`, a blank one is a mistake); a mode field combined with `enabled: false`, which asks
+        for two opposite things; and `enabled: false` on a CREATE, where there is nothing to de-convert.
+        All five are decided before anything is written.
       * `executionMode` is the STRING `Sequential` or `Parallel`, case-insensitive. The raw metadata's
         `0`/`1` is REFUSED — a number read out of stored metadata would otherwise select the other mode in
         silence. Omitted on an update it is left as it is, never reset to `Sequential`. Parallel does not
@@ -75,6 +89,10 @@ leaf rather than through `process-modeling`.
         against 105 ms for three iterations).
       * `ignoreErrors` changes only what happens AFTER a failed iteration; the failed-iteration counter is
         incremented either way.
+      * ONE DIFFERENCE FROM THE DESIGNER, so a comparison does not read as a defect: converting in the
+        process designer also switches `useBackgroundMode` ON; this contract does not touch it, because it
+        changes how the element RUNS and nobody asked for that. Set it yourself with `setElement` if you
+        want designer parity — but read the measurement above first: it buys no concurrency.
       * THE SHAPE CHANGES, and every mapping afterwards depends on it. A converted element carries FIVE
         parameters instead of the callee's: `InputRecordCollection`, `OutputRecordCollection` and the
         counters `CompletedIterationsCount`, `TerminatedIterationsCount`, `TotalIterationsCount`. The
