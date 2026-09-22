@@ -64,12 +64,19 @@ redrawn with it (process data intact, manual layout lost).
 
 That is not a side effect to work around — stored connector geometry is absolute canvas coordinates, so
 anything the engine did not recompute would stay frozen where no shape stands any more. From
-CrtProcessBuilder 1.6.5.13 a caption the designer recorded a position for is released with the rest and
+CrtProcessBuilder 1.6.5.14 a caption the designer recorded a position for is released with the rest and
 returns to the middle of what it names; an OLDER server leaves it pinned, which strands a branch label
 at the coordinates the arrow used to pass through.
 
+The same version also SAYS when it replaces a connector path somebody stored, as a warning on the
+successful edit: "N connectors had paths stored for them that are not the ones the builder draws". Read
+it back to the user rather than dropping it — the layout gate cannot raise this one, because routing an
+arrow by hand moves no element and the diagram still reads as one the builder drew. It fires on the
+first edit of a process whose arrows the designer routed, and goes quiet afterwards, once the stored
+paths are the builder's own.
+
 == The refusal, and the two questions behind it ==
-From CrtProcessBuilder 1.6.5.13 the server REFUSES an in-place edit that would re-draw the diagram
+From CrtProcessBuilder 1.6.5.14 the server REFUSES an in-place edit that would re-draw the diagram
 rather than extend it. An OLDER server asks nothing and applies it, so on one of those the warning
 above is the whole protection.
 

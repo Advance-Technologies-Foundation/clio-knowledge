@@ -83,7 +83,7 @@ which version becomes actual and that the call re-saves the whole family; call i
 THAT, not on the answer to Q2.
 
 A layout refusal RE-OPENS Q1 for that one edit, whatever the session answer was. From CrtProcessBuilder
-1.6.5.13 `modify-business-process` refuses an edit that would re-draw the diagram rather than extend it,
+1.6.5.14 `modify-business-process` refuses an edit that would re-draw the diagram rather than extend it,
 and the answer it offers is a new version -- so a session answer of "edit the current version" does not
 survive it. Put the refusal in front of the user, ask whether this edit should become a version, and on
 yes send the SAME operations to `modify-business-process-as-new-version`, which never refuses over
