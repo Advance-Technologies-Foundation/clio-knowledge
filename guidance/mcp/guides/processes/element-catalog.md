@@ -193,9 +193,11 @@ System actions (palette group "System actions"):
     READ-ONLY here.
 - `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing
     values through THAT process's own parameters. BUILDABLE from CrtProcessBuilder **1.6.3.26** via
-    `type:"subProcess"` with a `subProcess` block (`{processName | processUId, resync}`); the block, the
-    parameter mirroring/mapping rule, `resync`, the refusals and what is NOT supported (multi-instance,
-    event/expanded sub-processes) are owned by `process-sub-process`. Its EVENT and EXPANDED variants keep
+    `type:"subProcess"` with a `subProcess` block
+    (`{processName | processUId, resync, multiInstanceOptions}`); the block, the parameter
+    mirroring/mapping rule, `resync`, MULTI-INSTANCE (running the callee once per item of a collection,
+    from **1.6.6.0**), the refusals and what is NOT supported (the event/expanded sub-processes) are owned
+    by `process-sub-process` — go there before writing any of it. Its EVENT and EXPANDED variants keep
     their children in their OWN collection, which `describe-business-process` does not walk, but
     the delete guards see them, walking it recursively so a reference from inside one still blocks a delete.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).

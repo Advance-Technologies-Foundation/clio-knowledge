@@ -34,8 +34,11 @@ This article is the authoritative owner of process parameters, the mappings that
   mirror. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
   with no item properties, which the mirror therefore refuses). `describe-business-process` reports a collection parameter's `tag` and
   `itemProperties`; both are absent on a scalar and on a bare collection — feed a described collection back
-  through `typeFromElement` naming its source, never by re-typing the shape. Nothing CONSUMES a collection
-  yet (no multi-instance / sub-process element builds) — this is the producer-side contract only.
+  through `typeFromElement` naming its source, never by re-typing the shape. A `tag` rides on items that
+  are COLUMNS; where they are PARAMETERS of another process (a multi-instance Sub-process element's two
+  collections) there is none at all — 0 of 407 in the shipped corpus — so never require it. A collection
+  IS consumed now: such an element iterates one, bound onto `InputRecordCollection` by the ordinary
+  `addMapping` route — `process-sub-process`.
 - Edit a parameter with `setParameter` (parameterName + parameterUpdate: any of caption/description/code/
   direction/referenceSchema/value, applied in place — the UId and its references are preserved). A
   data-type change is rejected, and referenceSchema can only RE-TARGET a parameter that is already a
@@ -124,7 +127,9 @@ This article is the authoritative owner of process parameters, the mappings that
     catches an ADD, and misses a REMOVE, a caption change, and a CASE-ONLY code rename, which the runtime
     does bind on. On a MULTI-INSTANCE element `false` is permanent and meaningless (the element carries
     two collections and three iteration counters instead of the callee's names), so check `multiInstance`
-    first. And `true` can simply mean the read repaired the element on its way to you: materialising a
+    first, then read `multiInstanceOptions.calleeInSync` — the SAME one-directional test asked one level
+    down, against the collections' item properties, where that element's contract lives. `false` there DOES
+    mean a re-synchronization is owed, and `subProcess.resync: true` is how to ask. And `true` can simply mean the read repaired the element on its way to you: materialising a
     schema instance from metadata re-synchronizes every sub-process element on it, and so does every fetch
     of the DESIGN instance - the path every write takes. Never read `true` as "intact".
   * A parameter on the element that the callee does NOT declare is not necessarily damage. One the CALLER

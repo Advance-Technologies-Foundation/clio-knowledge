@@ -3,8 +3,8 @@ clio MCP process-sub-process guide — the Sub-process element (callActivity / s
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
 This article is the authoritative owner of the Sub-process element (`callActivity`, built via
 `type:"subProcess"`): the `subProcess` block, naming the callee, how values cross through the element's
-own mirrored parameters, `resync`, the refusals, describe's read-back, and what is NOT supported
-(multi-instance, event and expanded sub-processes). `process-element-catalog` says the element is
+own mirrored parameters, `resync`, MULTI-INSTANCE (running the callee once per item of a collection),
+the refusals, describe's read-back, and what is NOT supported (the event and expanded sub-processes). `process-element-catalog` says the element is
 buildable and from which CrtProcessBuilder version; `process-parameters` owns what happens to a CALLER
 when the called process's own parameters change. Split out of process-element-catalog.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
@@ -46,14 +46,69 @@ leaf rather than through `process-modeling`.
         from this element (live dependents) — remove or re-point them first; the called process has no
         Simple start event (rule R16, enforced at BUILD time in this element's own applier, not by
         `validate-process-graph` — see `process-activity-connections`) — add one to it, or call another;
-        an ambiguous caption or disagreeing `processName`/`processUId` — see above; the element is already
-        MULTI-INSTANCE — see NOT SUPPORTED.
+        an ambiguous caption or disagreeing `processName`/`processUId` — see above. Being MULTI-INSTANCE is
+        NOT one of them any more: such an element is de-converted, the work is done against a
+        single-instance element with every guard above, and it is re-converted — see MULTI-INSTANCE below.
       * DESCRIBE reports the callee under `subProcess`: `process` (name, falling back to the raw UId if
-        deleted), `processUId`, `processCaption`, `multiInstance`, `inSync`. `inSync` is one-directional
-        and instance-dependent, so it is NOT a drift report — see `process-parameters`.
-    NOT SUPPORTED: MULTI-INSTANCE (the callee once per item of a collection — the element then carries
-    collections and counters instead of the callee's parameters, so no name here addresses anything on it;
-    edit it in the designer, and see `process-parameters`), and the EVENT and EXPANDED (embedded)
+        deleted), `processUId`, `processCaption`, `multiInstance`, `inSync`, and — on a multi-instance
+        element only — `multiInstanceOptions`. `inSync` is one-directional and instance-dependent, so it
+        is NOT a drift report — see `process-parameters`. On a MULTI-INSTANCE element it is FALSE BY
+        CONSTRUCTION and says nothing at all: it compares the callee against the element's ROOT
+        parameters, which there are the five service ones. Read `multiInstanceOptions.calleeInSync`
+        instead — the same one-directional test asked one level down, where the contract lives. `null`
+        there means the callee could not be read: UNKNOWN, never "out of sync".
+    MULTI-INSTANCE — run the callee ONCE PER ITEM of a collection. BUILDABLE from CrtProcessBuilder
+    **1.6.6.0** through `subProcess.multiInstanceOptions` `{enabled?, executionMode?, ignoreErrors?}`.
+      * `enabled: true` converts, `false` de-converts. De-conversion is a DESTRUCTIVE write: the element's
+        parameter shape changes back, and a value mapped onto the callee's own parameters does not survive
+        the round trip.
+      * OMIT `enabled` on an element that is ALREADY multi-instance and the other two fields still apply —
+        that is how you change how it iterates without re-converting. Any other field on an element that
+        is NOT multi-instance is REFUSED rather than silently converting it: say `enabled: true` if that
+        is what you meant. A block naming NO field at all is refused too.
+      * `executionMode` is the STRING `Sequential` or `Parallel`, case-insensitive. The raw metadata's
+        `0`/`1` is REFUSED — a number read out of stored metadata would otherwise select the other mode in
+        silence. Omitted on an update it is left as it is, never reset to `Sequential`. Parallel does not
+        by itself mean concurrent threads: it changes the generated flow topology, and concurrency comes
+        from the element's own `useBackgroundMode`.
+      * `ignoreErrors` changes only what happens AFTER a failed iteration; the failed-iteration counter is
+        incremented either way.
+      * THE SHAPE CHANGES, and every mapping afterwards depends on it. A converted element carries FIVE
+        parameters instead of the callee's: `InputRecordCollection`, `OutputRecordCollection` and the
+        counters `CompletedIterationsCount`, `TerminatedIterationsCount`, `TotalIterationsCount`. The
+        callee's contract moves ONE LEVEL DOWN, into the collections' `itemProperties` — the callee's
+        `In`/`Variable` parameters into the input collection, its `Out` parameters into the output one.
+      * BIND the collection to iterate with the ordinary `addMapping` / `mappings[]` route onto
+        `InputRecordCollection`. There is no new operation. From a Read data element in `collection` mode
+        the source is `ResultCompositeObjectList` — the output whose data value type matches;
+        `ResultEntityCollection` does NOT and is refused by the type check.
+      * ADDRESS A PER-ITEM VALUE with a DOTTED name, on both sides:
+        `elementParameter: "InputRecordCollection.<CalleeParam>"` and, when the source is a column of
+        another element's collection output, `sourceElementParameter: "ResultCompositeObjectList.<Column>"`.
+        A flat name is tried FIRST and the dotted walk runs only when the whole string matches nothing, so
+        a parameter whose own name contains a dot still resolves as it always did.
+      * A TARGET INSIDE THE OUTPUT COLLECTION IS REFUSED, at any depth. Map FROM it instead: the platform
+        derives those values per completed iteration and clears them on every synchronization, so a write
+        there is erased with no error at any layer — the element would look configured and deliver nothing.
+      * COUNTERS read mid-run are not what they look like: the parallel barrier uses
+        `CompletedIterationsCount` as an arrival counter and the End token overwrites it with total minus
+        failed before persisting. Read them on a flow LEAVING the element.
+      * A RETARGET and a pure `resync: true` both work on a multi-instance element: it is de-converted,
+        the ordinary applier does the work with every guard it carries, and it is re-converted around the
+        SAME five parameter objects, so their UIds survive. That is what the process designer does for the
+        same edit.
+      * AN `Internal`-DIRECTION PARAMETER on the callee is DROPPED by a conversion and REPORTED by name,
+        not refused. The platform's fill routes `In`, `Out` and `Variable` and has no `Internal` branch, so
+        such a parameter is routed nowhere. Refusing instead would make 12 of the 327 shipped
+        single-instance sub-process elements — production Copilot flows among them — permanently
+        unconvertible through this contract.
+      * ONE ASYMMETRY, so it does not read as an oversight: a conversion WRITES all five parameters with
+        their directions, but the guard that runs before a de-conversion, a retarget or a re-synchronization
+        VALIDATES only the two collection UIds and that they are `CompositeObjectList`. Deliberate. The
+        three counters are re-derivable and self-heal; the collections are not — they carry the callee's
+        contract and every mapping written against it, so a missing or mistyped collection is the one state
+        nothing can be reconstructed from, and the only one worth refusing on.
+    NOT SUPPORTED: the EVENT and EXPANDED (embedded)
     sub-processes, which share this platform class but call no other process. Their children live in their
     OWN collection and the delete guards see them (they walk it recursively), while
     `describe-business-process` and `setElement` do not — so a refusal can name a flow no read call shows
