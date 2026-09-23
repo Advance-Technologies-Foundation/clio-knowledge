@@ -40,6 +40,16 @@ leaf rather than through `process-modeling`.
         `resync: false` is accepted and inert everywhere, including on CREATE; `resync: true` is REFUSED
         on CREATE, and REFUSED combined with a `processName`/`processUId` naming a DIFFERENT process (a
         resync and a retarget are different requests); naming the one already called is accepted.
+      * CAPTIONS, from CrtProcessBuilder 1.6.6.16. A re-sync also names every element parameter whose
+        CAPTION it replaced with the called process's, measured against the caller's STORED caption - so,
+        unlike the parameter diff, it DOES see a caption the callee changed between two requests. Two
+        notices: a stored caption REPLACED ('old' to 'new'), and one FILLED IN where none was stored (common
+        on older callers; not a replacement). Every synchronization copies the callee's captions, current
+        culture only, so a caption edited on the element does not survive one - the platform's rule, and the
+        process designer's card does the same. Before 1.6.6.16 a callee edited THROUGH THIS TOOLSET reached
+        its callers ONE SAVE LATE, on a re-sync and on any other save of a caller; on such a stand open the
+        called process in the process designer and save it (no change needed), then re-sync - saving it
+        again through this toolset only moves the lag by one save.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
         is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
