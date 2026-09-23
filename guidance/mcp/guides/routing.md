@@ -81,6 +81,9 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-approval
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
+  - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
+    how to convert an element, where the callee's contract moves to, and how a per-item value is addressed
+    -> name=process-sub-process
   - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
     what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
