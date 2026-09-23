@@ -95,11 +95,16 @@ leaf rather than through `process-modeling`.
         element's properties page does it right after the conversion — `convertToMultiInstance` itself
         touches only the five parameters and the options object, which is why reading that method alone
         says the opposite. This contract leaves the flag alone, because it changes how the element RUNS and
-        nobody asked for that; set it with `setElement` if you want parity. On such an element it does not
-        do what it does elsewhere: the platform excludes a multi-instance sub-process from the element
-        background token, and the flow generator reads the flag to build a different ITERATION flow. That
-        one is SLOWER — measured 1282 ms against 105 ms for three iterations — because the continuations
-        are consumed under a per-process lock and serialise anyway. It buys no concurrency.
+        nobody asked for that. For parity, send `setElement` with `useBackgroundMode: true`: the flag IS
+        written, but the reply still carries the multi-instance notice that the element "was NOT
+        re-synchronized as part of this edit and nothing was changed on it". That notice speaks for the
+        parameter refresh the edit skipped, not for the flag — do not retry on it; read the flag back with
+        `describe-business-process` (`useBackgroundMode`). On such an element the flag does not do what it
+        does elsewhere: the platform excludes a multi-instance sub-process from the element background
+        token, and the flow generator reads the flag to build a different ITERATION flow. It buys no
+        concurrency — the continuations are consumed under a per-process lock and serialise anyway: on a
+        stand, three `Parallel` iterations with background mode did not overlap, each queued behind the
+        previous one.
       * THE SHAPE CHANGES, and every mapping afterwards depends on it. A converted element carries FIVE
         parameters instead of the callee's: `InputRecordCollection`, `OutputRecordCollection` and the
         counters `CompletedIterationsCount`, `TerminatedIterationsCount`, `TotalIterationsCount`. The
@@ -130,11 +135,15 @@ leaf rather than through `process-modeling`.
         single-instance sub-process elements — production Copilot flows among them — permanently
         unconvertible through this contract.
       * ONE ASYMMETRY, so it does not read as an oversight: a conversion WRITES all five parameters with
-        their directions, but the guard that runs before a de-conversion, a retarget or a re-synchronization
+        their directions, but the guard that runs before a mode change, a retarget or a re-synchronization
         VALIDATES only the two collection UIds and that they are `CompositeObjectList`. Deliberate. The
         three counters are re-derivable and self-heal; the collections are not — they carry the callee's
         contract and every mapping written against it, so a missing or mistyped collection is the one state
-        nothing can be reconstructed from, and the only one worth refusing on.
+        nothing can be reconstructed from, and the only one worth refusing on. A DE-CONVERSION runs NO such
+        guard, and that is the point: it is the repair for exactly that state. It only reads what the
+        collections hold and then drops the options, so `multiInstanceOptions: {enabled: false}` works on
+        an element whose collection UId dangles or whose collection is not a collection — which is what
+        each of that guard's refusals tells the caller to send.
     NOT SUPPORTED: the EVENT and EXPANDED (embedded)
     sub-processes, which share this platform class but call no other process. Their children live in their
     OWN collection and the delete guards see them (they walk it recursively), while
