@@ -86,15 +86,16 @@ leaf rather than through `process-modeling`.
         by itself mean concurrent threads: it changes the generated flow topology.
       * `ignoreErrors` changes only what happens AFTER a failed iteration; the failed-iteration counter is
         incremented either way.
-      * `useBackgroundMode` IS NOT TOUCHED by a conversion — not here, and NOT in the process designer
-        either. An earlier revision of this article said the designer switches it ON; it does not.
-        `convertToMultiInstance` creates the five parameters and the options object and nothing else, and
-        the current designer component never mentions the flag. So there is no parity gap to close.
-        What the flag does on such an element is also not what it does elsewhere: the platform excludes a
-        multi-instance sub-process from the element background token explicitly, and the flow generator
-        reads the flag to build a different ITERATION flow instead. That one is SLOWER — measured 1282 ms
-        against 105 ms for three iterations — because the continuations are consumed under a per-process
-        lock and serialise anyway. It buys no concurrency.
+      * ONE DIFFERENCE FROM THE DESIGNER, so a comparison does not read as a defect: converting in the
+        process designer also switches `useBackgroundMode` ON, and de-converting switches it back OFF. The
+        element's properties page does it right after the conversion — `convertToMultiInstance` itself
+        touches only the five parameters and the options object, which is why reading that method alone
+        says the opposite. This contract leaves the flag alone, because it changes how the element RUNS and
+        nobody asked for that; set it with `setElement` if you want parity. On such an element it does not
+        do what it does elsewhere: the platform excludes a multi-instance sub-process from the element
+        background token, and the flow generator reads the flag to build a different ITERATION flow. That
+        one is SLOWER — measured 1282 ms against 105 ms for three iterations — because the continuations
+        are consumed under a per-process lock and serialise anyway. It buys no concurrency.
       * THE SHAPE CHANGES, and every mapping afterwards depends on it. A converted element carries FIVE
         parameters instead of the callee's: `InputRecordCollection`, `OutputRecordCollection` and the
         counters `CompletedIterationsCount`, `TerminatedIterationsCount`, `TotalIterationsCount`. The
