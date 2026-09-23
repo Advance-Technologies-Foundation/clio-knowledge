@@ -98,20 +98,35 @@ public sealed class ResponseShapeFieldGuidanceTests
     // FOUR after missingTargetPages became a fifth); nothing pinned the fix, so the same drift could return
     // unnoticed the way the FOUR count itself once did. resolvedSourceType/recommendedAction were briefly
     // documented here as always-null RESERVED fields — clio #1562 deleted both outright as dead wire surface
-    // (a settable-but-never-written property is not a contract), so the pin now checks the article says
-    // there is NO such field, not that one exists and is null.
+    // (a settable-but-never-written property is not a contract). The pin below asserts the NEGATION
+    // sentence verbatim rather than the bare identifiers: PR #174's own review (Major) caught that
+    // AssertAllPresent is guide.Contains(fragment) — a presence check — so pinning "resolvedSourceType"
+    // alone is satisfied equally by the sentence this requires and by the sentence it forbids ("...reads
+    // null"). Pinning the full negation closes that hole; NoResolvedSourceTypeOrRecommendedAction below
+    // additionally forbids the positive phrasings the negation must never be replaced by.
     private static readonly (string Fragment, string Because)[] UnresolvedTargetRequestFields =
     [
         ("resolvedCandidateSchemaName",
             "the entity-default-mobile-page read's candidate web edit page; null when none was found, and never a schema to assume is on mobile"),
-        ("resolvedSourceType",
-            "clio deleted this field outright; the article must say there is no such field, never that it exists and reads null"),
-        ("recommendedAction",
-            "clio deleted this field outright; the article must say there is no such field, never that it exists and reads null"),
+        ("No `resolvedSourceType`/`recommendedAction`.",
+            "clio deleted both fields outright; pinning the negation sentence itself (not just the identifiers) is what actually fails if the article reverts to claiming they exist and read null"),
         ("FIVE collections",
             "the count itself: missingTargetPages is the fifth, and a caller iterating requestConversions by this number would skip it if it silently reverted to FOUR"),
         ("missingTargetPages",
             "must be named among the requestConversions collections, not only in its own field entry, or an agent counting collections never finds it")
+    ];
+
+    // Complements UnresolvedTargetRequestFields: forbids the positive phrasings the negation sentence must
+    // never be replaced by. A presence-only pin on the bare identifiers could not distinguish these from
+    // the required negation; these NotContain checks can.
+    private static readonly string[] ResolvedSourceTypeForbiddenPhrasings =
+    [
+        "resolvedSourceType` — reserved",
+        "resolvedSourceType` - reserved",
+        "resolvedSourceType` reads null",
+        "recommendedAction` reads null",
+        "resolvedSourceType` is always null",
+        "recommendedAction` is always null"
     ];
 
     // guide.existingMobilePages and the widened missingTargetPages aggregation clio #1562 added
@@ -209,10 +224,24 @@ public sealed class ResponseShapeFieldGuidanceTests
     }
 
     [Test]
-    [Description("resolvedCandidateSchemaName is documented, resolvedSourceType/recommendedAction are documented as NOT existing on the wire, and requestConversions is counted as FIVE collections including missingTargetPages. PR #174's review found the article silent on clio #1562's new field and still saying FOUR; this pin is what that review itself was missing.")]
+    [Description("resolvedCandidateSchemaName is documented, resolvedSourceType/recommendedAction are documented as NOT existing on the wire (the negation sentence itself, not just the bare identifiers), and requestConversions is counted as FIVE collections including missingTargetPages. PR #174's review found the article silent on clio #1562's new field and still saying FOUR; this pin is what that review itself was missing.")]
     public void Guide_ShouldDocumentTheClio1562UnresolvedTargetRequestFields()
     {
         AssertAllPresent(UnresolvedTargetRequestFields, caseSensitive: true);
+    }
+
+    [Test]
+    [Description("resolvedSourceType/recommendedAction must never be documented as existing fields that read null. PR #174's second review found the sibling presence-only pin structurally unable to catch this — it passes on the bare identifier regardless of which sentence surrounds it — so this asserts the forbidden phrasings directly.")]
+    public void Guide_ShouldNeverDocumentResolvedSourceTypeOrRecommendedActionAsExistingFields()
+    {
+        string guide = Normalize(ReadGuide(OwnerGuide));
+
+        foreach (string forbidden in ResolvedSourceTypeForbiddenPhrasings)
+        {
+            guide.Should().NotContain(forbidden,
+                because: "clio #1562 deleted both fields outright; documenting either as present and null "
+                    + "reintroduces the always-null RESERVED-field claim PR #174's review rejected");
+        }
     }
 
     [Test]
