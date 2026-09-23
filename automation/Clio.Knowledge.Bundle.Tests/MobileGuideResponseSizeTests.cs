@@ -52,6 +52,36 @@ public sealed class MobileGuideResponseSizeTests
     /// came out, then to 61,607 when the sub-element clause was restated as DERIVED from the rule's one
     /// template rather than declared beside it; a ratchet goes DOWN as soon as the article does.
     /// </para>
+    /// <para>
+    /// MOVED AGAIN, deliberately (ENG-96589): 61,607 -> 62,764 and 17,776 -> 18,912. The converter now
+    /// PRUNES properties the target mobile component does not declare, which adds one reason code and two
+    /// response fields. None can go unwritten: an undecoded code reaches the caller through this article's
+    /// own fallback as unexplained loss, and a response field the conversion article does not list is one
+    /// the agent never reads — which is exactly what happened to `propertyPruneApplied` in the first draft
+    /// of this change, leaving the article teaching the very ambiguity that field was added to resolve.
+    /// Every entry was cut to roughly half its first draft before this move, so what is left is the floor,
+    /// not the draft.
+    /// </para>
+    /// <para>
+    /// LOWERED, 62,764 -> 62,636. The `mobileRuntimeVersion` field was removed from the conversion response
+    /// before release: it is provenance the producer has not published since 2026-09-17, so it was null in
+    /// every real conversion, and the two lines this article spent warning readers not to read anything into
+    /// its absence were the whole cost of carrying it. `propertyPruneApplied` already answers the only
+    /// question a caller asks, and `resolvedFrom` already reports which catalog was served. A ratchet goes
+    /// DOWN when a field stops shipping, not just when prose is tightened. Lowered again to 62,632 when the
+    /// gate learned to refuse an explicit version=latest: the article had to name that third refusal case,
+    /// and the clause was paid for by tightening the two entries around it rather than by moving the number.
+    /// Lowered once more to 62,559 when the version gate was dropped entirely: the prune now reads the loaded
+    /// registry rather than the stand's version, so the field list no longer has to enumerate three refusal
+    /// reasons — there is one, and naming it takes less room than listing them did.
+    /// </para>
+    /// <para>
+    /// STANDING PROBLEM, not caused by any move above: freedom-page-web-to-mobile-conversion is 62,558 against
+    /// a SmallestObservedSpill of 50,351. It has been past that threshold for every move recorded above,
+    /// which means the article this repository marks MANDATORY is in the band where the response has been
+    /// observed to spill. Trimming at the margin no longer changes that; it needs a real split, and each
+    /// further move should be read as evidence for one rather than as headroom.
+    /// </para>
     /// </summary>
     /// <remarks>
     /// The conversion ceiling moved knowingly from 61,244 to 62,468 as the companion to clio #1562's
@@ -64,10 +94,19 @@ public sealed class MobileGuideResponseSizeTests
     /// because it also shows up converted. That sentence is the fix the review asked for, not padding.
     /// Lower this back only if a future split or trim genuinely shrinks the article below this size.
     /// </remarks>
+    /// <remarks>
+    /// Merging master into ENG-94839 combined this branch's own drop-request-target-missing rewrite with
+    /// master's independent addition of drop-request-property-not-declared (from ENG-96589, already on
+    /// master); both are real content, so the conversion ceiling moved knowingly from 61,733 to 62,684 —
+    /// the exact post-merge size, not either side's number alone. The reason-codes ceiling moved from
+    /// 17,776 to 18,809: LOWER than master's own pre-merge 18,912, because this branch's phrasing of
+    /// drop-request-target-missing is shorter than the copy it replaced. A ratchet goes down as soon as
+    /// the merged article does, even inside a merge that also raises a different entry.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 61_733),
-        ("freedom-page-mobile-reason-codes", 17_776)
+        ("freedom-page-web-to-mobile-conversion", 62_684),
+        ("freedom-page-mobile-reason-codes", 18_809)
     ];
 
     /// <summary>
