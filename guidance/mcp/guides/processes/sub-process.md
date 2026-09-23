@@ -6,7 +6,8 @@ This article is the authoritative owner of the Sub-process element (`callActivit
 own mirrored parameters, `resync`, MULTI-INSTANCE (running the callee once per item of a collection),
 the refusals, describe's read-back, and what is NOT supported (the event and expanded sub-processes). `process-element-catalog` says the element is
 buildable and from which CrtProcessBuilder version; `process-parameters` owns what happens to a CALLER
-when the called process's own parameters change. Split out of process-element-catalog.
+when the called process's own parameters change (their CAPTIONS on a re-sync are covered here, under
+`resync`). Split out of process-element-catalog.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
 owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
 leaf rather than through `process-modeling`.
@@ -40,16 +41,18 @@ leaf rather than through `process-modeling`.
         `resync: false` is accepted and inert everywhere, including on CREATE; `resync: true` is REFUSED
         on CREATE, and REFUSED combined with a `processName`/`processUId` naming a DIFFERENT process (a
         resync and a retarget are different requests); naming the one already called is accepted.
-      * CAPTIONS, from CrtProcessBuilder 1.6.6.16. A re-sync also names every element parameter whose
+      * CAPTIONS, from CrtProcessBuilder 1.6.6.17. A re-sync also reports the element parameters whose
         CAPTION it replaced with the called process's, measured against the caller's STORED caption - so,
         unlike the parameter diff, it DOES see a caption the callee changed between two requests. Two
-        notices: a stored caption REPLACED ('old' to 'new'), and one FILLED IN where none was stored (common
-        on older callers; not a replacement). Every synchronization copies the callee's captions, current
-        culture only, so a caption edited on the element does not survive one - the platform's rule, and the
-        process designer's card does the same. Before 1.6.6.16 a callee edited THROUGH THIS TOOLSET reached
-        its callers ONE SAVE LATE, on a re-sync and on any other save of a caller; on such a stand open the
-        called process in the process designer and save it (no change needed), then re-sync - saving it
-        again through this toolset only moves the lag by one save.
+        notices: a stored caption REPLACED (`'P' from "old" to "new"`), and one FILLED IN where none was
+        stored (common on older callers; not a replacement). Each names at most ten and counts the rest; when
+        the stored captions cannot be read, a notice says so and names none. Every synchronization copies the
+        callee's captions, current culture only, so a caption edited on the element does not survive one -
+        the platform's rule, and the process designer's card does the same. Any OTHER save of a caller writes
+        the callee's current captions too, with NO notice. A callee saved through this toolset before 1.6.6.17
+        may still hand its callers the captions from before that save; if a re-sync reports the old caption,
+        ask the USER to open the called process in the process designer and save it (no change needed), then
+        re-sync. That designer save is the measured cure; re-saving the callee through this toolset is not.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
         is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
