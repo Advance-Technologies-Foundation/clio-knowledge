@@ -70,9 +70,11 @@ leaf rather than through `process-modeling`.
         re-derives the element from it, removes the parameter with its value, and the notice names it.
         What does not come back is the OUTPUT collection's non-`Out` items: each is a derived copy of an
         input item whose value the platform had already cleared, and the original returns from the input
-        side. Anything that read one of the five — `OutputRecordCollection` or a counter — or a Variable
-        parameter's output copy is left dangling, and the server NAMES those readers in a notice: re-point
-        them (a copy's reader at the restored Variable of the same name) or remove them.
+        side. Anything that still READS what the de-conversion removes — `OutputRecordCollection`, a
+        counter, or a Variable parameter's output copy — makes the platform's pre-save validation REFUSE
+        the whole edit and name the reader (measured for an element iterating the output collection and
+        a process parameter reading a counter): re-point it first (a copy's reader at the restored Variable
+        of the same name) or remove it, then de-convert. Nothing is saved by the refused edit.
       * OMIT `enabled` on an element that is ALREADY multi-instance and the other two fields still apply —
         that is how you change how it iterates without re-converting. FIVE shapes are REFUSED rather than
         accepted-and-ignored, and this is the whole list: a mode field on an element that is NOT
