@@ -66,11 +66,13 @@ leaf rather than through `process-modeling`.
         the element stops carrying the five and carries the callee's parameters again, so every dotted
         name stops addressing anything. A value you MAPPED survives it — the mapping row pairs source and
         target by UId, and the de-conversion clones the item properties back out with their UIds and
-        their values, which is also what the server's own notice says. What does not come back is the
-        OUTPUT collection's non-`Out` items: each is a derived copy of an input item whose value the
-        platform had already cleared, and the original returns from the input side. Anything that read one
-        of the five — `OutputRecordCollection` or a counter — is left dangling by the de-conversion, and
-        the server NAMES those readers in a notice: re-point or remove them.
+        their values — UNLESS the called process has dropped that parameter since: the de-conversion then
+        re-derives the element from it, removes the parameter with its value, and the notice names it.
+        What does not come back is the OUTPUT collection's non-`Out` items: each is a derived copy of an
+        input item whose value the platform had already cleared, and the original returns from the input
+        side. Anything that read one of the five — `OutputRecordCollection` or a counter — or a Variable
+        parameter's output copy is left dangling, and the server NAMES those readers in a notice: re-point
+        them (a copy's reader at the restored Variable of the same name) or remove them.
       * OMIT `enabled` on an element that is ALREADY multi-instance and the other two fields still apply —
         that is how you change how it iterates without re-converting. FIVE shapes are REFUSED rather than
         accepted-and-ignored, and this is the whole list: a mode field on an element that is NOT
