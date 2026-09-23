@@ -219,10 +219,12 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 - The SUB-PROCESS element is NOT on that list — it is buildable (`type:"subProcess"`, from
   CrtProcessBuilder 1.6.3.26, `process-element-catalog`) and the build path does warn you. It gets its
   own caveat, on a different axis: CREATING one is safe, REWIRING an existing one — retargeting its
-  called process, deleting it, editing its parameters — is high-risk. The build path REFUSES two of the
-  hazards by name: an element that is already multi-instance, and a retarget while live dependents still
-  read from the element. Let those refusals stand rather than routing around them. Multi-instance is not
-  an edge case — 61 of the 416 sub-process elements in the shipped package corpus are in that state
+  called process, deleting it, editing its parameters — is high-risk. The build path REFUSES a retarget
+  while live dependents still read from the element; let that refusal stand rather than routing around it.
+  An element that is already MULTI-INSTANCE is no longer refused: it is de-converted, the work is done
+  against a single-instance element with every guard, and it is re-converted (`process-sub-process`).
+  Multi-instance is not an edge case — 61 of the 416 sub-process elements in the shipped package corpus
+  are in that state
   (scanned 2026-09-12 over the local PackageStore, 1 099 package roots; recorded in the CrtProcessBuilder
   repository as `docs/sub-process-element-capture.md`). What is NOT guarded: `validate-process-graph`
   carries no parameter or mapping rule at all, so nothing here is caught by planning. And if a retarget
