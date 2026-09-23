@@ -38,5 +38,6 @@ schemas SysSchemaAdminUnitRight). get-record-rights reads it for you — do not 
 DO NOT confuse two different layers:
 - Record-level rights — Sys<Entity>Right / SysSchemaAdminUnitRight. Per-record "who can access this
   record/dashboard". This is what the UI "Set up access rights" dialog shows and what these tools manage.
-- Schema OPERATION rights — SysSchemaOperationRight. A different operation/configuration layer.
-  Querying it to answer "who has access to this dashboard" gives the WRONG answer.
+- Schema OPERATION rights — SysSchemaOperationRight. A different operation/configuration layer, owned
+  by `get-guidance name=object-rights`. Querying it to answer "who has access to this dashboard" gives
+  the WRONG answer.
