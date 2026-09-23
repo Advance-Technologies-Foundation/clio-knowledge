@@ -98,8 +98,8 @@ public sealed class MobileGuideResponseSizeTests
     /// Merging master into ENG-94839 combined this branch's own drop-request-target-missing rewrite with
     /// master's independent addition of drop-request-property-not-declared (from ENG-96589, already on
     /// master); both are real content, so the conversion ceiling moved knowingly from 61,733 to 62,684 —
-    /// the exact post-merge size, not either side's number alone. The reason-codes ceiling moved from
-    /// 17,776 to 18,809: LOWER than master's own pre-merge 18,912, because this branch's phrasing of
+    /// the exact post-merge size, not either side's pre-merge number alone. The reason-codes ceiling moved
+    /// from 17,776 to 18,809: LOWER than master's own pre-merge 18,912, because this branch's phrasing of
     /// drop-request-target-missing is shorter than the copy it replaced. A ratchet goes down as soon as
     /// the merged article does, even inside a merge that also raises a different entry.
     /// </remarks>
