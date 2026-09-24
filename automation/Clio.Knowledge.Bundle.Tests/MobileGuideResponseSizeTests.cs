@@ -83,10 +83,35 @@ public sealed class MobileGuideResponseSizeTests
     /// further move should be read as evidence for one rather than as headroom.
     /// </para>
     /// </summary>
+    /// <remarks>
+    /// PR #174 review (Major, discussion_r4074079026): an earlier version of this remark asserted a
+    /// ceiling move ("61,244 to 62,468") that did not match the diff it was added in, and told a future
+    /// maintainer to raise the ceiling on a future trim — the opposite of the ratchet-down rule stated in
+    /// the summary above. That remark is deleted rather than corrected in place, because its numbers were
+    /// never reconciled with the article's actual measured history and re-deriving them would only add a
+    /// third account. The one number that matters is in <c>MeasuredArticles</c> below, and it is the
+    /// article's actual measured size, per the ratchet-down rule.
+    /// </remarks>
+    /// <remarks>
+    /// Merging master into ENG-94839 combined this branch's own drop-request-target-missing rewrite with
+    /// master's independent addition of drop-request-property-not-declared (from ENG-96589, already on
+    /// master); both are real content, so the conversion ceiling moved knowingly from 61,733 to 62,684 —
+    /// the exact post-merge size, not either side's pre-merge number alone. The reason-codes ceiling moved
+    /// from 17,776 to 18,809: LOWER than master's own pre-merge 18,912, because this branch's phrasing of
+    /// drop-request-target-missing is shorter than the copy it replaced. A ratchet goes down as soon as
+    /// the merged article does, even inside a merge that also raises a different entry.
+    /// </remarks>
+    /// <remarks>
+    /// PR #174 review (Minor, carried over two rounds): the `bindingRemoved: true` bullet hardcoded
+    /// `params.schemaName` as the param the converter patches, while clio actually derives it from the
+    /// rule's `targetParam`. Reworded to name `params.schemaName` as today's value for
+    /// `crt.OpenPageRequest` rather than a fixed key, and trimmed the surrounding sentence to net shrink
+    /// the article (62,684 -> 62,614) rather than raise the ceiling, per the ratchet-down rule.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_558),
-        ("freedom-page-mobile-reason-codes", 18_912)
+        ("freedom-page-web-to-mobile-conversion", 62_614),
+        ("freedom-page-mobile-reason-codes", 18_809)
     ];
 
     /// <summary>
