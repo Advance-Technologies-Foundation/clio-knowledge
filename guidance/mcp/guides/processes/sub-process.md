@@ -8,6 +8,9 @@ the refusals, describe's read-back, and what is NOT supported (the event and exp
 buildable and from which CrtProcessBuilder version; `process-parameters` owns what happens to a CALLER
 when the called process's own parameters change (their CAPTIONS on a re-sync are covered here, under
 `resync`). Split out of process-element-catalog.
+WHETHER a request calls for this element at all — the one-process default, per-item work, a repeated
+fragment, long phases — and which execution mode a per-item loop needs is owned by
+`process-sub-process-when`: read it before you plan one.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
 owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
 leaf rather than through `process-modeling`.
@@ -97,8 +100,10 @@ leaf rather than through `process-modeling`.
         All five are decided before anything is written.
       * `executionMode` is the STRING `Sequential` or `Parallel`, case-insensitive. The raw metadata's
         `0`/`1` is REFUSED — a number read out of stored metadata would otherwise select the other mode in
-        silence. Omitted on an update it is left as it is, never reset to `Sequential`. Parallel does not
-        by itself mean concurrent threads: it changes the generated flow topology.
+        silence. Omitted on a CONVERSION it is `Sequential`, which starts the next item only after the
+        previous item's called process has finished; omitted on an update it is left as it is, never reset
+        to `Sequential`. Parallel does not by itself mean concurrent threads: it changes the generated flow
+        topology. Which mode a request needs is decided in `process-sub-process-when` (D1).
       * `ignoreErrors` changes only what happens AFTER a failed iteration; the failed-iteration counter is
         incremented either way.
       * ONE DIFFERENCE FROM THE DESIGNER, so a comparison does not read as a defect: converting in the

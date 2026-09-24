@@ -39,6 +39,9 @@ guards — it says whose rule it is and names that guide for the rest.
     modify-safety rules). After it, read the ONE matching sub-guide:
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
+  - decide HOW MANY processes a request becomes — one by default; the same work for each item of a set
+    ("for each contact…"), a fragment repeated in the plan, or two or more long human phases are the
+    exceptions -> name=process-sub-process-when (read it BEFORE planning a Sub-process element or a split)
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
@@ -83,7 +86,8 @@ guards — it says whose rule it is and names that guide for the rest.
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
     how to convert an element, where the callee's contract moves to, and how a per-item value is addressed
-    -> name=process-sub-process
+    -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
+    and which execution mode it takes)
   - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
     what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data

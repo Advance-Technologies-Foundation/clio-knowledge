@@ -197,7 +197,8 @@ System actions (palette group "System actions"):
     (`{processName | processUId, resync, multiInstanceOptions}`); the block, the parameter
     mirroring/mapping rule, `resync`, MULTI-INSTANCE (running the callee once per item of a collection,
     from **1.6.6.14**), the refusals and what is NOT supported (the event/expanded sub-processes) are owned
-    by `process-sub-process` — go there before writing any of it. Its EVENT and EXPANDED variants keep
+    by `process-sub-process` — go there before writing any of it; WHETHER a request needs one at all is
+    owned by `process-sub-process-when`. Its EVENT and EXPANDED variants keep
     their children in their OWN collection, which `describe-business-process` does not walk, but
     the delete guards see them, walking it recursively so a reference from inside one still blocks a delete.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).

@@ -3,9 +3,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 == Which process article to read ==
 This article is the ENTRY POINT. It owns the build lifecycle: what the tools are, what the
 descriptor looks like, the recipe, and the safety rules for editing an existing process. What is
-buildable today and the element catalog moved to `process-element-catalog`: this article had no
-budget headroom left, and both of those sections grow with every element the platform gains while
-the lifecycle around them does not. Everything else has its own article and its own authoritative
+buildable today and the element catalog live in `process-element-catalog`, because both grow with
+every element the platform gains. Everything else has its own article and its own authoritative
 owner -- read the one your task needs instead of guessing:
   * `process-custom-elements`     - author custom user-task elements with Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
@@ -47,8 +46,6 @@ owner -- read the one your task needs instead of guessing:
                                      dropdown offers the wrong set.
   * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
                                      the rule for when to choose it over its neighbours.
-  * `process-perform-task`         - the Perform task element: its parameter table, the performer
-                                     layers, and what the runtime sets.
   * `process-access-rights`        - the Change access rights element: the `accessRights` block,
                                      permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
@@ -63,6 +60,7 @@ owner -- read the one your task needs instead of guessing:
                                      completing buttons, the data sources and the record they carry.
   * `process-sub-process`          - the Sub-process element: naming the callee, the mirrored
                                      parameters and mapping rule, resync, and its refusals.
+  * `process-sub-process-when`     - WHEN a request needs more than one process: D1, D2, D4.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R20 connection rules.
   * `process-versions`             - the version model, which member runs, and how to read that
@@ -128,6 +126,8 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
 1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
+   ONE PROCESS per request: read `process-sub-process-when` if work repeats per item, a fragment
+   repeats, or the plan has long human phases.
    ONE START PER TRIGGER the process must react to: a process that runs both when a record is ADDED
    and when the same record is CHANGED carries TWO signal starts, not two processes and not one
    trigger. Signal, timer and message starts may be several; the SIMPLE start — the manual launch —
@@ -154,8 +154,8 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData
-   and changeData, `process-read-data` for readData, `process-add-data` for addData — their partial-update, mode-switch and
+   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData,
+   `process-data-elements` for changeData, `process-add-data` for addData — their partial-update, mode-switch and
    source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
    retarget clears the record filter, and an element left without one deletes nothing and fails at run
    time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
