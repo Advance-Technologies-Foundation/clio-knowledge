@@ -69,14 +69,16 @@ leaf rather than through `process-modeling`.
   background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
   which does not. Do NOT set it on the elements of a signal-started process just because the process is
-  signal-started: the start's own default (below) already runs the WHOLE instance in a background worker, and on
-  an ordinary activity the flag changes nothing — the platform inserts a background token only for a start event
-  and a single-instance Sub-process. It matters on an element that WAITS (a task, a page, a catch event, a
+  signal-started: the start's own default (below) already runs the instance in a background worker up to its first
+  element that waits, and on an ordinary activity the flag changes nothing — the platform inserts a background
+  token only for a start event and a Sub-process (a multi-instance one inside its iteration flow, `process-sub-process`). It matters on an element that WAITS (a task, a page, a catch event, a
   Sub-process), where it decides whether the work after that element runs inside the request that completes it
-  or is queued; set it there only when the request asks for that. A background run cannot open pages at all (the
-  platform's `ForbidUserInteractionInBackground`, on by default), and an `openEditPage` step with the flag ON was
+  or is queued; set it there only when the request asks for that. A background run never pops a page open on the
+  user's screen (the platform's `ForbidUserInteractionInBackground`, on by default, skips it; the step still waits
+  in the performer's task list), and an `openEditPage` step with the flag ON was
   measured not to resume — `process-open-edit-page` owns that. Shipped signal-started processes carry the flag on
-  28 of the 166 elements after their start. The designer gates the control on
+  28 of the 166 elements after their start, all 28 behind a background start (108 processes of the shipped
+  packages, packages named Test or Demo excluded; scanned 2026-09-24). The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op

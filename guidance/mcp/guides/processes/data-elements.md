@@ -100,7 +100,8 @@ filter; see `process-access-rights`.
   the token and whose target is the process parameter, or an `expression` mapping onto the process
   parameter. Steps 1 and 2 above give the UIds; write the UId token, because the name form in a formula
   body has no third segment either. Measured with `run-process` reading the parameters back on
-  CrtProcessBuilder 1.6.6.22 (2026-09-24). NOT measured: the same token in a `changeData` value, a
+  Creatio 10.1.37 (.NET Framework, MSSQL) with CrtProcessBuilder 1.6.6.22 (2026-09-24); the Formula
+  element itself needs the CrtProcessBuilder floor `process-element-catalog` names. NOT measured: the same token in a `changeData` value, a
   filter or a Send email recipient `expression` — route those through the parameter.
 - LIMITATION — record columns are still NOT element parameters. A mapping or `changeData` value using
   `sourceElementParameter: "Email"`, or a filter using `elementParameter.parameter: "Id"` on the read

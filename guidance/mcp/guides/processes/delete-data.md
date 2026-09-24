@@ -130,9 +130,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
 - To delete ONE record, filter on `Id` against a process parameter or a trigger output such as a
   `signalStart` element's `RecordId` — the same single-record shape `process-data-elements` documents for
   `changeData`.
-  LIMITATION: the record read by a preceding `readData` element is NOT referenceable here — its column
-  values live inside the `ResultEntity` output rather than as element parameters (`process-data-elements`
-  owns that rule).
+  LIMITATION: the record read by a preceding `readData` element is NOT referenceable here DIRECTLY — its
+  column values live inside the `ResultEntity` output rather than as element parameters. Put the column
+  into a process parameter with a formula first and filter on the parameter (`process-data-elements`
+  owns both the rule and that route).
 - Change an EXISTING element in place with the `setElement` op's `deleteData` field: omit `source` to keep
   the current target. A retarget is refused while another parameter still maps from the element, and on ANY
   target change (FIRST configuration included) the stored record filter clears unless its root already

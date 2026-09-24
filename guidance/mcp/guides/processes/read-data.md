@@ -101,7 +101,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   DISCOVERABILITY gap, not a refusal: `get-entity-schema-properties` supplies the UId describe does not.
   `process-data-elements` owns both recipes (steps, verified evidence).
   One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
-  `[[element:Read.ResultEntity.Column]]`. Outside a flow condition, the element's only output parameter
+  `[[element:Read.ResultEntity.Column]]`. The element's only output parameter
   is `ResultEntity` (the whole record, `isResult:true` in describe); the record's columns are still NOT
   element parameters, so a STRUCTURED reference to one (e.g. `sourceElementParameter: "Email"` on the
   read element) FAILS the build with "element has no parameter". To carry a column onward, put it into a

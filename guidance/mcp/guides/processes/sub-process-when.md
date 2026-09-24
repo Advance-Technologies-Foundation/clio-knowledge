@@ -13,20 +13,22 @@ it calls.
 == The default: one process ==
 - A request produces ONE process. Split it only when D1, D2 or D4 below fires — nothing else is a
   reason: not a diagram that looks big while D4 does not fire, not tidiness, not a step that "might
-  be reused one day".
+  be reused one day". These rules govern the splits YOU would make: a split the user ASKS for ("put
+  the approval in its own process", "call process X") is built as asked — `process-sub-process` owns how.
 - Why the bar is high: every Sub-process element this toolset builds calls a SEPARATE process, with
   its own parameters, versions and place in the process library; nothing here folds steps in place.
   So a split is a second artifact to build, keep in step and review, and the callee must exist before
   the caller can name it. A business user checks the result by opening one diagram; spread over three,
   it is harder to verify, not easier. Creatio's own product processes agree: 82% use no sub-process at
-  all, and the two largest of them, about 130 elements each, call no other process.
+  all, and the two largest of them, about 130 elements each, call no other process (585 processes of the
+  shipped product packages, 7.8.0 branches, test packages excluded; scanned 2026-09-24).
 
 == D1 — the same work for EACH item of a set: multi-instance, do not ask ==
 - TRIGGER: the request applies the same steps to every record of a set — "for each contact of the
   account…", "every overdue invoice…", "all participants of the event…" — and at least one of those
   steps acts ONCE per run: a Perform task creates one task, an Approval one approval, a Send email one
-  message (several recipients get the SAME message, so a message of its own for each item is D1), an
-  Open edit page one page for one record. A "call task" is a Perform task — `process-perform-task`
+  message (no recipient kind takes a set of records the process read, so an email to each contact of a
+  set is D1 even when every contact gets the same text), an Open edit page one page for one record. A "call task" is a Perform task — `process-perform-task`
   owns that rule — so "create a call task for each contact" is D1.
 - NOT D1 — work a set-based element does in one run, with no loop and no second process: Modify
   data updates every record its filter matches, Delete data deletes every record its filter matches,
@@ -48,8 +50,10 @@ it calls.
   item's called process has FINISHED. A helper with a human step parks until that person acts, so
   under Sequential the second contact's task is created only once the first one is completed. When
   the items are independent — the usual "for each…" — convert with `subProcess.multiInstanceOptions`
-  `{enabled: true, executionMode: "Parallel"}`, which starts each item without waiting for the one
-  before it to finish. Keep `Sequential` only when an item must wait for the one before it, and say so.
+  `{enabled: true, executionMode: "Parallel"}`: an item waiting for a person no longer holds the next
+  one back (measured on Creatio 10.1.37 with CrtProcessBuilder 1.6.6.22, 2026-09-24: three contacts,
+  three tasks at once). It does not make automatic steps run concurrently — `process-sub-process` says
+  why. Keep `Sequential` only when an item must wait for the one before it, and say so.
   In BOTH modes the caller moves past the element only when every item has finished — with a task in
   the helper, when every task is completed — so say that too when you describe the result.
 - ORDER: create the helper FIRST, then the caller — naming the helper is what copies its parameter
@@ -71,9 +75,12 @@ it calls.
 - TRIGGER: your plan contains the same fragment of AT LEAST 3 elements at AT LEAST 2 places — the
   same element kinds in the same order, differing only in values (a recipient, a text, a record).
   Two elements or fewer: keep both copies inline; the helper would cost more than the repetition.
-- FIRST TRY A JOIN: when the fragment ENDS both branches, join the branches before it and keep one
-  copy — no helper needed; a value that differs per branch is set on each branch, into a process
-  parameter, before the join. D2 is for copies that sit where no join can reach them.
+- FIRST TRY A JOIN: when the fragment ENDS two EXCLUSIVE branches — only one of them runs, as after a
+  gateway that chooses or an element's result branches — join them before it and keep one copy, no
+  helper needed; a value that differs per branch is set on each branch, into a process parameter,
+  before the join. NEVER after a PARALLEL split: both branches run, so a join either runs the fragment
+  once instead of twice or lets the two branches overwrite each other's value. D2 covers every copy
+  no such join can reach, parallel branches included.
 - ACTION: one helper holding the fragment, called by a Sub-process element at each place. The
   values that differ become the helper's `In` parameters, mapped at each call; a value the fragment
   hands back becomes an `Out` parameter. Take only a fragment with one way in and one way out — a
@@ -83,14 +90,19 @@ it calls.
 
 == D4 — two or more long phases: propose a split, and ask ==
 - TRIGGER: the plan has AT LEAST 2 phases — or exceeds about 30 elements, which 98% of Creatio's
-  product processes stay under. A PHASE is a stage the request names or clearly implies
+  product processes stay under (same scan). A PHASE is a stage the request names or clearly implies
   (qualification, approval, onboarding) that holds several steps around human work — a task, an
   approval or a page, each of which waits for a person. Count stages, not human elements: a lone task
-  in an otherwise automatic flow is a step, not a phase, and does not fire D4.
+  in an otherwise automatic flow is a step, not a phase, and does not fire D4. A wait with no person
+  in it (a timer, a signal or message catch) is read-only in this toolset (`process-element-catalog`),
+  so no plan built here holds one.
+- SIZE WITHOUT PHASES: past about 30 elements with fewer than 2 phases, propose a split along the
+  stages the request itself names (checking, updating, notifying), one sub-process each; when it names
+  none, build one process and do not ask.
 - ACTION: PROPOSE one sub-process per phase, each named after its phase, with the caller running the
   phases in order. Propose before you build, and build nothing split until the user has answered.
-- ASK: yes — propose, never impose. "Keep it as one process" is a normal answer: build ONE process
-  and do not raise the split again.
+- ASK: yes — propose, never impose. "Keep it as one process" is a normal answer: do not split by
+  phase — a D1 or D2 helper the plan needs still stays — and do not raise the split again.
 - EXISTING process: never propose restructuring one on your own, whatever its size.
 
 == Existing processes ==
@@ -125,7 +137,8 @@ it calls.
 - Split a process for readability alone while D4 does not fire, or split an existing process to tidy
   it.
 - Build helpers in the "agent tool" style — one small process per capability, each called from one
-  place for no D1, D2 or D4 reason: for a business user it adds processes and explains nothing.
+  place, unasked and for no D1, D2 or D4 reason: for a business user it adds processes and explains
+  nothing.
 
 == Naming and placement ==
 - The helper lives in the CALLER's package.

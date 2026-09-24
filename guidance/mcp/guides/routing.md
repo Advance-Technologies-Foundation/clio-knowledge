@@ -39,7 +39,8 @@ guards — it says whose rule it is and names that guide for the rest.
     modify-safety rules). After it, read the ONE matching sub-guide:
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
-  - BUILDING A NEW PROCESS -> ALSO name=process-sub-process-when, BEFORE you plan the graph, every time:
+  - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> ALSO
+    name=process-sub-process-when, BEFORE you plan the graph, every time:
     it decides how many processes the request becomes. One by default; the exceptions — the same work
     for each item of a set, a fragment repeated in the plan, two or more long human stages — are hard
     to recognise without its rules, so do not skip it because none seems to apply

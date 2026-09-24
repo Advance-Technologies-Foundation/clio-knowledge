@@ -37,7 +37,8 @@ N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrA
     package name only to break a real collision, never as blanket disambiguation. NO autonumber, NO
     random suffix, NO GUID fragment — the designer's own `Process_3d0825b` shape is what this prevents.
 N3  A process meant to be CALLED as a sub-process ends its code with `SubProcess`
-    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone. It matters
+    (`UsrInvoice_ValidateSubProcess`), so a caller can tell what it is from the code alone; a helper made
+    for ONE caller also starts with that caller's code (`process-sub-process-when` owns that part). It matters
     more now that the calling element is buildable (CrtProcessBuilder 1.6.3.26): the callee is named by
     schema name or display caption, and an ambiguous caption is refused rather than guessed — see
     `process-element-catalog` for that resolution rule — so a self-describing code is what makes the

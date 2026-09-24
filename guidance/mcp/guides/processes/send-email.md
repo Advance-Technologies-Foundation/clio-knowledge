@@ -98,14 +98,14 @@ template read-back — is owned by `process-send-email-template`.
   the contact's email at send time; for an entity-COLUMN recipient — the owner of a record the process
   read — put the column into a Contact-lookup process parameter with a formula first
   (`process-data-elements` owns that route) and send the parameter; a raw `expression` recipient carrying
-  the column token directly is not measured. What remains reachable here is a raw
-  `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
+  the column token directly is not measured. Every other recipient the designer offers is reachable
+  here only as a raw `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".
-  RANK RECIPIENT SOURCES for `to`/`cc`/`bcc`: a SYSTEM SETTING first, then a lookup PROCESS PARAMETER or an
-  entity lookup COLUMN (the raw `expression` route above), a CONSTANT address LAST. When the user supplies a
+  RANK RECIPIENT SOURCES for `to`/`cc`/`bcc`: a SYSTEM SETTING first, then a lookup PROCESS PARAMETER (for a
+  column of a record the process read, filled by a formula first, as above), a CONSTANT address LAST. When the user supplies a
   literal address ("send it to hr@company.com"), ADVISE AGAINST storing it and offer the ranked alternatives
-  — a system setting for a team address, a lookup parameter or column for a record-bound one — and take the
+  — a system setting for a team address, a lookup parameter for a record-bound one — and take the
   literal only when the user declines them.
   A SYSTEM SETTING is reachable today and is the RIGHT default for an address that belongs to a team rather
   than a person (an HR inbox, a support alias): send the recipient as an `expression` whose formula is

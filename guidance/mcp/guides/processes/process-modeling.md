@@ -122,8 +122,9 @@ article from what this one says; read that article.
 == Build recipe (intent -> running process) ==
 Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
 today and what it does not, and a plan built around something it cannot build fails only at build
-time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process
-you MUST also read `process-sub-process-when` first: it decides how many processes the request is.
+time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process, and
+for a change that applies to EACH item of a set, you MUST also read `process-sub-process-when` first: it
+decides how many processes the request is.
 1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
