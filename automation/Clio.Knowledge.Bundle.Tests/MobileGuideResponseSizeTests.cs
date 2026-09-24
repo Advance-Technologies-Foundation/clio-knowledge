@@ -101,9 +101,16 @@ public sealed class MobileGuideResponseSizeTests
     /// drop-request-target-missing is shorter than the copy it replaced. A ratchet goes down as soon as
     /// the merged article does, even inside a merge that also raises a different entry.
     /// </remarks>
+    /// <remarks>
+    /// PR #174 review (Minor, carried over two rounds): the `bindingRemoved: true` bullet hardcoded
+    /// `params.schemaName` as the param the converter patches, while clio actually derives it from the
+    /// rule's `targetParam`. Reworded to name `params.schemaName` as today's value for
+    /// `crt.OpenPageRequest` rather than a fixed key, and trimmed the surrounding sentence to net shrink
+    /// the article (62,684 -> 62,614) rather than raise the ceiling, per the ratchet-down rule.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_684),
+        ("freedom-page-web-to-mobile-conversion", 62_614),
         ("freedom-page-mobile-reason-codes", 18_809)
     ];
 

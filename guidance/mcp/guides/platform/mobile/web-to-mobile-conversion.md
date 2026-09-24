@@ -139,11 +139,10 @@ Creatio or disk. The guide contains:
   - requestConversions.unresolvedTargetRequests — actions whose request converts but whose NAVIGATION
     TARGET could not be confirmed on mobile. The CONTROL stays; `bindingRemoved` says whether the
     binding's target param was blanked, read with `state`:
-      • `missing` + `bindingRemoved: true` — DEFINITIONAL (web page): request converts; `params.schemaName`
-        blanked to `""` (also `droppedRequests`/`drop-request-target-missing` and
-        `missingTargetPages[].references`; never `convertedRequests` — its add is unreached on this
-        branch). Not usable as-is (an empty `schemaName` fails every tap); repoint by patching
-        `params.schemaName` on that binding via `elementName`/`binding`.
+      • `missing` + `bindingRemoved: true` — DEFINITIONAL (web page): request converts; the target param
+        (`params.schemaName` for `crt.OpenPageRequest`, per the rule's `targetParam`) blanked to `""`
+        (also `droppedRequests`/`drop-request-target-missing` and `missingTargetPages[].references`;
+        never `convertedRequests`). Not usable as-is; repoint that param via `elementName`/`binding`.
       • `missing` + `bindingRemoved: false` — a READ found no default mobile page; cannot PROVE absence,
         so nothing changed. `resolvedCandidateSchemaName` is that read's unconfirmed WEB-page candidate.
       • `unknown` — unverified; ask the user.
