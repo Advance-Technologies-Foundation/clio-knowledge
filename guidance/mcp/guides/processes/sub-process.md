@@ -44,13 +44,13 @@ leaf rather than through `process-modeling`.
       * CAPTIONS. Every synchronization - a re-sync, and any OTHER save of a caller - copies the called
         process's parameter captions onto the element, current culture only, with NO notice, so a caption
         edited on the element does not survive one: the platform's rule, and the process designer's card does
-        the same. Captions are display text; nothing binds by them. A callee saved through this toolset before
-        CrtProcessBuilder 1.6.6.20 may still hand its callers the captions from before that save; if a caller
-        still shows a caption the called process no longer has after a re-sync, ask the USER to open the
-        called process in the process designer and save it (no change needed), then re-sync. That designer
-        save is the measured cure. Re-saving the callee through this toolset is no cure before 1.6.6.20;
-        from 1.6.6.20 that save releases the same cache the designer's save does, which should cure it too,
-        but that is not measured yet.
+        the same. Captions are display text; nothing binds by them. Before CrtProcessBuilder 1.6.6.20 a callee
+        saved through this toolset may still hand its callers the captions from before that save, and saving
+        it again through this toolset only moves that lag. So if a caller still shows a caption the called
+        process no longer has after a re-sync, run `install-process-builder` - the install restarts the
+        application, which drops the stale cache - then re-sync. Only when the package cannot be updated, ask
+        the USER to open the called process in the process designer and save it (no change needed), then
+        re-sync; that cure lasts only until the next save of the callee through an older toolset.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
         is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
