@@ -133,14 +133,13 @@ carry the same action. Each entry says which of the two it is; read the entry, n
                                own remark when the rules file has one; show it as detail, branch on the
                                code.
   drop-request-target-missing  The request TYPE converts, but its navigation TARGET cannot exist on mobile,
-                               so the binding was removed and THE COMPONENT STILL RENDERS. Emitted only for
-                               a DEFINITIONAL absence — a web page, which cannot open on mobile at all, and
-                               a verdict that needed no environment read. A target an environment read
-                               merely failed to confirm removes NOTHING: it is reported in
-                               requestConversions.unresolvedTargetRequests with state "unknown" and
-                               bindingRemoved false. params.targetKind + params.target name what to fix:
-                               repoint the action, convert the target page, or leave it and tell the user.
-                               Never re-add the binding as it was — it would fail every time it is used.
+                               so only the target param is blanked (params.schemaName = "") — the binding
+                               stays and THE COMPONENT STILL RENDERS. Emitted only for a DEFINITIONAL
+                               web-page absence (no environment read needed); a read that merely failed to
+                               confirm changes NOTHING — reported with bindingRemoved false.
+                               params.targetKind + params.target name the fix. The blanked binding is not
+                               usable as-is; there is no originalBinding to restore from — patch the SAME
+                               binding's target param by elementName/binding once it resolves.
   drop-request-property-not-declared
                                The PROPERTY carrying the binding is not declared by the target mobile
                                component — not in its inputs, not in its outputs, not inherited — so

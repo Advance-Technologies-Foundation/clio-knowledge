@@ -59,6 +59,11 @@ Creatio or disk. The guide contains:
     environment-derived flag is ABSENT rather than false — report that nothing was established, and do
     NOT tell the user the page is unregistered. isFormPage is read from the page itself and is present
     either way.
+  - existingMobilePages — mobile page(s) already covering the entity/page (reuse-vs-convert-again fact):
+    `section` comes from sectionRegistration's mobile-section state, `entity-default-mobile-page` from
+    the bound entity's MobileRelatedPage add-on. Each entry carries schemaName, schemaUId, source; the
+    schema THIS run would create/update is excluded. Ask to reuse or convert again when non-empty; empty
+    means none found, not unprobed.
   - layoutResolution — set ONLY when the source page HAD components and the converted layout came out
     empty. A legitimately layout-less page and a conversion that lost everything look identical without
     it, so treat its presence as a STOP: report it and do not build a body. The usual cause is an
@@ -131,26 +136,21 @@ Creatio or disk. The guide contains:
     and friends while declaring none of them). Inventing a key would REPLACE a localized column title
     with one hardcoded culture. If a token still renders raw on the device, the fix is the entity column
     or the source page's resources — not a key added here.
-  - requestConversions.unresolvedTargetRequests — actions whose request type converts but whose
-    NAVIGATION TARGET the converter could not confirm exists on mobile. Every entry keeps its CONTROL on
-    the page; what differs is what happened to the action and how confidently it was judged, and you
-    must read BOTH fields before saying anything to the user:
-      • `state: "missing"` + `bindingRemoved: true` — a DEFINITIONAL absence: the target is a web page,
-        which cannot open on mobile at all. The binding is already gone from `viewConfigDiff[].values`
-        and also appears in droppedRequests under `drop-request-target-missing`. Do NOT re-add it — it
-        would fail every time it is used. Tell the user the control is on the page without its action,
-        and offer the two real fixes: convert the target page to mobile, or repoint the action.
-      • `state: "missing"` + `bindingRemoved: false` — an environment READ reported the target absent
-        (an object with no default mobile page). A read cannot PROVE absence, so nothing was removed.
-        Report it and name the remedy — create the object's default mobile page — but never present it
-        as a certainty and never strip the binding yourself.
-      • `state: "unknown"` — the target was not verified at all (no reachable environment, or the probe
-        degraded). Nothing was removed and nothing is claimed. Ask the user; do NOT report a working
-        action as broken.
-    `targetKind` says which of the two kinds it is (a web page, or an object's default mobile page) and
-    therefore which remedy applies; `target` names it. `requestConversions.targetsProbed` false means
-    the whole question was never asked — an EMPTY list then means "not checked", not "all clear", and
-    `targetsNote` says why. Null/empty when every target resolved.
+  - requestConversions.unresolvedTargetRequests — actions whose request converts but whose NAVIGATION
+    TARGET could not be confirmed on mobile. The CONTROL stays; `bindingRemoved` says whether the
+    binding's target param was blanked, read with `state`:
+      • `missing` + `bindingRemoved: true` — DEFINITIONAL (web page): request converts; the target param
+        (`params.schemaName` for `crt.OpenPageRequest`, per the rule's `targetParam`) blanked to `""`
+        (also `droppedRequests`/`drop-request-target-missing` and `missingTargetPages[].references`;
+        never `convertedRequests`). Not usable as-is; repoint that param via `elementName`/`binding`.
+      • `missing` + `bindingRemoved: false` — a READ found no default mobile page; cannot PROVE absence,
+        so nothing changed. `resolvedCandidateSchemaName` is that read's unconfirmed WEB-page candidate.
+      • `unknown` — unverified; ask the user.
+    `targetKind`/`target` name the kind and remedy; `targetsProbed` false = never asked. No
+    `resolvedSourceType`/`recommendedAction`.
+    `missingTargetPages` dedupes both kinds (web-page always; entity-default-mobile-page only when
+    verified missing), keyed by `resolvedCandidateSchemaName` or `target`; a shared schema collapses
+    into one row (`web-page` wins). Repoint via each reference's `elementName`/`binding`.
   - webOnlySections — page sections the source declares that mobile has no place for (handlers,
     validators, converters). REPORT ONLY: nothing here transfers, and re-implementing the behaviour is
     an entity-level business-rule job, not a body change.
@@ -514,11 +514,10 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
       `flag-request-unmapped`, for you to verify with the user.
   A supported request is kept in
   viewConfigDiff[].values (the operation's name is already the mobile one) — paste the values verbatim.
-  guide.requestConversions has FOUR collections and you need all of them: convertedRequests,
-  droppedRequests (a binding lost — including on a component that SURVIVED, which is a loss
-  `droppedElements` by construction never shows), flaggedRequests, and unresolvedTargetRequests (see its
-  own field entry above). Tell the user which action components were removed AND which surviving
-  components lost an action.
+  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
+  a SURVIVING component — a loss `droppedElements` never shows), flaggedRequests,
+  unresolvedTargetRequests, and missingTargetPages (both above). Tell the user which action components
+  were removed AND which surviving components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
   get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info
