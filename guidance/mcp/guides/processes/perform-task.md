@@ -21,10 +21,11 @@ leaf rather than through `process-modeling`.
   Activity), emails approver and author, supports delegation, and branches on the verdict. Perform task has no
   approved/rejected semantics. Approval IS buildable — `process-approval` owns it; use that element rather
   than emulating it with a task.
-- DO NOT EMULATE IT with an Add data of `Activity` records (Type = Task): such a record gets no binding to this
-  process element, no completion listener and no performer assignment, so nothing waits for it and nothing
-  resumes when it is done (`ActivityUserTask`, `UserTaskActivityHandler`). A task for each record of a set is
-  decided by D1 in `process-sub-process-when`.
+- DO NOT EMULATE IT with an Add data of `Activity` records (Type = Task). Setting `Owner` or `OwnerRole` on the
+  record does not make it one: it gets no binding to this process element and no completion listener, so the
+  process runs straight past it, never learns that the task was completed or with which result, and cannot
+  branch on that result (`ActivityUserTask`, `UserTaskActivityHandler`, `AddDataUserTask`). A task for each
+  record of a set is decided by D1 in `process-sub-process-when`.
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with

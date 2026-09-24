@@ -129,6 +129,8 @@ it calls.
   points use it."
 - Say what follows from it being a process of its own: it appears in the process library, and a
   change to it applies wherever it is used.
+- A question you owe anyway — which version to edit, who performs a task — is no reason to put the
+  loop or the helper up for approval: say what you will build, and ask only what is owed.
 
 == Never ==
 - Extract a single element — except as a D1 helper, where one per-item step is the whole loop body.

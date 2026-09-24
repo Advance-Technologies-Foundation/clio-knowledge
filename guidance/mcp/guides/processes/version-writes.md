@@ -65,7 +65,7 @@ and six ambiguous transport errors rather than a call you can retry. The databas
 handled (two writers on one number are refused after the save); the load is not.
 
 == Ask once, then behave predictably ==
-Two questions, asked ONCE, at the first edit of a session:
+Two questions, asked ONCE, BEFORE the first edit of a session:
   1. Do edits go to the CURRENT version, or to a NEW one?
   2. Once a new version exists, do you want it made the ACTUAL one?
 Then hold those answers for the rest of the session and say what you did in EVERY reply -- "edited the
@@ -74,9 +74,12 @@ who has to re-derive which of those happened has lost the thing versioning was f
 
 The two answers do NOT carry the same authority, and this paragraph decides any sentence that seems
 to say otherwise. Q1 is a ROUTING answer: it picks which tool every later edit uses, and picking a
-tool changes nothing on the environment by itself. A CURRENT answer is also the explicit yes that
-`process-modeling` requires before an in-place edit of the active version, for the rest of the session;
-the edit request alone never is, so ask Q1 before that first edit rather than a second question after it. Q2 is a PREFERENCE, not a consent: it decides
+tool changes nothing on the environment by itself. Ask Q1 with its consequence -- CURRENT overwrites the
+running graph and nothing brings the old one back -- because a CURRENT answer is also the explicit yes
+`process-modeling` requires for an in-place edit of the ACTIVE version: of THAT process on THAT
+environment, for the rest of the session; another process gets its own question. The edit request alone
+is never that yes. A process you created in this session needs neither while you are still building it:
+its active graph is your own draft, not one anybody relies on yet. Q2 is a PREFERENCE, not a consent: it decides
 whether you OFFER activation once a version exists, and it authorises no call. Every
 `set-active-business-process-version` call needs its own request, naming the version to be made actual
 and the environment -- a session answer is never that request, per `core-rules`, where an answer given

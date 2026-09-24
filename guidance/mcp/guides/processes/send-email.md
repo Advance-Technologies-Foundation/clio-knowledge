@@ -31,10 +31,11 @@ template read-back — is owned by `process-send-email-template`.
 - NEVER EMULATE THIS ELEMENT with an Add data of `Activity` records (Type = Email), not even to leave drafts
   for manual sending when no mailbox exists: `mode:"manual"` creates that email Activity for the `performer`
   and then WAITS until it is completed — a human step (EXECUTION MODE in `process-sub-process-when`). Copying
-  its columns (`Sender`, `MessageTypeId`, `IsHtmlBody`) does not close the gap. An Add data cannot write the
-  activity's binding to this process element with its completion listener, its link to the process instance
-  or the performer assignment, and it never sends (`EmailTemplateUserTask.CreateActivityEntity`,
-  `ManualEmailUserTaskSender`, `AutoEmailUserTaskSender`, CrtProcessDesigner 7.8.0). Whether each record of a
+  its columns (`Sender`, `MessageTypeId`, `IsHtmlBody`, `Owner`) does not close the gap. What an Add data
+  cannot write: in manual mode, the activity's binding to this process element with its completion listener,
+  so nothing waits for the email; in either mode, the activity's link to the process instance; in auto mode,
+  the send itself (`EmailTemplateUserTask.CreateActivityEntity`, `ManualEmailUserTaskSender`,
+  `AutoEmailUserTaskSender`, CrtProcessDesigner 7.8.0). Whether each record of a
   set gets its own email is decided by D1 in `process-sub-process-when`. Observed in an agent run
   (2026-09-24): asked to email each contact of an account with no mailbox configured, it built exactly that
   emulation.

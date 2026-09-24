@@ -122,9 +122,9 @@ article from what this one says; read that article.
 == Build recipe (intent -> running process) ==
 Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
 today and what it does not, and a plan built around something it cannot build fails only at build
-time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process, and
-for a change that applies to EACH item of a set, you MUST also read `process-sub-process-when` first: it
-decides how many processes the request is.
+time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process, or a
+change for EACH item of a set, you MUST also read `process-sub-process-when` first: it decides how many
+processes the request is.
 1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
@@ -252,9 +252,9 @@ decides how many processes the request is.
   its two answers; read it before editing a process whose diagram matters.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
-  way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
-  overwrite is the one the runtime executes, so get explicit confirmation (the edit request is not
-  one), and offer
+  way -- the previous graph is gone and nothing brings it back. TRUE: you would overwrite the graph the
+  runtime executes, so get explicit confirmation (the edit request is not one; `process-version-writes`
+  says what is), and offer
   `modify-business-process-as-new-version` instead -- the SAME operations against a new version, or an
   EMPTY operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not
   the one that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that
