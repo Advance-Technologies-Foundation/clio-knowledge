@@ -28,6 +28,13 @@ template read-back — is owned by `process-send-email-template`.
   ONLY the message: `mode`, `sender`, `to`/`cc`/`bcc`, `importance`, `ignoreErrors` and `performer` follow the
   rules below unchanged in both modes, and `useBackgroundMode` is an element-level field outside the `email`
   block, not part of this contract.
+- NEVER EMULATE THIS ELEMENT with an Add data of `Activity` records (Type = Email), not even to leave drafts
+  for manual sending when no mailbox exists — `mode:"manual"` IS that draft. The element writes what an Add
+  data does not: the sender, the outgoing message type (`MessageTypeId`), `IsHtmlBody` and the activity's
+  link to the process instance (`EmailTemplateUserTask.CreateActivityEntity`, CrtProcessDesigner 7.8.0), and
+  in auto mode it sends. An email to EACH record of a set is one Send email inside a D1 helper
+  (`process-sub-process-when`), not one Add data. Observed in an agent run (2026-09-24): asked to email each
+  contact of an account with no mailbox configured, it built exactly that emulation.
   Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
   a design-time required field: the server saves without one, the designer's card validates `Sender` only
   while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a

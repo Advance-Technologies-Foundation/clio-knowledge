@@ -253,7 +253,8 @@ decides how many processes the request is.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
   way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
-  overwrite is the one the runtime executes, so get explicit confirmation, and offer
+  overwrite is the one the runtime executes, so get explicit confirmation (the edit request is not
+  one), and offer
   `modify-business-process-as-new-version` instead -- the SAME operations against a new version, or an
   EMPTY operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not
   the one that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that
