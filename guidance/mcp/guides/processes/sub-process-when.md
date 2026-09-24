@@ -38,8 +38,11 @@ it calls.
 - ACTION: the per-item steps become the HELPER; the caller reads the set (Read data in `collection`
   mode, `process-read-data`) and calls the helper through ONE multi-instance Sub-process element bound
   to that read. The helper receives each item through its own input parameters (`In`, or `Variable`),
-  and its steps read the item from there, never from the caller. Converting the element, binding the
-  collection and addressing a per-item value are owned by `process-sub-process` (MULTI-INSTANCE).
+  and its steps read the item from there, never from the caller. That takes TWO kinds of mapping, and
+  the first is the one that gets forgotten: the collection itself (`InputRecordCollection` from
+  `ResultCompositeObjectList`), and each per-item value (a dotted name). Without the first the build
+  succeeds and the loop runs ONCE with empty values. Converting the element, binding the collection and
+  addressing a per-item value are owned by `process-sub-process` (MULTI-INSTANCE).
 - EXECUTION MODE — choose it, do not inherit it. A conversion that names no `executionMode` is
   `Sequential` (`process-sub-process`), and Sequential starts the next item only after the previous
   item's called process has FINISHED. A helper with a human step parks until that person acts, so

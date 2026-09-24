@@ -130,6 +130,11 @@ leaf rather than through `process-modeling`.
         `InputRecordCollection`. There is no new operation. From a Read data element in `collection` mode
         the source is `ResultCompositeObjectList` — the output whose data value type matches;
         `ResultEntityCollection` does NOT and is refused by the type check.
+        MUST: send THIS mapping as well as the per-item ones below — the collection decides HOW MANY
+        iterations run, the dotted mappings only what each one receives. Without it nothing refuses or
+        warns: the build succeeds, describe shows `InputRecordCollection` with `source: "None"`, and at run
+        time the element runs ONE iteration with every per-item value empty (measured, CrtProcessBuilder
+        1.6.6.22: one task with no contact instead of one per contact).
       * ADDRESS A PER-ITEM VALUE with a DOTTED name, on both sides:
         `elementParameter: "InputRecordCollection.<CalleeParam>"` and, when the source is a column of
         another element's collection output, `sourceElementParameter: "ResultCompositeObjectList.<Column>"`.
