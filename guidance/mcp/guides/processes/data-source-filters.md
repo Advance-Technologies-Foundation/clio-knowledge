@@ -37,9 +37,11 @@ is the one contract all three share, which is why it reads as its own subject.
 - The right-hand value of a condition is exactly ONE of: `value` (a constant as a string — the server
   types it by the column; for a Date/DateTime/Time column pass ISO-8601, e.g. `2026-05-01` or
   `2026-05-01T12:00:00Z`), `processParameter` (a process parameter by name), `elementParameter`
-  ({ elementName, parameter } — another element's output; the parameter must EXIST on that element — a
-  `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }` is
-  refused, see the readData LIMITATION in `process-read-data`), `expression` (a raw token), or
+  ({ elementName, parameter, column? } — another element's output; the parameter must EXIST on that element —
+  a `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }`
+  is refused; compare against ONE column of the read record with `column`:
+  `{ "elementName": "ReadNewestContact", "parameter": "ResultEntity", "column": "Id" }`, see
+  `process-data-elements`), `expression` (a raw token), or
   `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform

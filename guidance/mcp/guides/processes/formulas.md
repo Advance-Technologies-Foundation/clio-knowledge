@@ -96,9 +96,11 @@ unknown setting. Build the token yourself, in two steps:
    * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
    * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
-For a COLUMN inside a read element's `ResultEntity`, read `process-data-elements`: it owns discovering
-the column UId through `get-entity-schema-properties` and authoring the third segment on a branch
-condition. A missing column UId in describe does not make that condition unauthorable.
+For a COLUMN inside a read element's `ResultEntity`: a Formula BODY takes the name form
+`[#ReadContact.ResultEntity.Owner#]`, expanded on every write path; a raw `expression` takes the UId form with
+a third segment, `[#[Element:{elementUid}].[Parameter:{parameterUid}].[EntityColumn:{columnUid}]#]`, the column
+UId from `get-entity-schema-properties`. A plain column mapping is `sourceColumn`, not a formula -
+`process-data-elements` owns both.
 
 Worked example — note the target is a FLOAT parameter: `Math.Ceiling` returns `decimal`, and a decimal
 result into an Integer parameter is refused by the result-type rule below. `describe-business-process`
