@@ -236,6 +236,6 @@ This article is the authoritative owner of process parameters, the mappings that
   The third segment above, `[EntityColumn:{uid}]`, addresses ONE COLUMN of the record, and it IS
   authorable: the column UId comes from `get-entity-schema-properties`, not from describe.
   `process-data-elements` owns the recipe, in a condition and in a formula — the formula is how a
-  column reaches a process parameter. A structured `sourceElementParameter` still cannot name a column
-  (ENG-91844). An email BODY macro reaches a column by name instead,
+  column reaches a process parameter. A structured `sourceElementParameter` still cannot name a column.
+  An email BODY macro reaches a column by name instead,
   `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).

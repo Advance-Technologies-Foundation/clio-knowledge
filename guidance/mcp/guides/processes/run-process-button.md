@@ -74,7 +74,7 @@ handler reads the primary data source record Id and injects it into the named pa
   run type — it names the process parameter that receives the current record, and the designer
   marks that field required. A `ForTheSelectedPage` button WITHOUT it runs the process with NO
   record (contradicting "run for this record"), yet the platform still saves it — so `validate-page`
-  and `update-page` REJECT that button up front (ENG-95822), naming the button and this key.
+  and `update-page` REJECT that button up front, naming the button and this key.
   If the process has no input parameter to receive the record, either add one with
   create/modify-business-process, or use `RegardlessOfThePage` because the record is not being passed.
 - `recordIdProcessParameterName` must be a parameter CODE from the signature.
@@ -84,7 +84,7 @@ handler reads the primary data source record Id and injects it into the named pa
 - `parameterMappings` was NOT observed to deliver ordinary parameter VALUES under `ForTheSelectedPage`.
   Mapping a column (e.g. `"ProcessSchemaParameter2": "UsrName"`) is ACCEPTED by validate-page/update-page,
   but in the case checked the value did not reach the started process — the parameter opened empty
-  (one process on a live Creatio 10.1.x SalesEnterprise stand, ENG-96432; behavior for other run types
+  (one process on a live Creatio 10.1.x SalesEnterprise stand; behavior for other run types
   and versions is unverified, and the field's supported purpose is not documented here). To pass VALUES
   from the record use `processParameters` with `$Attr` bindings (V2), or the mix in V4 when you also need
   the record Id.
@@ -129,7 +129,7 @@ viewModelConfigDiff: [
 - The record's Id reaches `ProcessSchemaParameter3` via the ForTheSelectedPage record mechanism; the
   other values reach their parameters from the DS-bound view-model attributes (`$UsrName`, `$UsrPhoneNumber`).
 - Like the `$Attr` bindings in V2 (below), these are agent-only — the OOTB designer does not produce them.
-- Verified end-to-end on a live stand (ENG-96432): the same page FAILED the process-launch check when
+- Verified end-to-end on a live Creatio 10.1.x SalesEnterprise stand: the same page FAILED the process-launch check when
   Name/Phone were wired through `parameterMappings`, and PASSED once they were moved to `processParameters`.
 
 Variant V2 — bind a parameter to a view-model attribute
@@ -197,7 +197,7 @@ the two disagree)
                                observed to carry.
 - recordIdProcessParameterName (string) — parameter CODE that receives the current/selected record Id.
                                REQUIRED with processRunType=ForTheSelectedPage; validate-page and
-                               update-page reject its absence (ENG-95822).
+                               update-page reject its absence.
 - resultParameterNames         (string[]) — process OUTPUT parameter CODES to read back.
 - dataSourceName               (string) — datasource used by ForTheSelectedRecords.
 - filters / sorting            (object) — record selection for ForTheSelectedRecords.
@@ -209,10 +209,10 @@ processRunType reference
 - `RegardlessOfThePage` — run globally, no record context (V1/V2).
 - `ForTheSelectedPage` — run for the current form record (V3). REQUIRES `recordIdProcessParameterName`
   (the parameter that receives the record); validate-page/update-page reject a ForTheSelectedPage button
-  without it (ENG-95822).
+  without it.
 - `ForTheSelectedRecords` — run for grid-selected records; pair with dataSourceName /
   filters / sorting / selectionStateAttributeName. NOTE: accepted by the web and mobile
-  runtime, but the mobile designer does not yet emit it (ENG-87164) — author it for web for now.
+  runtime, but the mobile designer does not yet emit it — author it for web for now.
 
 resources parameter
 - Register the caption key you used, e.g. resources = {"RunBusinessProcessButton_caption":"Run process"}.

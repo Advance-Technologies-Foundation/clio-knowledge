@@ -24,15 +24,15 @@ N2  Process `name`: `<prefix><Object>_<Action>` in PascalCase segments — `UsrA
     `create-app` (or from `get-schema-name-prefix`) as the prefix for ALL custom schema codes" — whose
     enumeration names business-process codes. Read the prefix from there and apply what it yields:
     * The environment DECLARES a prefix -> the server REFUSES a code without it, with `The
-      "Account_Onboard" code of the "<caption>" object must start with the "Usr" prefix` (ENG-94378,
-      observed 2026-08-19 on a 7.8.0 stand whose `SchemaNamePrefix` is `Usr`; the refusal names whatever
+      "Account_Onboard" code of the "<caption>" object must start with the "Usr" prefix` (observed
+      2026-08-19 on a 7.8.0 stand whose `SchemaNamePrefix` is `Usr`; the refusal names whatever
       prefix THAT environment declares, so never hard-code `Usr`).
     * The environment declares an EMPTY prefix -> add none, as `app-modeling` states outright. The
       refusal above is evidence about a prefix-declaring environment only; an empty-prefix stand was not
       probed, so do not read it as "the platform always demands a prefix".
     After the prefix use two `_`-separated PascalCase segments, the object then the action. A further
-    `_<Qualifier>` segment IS accepted — `UsrProbe_Check_Naming` saved on a 7.8.0 stand (ENG-94378,
-    probed 2026-08-20) — but add one only when the action genuinely needs it: of 427 process schemas on
+    `_<Qualifier>` segment IS accepted — `UsrProbe_Check_Naming` saved on a 7.8.0 stand (probed
+    2026-08-20) — but add one only when the action genuinely needs it: of 427 process schemas on
     that stand, 90 carry exactly one `_` and NONE carry two, so two segments is the house shape. Add the
     package name only to break a real collision, never as blanket disambiguation. NO autonumber, NO
     random suffix, NO GUID fragment — the designer's own `Process_3d0825b` shape is what this prevents.
@@ -70,7 +70,7 @@ N4  `elements[].caption`: ALWAYS set one explicitly on EVERY element — never l
     EVERY element type accepts one — verified across the whole buildable slice, events included:
     `startEvent`, `signalStart`, `endEvent`, `userTask` (incl. `performTask` / `readData`) and `sendEmail`
     were each built WITH a caption and each read the caption back verbatim through
-    `describe-business-process` (ENG-94378, probed 2026-08-20 on a 7.8.0 stand). So there is no element
+    `describe-business-process` (probed 2026-08-20 on a 7.8.0 stand). So there is no element
     on which this rule is dead text. OMIT a caption and the platform falls back to THE ELEMENT CODE as the
     caption — the same graph built without captions read back `"caption": "ProbeStart"` on its start event
     — so an unset caption is not a friendly default: it puts a raw code on the diagram, which is exactly
@@ -95,13 +95,13 @@ N5  `elements[].name`: PascalCase, a meaningful verb+object, no spaces. NO auton
     "Follow-up task created" -> `EndFollowUpTaskCreated`. Do NOT paraphrase, abbreviate, or drop a
     content word on the way. Two independent runs of one request wrote the SAME caption "Follow-up task
     created" and produced `EndFollowUpTaskCreated` and `EndFollowUpCreated`
-    (ENG-94378, clean-room re-run 2026-08-21) — the drift came from shortening, and it is what makes
+    (clean-room re-run 2026-08-21) — the drift came from shortening, and it is what makes
     two generations of the same request undiffable. Every element example across the process guides is derivable
     this way, and `GuideExamples_ShouldDeriveEveryElementCodeFromItsCaption` holds them to it — where a
     caption and a code disagree, the caption is the input and the code is what is wrong.
 N6  An element code MUST NOT contradict the element's RUNTIME type. `endEvent` currently builds a
     `ProcessSchemaTerminateEvent` — a Terminate end, not a Simple end — so `EndNormal` on one is a lie the
-    code tells about the element (ENG-94378: the baseline run produced exactly that). The element catalog in
+    code tells about the element (a baseline agent run produced exactly that). The element catalog in
     `process-element-catalog` lists `endEvent` as "End/Terminate" because BPMN has both; what THIS API
     builds today is Terminate.
     SCOPE: the rule forbids only a code that ASSERTS a type — `EndNormal` on a Terminate end, or
@@ -123,7 +123,7 @@ N9  Codes are STABLE: regenerating from the same request must yield the same cod
     caption cannot drift unless the caption does. Measured on one request across two independent runs,
     every code backed by a formula was byte-identical — the process code (N2's `Object_Action`) and the
     start-event code (N5's `<Trigger>Signal`) — while the one rule that gives a shape and leaves the
-    wording free, `End<Reason>`, drifted (ENG-94378, 2026-08-21). So the caption wording is part of
+    wording free, `End<Reason>`, drifted (agent re-run, 2026-08-21). So the caption wording is part of
     what this rule constrains: a drifting caption drags its derived code with it, and N4 owns the rule
     that keeps it still (prefer the plainest statement of the action or the outcome).
     SCOPE: N9 governs the codes of elements and parameters PRESENT IN BOTH runs. Two runs may

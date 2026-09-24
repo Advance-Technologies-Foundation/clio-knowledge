@@ -10,7 +10,7 @@ never repeated here.
 
 == Writing a version, and making it actual ==
 Evidence for this section and the three that follow, graded the way V1-V7 are: both operations were
-exercised END TO END on a stand (CrtProcessBuilder 1.6.1.9, ENG-94374, 2026-09-11), and a three-member
+exercised END TO END on a stand (CrtProcessBuilder 1.6.1.9, 2026-09-11), and a three-member
 family was switched in every direction -- v2 -> v1 -> v0 -> v2 -- with exactly one member active at each
 hop and the process-library view agreeing independently. Numbering came out consecutive, every version
 was created inactive, and activation warned about the whole-family re-save before doing it. Those HAPPY
@@ -109,7 +109,7 @@ Activating an earlier version IS the rollback, and it is bounded:
   * ANY member is a valid target, the family ROOT included. "Go back to the original" IS activating
     the root, because the root is what ran before the family existed -- the PLATFORM accepts it and
     reports it as actual afterwards like any other member (measured on CrtProcessBuilder 1.6.1.9 and
-    again on 1.6.2.4, ENG-94374). Do not refuse it yourself, and do not offer a copy or yet another
+    again on 1.6.2.4). Do not refuse it yourself, and do not offer a copy or yet another
     version in its place.
     The TOOL says otherwise and is WRONG. No shipped clio carries the correction yet, so the
     `set-active-business-process-version` description you are reading almost certainly still says "it
@@ -143,7 +143,7 @@ is the one worth not repeating: `modify-business-process-as-new-version` has bee
 CrtProcessBuilder 1.6.1.1. `create-business-process` has NOT -- the same fix was never applied to the
 build path, and 1.6.1.9 still answers a descriptor-validation failure with "a partially created process
 schema '<your process>' may still exist in the package and has to be deleted manually", with nothing in
-the environment to delete (measured, ENG-94374). A fix is in flight; no version is named here until it
+the environment to delete (measured). A fix is in flight; no version is named here until it
 ships, because naming one in advance is exactly how this paragraph came to be wrong. The package
 refusal path carries no such text at all and is clean: "Package '<name>' does not accept edits on this
 environment, so a new version of '<process>' cannot be saved into it."

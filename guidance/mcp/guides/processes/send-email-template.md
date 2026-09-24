@@ -55,7 +55,7 @@ leaf rather than through `process-modeling`.
   in template mode; a `body` (or `messageSource:"custom"`) on a template element clears the template and its
   macro source, as the designer's card does on save — but `messageSource:"custom"` with NO body sent and none
   stored is REFUSED (`needs a 'body'`) rather than leaving an element with no message at all. A `subject`
-  sent ALONE never changes the mode — a template element keeps its template (the pre-ENG-95986 server
+  sent ALONE never changes the mode — a template element keeps its template (an older CrtProcessBuilder
   flipped it to custom; fixed), and so does an element with no stored mode that CARRIES a template, because
   an unset mode runs as template mode; only an element with neither a mode nor a template selects custom.
   `templateEntity` alone

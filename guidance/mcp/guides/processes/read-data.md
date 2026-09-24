@@ -46,7 +46,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
     `create-business-process` call find a shape rather than an empty list; re-selecting re-shapes in place,
     keeping surviving item ids. A multi-instance Sub-process element CONSUMES a collection - map
     `ResultCompositeObjectList` onto its `InputRecordCollection` and the called process runs once per item;
-    see `process-sub-process`. Reading one column out of the list into a scalar still needs ENG-91844.
+    see `process-sub-process`. Reading one column out of the list into a scalar is not supported yet.
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
     MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element, but `describe`
     does NOT list `ResultRowsCount` on a builder- or designer-made count element (see the `describe` coverage

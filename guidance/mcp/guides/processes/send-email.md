@@ -50,7 +50,7 @@ template read-back — is owned by `process-send-email-template`.
   their ABSENCE beside `hasBody:false` is the signal — not an older
   server, which the template-landed warning in `process-send-email-template` covers — so read the element
   back and check it — and the run fails with
-  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (reported on ENG-95979). The mechanism, from the platform
+  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (observed in a manual test, 2026-09-04). The mechanism, from the platform
   sources (`CrtProcessDesigner` 7.8.0, read 2026-09-09): the runtime dispatches on `BodyTemplateType`, an
   Integer with no default, so an element whose mode was never written RUNS in TEMPLATE mode with no template,
   and that text is the template provider's (`EmailTemplateUserTaskMessageProvider.GetEmailContent`, the only
@@ -90,7 +90,7 @@ template read-back — is owned by `process-send-email-template`.
   the same one-line justification the cc/bcc pushback gives. Creating a record is an ENVIRONMENT change:
   the build checks only `SenderEmailAddress`, so a bare record satisfies the build while whether it SENDS
   depends on the mailbox's server configuration, which this tool does not set up — say so when you create
-  one. Observed on ENG-95979 (manual test, 2026-09-04): an agent that pushed back on a literal `cc` with a
+  one. Observed in a manual test (2026-09-04): an agent that pushed back on a literal `cc` with a
   stated reason took a literal `sender` straight to a NEW mailbox record, without checking the mailbox it
   had configured minutes earlier — the correct build result, reached without the reasoning this rule asks for.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).

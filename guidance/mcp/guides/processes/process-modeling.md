@@ -134,8 +134,8 @@ you MUST also read `process-sub-process-when` first: it decides how many process
    nothing to tell them apart. Both `validate-process-graph` (R3) and `create-business-process`
    enforce exactly that, and both used to refuse ANY second start: a process reacting to two triggers
    was unbuildable, and the shape is one the platform itself ships (`PublishDraftToArticle` carries
-   two start signals). Requires CrtProcessBuilder 1.6.2.24 or later on the environment AND a clio carrying ENG-98559
-   (Advance-Technologies-Foundation/clio#1559): an older environment refuses the second start at build
+   two start signals). Requires CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later:
+   an older environment refuses the second start at build
    time with "the process has more than one start event", and an older clio reports it as an R3 error
    from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
