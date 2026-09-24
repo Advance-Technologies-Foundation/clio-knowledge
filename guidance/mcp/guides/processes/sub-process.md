@@ -6,7 +6,8 @@ This article is the authoritative owner of the Sub-process element (`callActivit
 own mirrored parameters, `resync`, MULTI-INSTANCE (running the callee once per item of a collection),
 the refusals, describe's read-back, and what is NOT supported (the event and expanded sub-processes). `process-element-catalog` says the element is
 buildable and from which CrtProcessBuilder version; `process-parameters` owns what happens to a CALLER
-when the called process's own parameters change. Split out of process-element-catalog.
+when the called process's own parameters change (their CAPTIONS on a re-sync are covered here, under
+`resync`). Split out of process-element-catalog.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
 owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
 leaf rather than through `process-modeling`.
@@ -40,6 +41,16 @@ leaf rather than through `process-modeling`.
         `resync: false` is accepted and inert everywhere, including on CREATE; `resync: true` is REFUSED
         on CREATE, and REFUSED combined with a `processName`/`processUId` naming a DIFFERENT process (a
         resync and a retarget are different requests); naming the one already called is accepted.
+      * CAPTIONS. Every synchronization - a re-sync, and any OTHER save of a caller - copies the called
+        process's parameter captions onto the element, current culture only, with NO notice, so a caption
+        edited on the element does not survive one: the platform's rule, and the process designer's card does
+        the same. Captions are display text; nothing binds by them. Before CrtProcessBuilder 1.6.6.20 a callee
+        saved through this toolset may still hand its callers the captions from before that save, and saving
+        it again through this toolset only moves that lag. So if a caller still shows a caption the called
+        process no longer has after a re-sync, run `install-process-builder` - the install restarts the
+        application, which drops the stale cache - then re-sync. Only when the package cannot be updated, ask
+        the USER to open the called process in the process designer and save it (no change needed), then
+        re-sync; that cure lasts only until the next save of the callee through an older toolset.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
         is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
