@@ -22,6 +22,20 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <c>MobileDropReasonCodeCoverageTests</c>: a value renamed in clio fails THERE, a clause deleted here
 /// fails HERE.
 /// </para>
+/// <para>
+/// PR #174 added <c>resolvedCandidateSchemaName</c>, <c>resolvedSourceType</c>, <c>recommendedAction</c>
+/// and the corrected FIVE-collection count for clio #1562, and separately reinstated
+/// <c>bindingRemoved</c> / <c>drop-request-target-missing</c> after a brief retirement (commit 6cab799)
+/// that a review caught before merge. Neither had a pin, so the same review would be needed again on the
+/// next silent drift; <see cref="UnresolvedTargetRequestFields"/> and
+/// <see cref="BindingRemovedContract"/> exist so it is not.
+/// </para>
+/// <para>
+/// clio #1562 (ENG-94839), companion to toolkit #183, later moved missing-target dedup and the
+/// existing-mobile-page check server-side: <c>existingMobilePages</c> is a brand-new field, and
+/// <c>missingTargetPages</c> silently widened from web-page-only to also aggregating
+/// entity-default-mobile-page targets. <see cref="ExistingMobilePagesFields"/> pins both.
+/// </para>
 /// </remarks>
 [TestFixture]
 public sealed class ResponseShapeFieldGuidanceTests
@@ -77,6 +91,92 @@ public sealed class ResponseShapeFieldGuidanceTests
             "without this an agent reads a missing entry as a converter bug and starts filling gaps"),
         ("do NOT invent",
             "the directive itself: an invented key REPLACES a localized column title with one hardcoded culture")
+    ];
+
+    // unresolvedTargetRequests / requestConversions field set clio #1562 introduced. PR #174's review found
+    // the article silent on resolvedCandidateSchemaName and stale on the collection count (it still said
+    // FOUR after missingTargetPages became a fifth); nothing pinned the fix, so the same drift could return
+    // unnoticed the way the FOUR count itself once did. resolvedSourceType/recommendedAction were briefly
+    // documented here as always-null RESERVED fields — clio #1562 deleted both outright as dead wire surface
+    // (a settable-but-never-written property is not a contract). The pin below asserts the NEGATION
+    // sentence verbatim rather than the bare identifiers: PR #174's own review (Major) caught that
+    // AssertAllPresent is guide.Contains(fragment) — a presence check — so pinning "resolvedSourceType"
+    // alone is satisfied equally by the sentence this requires and by the sentence it forbids ("...reads
+    // null"). Pinning the full negation closes that hole; NoResolvedSourceTypeOrRecommendedAction below
+    // additionally forbids the positive phrasings the negation must never be replaced by.
+    private static readonly (string Fragment, string Because)[] UnresolvedTargetRequestFields =
+    [
+        ("resolvedCandidateSchemaName",
+            "the entity-default-mobile-page read's candidate web edit page; null when none was found, and never a schema to assume is on mobile"),
+        ("No `resolvedSourceType`/`recommendedAction`.",
+            "clio deleted both fields outright; pinning the negation sentence itself (not just the identifiers) is what actually fails if the article reverts to claiming they exist and read null"),
+        ("FIVE collections",
+            "the count itself: missingTargetPages is the fifth, and a caller iterating requestConversions by this number would skip it if it silently reverted to FOUR"),
+        ("missingTargetPages",
+            "must be named among the requestConversions collections, not only in its own field entry, or an agent counting collections never finds it")
+    ];
+
+    // Complements UnresolvedTargetRequestFields: forbids the positive phrasings the negation sentence must
+    // never be replaced by. A presence-only pin on the bare identifiers could not distinguish these from
+    // the required negation; these NotContain checks can.
+    private static readonly string[] ResolvedSourceTypeForbiddenPhrasings =
+    [
+        "resolvedSourceType` — reserved",
+        "resolvedSourceType` - reserved",
+        "resolvedSourceType` reads null",
+        "recommendedAction` reads null",
+        "resolvedSourceType` is always null",
+        "recommendedAction` is always null"
+    ];
+
+    // guide.existingMobilePages and the widened missingTargetPages aggregation clio #1562 added
+    // (companion to toolkit #183, ENG-94839). Neither had a pin: existingMobilePages is a brand-new
+    // top-level field a caller must check before Gate M, and missingTargetPages silently went from
+    // web-page-only to covering entity-default-mobile-page targets too — a caller that assumed the old
+    // web-page-only scope would miss half the queue with no error to notice it by.
+    private static readonly (string Fragment, string Because)[] ExistingMobilePagesFields =
+    [
+        ("existingMobilePages",
+            "the reuse-vs-convert-again field; losing its entry would leave a caller searching for an existing mobile page by hand again"),
+        ("entity-default-mobile-page",
+            "one of the two existingMobilePages.source values and one of the two kinds missingTargetPages now aggregates; losing it collapses the vocabulary back to one kind"),
+        ("collapses into",
+            "the rule that a web-page target and an entity target sharing a schema name merge into ONE missingTargetPages row instead of two"),
+    ];
+
+    // The two-repository vocabulary contract clio #1562 briefly broke: commit 6cab799 retired
+    // drop-request-target-missing and stripped bindingRemoved from this article on the premise the
+    // converter never removes a binding for a missing navigation target, then commit 268c2d5 reinstated
+    // both once ENG-94839's review showed the "always keep" behavior violated AC-2. Nothing pinned the
+    // OWNER article's half of that reversal, so the same silent strip could recur without failing here —
+    // only MobileDropReasonCodeCoverageTests would notice, and only for the reason-codes article.
+    private static readonly (string Fragment, string Because)[] BindingRemovedContract =
+    [
+        ("bindingRemoved",
+            "the field this article branches state on; stripping it again would silently revert to the 'always keep' behavior that violated AC-2"),
+        ("drop-request-target-missing",
+            "the cross-reference from the OWNER article to the code that fires when bindingRemoved is true; losing it here decouples the two halves of the contract again")
+    ];
+
+    // PR #174 round 2 (Major, discussion_r4084225498): the article claimed the definitional missing-target
+    // finding also lands in convertedRequests. The converter's definitional branch returns before
+    // ConvertedRequests.Add is ever reached, and clio's own e2e pins the opposite. Corrected in the article
+    // to the negation below; this pin is what the reviewer asked for so the claim cannot silently return -
+    // the third collection-membership drift in this article, after the FOUR/FIVE count and the
+    // resolvedSourceType/recommendedAction pair.
+    private static readonly (string Fragment, string Because)[] ConvertedRequestsNegationClause =
+    [
+        ("never `convertedRequests`",
+            "the definitional branch returns before ConvertedRequests.Add is reached; losing this negation reintroduces the false triple-membership claim PR #174's review rejected"),
+    ];
+
+    // Complements ConvertedRequestsNegationClause: forbids the specific false phrasings the negation must
+    // never be replaced by, the same pattern as ResolvedSourceTypeForbiddenPhrasings.
+    private static readonly string[] ConvertedRequestsForbiddenPhrasings =
+    [
+        "convertedRequests`, and `missingTargetPages",
+        "also shows up converted",
+        "it also shows up converted",
     ];
 
     [Test]
@@ -142,6 +242,57 @@ public sealed class ResponseShapeFieldGuidanceTests
             because: "same instruction in prose form - the synthesized layers arrive in viewConfigDiff");
         guide.Should().NotContain("baked into the element map",
             because: "the third phrasing of the same instruction");
+    }
+
+    [Test]
+    [Description("resolvedCandidateSchemaName is documented, resolvedSourceType/recommendedAction are documented as NOT existing on the wire (the negation sentence itself, not just the bare identifiers), and requestConversions is counted as FIVE collections including missingTargetPages. PR #174's review found the article silent on clio #1562's new field and still saying FOUR; this pin is what that review itself was missing.")]
+    public void Guide_ShouldDocumentTheClio1562UnresolvedTargetRequestFields()
+    {
+        AssertAllPresent(UnresolvedTargetRequestFields, caseSensitive: true);
+    }
+
+    [Test]
+    [Description("resolvedSourceType/recommendedAction must never be documented as existing fields that read null. PR #174's second review found the sibling presence-only pin structurally unable to catch this — it passes on the bare identifier regardless of which sentence surrounds it — so this asserts the forbidden phrasings directly.")]
+    public void Guide_ShouldNeverDocumentResolvedSourceTypeOrRecommendedActionAsExistingFields()
+    {
+        string guide = Normalize(ReadGuide(OwnerGuide));
+
+        foreach (string forbidden in ResolvedSourceTypeForbiddenPhrasings)
+        {
+            guide.Should().NotContain(forbidden,
+                because: "clio #1562 deleted both fields outright; documenting either as present and null "
+                    + "reintroduces the always-null RESERVED-field claim PR #174's review rejected");
+        }
+    }
+
+    [Test]
+    [Description("bindingRemoved and its drop-request-target-missing cross-reference survive in the OWNER article. Commit 6cab799 stripped both on the premise the converter never removes this binding; commit 268c2d5 reinstated them once review showed that broke AC-2. A future edit reverting to the 'always keep' premise must fail here, not only in MobileDropReasonCodeCoverageTests.")]
+    public void Guide_ShouldKeepTheBindingRemovedContract()
+    {
+        AssertAllPresent(BindingRemovedContract, caseSensitive: true);
+    }
+
+    [Test]
+    [Description("The definitional missing-target finding (web page, bindingRemoved: true) is never documented as also appearing in convertedRequests. PR #174 round 2 (discussion_r4084225498) found the article claiming a triple membership - droppedRequests, convertedRequests, missingTargetPages[].references - when WebToMobileAnalysisService.ProcessOneEventBinding's definitional branch returns before ConvertedRequests.Add is reached, and clio's own e2e pins the opposite (ConvertedRequests.Should().NotContain(...)). This is the third collection-membership claim in this article to drift from the code; the reviewer asked for a pin so the next one fails here instead of in review.")]
+    public void Guide_ShouldDenyConvertedRequestsMembership_ForTheDefinitionalMissingTargetFinding()
+    {
+        AssertAllPresent(ConvertedRequestsNegationClause, caseSensitive: true);
+
+        string guide = Normalize(ReadGuide(OwnerGuide));
+        foreach (string forbidden in ConvertedRequestsForbiddenPhrasings)
+        {
+            guide.Should().NotContain(forbidden,
+                because: "the definitional branch returns before ConvertedRequests.Add is reached; "
+                    + "reintroducing a claim that this finding also converts is the exact drift PR #174 "
+                    + "round 2 rejected");
+        }
+    }
+
+    [Test]
+    [Description("existingMobilePages is documented as its own field, and missingTargetPages is documented as covering entity-default-mobile-page targets (with the same-schema collapse rule), not only web-page ones. clio #1562 added both server-side as the companion to toolkit #183; nothing pinned them, so the same silent drift that hit resolvedCandidateSchemaName before PR #174 could recur unnoticed.")]
+    public void Guide_ShouldDocumentExistingMobilePagesAndTheWidenedMissingTargetPages()
+    {
+        AssertAllPresent(ExistingMobilePagesFields, caseSensitive: true);
     }
 
     [Test]

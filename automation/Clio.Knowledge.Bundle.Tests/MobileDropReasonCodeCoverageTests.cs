@@ -89,6 +89,10 @@ public sealed class MobileDropReasonCodeCoverageTests
             "the request TYPE converts and only its navigation TARGET is gone, so the remedy is about the "
                 + "destination rather than the action — and it fires ONLY for a definitional absence, which is "
                 + "what separates it from the softer verdicts that remove nothing"),
+        ("drop-request-property-not-declared",
+            "the request converts perfectly well and the COMPONENT has no slot to fire it from, so the remedy is "
+                + "about the element rather than the action — and unlike every other drop here, re-adding the "
+                + "binding is not merely wrong but INERT, which a caller has to be told before it tries"),
         ("drop-request-element-empty-container",
             "reconciliation after the empty-container pass; the container's own entry carries the detail"),
         ("drop-request-element-excluded",
