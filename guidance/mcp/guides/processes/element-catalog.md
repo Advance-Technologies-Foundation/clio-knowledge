@@ -115,9 +115,9 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  and a CONSUMER
-  of a read collection (no iterator element builds, and reading one column out of the list needs ENG-91844 — all
-  four Read data modes DO build, see the catalog entry below).
+  and reading one COLUMN out of a read collection (ENG-91844) — all
+  four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance
+  Sub-process element iterates one, once per item (see the `callActivity` entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
 
@@ -193,9 +193,11 @@ System actions (palette group "System actions"):
     READ-ONLY here.
 - `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing
     values through THAT process's own parameters. BUILDABLE from CrtProcessBuilder **1.6.3.26** via
-    `type:"subProcess"` with a `subProcess` block (`{processName | processUId, resync}`); the block, the
-    parameter mirroring/mapping rule, `resync`, the refusals and what is NOT supported (multi-instance,
-    event/expanded sub-processes) are owned by `process-sub-process`. Its EVENT and EXPANDED variants keep
+    `type:"subProcess"` with a `subProcess` block
+    (`{processName | processUId, resync, multiInstanceOptions}`); the block, the parameter
+    mirroring/mapping rule, `resync`, MULTI-INSTANCE (running the callee once per item of a collection,
+    from **1.6.6.14**), the refusals and what is NOT supported (the event/expanded sub-processes) are owned
+    by `process-sub-process` — go there before writing any of it. Its EVENT and EXPANDED variants keep
     their children in their OWN collection, which `describe-business-process` does not walk, but
     the delete guards see them, walking it recursively so a reference from inside one still blocks a delete.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).
