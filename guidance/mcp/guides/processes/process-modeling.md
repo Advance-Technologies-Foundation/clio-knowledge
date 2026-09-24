@@ -122,12 +122,11 @@ article from what this one says; read that article.
 == Build recipe (intent -> running process) ==
 Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
 today and what it does not, and a plan built around something it cannot build fails only at build
-time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
+time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process
+you MUST also read `process-sub-process-when` first: it decides how many processes the request is.
 1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
-   ONE PROCESS per request: read `process-sub-process-when` if work repeats per item, a fragment
-   repeats, or the plan has long human phases.
    ONE START PER TRIGGER the process must react to: a process that runs both when a record is ADDED
    and when the same record is CHANGED carries TWO signal starts, not two processes and not one
    trigger. Signal, timer and message starts may be several; the SIMPLE start — the manual launch —
