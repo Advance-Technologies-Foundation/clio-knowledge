@@ -106,7 +106,8 @@ The fields:
 Read `isActiveVersion` BEFORE you explain or edit anything. That is the whole reason the fields exist:
 resolving a versioned process by `process-name` returns the root, and the root is normally inactive.
 Three outcomes, and only the first two are ordinary:
-  * TRUE -- you hold the version that runs. Proceed.
+  * TRUE -- you hold the version that runs. Proceed under `process-modeling`'s modify rules: overwriting it
+    needs the user's explicit yes.
   * FALSE WITH an `activeVersionSchemaUId` -- the graph you are holding is NOT the one that runs.
     Describe again by that UId and work from the result. This is the common case on a versioned process.
   * FALSE with NO `activeVersionSchemaUId`, or the version fields absent -- there is no graph to redirect

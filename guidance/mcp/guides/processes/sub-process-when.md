@@ -36,9 +36,9 @@ it calls.
   rights changes every record its filter matches. A request that is ONLY data work of that kind
   ("mark every overdue invoice as overdue") is one element with a filter — prefer it. Modify data
   writes the SAME values to every matched record, so a value computed from each record's own data is
-  D1 again. An email or a task is not data work, though each is stored as an Activity: Add data of
-  Activity records never stands in for a Send email (`process-send-email` says what it loses) or a
-  Perform task (whose task the process follows until it is completed), so one for each item stays D1.
+  D1 again. An email to send or prepare, or a task to perform, is not data work, though each is stored
+  as an Activity: one for each item stays D1, and an Add data of Activity records is no substitute
+  (`process-send-email`, `process-perform-task`).
 - ACTION: the per-item steps become the HELPER; the caller reads the set (Read data in `collection`
   mode, `process-read-data`) and calls the helper through ONE multi-instance Sub-process element bound
   to that read. The helper receives each item through its own input parameters (`In`, or `Variable`),

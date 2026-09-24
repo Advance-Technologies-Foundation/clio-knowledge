@@ -74,7 +74,9 @@ who has to re-derive which of those happened has lost the thing versioning was f
 
 The two answers do NOT carry the same authority, and this paragraph decides any sentence that seems
 to say otherwise. Q1 is a ROUTING answer: it picks which tool every later edit uses, and picking a
-tool changes nothing on the environment by itself. Q2 is a PREFERENCE, not a consent: it decides
+tool changes nothing on the environment by itself. A CURRENT answer is also the explicit yes that
+`process-modeling` requires before an in-place edit of the active version, for the rest of the session;
+the edit request alone never is, so ask Q1 before that first edit rather than a second question after it. Q2 is a PREFERENCE, not a consent: it decides
 whether you OFFER activation once a version exists, and it authorises no call. Every
 `set-active-business-process-version` call needs its own request, naming the version to be made actual
 and the environment -- a session answer is never that request, per `core-rules`, where an answer given
