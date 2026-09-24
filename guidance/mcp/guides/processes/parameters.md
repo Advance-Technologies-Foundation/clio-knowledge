@@ -233,6 +233,6 @@ This article is the authoritative owner of process parameters, the mappings that
   etc.).
   This applies to MAPPINGS only. It does NOT mean a formula cannot reference a parameter: inside an
   `expression` there is no structured alternative, and the UId meta-path is exactly what you write.
-  `process-formulas` owns that form — built from the `uid`s `describe-business-process` reports; a column's
-  third segment takes the column's `u-id` from `get-entity-schema-properties`. An email BODY macro reaches a
-  column with its own grammar, `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).
+  `process-formulas` owns that form — built from the `uid`s `describe-business-process` reports; the column
+  form (a third segment) is `process-data-elements`'. An email BODY macro reaches a column with its own
+  grammar, `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).

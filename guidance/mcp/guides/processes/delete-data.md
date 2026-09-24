@@ -132,7 +132,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   `changeData`.
   A COLUMN of a record a preceding `readData` element read is a filter source too -
   `elementParameter: { elementName, parameter: "ResultEntity", column: "<Code>" }`
-  (`process-data-elements` owns that source).
+  (`process-data-elements` owns that source). When the read finds NO record that column is empty, and what
+  a delete filter does with an empty value was not measured: branch on the read's result before a delete.
 - Change an EXISTING element in place with the `setElement` op's `deleteData` field: omit `source` to keep
   the current target. A retarget is refused while another parameter still maps from the element, and on ANY
   target change (FIRST configuration included) the stored record filter clears unless its root already

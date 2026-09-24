@@ -96,13 +96,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
   reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- ONE column of a first-record read's `ResultEntity` IS a source, by its code: `sourceColumn` in a mapping
-  or an element value, `elementParameter.column` in a filter, `[#Read.ResultEntity.Column#]` in a
-  create-time condition or a Formula body. `process-data-elements` owns the forms and the refusals. The one
-  this block causes: with a non-empty `columns` list the platform fetches ONLY those columns, so a column
-  outside the list would arrive empty at run time and is refused - list it, or omit `columns`. The
-  element's only output PARAMETER is still `ResultEntity` (the whole record, `isResult:true` in describe),
-  so a column name in `sourceElementParameter` (`"Email"`) fails with "element has no parameter".
+- ONE column of a first-record read's `ResultEntity` IS a source, by its code (`sourceColumn`,
+  `elementParameter.column`, `[#Read.ResultEntity.Column#]`); `process-data-elements` owns the forms and every
+  refusal, including the two this block causes (a column outside a non-empty `columns`
+  list, and a count / aggregation read). The element's only output PARAMETER is still `ResultEntity`.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",

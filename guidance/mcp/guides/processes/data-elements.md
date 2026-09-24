@@ -80,31 +80,37 @@ filter; see `process-access-rights`.
   * a `changeData` / `addData` / `openEditPage` value - the same trio; the entry's `column` is its TARGET:
         { "column": "Owner", "sourceElement": "ReadContact", "sourceElementParameter": "ResultEntity",
           "sourceColumn": "Owner" }
-  * an `openEditPage` `recordId` - the trio, with a LOOKUP column that points at the page's object;
+  * an `openEditPage` `recordId` - the trio, with a LOOKUP column that points at the page's object (or the
+    `Id` column);
   * a filter's right-hand side - `"elementParameter": { "elementName": "ReadContact", "parameter":
     "ResultEntity", "column": "Owner" }`;
   * a branch condition at CREATE, or a Formula body - `[#ReadContact.ResultEntity.DoNotUseCall#] == true`.
-- Refused at build, naming the field: the read does not precede the consumer; a PATH (`Owner.Name` - read
-  the related record with its own `readData`, filter `Id` = the column); a collection output, an item of
-  one, or a lookup/`RecordId` parameter (nothing loads a lookup's record, so its columns would stay empty);
-  a column outside a non-empty `readData.columns` list (the platform fetches only the listed columns, so it
-  would arrive EMPTY - list it or omit `columns`); a type that does not fit the target, by the rule
-  parameter-to-parameter mappings use (`OwnerId` <- `Owner` builds, <- `Account` is refused). A column name
-  in `sourceElementParameter` (`"Email"`) is still "element has no parameter": the column goes in
-  `sourceColumn`.
+- Refused at build, naming the field: a PATH (`Owner.Name` - read the related record with its own
+  `readData`, filter `Id` = the column); a collection output, an item of one, or a lookup/`RecordId`
+  parameter (nothing loads a lookup's record, so its columns would stay empty); a read in `count` /
+  `aggregation` mode (it never fills `ResultEntity`); a column outside a non-empty `readData.columns` list
+  (the platform fetches only the listed columns, so it would arrive EMPTY - list it or omit `columns`; the
+  primary column `Id` is always fetched); a type that does not fit the target, by the rule
+  parameter-to-parameter mappings use (`OwnerId` <- `Owner` builds, <- `Account` is refused). A later
+  `setElement readData.columns` that drops a column something still reads is refused too. A column name in
+  `sourceElementParameter` (`"Email"`) is still "element has no parameter": the column goes in
+  `sourceColumn`. Nothing checks ORDER on a mapping, filter or condition, so place the read before its
+  consumers in the flow yourself.
 - `describe-business-process` reports such a value's `sourceElement` / `sourceElementParameter` /
-  `sourceColumn` beside the raw `value`, only when those names re-apply to the identical value.
+  `sourceColumn` beside the raw `value`, only when those names would re-apply to the identical value
+  (same spelling, a fitting type, a loaded column).
 - A condition on the MODIFY path has no name expansion, so write the UId form: the read element's `uid`
   and its `ResultEntity` parameter's `uid` from describe, the column's `u-id` from
   `get-entity-schema-properties` (merged view, no `package-name`) -
   `[#[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#] == true`.
+  This form is stored as written and gets NO load check: include the column in `readData.columns`, or omit
+  the list, yourself. The same holds for the UId form inside any raw `expression`.
   Describe again and require `kind: "conditional"` plus the exact text, then run with a matching and a
   non-matching record: a read-back proves authoring, NOT routing.
   Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;
   [validation evidence](https://github.com/Advance-Technologies-Foundation/clio/issues/1645#issuecomment-5760323479).
-- A Send email BODY macro reaches a column with its own grammar, `[[element:Read.ResultEntity.Column]]`
-  (`process-send-email` owns it). A RECIPIENT has no column field: map the column into a Contact-lookup
-  process parameter with `sourceColumn`, then name that parameter.
+- A Send email BODY macro reaches a column with its own grammar, and a recipient reaches one through a
+  process parameter; `process-send-email` owns both.
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
