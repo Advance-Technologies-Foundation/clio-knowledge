@@ -158,6 +158,27 @@ public sealed class ResponseShapeFieldGuidanceTests
             "the cross-reference from the OWNER article to the code that fires when bindingRemoved is true; losing it here decouples the two halves of the contract again")
     ];
 
+    // PR #174 round 2 (Major, discussion_r4084225498): the article claimed the definitional missing-target
+    // finding also lands in convertedRequests. The converter's definitional branch returns before
+    // ConvertedRequests.Add is ever reached, and clio's own e2e pins the opposite. Corrected in the article
+    // to the negation below; this pin is what the reviewer asked for so the claim cannot silently return -
+    // the third collection-membership drift in this article, after the FOUR/FIVE count and the
+    // resolvedSourceType/recommendedAction pair.
+    private static readonly (string Fragment, string Because)[] ConvertedRequestsNegationClause =
+    [
+        ("never `convertedRequests`",
+            "the definitional branch returns before ConvertedRequests.Add is reached; losing this negation reintroduces the false triple-membership claim PR #174's review rejected"),
+    ];
+
+    // Complements ConvertedRequestsNegationClause: forbids the specific false phrasings the negation must
+    // never be replaced by, the same pattern as ResolvedSourceTypeForbiddenPhrasings.
+    private static readonly string[] ConvertedRequestsForbiddenPhrasings =
+    [
+        "convertedRequests`, and `missingTargetPages",
+        "also shows up converted",
+        "it also shows up converted",
+    ];
+
     [Test]
     [Description("Every componentSuggestions category ships in the article with the exact PascalCase spelling a caller branches on. A case change or a dropped entry re-records the digest silently.")]
     public void Guide_ShouldCarryEveryComponentSuggestionCategory_VerbatimAsItShips()
@@ -249,6 +270,22 @@ public sealed class ResponseShapeFieldGuidanceTests
     public void Guide_ShouldKeepTheBindingRemovedContract()
     {
         AssertAllPresent(BindingRemovedContract, caseSensitive: true);
+    }
+
+    [Test]
+    [Description("The definitional missing-target finding (web page, bindingRemoved: true) is never documented as also appearing in convertedRequests. PR #174 round 2 (discussion_r4084225498) found the article claiming a triple membership - droppedRequests, convertedRequests, missingTargetPages[].references - when WebToMobileAnalysisService.ProcessOneEventBinding's definitional branch returns before ConvertedRequests.Add is reached, and clio's own e2e pins the opposite (ConvertedRequests.Should().NotContain(...)). This is the third collection-membership claim in this article to drift from the code; the reviewer asked for a pin so the next one fails here instead of in review.")]
+    public void Guide_ShouldDenyConvertedRequestsMembership_ForTheDefinitionalMissingTargetFinding()
+    {
+        AssertAllPresent(ConvertedRequestsNegationClause, caseSensitive: true);
+
+        string guide = Normalize(ReadGuide(OwnerGuide));
+        foreach (string forbidden in ConvertedRequestsForbiddenPhrasings)
+        {
+            guide.Should().NotContain(forbidden,
+                because: "the definitional branch returns before ConvertedRequests.Add is reached; "
+                    + "reintroducing a claim that this finding also converts is the exact drift PR #174 "
+                    + "round 2 rejected");
+        }
     }
 
     [Test]
