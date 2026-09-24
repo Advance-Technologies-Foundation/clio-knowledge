@@ -48,7 +48,9 @@ leaf rather than through `process-modeling`.
         CrtProcessBuilder 1.6.6.20 may still hand its callers the captions from before that save; if a caller
         still shows a caption the called process no longer has after a re-sync, ask the USER to open the
         called process in the process designer and save it (no change needed), then re-sync. That designer
-        save is the measured cure; re-saving the callee through this toolset is not.
+        save is the measured cure. Re-saving the callee through this toolset is no cure before 1.6.6.20;
+        from 1.6.6.20 that save releases the same cache the designer's save does, which should cure it too,
+        but that is not measured yet.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
         is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
