@@ -95,9 +95,10 @@ template read-back — is owned by `process-send-email-template`.
   had configured minutes earlier — the correct build result, reached without the reasoning this rule asks for.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
-  the contact's email at send time; an entity-COLUMN recipient would need a raw `expression` carrying a
-  three-segment meta-path whose column UId nothing reports, so it is NOT authorable today (ENG-91844) —
-  route the column through a process parameter instead. What remains reachable here is a raw
+  the contact's email at send time; for an entity-COLUMN recipient — the owner of a record the process
+  read — put the column into a Contact-lookup process parameter with a formula first
+  (`process-data-elements` owns that route) and send the parameter; a raw `expression` recipient carrying
+  the column token directly is not measured. What remains reachable here is a raw
   `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".

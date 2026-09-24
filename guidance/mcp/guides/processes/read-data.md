@@ -95,18 +95,18 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
   reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- A read record's individual COLUMN values ARE reachable in a flow condition — the platform parses a
+- A read record's individual COLUMN values ARE reachable in a flow condition and in a formula — the platform parses a
   third meta-path segment (`FillMatchedData` routes an `EntityColumn` segment into `SubParameterMetaPath`
   and `TryGetParameterMapPath` carries it). describe reports no column UIds, but that is a
   DISCOVERABILITY gap, not a refusal: `get-entity-schema-properties` supplies the UId describe does not.
-  `process-data-elements` owns the canonical column-in-branch-condition recipe (steps, verified evidence).
+  `process-data-elements` owns both recipes (steps, verified evidence).
   One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
   `[[element:Read.ResultEntity.Column]]`. Outside a flow condition, the element's only output parameter
   is `ResultEntity` (the whole record, `isResult:true` in describe); the record's columns are still NOT
-  element parameters, so a mapping, `changeData` value or filter condition that references them (e.g.
-  `sourceElementParameter: "Email"` on the read element) FAILS the build with "element has no parameter".
-  To key work off a specific record today, use a `signalStart` trigger output (`RecordId`) or a process
-  parameter.
+  element parameters, so a STRUCTURED reference to one (e.g. `sourceElementParameter: "Email"` on the
+  read element) FAILS the build with "element has no parameter". To carry a column onward, put it into a
+  process parameter with a formula (`process-data-elements`). To key work off a specific record, use a
+  `signalStart` trigger output (`RecordId`) or a process parameter.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",

@@ -68,10 +68,15 @@ leaf rather than through `process-modeling`.
   `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
   background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
-  which does not. For a SIGNAL-STARTED process set the flag on every element that offers it — the trigger fires
-  with no one waiting at a screen, so there is nothing for inline execution to return to — with one EXCEPTION
-  established by measurement rather than reasoning: an `openEditPage` step is left INLINE (the rule and its
-  measurement are in `process-open-edit-page`), because with the flag on it did not resume when its completion condition was met. The designer gates the control on
+  which does not. Do NOT set it on the elements of a signal-started process just because the process is
+  signal-started: the start's own default (below) already runs the WHOLE instance in a background worker, and on
+  an ordinary activity the flag changes nothing — the platform inserts a background token only for a start event
+  and a single-instance Sub-process. It matters on an element that WAITS (a task, a page, a catch event, a
+  Sub-process), where it decides whether the work after that element runs inside the request that completes it
+  or is queued; set it there only when the request asks for that. A background run cannot open pages at all (the
+  platform's `ForbidUserInteractionInBackground`, on by default), and an `openEditPage` step with the flag ON was
+  measured not to resume — `process-open-edit-page` owns that. Shipped signal-started processes carry the flag on
+  28 of the 166 elements after their start. The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op

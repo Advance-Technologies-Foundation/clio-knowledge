@@ -233,9 +233,9 @@ This article is the authoritative owner of process parameters, the mappings that
   parameter: inside an `expression` there is no structured alternative, and the UId meta-path is exactly
   what you write. `process-formulas` owns that form — you build it from the `uid` that
   `describe-business-process` reports, and it is the only accepted one.
-  The third segment above, `[EntityColumn:{uid}]`, is what the PLATFORM writes when it stores such a
-  reference. You cannot author one: `describe-business-process` reports no column UIds, so there is nowhere
-  to get it. A read record's individual columns are not referenceable from a MAPPING, a `changeData` value
-  or a filter condition either (ENG-91844) — but an email BODY macro does reach them, with
-  `[[element:<Element>.<OutputParameter>.<Column>]]`, a different grammar that needs no UId (see
-  `process-send-email`). Inside a formula: author two segments, not three.
+  The third segment above, `[EntityColumn:{uid}]`, addresses ONE COLUMN of the record, and it IS
+  authorable: the column UId comes from `get-entity-schema-properties`, not from describe.
+  `process-data-elements` owns the recipe, in a condition and in a formula — the formula is how a
+  column reaches a process parameter. A structured `sourceElementParameter` still cannot name a column
+  (ENG-91844). An email BODY macro reaches a column by name instead,
+  `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).
