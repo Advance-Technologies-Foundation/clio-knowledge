@@ -169,14 +169,13 @@ configuration is stored — the completion conditions and this column both refer
 stranded column leaves the designer's field empty with the list still switched on. Swapping in another page of the
 SAME object (the Classic-to-Freedom move) is fine: every reference stays valid. The refusal names the way out —
 supply a column of the new object, or `enabled: false`; for the conditions, `clearFilter` before the retarget.
-**State this to the user before building one:** this contract builds the result list and the column, not the
-routing. With `resultsByColumn` enabled AND its column set, its connectors take the designer's
+**The `openEditPage` block builds the result list and the column, not the routing** — the branches are
+flows. With `resultsByColumn` enabled AND its column set, its connectors take the designer's
 RESULT-SELECTION editor and never a formula field, so write the branch with `flows[].results` /
 `setFlowResults` — a formula there is REFUSED, because it would run unreadably
-(`process-activity-result-branches`, which says what to tell them). With the list off — or switched on with
+(`process-activity-result-branches` owns that dialect). With the list off — or switched on with
 `column: null` — the element enumerates nothing, so add the flows plain and set each condition
-with `modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op; gateway
-ELEMENTS and default flows stay unbuildable, see `process-element-catalog`). The list and
+with `modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op). The list and
 the column are the part a human cannot infer, and they are what this element contributes.
 `priority` takes an `ActivityPriority` lookup NAME (`Medium`) or its record id; an unknown name is refused rather
 than defaulted, because the designer marks the field required and a defaulted priority is indistinguishable from a

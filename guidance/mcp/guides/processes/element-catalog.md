@@ -136,8 +136,8 @@ System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD, COLLECTION, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
     object, mode, columns/sort — `first` / `collection`, refused for `count`/`aggregation` — a
-    `numberOfRecords` top-N (`collection` ONLY) and aggregation —
-    `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
+    `numberOfRecords` top-N (`collection` ONLY) and an aggregation function + column —
+    `aggregation` ONLY) plus a `filter` — see `process-read-data` for the block
     and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" |
     "collection" | "count" | "aggregation"`. `collection` reads every match into `ResultEntityCollection`
     and the shaped `ResultCompositeObjectList`, which a `Collection` process parameter mirrors; it requires
@@ -145,16 +145,16 @@ System actions (palette group "System actions"):
 - `addDataUserTask`   Add data     – create record(s) in background; BUILDABLE via the `addData` block in
                                      both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
+    element's `changeData` block (target object + column values) plus a `filter` — see
+    `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `changeAdminRightsUserTask` Change access rights - grant/revoke record permissions on matched
     records. BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
     `process-access-rights` owns the shape and the hazards. Both no-op states are worth naming here
     because they build green: `add` and `remove` both empty changes nothing, and a filter that is
-    PRESENT but carries no conditions is the inert state (the package refuses that one at build).
+    PRESENT but carries no conditions is the inert state (the package refuses that one at build);
     a record filter that is ABSENT is the opposite hazard and acts on every record of the object -
     nothing refuses or warns it. The element has no output parameters,
     so a clean build does NOT mean the element will do anything - check the filter and the entries.
-    element's `changeData` block (target object + column values) plus a `filter` — see
-    `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData`
     block (target object — the only field it has) plus a `filter` — see `process-delete-data` for the
     block and the confirmation duty, `process-data-source-filters` for the filter. Unlike Modify data there

@@ -148,8 +148,9 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
-   signal/readData/
+   setFlow / setFlowCondition / setFlowResults (`process-activity-result-branches`) / setElement /
+   setConnections / clearConnections — same
+   parameter/mapping/filter/signal/readData/
    changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
