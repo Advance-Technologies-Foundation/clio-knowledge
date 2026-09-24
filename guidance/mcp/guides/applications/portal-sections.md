@@ -59,17 +59,26 @@ assumes the earlier one exists.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`. Give `All external users`
    operation permissions on the section's object AND its lookup objects, or the list and fields are
-   empty even though the section and page exist:
-   `set-object-rights --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f
-   --operations read --include-connected --confirm`.
+   empty even though the section and page exist. `--include-connected` grants read to the WHOLE external
+   audience on every connected lookup too, so REVIEW WHAT THE FAN-OUT EXPOSES BEFORE GRANTING — a
+   connected lookup can carry PII or internal reference data (`Account`, `Contact`, price lists,
+   catalogs) that must not become world-readable to every external user:
+   1. Dry-read the connected set first: `get-object-rights --entity-schema-name <Object>
+      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected` to enumerate the object and
+      the lookups the grant would touch.
+   2. Confirm none of them is unsafe for the whole external audience. Where a shared lookup holds
+      sensitive data, do NOT fan it out — grant per-object (drop `--include-connected` and run
+      `set-object-rights` only on the safe objects) and handle the sensitive lookup another way.
+   3. Then grant the reviewed set:
+      `set-object-rights --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f
+      --operations read --include-connected --confirm`.
    Pin `--operations read` explicitly. The default (read/create/edit) would hand the WHOLE external
    audience create and edit on the object and on every shared lookup it fans out to; grant only what the
    portal scenario needs, and add `create`/`edit` only where external users genuinely author records.
-   `--include-connected` fans out to the object's own lookup objects so their reference fields resolve
-   for external users. Then VERIFY with `get-object-rights --entity-schema-name <Object>
-   --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected`: `object-rights` owns the caveat
-   that a deliberate read-only grant still shows in the "lacks the read/create/edit triple" list — that
-   is expected here, not a gap to fix by adding write access.
+   This read-exposure review mirrors the write caution — a fan-out grant is a disclosure decision, not a
+   mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read:
+   `object-rights` owns the caveat that a deliberate read-only grant still shows in the "lacks the
+   read/create/edit triple" list — that is expected here, not a gap to fix by adding write access.
 
 ## Fixed ids
 - `All external users` role (the portal audience, used in steps 2–4):
