@@ -73,16 +73,15 @@ NOT LOSS — report it, and re-insert NOTHING
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is
-                               lost. Say so. params.scope when the component sat inside a
-                               non-converting scope container. Do not confuse it with
+                               lost. Say so. NO params means the control had no action and nothing under
+                               it — read ANY menu items dropped beside it. params.scope
+                               inside a non-converting scope container. Do not confuse it with
                                drop-request-unsupported below — there the ELEMENT survives and only its
                                binding is removed.
-  drop-unknown-request         params.request is in NEITHER the conversion map nor the bundled set. clio
-                               cannot claim it is unavailable on mobile, only that it does not know it —
-                               so if that custom request IS implemented on mobile, the action can be
-                               re-added by hand. Offer that. params.scope is ALWAYS present, unlike on
-                               drop-unsupported-request above: this code is emitted from one site, and
-                               that site is the non-converting-scope path.
+  drop-unknown-request         params.request is in NEITHER the conversion map nor the mobile request
+                               registry. clio cannot claim it is unavailable on mobile, only that it does
+                               not know it — so if that custom request IS implemented on mobile, the
+                               action can be re-added by hand. Offer that. params.scope as above.
   drop-type-not-in-mobile-registry
                                this record's own webType has no mobile counterpart at all. No params:
                                a param that echoes a field the record already carries is a second place
@@ -164,9 +163,9 @@ carry the same action. Each entry says which of the two it is; read the entry, n
                                rule covers the binding too.
 
   flag-request-unmapped        KEPT, NOT LOST. The entry's request is in neither the conversion map nor
-                               the bundled set, so it was carried VERBATIM onto the mobile element.
-                               The component works; the action may or may not, and clio cannot tell.
-                               Ask the user to verify that request exists on mobile. Do NOT remove the
+                               the mobile request registry, so it was carried VERBATIM onto the element.
+                               The component works; the action may or may not — clio cannot tell.
+                               Ask the user to verify it exists on mobile. Do NOT remove the
                                binding and do NOT report it as conversion loss.
 
 
