@@ -303,10 +303,10 @@ FLOW
      carries the type and EVERY source property the mobile component supports — never drop any of
      them. It also already carries the CONVERTED event-binding requests (a button's `clicked`, a
      field's `valueChange`/`updated`): supported requests are kept (remapped when the mobile name
-     differs). A `crt.Button` whose request the mobile app does NOT support is not inserted at all — it
-     was already DROPPED (see its `droppedElements` entry), so you never see it here. Any OTHER
-     component type IS here even when its request was not supported: the component survives and only its
-     binding was dealt with — see REQUESTS in HARD MOBILE RULES for which of the two happened to it. Do NOT re-add or
+     differs). An ACTION-ONLY component (`crt.Button`, `crt.MenuItem`) whose request the mobile app does
+     NOT support is not inserted at all — it was already DROPPED; see its `droppedElements` entry.
+     Any OTHER component type IS here even when its request was not supported:
+     only its binding was dealt with — see REQUESTS in HARD MOBILE RULES for which of the two. Do NOT re-add or
      hand-edit these bindings — paste values as-is. There is NOTHING to add: the value binding is in
      `values` too, under `control`, which is the same wire name on both web and mobile (the mobile
      runtime reads the JSON key `control`; a Dart field named `value` is what it deserializes INTO, and

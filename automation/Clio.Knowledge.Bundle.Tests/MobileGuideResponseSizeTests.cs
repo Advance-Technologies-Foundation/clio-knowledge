@@ -115,10 +115,17 @@ public sealed class MobileGuideResponseSizeTests
     /// arrives with NO params for a control left with nothing to do, drop-unknown-request's
     /// "params.scope is ALWAYS present ... emitted from one site" was wrong on both halves once the
     /// reason helper became shared across three sites, and the "bundled set" it names was deleted from
-    /// clio by ENG-96589 in favour of the mobile request registry. All four are written, and both
-    /// ceilings still went DOWN, because the two request bullets and the surviving-binding lead-in were
-    /// paid down to cover them. The conversion article is the one under the STANDING PROBLEM above, so
-    /// growing it was not an option this change was willing to take.
+    /// clio by ENG-96589 in favour of the mobile request registry. Both ceilings still went DOWN, because
+    /// the two request bullets and the surviving-binding lead-in were paid down to cover the additions.
+    /// The conversion article is the one under the STANDING PROBLEM above, so growing it was not an option
+    /// this change was willing to take.
+    /// <para>
+    /// This fixture cannot tell you the corrections are COMPLETE, and an earlier draft of this remark
+    /// claimed they were while two of the four still had a second, untouched occurrence elsewhere in the
+    /// same article. Counting characters cannot see that. What checks it is
+    /// <c>MobileDropReasonCodeCoverageTests.Articles_ShouldNotCarryARetiredWording</c>; this one only
+    /// keeps the size from drifting.
+    /// </para>
     /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
