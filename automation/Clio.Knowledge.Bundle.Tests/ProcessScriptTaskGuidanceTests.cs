@@ -67,7 +67,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins the rules a ScriptTask author cannot recover from anywhere else: that the element costs a compile and comes last in the decision order, that the compile must be FULL, the namespaces that are NOT imported, why an alias exists and when one is refused, and that Get/Set names are case-sensitive. Each was measured on a stand (ENG-92711); losing one sends an author into a compile failure or a silently stale process.")]
+    [Description("Pins the rules a ScriptTask author cannot recover from anywhere else: that the element costs a compile and comes last in the decision order, that the compile is compile-creatio process-name, the namespaces that are NOT imported, why an alias exists and when one is refused, and that Get/Set names are case-sensitive. Each was measured on a stand (ENG-92711); losing one sends an author into a compile failure or a silently stale process.")]
     public void Guide_ShouldKeepTheAuthoringDecisionCompileAndNamespaceRules()
     {
         // Arrange
@@ -82,8 +82,10 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the element is the one that makes a clio-built process need a compile, so choosing it is a decision");
         guide.Should().Contain("call it from a custom user task",
             because: "reusable C# belongs in a compiled user task, whose callers need no compile of their own");
-        guide.Should().Contain("Run a FULL `compile-creatio`",
-            because: "a changed-items build was measured leaving an edited body uncompiled");
+        guide.Should().Contain("run `compile-creatio` with `process-name` set to the process",
+            because: "on Creatio 10.x a plain and a package-name compile were both measured leaving an edited body uncompiled");
+        guide.Should().Contain("with the user's confirmation that tool requires",
+            because: "a compile reloads the runtime for every user, so the process compile is asked for like any other");
         guide.Should().Contain("keeps running its PREVIOUS body",
             because: "an edited, uncompiled script runs the old code silently, which no save reports");
         guide.Should().Contain("There is NO `System.Linq`, and no `Terrasoft.Configuration`",
