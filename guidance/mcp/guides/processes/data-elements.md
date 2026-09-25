@@ -97,6 +97,11 @@ filter; see `process-access-rights`.
   `sourceElementParameter` (`"Email"`) is still "element has no parameter": the column goes in
   `sourceColumn`. Nothing checks ORDER on a mapping, filter or condition, so place the read before its
   consumers in the flow yourself.
+- Verified at run time on Creatio 10.1.37 (.NET Framework, MSSQL), CrtProcessBuilder 1.6.6.27, 2026-09-25: one
+  create call built signalStart (Contact added) -> readData (Id = RecordId) -> exclusiveGateway on
+  `[#ReadContact.ResultEntity.DoNotUseCall#] == false` -> Perform task with `OwnerId` <- `sourceColumn: "Owner"`.
+  A contact with `DoNotUseCall = false` ran the call branch and its Activity got the contact's owner (not the
+  process starter); one with `true` ran the fallback.
 - `describe-business-process` reports such a value's `sourceElement` / `sourceElementParameter` /
   `sourceColumn` beside the raw `value`, only when those names would re-apply to the identical value
   (same spelling, a fitting type, a loaded column).
