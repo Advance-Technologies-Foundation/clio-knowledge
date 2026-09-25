@@ -72,9 +72,10 @@ assumes the earlier one exists.
    3. Then grant the reviewed set:
       `set-object-rights --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f
       --operations read --include-connected --confirm`.
-   Pin `--operations read` explicitly. The default (read/create/edit) would hand the WHOLE external
-   audience create and edit on the object and on every shared lookup it fans out to; grant only what the
-   portal scenario needs, and add `create`/`edit` only where external users genuinely author records.
+   Pin `--operations read` explicitly. The root default (read/create/edit) would hand the WHOLE external
+   audience create and edit on the section's object; the connected lookups get read only unless
+   `--connected-operations` widens them. Grant only what the portal scenario needs, and add
+   `create`/`edit` only where external users genuinely author records.
    This read-exposure review mirrors the write caution — a fan-out grant is a disclosure decision, not a
    mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read:
    `object-rights` owns the caveat that a deliberate read-only grant still shows in the "lacks the
