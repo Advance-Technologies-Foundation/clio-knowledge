@@ -99,7 +99,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
 - ONE column of a first-record read's `ResultEntity` IS a source, by its code (`sourceColumn`,
   `elementParameter.column`, `[#Read.ResultEntity.Column#]`); `process-data-elements` owns the forms and every
   refusal, including the two this block causes (a column outside a non-empty `columns`
-  list, and a count / aggregation read). The element's only output PARAMETER is still `ResultEntity`.
+  list, and a read in any mode but first). The element's only output PARAMETER is still `ResultEntity`.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",

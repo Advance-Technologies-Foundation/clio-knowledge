@@ -87,8 +87,9 @@ filter; see `process-access-rights`.
   * a branch condition at CREATE, or a Formula body - `[#ReadContact.ResultEntity.DoNotUseCall#] == true`.
 - Refused at build, naming the field: a PATH (`Owner.Name` - read the related record with its own
   `readData`, filter `Id` = the column); a collection output, an item of one, or a lookup/`RecordId`
-  parameter (nothing loads a lookup's record, so its columns would stay empty); a read in `count` /
-  `aggregation` mode (it never fills `ResultEntity`); a column outside a non-empty `readData.columns` list
+  parameter (nothing loads a lookup's record, so its columns would stay empty); a read in any mode but
+  `first` (`count` / `aggregation` never fill `ResultEntity`, and in `collection` mode it is not the output -
+  use the list outputs); a column outside a non-empty `readData.columns` list
   (the platform fetches only the listed columns, so it would arrive EMPTY - list it or omit `columns`; the
   primary column `Id` is always fetched); a type that does not fit the target, by the rule
   parameter-to-parameter mappings use (`OwnerId` <- `Owner` builds, <- `Account` is refused). A later
