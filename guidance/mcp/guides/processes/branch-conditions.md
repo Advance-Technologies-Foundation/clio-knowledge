@@ -51,13 +51,13 @@ everything exists.
     { "source": "Check", "target": "Escalate", "kind": "conditional",
       "condition": "[#Priority#] == \"High\"", "label": "Escalated" } // and another
 
-`[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
-before you rely on it. A `readData` in `first` mode, the only mode clio builds, exposes exactly one output
-and it is a RECORD (`ResultEntity`). Testing one of its COLUMNS needs a third meta-path segment
-(`[EntityColumn:]`) that the create-time name form cannot express, so a column test goes through the modify
-path. `process-data-elements` owns the recipe: discover the column UId with
-`get-entity-schema-properties`, then combine it with the element/parameter UIds from describe. That is not a
-corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
+`[#Element.Parameter#]` is expanded too, for an element's OWN output parameter, and
+`[#Element.Parameter.Column#]` for ONE column of the record it returned. A `readData` in `first` mode exposes
+exactly one output and it is a RECORD (`ResultEntity`), so a column test reads
+`[#ReadContact.ResultEntity.DoNotUseCall#] == true`; the column is resolved by its code on the read object,
+and `process-data-elements` owns that source, its refusals and the UId form a MODIFY-path condition needs.
+That is not a corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and
+245 are not.
 
 > Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
 > condition stores, and `describe` reads back clean — but `ReadDataUserTask.HandleResult` assigns it only in

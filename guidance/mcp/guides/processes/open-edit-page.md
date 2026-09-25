@@ -92,11 +92,13 @@ values in EITHER mode, so a leftover set would be live configuration nobody aske
 `defaultValues` uses the SAME entry shape and the same stored format a Modify data element's `values` use:
 per column, exactly ONE of `value` (a constant — TEXT columns only and non-empty; a date/lookup/numeric
 constant is refused because the runtime reads those columns typed), `processParameter`,
-`sourceElement` + `sourceElementParameter` (an EARLIER element's output), or `expression` (a raw macro — and
+`sourceElement` + `sourceElementParameter` (an EARLIER element's output, + `sourceColumn` for one column of
+its record), or `expression` (a raw macro — and
 this is how a LOOKUP value is set: `[#Lookup.{objectSchemaUId}.{recordId}#]`).
 `recordId` takes exactly ONE of `value` (a fixed record Id — the server wraps it into the lookup macro
 against the page's own object, so you never need that object's UId), `processParameter`,
-`sourceElement` + `sourceElementParameter` (e.g. a `signalStart` element's `RecordId`), or `expression`.
+`sourceElement` + `sourceElementParameter` (e.g. a `signalStart` element's `RecordId`; + `sourceColumn` for a
+lookup column of a read record, which must point at the page's object), or `expression`.
 `recommendation` is the text shown on the opened page. The designer REQUIRES it, so it defaults to the
 element caption; the platform stores a SINGLE line and a line break is REFUSED rather than silently
 re-encoded. For a value taken from the process, map the element's `Recommendation` parameter with

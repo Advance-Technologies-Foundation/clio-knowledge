@@ -69,37 +69,54 @@ filter; see `process-access-rights`.
 == Add data element (addData) — MOVED ==
 - Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
 
-== Reading a column of a Read data record in a branch condition ==
-- A COLUMN of a `readData` element's read record CAN be used in a branch condition, despite
-  `describe-business-process` reporting no column UIds. This article owns the canonical recipe (the
-  block and modes it applies to are `process-read-data`'s):
-  1. Call `get-entity-schema-properties` for `readData.source`, WITHOUT `package-name` to read the
-     merged schema. Match the column by `name` and take its `u-id` from `columns[]` — NOT a record Id.
-     Include that column in `readData.columns`, or omit the list to read all columns.
-  2. Call `describe-business-process` for the saved process. Take the read element's `uid` and its
-     `ResultEntity` parameter's `uid`; describe reports no column UIds, so use step 1 for the third.
-  3. On `modify-business-process`, use `setFlowCondition` with the existing flow's `source`, `target`
-     and `condition`. For a Boolean column, assemble the token with braces and dots exactly as shown:
-     `[#[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#] == true`.
-     Replace the angle-bracket placeholders with the discovered UIds. The read must precede the branch.
-     `process-branch-conditions` owns flow kinds and the required fallback. The create-time NAME form
-     cannot express this third segment: create the graph first, then modify its condition before running.
-  4. Describe again and require `kind: "conditional"` plus the exact condition text. Then run with
-     controlled matching and non-matching records and verify each branch's effect: save/read-back alone
-     proves authoring, NOT runtime routing. Do not infer missing-record behavior from those two cases.
+== A column of a Read data record as a source ==
+- ONE column of the record a first-record `readData` element read (its `ResultEntity`) is a value source,
+  named by the column's CODE. The server resolves it on the read object, type-checks it against the target
+  and writes the platform's three-segment meta path, so there are no UIds to find. This article owns the
+  forms and the refusals:
+  * a mapping (`mappings[]` at create, `addMapping` on modify) - the element source plus `sourceColumn`:
+        { "elementName": "Call", "elementParameter": "OwnerId",
+          "sourceElement": "ReadContact", "sourceElementParameter": "ResultEntity", "sourceColumn": "Owner" }
+  * a `changeData` / `addData` / `openEditPage` value - the same trio; the entry's `column` is its TARGET:
+        { "column": "Owner", "sourceElement": "ReadContact", "sourceElementParameter": "ResultEntity",
+          "sourceColumn": "Owner" }
+  * an `openEditPage` `recordId` - the trio, with a LOOKUP column that points at the page's object (or the
+    `Id` column);
+  * a filter's right-hand side - `"elementParameter": { "elementName": "ReadContact", "parameter":
+    "ResultEntity", "column": "Owner" }`;
+  * a branch condition at CREATE, or a Formula body - `[#ReadContact.ResultEntity.DoNotUseCall#] == true`.
+- Refused at build, naming the field: a PATH (`Owner.Name` - read the related record with its own
+  `readData`, filter `Id` = the column); a collection output, an item of one, or a lookup/`RecordId`
+  parameter (nothing loads a lookup's record, so its columns would stay empty); a read in any mode but
+  `first` (`count` / `aggregation` never fill `ResultEntity`, and in `collection` mode it is not the output -
+  use the list outputs); a column outside a non-empty `readData.columns` list
+  (the platform fetches only the listed columns, so it would arrive EMPTY - list it or omit `columns`; the
+  primary column `Id` is always fetched); a type that does not fit the target, by the rule
+  parameter-to-parameter mappings use (`OwnerId` <- `Owner` builds, <- `Account` is refused). A later
+  `setElement readData.columns` that drops a column something still reads is refused too. A column name in
+  `sourceElementParameter` (`"Email"`) is still "element has no parameter": the column goes in
+  `sourceColumn`. Nothing checks ORDER on a mapping, filter or condition, so place the read before its
+  consumers in the flow yourself.
+- Verified at run time on Creatio 10.1.37 (.NET Framework, MSSQL), CrtProcessBuilder 1.6.6.27, 2026-09-25: one
+  create call built signalStart (Contact added) -> readData (Id = RecordId) -> exclusiveGateway on
+  `[#ReadContact.ResultEntity.DoNotUseCall#] == false` -> Perform task with `OwnerId` <- `sourceColumn: "Owner"`.
+  A contact with `DoNotUseCall = false` ran the call branch and its Activity got the contact's owner (not the
+  process starter); one with `true` ran the fallback.
+- `describe-business-process` reports such a value's `sourceElement` / `sourceElementParameter` /
+  `sourceColumn` beside the raw `value`, only when those names would re-apply to the identical value
+  (same spelling, a fitting type, a loaded column).
+- A condition on the MODIFY path has no name expansion, so write the UId form: the read element's `uid`
+  and its `ResultEntity` parameter's `uid` from describe, the column's `u-id` from
+  `get-entity-schema-properties` (merged view, no `package-name`) -
+  `[#[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#] == true`.
+  This form is stored as written and gets NO load check: include the column in `readData.columns`, or omit
+  the list, yourself. The same holds for the UId form inside any raw `expression`.
+  Describe again and require `kind: "conditional"` plus the exact text, then run with a matching and a
+  non-matching record: a read-back proves authoring, NOT routing.
   Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;
   [validation evidence](https://github.com/Advance-Technologies-Foundation/clio/issues/1645#issuecomment-5760323479).
-  Column UIds are discoverable through entity metadata even though process describe omits them — that
-  is a discoverability gap this recipe closes, not a platform refusal: `FillMatchedData` routes an
-  `EntityColumn` segment into `SubParameterMetaPath` and `TryGetParameterMapPath` carries it, so the
-  platform does not refuse a third segment.
-- LIMITATION — record columns are still NOT element parameters. A mapping or `changeData` value using
-  `sourceElementParameter: "Email"`, or a filter using `elementParameter.parameter: "Id"` on the read
-  element, still fails with "element has no parameter". `ResultEntity` is the whole record; the branch
-  recipe above does not make a column name a parameter or establish the raw-expression contract for
-  mappings, values or filters. For record targeting use a process parameter or `signalStart.RecordId`.
-  The separate Send email BODY macro reaches a column by NAME: `[[element:Read.ResultEntity.Column]]`;
-  `process-send-email` owns that form.
+- A Send email BODY macro reaches a column with its own grammar, and a recipient reaches one through a
+  process parameter; `process-send-email` owns both.
 
 == Modify data element (changeData) ==
 - A `changeData` element updates every record matching its `filter` with the declared column values:
@@ -114,7 +131,8 @@ filter; see `process-access-rights`.
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
 - Each `values` entry sets `column` (entity COLUMN name) + exactly ONE source: `value` | `processParameter` |
-  `sourceElement` + `sourceElementParameter` | `expression` — the mapping source vocabulary. One entry per
+  `sourceElement` + `sourceElementParameter` (+ `sourceColumn`, one column of that element's record) |
+  `expression` — the mapping source vocabulary. One entry per
   column (duplicates rejected); unknown columns/parameters rejected at build.
 - `value` is a plain constant for TEXT columns ONLY, and non-empty. The platform stores it as the raw string
   and the runtime reads every non-text column TYPED — a date/lookup/numeric constant would save green and

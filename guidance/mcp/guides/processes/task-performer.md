@@ -36,13 +36,16 @@ create/addElement, or in place via setElement's
   roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
   than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
   element has its own `email.performer`, which is a different field and is not refused.
-LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Four working ways:
+LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Five working ways:
 * a bare Contact record Guid in `value` — the Guid must be an EXISTING Contact record: an id of another
   entity (a ROLE id is the classic mistake) is REFUSED naming the reference object, because before this
   guard it persisted as a well-formed ConstValue referencing nothing at run time;
 * a process parameter: create it with `typeFromElement` + `typeFromElementParameter: "OwnerId"` so the types
   are guaranteed compatible, then map it in;
 * another element's Contact/Guid output parameter;
+* a Contact column of a record another element READ — "the contact's owner" — with `sourceColumn`:
+  `sourceElement: "ReadContact"`, `sourceElementParameter: "ResultEntity"`, `sourceColumn: "Owner"`
+  (`process-data-elements` owns the source and its refusals);
 * `expression: "[#SysVariable.CurrentUserContact#]"` for "whoever started the process".
 A Lookup -> SysAdminUnit PARAMETER source is likewise REJECTED (incompatible reference object).
 A team is NEVER routed through OwnerId -- LAYER 1's `performer` block with type "role" is the only
