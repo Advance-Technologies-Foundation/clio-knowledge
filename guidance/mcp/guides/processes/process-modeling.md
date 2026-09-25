@@ -180,12 +180,12 @@ processes the request is.
   freshly-saved process. None of them is a `compile-creatio` instruction (`NeedInstall` in particular is a
   DB-install marker meaning "finish installing this into the DB", never "compile"), and the same caution
   applies to any `NeedXxx` / `IsXxx` column reached through a raw read.
-  WITHIN A PROCESS exactly two things pull a compile in, and both are C# YOU authored: a `scriptTask`,
-  and a `userTask` carrying an after-activity-save script. Everything else — add/read/modify data,
+  WITHIN A PROCESS exactly two things pull a compile in, and both are C# YOU authored: a `scriptTask`
+  (with the process `methods` it calls), and a `userTask` carrying an after-activity-save script. Everything else — add/read/modify data,
   formulas, connections, signals, and USING an already-compiled user task — is applied and runs with no
   compile. This bullet scopes compilation to the PROCESS; other configuration schemas (source code,
-  business objects, DCM, value lists, and a CUSTOM user-task schema — the custom user-task compile
-  rule is in `process-element-catalog`) carry their own compile obligations and are NOT covered here.
+  business objects, DCM, value lists, and a CUSTOM user-task schema — its rule is in
+  `process-element-catalog`) carry their own compile obligations and are NOT covered here.
 
 == Set what was asked for, and nothing else ==
 - An OPTIONAL field the request did not mention stays OUT of the descriptor. Filling it in changes
