@@ -79,11 +79,12 @@ assumes the earlier one exists.
    `--connected-operations` widens them. Grant only what the portal scenario needs, and add
    `create`/`edit` only where external users genuinely author records.
    This read-exposure review mirrors the write caution — a fan-out grant is a disclosure decision, not a
-   mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read: it lists
-   the objects the portal audience cannot READ, so after the read-only grant above the list is empty. An
-   object it reports as unverified (not read, or the connected set could not be enumerated) is NOT
-   covered — re-run the read; do not treat it as done. `object-rights` owns the coverage rule and the
-   failure semantics.
+   mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read. The tool
+   reports facts, not a verdict, so read them for the portal audience: every object must show
+   `All external users` with at least `read`. An object reported as `not administered by operation
+   permissions` is CLOSED to external users (it is open only to internal ones) and still needs the grant;
+   one with `NO object operations granted` needs it too. An object that could not be read, or a connected
+   set that could not be enumerated, is not verified — re-run the read; do not treat it as done.
 
 ## Fixed ids
 - `All external users` role (the portal audience, used in steps 2–4):
