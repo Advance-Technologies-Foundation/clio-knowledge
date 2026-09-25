@@ -13,6 +13,11 @@ owned by `process-naming` — read it BEFORE you name anything, including when y
 leaf rather than through `process-modeling`.
 
 == What you can build today (create-business-process) ==
+- Every key in a descriptor, and in each `modify-business-process` operation, is CASE-SENSITIVE and checked
+  BEFORE anything is sent: a key the server's contract does not declare (`lable`, `Label`, `sortt`) would be
+  dropped in silence while the call reports success, so clio refuses it, naming its path and the key meant.
+  On an environment whose CrtProcessBuilder is newer than clio's bundle it is a warning instead. Needs a clio
+  carrying ENG-95244 - an older one sends the key and the server drops it.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
