@@ -4,7 +4,9 @@ Manage OBJECT operation permissions — who may read/create/edit/delete ANY reco
 SysSchemaOperationRight / "Object permissions" layer) — for ANY role, with two tools, NOT with
 hand-written ESQ into the rights tables:
 - get-object-rights — read the per-role operation permissions of an object.
-- set-object-rights — grant or revoke a role's operations. DESTRUCTIVE (applies immediately).
+- set-object-rights — grant or revoke a role's operations. DESTRUCTIVE — writes immediately, no publish
+  step. Whether users who are already logged in see the change without a new session is NOT verified,
+  so check the effect as a user who logged in AFTER the change.
 
 This is the object-level analog of `record-rights`. Do NOT confuse the layers:
 - Object operation rights — SysSchemaOperationRight. Per-ROLE "who may read/create/edit/delete ANY
