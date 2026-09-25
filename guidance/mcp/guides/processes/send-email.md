@@ -28,7 +28,18 @@ template read-back — is owned by `process-send-email-template`.
   ONLY the message: `mode`, `sender`, `to`/`cc`/`bcc`, `importance`, `ignoreErrors` and `performer` follow the
   rules below unchanged in both modes, and `useBackgroundMode` is an element-level field outside the `email`
   block, not part of this contract.
-  Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
+- NEVER EMULATE THIS ELEMENT with an Add data of `Activity` records (Type = Email), not even to leave drafts
+  for manual sending when no mailbox exists: `mode:"manual"` creates that email Activity for the `performer`
+  and then WAITS until it is completed — a human step (EXECUTION MODE in `process-sub-process-when`). Copying
+  its columns (`Sender`, `MessageTypeId`, `IsHtmlBody`, `Owner`) does not close the gap. What an Add data
+  cannot write: in manual mode, the activity's binding to this process element with its completion listener,
+  so nothing waits for the email; in manual mode, and in auto mode only with `CreateActivity` on and a sender,
+  the activity's link to the process instance; in auto mode, the send itself (`EmailTemplateUserTask.CreateActivityEntity`, `ManualEmailUserTaskSender`,
+  `AutoEmailUserTaskSender`, CrtProcessDesigner 7.8.0). Whether each record of a
+  set gets its own email is decided by D1 in `process-sub-process-when`. Observed in an agent run
+  (2026-09-24): asked to email each contact of an account with no mailbox configured, it built exactly that
+  emulation.
+- Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
   a design-time required field: the server saves without one, the designer's card validates `Sender` only
   while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a
   Send email element is `BodyTemplateType`, not `Sender`. With no resolvable sender the RUN fails with
@@ -50,7 +61,7 @@ template read-back — is owned by `process-send-email-template`.
   their ABSENCE beside `hasBody:false` is the signal — not an older
   server, which the template-landed warning in `process-send-email-template` covers — so read the element
   back and check it — and the run fails with
-  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (reported on ENG-95979). The mechanism, from the platform
+  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (observed in a manual test, 2026-09-04). The mechanism, from the platform
   sources (`CrtProcessDesigner` 7.8.0, read 2026-09-09): the runtime dispatches on `BodyTemplateType`, an
   Integer with no default, so an element whose mode was never written RUNS in TEMPLATE mode with no template,
   and that text is the template provider's (`EmailTemplateUserTaskMessageProvider.GetEmailContent`, the only
@@ -90,21 +101,22 @@ template read-back — is owned by `process-send-email-template`.
   the same one-line justification the cc/bcc pushback gives. Creating a record is an ENVIRONMENT change:
   the build checks only `SenderEmailAddress`, so a bare record satisfies the build while whether it SENDS
   depends on the mailbox's server configuration, which this tool does not set up — say so when you create
-  one. Observed on ENG-95979 (manual test, 2026-09-04): an agent that pushed back on a literal `cc` with a
+  one. Observed in a manual test (2026-09-04): an agent that pushed back on a literal `cc` with a
   stated reason took a literal `sender` straight to a NEW mailbox record, without checking the mailbox it
   had configured minutes earlier — the correct build result, reached without the reasoning this rule asks for.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
-  the contact's email at send time; an entity-COLUMN recipient would need a raw `expression` carrying a
-  three-segment meta-path whose column UId nothing reports, so it is NOT authorable today (ENG-91844) —
-  route the column through a process parameter instead. What remains reachable here is a raw
-  `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
+  the contact's email at send time; for an entity-COLUMN recipient — the owner of a record the process
+  read — put the column into a Contact-lookup process parameter with a formula first
+  (`process-data-elements` owns that route) and send the parameter; a raw `expression` recipient carrying
+  the column token directly is not measured. Every other recipient the designer offers is reachable
+  here only as a raw `expression` formula — a CONTRACT limit, not a platform one: the designer's own recipient menu offers
   Contact/Account lookups, the current-user contact, a system setting and a formula (designer specimen
   capture), so say "not through this tool yet", never "Creatio cannot".
-  RANK RECIPIENT SOURCES for `to`/`cc`/`bcc`: a SYSTEM SETTING first, then a lookup PROCESS PARAMETER or an
-  entity lookup COLUMN (the raw `expression` route above), a CONSTANT address LAST. When the user supplies a
+  RANK RECIPIENT SOURCES for `to`/`cc`/`bcc`: a SYSTEM SETTING first, then a lookup PROCESS PARAMETER (for a
+  column of a record the process read, filled by a formula first, as above), a CONSTANT address LAST. When the user supplies a
   literal address ("send it to hr@company.com"), ADVISE AGAINST storing it and offer the ranked alternatives
-  — a system setting for a team address, a lookup parameter or column for a record-bound one — and take the
+  — a system setting for a team address, a lookup parameter for a record-bound one — and take the
   literal only when the user declines them.
   A SYSTEM SETTING is reachable today and is the RIGHT default for an address that belongs to a team rather
   than a person (an HR inbox, a support alias): send the recipient as an `expression` whose formula is

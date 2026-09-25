@@ -8,6 +8,9 @@ the refusals, describe's read-back, and what is NOT supported (the event and exp
 buildable and from which CrtProcessBuilder version; `process-parameters` owns what happens to a CALLER
 when the called process's own parameters change (their CAPTIONS on a re-sync are covered here, under
 `resync`). Split out of process-element-catalog.
+WHETHER a request calls for this element at all — the one-process default, per-item work, a repeated
+fragment, long phases — and which execution mode a per-item loop needs is owned by
+`process-sub-process-when`: read it before you plan one.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
 owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
 leaf rather than through `process-modeling`.
@@ -97,8 +100,10 @@ leaf rather than through `process-modeling`.
         All five are decided before anything is written.
       * `executionMode` is the STRING `Sequential` or `Parallel`, case-insensitive. The raw metadata's
         `0`/`1` is REFUSED — a number read out of stored metadata would otherwise select the other mode in
-        silence. Omitted on an update it is left as it is, never reset to `Sequential`. Parallel does not
-        by itself mean concurrent threads: it changes the generated flow topology.
+        silence. Omitted on a CONVERSION it is `Sequential`, which starts the next item only after the
+        previous item's called process has finished; omitted on an update it is left as it is, never reset
+        to `Sequential`. Parallel does not by itself mean concurrent threads: it changes the generated flow
+        topology. Which mode a request needs is decided in `process-sub-process-when` (D1).
       * `ignoreErrors` changes only what happens AFTER a failed iteration; the failed-iteration counter is
         incremented either way.
       * ONE DIFFERENCE FROM THE DESIGNER, so a comparison does not read as a defect: converting in the
@@ -125,6 +130,11 @@ leaf rather than through `process-modeling`.
         `InputRecordCollection`. There is no new operation. From a Read data element in `collection` mode
         the source is `ResultCompositeObjectList` — the output whose data value type matches;
         `ResultEntityCollection` does NOT and is refused by the type check.
+        MUST: send THIS mapping as well as the per-item ones below — the collection decides HOW MANY
+        iterations run, the dotted mappings only what each one receives. Without it nothing refuses or
+        warns: the build succeeds, describe shows `InputRecordCollection` with `source: "None"`, and at run
+        time the element runs ONE iteration with every per-item value empty (measured, CrtProcessBuilder
+        1.6.6.22: one task with no contact instead of one per contact).
       * ADDRESS A PER-ITEM VALUE with a DOTTED name, on both sides:
         `elementParameter: "InputRecordCollection.<CalleeParam>"` and, when the source is a column of
         another element's collection output, `sourceElementParameter: "ResultCompositeObjectList.<Column>"`.

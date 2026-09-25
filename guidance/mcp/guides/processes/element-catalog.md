@@ -73,10 +73,17 @@ leaf rather than through `process-modeling`.
   `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
   background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
-  which does not. For a SIGNAL-STARTED process set the flag on every element that offers it — the trigger fires
-  with no one waiting at a screen, so there is nothing for inline execution to return to — with one EXCEPTION
-  established by measurement rather than reasoning: an `openEditPage` step is left INLINE (the rule and its
-  measurement are in `process-open-edit-page`), because with the flag on it did not resume when its completion condition was met. The designer gates the control on
+  which does not. Do NOT set it on the elements of a signal-started process just because the process is
+  signal-started: the start's own default (below) already runs the instance in a background worker up to its first
+  element that waits, and on an ordinary activity the flag changes nothing — the platform inserts a background
+  token only for a start event and a Sub-process (a multi-instance one inside its iteration flow, `process-sub-process`). It matters on an element that WAITS (a task, a page, a catch event, a
+  Sub-process), where it decides whether the work after that element runs inside the request that completes it
+  or is queued; set it there only when the request asks for that. A background run never pops a page open on the
+  user's screen (the platform's `ForbidUserInteractionInBackground`, on by default, skips it; the step still waits
+  in the performer's task list), and an `openEditPage` step with the flag ON was
+  measured not to resume — `process-open-edit-page` owns that. Shipped signal-started processes carry the flag on
+  28 of the 166 elements after their start, all 28 behind a background start (108 processes of the shipped
+  packages, packages named Test or Demo excluded; scanned 2026-09-24). The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op
@@ -120,7 +127,7 @@ leaf rather than through `process-modeling`.
   intermediate events,
     `scriptTask`, `webService` (each also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  and reading one COLUMN out of a read collection (ENG-91844) — all
+  and reading one COLUMN out of a read collection — all
   four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance
   Sub-process element iterates one, once per item (see the `callActivity` entry below).
   Use the catalog below to reason about a solution and to READ existing processes
@@ -141,8 +148,8 @@ System actions (palette group "System actions"):
 - `readDataUserTask`  Read data    — read first record / aggregate / count / collection of an object.
     FIRST-RECORD, COLLECTION, COUNT and AGGREGATION modes are buildable via the element's `readData` block (source
     object, mode, columns/sort — `first` / `collection`, refused for `count`/`aggregation` — a
-    `numberOfRecords` top-N (`collection` ONLY) and aggregation —
-    `aggregation` ONLY) plus a `filter` — see `process-data-elements` for the block
+    `numberOfRecords` top-N (`collection` ONLY) and an aggregation function + column —
+    `aggregation` ONLY) plus a `filter` — see `process-read-data` for the block
     and `process-data-source-filters` for the filter; describe reads them back as `mode: "first" |
     "collection" | "count" | "aggregation"`. `collection` reads every match into `ResultEntityCollection`
     and the shaped `ResultCompositeObjectList`, which a `Collection` process parameter mirrors; it requires
@@ -150,16 +157,16 @@ System actions (palette group "System actions"):
 - `addDataUserTask`   Add data     – create record(s) in background; BUILDABLE via the `addData` block in
                                      both modes. Returns ONLY the new record's Id, on `RecordId`.
 - `changeDataUserTask` Modify data — bulk-update matched records (same values to all). BUILDABLE via the
+    element's `changeData` block (target object + column values) plus a `filter` — see
+    `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `changeAdminRightsUserTask` Change access rights - grant/revoke record permissions on matched
     records. BUILDABLE via `accessRights` (alias `changeAccessRights`) plus a `filter`; no outputs.
     `process-access-rights` owns the shape and the hazards. Both no-op states are worth naming here
     because they build green: `add` and `remove` both empty changes nothing, and a filter that is
-    PRESENT but carries no conditions is the inert state (the package refuses that one at build).
+    PRESENT but carries no conditions is the inert state (the package refuses that one at build);
     a record filter that is ABSENT is the opposite hazard and acts on every record of the object -
     nothing refuses or warns it. The element has no output parameters,
     so a clean build does NOT mean the element will do anything - check the filter and the entries.
-    element's `changeData` block (target object + column values) plus a `filter` — see
-    `process-data-elements` for the block and `process-data-source-filters` for the filter.
 - `deleteDataUserTask` Delete data — delete matched records. BUILDABLE via the element's `deleteData`
     block (target object — the only field it has) plus a `filter` — see `process-delete-data` for the
     block and the confirmation duty, `process-data-source-filters` for the filter. Unlike Modify data there
@@ -202,7 +209,8 @@ System actions (palette group "System actions"):
     (`{processName | processUId, resync, multiInstanceOptions}`); the block, the parameter
     mirroring/mapping rule, `resync`, MULTI-INSTANCE (running the callee once per item of a collection,
     from **1.6.6.14**), the refusals and what is NOT supported (the event/expanded sub-processes) are owned
-    by `process-sub-process` — go there before writing any of it. Its EVENT and EXPANDED variants keep
+    by `process-sub-process` — go there before writing any of it; WHETHER a request needs one at all is
+    owned by `process-sub-process-when`. Its EVENT and EXPANDED variants keep
     their children in their OWN collection, which `describe-business-process` does not walk, but
     the delete guards see them, walking it recursively so a reference from inside one still blocks a delete.
 - `userTask`/`*UserTask` — user/system tasks (Perform task, Open edit page, Send email, Approval, etc.).

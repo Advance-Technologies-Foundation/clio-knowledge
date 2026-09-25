@@ -69,7 +69,7 @@ filter; see `process-access-rights`.
 == Add data element (addData) — MOVED ==
 - Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
 
-== Reading a column of a Read data record in a branch condition ==
+== Reading a column of a Read data record in a branch condition or a formula ==
 - A COLUMN of a `readData` element's read record CAN be used in a branch condition, despite
   `describe-business-process` reporting no column UIds. This article owns the canonical recipe (the
   block and modes it applies to are `process-read-data`'s):
@@ -93,11 +93,21 @@ filter; see `process-access-rights`.
   is a discoverability gap this recipe closes, not a platform refusal: `FillMatchedData` routes an
   `EntityColumn` segment into `SubParameterMetaPath` and `TryGetParameterMapPath` carries it, so the
   platform does not refuse a third segment.
+- The SAME token reaches the column in a FORMULA, and that is how a column travels anywhere else in
+  the process: put it into a process parameter, then use the parameter. Two routes, both measured to
+  deliver the column's value at run time, for a Text column (`Contact.Name`) and a Lookup column
+  (`Contact.Account`, into a Lookup parameter of that object) alike: a Formula element whose `body` is
+  the token and whose target is the process parameter, or an `expression` mapping onto the process
+  parameter. Steps 1 and 2 above give the UIds; write the UId token, because the name form in a formula
+  body has no third segment either. Measured with `run-process` reading the parameters back on
+  Creatio 10.1.37 (.NET Framework, MSSQL) with CrtProcessBuilder 1.6.6.22 (2026-09-24); the Formula
+  element itself needs the CrtProcessBuilder floor `process-element-catalog` names. NOT measured: the same token in a `changeData` value, a
+  filter or a Send email recipient `expression` — route those through the parameter.
 - LIMITATION — record columns are still NOT element parameters. A mapping or `changeData` value using
   `sourceElementParameter: "Email"`, or a filter using `elementParameter.parameter: "Id"` on the read
-  element, still fails with "element has no parameter". `ResultEntity` is the whole record; the branch
-  recipe above does not make a column name a parameter or establish the raw-expression contract for
-  mappings, values or filters. For record targeting use a process parameter or `signalStart.RecordId`.
+  element, still fails with "element has no parameter". `ResultEntity` is the whole record; neither
+  recipe above makes a column name a parameter. For record targeting use a process parameter or
+  `signalStart.RecordId`.
   The separate Send email BODY macro reaches a column by NAME: `[[element:Read.ResultEntity.Column]]`;
   `process-send-email` owns that form.
 

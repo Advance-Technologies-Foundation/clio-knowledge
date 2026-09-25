@@ -52,7 +52,7 @@ everything exists.
       "condition": "[#Priority#] == \"High\"", "label": "Escalated" } // and another
 
 `[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
-before you rely on it. A `readData` in `first` mode, the only mode clio builds, exposes exactly one output
+before you rely on it. A `readData` in `first` mode exposes exactly one output
 and it is a RECORD (`ResultEntity`). Testing one of its COLUMNS needs a third meta-path segment
 (`[EntityColumn:]`) that the create-time name form cannot express, so a column test goes through the modify
 path. `process-data-elements` owns the recipe: discover the column UId with
