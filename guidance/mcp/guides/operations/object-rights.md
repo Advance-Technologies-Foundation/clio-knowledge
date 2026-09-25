@@ -78,3 +78,9 @@ fan-out, not to settle that decision.
 
 Scope boundary: object operation permissions for a role on an object (and, with include-connected, its
 own lookup objects). NOT column permissions, NOT record-level rights, NOT role/user provisioning.
+
+<!-- Version boundary: set-object-rights / get-object-rights ship in clio
+<SET-OBJECT-RIGHTS-CLIO-VERSION-TBD>. Replace this placeholder with the released clio version before
+merging (merging publishes; an unresolved boundary is refused by the producer contract suite). Until
+then this article stays on a draft PR. -->
+
