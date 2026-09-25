@@ -65,7 +65,9 @@ assumes the earlier one exists.
    catalogs) that must not become world-readable to every external user:
    1. Dry-read the connected set first: `get-object-rights --entity-schema-name <Object>
       --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected` to enumerate the object and
-      the lookups the grant would touch.
+      the lookups the grant would touch. On MCP the grant applies without a preview, so this read is the
+      only place the target list is seen. Security and system lookups (for example `SysAdminUnit`) are
+      never in the fan-out — the read names them in a warning; granting one is a separate decision.
    2. Confirm none of them is unsafe for the whole external audience. Where a shared lookup holds
       sensitive data, do NOT fan it out — grant per-object (drop `--include-connected` and run
       `set-object-rights` only on the safe objects) and handle the sensitive lookup another way.
@@ -77,9 +79,11 @@ assumes the earlier one exists.
    `--connected-operations` widens them. Grant only what the portal scenario needs, and add
    `create`/`edit` only where external users genuinely author records.
    This read-exposure review mirrors the write caution — a fan-out grant is a disclosure decision, not a
-   mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read:
-   `object-rights` owns the caveat that a deliberate read-only grant still shows in the "lacks the
-   read/create/edit triple" list — that is expected here, not a gap to fix by adding write access.
+   mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read: it lists
+   the objects the portal audience cannot READ, so after the read-only grant above the list is empty. An
+   object it reports as unverified (not read, or the connected set could not be enumerated) is NOT
+   covered — re-run the read; do not treat it as done. `object-rights` owns the coverage rule and the
+   failure semantics.
 
 ## Fixed ids
 - `All external users` role (the portal audience, used in steps 2–4):
