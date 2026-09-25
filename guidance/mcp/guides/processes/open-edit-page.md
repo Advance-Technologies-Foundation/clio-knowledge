@@ -182,7 +182,9 @@ chosen one. It reads back as the name with the stored id alongside.
 `describe-business-process` reads the configuration back as the element's `openEditPage` block,
 round-trippable into a build/modify block with ONE asymmetry — the read reports pre-filled values AND a record
 when the schema carries both (the write path refuses that pair), so drop the one that does not belong to the
-reported `editMode` before re-applying, and feed `pageTypeUId` back as `recordType`. A `performer` of `null`
+reported `editMode` before re-applying, feed `pageTypeUId` back as `recordType`, and drop the read-only fields
+describe adds (`object`, `pageTypeUId`, `completionMode` and the id/display companions - a refusal names every
+one). A `performer` of `null`
 in the read-back means UNASSIGNED, never unsupported.
 ROUTING between the three page elements — **Open edit page is the DEFAULT, not one of three equals.** Ask one
 question: *is a user filling in COLUMNS of a record?* If yes, it is Open edit page, and no further deliberation
