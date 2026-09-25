@@ -69,13 +69,14 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
 uses one. A parameter is referenced by its **UId**, never by its name.
 
-> **ONE EXCEPTION, and it is narrow:** a `flows[].condition` on `create-business-process` takes the NAME
+> **TWO EXCEPTIONS, both narrow:** a `flows[].condition` on `create-business-process` takes the NAME
 > — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
-> not exist yet. That is the only surface with a name-based form. A `mappings[].expression`, a filter, a
-> condition set through `modify-business-process` and everything else on this page still take the UId,
-> and the failures below are what a name gets you there. See `process-branch-conditions`.
+> not exist yet (see `process-branch-conditions`); and a Formula element's `body` takes it on EVERY route
+> that writes one — create, `addElement`, `setElement` (`process-element-catalog` owns that element). A
+> `mappings[].expression`, a filter, a condition set through `modify-business-process` and everything
+> else on this page still take the UId, and the failures below are what a name gets you there.
 
-Outside that exception there is no name-based form — and the four wrong shapes do not all fail the same
+Outside those two there is no name-based form — and the four wrong shapes do not all fail the same
 way, which matters:
 
 - a bare `Price` is REFUSED naming the identifier: `Formula value error: Parameter "Price" not found`.
@@ -97,8 +98,9 @@ unknown setting. Build the token yourself, in two steps:
    * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
 For a COLUMN inside a read element's `ResultEntity`, read `process-data-elements`: it owns discovering
-the column UId through `get-entity-schema-properties` and authoring the third segment on a branch
-condition. A missing column UId in describe does not make that condition unauthorable.
+the column UId through `get-entity-schema-properties` and authoring the third segment, in a branch
+condition and in a formula. A missing column UId in describe does not make either unauthorable, and
+no name form can say that segment.
 
 Worked example — note the target is a FLOAT parameter: `Math.Ceiling` returns `decimal`, and a decimal
 result into an Integer parameter is refused by the result-type rule below. `describe-business-process`

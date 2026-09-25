@@ -26,6 +26,7 @@ public sealed class GuidanceMigrationTests
     [
         "process-add-data",
         "process-read-data",
+        "process-sub-process-when",
         "portal-service-routing",
         "external-organizations"
     ];
