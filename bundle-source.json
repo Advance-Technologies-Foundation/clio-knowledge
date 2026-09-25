@@ -476,9 +476,6 @@
       "topicId": "creatio.portal-sections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/portal-sections",
-      "legacyUris": [
-        "docs://mcp/guides/portal-sections"
-      ],
       "sourcePath": "guidance/mcp/guides/applications/portal-sections.md",
       "bundlePath": "resources/portal-sections.md",
       "mediaType": "text/plain"
