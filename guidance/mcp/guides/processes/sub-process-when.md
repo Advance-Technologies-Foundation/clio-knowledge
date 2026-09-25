@@ -7,6 +7,9 @@ talk to the user about it, the never-list, and where a helper process lives. HOW
 once the decision is made — the `subProcess` block, the mirrored parameters, multi-instance — is owned
 by `process-sub-process`; every code and caption is governed by N1-N10 in `process-naming`. Read this
 BEFORE you plan a graph: the decision changes how many processes you build and in which order.
+There is no D3 to look for: it would be reusing an existing process that already does a step, and it
+is left out because this toolset has no search of processes by purpose. The set is complete as
+D1, D2 and D4 — a process the USER names is still called as asked (below).
 Vocabulary: the CALLER is the process that holds the Sub-process element; the HELPER is the process
 it calls.
 
