@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.76",
+  "libraryVersion": "1.15.80",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1740,7 +1740,7 @@
     {
       "itemId": "process-script-task",
       "title": "Process ScriptTask C#",
-      "description": "Guides C# inside an existing Creatio process ScriptTask: exact process parameter codes, Get/Set access, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and target-environment verification.",
+      "description": "When to add a Creatio process ScriptTask (it makes the process need a compile) and how to write one: the scriptTask block, exact case-sensitive Get/Set parameter access, the namespaces the generated code imports, process usings and when an alias is needed, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and compiling and verifying on the target environment.",
       "topicId": "creatio.process-script-task",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-script-task",

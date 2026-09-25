@@ -149,7 +149,7 @@ processes the request is.
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setFlowResults (`process-activity-result-branches`) / setElement /
-   setConnections / clearConnections — same
+   setConnections / clearConnections / addUsing / removeUsing — same
    parameter/mapping/filter/signal/readData/
    changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
@@ -172,11 +172,11 @@ processes the request is.
 - File-design-mode caveat: on an FSD stand a built process is saved to the file system (the designer
   sees it) but is NOT runtime-active until it is loaded FS->DB and published — so a signal won't
   physically fire yet.
-- Do NOT run `compile-creatio` to "make a process runnable", and do NOT read a raw system record
-  (`odata-read`/`execute-esq`) to decide readiness — read status back with `describe-business-process`.
-  Inferring "needs a compile" from a raw column NAME is the trap here: a raw read of `VwSysProcess` (what
-  `odata-read`/`execute-esq` returns for a process — verified: run_20260820_133837) surfaces per-process
-  DIRTY flags — `NeedInstall`, `NeedUpdateSourceCode`, `NeedUpdateStructure` — that are ALL `true` on a
+- Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
+  compiled (a `scriptTask`), and do NOT read a raw system record (`odata-read`/`execute-esq`) to decide
+  readiness — read status back with `describe-business-process`.
+  Inferring "needs a compile" from a raw column NAME is the trap here: a raw read of `VwSysProcess` surfaces
+  per-process DIRTY flags — `NeedInstall`, `NeedUpdateSourceCode`, `NeedUpdateStructure` — that are ALL `true` on a
   freshly-saved process. None of them is a `compile-creatio` instruction (`NeedInstall` in particular is a
   DB-install marker meaning "finish installing this into the DB", never "compile"), and the same caution
   applies to any `NeedXxx` / `IsXxx` column reached through a raw read.
@@ -213,7 +213,7 @@ processes the request is.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - If describe shows constructs the builder cannot create (inclusive and event-based gateways,
-  timer/message starts, intermediate events, `scriptTask`, `webService`; `process-element-catalog` owns
+  timer/message starts, intermediate events, `webService`; `process-element-catalog` owns
   the full list), they survive a save untouched as data — but you CAN still remove or rewire them by name
   and nothing will warn you. Gateway ELEMENTS, DEFAULT flows and the Formula element are no longer on
   that list: all are buildable, `process-branch-conditions` and `process-element-catalog` own them.

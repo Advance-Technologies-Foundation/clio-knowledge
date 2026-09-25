@@ -66,6 +66,36 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "matching the signature establishes type compatibility, not record or business authorization");
     }
 
+    [Test]
+    [Description("Pins the rules a ScriptTask author cannot recover from anywhere else: that the element costs a compile and comes last in the decision order, that the compile must be FULL, the namespaces that are NOT imported, why an alias exists and when one is refused, and that Get/Set names are case-sensitive. Each was measured on a stand (ENG-92711); losing one sends an author into a compile failure or a silently stale process.")]
+    public void Guide_ShouldKeepTheAuthoringDecisionCompileAndNamespaceRules()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+
+        // Act
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance/mcp/guides/processes/process-script-task.md"));
+
+        // Assert
+        guide.Should().Contain("Decide first: a ScriptTask costs a compile",
+            because: "the element is the one that makes a clio-built process need a compile, so choosing it is a decision");
+        guide.Should().Contain("call it from a custom user task",
+            because: "reusable C# belongs in a compiled user task, whose callers need no compile of their own");
+        guide.Should().Contain("Run a FULL `compile-creatio`",
+            because: "a changed-items build was measured leaving an edited body uncompiled");
+        guide.Should().Contain("keeps running its PREVIOUS body",
+            because: "an edited, uncompiled script runs the old code silently, which no save reports");
+        guide.Should().Contain("There is NO `System.Linq`, and no `Terrasoft.Configuration`",
+            because: "the two namespaces a script most often needs are exactly the two it does not get");
+        guide.Should().Contain("An ALIAS on a default namespace is refused",
+            because: "the generator drops such an entry with its alias, so the alias would not exist at compile time");
+        guide.Should().Contain("makes `SysSettings` ambiguous (CS0104)",
+            because: "this is the measured collision an alias exists to break");
+        guide.Should().Contain("the run-time lookup is case-sensitive",
+            because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);

@@ -24,11 +24,9 @@ This split was verified from Creatio 10.0.0.858 assemblies and rechecked in 10.1
 10.1.585. `AggregationTypeStrict` is `Terrasoft.Common.AggregationTypeStrict`; it is not in
 `Terrasoft.Core.DB`.
 
-Add both `using` directives in a source-code schema. A process ScriptTask has a generated
-ambient `using` set that can differ, so the recipes below fully qualify the two
-`Terrasoft.Common` enums instead of assuming that namespace is imported. The remaining ESQ
-types are in `Terrasoft.Core.Entities`; fully qualify them too if the target host does not
-already import that namespace.
+Add both `using` directives in a source-code schema. A process ScriptTask's generated code
+imports both namespaces already (`process-script-task` lists its defaults); the recipes below
+still fully qualify the two `Terrasoft.Common` enums so they paste unchanged into any host.
 
 ## Create the query and select columns
 ```csharp
