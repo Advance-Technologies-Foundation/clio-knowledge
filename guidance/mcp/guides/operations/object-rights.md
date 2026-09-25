@@ -48,11 +48,12 @@ before any write.
   revoke empties it — refused when it is the object's last row, see below), and the object is saved.
 - Granting to an object that does not yet use operation permissions TURNS THEM ON — an access NARROWING for
   every other internal role. The tool reports it per object, connected lookups included, so a fan-out that
-  turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. Creatio
-  may also add an "All employees" row at that point (observed on the stands used to build these tools; not
-  a documented contract), which would keep internal users' access. Do not assume either way: read the
-  object back with get-object-rights. For EXCLUSIVE access — only the grantee — inspect the "All employees"
-  row after the first grant and revoke or narrow it.
+  turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. On Creatio
+  8.3.4 the server then adds an "All employees" row with read/create/edit/delete on its own — for the root
+  and for every connected lookup the fan-out enables, section objects and plain dictionaries alike — so
+  internal users keep their access. Not verified on other versions: read the object back with
+  get-object-rights. For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row
+  after the first grant.
 - A revoke only narrows. A revoke that would remove the object's LAST rights row is REFUSED (writes
   nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
   turned off — "available to ALL internal users", an access WIDENING. Pass disable-operation-permissions
