@@ -120,6 +120,15 @@ leaf rather than through `process-modeling`.
   Sub-process element iterates one, once per item (see the `callActivity` entry below).
   Use the catalog below to reason about a solution and to READ existing processes
   (`describe-business-process`); don't expect to build those types in this increment.
+  `validate-process-graph` reports each such node as an `UNBUILDABLE` WARNING naming it (a clio carrying
+  ENG-95244), so plan around that finding rather than around this list; the build refuses the type itself.
+- Before posting, `create-business-process` runs the `validate-process-graph` rules over `elements` /
+  `flows` and writes, as `Pre-flight <rule>` warnings in `execution-log-messages`, ONLY what the server
+  does not check: R7/R9 with no default branch, R8 (a parallel join behind a choice - it hangs in
+  Running with no error), R13 off an event, R17. They never block the build; fix each or confirm it with
+  the user. Nothing the server reports itself is repeated (no error, no R12, no UNBUILDABLE).
+  `modify-business-process` runs no such pass: it takes operations, and judging the whole process would
+  pin every pre-existing violation on the edit. The rules are in `process-activity-connections`.
 
 == Element catalog (data-id -> label -> purpose) ==
 (The `data-id` strings below are the vocabulary for `validate-process-graph` and for reasoning about /
