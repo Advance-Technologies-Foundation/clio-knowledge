@@ -58,27 +58,38 @@ before any write.
   what to revoke there — the read-only grant default must not strip READ from shared lookups that other
   sections of the same audience still need.
 - Read-modify-write: the per-role grid is read, the grantee's row is added/updated (or removed when a
-  revoke empties it), and the object is saved.
+  revoke empties it — refused when it is the object's last row, see below), and the object is saved.
 - Granting to an object that does not yet use operation permissions TURNS THEM ON — an access NARROWING for
-  every other internal role, which the tool reports. Creatio then also grants "All employees" by default so
-  internal users keep access.
+  every other internal role. The tool reports it per object, connected lookups included, so a fan-out that
+  turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. Creatio
+  may also add an "All employees" row at that point (observed on the stands used to build these tools; not
+  a documented contract), which would keep internal users' access. Do not assume either way: read the
+  object back with get-object-rights. For EXCLUSIVE access — only the grantee — inspect the "All employees"
+  row after the first grant and revoke or narrow it.
 - A revoke only narrows. A revoke that would remove the object's LAST rights row is REFUSED (writes
   nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
   turned off — "available to ALL internal users", an access WIDENING. Pass disable-operation-permissions
   only when widening to every internal user is the intent; it applies to the ROOT object only, never to a
   connected lookup. To empty the row, revoke every operation the role holds (operations=read,create,edit,
-  delete). The auto-granted "All employees" row usually keeps the object administered; read the result
-  back with get-object-rights.
+  delete). Whether a revoke hits the last row depends on the other rows present (for example an
+  "All employees" row), so read the object back with get-object-rights before and after.
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. Read the result back when concurrent edits are possible.
-- Idempotent: re-applying the same grant/revoke is safe. It does NOT change column permissions.
+- Idempotent: re-applying the same grant/revoke is safe, and the connected set is re-resolved on every
+  call, so a lookup added to the object later is picked up by a re-run. It does NOT change column
+  permissions.
 
 Use cases (all one general capability):
 - Grant or revoke any role's object access — the general audit-and-fix use.
 - Make a Freedom PORTAL section's object available to external users: grant
   grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f (All external users) operations=read with
   include-connected, so the object and its lookups are readable by portal users (the lookups get read by
-  default). Pin operations=read on the root explicitly: its default also grants create and edit to the whole
+  default). PRECONDITION — the fan-out gives the WHOLE external audience READ on ANY record of every
+  lookup, limited only by record-level rights, and turns operation permissions ON for a lookup that is not
+  administered yet. So first run get-object-rights entity-schema-name=<root> include-connected=true to list
+  the lookups it will touch, and confirm with the user every lookup that holds internal or personal data
+  (Contact, Account, Employee, custom objects) or is not administered yet. Where a lookup must not be
+  exposed, grant the root WITHOUT include-connected and grant only the approved lookups individually. Pin operations=read on the root explicitly: its default also grants create and edit to the whole
   external audience. An object external users cannot read is invisible to them even when the
   section and page exist. A lookup to a security/system object (for example SysAdminUnit) is NOT granted
   by the fan-out; decide with the user whether the whole external audience may read it before granting it

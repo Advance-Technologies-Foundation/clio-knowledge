@@ -1788,9 +1788,6 @@
       "topicId": "creatio.object-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/object-rights",
-      "legacyUris": [
-        "docs://mcp/guides/object-rights"
-      ],
       "sourcePath": "guidance/mcp/guides/operations/object-rights.md",
       "bundlePath": "resources/object-rights.md",
       "mediaType": "text/plain"
