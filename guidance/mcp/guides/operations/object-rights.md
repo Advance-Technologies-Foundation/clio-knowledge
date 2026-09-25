@@ -30,22 +30,33 @@ get-object-rights args: entity-schema-name (required), grantee (optional), inclu
   grantee, a not-administered object is LISTED as still lacking access (never counted as covered). The
   tools report the rights layer and cannot infer portal reachability by themselves.
 - include-connected also reads the object's OWN lookup objects (inherited BaseEntity audit lookups such
-  as CreatedBy/ModifiedBy are skipped). With a grantee this lists the objects where that role does not
-  hold the full read/create/edit triple — the tool's "has access" bar. A deliberate read-only grant (the
-  portal case below) is therefore EXPECTED to appear in that list; do not add create/edit to clear it.
-- Read-only; use it to see current access and to VERIFY a set-object-rights change. Verification has
-  limits: the connected fan-out is best-effort, so a schema that cannot be read makes BOTH tools warn and
-  fall back to the ROOT object alone, and get-object-rights skips objects it cannot read (its all-clear
-  then reads "on every object that could be read"). An unread object is UNKNOWN, not verified — for the
-  portal case it can still leave the section empty for external users.
+  as CreatedBy/ModifiedBy are skipped). Security and system objects — SysAdmin*, SysUser*, SysSchema*,
+  SysPackage*, SysSettings* and *Right/*Rights — are never part of the connected set; both tools name them
+  in a warning. With a grantee it lists the objects that role cannot READ. READ is the bar on every object:
+  it is what makes a record and its lookup values visible, and what set-object-rights grants on connected
+  lookups by default. The operations each object holds are printed per object — do not add create/edit
+  to an object just because it shows read only.
+- Read-only; use it to see current access and to VERIFY a set-object-rights change. It FAILS
+  (success=false) when the root object is not found or cannot be read. A connected object that cannot be
+  read, or a connected set that cannot be enumerated, is reported as UNVERIFIED and the all-clear is
+  withheld — an unread object is unknown, not covered, and for the portal case it can still leave the
+  section empty for external users.
 
 set-object-rights args: entity-schema-name + grantee (required); operations=read,create,edit,delete for
 the ROOT object (default read,create,edit — delete is NOT granted unless you pass it); revoke=true to
-remove; include-connected=true to fan out to the object's own lookup objects, which get
-connected-operations (default READ only — create/edit are never fanned out to shared lookups implicitly);
-disable-operation-permissions (see below); --confirm on the CLI (on MCP the Destructive flag is the gate).
-An unknown or misspelled argument name is refused before any write. A root object that is not found fails
-(nothing was written); a connected lookup that is not found only warns.
+remove; include-connected=true to fan out to the object's own lookup objects (security/system objects
+excluded, as above), which get connected-operations (default READ only on a grant — create/edit are never
+fanned out to shared lookups implicitly); disable-operation-permissions (see below); --confirm on the CLI.
+On MCP the Destructive flag is the only gate and the write applies WITHOUT a preview, so read the target
+set first with get-object-rights include-connected. An unknown or misspelled argument name is refused
+before any write.
+- Failures never report success: a root object that is not found fails (nothing was written); if the
+  connected objects cannot be enumerated nothing is written and the call fails; when the root write fails
+  the connected objects are not attempted; a connected object that fails is named and the rest are still
+  attempted (the call fails); a connected lookup that is not found only warns.
+- revoke with include-connected leaves the connected lookups UNTOUCHED unless connected-operations names
+  what to revoke there — the read-only grant default must not strip READ from shared lookups that other
+  sections of the same audience still need.
 - Read-modify-write: the per-role grid is read, the grantee's row is added/updated (or removed when a
   revoke empties it), and the object is saved.
 - Granting to an object that does not yet use operation permissions TURNS THEM ON — an access NARROWING for
@@ -54,8 +65,12 @@ An unknown or misspelled argument name is refused before any write. A root objec
 - A revoke only narrows. A revoke that would remove the object's LAST rights row is REFUSED (writes
   nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
   turned off — "available to ALL internal users", an access WIDENING. Pass disable-operation-permissions
-  only when widening to every internal user is the intent. The auto-granted "All employees" row usually
-  keeps the object administered; read the result back with get-object-rights.
+  only when widening to every internal user is the intent; it applies to the ROOT object only, never to a
+  connected lookup. To empty the row, revoke every operation the role holds (operations=read,create,edit,
+  delete). The auto-granted "All employees" row usually keeps the object administered; read the result
+  back with get-object-rights.
+- Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
+  overwritten. Read the result back when concurrent edits are possible.
 - Idempotent: re-applying the same grant/revoke is safe. It does NOT change column permissions.
 
 Use cases (all one general capability):
@@ -65,7 +80,9 @@ Use cases (all one general capability):
   include-connected, so the object and its lookups are readable by portal users (the lookups get read by
   default). Pin operations=read on the root explicitly: its default also grants create and edit to the whole
   external audience. An object external users cannot read is invisible to them even when the
-  section and page exist. The surrounding portal-section steps are `related-page-binding` (bind the page
+  section and page exist. A lookup to a security/system object (for example SysAdminUnit) is NOT granted
+  by the fan-out; decide with the user whether the whole external audience may read it before granting it
+  as a root. The surrounding portal-section steps are `related-page-binding` (bind the page
   as portal) and `workplaces` (add the section to an external workplace).
 - Enable operation permissions on an object from scratch by granting the first role.
 
