@@ -12,12 +12,8 @@ This is the object-level analog of `record-rights`. Do NOT confuse the layers:
   tools own.
 - Record-level rights — Sys<Entity>Right / SysSchemaAdminUnitRight. Per-RECORD "who can access THIS
   record/dashboard" -> read `get-guidance name=record-rights`.
-- System-operation permissions — SysAdminOperation (e.g. "Manage users") -> read
-  `get-guidance name=administration`.
-Querying the wrong layer to answer "who can access this object" gives the WRONG answer. System
-operations ("View/Add/Edit/Delete any data") granted to a role ADD access beyond what these tools
-report, so an internal role may still reach records not listed here — that layer is owned by
-`get-guidance name=entity-operation-access`.
+
+Querying the wrong layer to answer "who can access this object" gives the WRONG answer.
 
 grantee is a SysAdminUnit id (a role or user id). Names are NOT unique — resolve a name to its id
 yourself (e.g. execute-esq on SysAdminUnit by Name), the tools take the id. The portal audience has a
@@ -25,6 +21,8 @@ fixed platform id — see the portal use case below.
 
 get-object-rights args: entity-schema-name (required), grantee (optional), include-connected (optional).
 - With no grantee it lists EVERY role's rights on the object; with a grantee it reports just that role.
+  Internal roles holding the "…any data" system operations can reach records beyond what this reports —
+  see `get-guidance name=entity-operation-access`.
 - An object not administered by operation permissions is available to all INTERNAL users only:
   external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant. So with a
   grantee, a not-administered object is LISTED as still lacking access (never counted as covered). The
