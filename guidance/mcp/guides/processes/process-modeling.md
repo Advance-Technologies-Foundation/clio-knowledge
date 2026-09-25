@@ -3,9 +3,8 @@ clio MCP process-modeling guide — design Creatio business processes (BPMN)
 == Which process article to read ==
 This article is the ENTRY POINT. It owns the build lifecycle: what the tools are, what the
 descriptor looks like, the recipe, and the safety rules for editing an existing process. What is
-buildable today and the element catalog moved to `process-element-catalog`: this article had no
-budget headroom left, and both of those sections grow with every element the platform gains while
-the lifecycle around them does not. Everything else has its own article and its own authoritative
+buildable today and the element catalog live in `process-element-catalog`, because both grow with
+every element the platform gains. Everything else has its own article and its own authoritative
 owner -- read the one your task needs instead of guessing:
   * `process-custom-elements`     - author custom user-task elements with Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
@@ -47,8 +46,6 @@ owner -- read the one your task needs instead of guessing:
                                      dropdown offers the wrong set.
   * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
                                      the rule for when to choose it over its neighbours.
-  * `process-perform-task`         - the Perform task element: its parameter table, the performer
-                                     layers, and what the runtime sets.
   * `process-access-rights`        - the Change access rights element: the `accessRights` block,
                                      permission entries, grantee kinds and its silent no-ops.
   * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
@@ -63,6 +60,7 @@ owner -- read the one your task needs instead of guessing:
                                      completing buttons, the data sources and the record they carry.
   * `process-sub-process`          - the Sub-process element: naming the callee, the mirrored
                                      parameters and mapping rule, resync, and its refusals.
+  * `process-sub-process-when`     - WHEN a request needs more than one process: D1, D2, D4.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
                                      and the R1-R20 connection rules.
   * `process-versions`             - the version model, which member runs, and how to read that
@@ -124,7 +122,9 @@ article from what this one says; read that article.
 == Build recipe (intent -> running process) ==
 Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
 today and what it does not, and a plan built around something it cannot build fails only at build
-time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
+time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process, or a
+change for EACH item of a set, you MUST also read `process-sub-process-when` first: it decides how many
+processes the request is.
 1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
@@ -135,8 +135,8 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    nothing to tell them apart. Both `validate-process-graph` (R3) and `create-business-process`
    enforce exactly that, and both used to refuse ANY second start: a process reacting to two triggers
    was unbuildable, and the shape is one the platform itself ships (`PublishDraftToArticle` carries
-   two start signals). Requires CrtProcessBuilder 1.6.2.24 or later on the environment AND a clio carrying ENG-98559
-   (Advance-Technologies-Foundation/clio#1559): an older environment refuses the second start at build
+   two start signals). Requires CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later:
+   an older environment refuses the second start at build
    time with "the process has more than one start event", and an older clio reports it as an R3 error
    from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
@@ -148,14 +148,15 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
    bullet below).
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
-   setFlow / setFlowCondition / setElement / setConnections / clearConnections — same parameter/mapping/filter/
-   signal/readData/
+   setFlow / setFlowCondition / setFlowResults (`process-activity-result-branches`) / setElement /
+   setConnections / clearConnections — same
+   parameter/mapping/filter/signal/readData/
    changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any
    element that OFFERS it (four kinds remove the control — see the element catalog in
    `process-element-catalog`), `readData` /
-   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData
-   and changeData, `process-read-data` for readData, `process-add-data` for addData — their partial-update, mode-switch and
+   `changeData` / `addData` on the matching data element only (see `process-read-data` for readData,
+   `process-data-elements` for changeData, `process-add-data` for addData — their partial-update, mode-switch and
    source-retarget rules), `deleteData` on a Delete data element only — MUST: a target
    retarget clears the record filter, and an element left without one deletes nothing and fails at run
    time, so re-issue `setFilter` in the same batch; state the object and the records and get an explicit
@@ -251,8 +252,9 @@ time -- there is no earlier signal, so one fetch is cheaper than one wrong plan.
   its two answers; read it before editing a process whose diagram matters.
 - You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
   ONE schema you named, a process can be a family of them, and the overwrite is irreversible either
-  way -- the previous graph is gone and nothing brings it back. TRUE: the graph you are about to
-  overwrite is the one the runtime executes, so get explicit confirmation, and offer
+  way -- the previous graph is gone and nothing brings it back. TRUE: you would overwrite the graph the
+  runtime executes, so get explicit confirmation (the edit request is not one; `process-version-writes`
+  says what is), and offer
   `modify-business-process-as-new-version` instead -- the SAME operations against a new version, or an
   EMPTY operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not
   the one that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that
