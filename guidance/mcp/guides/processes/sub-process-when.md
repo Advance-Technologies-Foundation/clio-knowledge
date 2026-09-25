@@ -83,6 +83,10 @@ it calls.
   before the join. NEVER after a PARALLEL split: both branches run, so a join either runs the fragment
   once instead of twice or lets the two branches overwrite each other's value. D2 covers every copy
   no such join can reach, parallel branches included.
+- AND HOIST WHAT DOES NOT DEPEND ON THE BRANCH: a step at the fragment's HEAD that only reads or
+  computes (a Read data, a Formula — "find the owner") and needs nothing from the branch may move
+  before the split and run once. Judge D2 on what stays in the branches. Never hoist a step that acts
+  — an email, a task, a data change — since it would then run on a branch that did not have it.
 - ACTION: one helper holding the fragment, called by a Sub-process element at each place. The
   values that differ become the helper's `In` parameters, mapped at each call; a value the fragment
   hands back becomes an `Out` parameter. Take only a fragment with one way in and one way out — a
