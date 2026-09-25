@@ -19,9 +19,12 @@ get-object-rights args: entity-schema-name (required), grantee (optional), inclu
   Internal roles holding the "…any data" system operations can reach records beyond what this reports —
   see `get-guidance name=entity-operation-access`.
 - An object not administered by operation permissions is available to all INTERNAL users only:
-  external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant. So with a
-  grantee, a not-administered object is LISTED as still lacking access (never counted as covered). The
-  tools report the rights layer and cannot infer portal reachability by themselves.
+  external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant. The tool
+  cannot tell whether the grantee is internal or external, so with a grantee such an object is never
+  counted as covered: it is listed separately as having no explicit grant — reachable only if the role is
+  internal, so for the portal audience it still needs a grant.
+- An empty "cannot read" list means the object rights are in place, not that the portal works — page
+  binding, workplace and licensing are checked by `portal-sections`.
 - include-connected also reads the object's OWN lookup objects (inherited BaseEntity audit lookups such
   as CreatedBy/ModifiedBy are skipped). Security and system objects — SysAdmin*, SysUser*, SysSchema*,
   SysPackage*, SysSettings* and *Right/*Rights — are never part of the connected set; both tools name them
