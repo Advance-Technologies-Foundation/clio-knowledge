@@ -8,14 +8,7 @@ hand-written ESQ into the rights tables:
   step. Whether users who are already logged in see the change without a new session is NOT verified,
   so check the effect as a user who logged in AFTER the change.
 
-This is the object-level analog of `record-rights`. Do NOT confuse the layers:
-- Object operation rights — SysSchemaOperationRight. Per-ROLE "who may read/create/edit/delete ANY
-  record of this entity". This is the System Designer "Object permissions" section, and what these
-  tools own.
-- Record-level rights — Sys<Entity>Right / SysSchemaAdminUnitRight. Per-RECORD "who can access THIS
-  record/dashboard" -> read `get-guidance name=record-rights`.
-
-Querying the wrong layer to answer "who can access this object" gives the WRONG answer.
+Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`.
 
 grantee is a SysAdminUnit id (a role or user id). Names are NOT unique — resolve a name to its id
 yourself (e.g. execute-esq on SysAdminUnit by Name), the tools take the id. The portal audience has a
