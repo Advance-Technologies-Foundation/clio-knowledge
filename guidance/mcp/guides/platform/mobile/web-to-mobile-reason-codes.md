@@ -73,8 +73,8 @@ NOT LOSS — report it, and re-insert NOTHING
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is
-                               lost. Say so. NO params means another loss: the control had no action and
-                               nothing under it — read the menu items dropped beside it. params.scope
+                               lost. Say so. NO params means the control had no action and nothing under
+                               it — read ANY menu items dropped beside it. params.scope
                                inside a non-converting scope container. Do not confuse it with
                                drop-request-unsupported below — there the ELEMENT survives and only its
                                binding is removed.

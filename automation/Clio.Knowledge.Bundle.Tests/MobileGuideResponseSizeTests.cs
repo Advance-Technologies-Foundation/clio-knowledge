@@ -130,7 +130,7 @@ public sealed class MobileGuideResponseSizeTests
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
         ("freedom-page-web-to-mobile-conversion", 62_590),
-        ("freedom-page-mobile-reason-codes", 18_754)
+        ("freedom-page-mobile-reason-codes", 18_738)
     ];
 
     /// <summary>
