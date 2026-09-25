@@ -123,7 +123,8 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
   and the read-back shape. `describe-business-process` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`, and `aggregation` as `{function, column}` in aggregation
-  mode), so anything the builder made round-trips into create/modify. Read-back limits on a HUMAN-made
+  mode), so anything the builder made round-trips into create/modify once the read-only `sourceSchemaUId` and
+  `outputs` are dropped. Read-back limits on a HUMAN-made
   element: a linked-object column is omitted from
   `columns` (it cannot be expressed here), and `sort` is the EFFECTIVE PRIMARY entry — the one the
   runtime's ORDER BY actually ranks first — while any further ACTIVE secondary sort entries are not

@@ -13,6 +13,11 @@ owned by `process-naming` — read it BEFORE you name anything, including when y
 leaf rather than through `process-modeling`.
 
 == What you can build today (create-business-process) ==
+- Every key is case-sensitive. The server REFUSES a build or modify request carrying any key its contract does
+  not declare (`lable`, `Label`) and saves nothing; the message gives each key's path and the key meant. A
+  read-only field copied from describe (`position`, `*Display`, `*SchemaUId`, `outputs`) is refused the same way
+  and named read-only: remove it. Fix and resend. A CrtProcessBuilder that predates this check drops such a key
+  in silence while reporting success; there, read the result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.

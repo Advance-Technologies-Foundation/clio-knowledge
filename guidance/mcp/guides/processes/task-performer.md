@@ -33,7 +33,7 @@ create/addElement, or in place via setElement's
 * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
   performer to open the page for) and stays untouched for user.
 * describe reads the block back top-level on the element (`performer`: type + the stored formula +
-  roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
+  roleDisplay); drop roleDisplay (read-only) and it re-applies. This ELEMENT-LEVEL block is REFUSED on any element other
   than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
   element has its own `email.performer`, which is a different field and is not refused.
 LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON only. Four working ways:
