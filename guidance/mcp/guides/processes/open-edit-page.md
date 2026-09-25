@@ -54,11 +54,10 @@ task usually needs its connections" as a reason: the shipped corpus says the opp
 on 15 of the 120 Open edit page elements in `PackageStore`. Either way, say in one line what you did, rather than
 letting the user find the answer on the card.
 `useBackgroundMode` is covered by this rule too, ON THIS ELEMENT: leave it off unless the request asks for
-background execution. Three things say so, and the third is the one that matters. The platform's own corpus:
+background execution. Two things say so, and the second is the one that matters. The platform's own corpus:
 of the 120 Open edit page elements shipped across `PackageStore`, 118 leave the flag off, and the only two
 that carry it are `ProcessTests` fixtures rather than business processes (across all 469 shipped user tasks,
-7). The general rule further down — set the flag on every element of a signal-started process — predates that
-check and was never about a step that WAITS FOR A HUMAN. And the failure it produces is SILENT: measured on a
+7). And the failure it produces is SILENT: measured on a
 10.1.628 core, an Open edit page step with the flag ON did NOT complete after its completion condition was
 satisfied and the record saved — no error, no log entry, the instance simply sits in `Running` and the
 performer's task never clears; clearing the flag completed it. So do not set it here unless asked — and when a
@@ -169,14 +168,13 @@ configuration is stored — the completion conditions and this column both refer
 stranded column leaves the designer's field empty with the list still switched on. Swapping in another page of the
 SAME object (the Classic-to-Freedom move) is fine: every reference stays valid. The refusal names the way out —
 supply a column of the new object, or `enabled: false`; for the conditions, `clearFilter` before the retarget.
-**State this to the user before building one:** this contract builds the result list and the column, not the
-routing. With `resultsByColumn` enabled AND its column set, its connectors take the designer's
+**The `openEditPage` block builds the result list and the column, not the routing** — the branches are
+flows. With `resultsByColumn` enabled AND its column set, its connectors take the designer's
 RESULT-SELECTION editor and never a formula field, so write the branch with `flows[].results` /
 `setFlowResults` — a formula there is REFUSED, because it would run unreadably
-(`process-activity-result-branches`, which says what to tell them). With the list off — or switched on with
+(`process-activity-result-branches` owns that dialect). With the list off — or switched on with
 `column: null` — the element enumerates nothing, so add the flows plain and set each condition
-with `modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op; gateway
-ELEMENTS and default flows stay unbuildable, see `process-element-catalog`). The list and
+with `modify-business-process` + `setFlowCondition` (`process-branch-conditions` owns that op). The list and
 the column are the part a human cannot infer, and they are what this element contributes.
 `priority` takes an `ActivityPriority` lookup NAME (`Medium`) or its record id; an unknown name is refused rather
 than defaulted, because the designer marks the field required and a defaulted priority is indistinguishable from a

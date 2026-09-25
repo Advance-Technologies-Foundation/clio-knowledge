@@ -120,8 +120,9 @@ public sealed class ProcessNamingRuleTests
         ("It does NOT ban the `End<Reason>` shape N5 prescribes",
             "without it a strict reading of N6 bans the very shape N5 hands the reader, and the guide answers "
             + "the same question two ways"),
-        ("ENG-94378",
-            "AGENTS.md requires an evidence pointer for a prescriptive claim; N2's prefix refusal is one"),
+        ("2026-08-19 on a 7.8.0 stand whose `SchemaNamePrefix` is `Usr`",
+            "AGENTS.md requires an evidence pointer for a prescriptive claim; N2's prefix refusal is one, and the "
+            + "pointer is the observation itself (stand, version, date) - the agent that reads the article cannot open a ticket"),
         ("must start with the \"Usr\" prefix",
             "N2 asserts the server REFUSES an unprefixed code — the observed error text is that claim's evidence"),
         ("The environment declares an EMPTY prefix -> add none",
