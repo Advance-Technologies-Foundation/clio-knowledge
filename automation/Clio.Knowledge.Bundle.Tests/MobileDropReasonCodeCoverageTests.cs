@@ -62,6 +62,9 @@ public sealed class MobileDropReasonCodeCoverageTests
         ("drop-container-no-mobile-equivalent",
             "the branch is FLATTENED, not lost — the children are in viewConfigDiff under a new parent; "
                 + "without an entry this benign case is reported as loss"),
+        ("drop-folded-into-parent",
+            "the element's data is inside its parent's property, not lost — without an entry a caller re-inserts "
+                + "the child as an element, which the mobile runtime drops"),
         ("drop-unsupported-request",
             "genuine loss the user must be told about: the request is KNOWN-unsupported on mobile"),
         ("drop-unknown-request",

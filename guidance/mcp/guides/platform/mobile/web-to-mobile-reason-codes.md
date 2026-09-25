@@ -70,6 +70,8 @@ NOT LOSS — report it, and re-insert NOTHING
                                cause on a LEAF, where it IS loss. Say the layout wrapper is gone if that
                                matters, and author NOTHING — re-creating it would insert a parent the diff
                                does not create, and the children already name their new one.
+  drop-folded-into-parent      NOT lost: a crt.TimelineTile is a descriptor in params.parentName's
+                               params.property, already in viewConfigDiff. Re-insert nothing.
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is
@@ -81,12 +83,9 @@ GENUINE LOSS — tell the user what is gone
                                cannot claim it is unavailable on mobile, only that it does not know it —
                                so if that custom request IS implemented on mobile, the action can be
                                re-added by hand. Offer that. params.scope is ALWAYS present, unlike on
-                               drop-unsupported-request above: this code is emitted from one site, and
-                               that site is the non-converting-scope path.
+                               drop-unsupported-request above.
   drop-type-not-in-mobile-registry
-                               this record's own webType has no mobile counterpart at all. No params:
-                               a param that echoes a field the record already carries is a second place
-                               for one fact to drift.
+                               this record's own webType has no mobile counterpart at all. No params.
 
 A CONVERSION-RULES DEFECT — report the name, do not work around it
   drop-target-missing          params.missingParent is absent from the mobile template, so the element
