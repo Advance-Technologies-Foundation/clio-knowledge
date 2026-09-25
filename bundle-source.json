@@ -1784,7 +1784,7 @@
     {
       "itemId": "object-rights",
       "title": "Object rights",
-      "description": "Canonical MCP guidance for OBJECT operation permissions (the SysSchemaOperationRight / \"Object permissions\" layer): read a role's read/create/edit/delete on an entity with get-object-rights and grant or revoke it with set-object-rights, for ANY role. Covers the object-level vs record-level distinction; making a portal section's object available to external users is one use case.",
+      "description": "Canonical MCP guidance for OBJECT operation permissions (the SysSchemaOperationRight / \"Object permissions\" layer): read a role's read/create/edit/delete on an entity with get-object-rights and grant or revoke it with set-object-rights, for ANY role. Covers the object-level vs record-level distinction; the portal-section flow lives in portal-sections.",
       "topicId": "creatio.object-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/object-rights",

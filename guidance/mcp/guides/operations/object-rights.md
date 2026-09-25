@@ -11,30 +11,23 @@ hand-written ESQ into the rights tables:
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`.
 
 grantee is a SysAdminUnit id (a role or user id). Names are NOT unique — resolve a name to its id
-yourself (e.g. execute-esq on SysAdminUnit by Name), the tools take the id. The portal audience has a
-fixed platform id — see the portal use case below.
+yourself (e.g. execute-esq on SysAdminUnit by Name), the tools take the id.
 
 get-object-rights args: entity-schema-name (required), grantee (optional), include-connected (optional).
 - With no grantee it lists EVERY role's rights on the object; with a grantee it reports just that role.
   Internal roles holding the "…any data" system operations can reach records beyond what this reports —
   see `get-guidance name=entity-operation-access`.
+- It reports facts per object — the operations each role (or the grantee) holds, "NO object operations
+  granted", or "not administered by operation permissions" — and draws no verdict.
 - An object not administered by operation permissions is available to all INTERNAL users only:
-  external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant. The tool
-  cannot tell whether the grantee is internal or external, so with a grantee such an object is never
-  counted as covered: it is listed separately as having no explicit grant — reachable only if the role is
-  internal, so for the portal audience it still needs a grant.
+  external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant.
 - include-connected also reads the object's OWN lookup objects (inherited BaseEntity audit lookups such
   as CreatedBy/ModifiedBy are skipped). Security and system objects — SysAdmin*, SysUser*, SysSchema*,
   SysPackage*, SysSettings* and *Right/*Rights — are never part of the connected set; both tools name them
-  in a warning. With a grantee it lists the objects that role cannot READ. READ is the bar on every object:
-  it is what makes a record and its lookup values visible, and what set-object-rights grants on connected
-  lookups by default. The operations each object holds are printed per object — do not add create/edit
-  to an object just because it shows read only.
-- Read-only; use it to see current access and to VERIFY a set-object-rights change. It FAILS
-  (success=false) when the root object is not found or cannot be read. A connected object that cannot be
-  read, or a connected set that cannot be enumerated, is reported as UNVERIFIED and the all-clear is
-  withheld — an unread object is unknown, not covered, and for the portal case it can still leave the
-  section empty for external users.
+  in a warning.
+- Read-only; use it to see current access and to verify a set-object-rights change. It FAILS
+  (success=false) when the root object is not found or cannot be read; a connected object that cannot be
+  read, or a connected set that cannot be enumerated, is reported with a warning.
 
 set-object-rights args: entity-schema-name + grantee (required); operations=read,create,edit,delete for
 the ROOT object (default read,create,edit — delete is NOT granted unless you pass it); revoke=true to
@@ -75,20 +68,8 @@ before any write.
 
 Use cases (all one general capability):
 - Grant or revoke any role's object access — the general audit-and-fix use.
-- Make a Freedom PORTAL section's object available to external users: grant
-  grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f (All external users) operations=read with
-  include-connected, so the object and its lookups are readable by portal users (the lookups get read by
-  default). PRECONDITION — the fan-out gives the WHOLE external audience READ on ANY record of every
-  lookup, limited only by record-level rights, and turns operation permissions ON for a lookup that is not
-  administered yet. So first run get-object-rights entity-schema-name=<root> include-connected=true to list
-  the lookups it will touch, and confirm with the user every lookup that holds internal or personal data
-  (Contact, Account, Employee, custom objects) or is not administered yet. Where a lookup must not be
-  exposed, grant the root WITHOUT include-connected and grant only the approved lookups individually. Pin operations=read on the root explicitly: its default also grants create and edit to the whole
-  external audience. An object external users cannot read is invisible to them even when the
-  section and page exist. A lookup to a security/system object (for example SysAdminUnit) is NOT granted
-  by the fan-out; decide with the user whether the whole external audience may read it before granting it
-  as a root. The surrounding portal-section steps are `related-page-binding` (bind the page
-  as portal) and `workplaces` (add the section to an external workplace).
+- Make a Freedom PORTAL section's object available to external users — `get-guidance name=portal-sections`
+  owns that flow.
 - Enable operation permissions on an object from scratch by granting the first role.
 
 Where the rights live: SysSchemaOperationRight (per role, per operation), served by the native
