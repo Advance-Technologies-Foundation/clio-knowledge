@@ -48,6 +48,12 @@ The generated code always imports `System`, `System.Collections.Generic`, `Syste
 - An alias exists to break a NAME COLLISION between two imported namespaces. The common one: importing `Terrasoft.Configuration` makes `SysSettings` ambiguous (CS0104) between the entity class `Terrasoft.Configuration.SysSettings` and `Terrasoft.Core.Configuration.SysSettings`. Alias the TYPE you mean: `{ "namespace": "Terrasoft.Core.Configuration.SysSettings", "alias": "SysSettings" }`. An alias can also shorten a long prefix (`TSConfiguration` = `Terrasoft.Configuration`); a fully qualified name needs no using at all and is always an alternative.
 - Inside the generated `namespace Terrasoft.Core.Process`, a bare `Configuration.X` means `Terrasoft.Core.Process.Configuration.X`. Write `Terrasoft.Configuration.X`, or alias it.
 
+Process methods
+Helpers that several ScriptTasks of ONE process share go into the process methods - the designer's Process properties -> Methods text: `methods` on `create-business-process`, `setMethods` (a whole-text replace; an empty string clears) on `modify-business-process`, read back by describe as `methods`.
+- The text is C# CLASS MEMBERS, not statements: `private decimal Discount(decimal amount) => amount * Get<decimal>("Rate");`. It compiles into the same generated class as the ScriptTasks, so they call it by name; it can use `Get`/`Set` and `UserConnection`, and it compiles under the same usings.
+- Only interpreted ScriptTasks (and a user task's after-save script) can call it; formulas cannot. Logic that more than one PROCESS needs belongs in a source-code schema instead.
+- Changing the methods owes the same FULL compile as a changed body. Describe's `compiledMethods` is the older compiled variant's text, read-only.
+
 Backend query namespaces
 For `EntitySchemaQuery` recipes also read `esq-filters-backend`. `AggregationTypeStrict` and `LogicalOperationStrict` belong to `Terrasoft.Common`, while ESQ types belong to `Terrasoft.Core.Entities`. Both namespaces are default imports; if the compiler still cannot resolve a type, fully qualify it; do not move `AggregationTypeStrict` to `Terrasoft.Core.DB`.
 

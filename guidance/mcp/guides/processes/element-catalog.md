@@ -117,7 +117,7 @@ leaf rather than through `process-modeling`.
   refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
   naming the callee is what copies that process's parameters onto the element — see `process-sub-process`
   for the block.
-- `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.29**: C# the process must be COMPILED for -
+- `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C# the process must be COMPILED for -
   `process-script-task` owns when to use one, the block and the usings.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
@@ -194,7 +194,7 @@ System actions (palette group "System actions"):
     Still true, and still the cheaper answer for a one-off value: a mapping with an `expression` source
     computes a value without an element at all. Reach for this element when the computation deserves to
     be visible on the diagram, or when the result must be written between two steps.
-- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs a compile), from 1.6.6.29.
+- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs a compile), from 1.6.6.30.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.

@@ -149,7 +149,7 @@ processes the request is.
 6. Change it later with `modify-business-process` (ops: addElement / removeElement / addFlow / removeFlow /
    addParameter / addMapping / setParameter / removeParameter / setFilter / clearFilter / setSignal /
    setFlow / setFlowCondition / setFlowResults (`process-activity-result-branches`) / setElement /
-   setConnections / clearConnections / addUsing / removeUsing — same
+   setConnections / clearConnections / addUsing / removeUsing / setMethods — same
    parameter/mapping/filter/signal/readData/
    changeData/addData/deleteData/email shapes as a build; setSignal reconfigures an existing signalStart's record trigger +
    tracked columns in place, setElement changes element-level fields in place: `useBackgroundMode` on any

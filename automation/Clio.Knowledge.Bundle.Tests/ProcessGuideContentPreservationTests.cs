@@ -185,8 +185,8 @@ public sealed class ProcessGuideContentPreservationTests
         ("process-element-catalog", "`formulaTask`       Formula", "1.6.3.16",
             "the version floor on the one entry in this catalog that CHANGED from read-only to buildable"),
         // scriptTask lost its READ-ONLY pin in ENG-92711 the same way: buildable from CrtProcessBuilder
-        // 1.6.6.29 through type:"scriptTask". The floor is what the entry must still carry.
-        ("process-element-catalog", "`scriptTask`        Script task", "1.6.6.29",
+        // 1.6.6.30 through type:"scriptTask". The floor is what the entry must still carry.
+        ("process-element-catalog", "`scriptTask`        Script task", "1.6.6.30",
             "the version floor on the entry that changed from read-only to buildable"),
         ("process-element-catalog", "`webService`        Call web service", "READ-ONLY here",
             "the per-entry marker on the entry with no other signal that it cannot be built"),
