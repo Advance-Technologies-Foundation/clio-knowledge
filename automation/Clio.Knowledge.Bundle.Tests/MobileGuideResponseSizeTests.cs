@@ -108,10 +108,22 @@ public sealed class MobileGuideResponseSizeTests
     /// `crt.OpenPageRequest` rather than a fixed key, and trimmed the surrounding sentence to net shrink
     /// the article (62,684 -> 62,614) rather than raise the ceiling, per the ratchet-down rule.
     /// </remarks>
+    /// <remarks>
+    /// LOWERED BOTH, 62,614 -> 62,590 and 18,809 -> 18,754, in a change that ADDS content (ENG-96178).
+    /// Three statements had become false and one had never been true: a second component type is now
+    /// dropped over a request (crt.MenuItem, declared by the rules' actionComponents), that code also
+    /// arrives with NO params for a control left with nothing to do, drop-unknown-request's
+    /// "params.scope is ALWAYS present ... emitted from one site" was wrong on both halves once the
+    /// reason helper became shared across three sites, and the "bundled set" it names was deleted from
+    /// clio by ENG-96589 in favour of the mobile request registry. All four are written, and both
+    /// ceilings still went DOWN, because the two request bullets and the surviving-binding lead-in were
+    /// paid down to cover them. The conversion article is the one under the STANDING PROBLEM above, so
+    /// growing it was not an option this change was willing to take.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_614),
-        ("freedom-page-mobile-reason-codes", 18_809)
+        ("freedom-page-web-to-mobile-conversion", 62_590),
+        ("freedom-page-mobile-reason-codes", 18_754)
     ];
 
     /// <summary>

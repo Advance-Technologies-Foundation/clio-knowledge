@@ -73,16 +73,15 @@ NOT LOSS — report it, and re-insert NOTHING
 
 GENUINE LOSS — tell the user what is gone
   drop-unsupported-request     params.request is KNOWN-unsupported on the Mobile app, so the action is
-                               lost. Say so. params.scope when the component sat inside a
-                               non-converting scope container. Do not confuse it with
+                               lost. Say so. NO params means another loss: the control had no action and
+                               nothing under it — read the menu items dropped beside it. params.scope
+                               inside a non-converting scope container. Do not confuse it with
                                drop-request-unsupported below — there the ELEMENT survives and only its
                                binding is removed.
-  drop-unknown-request         params.request is in NEITHER the conversion map nor the bundled set. clio
-                               cannot claim it is unavailable on mobile, only that it does not know it —
-                               so if that custom request IS implemented on mobile, the action can be
-                               re-added by hand. Offer that. params.scope is ALWAYS present, unlike on
-                               drop-unsupported-request above: this code is emitted from one site, and
-                               that site is the non-converting-scope path.
+  drop-unknown-request         params.request is in NEITHER the conversion map nor the mobile request
+                               registry. clio cannot claim it is unavailable on mobile, only that it does
+                               not know it — so if that custom request IS implemented on mobile, the
+                               action can be re-added by hand. Offer that. params.scope as above.
   drop-type-not-in-mobile-registry
                                this record's own webType has no mobile counterpart at all. No params:
                                a param that echoes a field the record already carries is a second place

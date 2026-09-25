@@ -500,20 +500,20 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   droppedRules[] did not convert (every referenced element drops) — report them.
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
-  ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
-  that does not remap to a supported one) is DROPPED (a `droppedElements` entry whose reason names the
-  request) — a dead button is not shipped. NO OTHER component type is ever dropped over a request: some
-  legitimately use a system request absent from the list, and losing the component would lose valid UI.
-  What happens to that surviving component's BINDING depends on which of the two it is, and they are
-  opposite reports:
-    • the request is KNOWN-unsupported (the conversion rules name it and give no mobile counterpart) —
-      the binding is REMOVED and the component ships without that action, reported in
-      `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
-    • the request is UNKNOWN (in neither the map nor the bundled set — often a custom `usr.*`) — the
-      binding is KEPT VERBATIM and flagged in `requestConversions.flaggedRequests[]` under
-      `flag-request-unmapped`, for you to verify with the user.
-  A supported request is kept in
-  viewConfigDiff[].values (the operation's name is already the mobile one) — paste the values verbatim.
+  ARE handled for you. An ACTION-ONLY component (`crt.Button`, `crt.MenuItem` — they exist only to fire
+  one) is DROPPED when the Mobile app does NOT support its request, and so is one left with NO action
+  and NO menu item: a `droppedElements` entry, whose reason names the request in the first case and
+  carries no params in the second. NO OTHER component type is ever dropped over a request: some
+  legitimately use a system request absent from the registry, and losing it would lose valid UI.
+  What happens to a SURVIVING component's binding depends on which of the two it is:
+    • KNOWN-unsupported (the rules name it and give no mobile counterpart) — the binding is REMOVED
+      and the component ships without that action, in `requestConversions.droppedRequests[]` under
+      `drop-request-unsupported`;
+    • UNKNOWN (in neither the map nor the registry — often a custom `usr.*`) — the binding is KEPT
+      VERBATIM and flagged in `requestConversions.flaggedRequests[]` under `flag-request-unmapped`,
+      for you to verify.
+  A supported request is kept in viewConfigDiff[].values with the mobile name already applied — paste
+  the values verbatim.
   guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
   a SURVIVING component — a loss `droppedElements` never shows), flaggedRequests,
   unresolvedTargetRequests, and missingTargetPages (both above). Tell the user which action components
