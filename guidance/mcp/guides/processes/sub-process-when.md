@@ -82,14 +82,20 @@ it calls.
   helper needed; a value that differs per branch is set on each branch, into a process parameter,
   before the join. NEVER after a PARALLEL split: both branches run, so a join either runs the fragment
   once instead of twice or lets the two branches overwrite each other's value. D2 covers every copy
-  no such join can reach, parallel branches included.
+  no such join can reach, parallel branches included. Do not join branches and split again on the
+  same decision just to share a fragment that sits mid-branch: that is D2's case.
 - AND HOIST WHAT DOES NOT DEPEND ON THE BRANCH: a step at the fragment's HEAD that only reads or
-  computes (a Read data, a Formula — "find the owner") and needs nothing from the branch may move
-  before the split and run once. Judge D2 on what stays in the branches. Never hoist a step that acts
-  — an email, a task, a data change — since it would then run on a branch that did not have it.
-- ACTION: one helper holding the fragment, called by a Sub-process element at each place. The
-  values that differ become the helper's `In` parameters, mapped at each call; a value the fragment
-  hands back becomes an `Out` parameter. Take only a fragment with one way in and one way out — a
+  computes (a Read data, a Formula — "find the owner") may move before the split and run once, when
+  its filter or formula uses nothing a branch sets and nothing between the split and the fragment —
+  a branch step, the deciding element's own wait — changes what it reads or computes (a date such as
+  "today + 1" computed before a week-long approval is not the same value). Judge D2 on what stays in
+  the branches. Never hoist a step that acts — an email, a task, a data change — since it would then
+  run on a branch that did not have it.
+- ACTION: one helper holding the fragment, called by a Sub-process element at each place. EVERY
+  caller value the fragment uses becomes an `In` parameter of the helper, mapped at each call — the
+  ones that differ between the places and the ones that do not (the record, its owner), since a
+  separate process can read none of the caller's; a value the fragment hands back becomes an `Out`
+  parameter. Take only a fragment with one way in and one way out — a
   helper is a separate process with one start and one run.
 - ASK: no, for a NEW process; say it in the summary. An EXISTING process that repeats a fragment is
   left as it is — extract it only when the user asks for exactly that.
