@@ -28,7 +28,8 @@ public sealed class GuidanceMigrationTests
         "process-read-data",
         "process-sub-process-when",
         "portal-service-routing",
-        "external-organizations"
+        "external-organizations",
+        "object-rights"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
