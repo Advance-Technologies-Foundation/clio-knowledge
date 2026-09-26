@@ -66,6 +66,48 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "matching the signature establishes type compatibility, not record or business authorization");
     }
 
+    [Test]
+    [Description("Pins the rules a ScriptTask author cannot recover from anywhere else: that the element costs a compile and comes last in the decision order, that the compile is compile-creatio process-name, the namespaces that are NOT imported, why an alias exists and when one is refused, and that Get/Set names are case-sensitive. Each was measured on a stand (ENG-92711); losing one sends an author into a compile failure or a silently stale process.")]
+    public void Guide_ShouldKeepTheAuthoringDecisionCompileAndNamespaceRules()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+
+        // Act
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance/mcp/guides/processes/process-script-task.md"));
+
+        // Assert
+        guide.Should().Contain("Decide first: a ScriptTask costs a compile",
+            because: "the element is the one that makes a clio-built process need a compile, so choosing it is a decision");
+        guide.Should().Contain("call it from a custom user task",
+            because: "reusable C# belongs in a compiled user task, whose callers need no compile of their own");
+        guide.Should().Contain("run `compile-creatio` with `process-name` set to the process",
+            because: "on Creatio 10.x a package-name compile was measured leaving an edited body uncompiled, and a full one takes 20 minutes");
+        guide.Should().Contain("Ask before building it - before the save, never after it.",
+            because: "TC-05 (ENG-92711): an agent told only to INFORM built first and explained afterwards, in C# terms; the user decides on custom server code before it lands in a shared package");
+        guide.Should().Contain("Save the ScriptTask only after a yes",
+            because: "a saved ScriptTask whose code does not compile breaks every later compile of its package");
+        guide.Should().Contain("That yes approves the code, not the compile",
+            because: "core-rules and compile-creatio require consent right before EVERY compile; an earlier yes is not standing consent, so the question before the save must not replace it");
+        guide.Should().NotContain("do not ask for it again",
+            because: "the retired single-question wording contradicted the per-compile consent rule on six other surfaces");
+        guide.Should().Contain("with the user's confirmation that tool requires",
+            because: "a compile reloads the runtime for every user, so the process compile is asked for like any other");
+        guide.Should().Contain("keeps running its PREVIOUS body",
+            because: "an edited, uncompiled script runs the old code silently, which no save reports");
+        guide.Should().Contain("There is NO `System.Linq`, and no `Terrasoft.Configuration`",
+            because: "the two namespaces a script most often needs are exactly the two it does not get");
+        guide.Should().Contain("An ALIAS on a default namespace is refused",
+            because: "the generator drops such an entry with its alias, so the alias would not exist at compile time");
+        guide.Should().Contain("makes `SysSettings` ambiguous (CS0104)",
+            because: "this is the measured collision an alias exists to break");
+        guide.Should().Contain("the run-time lookup is case-sensitive",
+            because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
+        guide.Should().Contain("The text is C# CLASS MEMBERS, not statements",
+            because: "the methods text is pasted into the generated class, so statements there do not compile");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);

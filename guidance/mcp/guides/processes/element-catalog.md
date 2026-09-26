@@ -117,11 +117,13 @@ leaf rather than through `process-modeling`.
   refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
   naming the callee is what copies that process's parameters onto the element — see `process-sub-process`
   for the block.
+- `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C# the process must be COMPILED for -
+  `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
+  and the methods.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
-    `scriptTask`, `webService` (each also marked READ-ONLY in the
-    catalog below, where silence used to read as "buildable"),
+    `webService` (also marked READ-ONLY below),
   and reading one COLUMN out of a read collection — all
   four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance
   Sub-process element iterates one, once per item (see the `callActivity` entry below).
@@ -193,7 +195,7 @@ System actions (palette group "System actions"):
     Still true, and still the cheaper answer for a one-off value: a mapping with an `expression` source
     computes a value without an element at all. Reach for this element when the computation deserves to
     be visible on the diagram, or when the result must be written between two steps.
-- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication). READ-ONLY here.
+- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs a compile), from 1.6.6.30.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
