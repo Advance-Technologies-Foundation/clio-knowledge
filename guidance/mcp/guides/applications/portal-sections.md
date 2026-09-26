@@ -68,7 +68,9 @@ assumes the earlier one exists.
       the lookups the grant would touch. On MCP the grant applies without a preview, so this read is the
       only place the target list is seen. Security and system lookups (for example `SysAdminUnit`) are
       never in the fan-out — the read names them in a warning; granting one is a separate decision.
-   2. Confirm none of them is unsafe for the whole external audience. Where a shared lookup holds
+   2. ASK THE USER before granting, as `object-rights` requires for every include-connected grant: name
+      each object the grant will change and which of them get operation permissions turned on. For the
+      portal case add that the WHOLE external audience gets read on them. Where a shared lookup holds
       sensitive data, do NOT fan it out — grant per-object (drop `--include-connected` and run
       `set-object-rights` only on the safe objects) and handle the sensitive lookup another way.
    3. Then grant the reviewed set:
