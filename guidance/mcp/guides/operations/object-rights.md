@@ -34,9 +34,16 @@ the ROOT object (default read,create,edit — delete is NOT granted unless you p
 remove; include-connected=true to fan out to the object's own lookup objects (security/system objects
 excluded, as above), which get connected-operations (default READ only on a grant — create/edit are never
 fanned out to shared lookups implicitly); disable-operation-permissions (see below); --confirm on the CLI.
-On MCP the Destructive flag is the only gate and the write applies WITHOUT a preview, so read the target
-set first with get-object-rights include-connected. An unknown or misspelled argument name is refused
-before any write.
+An unknown or misspelled argument name is refused before any write.
+- BEFORE a set-object-rights call with include-connected, ASK THE USER EXPLICITLY. On MCP the Destructive
+  flag is the only gate and the write applies without a preview, so the question is the only place the
+  user sees what will change. First run get-object-rights include-connected, then name in the question:
+  - every object the call will change — the root and each connected lookup — and what the grantee gets;
+  - which of them are "not administered by operation permissions": the call turns operation permissions
+    ON for them, and the server adds an "All employees" row with full rights (read/create/edit/delete) on
+    each of them (observed on Creatio 8.3.4, see below).
+  Apply only after the user confirms that list; drop include-connected and grant object by object if they
+  reject part of it.
 - Failures never report success: a root object that is not found fails (nothing was written); if the
   connected objects cannot be enumerated nothing is written and the call fails; when the root write fails
   the connected objects are not attempted; a connected object that fails is named and the rest are still
