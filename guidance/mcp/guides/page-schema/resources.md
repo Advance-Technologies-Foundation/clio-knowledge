@@ -1,6 +1,6 @@
 clio MCP page-schema resources guide
 
-Scope: use when a Freedom UI page change adds, references, or modifies localizable strings (captions, labels, titles, validator messages).
+Scope: use when a Freedom UI page change adds, references, or modifies localizable strings (captions, labels, titles, validator messages), and when a page is translated into another culture (TRANSLATING A PAGE INTO ANOTHER CULTURE below).
 
 For schema ownership, culture-file setup, backend strict/fallback lookup, and localization testing,
 MUST also read `localizable-values`. This guide remains the owner of Freedom UI binding and registration rules.
@@ -76,11 +76,52 @@ Pass the `resources` parameter as a JSON object string of `Key → display strin
 
 `update-page` / `sync-pages` preserve omitted `localizableStrings` entries (platform entries like `SaveButton`, `CancelButton`, `GeneralInfoTab_caption` included). Check the installed tool contract with `get-tool-contract`: versions whose `resources` description says **updates supplied en-US values** can update an existing key's English value while preserving its declaration identity and other cultures. Earlier contracts say **Additions only** and silently ignore a supplied value for an existing key; use the native designer for those updates or upgrade to a build carrying the repair for [Clio #1614](https://github.com/Advance-Technologies-Foundation/clio/issues/1614). Never infer that a changed caption landed from `success:true` or `resourcesRegistered`: that count covers new keys only. Read back the value and verify the rendered page.
 
-The key/value input targets `en-US`, not the caller's current culture. Use the native localization workflow for other cultures. Preservation is not permission to skip the registration check: confirm no DS-bound view model attribute with that name already provides the caption before adding it.
+The `update-page` / `sync-pages` key/value input targets `en-US`, not the caller's current culture. Other cultures are written with `localize-page` (TRANSLATING A PAGE INTO ANOTHER CULTURE below), never by putting translated text under `en-US`. Preservation is not permission to skip the registration check: confirm no DS-bound view model attribute with that name already provides the caption before adding it.
 
 **Capture before push.** A successful designer save does not synchronize an independent workspace. Stale `metadata.json` or culture resource XML can revert the declaration or text on the next `push-workspace`. Apply the create/capture/review/push rule in `app-modeling` to resource edits too: preserve local edits, capture the affected package with `restore-workspace`, and review both B2 declarations and culture XML before pushing. A body-only `get-page` file or a standalone `export-schema` bundle is not that workspace capture. In linked FSM workspaces the native designer can already write those files through the link; inspect the source diff and follow that workspace's FSM instructions instead of blindly pulling over local work. `localizable-values` owns schema metadata and culture-file details.
 
 Evidence boundary: the Clio #1614 investigation reproduced ignored existing values on Creatio 10.1.585.0 / .NET 8 / PostgreSQL and confirmed native designer writes to linked FSM metadata/XML. The updated reference example remains schema-owned; no second B2 serializer is required in Clio.
+
+─────────────────────────────────────────────────────────────
+TRANSLATING A PAGE INTO ANOTHER CULTURE
+─────────────────────────────────────────────────────────────
+
+This guide owns the page-translation workflow and the `localize-page` tool. Availability: a clio whose `get-tool-contract` index lists `localize-page`. It is a long-tail tool, called through `clio-run` (`core-rules` owns that rule). On an earlier clio there is no per-culture page write: use the native localization workflow (page designer) for other cultures.
+
+`localize-page` writes ONE culture of ONE page per call:
+- `schema-name` — the page.
+- `culture` — the target culture in canonical `ll-CC` form (`es-ES`); matched case-insensitively and stored in the environment's spelling. It is for ADDITIONAL cultures only: the default-culture (`en-US`) text is registered and changed with `update-page` `resources`, never with `localize-page`.
+- `resources` — JSON-object string `Key → text in that culture`, e.g. `'{"UsrName_caption":"Nombre"}'`. The valid keys are exactly the set `get-page` shows under `bundle.resources.strings`, including keys inherited from the template hierarchy (an inherited key gets a page-level override holding only that culture; its `en-US` text keeps coming from the parent).
+- `caption` — the page title in that culture.
+- With neither `resources` nor `caption` the call is REPORT-ONLY: nothing is saved and `coverage` returns `keys`, `translated`, `missing`, `sameAsDefault`, `captionSameAsDefault` over the same key set as `get-page`.
+
+What the tool guarantees:
+- Every other culture of every key, and the default culture, is left unchanged. A second culture is another call and keeps the first.
+- Idempotent: a re-run with the same values stores nothing and reports `saved:false`.
+- An unknown key fails the WHOLE call and nothing is saved; the error lists the candidate keys. `localize-page` never registers a key: register it with `update-page` (default culture first), then translate it.
+- A culture that the environment's Languages section does not contain fails before any write; the error names the Languages section and lists the available cultures. An inactive culture is written and the result warns to activate it in the Languages section. `localizable-values` owns these culture rules.
+- After a save the tool reads the page back and fails when a written value was not stored. An existing `get-page` baseline (`.clio-pages/<schema>/meta.json`) is refreshed, so the next `update-page` is not refused as an external modification.
+- `sameAsDefault` lists keys whose value equals the `en-US` value. Right after `create-page` the page title holds the English text in every culture, so "present" does not mean "translated". Review these keys; a word can legitimately be the same in two languages, so it is never an error.
+
+Not page resources — translate them elsewhere:
+- A DS-bound field label (the auto-provided case in THE DECISION ALGORITHM) is the entity column caption, not a page key; `localize-page` fails on it. Translate the column with `title-localizations` on the entity tools — `existing-app-maintenance` owns that rule.
+- The section title in the application is `update-app-section` `caption` + `caption-culture` — also owned by `existing-app-maintenance`.
+
+Workflow for "translate this page / this app into Spanish":
+1. `get-page` the page.
+2. `localize-page` report-only with `culture: "es-ES"`; read `coverage.missing` and `coverage.sameAsDefault`.
+3. Translate those keys and the page title.
+4. `localize-page` with `resources` (and `caption`); expect `saved:true`. A report-only re-run must show `missing` empty.
+5. Translate DS-bound field labels and list columns through the entity column `title-localizations`.
+6. Translate the section title with `update-app-section` `caption-culture`.
+7. Activate the culture in the Languages section if the result warned it is inactive, switch the user profile language to it, and verify the rendered page (verification-in-browser preference in `core-rules`).
+Repeat steps 1-4 for every page and every culture: each call covers one page and one culture.
+
+After changing an `en-US` value with `update-page`, the other cultures are NOT updated and nothing marks them stale: re-run `localize-page` for every translated culture of that key.
+
+Capture before push (above) applies to `localize-page` too: a server save updates neither workspace metadata nor culture XML.
+
+Evidence boundary: the storage behavior behind this workflow (inherited-key overrides, own-key full-list writes, inactive and absent cultures) was measured on Creatio 10.2.254 / .NET Framework for ENG-90576. Mobile page schemas were not measured; the readback makes an unsupported case fail instead of reporting success. Rendering in a non-default culture was not verified in a browser in that measurement.
 
 ─────────────────────────────────────────────────────────────
 VALIDATOR PARAMS — special rule
