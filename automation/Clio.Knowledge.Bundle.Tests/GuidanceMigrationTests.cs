@@ -27,6 +27,14 @@ public sealed class GuidanceMigrationTests
         "process-add-data",
         "process-read-data",
         "process-sub-process-when",
+        "process-digest",
+        "process-send-email-details",
+        "process-branch-conditions-details",
+        "process-open-edit-page-details",
+        "process-access-rights-details",
+        "process-activity-connections-details",
+        "process-formulas-details",
+        "process-parameters-details",
         "portal-service-routing",
         "external-organizations"
     ];

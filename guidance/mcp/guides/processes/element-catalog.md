@@ -9,8 +9,8 @@ while the lifecycle around them does not.
 `process-modeling` keeps the lifecycle: the tools, the descriptor, the build recipe and the safety
 rules for editing an existing process.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
-leaf rather than through `process-modeling`.
+owned by `process-naming` — read it (or its restatement in `process-digest`) BEFORE you name
+anything, including when you entered at this leaf rather than through `process-modeling`.
 
 == What you can build today (create-business-process) ==
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
@@ -76,7 +76,8 @@ leaf rather than through `process-modeling`.
   or is queued; set it there only when the request asks for that. A background run never pops a page open on the
   user's screen (the platform's `ForbidUserInteractionInBackground`, on by default, skips it; the step still waits
   in the performer's task list), and an `openEditPage` step with the flag ON was
-  measured not to resume — `process-open-edit-page` owns that. Shipped signal-started processes carry the flag on
+  measured not to resume — `process-open-edit-page` owns that rule and `process-open-edit-page-details` the
+  measurement. Shipped signal-started processes carry the flag on
   28 of the 166 elements after their start, all 28 behind a background start (108 processes of the shipped
   packages, packages named Test or Demo excluded; scanned 2026-09-24). The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,

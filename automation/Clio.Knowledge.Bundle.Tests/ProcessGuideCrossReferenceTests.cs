@@ -73,7 +73,8 @@ public sealed class ProcessGuideCrossReferenceTests
         // this same change had moved out of it - a pointer to an article that only forwards again.
         // The setFlowResults row above could not catch it: the drifting reference names the FIELD.
         ("branchesOnActivityResult", "process-activity-result-branches"),
-        ("R1-R20", "process-activity-connections"),
+        // ENG-100156 moved the R1-R20 catalog into its own article; the row follows the catalog.
+        ("R1-R20", "process-activity-connections-details"),
         ("N1-N10", "process-naming"),
         // ENG-96536 moved this section into its own article; the row follows the section, not the file
         // it used to live in. Left on process-data-elements, the owner-skip would have exempted the

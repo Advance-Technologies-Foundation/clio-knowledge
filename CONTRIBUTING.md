@@ -168,6 +168,28 @@ So size is a delivery contract, not a matter of taste:
   where the instruction is — restate them inline as a MUST and cite the owning article for the detail.
   Keeping the rule in one place is right; leaving the reader to discover that it exists is not.
 
+### The process digest
+
+`process-digest` (`guidance/mcp/guides/processes/digest.md`) is the build CARD for the process domain.
+It owns no rule: it restates, in short form and naming the owner on every block, what every process
+build and edit needs from `process-modeling`, `process-element-catalog`, `process-naming` and
+`process-sub-process-when`, so that an agent reads it INSTEAD of those four for an ordinary build.
+Those four were mandatory reading before any element article, roughly 91 KB per build, and the
+context that consumed was what pushed process runs into compaction (ENG-99970).
+
+A restatement drifts unless something ties it to its owner, so three rules apply:
+
+- A pull request that changes a rule the card restates changes the card in the SAME pull request.
+  `ProcessDigestTests.RestatedClauses` pins one verbatim clause per restated rule in both files; a
+  reword on one side fails the suite. Add a row when you restate a new rule.
+- The card stays a card. `ProcessDigestTests` holds it to a 12 000-character budget, far under the
+  article budget: detail belongs to the owner, and the card says when to open it.
+- The card names only those four owners (plus `process-versions` for the edit block). Restating a
+  fifth article is a decision, not an edit.
+
+Like any restatement, a destructive or irreversible instruction on the card carries its preconditions
+inline, as a MUST, next to the instruction (see "An article must fit in one `get-guidance` response").
+
 ## Advisory changes
 
 An advisory should state:
