@@ -90,9 +90,10 @@ This guide owns the page-translation workflow and the `localize-page` tool. Avai
 
 `localize-page` writes ONE culture of ONE page per call:
 - `schema-name` — the page.
-- `culture` — the target culture in canonical `ll-CC` form (`es-ES`); matched case-insensitively and stored in the environment's spelling. It is for ADDITIONAL cultures only: the default-culture (`en-US`) text is registered and changed with `update-page` `resources`, never with `localize-page`.
+- `culture` — the target culture in canonical `ll-CC` form (`es-ES`); matched case-insensitively and stored in the environment's spelling. It is for ADDITIONAL cultures only: `culture: "en-US"` is REJECTED with an error pointing to `update-page` `resources`, which registers and changes the default-culture text.
 - `resources` — JSON-object string `Key → text in that culture`, e.g. `'{"UsrName_caption":"Nombre"}'`. The valid keys are exactly the set `get-page` shows under `bundle.resources.strings`, including keys inherited from the template hierarchy (an inherited key gets a page-level override holding only that culture; its `en-US` text keeps coming from the parent).
 - `caption` — the page title in that culture.
+- `output-directory` — pass the same directory you gave `get-page` `output-directory`, so the tool finds and refreshes that `.clio-pages/<schema>/meta.json` conflict baseline. It does not change where the page is saved.
 - With neither `resources` nor `caption` the call is REPORT-ONLY: nothing is saved and `coverage` returns `keys`, `translated`, `missing`, `sameAsDefault`, `captionSameAsDefault` over the same key set as `get-page`.
 
 What the tool guarantees:
@@ -100,7 +101,7 @@ What the tool guarantees:
 - Idempotent: a re-run with the same values stores nothing and reports `saved:false`.
 - An unknown key fails the WHOLE call and nothing is saved; the error lists the candidate keys. `localize-page` never registers a key: register it with `update-page` (default culture first), then translate it.
 - A culture that the environment's Languages section does not contain fails before any write; the error names the Languages section and lists the available cultures. An inactive culture is written and the result warns to activate it in the Languages section. `localizable-values` owns these culture rules.
-- After a save the tool reads the page back and fails when a written value was not stored. An existing `get-page` baseline (`.clio-pages/<schema>/meta.json`) is refreshed, so the next `update-page` is not refused as an external modification.
+- After a save the tool reads the page back and fails when a written value was not stored. The `get-page` baseline found through `output-directory` is refreshed, so the next `update-page` is not refused as an external modification. If that baseline is already stale (the page changed after your `get-page`), the write still succeeds, the baseline is left untouched, and a warning says the next `update-page` will report the conflict: run `get-page` again before editing the body.
 - `sameAsDefault` lists keys whose value equals the `en-US` value. Right after `create-page` the page title holds the English text in every culture, so "present" does not mean "translated". Review these keys; a word can legitimately be the same in two languages, so it is never an error.
 
 Not page resources — translate them elsewhere:
@@ -114,14 +115,14 @@ Workflow for "translate this page / this app into Spanish":
 4. `localize-page` with `resources` (and `caption`); expect `saved:true`. A report-only re-run must show `missing` empty.
 5. Translate DS-bound field labels and list columns through the entity column `title-localizations`.
 6. Translate the section title with `update-app-section` `caption-culture`.
-7. Activate the culture in the Languages section if the result warned it is inactive, switch the user profile language to it, and verify the rendered page (verification-in-browser preference in `core-rules`).
+7. If the result warned the culture is inactive, activate it in the Languages section, then run a FULL configuration compile (`clio compile-configuration --all`; MCP `compile-creatio` without `package-name`). Until that compile the UI does not load in that culture at all (its client resource files answer 404); no restart is needed. The compile confirmation rule in `core-rules` applies: warn the user and ask before compiling. Then switch the user profile language to the culture and verify the rendered page (verification-in-browser preference in `core-rules`).
 Repeat steps 1-4 for every page and every culture: each call covers one page and one culture.
 
 After changing an `en-US` value with `update-page`, the other cultures are NOT updated and nothing marks them stale: re-run `localize-page` for every translated culture of that key.
 
 Capture before push (above) applies to `localize-page` too: a server save updates neither workspace metadata nor culture XML.
 
-Evidence boundary: the storage behavior behind this workflow (inherited-key overrides, own-key full-list writes, inactive and absent cultures) was measured on Creatio 10.2.254 / .NET Framework for ENG-90576. Mobile page schemas were not measured; the readback makes an unsupported case fail instead of reporting success. Rendering in a non-default culture was not verified in a browser in that measurement.
+Evidence boundary: the storage behavior behind this workflow (inherited-key overrides, own-key full-list writes, inactive and absent cultures) was measured on Creatio 10.2.254 / .NET Framework for ENG-90576. Mobile page schemas were not measured; the readback makes an unsupported case fail instead of reporting success. The full-compile requirement after activating a culture was observed on the same stand (the `es-ES` resource file answered 404 until `compile-configuration --all`).
 
 ─────────────────────────────────────────────────────────────
 VALIDATOR PARAMS — special rule
