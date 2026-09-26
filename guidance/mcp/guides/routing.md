@@ -31,6 +31,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
   - reuse JavaScript helpers across Freedom UI web pages (client-unit schemas and AMD dependencies) -> name=shared-client-logic
+  - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-resources + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
