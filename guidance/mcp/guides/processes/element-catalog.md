@@ -118,7 +118,8 @@ leaf rather than through `process-modeling`.
   naming the callee is what copies that process's parameters onto the element — see `process-sub-process`
   for the block.
 - `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C# the process must be COMPILED for -
-  `process-script-task` owns when to use one, the block, the usings and the methods.
+  `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
+  and the methods.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,

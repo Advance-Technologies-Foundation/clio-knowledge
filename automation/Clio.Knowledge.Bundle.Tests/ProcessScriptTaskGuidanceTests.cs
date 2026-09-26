@@ -84,6 +84,12 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "reusable C# belongs in a compiled user task, whose callers need no compile of their own");
         guide.Should().Contain("run `compile-creatio` with `process-name` set to the process",
             because: "on Creatio 10.x a package-name compile was measured leaving an edited body uncompiled, and a full one takes 20 minutes");
+        guide.Should().Contain("Ask before building it - one question, before the save, never after it.",
+            because: "TC-05 (ENG-92711): an agent told only to INFORM built first and explained afterwards, in C# terms; the user decides on custom server code before it lands in a shared package");
+        guide.Should().Contain("Save the ScriptTask only after a yes",
+            because: "a saved ScriptTask whose code does not compile breaks every later compile of its package");
+        guide.Should().Contain("That yes is the consent for the one compile this save owes - do not ask for it again",
+            because: "the question before the save replaces the compile question after it, so the user is asked once");
         guide.Should().Contain("with the user's confirmation that tool requires",
             because: "a compile reloads the runtime for every user, so the process compile is asked for like any other");
         guide.Should().Contain("keeps running its PREVIOUS body",
