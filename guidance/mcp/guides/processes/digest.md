@@ -1,12 +1,13 @@
 clio MCP process-digest guide - the build card: what every process build needs, and where an edit starts, in one read
 
 Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-This card OWNS NO RULE. It restates, in short form, the rules every build of a NEW process needs from
-four articles - `process-modeling` (tools, descriptor, recipe, modify safety), `process-element-catalog`
+For an ORDINARY BUILD, do NOT open `process-modeling`, `process-element-catalog`, `process-naming` or
+`process-sub-process-when` - including any you already planned to read: this card is what you read
+instead. It OWNS NO RULE; it restates, in short form, the rules every build of a NEW process needs from
+those four - `process-modeling` (tools, descriptor, recipe, modify safety), `process-element-catalog`
 (what builds today), `process-naming` (N1-N10) and `process-sub-process-when` (how many processes) -
-and each block names its owner. Read this card INSTEAD of those four for an ordinary build; open an owner
-when a line below sends you there, or when your case is not the ordinary one a line describes. The owner
-always wins over this card. Editing an existing process starts at `process-versions` (last block).
+and each block names its owner. Open an owner only when a line below sends you there, or when your case
+is not the ordinary one a line describes. The owner always wins over this card. Editing an existing process starts at `process-versions` (last block).
 Each ELEMENT you put in the process has its own article; the routing map's Business processes rows and
 the index in `process-modeling` name it - a record signal and Modify data: `process-data-elements`,
 gateways and flow conditions: `process-branch-conditions`. No article owns User dialog or Auto-generated

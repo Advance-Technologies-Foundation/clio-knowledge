@@ -35,12 +35,13 @@ guards — it says whose rule it is and names that guide for the rest.
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
-  FIRST, then the article of each element you use (the rows below)
+  ALONE and FIRST: request it in a call of its own and read it before you request any other process
+  article, then the article of each element you use (the rows below)
   - process-digest is the BUILD CARD: it restates, naming each owner, what every build and edit needs
-    from name=process-modeling (the ENTRY and build-lifecycle owner: tools, descriptor, the recipe, the
-    modify-safety rules), name=process-element-catalog, name=process-naming and
-    name=process-sub-process-when. Open one of those four only when the card sends you there. After it,
-    read the ONE matching sub-guide per element:
+    from `process-modeling` (the build-lifecycle owner: tools, descriptor, the recipe, the modify-safety
+    rules), `process-element-catalog`, `process-naming` and `process-sub-process-when`. For an ordinary
+    build do NOT open those four - the card is what you read instead; open one only when the card sends
+    you there. After the card, read the ONE matching sub-guide per element:
   - which elements exist beyond the card's buildable list, and the element catalog (data-id -> label ->
     purpose) -> name=process-element-catalog
   - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> check the D1,
