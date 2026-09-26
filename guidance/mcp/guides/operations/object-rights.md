@@ -33,7 +33,9 @@ set-object-rights args: entity-schema-name + grantee (required); operations=read
 the ROOT object (default read,create,edit — delete is NOT granted unless you pass it); revoke=true to
 remove; include-connected=true to fan out to the object's own lookup objects (security/system objects
 excluded, as above), which get connected-operations (default READ only on a grant — create/edit are never
-fanned out to shared lookups implicitly); disable-operation-permissions (see below); --confirm on the CLI.
+fanned out to shared lookups implicitly); disable-operation-permissions (see below);
+allow-security-object (a security/system ROOT — SysAdmin*, SysUser*, … — may otherwise only be granted
+read); --confirm on the CLI. The grantee must exist in SysAdminUnit — an unknown id fails before any write.
 An unknown or misspelled argument name is refused before any write.
 - BEFORE a set-object-rights call with include-connected, ASK THE USER EXPLICITLY. On MCP the Destructive
   flag is the only gate and the write applies without a preview, so the question is the only place the
@@ -58,10 +60,11 @@ An unknown or misspelled argument name is refused before any write.
   turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. On Creatio
   8.3.4 the server then adds an "All employees" row with read/create/edit/delete on its own — for the root
   and for every connected lookup the fan-out enables, section objects and plain dictionaries alike — so
-  internal users keep their access. Not verified on other versions: read the object back with
-  get-object-rights. For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row
+  internal users keep their access. Not verified on other versions, so the tool reads the object back after
+  turning permissions on, names the roles that hold rights, and FAILS when only the grantee does (every
+  other internal user lost access). For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row
   after the first grant.
-- A revoke only narrows. A revoke that would remove the object's LAST rights row is REFUSED (writes
+- A revoke only narrows. A revoke that would remove the object's LAST effective grant is REFUSED (writes
   nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
   turned off — "available to ALL internal users", an access WIDENING. Pass disable-operation-permissions
   only when widening to every internal user is the intent; it applies to the ROOT object only, never to a

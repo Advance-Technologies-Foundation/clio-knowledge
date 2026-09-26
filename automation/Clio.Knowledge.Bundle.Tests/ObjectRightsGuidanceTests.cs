@@ -52,7 +52,7 @@ public sealed class ObjectRightsGuidanceTests
         string normalized = string.Join(" ", guide.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
         // Assert
-        normalized.Should().Contain("LAST rights row is REFUSED",
+        normalized.Should().Contain("LAST effective grant is REFUSED",
             because: "the owning article must keep the refusal an agent relies on");
         normalized.Should().Contain("disable-operation-permissions",
             because: "the explicit opt-in is the only path to turning operation permissions off");
