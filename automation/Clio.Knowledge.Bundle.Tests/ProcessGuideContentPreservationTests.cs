@@ -27,7 +27,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class ProcessGuideContentPreservationTests
 {
-    private const string ConnectionRulesArticle = "guidance/mcp/guides/processes/activity-connections.md";
+    private const string ConnectionRulesArticle = "guidance/mcp/guides/processes/activity-connections-details.md";
 
     [Test]
     [Description("No process article ends mid-sentence, which is what a truncated extraction leaves behind.")]

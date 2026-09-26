@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.76",
+  "libraryVersion": "1.16.1",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -104,6 +104,7 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-digest",
       "process-element-catalog",
       "process-naming",
       "process-read-data",
@@ -112,21 +113,28 @@
       "process-data-source-filters",
       "process-delete-data",
       "process-parameters",
+      "process-parameters-details",
       "process-formulas",
+      "process-formulas-details",
       "process-branch-conditions",
+      "process-branch-conditions-details",
       "process-activity-result-branches",
       "process-perform-task",
       "process-task-performer",
       "process-task-category",
       "process-open-edit-page",
+      "process-open-edit-page-details",
       "process-access-rights",
+      "process-access-rights-details",
       "process-send-email",
+      "process-send-email-details",
       "process-send-email-template",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
       "process-sub-process-when",
       "process-activity-connections",
+      "process-activity-connections-details",
       "process-version-writes",
       "process-versions",
       "process-script-task",
@@ -280,6 +288,7 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-digest",
       "docs://knowledge/com.creatio.clio/process-element-catalog",
       "docs://knowledge/com.creatio.clio/process-naming",
       "docs://knowledge/com.creatio.clio/process-read-data",
@@ -287,22 +296,29 @@
       "docs://knowledge/com.creatio.clio/process-data-elements",
       "docs://knowledge/com.creatio.clio/process-data-source-filters",
       "docs://knowledge/com.creatio.clio/process-parameters",
+      "docs://knowledge/com.creatio.clio/process-parameters-details",
       "docs://knowledge/com.creatio.clio/process-formulas",
+      "docs://knowledge/com.creatio.clio/process-formulas-details",
       "docs://knowledge/com.creatio.clio/process-branch-conditions",
+      "docs://knowledge/com.creatio.clio/process-branch-conditions-details",
       "docs://knowledge/com.creatio.clio/process-activity-result-branches",
       "docs://knowledge/com.creatio.clio/process-perform-task",
       "docs://knowledge/com.creatio.clio/process-task-performer",
       "docs://knowledge/com.creatio.clio/process-task-category",
       "docs://knowledge/com.creatio.clio/process-open-edit-page",
+      "docs://knowledge/com.creatio.clio/process-open-edit-page-details",
       "docs://knowledge/com.creatio.clio/process-delete-data",
       "docs://knowledge/com.creatio.clio/process-access-rights",
+      "docs://knowledge/com.creatio.clio/process-access-rights-details",
       "docs://knowledge/com.creatio.clio/process-send-email",
+      "docs://knowledge/com.creatio.clio/process-send-email-details",
       "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
       "docs://knowledge/com.creatio.clio/process-sub-process-when",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
+      "docs://knowledge/com.creatio.clio/process-activity-connections-details",
       "docs://knowledge/com.creatio.clio/process-version-writes",
       "docs://knowledge/com.creatio.clio/process-versions",
       "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1385,7 +1401,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point and build-lifecycle owner for Creatio business processes: the tools, the create-business-process descriptor, the recipe and the modify safety rules. Read process-element-catalog before planning a graph. Routes onward: process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole.",
+      "description": "Entry point and build-lifecycle owner for Creatio business processes: the tools, the create-business-process descriptor, the recipe and the modify safety rules. Read process-element-catalog before planning a graph. Routes onward: process-digest, process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1394,6 +1410,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-digest",
+      "title": "Process build digest",
+      "description": "The build CARD for Creatio business processes: owns no rule, and restates in short form - each block naming its owner - what every build of a new process and every edit of an existing one needs from process-modeling (tools, descriptor, recipe, modify safety), process-element-catalog (what builds today), process-naming (N1-N10) and process-sub-process-when (the D1/D2/D4 triggers for more than one process). Read it instead of those four for an ordinary build, and open an owner when the card sends you there.",
+      "topicId": "creatio.process-digest",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-digest",
+      "sourcePath": "guidance/mcp/guides/processes/digest.md",
+      "bundlePath": "resources/process-digest.md",
       "mediaType": "text/plain"
     },
     {
@@ -1477,7 +1504,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. Also owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side - the procedural re-sync rule and the request shapes that perform one, the full notice set a re-sync answers with, values crossing by NAME with an unmatched name skipped silently, what inSync can and cannot see, and the designer card whose parameter row has no code column - while the BUILD contract for that element (naming the callee, which directions keep a value, what resync refuses) is owned by process-element-catalog. Formulas themselves are owned by process-formulas.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. The SUB-PROCESS element's parameters at RUN TIME (the caller re-sync rule, the re-sync notices, values crossing by NAME, inSync, the designer card) moved to process-parameters-details. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -1489,9 +1516,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-parameters-details",
+      "title": "Sub-process parameter sync",
+      "description": "Owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side: the rule to re-synchronize every caller after a called process's parameters change, and the setElement shapes that perform one (resync:true, a block naming the already-called process, an empty subProcess:{}); what a re-synchronization costs (a dropped parameter's mapping row deleted, replacements carrying new UIds), the full notice set a re-sync answers with, and how far the dangling-reference scan reaches; values crossing by NAME, case-sensitively, with an unmatched name skipped silently, and which version of a versioned callee actually runs; what inSync and multiInstanceOptions.calleeInSync can and cannot see, how a rename is followed and when a value survives it, describe's read-back of direction/isRequired/isResult, and the designer card, whose parameter row has no code column and must not be saved from. Split out of process-parameters.",
+      "topicId": "creatio.process-parameters-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-parameters-details",
+      "sourcePath": "guidance/mcp/guides/processes/parameters-details.md",
+      "bundlePath": "resources/process-parameters-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-formulas",
       "title": "Process formulas",
-      "description": "Owns the vocabulary the platform's expression interpreter actually accepts for an `expression` mapping source and for a flow condition (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41; an environment below clio's enforced floor is refused up front), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - and the length bound clio still applies. Branch mechanics moved to `process-branch-conditions`.",
+      "description": "Owns the vocabulary the platform's expression interpreter actually accepts for an `expression` mapping source and for a flow condition (a flat, case-sensitive registry - not the whole .NET surface), how a process parameter is referenced inside a formula, the macro families, what the PLATFORM validates at its own pre-save gate and clio no longer validates a second time (from CrtProcessBuilder 1.4.0.41), what each refusal names verbatim - including that it quotes the CONVERTED expression, not the one you wrote - and the length bound clio still applies. How the designer renders and describe reads back a stored formula, the verbatim refusal table and the older-package history moved to process-formulas-details. Branch mechanics moved to `process-branch-conditions`.",
       "topicId": "creatio.process-formulas",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-formulas",
@@ -1503,9 +1541,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-formulas-details",
+      "title": "Process formula details",
+      "description": "Owns the read-back and reference material for a stored formula: how the process designer renders it (its own function spelling, parameter names instead of UIds); how a stored formula or condition reads back in describe-business-process (source Script with the expression in value, ConstValue meaning a constant went in instead, kind conditional plus the condition text, branchesOnActivityResult for a result-enumerating connector), and why no designer link can be offered; the verbatim table of formula refusals with the fix for each; the absence of a per-request budget; and what older CrtProcessBuilder packages did with a formula, including why every 'on an older package' fallback in the process guide set is unreachable from a current clio and install-process-builder is the remedy. Split out of process-formulas, which keeps the vocabulary, the reference syntax, what the gate checks and what each refusal names, and the length bound.",
+      "topicId": "creatio.process-formulas-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-formulas-details",
+      "sourcePath": "guidance/mcp/guides/processes/formulas-details.md",
+      "bundlePath": "resources/process-formulas-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-branch-conditions",
       "title": "Process branch conditions",
-      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections, what a condition may contain, branch PRECEDENCE - which is flow ORDER, inspectable in the flows[] describe reports and carried by no priority field - and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The result-SELECTION dialect, not a formula, is `process-activity-result-branches`. The formula vocabulary itself is `process-formulas`.",
+      "description": "Owns the CONDITION on a conditional flow as a branching construct: declaring one on the build path with flows[].kind and flows[].condition, turning an existing flow into a conditional one in place with setFlow / setFlowCondition, how to WRITE the flows leaving a gateway element (choose-gateway outgoings must be conditional or default and a lone unconditional one is written as the default; at most one default per element; a parallel gateway takes plain flows only) - authoring guidance for what the catalog numbers R7, R11 and R14 in process-activity-connections-details, what a condition may contain, branch PRECEDENCE - which is flow ORDER - and the hazard of clearing the last condition on an element, which turns an exclusive branch into a silent parallel split. The result-SELECTION dialect, not a formula, is `process-activity-result-branches`. The formula vocabulary itself is `process-formulas`. Its evidence and rarer cases moved to process-branch-conditions-details.",
       "topicId": "creatio.process-branch-conditions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions",
@@ -1514,6 +1563,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/branch-conditions.md",
       "bundlePath": "resources/process-branch-conditions.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-branch-conditions-details",
+      "title": "Branch conditions details",
+      "description": "Owns the evidence, version provenance and rarer cases behind the branch rules of process-branch-conditions: why both arms of a branch are labelled and how they are worded (the rule itself is process-naming N10's); the CrtProcessBuilder 1.6.0.3 floor both condition paths need, and why a 1.4.x number proves nothing; the measured fact that a diverging gateway with no fallback still builds (R7/R9 only advise, and an unmatched run fails with 'None of the conditions were met'); the create/modify NOTICE that reports a parallel split from CrtProcessBuilder 1.6.2.10, and its three caveats (on an older stand you get a version-convergence REFUSAL rather than silence, modify reports only the sources the request touched, and a default beside a plain flow goes unreported); how the diagram draws branch evaluation order; and the corpus-attested condition shapes. Split out of process-branch-conditions.",
+      "topicId": "creatio.process-branch-conditions-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions-details",
+      "sourcePath": "guidance/mcp/guides/processes/branch-conditions-details.md",
+      "bundlePath": "resources/process-branch-conditions-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1561,7 +1621,7 @@
     {
       "itemId": "process-access-rights",
       "title": "Change access rights element",
-      "description": "Owns the Creatio Change access rights element (changeAccessRights / ChangeAdminRightsUserTask): the accessRights block shape, the add and remove permission entries, the read/edit/delete operations and the permit/delegate/restrict levels, the three grantee kinds (role, employee by contact, and selected employees via a Contact-rooted filter the runtime evaluates with record permissions disabled), the setElement replace-and-clear semantics, the describe read-back, and the one silent runtime no-op that is NOT refused at build time -- both collections empty -- and the opposite hazard, an element with NO record filter at all, which applies the change to EVERY record of the object (a filter that IS present but carries no conditions is the inert state, and a current package refuses it at build), on an element that has no output parameters to report any of them.",
+      "description": "Owns the Creatio Change access rights element (changeAccessRights / ChangeAdminRightsUserTask): the accessRights block shape, the add and remove permission entries, the read/edit/delete operations and the permit/delegate/restrict levels, the three grantee kinds (role, employee by contact, and selected employees via a Contact-rooted filter the runtime evaluates with record permissions disabled), the setElement replace-and-clear semantics, the describe read-back, and the one silent runtime no-op that is NOT refused at build time -- both collections empty -- and the opposite hazard, an element with NO record filter at all, which applies the change to EVERY record of the object (a filter that IS present but carries no conditions is the inert state, and a current package refuses it at build), on an element that has no output parameters to report any of them. Its version boundaries and read-back specifics moved to process-access-rights-details.",
       "topicId": "creatio.process-access-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-access-rights",
@@ -1570,6 +1630,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/access-rights.md",
       "bundlePath": "resources/process-access-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-access-rights-details",
+      "title": "Change access rights details",
+      "description": "Owns the Change access rights element's version and read-back specifics: the two version boundaries (the environment's CrtProcessBuilder must be at least 1.6.0.2 for the accessRights block to land at all, and only a clio that bundles 1.6.0.2 or later carries the read-back check that warns when it does not, so an older clio's silence proves nothing), when that check runs on an operations array containing clearFilter (a mixed batch counts), the field-by-field shape describe-business-process returns for the block (object, objectSchemaUId, considerTimeInFilter, display), and the provenance of the restrict level (enum-derived, not observed). Split out of process-access-rights, which keeps the block, the entries, the grantee kinds, the levels, the record filter, every refusal and every confirmation duty; read that first.",
+      "topicId": "creatio.process-access-rights-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-access-rights-details",
+      "sourcePath": "guidance/mcp/guides/processes/access-rights-details.md",
+      "bundlePath": "resources/process-access-rights-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1603,7 +1674,7 @@
     {
       "itemId": "process-open-edit-page",
       "title": "Open edit page element",
-      "description": "Owns the Creatio Open edit page element (openEditPage / OpenEditPageUserTask) -- the step that shows a record's edit page to a user and waits. Covers the page and the object and record type DERIVED from it, the add and edit modes and what each one requires, pre-filled column values and their value sources, the record to open, recommendation and hint, the performer and the show-page flag that follows it, the Log activity gate and what it actually gates, the result column, and the completion condition and the filter it is paired with. Also owns the two rules that decide WHEN to choose this element over its neighbours, why an omitted block is not the same as a disabled one, and why background mode is set on demand here rather than by the general signal-started rule.",
+      "description": "Owns the Creatio Open edit page element (openEditPage / OpenEditPageUserTask) -- the step that shows a record's edit page to a user and waits. Covers the page and the object and record type DERIVED from it, the add and edit modes and what each one requires, pre-filled column values and their value sources, the record to open, recommendation and hint, the performer and the show-page flag that follows it, the Log activity gate and what it actually gates, the result column, and the completion condition and the filter it is paired with. Also owns the two rules that decide WHEN to choose this element over its neighbours and why an omitted block is not the same as a disabled one. The measured evidence behind its defaults, background mode on this element, the designer's value-source menu, the showPage value written at create and reading an existing element back moved to process-open-edit-page-details.",
       "topicId": "creatio.process-open-edit-page",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-open-edit-page",
@@ -1615,9 +1686,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-open-edit-page-details",
+      "title": "Open edit page details",
+      "description": "Owns the evidence and read-back detail behind the Creatio Open edit page element (openEditPage / OpenEditPageUserTask): the measured useBackgroundMode evidence on this element (the shipped-corpus counts and the silent non-completion with the flag ON); the measured Log activity default and its version dependence; why the record type follows the page; the designer's value-source menu for pre-filled values and the record to open; the showPage value written at create; and reading an existing element back with describe-business-process - the round-trip asymmetry, a switched-on result list with no column, and a completion mode read back with no conditions. Split out of process-open-edit-page, which keeps the block, every field rule and refusal, the destructive-change guards, the background-mode MUST and the routing rule; read that first.",
+      "topicId": "creatio.process-open-edit-page-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-open-edit-page-details",
+      "sourcePath": "guidance/mcp/guides/processes/open-edit-page-details.md",
+      "bundlePath": "resources/process-open-edit-page-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template. Its evidence and rare cases moved to process-send-email-details.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",
@@ -1626,6 +1708,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/send-email.md",
       "bundlePath": "resources/process-send-email.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-send-email-details",
+      "title": "Send email details",
+      "description": "The evidence and rare cases behind the Send email element's rules: what an Add data emulation of an email Activity cannot write, and the agent run that built one; the acceptance tests (RND-T26743/T26744) behind the rule that a sender is required only at run time; the platform's mode dispatch, which makes an element with no stored mode RUN as a template (the mechanism of the missing-message trap), and the unmeasured subject-only element; why the mailbox record survives an address change, and the sender-discipline observation; the bodyFormat stand run, and why a lookup body macro cannot be drilled deeper; the tests that make the subject write order a stated contract; the two designer-removal exceptions (the last To row, a still-referenced parameter) and the recipient idempotence run; and describe's fallback for a macro that no longer resolves. Split out of process-send-email; read that first. An ordinary build or edit does not need this article.",
+      "topicId": "creatio.process-send-email-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-send-email-details",
+      "sourcePath": "guidance/mcp/guides/processes/send-email-details.md",
+      "bundlePath": "resources/process-send-email-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1698,7 +1791,7 @@
     {
       "itemId": "process-activity-connections",
       "title": "Activity connections (\"Connected to\")",
-      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and the four stored shapes that read back but refuse on re-apply. Also carries the R1-R20 connection rules as a NUMBERED CATALOG - the ids validate-process-graph reports - which are about sequence flows and not about these links. Where a rule also needs authoring advice, that advice is owned elsewhere and cited: the gateway flow rules R7, R11 and R14 are written up for authors in process-branch-conditions.",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, and the upsert-by-column semantics. The R1-R20 connection-rule catalog, the four read-back shapes that refuse on re-apply and the skipped-registration mechanism moved to process-activity-connections-details.",
       "topicId": "creatio.process-activity-connections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
@@ -1707,6 +1800,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/activity-connections.md",
       "bundlePath": "resources/process-activity-connections.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-activity-connections-details",
+      "title": "Connection rules and read-back",
+      "description": "Owns the R1-R20 connection rules as a NUMBERED CATALOG - the ids validate-process-graph reports, which are about sequence flows and not about the Activity \"Connected to\" links - with the enforced / semantic / build-time split and the closing can/can't summary. Also owns the four stored connection shapes that read back from describe-business-process but refuse on re-apply, what else a connections[] entry carries (registered, source, why absence is never verified-empty), and the mechanism that lets a declared connection write when the EntityConnection registration step is skipped. Where a rule also needs authoring advice, that advice is owned elsewhere and cited: the gateway flow rules R7, R11 and R14 are written up for authors in process-branch-conditions. Split out of process-activity-connections, which keeps setConnections/clearConnections, the sources, the current-user macros, the refusals and warnings, and the custom-entity recipe.",
+      "topicId": "creatio.process-activity-connections-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-activity-connections-details",
+      "sourcePath": "guidance/mcp/guides/processes/activity-connections-details.md",
+      "bundlePath": "resources/process-activity-connections-details.md",
       "mediaType": "text/plain"
     },
     {

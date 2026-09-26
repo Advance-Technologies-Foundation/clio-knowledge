@@ -6,67 +6,62 @@ descriptor looks like, the recipe, and the safety rules for editing an existing 
 buildable today and the element catalog live in `process-element-catalog`, because both grow with
 every element the platform gains. Everything else has its own article and its own authoritative
 owner -- read the one your task needs instead of guessing:
-  * `process-custom-elements`     - author custom user-task elements with Classic panels and registration.
+  * `process-digest` - the BUILD CARD: owns nothing; restates, naming each owner, what an ordinary build
+    needs from this article and three others.
+  * `process-custom-elements` - author custom user-task elements with Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
-  * `process-element-catalog`      - what `create-business-process` can build TODAY, what it cannot,
-                                     and the element catalog (data-id -> label -> purpose).
-  * `process-diagram-layout`       - how the diagram is drawn, and the re-draw refusal.
-  * `process-naming`               - N1-N10: the process caption and code, element captions and
-                                     codes, parameter codes. Read it BEFORE you name anything.
-  * `process-data-elements`        - start a process from a record event (signalStart), and the Modify
-                                     data element.
-  * `process-read-data`            - the Read data element: all four modes and their outputs, the column
-                                     selection and sort, the collection shape and its top-N.
-  * `process-add-data`             - the Add data element: both adding modes, the selection and its
-                                     filter, the column value sources, and the refused transitions.
-  * `process-delete-data`          - the Delete data element: its one-field block, why its filter is
-                                     what decides whether it works at all, and the confirmation you owe
-                                     the user before building one. Read it BEFORE planning a delete.
-  * `process-data-source-filters`  - the `filter` those three carry: its shape, the comparisons, the
-                                     right-hand value sources, the relative-date macro vocabulary and
-                                     the signal-start restriction.
-  * `process-parameters`           - process parameters, element-parameter mappings, the SUB-PROCESS
-    element at RUN TIME (what crosses, what a re-sync reports, what `inSync` shows), type
-                                     compatibility, and the date/time/lookup default macros.
-  * `process-formulas`             - the `expression` mapping source and the formula
-                                    vocabulary both it and a condition use
-  * `process-branch-conditions`    - the condition on a conditional flow: setting one,
-                                    branch precedence, and the parallel-split hazard
-  * `process-activity-result-branches`
-                                  - the OTHER branch dialect: a connector whose source enumerates
-                                    activity results takes a result SELECTION, never a formula
-  * `process-perform-task`         - the Perform task element: what it produces, its parameter table and
-                                     what the runtime sets.
-  * `process-task-performer`       - who performs a task: the element-level performer block (the only
-                                     route to a TEAM) and OwnerId for one person.
-  * `process-task-category`        - HOW a category or priority must be mapped, and what degrades
-                                     silently when it is not. Not
-                                     needed to BUILD one -- `process-perform-task` carries the ids and
-                                     the refusals. Read this when a field shows a raw Guid or a results
-                                     dropdown offers the wrong set.
-  * `process-open-edit-page`       - the Open edit page element: its block, every field in it, and
-                                     the rule for when to choose it over its neighbours.
-  * `process-access-rights`        - the Change access rights element: the `accessRights` block,
-                                     permission entries, grantee kinds and its silent no-ops.
-  * `process-send-email`           - the Send email element: mode, sender, recipients, subject,
-                                     the custom HTML body and its process macros, and the
-                                     auto-mode checklist.
-  * `process-send-email-template`  - the Send email element's TEMPLATE message: the template and
-                                     the record its macros resolve against, the refusals, the
-                                     subject override, mode switching and the read-back.
-  * `process-approval`             - the Approval element: who approves, the record under approval,
-                                     and the two notifications.
-  * `process-preconfigured-page`   - the Pre-configured page element: the page facts to read first, the
-                                     completing buttons, the data sources and the record they carry.
-  * `process-sub-process`          - the Sub-process element: naming the callee, the mirrored
-                                     parameters and mapping rule, resync, and its refusals.
-  * `process-sub-process-when`     - WHEN a request needs more than one process: D1, D2, D4.
-  * `process-activity-connections` - the "Connected to" links of the Activity a task creates,
-                                     and the R1-R20 connection rules.
-  * `process-versions`             - the version model, which member runs, and how to read that
-                                     standing. Read it BEFORE editing or launching ANY existing process.
-  * `process-version-writes`       - saving a change as a new version, taking a restore point, and
-                                     making a member actual (the rollback gesture).
+  * `process-element-catalog` - what `create-business-process` can build TODAY, what it cannot, and the
+    element catalog (data-id -> label -> purpose).
+  * `process-diagram-layout` - how the diagram is drawn, and the re-draw refusal.
+  * `process-naming` - N1-N10: the process caption and code, element captions and codes, parameter
+    codes. Read it (or its restatement in `process-digest`) BEFORE you name anything.
+  * `process-data-elements` - start a process from a record event (signalStart), and the Modify data
+    element.
+  * `process-read-data` - the Read data element: all four modes and their outputs, the column selection
+    and sort, the collection shape and its top-N.
+  * `process-add-data` - the Add data element: both adding modes, the selection and its filter, the
+    column value sources, and the refused transitions.
+  * `process-delete-data` - the Delete data element: its one-field block, why its filter is what decides
+    whether it works at all, and the confirmation you owe the user before building one. Read it BEFORE
+    planning a delete.
+  * `process-data-source-filters` - the `filter` those three carry: its shape, the comparisons, the
+    right-hand value sources, the relative-date macro vocabulary and the signal-start restriction.
+  * `process-parameters` - process parameters, element-parameter mappings, type compatibility, and the
+    date/time/lookup default macros.
+  * `process-formulas` - the `expression` mapping source and the formula vocabulary both it and a
+    condition use
+  * `process-branch-conditions` - the condition on a conditional flow: setting one, branch precedence,
+    and the parallel-split hazard
+  * `process-activity-result-branches` - the OTHER branch dialect: a connector whose source enumerates
+    activity results takes a result SELECTION, never a formula
+  * `process-perform-task` - the Perform task element: what it produces, its parameter table and what
+    the runtime sets.
+  * `process-task-performer` - who performs a task: the element-level performer block (the only route to
+    a TEAM) and OwnerId for one person.
+  * `process-task-category` - HOW a category or priority must be mapped, and what degrades silently when
+    it is not. Not needed to BUILD one -- `process-perform-task` carries the ids and the refusals. Read
+    this when a field shows a raw Guid or a results dropdown offers the wrong set.
+  * `process-open-edit-page` - the Open edit page element: its block, every field in it, and the rule
+    for when to choose it over its neighbours.
+  * `process-access-rights` - the Change access rights element: the `accessRights` block, permission
+    entries, grantee kinds and its silent no-ops.
+  * `process-send-email` - the Send email element: mode, sender, recipients, subject, the custom HTML
+    body and its process macros, and the auto-mode checklist.
+  * `process-send-email-template` - the Send email element's TEMPLATE message: the template and the
+    record its macros resolve against, the refusals, the subject override, mode switching and the
+    read-back.
+  * `process-approval` - the Approval element: who approves, the record under approval, and the two
+    notifications.
+  * `process-preconfigured-page` - the Pre-configured page element: the page facts to read first, the
+    completing buttons, the data sources and the record they carry.
+  * `process-sub-process` - the Sub-process element: naming the callee, the mirrored parameters and
+    mapping rule, resync, and its refusals.
+  * `process-sub-process-when` - WHEN a request needs more than one process: D1, D2, D4.
+  * `process-activity-connections` - the "Connected to" links of the Activity a task creates.
+  * `process-versions` - the version model, which member runs, and how to read that standing. Read it
+    BEFORE editing or launching ANY existing process.
+  * `process-version-writes` - saving a change as a new version, taking a restore point, and making a
+    member actual (the rollback gesture).
 Each is sized to be read WHOLE through get-guidance. Do not infer a rule that lives in another
 article from what this one says; read that article.
 
@@ -94,7 +89,7 @@ article from what this one says; read that article.
     outside the supported six all report `null`. `setConnections` is refused on `false` AND on `null`; only
     `true` means it is accepted.
   * validate-process-graph  — pre-check a planned graph against the connection rules R1-R20
-    (the rules themselves are in `process-activity-connections`).
+    (the rules themselves are in `process-activity-connections-details`).
 
 == Descriptor (create-business-process) ==
 {
@@ -120,11 +115,12 @@ article from what this one says; read that article.
   failure those rules exist to prevent, and an example is what a model copies first.
 
 == Build recipe (intent -> running process) ==
-Before step 1 you MUST read `process-element-catalog`. It owns what `create-business-process` builds
+Before step 1 you MUST read `process-element-catalog` (or `process-digest`, while every element you
+plan is on its buildable list). It owns what `create-business-process` builds
 today and what it does not, and a plan built around something it cannot build fails only at build
 time -- there is no earlier signal, so one fetch is cheaper than one wrong plan. For a NEW process, or a
-change for EACH item of a set, you MUST also read `process-sub-process-when` first: it decides how many
-processes the request is.
+change for EACH item of a set, you MUST also check the D1/D2/D4 triggers of `process-sub-process-when`
+first (restated in `process-digest`): they decide how many processes the request is.
 1. Translate the request into a graph: the start event(s), the activities, the sequence flows, one or
    more end events; plus process parameters and the value mappings between them — and name them per
    N1-N10 in `process-naming`, which is what makes the result reviewable in the Process Designer.
@@ -141,7 +137,9 @@ processes the request is.
    from `validate-process-graph` — the step this recipe tells you to call — before you get that far.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
-4. `create-business-process(descriptor)` -> builds + saves in one call.
+4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON
+   object itself; a clio that answers "must be a string" predates that - pass a string holding the
+   same JSON.
 5. Verify: `describe-business-process` (element types, user-task names, parameter sources + direction + isOutput
    — an output you can map FROM has `isOutput:true` (not `isResult`); the signal trigger). Verify through
    `describe-business-process`, not a raw `execute-esq`/`odata-read` of the process record (see the readiness

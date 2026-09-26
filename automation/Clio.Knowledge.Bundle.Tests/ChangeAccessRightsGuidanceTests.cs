@@ -30,6 +30,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class ChangeAccessRightsGuidanceTests
 {
     private const string OwningArticle = "guidance/mcp/guides/processes/access-rights.md";
+
+    /// <summary>ENG-100156 split the version boundaries and read-back specifics out of the owning article.</summary>
+    private const string DetailsArticle = "guidance/mcp/guides/processes/access-rights-details.md";
     private const string EntryArticle = "guidance/mcp/guides/processes/element-catalog.md";
     private const string FilterArticle = "guidance/mcp/guides/processes/data-source-filters.md";
 
@@ -84,7 +87,8 @@ public sealed class ChangeAccessRightsGuidanceTests
         guide.Should().Contain("A FOURTH cause produces the same symptom",
             because: "the package-age discard is invisible at build time and is the one cause clio can "
                 + "detect, so it has to be named where the other three are");
-        guide.Should().Contain("VERSION BOUNDARIES - there are TWO",
+        string details = ProcessGuideSet.Read(repositoryRoot, DetailsArticle);
+        details.Should().Contain("VERSION BOUNDARIES - there are TWO",
             because: "an agent has to answer two DIFFERENT questions - whether the ENVIRONMENT's deployed package "
                 + "lands the block at all, and whether the CLIO it is running would tell it if not. A single "
                 + "boundary conflated them, so an agent could satisfy itself on the wrong one and read the absence "
@@ -93,6 +97,9 @@ public sealed class ChangeAccessRightsGuidanceTests
             because: "the placeholders are filled now that the rebundle exists: 1.6.0.2 is the first archive "
                 + "carrying the element, and the clio boundary is stated as the release that starts bundling "
                 + "it, so neither boundary needs a number that does not exist yet");
+        details.Should().NotContain("TBD",
+            because: "the version boundaries moved to the details article with ENG-100156, and a reappearing TBD "
+                + "there means a boundary went back to being unknown");
         guide.Should().NotContain("TBD",
             because: "the markers were deliberately greppable so they could not ship unnoticed, and they are "
                 + "resolved - a reappearing TBD means a boundary went back to being unknown");
