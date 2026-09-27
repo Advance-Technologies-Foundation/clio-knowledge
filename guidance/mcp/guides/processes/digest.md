@@ -100,7 +100,11 @@ page. Read the articles of the elements you actually use, and only those.
 3. `list-user-tasks` -> the exact `userTaskName` for each user task. It lists RETIRED schemas as equal
    peers with no marker (`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`), and two shipped schemas
    share the caption "Send email": key on the schema NAME, never a caption.
-4. `create-business-process` with the descriptor. Pass the descriptor as the JSON object itself; a
+4. `packageName`: ONE `get-target-package` call via `clio-run` (`package` for a package the user
+   named or the application's `package-name` from `get-app-info`; omit it for the current one); use its
+   `package-name`. Never guess from `list-packages`: it does not say which packages accept changes.
+   On `success: false` relay its error and ask; never substitute a package.
+   Then `create-business-process` with the descriptor. Pass the descriptor as the JSON object itself; a
    clio that answers "must be a string" predates that - pass a string holding the same JSON.
 5. Verify with `describe-business-process`: element types, user-task names, parameter sources and
    direction; an output you can map FROM has `isOutput: true`.
@@ -115,7 +119,7 @@ page. Read the articles of the elements you actually use, and only those.
   it is loaded FS->DB and published, so a signal will not fire yet.
 
 == Descriptor skeleton (owner: `process-modeling`) ==
-{ "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "Custom",
+{ "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "<package-name from get-target-package>",
   "elements": [ { "name": "OnboardingRequestedStart", "type": "startEvent", "caption": "Onboarding requested" },
                 { "name": "NotifyAccountOwner", "type": "performTask", "caption": "Notify the account owner" },
                 { "name": "EndOnboardingHandedOff", "type": "endEvent", "caption": "Onboarding handed off" } ],

@@ -93,7 +93,7 @@ article from what this one says; read that article.
 
 == Descriptor (create-business-process) ==
 {
-  "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "Custom",
+  "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "<package-name from get-target-package>",
   "elements": [
     { "name": "OnboardingRequestedStart", "type": "startEvent",  "caption": "Onboarding requested" },
     { "name": "NotifyAccountOwner",       "type": "performTask", "caption": "Notify the account owner" },
@@ -106,6 +106,11 @@ article from what this one says; read that article.
   "mappings":   [ { "elementName": "NotifyAccountOwner", "elementParameter": "<ParamName>",
                     "processParameter": "AccountNameParameter" } ]
 }
+- `packageName` must accept edits. Take a package the user named, else the package of the application
+  the process belongs to (`package-name` from `get-app-info` / `create-app`), else the environment's current
+  package, and resolve it with ONE `get-target-package` call (`clio-run`; add `package` for a named or
+  application package; it answers `package-name`). Never guess one from `list-packages`: it does not say
+  which packages accept changes. On `success: false` relay its error and ask; never substitute a package.
 - `name` is the local element handle (the schema element Name, a string code) used by flows
   (`source`/`target`) and mappings (`elementName`). Creatio identifies an element by this Name plus a
   UId GUID; the platform reserves "Id" for the GUID, so the handle is `name`, not `id`. A `userTask`
