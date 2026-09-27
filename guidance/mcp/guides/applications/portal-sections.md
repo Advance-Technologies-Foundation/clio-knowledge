@@ -74,7 +74,7 @@ assumes the earlier one exists.
       data, do NOT fan it out — grant per-object (drop `--include-connected` and preview/grant only the safe
       objects) and handle the sensitive lookup another way.
    3. Only after approval, repeat the SAME call with `confirm=true` and the `confirmation-code` (on the
-      CLI: `--confirmation-code <token>`). A token that no longer matches means the targets changed —
+      CLI: `--confirmation-code <code>`). A code that no longer matches means the targets changed —
       preview and ask again.
    Pin `--operations read` explicitly. The root default (read/create/edit) would hand the WHOLE external
    audience create and edit on the section's object; the connected lookups get read only unless
