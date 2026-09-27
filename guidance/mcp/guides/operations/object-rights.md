@@ -35,22 +35,23 @@ remove; include-connected=true to fan out to the object's own lookup objects (se
 excluded, as above), which get connected-operations (default READ only on a grant — create/edit are never
 fanned out to shared lookups implicitly); disable-operation-permissions (see below);
 allow-security-object (a security/system ROOT — SysAdmin*, SysUser*, … — may otherwise only be granted
-read); --confirm on the CLI. The grantee must exist in SysAdminUnit — an unknown id fails before any write.
+read, and never have its operation permissions turned off); --confirm on the CLI. The grantee must exist in SysAdminUnit — an unknown id fails before any write.
 An unknown or misspelled argument name is refused before any write.
 - EVERY set-object-rights write is TWO calls, and the user approves in between:
   1. Call it WITHOUT confirm. That writes nothing and returns a PREVIEW: every object the call would change
-     (the root and each connected lookup), what the grantee gets, its current state — including which
-     objects are "not administered" and will have operation permissions turned ON (the server then adds an
-     "All employees" row with full rights, observed on Creatio 8.3.4, see below) — and a confirmation-code.
+     (the root and each connected lookup), what the grantee gets, its current state — which roles hold
+     rights on it, and which objects are "not administered" and will have operation permissions turned ON
+     (the server then adds an "All employees" row with full rights, observed on Creatio 8.3.4, see below) —
+     and a confirmation-code. A root that cannot be read or does not exist fails the preview: no code.
   2. Show that preview to the user and ask explicitly. Only after they approve, repeat the SAME call with
      confirm=true and that confirmation-code. If they reject part of it, drop include-connected and grant
      the approved objects one by one (each with its own preview).
-  The confirmed call is refused when the code no longer matches — the targets or their rights changed
-  since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a code
+  The confirmed call is refused when the code no longer matches — the targets or any role's rights on them
+  changed since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a code
   is refused outright. Never pass confirm=true without having shown the user that preview.
 - Failures never report success: a root object that is not found fails (nothing was written); if the
-  connected objects cannot be enumerated nothing is written and the call fails; when the root write fails
-  the connected objects are not attempted; a connected object that fails is named and the rest are still
+  connected objects cannot be enumerated nothing is written and the call fails; when the root was not
+  written the connected objects are not attempted; a connected object that fails is named and the rest are still
   attempted (the call fails); a connected lookup that is not found only warns.
 - revoke with include-connected leaves the connected lookups UNTOUCHED unless connected-operations names
   what to revoke there — the read-only grant default must not strip READ from shared lookups that other
@@ -64,7 +65,7 @@ An unknown or misspelled argument name is refused before any write.
   and for every connected lookup the fan-out enables, section objects and plain dictionaries alike — so
   internal users keep their access. Not verified on other versions, so the tool reads the object back after
   turning permissions on, names the roles that hold rights, and FAILS when only the grantee does (every
-  other internal user lost access). For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row
+  other internal user lost access — the change is already saved, fix it with a follow-up grant). For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row
   after the first grant.
 - A revoke only narrows. A revoke that would remove the object's LAST effective grant is REFUSED (writes
   nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
