@@ -63,19 +63,19 @@ assumes the earlier one exists.
    audience on every connected lookup too, so REVIEW WHAT THE FAN-OUT EXPOSES BEFORE GRANTING — a
    connected lookup can carry PII or internal reference data (`Account`, `Contact`, price lists,
    catalogs) that must not become world-readable to every external user:
-   1. Dry-read the connected set first: `get-object-rights --entity-schema-name <Object>
-      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected` to enumerate the object and
-      the lookups the grant would touch. On MCP the grant applies without a preview, so this read is the
-      only place the target list is seen. Security and system lookups (for example `SysAdminUnit`) are
-      never in the fan-out — the read names them in a warning; granting one is a separate decision.
-   2. ASK THE USER before granting, as `object-rights` requires for every include-connected grant: name
-      each object the grant will change and which of them get operation permissions turned on. For the
-      portal case add that the WHOLE external audience gets read on them. Where a shared lookup holds
-      sensitive data, do NOT fan it out — grant per-object (drop `--include-connected` and run
-      `set-object-rights` only on the safe objects) and handle the sensitive lookup another way.
-   3. Then grant the reviewed set:
-      `set-object-rights --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f
-      --operations read --include-connected --confirm`.
+   1. PREVIEW the grant: call `set-object-rights --entity-schema-name <Object>
+      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --operations read --include-connected` WITHOUT
+      confirm (on the CLI: `--preview`). It writes nothing and lists the object and every lookup the grant
+      would touch, their current state, which get operation permissions turned on, and a
+      confirmation-token. Security and system lookups (for example `SysAdminUnit`) are never in the fan-out
+      — the preview names them in a warning; granting one is a separate decision.
+   2. ASK THE USER with that preview, as `object-rights` requires for every write: for the portal case add
+      that the WHOLE external audience gets read on those objects. Where a shared lookup holds sensitive
+      data, do NOT fan it out — grant per-object (drop `--include-connected` and preview/grant only the safe
+      objects) and handle the sensitive lookup another way.
+   3. Only after approval, repeat the SAME call with `confirm=true` and the `confirmation-token` (on the
+      CLI: `--confirmation-token <token>`). A token that no longer matches means the targets changed —
+      preview and ask again.
    Pin `--operations read` explicitly. The root default (read/create/edit) would hand the WHOLE external
    audience create and edit on the section's object; the connected lookups get read only unless
    `--connected-operations` widens them. Grant only what the portal scenario needs, and add
