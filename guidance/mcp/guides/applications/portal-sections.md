@@ -67,14 +67,14 @@ assumes the earlier one exists.
       --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --operations read --include-connected` WITHOUT
       confirm (on the CLI: `--preview`). It writes nothing and lists the object and every lookup the grant
       would touch, their current state, which get operation permissions turned on, and a
-      confirmation-token. Security and system lookups (for example `SysAdminUnit`) are never in the fan-out
+      confirmation-code. Security and system lookups (for example `SysAdminUnit`) are never in the fan-out
       — the preview names them in a warning; granting one is a separate decision.
    2. ASK THE USER with that preview, as `object-rights` requires for every write: for the portal case add
       that the WHOLE external audience gets read on those objects. Where a shared lookup holds sensitive
       data, do NOT fan it out — grant per-object (drop `--include-connected` and preview/grant only the safe
       objects) and handle the sensitive lookup another way.
-   3. Only after approval, repeat the SAME call with `confirm=true` and the `confirmation-token` (on the
-      CLI: `--confirmation-token <token>`). A token that no longer matches means the targets changed —
+   3. Only after approval, repeat the SAME call with `confirm=true` and the `confirmation-code` (on the
+      CLI: `--confirmation-code <token>`). A token that no longer matches means the targets changed —
       preview and ask again.
    Pin `--operations read` explicitly. The root default (read/create/edit) would hand the WHOLE external
    audience create and edit on the section's object; the connected lookups get read only unless
