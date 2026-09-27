@@ -41,9 +41,9 @@ An unknown or misspelled argument name is refused before any write.
   1. Call it WITHOUT confirm. That writes nothing and returns a PREVIEW: every object the call would change
      (the root and each connected lookup), what the grantee gets, its current state — including which
      objects are "not administered" and will have operation permissions turned ON (the server then adds an
-     "All employees" row with full rights, observed on Creatio 8.3.4, see below) — and a confirmation-token.
+     "All employees" row with full rights, observed on Creatio 8.3.4, see below) — and a confirmation-code.
   2. Show that preview to the user and ask explicitly. Only after they approve, repeat the SAME call with
-     confirm=true and that confirmation-token. If they reject part of it, drop include-connected and grant
+     confirm=true and that confirmation-code. If they reject part of it, drop include-connected and grant
      the approved objects one by one (each with its own preview).
   The confirmed call is refused when the token no longer matches — the targets or their rights changed
   since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a token
