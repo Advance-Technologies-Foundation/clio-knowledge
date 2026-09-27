@@ -23,7 +23,7 @@ get-object-rights args: entity-schema-name (required), grantee (optional), inclu
   external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant.
 - include-connected also reads the object's OWN lookup objects (inherited BaseEntity audit lookups such
   as CreatedBy/ModifiedBy are skipped). Security and system objects — SysAdmin*, SysUser*, SysSchema*,
-  SysPackage*, SysSettings* and *Right/*Rights — are never part of the connected set; both tools name them
+  SysPackage*, SysSettings*, SysLic*, SysProcess*, Vw* and *Right/*Rights — are never part of the connected set; both tools name them
   in a warning.
 - Read-only; use it to see current access and to verify a set-object-rights change. It FAILS
   (success=false) when the root object is not found or cannot be read; a connected object that cannot be
@@ -37,15 +37,17 @@ fanned out to shared lookups implicitly); disable-operation-permissions (see bel
 allow-security-object (a security/system ROOT — SysAdmin*, SysUser*, … — may otherwise only be granted
 read); --confirm on the CLI. The grantee must exist in SysAdminUnit — an unknown id fails before any write.
 An unknown or misspelled argument name is refused before any write.
-- BEFORE a set-object-rights call with include-connected, ASK THE USER EXPLICITLY. On MCP the Destructive
-  flag is the only gate and the write applies without a preview, so the question is the only place the
-  user sees what will change. First run get-object-rights include-connected, then name in the question:
-  - every object the call will change — the root and each connected lookup — and what the grantee gets;
-  - which of them are "not administered by operation permissions": the call turns operation permissions
-    ON for them, and the server adds an "All employees" row with full rights (read/create/edit/delete) on
-    each of them (observed on Creatio 8.3.4, see below).
-  Apply only after the user confirms that list; drop include-connected and grant object by object if they
-  reject part of it.
+- EVERY set-object-rights write is TWO calls, and the user approves in between:
+  1. Call it WITHOUT confirm. That writes nothing and returns a PREVIEW: every object the call would change
+     (the root and each connected lookup), what the grantee gets, its current state — including which
+     objects are "not administered" and will have operation permissions turned ON (the server then adds an
+     "All employees" row with full rights, observed on Creatio 8.3.4, see below) — and a confirmation-token.
+  2. Show that preview to the user and ask explicitly. Only after they approve, repeat the SAME call with
+     confirm=true and that confirmation-token. If they reject part of it, drop include-connected and grant
+     the approved objects one by one (each with its own preview).
+  The confirmed call is refused when the token no longer matches — the targets or their rights changed
+  since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a token
+  is refused outright. Never pass confirm=true without having shown the user that preview.
 - Failures never report success: a root object that is not found fails (nothing was written); if the
   connected objects cannot be enumerated nothing is written and the call fails; when the root write fails
   the connected objects are not attempted; a connected object that fails is named and the rest are still
