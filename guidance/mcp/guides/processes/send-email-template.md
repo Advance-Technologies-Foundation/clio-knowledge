@@ -20,7 +20,8 @@ leaf rather than through `process-modeling`.
   email template is named '<name>'`), an id no row carries, another type (`is not an email template` — a CHAT
   template is one), and an AMBIGUOUS name (`more than one email template is named '<name>'. Pass the record
   id of the one you mean.`). It is stored TOGETHER with the mode (`BodyTemplateType="0"` + `EmailTemplateId`),
-  never one without the other — the missing-message trap in `process-send-email`'s AUTO-MODE CHECKLIST is why. `template` and `body`/`bodyFormat` in one block
+  never one without the other — the missing-message trap in `process-send-email`'s AUTO-MODE CHECKLIST is why (its mechanism is in
+`process-send-email-details`). `template` and `body`/`bodyFormat` in one block
   are REFUSED (`mutually exclusive`). `messageSource` is optional: omitted, the mode follows the content
   (`template` → template, `body` → custom) or, with neither, stays what the element has; sent, it must agree
   with the content. Macros are resolved by the PLATFORM at send time — process data is NOT injected into the

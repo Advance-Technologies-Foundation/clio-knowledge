@@ -5,6 +5,9 @@ This article is the authoritative owner of the Send email element: the `email` b
 and recipients, the auto-mode checklist, and the CUSTOM message (the HTML `body` and its process macros). The
 TEMPLATE message — `template`, `templateEntity`, their refusals, the subject override, mode switching and the
 template read-back — is owned by `process-send-email-template`.
+Evidence and rare cases moved to `process-send-email-details` (the tests, stand runs and source reads behind
+these rules, why a no-mode element runs as a template, the designer-removal exceptions); read it only when a
+result contradicts a rule here or a user disputes one.
 
 == Element: Send email (sendEmail -> EmailTemplateUserTask) ==
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), in either of the designer's two
@@ -31,25 +34,15 @@ template read-back — is owned by `process-send-email-template`.
 - NEVER EMULATE THIS ELEMENT with an Add data of `Activity` records (Type = Email), not even to leave drafts
   for manual sending when no mailbox exists: `mode:"manual"` creates that email Activity for the `performer`
   and then WAITS until it is completed — a human step (EXECUTION MODE in `process-sub-process-when`). Copying
-  its columns (`Sender`, `MessageTypeId`, `IsHtmlBody`, `Owner`) does not close the gap. What an Add data
-  cannot write: in manual mode, the activity's binding to this process element with its completion listener,
-  so nothing waits for the email; in manual mode, and in auto mode only with `CreateActivity` on and a sender,
-  the activity's link to the process instance; in auto mode, the send itself (`EmailTemplateUserTask.CreateActivityEntity`, `ManualEmailUserTaskSender`,
-  `AutoEmailUserTaskSender`, CrtProcessDesigner 7.8.0). Whether each record of a
-  set gets its own email is decided by D1 in `process-sub-process-when`. Observed in an agent run
-  (2026-09-24): asked to email each contact of an account with no mailbox configured, it built exactly that
-  emulation.
+  its columns (`Sender`, `MessageTypeId`, `IsHtmlBody`, `Owner`) does not close the gap. Whether each record of a
+  set gets its own email is decided by D1 in `process-sub-process-when`.
 - Rules: `mode:"auto"` sends automatically and its `sender` is required AT RUN TIME, not to save — it is NOT
   a design-time required field: the server saves without one, the designer's card validates `Sender` only
   while auto mode is selected (any filled formula satisfies it), and the field whose absence blocks saving a
   Send email element is `BodyTemplateType`, not `Sender`. With no resolvable sender the RUN fails with
   `Terrasoft.Mail.Sender.EmailException: Sender is not specified` — UNLESS the `SkipSenderValidation` feature
   flag is on, where the identical setup completes. So configure a `sender` for `auto`, but do NOT report a
-  missing one as a save-time error. Verified against the platform's own acceptance tests —
-  `process_elements_validation.feature` (the element's validation field is `BodyTemplateType`) and
-  `exchange_process_send_error_v2.feature` (RND-T26743: auto mode with `Sender` = a `Guid.Empty` formula
-  SAVES with no validation dialog and fails only at run time; RND-T26744 `@ft_SkipSenderValidation`: the same
-  setup completes) — plus the card's auto-mode-only `senderValidator`.
+  missing one as a save-time error.
   AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four (in
   template mode the `template` stands in for `body`). That is an AUTHORING rule, not a tool contract —
   neither the build nor the platform save enforces any of them (the designer itself saves an auto element
@@ -61,15 +54,8 @@ template read-back — is owned by `process-send-email-template`.
   their ABSENCE beside `hasBody:false` is the signal — not an older
   server, which the template-landed warning in `process-send-email-template` covers — so read the element
   back and check it — and the run fails with
-  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (observed in a manual test, 2026-09-04). The mechanism, from the platform
-  sources (`CrtProcessDesigner` 7.8.0, read 2026-09-09): the runtime dispatches on `BodyTemplateType`, an
-  Integer with no default, so an element whose mode was never written RUNS in TEMPLATE mode with no template,
-  and that text is the template provider's (`EmailTemplateUserTaskMessageProvider.GetEmailContent`, the only
-  throw site of it in the sources); it was OBSERVED on a no-mode element, and an earlier version of this guide
-  attributed it to "subject or body writes `BodyTemplateType="1"`" (the custom provider), which the sources do
-  not support. A subject-only element with neither a mode nor a template still selects the custom mode
-  (`BodyTemplateType="1"`) and has no body to send; that run was not made.
-  Note the asymmetry: an explicitly EMPTY `body` (`""` or whitespace)
+  `Localizable template not found for record 00000000-0000-0000-0000-000000000000` (observed in a manual test,
+  2026-09-04). Note the asymmetry: an explicitly EMPTY `body` (`""` or whitespace)
   IS rejected at build (`requires a non-empty 'email.body'`); only an OMITTED one slips through.
   `sender` is resolved at BUILD time and takes exactly three shapes: a `MailboxSyncSettings` record id
   (a GUID), the `[#Lookup.{objectUId}.{recordId}#]` macro that describe echoes back (round-trip), or a
@@ -80,10 +66,7 @@ template read-back — is owned by `process-send-email-template`.
   2026-09-01). So the system-setting source the recipient ranking below prefers is NOT usable for `sender`
   through this tool — the designer's own sender menu offers Process parameter / Lookup / System setting /
   Formula, so say "not through this tool yet", never "Creatio cannot". Keep the two sender failures apart:
-  a MISSING sender saves and fails the RUN (rules above); a MALFORMED sender fails the BUILD. The sender
-  choice that survives an address change is the environment mailbox itself: the address you pass is
-  resolved to the mailbox RECORD at build, so an administrator can later change that mailbox's address
-  without reopening the process.
+  a MISSING sender saves and fails the RUN (rules above); a MALFORMED sender fails the BUILD.
   SENDER DISCIPLINE: rank `sender` sources the way the recipient ranking below ranks `to`/`cc`/`bcc`, with
   the mailbox RECORD standing in for the system setting as the indirection an administrator can change later.
   The build resolving a literal to a record is a platform side-effect, not a decision — the decision is
@@ -101,9 +84,7 @@ template read-back — is owned by `process-send-email-template`.
   the same one-line justification the cc/bcc pushback gives. Creating a record is an ENVIRONMENT change:
   the build checks only `SenderEmailAddress`, so a bare record satisfies the build while whether it SENDS
   depends on the mailbox's server configuration, which this tool does not set up — say so when you create
-  one. Observed in a manual test (2026-09-04): an agent that pushed back on a literal `cc` with a
-  stated reason took a literal `sender` straight to a NEW mailbox record, without checking the mailbox it
-  had configured minutes earlier — the correct build result, reached without the reasoning this rule asks for.
+  one.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
   the contact's email at send time; for an entity-COLUMN recipient — the owner of a record the process
@@ -131,28 +112,17 @@ template read-back — is owned by `process-send-email-template`.
   setting as the expected answer and offer it explicitly — an option set of literal / contact / parameter
   omits the one source that survives a change of staff. The HTML body is stored verbatim;
   `bodyFormat` accepts ONLY `"html"` — any other value is REJECTED at build even when no `body` is sent (the
-  applier validates the format first, so it is a contract guarantee, not a convention). VERIFIED on a stand
-  (2026-08-13, a `CrtProcessBuilder` that supports `sendEmail`): `bodyFormat:"text"` and `bodyFormat:"markdown"`
-  both FAIL the build with `Send email element '<name>': 'bodyFormat' must be 'html' (only HTML custom-message
-  bodies are supported). Got '<value>'.` — and the `markdown` case carried NO `body` at all, which is the half
-  that proves the format is checked on its own rather than only alongside a body. To put PROCESS DATA in the
+  applier validates the format first, so it is a contract guarantee, not a convention). To put PROCESS DATA in the
   body, author BY NAME with friendly macros the server resolves into the platform's
   `<img data-value="[#…#]">` image tokens — NO UID needed: `[[param:<Name>]]` (a whole process parameter),
   `[[element:<ElementName>.<OutputParameter>]]` (a whole element output, e.g. a `readData` element's
   `ResultEntity`), and `[[element:<ElementName>.<OutputParameter>.<Column>]]` (ONE direct column of that
   output record). A LOOKUP column in a body macro renders the referenced record's **Id**, not its display
   value: `[[element:Read.ResultEntity.Job]]` mails `11d68189-…`, and an EMPTY lookup mails
-  `00000000-0000-0000-0000-000000000000` rather than a blank. This is a PLATFORM limit, not a contract one, and
-  it cannot be worked around by drilling deeper — the token is one column deep by construction and BOTH deeper
-  routes are refused by core, verified 2026-08-21: a chained `[EntityColumn:{…}].[EntityColumn:{…}]` is read
-  only to its LAST segment and resolved against the ROOT schema, and a chained meta path in a `readData`
-  element's `EntityColumnMetaPathes` is REJECTED on save (`Column with identifier "<uid>" not found in the
-  entity schema "<root>"`). So do NOT put a lookup column in a body a human reads. Email a TEXT column that
-  carries the same information instead — on `Employee`, `FullJobTitle` mails `Developer` while `Job` mails a
-  GUID — and when only the lookup exists, say the value cannot be rendered rather than shipping an Id.
-  Reviewing this needs a SENT message: the schema validates, the process runs green, and no macro is left
-  unresolved, so every check short of reading the delivered email passes. A process parameter can only be
-  inserted WHOLE — Creatio has NO column drill on a bare
+  `00000000-0000-0000-0000-000000000000` rather than a blank. So do NOT put a lookup column in a body a human
+  reads. Email a TEXT column that carries the same information instead — on `Employee`, `FullJobTitle` mails
+  `Developer` while `Job` mails a GUID — and when only the lookup exists, say the value cannot be rendered
+  rather than shipping an Id. A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
   parameter (verified: zero specimens of `[Parameter].[EntityColumn]` without an `[Element]`; the designer
   offers column drill only on the Elements tab), so to email a record's column read it with a data element
   FIRST and drill THAT output. An unknown parameter/element/column is REJECTED naming what was missing, so
@@ -168,11 +138,7 @@ template read-back — is owned by `process-send-email-template`.
   descriptor's `mappings` are applied BEFORE the elements' `email` blocks, so `email.subject` overwrites the
   mapped formula whatever order you wrote them in; in a MODIFY the operations run strictly in the order you
   list them, so the LATER of `addMapping` / `setElement`(`email.subject`) wins. Deterministic on each path but
-  opposite by default, so send exactly ONE of the two rather than relying on it. This is now a STATED CONTRACT
-  rather than an observed implementation order: the server's `email.subject` member documents both paths, and
-  two tests pin them — a build asserting the mapping phase runs before the email block, and a modify asserting
-  operations dispatch in array order — so reordering either phase is a breaking change that fails the suite
-  instead of silently inverting this guide.
+  opposite by default, so send exactly ONE of the two rather than relying on it.
   Works in `create-business-process`, `modify-business-process` `addElement` (same block) and `setElement`
   (`elementUpdate.email` — an in-place partial update). Recipients are MATCH-OR-APPEND: an entry whose
   resolved source and value already match an existing line under the same prefix is a NO-OP (re-application
@@ -180,17 +146,8 @@ template read-back — is owned by `process-send-email-template`.
   removal path THROUGH THIS TOOL — a wrong recipient cannot be replaced or removed through `modify`.
   The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
   recipient's value and saving DELETES the parameter (`saveRecipients` calls `removeRecipient` on an emptied
-  row, which calls `removeParameter`, which removes it from the element). Two exceptions persist as valueless
-  parameters instead — the LAST `To` row (the guard keeps one To row alive), and a parameter something else
-  still references (`canRemoveParameter`). That last-`To` case is why a designer capture can show an unfilled
-  recipient row surviving; it is a special case, NOT evidence that removal is impossible.
-  VERIFIED on a stand (2026-08-13): the SAME `to:[{"value":"…"}]` entry applied three times over `setElement`
-  left exactly ONE recipient parameter, and a different address then appended as a second — so "idempotent" is
-  measured behaviour here, not an inference from the applier's source. The tool's no-removal half is a
-  limitation of the operation set (there is no removeRecipient op), not a platform limit — the designer
-  behaviour above is read from `EmailTemplateUserTaskPropertiesPage.js` in `CrtProcessDesigner` 7.8.0
-  (`saveRecipients` :645, `removeRecipient` :1410, `removeParameter` :1390).
+  row, which calls `removeParameter`, which removes it from the element).
   `describe-business-process` reads the configuration back as the element's `email` block: `hasBody` is a
   presence flag, and `body` echoes the HTML with the process-macro tokens DECODED back into the same
   `[[param:…]]` / `[[element:…]]` author form — so on a MODIFY you can read the current body and edit it in
-  place. A macro whose UIds no longer resolve to names is left as the raw `<img>` token (best-effort decode).
+  place.

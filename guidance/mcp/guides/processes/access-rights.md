@@ -12,6 +12,10 @@ points here; `process-data-elements` owns the record `filter` shape this element
 `record-rights` for an ad-hoc grant or revoke you make now, and this element only when the change must
 happen inside a running process. Note the two surfaces spell levels differently — `record-rights` exposes
 `granted`/`delegated`, this block uses `permit`/`delegate`/`restrict`.
+Moved to `process-access-rights-details`: the two VERSION BOUNDARIES (CrtProcessBuilder `1.6.0.2`), when
+the read-back check runs on a `clearFilter` batch, describe's full field shape, and the PROVENANCE of
+`restrict`. Read it when the environment's CrtProcessBuilder, or the one your clio bundles, may predate
+`1.6.0.2`, or to decide what a MISSING read-back warning proves.
 
 == Read this first: the element cannot tell you it did nothing ==
 This element has **NO output parameters**. Nothing downstream can branch on whether permissions were
@@ -37,18 +41,7 @@ CrtProcessBuilder predates this element DISCARDS the whole `accessRights` block 
 still answers success, leaving the element unconfigured. A clio that carries the accessRights read-back
 check detects this one for you: it reads the process back after the operation and warns when the block
 did not land, or when the read-back could not be obtained at all. Treat either warning as "the
-permissions were NOT changed". VERSION BOUNDARIES - there are TWO, and they are different questions:
-  - the CrtProcessBuilder deployed on the ENVIRONMENT decides whether the block lands at all. Anything
-    older than `1.6.0.2` discards it - that is the first archive containing the element at all, and
-    every earlier one, 1.6.0.1 included, drops the block while still answering success. Check with
-    `list-packages` and read the CrtProcessBuilder row.
-  - the CLIO you are running decides whether you are TOLD. The read-back check ships in the same
-    release that starts bundling CrtProcessBuilder `1.6.0.2`, so a clio bundling an older archive
-    predates the check and emits no warning - its silence proves nothing. `install-process-builder`
-    installs whatever archive YOUR clio bundles, so a clio old enough to lack the check also installs
-    a package old enough to discard the block.
-  On a clio or an environment below those boundaries, do not treat the absence of a warning as
-  evidence: read the process back with `describe-business-process` yourself.
+permissions were NOT changed".
 But be precise about what that proves: `describe-business-process` is a process DEFINITION read. It
 confirms the `accessRights` block LANDED — the case above — and it proves NOTHING about whether any
 permission changed. It cannot see a record `filter` that matched zero records, a `remove` whose grantee
@@ -102,17 +95,14 @@ strength of a green build.
 == Levels (add entries only) ==
   `permit`   — the default when `level` is omitted: the grantee gets the operation. This default is
     applied by the SERVER, which writes the permit value explicitly onto the stored entry, so the
-    platform enum's zero value in the PROVENANCE note below is never reached by omitting `level`.
+    platform enum's zero value in the PROVENANCE note of `process-access-rights-details` is never
+    reached by omitting `level`.
   `delegate` — "Permit with rights to delegate": the grantee may pass the right onward.
   `restrict` — the platform Deny level, and the DESTRUCTIVE one: it downgrades an existing Allow row
     for that grantee to Deny, and on a fresh insert denies the two operations you did NOT name. The
     record-rights detail captions the same value "NotSet", which is a UI rendering, not the storage.
 A `level` on a REMOVE entry is REFUSED, not ignored: the runtime never reads one there, so accepting
 it would silently discard your intent.
-
-PROVENANCE of `restrict`: it is enum-derived (`EntitySchemaRecordOperationRightLevel.Deny = 0`), not
-observed — none of the seven captured designer specimens uses it, and the record-rights detail captions
-that same value "NotSet". Verify it on your stand before relying on it as an access control.
 
 == The three grantee kinds ==
 - `role` — a user role. Accepts a role NAME (resolved through the platform role view; an ambiguous
@@ -235,18 +225,9 @@ showing the element and the object whose filter is being cleared, and still gett
   `object`, in the same operations array: `setFilter` never validates its own `object` against the
   element, so one sent BEFORE the retarget is cleared by it (see `process-data-elements`).
 - A present-but-blank `object` is refused; omit it to keep the current target.
-- A clio carrying the read-back check also reads the process back after an operations array that CONTAINS
-  a `clearFilter` — a mixed batch counts, the check is keyed on the operation and not on the array being
-  a single one — and warns on the resulting filter state of any Change access rights element among the
-  cleared elements — clearing a record filter makes that element act on EVERY record
-  of its object, so that batch is checked rather than waved through silently.
 
 == Read-back (describe-business-process) ==
-The element returns its `accessRights` block: `object` + `objectSchemaUId` (`object` is null when the
-stored UId resolves to no entity), `considerTimeInFilter`, and both entry collections with their
-operations, level and grantee in the same wire shape you write. A role/employee grantee reports its
-stored formula plus the stored caption in `display`, and an echoed `[#Lookup…#]` macro re-applies as
-written. A `selectedEmployees` filter decodes when stored in the modern format; a legacy `FilterEdit`
+A `selectedEmployees` filter decodes when stored in the modern format; a legacy `FilterEdit`
 value reports the entry without its filter. A stored-but-undecodable collection reports as an EMPTY
 array, but `addUnreadable`/`removeUnreadable` say how many entries could NOT be reported (-1 when the
 collection itself did not decode). So `[]` with a non-zero count means UNKNOWN, not empty; only `[]`

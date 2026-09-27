@@ -9,6 +9,8 @@ shape live in `process-modeling`; the element catalog and what is buildable toda
 `process-element-catalog`; naming rules for the caption and code live in
 `process-naming`; the record filter this element shares with the data elements is owned by
 `process-data-source-filters`. Do not infer a rule that lives in one of those from what this article says.
+MOVED to `process-open-edit-page-details`: `useBackgroundMode` on this element, the measured Log activity default, why the record type follows the page, the designer's value-source menu, the `showPage` value written at create, and reading an existing element back with `describe-business-process`. Read it BEFORE you set `useBackgroundMode` here, when a step will not complete although its completion condition is met, or before you feed a read-back block into a write; an ordinary build needs only this article.
+MUST NOT, unless the request asks for it: set `useBackgroundMode: true` on this element - an Open edit page step with the flag ON was measured not to resume (the measurement is in `process-open-edit-page-details`).
 
 == The element and its block ==
 The Open edit page element (`openEditPage` / OpenEditPageUserTask) shows a record's edit page to a user and
@@ -33,12 +35,10 @@ half is short: `page`, and `editMode` with its mode's payload (`defaultValues` f
 element caption when you omit it, so send it only when the request gives you wording. Inside a block you DO
 send, its own required fields apply — `resultsByColumn.column`, and a `unit` with every non-zero interval.
 **But do not read "omitted" as "off".** Creating this element MATERIALIZES the user-task schema's own parameter
-defaults onto it as CONSTANTS, so an omitted block is not absent — it is whatever that schema ships. Measured on
-a 10.1.628 core: a freshly built element comes back from `describe` with `logActivity.enabled: true`, a 5-minute
-duration and `Medium` priority, none of it requested. The shipped 7.8.0 copy of the same schema has the gate at
-`false`, so the default is VERSION-DEPENDENT and cannot be assumed either way. Two consequences. To have NO
-activity you must say so — `logActivity: { "enabled": false }`; omitting the block leaves whatever the
-environment defaults to, and on the core measured above that is an activity with intervals nobody chose. And an
+defaults onto it as CONSTANTS, so an omitted block is not absent — it is whatever that schema ships. Two
+consequences. To have NO activity you must say so — `logActivity: { "enabled": false }`; omitting the block
+leaves whatever the environment defaults to, and on the core measured in `process-open-edit-page-details` that is
+an activity with intervals nobody chose. And an
 `enabled: true` in a read-back is NOT evidence the caller asked for one, so do not "preserve" it on a
 read-modify-write and do not report it to a user as their configuration — `describe` reports what the element
 STORES, which after a plain create already includes the platform's defaults.
@@ -53,15 +53,6 @@ are also writing this element's connections in the same build — otherwise turn
 task usually needs its connections" as a reason: the shipped corpus says the opposite, with `CreateActivity` true
 on 15 of the 120 Open edit page elements in `PackageStore`. Either way, say in one line what you did, rather than
 letting the user find the answer on the card.
-`useBackgroundMode` is covered by this rule too, ON THIS ELEMENT: leave it off unless the request asks for
-background execution. Two things say so, and the second is the one that matters. The platform's own corpus:
-of the 120 Open edit page elements shipped across `PackageStore`, 118 leave the flag off, and the only two
-that carry it are `ProcessTests` fixtures rather than business processes (across all 469 shipped user tasks,
-7). And the failure it produces is SILENT: measured on a
-10.1.628 core, an Open edit page step with the flag ON did NOT complete after its completion condition was
-satisfied and the record saved — no error, no log entry, the instance simply sits in `Running` and the
-performer's task never clears; clearing the flag completed it. So do not set it here unless asked — and when a
-step will not complete although its condition is met, suspect this flag before anything else.
 PICKING THE PAGE is the part to get right, because it decides everything else: the target OBJECT and — for a
 typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only a page REGISTERED ON A SECTION
 can be opened; any other page is REFUSED. That refusal is protecting you, not being strict: the designer
@@ -72,9 +63,7 @@ whose `kind` is `freedom`, falling back to `classic` — but state the preferenc
 environment with the platform's 8.x-pages feature off offers Classic pages ONLY, so "we will use the Freedom
 UI page" is a promise you cannot keep everywhere. Rank `kind: "unknown"` last and confirm with the user that
 it really is an edit page rather than hiding it.
-`recordType` is an optional CHECK, not a selector. The designer's page list carries ONE entry per page
-(`_fillPageSchemaList` merges a repeat row instead of adding a second), so a page registered for several
-record types is offered once and the type FOLLOWS the page. Pass `recordType` to assert which
+`recordType` is an optional CHECK, not a selector. Pass `recordType` to assert which
 registration you expect: a mismatch is refused naming the type the environment actually registers.
 `editMode` decides which of two MUTUALLY EXCLUSIVE payloads applies, and they are exclusive IN STORAGE, not
 only in the UI: `add` (the user creates a record) takes `defaultValues`, `edit` (the user edits an existing
@@ -107,9 +96,7 @@ filter on the mode: a filter without `onConditions` (or the mode without a filte
 run GREEN while the condition is silently ignored. An EMPTY condition group counts as NO conditions, not as a
 filter — the runtime evaluates an empty group as matching everything — so `onConditions` with an empty `filter` is
 refused for the same reason — on a `setElement` update too, where the element's STORED group is the one measured.
-(The designer permits that state, so a process read back with `onConditions` and no conditions completes on every
-save regardless of what its card suggests; switching such an element to `onConditions` is refused until it has real
-conditions.) On `setElement` the mode is validated against the element's STORED filter, because that operation
+On `setElement` the mode is validated against the element's STORED filter, because that operation
 carries no filter field of its own.
 ON THIS ELEMENT `setFilter` AND `clearFilter` MOVE THE COMPLETION MODE THEMSELVES, which is the surprise worth
 planning for: they change what the step DOES through an operation that names only its conditions. `setFilter` with
@@ -123,14 +110,8 @@ sit in parallel branches, give each its own completion condition — otherwise t
 `defaultValues` is the whole "Which default values to set in the fields of new records?" block: a supplied array
 REPLACES the stored set (so removing ONE field means sending the others), and an EMPTY array `[]` removes them
 ALL — the only way to empty the block, since an omitted field keeps what is stored and the runtime applies
-whatever stays there. At create `[]` is simply a no-op. Per-entry value sources map onto the designer's own
-menu, whose contents depend on the COLUMN's type: on a text column it offers "Process parameter", "System setting"
-and "Formula"; on a lookup column it adds "Lookup value". `processParameter` = "Process parameter";
-`expression` with `[#Lookup.{objectSchemaUId}.{recordId}#]` = "Lookup value"; `value` is a plain TEXT constant
-(a typed constant is refused — the runtime reads those columns typed). "System setting" and "Formula" are NOT
-supported on any field of this element. The `recordId` field's menu is the richest — it also offers
-"Current user account" when the page's object is Account — and any such option is reachable through
-`expression`, which is passed through verbatim.
+whatever stays there. At create `[]` is simply a no-op. "System setting" and "Formula" are NOT
+supported on any field of this element.
 `performer` is "Who performs the task?" together with "Show page automatically":
 `{ "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's contact>",
 "role"?: "<SysAdminUnit record id or role NAME>", "showPage"?: true|false }`. A role NAME is resolved for you
@@ -140,11 +121,7 @@ initial state — and say what that means rather than offering to "fix" it: the 
 performer to the CURRENT USER's contact at run time, which is exactly why the designer's card shows "User" and the
 current user for an element that stores neither. A `performer: null` in a read-back therefore means "not assigned
 explicitly", not "nobody"; on a `setElement` update a supplied block REPLACES the assignment, so pass every part you want
-kept. `showPage` is written explicitly at create (an inherited default would be
-unreportable, since `describe` reports only what an element STORES) and its VALUE follows the performer: `true`
-for a `user` performer or none at all, `false` for `manager`/`role`. That is not a policy of ours — the platform
-opens the page automatically only for the user the step is assigned to, and the designer disables the checkbox for
-the other two kinds. An explicit `showPage: true` on `manager`/`role` is refused rather than stored and ignored.
+kept. An explicit `showPage: true` on `manager`/`role` is refused rather than stored and ignored.
 `logActivity` is the "Log activity" block: `{ "enabled"?: true|false, "startIn"?: { "value": N, "unit": "..." },
 "duration"?: {…}, "remindIn"?: {…}, "showInCalendar"?: true|false }`, with `unit` one of `minutes`, `hours`,
 `days`, `weeks`, `months`. Supplying the block turns the activity ON unless you pass `enabled: false`; scheduling
@@ -158,11 +135,7 @@ same flag decides whether this element's "Connected to" links are written at run
 The step's outcome becomes one result per value of a LOOKUP column of the page's object, which is what lets
 following elements branch on what the user chose. Only a lookup column qualifies — the runtime builds the list by
 enumerating the column's REFERENCED object, so any other kind yields an empty list and is refused. `column` is
-required unless you pass `enabled: false`. Two states to recognize when READING an existing element: the
-designer lets a human switch the checkbox on and leave the required Column empty, and `describe` reports that
-faithfully as `enabled: true` with `column: null` — a switched-on list that produces no results. Such a block
-cannot be fed straight back (the write path requires the column), so supply a column or `enabled: false` when
-re-applying.
+required unless you pass `enabled: false`.
 On a `setElement` update, a `page` change that also changes the OBJECT is REFUSED while object-bound
 configuration is stored — the completion conditions and this column both reference the OLD object's columns, and a
 stranded column leaves the designer's field empty with the list still switched on. Swapping in another page of the
@@ -179,11 +152,6 @@ the column are the part a human cannot infer, and they are what this element con
 `priority` takes an `ActivityPriority` lookup NAME (`Medium`) or its record id; an unknown name is refused rather
 than defaulted, because the designer marks the field required and a defaulted priority is indistinguishable from a
 chosen one. It reads back as the name with the stored id alongside.
-`describe-business-process` reads the configuration back as the element's `openEditPage` block,
-round-trippable into a build/modify block with ONE asymmetry — the read reports pre-filled values AND a record
-when the schema carries both (the write path refuses that pair), so drop the one that does not belong to the
-reported `editMode` before re-applying, and feed `pageTypeUId` back as `recordType`. A `performer` of `null`
-in the read-back means UNASSIGNED, never unsupported.
 ROUTING between the three page elements — **Open edit page is the DEFAULT, not one of three equals.** Ask one
 question: *is a user filling in COLUMNS of a record?* If yes, it is Open edit page, and no further deliberation
 is needed. Signals that answer it yes, any one of which is enough: the request names fields or columns of an

@@ -6,7 +6,7 @@ This article is the authoritative owner of the N1-N10 rules for the process capt
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
 pre-checks them — `validate-process-graph` enforces a subset of the R1–R20 connection rules (which live
-in `process-activity-connections`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
+in `process-activity-connections-details`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
 Designer, so a generated process has to read as though a person named it.)
 Field map — each rule below names the descriptor field it governs:
   process title    -> `caption` (top level)

@@ -67,7 +67,7 @@ it calls.
   tell the user the helper exists and what it is.
 - ASK: not about the loop. It is the only per-item loop the process designer and this toolset offer,
   so there is no design choice to put to the user; explain it in the result summary in business
-  words. A flow routed back through a gateway (R15, `process-activity-connections`) repeats steps but
+  words. A flow routed back through a gateway (R15, `process-activity-connections-details`) repeats steps but
   hands them no item — do not hand-roll a per-item loop that way. Questions the request leaves open
   elsewhere — who performs the task, for example — are still asked, by the rules of the article that
   owns them.

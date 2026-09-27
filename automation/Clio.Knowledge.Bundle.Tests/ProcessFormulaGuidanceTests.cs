@@ -29,6 +29,9 @@ public sealed class ProcessFormulaGuidanceTests
 {
     private const string FormulaGuide = "guidance/mcp/guides/processes/formulas.md";
     private const string BranchGuide = "guidance/mcp/guides/processes/branch-conditions.md";
+
+    /// <summary>ENG-100156 split the branch article's evidence and rarer cases into this one.</summary>
+    private const string BranchDetailsGuide = "guidance/mcp/guides/processes/branch-conditions-details.md";
     private const string DataElementsGuide = "guidance/mcp/guides/processes/data-elements.md";
     private const string ReadDataGuide = "guidance/mcp/guides/processes/read-data.md";
 
@@ -88,7 +91,7 @@ public sealed class ProcessFormulaGuidanceTests
             "naming the outcome is what makes the hazard recognisable - an approval gate that approves "
             + "everything does not look like a failure"),
         ("R7 does NOT apply",
-            "process-activity-connections owns R1-R17 and says the synthesized gateway is not a graph node; "
+            "process-activity-connections-details owns R1-R20 and says the synthesized gateway is not a graph node; "
             + "'is satisfied by' would license dismissing a genuine R7 finding"),
         ("BRANCH PRECEDENCE IS FLOW ORDER",
             "nothing in the metadata carries a priority, so order is the only answer to 'which branch wins'"),
@@ -133,8 +136,9 @@ public sealed class ProcessFormulaGuidanceTests
     [Test]
     [Description("Every load-bearing clause of the branch article survives an edit, including the two that are SILENT when wrong: the parallel-split hazard and the R7 deferral. A process whose exclusive gate silently became a parallel split still saves, still runs, and reports kind:'sequence' on both flows.")]
     public void BranchGuide_ShouldKeepEveryLoadBearingClause() {
-        // Arrange
-        string text = ReadGuide(BranchGuide);
+        // Arrange - the branch article is two files since ENG-100156 split its evidence and rarer cases
+        // out; a clause survives when either piece still carries it.
+        string text = ReadGuide(BranchGuide) + "\n" + ReadGuide(BranchDetailsGuide);
 
         // Act & Assert
         foreach ((string fragment, string because) in BranchClauses) {

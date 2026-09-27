@@ -6,6 +6,12 @@ read at different times - the vocabulary while authoring any formula, this while
 The formula vocabulary, the reference syntax, what each refusal names and the length bound stay there
 and are NOT restated here; fetch both when you author a condition.
 
+`process-branch-conditions-details` carries the evidence and rarer cases behind these rules: the label
+figures and wording, the condition paths' version floor, a gateway that builds with no fallback, the
+NOTICE that reports a parallel split and its three caveats, the diagram's branch order, and the
+corpus-attested condition shapes. Read it when a build or a pre-flight answers with a parallel-split
+notice or a package-version refusal, or when you need the evidence behind a rule.
+
 == Conditional flows and branch conditions ==
 
 HOW A CONDITION NAMES A PARAMETER DEPENDS ON WHICH CALL YOU ARE IN, and getting it wrong costs the
@@ -25,21 +31,6 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 
 `kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
 `condition`. The same fields are on `addFlow`.
-
-**LABEL BOTH ARMS.** `flows[].label` is the text the designer draws ON the connector, and on a branch it
-is not decoration: without it a two-branch decision renders as two identical unlabelled arrows and a
-reader has to open each one's properties to tell them apart. It is what the shipped product does on the
-large majority of its conditional flows and a quarter of its default ones, and almost never on a plain
-sequence flow — so label the arms and leave an ordinary continuation bare. `process-naming` N10 carries
-the measured figures and their population.
-
-Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
-`Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
-because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule in
-full. EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
-caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
-`describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
-human's label is there to be erased.
 
 **ON THE BUILD PATH, WRITE THE NAME.** This is the one exception to the UId rule above and it exists
 because it has to: on `create-business-process` the UIds do not exist yet — the parameters and elements
@@ -97,13 +88,6 @@ from `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.
 extra fields are accepted and silently dropped, clio does no client-side check, and stripping them
 yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule in full.
 
-Both need `CrtProcessBuilder` **1.6.0.3** or newer; below it the build path takes a system setting
-only. State the version that SHIPS the behaviour, not the one it first appeared under: the gateway
-line was numbered 1.4.0.58 through 1.4.0.70 while it was being built, and no released archive ever
-carried those numbers - a 1.5.0.0 minor was cut elsewhere and outranks all of them, so a 1.4.x floor
-is satisfied by a server carrying none of this. 1.6.0.3 is the first released archive with the whole
-line in it, and it is what clio's own [RequiresPackage] floor demands.
-
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in
 the shipped product are exactly that. `exclusiveGateway` and `parallelGateway` ELEMENTS are buildable
@@ -139,7 +123,7 @@ saying so. Declaration order does not change the outcome — it did until the fi
 where declaring the conditional arm first (which the precedence advice below tells you to do) aborted
 the whole `create-business-process` call. Off a gateway, write the else branch as `kind: "default"` and
 the notice does not arise. R7 does NOT apply to this shape - not "is satisfied by it":
-`process-activity-connections` owns R1-R20 and states why, and the difference is operational. The
+`process-activity-connections-details` owns R1-R20 and states why, and the difference is operational. The
 gateway is synthesized at generation time and never appears as a graph node, so there is no
 exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding
 elsewhere in the graph as already handled.
@@ -169,26 +153,9 @@ Two consequences worth having before you build:
   validation — `process-modeling` is right that the modify path runs none; this refusal is a
   different mechanism that happens to guard the same shape, which is why modify is not the hole
   here that it is for the structural rules.
-- **A diverging gateway with no fallback still BUILDS — the warning does not block it.**
-  `validate-process-graph` reports R7/R9 and `create-business-process` saves the process anyway, so a
-  clean build is NOT evidence that the conditions cover every case. Only a run is. What the warning
-  predicts is exact — on a stand, an unmatched value produced `status: error` and a
-  `SysProcessLog.ErrorDescription` reading "None of the conditions were met after the element ...",
-  word for word what R7 said it would — but the prediction arrives as advice, not as a refusal.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
   outgoing flow is taken. That is a parallel split.
-
-  It is no longer a SILENT one at build time. `validate-process-graph` has always reported the shape as
-  an R12 warning, and from **CrtProcessBuilder 1.6.2.10** `create-business-process` and
-  `modify-business-process` raise a matching NOTICE — so a caller who skipped the pre-flight is no longer
-  told less than one who ran it. Both sides WARN rather than refuse, because the shape ships and runs: 74
-  non-gateway sources in the 7.8.0 corpus carry it, 33 of them on ordinary activities. Read the notice as
-  "confirm you meant a fan-out", not as a defect.
-
-  It is raised ONCE per request, over the graph that is actually saved — so a batch that builds the split
-  and then dissolves it (`addFlow` twice, then `setFlow kind:"conditional"`, which is the remedy below)
-  correctly reports nothing.
 
   **How you fix it depends on how many branches there are, and the two answers are not variations of
   one another.** With TWO plain flows, give either of them a condition and the one left plain becomes
@@ -197,26 +164,6 @@ Two consequences worth having before you build:
   an `exclusiveGateway` element: route the flows through it and condition each of ITS outgoing flows,
   leaving one `default`. A deciding gateway is exempt from the stray-branch rule, which is why
   `[conditional, conditional, default]` is legal there and illegal on the activity.
-
-  Three caveats, each a way you would otherwise be told something untrue:
-
-  - **On a stand below 1.6.2.10, you do not get silence — you get a REFUSAL.** No `[RequiresPackage]`
-    floor was raised for this notice, but the floor is not what decides: clio refuses whenever the
-    environment records a package version *older than the one this clio ships*, whatever that version
-    is. So a clio carrying 1.6.2.10 answers `create-business-process`, `modify-business-process`,
-    `describe-business-process` **and `validate-process-graph`** with *"This clio carries
-    CrtProcessBuilder 1.6.2.10, but the target environment has X. Update the package in the target
-    environment and retry."* The pre-flight is gated too, so it is not a fallback. Run
-    `install-process-builder` — that is the whole remedy. The build is silent about the split only when
-    your clio ALSO predates 1.6.2.10, so the two versions converge and nothing is refused — and on that
-    stand `validate-process-graph` still reports the shape as R12, which it always has. An
-    un-upgraded stand is exactly where the pre-flight earns its keep, not a stand where nothing can
-    see the split.
-  - **On modify it reports the sources your request TOUCHED**, not the whole graph. A split already
-    present in a designer-authored process you did not edit stays unreported here — `validate-process-graph`
-    is what reads the whole graph, and a clean modify is therefore not evidence of a clean process.
-  - **The notice covers plain flows only.** A `default` flow beside a plain one off an ordinary element
-    is an implicit split too, by exactly the same mechanism, and neither side reports that one.
 
 That second point is what makes CLEARING a condition the dangerous edit, and it is why the clear-condition
 operation is `setFlow` rather than remove-and-add. `setFlow` re-kinds the flow in place: it keeps the flow's
@@ -244,14 +191,6 @@ fires above 100 and one that fires above 1000 resolve differently purely by whic
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
 
-THE DIAGRAM NOW SHOWS THAT ORDER, which is the one place a human can read it. The layout in
-`process-diagram-layout` draws a split's branches top to bottom in evaluation order, with one deliberate
-exception: the DEFAULT branch keeps the gateway's own row, because it is the path that runs when nothing
-matched and it is what the eye follows across the picture. So the conditional branches read downward in
-the order you declared them, and the default is on the spine rather than at the bottom. Two consequences
-worth knowing before you write: declare the main path first when a gateway has no default, and expect a
-gateway that GAINS a default later to move its existing branches down a row.
-
 One exception, and it decides the DIALECT rather than the order: when a connector's source
 enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula, the
 designer offers no formula field there at all, and a condition written onto such a connector is
@@ -264,10 +203,3 @@ evaluated BEFORE any formula branch, whatever order the flows are written in.
 behind it, how to write the dialect with `flows[].results` and `setFlowResults`, how to read it back,
 and exactly when the checkbox editor appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
 edit page with results by column.
-
-Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
-`B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
-parameter's name:
-`X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
-boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
-`A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.
