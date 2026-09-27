@@ -45,8 +45,8 @@ An unknown or misspelled argument name is refused before any write.
   2. Show that preview to the user and ask explicitly. Only after they approve, repeat the SAME call with
      confirm=true and that confirmation-code. If they reject part of it, drop include-connected and grant
      the approved objects one by one (each with its own preview).
-  The confirmed call is refused when the token no longer matches — the targets or their rights changed
-  since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a token
+  The confirmed call is refused when the code no longer matches — the targets or their rights changed
+  since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a code
   is refused outright. Never pass confirm=true without having shown the user that preview.
 - Failures never report success: a root object that is not found fails (nothing was written); if the
   connected objects cannot be enumerated nothing is written and the call fails; when the root write fails
