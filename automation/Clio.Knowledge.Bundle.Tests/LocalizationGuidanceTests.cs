@@ -141,6 +141,58 @@ public sealed class LocalizationGuidanceTests
             because: "the gate row must not restate the owner's push-workspace behavior");
     }
 
+    [Test]
+    [Description("Pins the page-translation safety rules, their single owner, and the route that reaches them.")]
+    public void PageTranslationGuide_ShouldPublishSafetyRulesOwnerAndRoute()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string guidesRoot = Path.Combine(repositoryRoot, "guidance", "mcp", "guides");
+        string translation = File.ReadAllText(Path.Combine(guidesRoot, "page-schema", "translation.md"));
+        string maintenance = File.ReadAllText(Path.Combine(guidesRoot, "applications",
+            "existing-app-maintenance.md"));
+        string localizableValues = File.ReadAllText(Path.Combine(guidesRoot, "localizable-values.md"));
+        string routing = File.ReadAllText(Path.Combine(guidesRoot, "routing.md"));
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(
+            repositoryRoot, "bundle-source.json")));
+
+        // Act
+        JsonElement resource = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == "page-schema-translation");
+        JsonElement requirements = source.RootElement.GetProperty("requirements");
+
+        // Assert
+        translation.Should().Contain("never send an empty string",
+            because: "localize-page stores an empty string as the value, so the guide must forbid sending one");
+        translation.Should().Contain("`culture: \"en-US\"` is REJECTED",
+            because: "the default culture is changed through update-page, never through localize-page");
+        translation.Should().Contain("writes ONE culture of ONE page per call",
+            because: "each call must leave every other culture unchanged");
+        maintenance.Should().Contain(
+            "MUST call `get-tool-contract` for `update-app-section` before ANY update of an existing section",
+            because: "an earlier clio ignores caption-culture and every section update deletes other-language titles");
+        localizableValues.Should().Contain("owned by `page-schema-translation`",
+            because: "the localize-page workflow has exactly one owning article");
+        localizableValues.Should().NotContain("resource registration, and the `localize-page` workflow",
+            because: "page-schema-resources no longer owns the localize-page workflow");
+        routing.Should().Contain("translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation",
+            because: "agents must be routed to the owner of the page-translation workflow");
+        resource.GetProperty("uri").GetString().Should().Be(
+            "docs://knowledge/com.creatio.clio/page-schema-translation",
+            because: "the article needs one stable canonical route");
+        resource.GetProperty("sourcePath").GetString().Should().Be(
+            "guidance/mcp/guides/page-schema/translation.md",
+            because: "Git consumers must read the canonical human-authored article");
+        requirements.GetProperty("itemIds").EnumerateArray()
+            .Select(item => item.GetString()).Should().Contain("page-schema-translation",
+                because: "activation requirements must include the page-translation guide item");
+        requirements.GetProperty("resourceUris").EnumerateArray()
+            .Select(item => item.GetString()).Should().Contain(
+                "docs://knowledge/com.creatio.clio/page-schema-translation",
+                because: "activation requirements must include the page-translation guide URI");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);

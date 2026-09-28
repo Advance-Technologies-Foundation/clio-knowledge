@@ -1,6 +1,6 @@
 clio MCP page-schema resources guide
 
-Scope: use when a Freedom UI page change adds, references, or modifies localizable strings (captions, labels, titles, validator messages).
+Scope: use when a Freedom UI page change adds, references, or modifies localizable strings (captions, labels, titles, validator messages). To translate a page into another culture, read `page-schema-translation`.
 
 For schema ownership, culture-file setup, backend strict/fallback lookup, and localization testing,
 MUST also read `localizable-values`. This guide remains the owner of Freedom UI binding and registration rules.
@@ -78,7 +78,7 @@ Pass the `resources` parameter as a JSON object string of `Key → display strin
 
 `update-page` / `sync-pages` preserve omitted `localizableStrings` entries (platform entries like `SaveButton`, `CancelButton`, `GeneralInfoTab_caption` included). Check the installed tool contract with `get-tool-contract`: versions whose `resources` description says **updates supplied en-US values** can update an existing key's English value while preserving its declaration identity and other cultures. Earlier contracts say **Additions only** and silently ignore a supplied value for an existing key; use the native designer for those updates or upgrade to a build carrying the repair for [Clio #1614](https://github.com/Advance-Technologies-Foundation/clio/issues/1614). Never infer that a changed caption landed from `success:true` or `resourcesRegistered`: that count covers new keys only. Read back the value and verify the rendered page.
 
-The key/value input targets `en-US`, not the caller's current culture. Use the native localization workflow for other cultures. Preservation is not permission to skip the registration check: confirm no DS-bound view model attribute with that name already provides the caption before adding it.
+The `update-page` / `sync-pages` key/value input targets `en-US`, not the caller's current culture. Other cultures are written with `localize-page` (`page-schema-translation`), never by putting translated text under `en-US`. Preservation is not permission to skip the registration check: confirm no DS-bound view model attribute with that name already provides the caption before adding it.
 
 **Capture before push.** A successful designer save does not synchronize an independent workspace. Stale `metadata.json` or culture resource XML can revert the declaration or text on the next `push-workspace`. Apply the create/capture/review/push rule in `app-modeling` to resource edits too: preserve local edits, capture the affected package with `restore-workspace`, and review both B2 declarations and culture XML before pushing. A body-only `get-page` file or a standalone `export-schema` bundle is not that workspace capture. In linked FSM workspaces the native designer can already write those files through the link; inspect the source diff and follow that workspace's FSM instructions instead of blindly pulling over local work. `localizable-values` owns schema metadata and culture-file details.
 
