@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.79",
+  "libraryVersion": "1.15.84",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -203,7 +203,8 @@
       "backend-deployment-troubleshooting",
       "portal-service-routing",
       "external-organizations",
-      "reference.portal-service-lab-validation"
+      "reference.portal-service-lab-validation",
+      "page-schema-translation"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -379,7 +380,8 @@
       "docs://knowledge/com.creatio.clio/backend-deployment-troubleshooting",
       "docs://knowledge/com.creatio.clio/portal-service-routing",
       "docs://knowledge/com.creatio.clio/external-organizations",
-      "docs://knowledge/com.creatio.clio/reference.portal-service-lab-validation"
+      "docs://knowledge/com.creatio.clio/reference.portal-service-lab-validation",
+      "docs://knowledge/com.creatio.clio/page-schema-translation"
     ]
   },
   "resources": [
@@ -1357,7 +1359,7 @@
     {
       "itemId": "page-schema-resources",
       "title": "Page schema resources",
-      "description": "Canonical MCP guidance for Freedom UI page localizable strings: $Resources.Strings.* as the recommended binding, #ResourceString()# required for validator params (and conventional for grid captions), resources parameter usage, and common mistakes.",
+      "description": "Canonical MCP guidance for Freedom UI page localizable strings: $Resources.Strings.* as the recommended binding, #ResourceString()# required for validator params (and conventional for grid captions), resources parameter usage, and common mistakes. Translating a page into another culture: page-schema-translation.",
       "topicId": "creatio.page-schema-resources",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-resources",
@@ -2786,6 +2788,17 @@
       "sourcePath": "references/portal-service-lab-validation.md",
       "bundlePath": "resources/references/portal-service-lab-validation.md",
       "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "page-schema-translation",
+      "title": "Page translation",
+      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
+      "topicId": "creatio.page-schema-translation",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-translation",
+      "sourcePath": "guidance/mcp/guides/page-schema/translation.md",
+      "bundlePath": "resources/page-schema-translation.md",
+      "mediaType": "text/plain"
     }
   ]
 }
