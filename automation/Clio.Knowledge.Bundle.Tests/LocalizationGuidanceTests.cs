@@ -108,6 +108,40 @@ public sealed class LocalizationGuidanceTests
     }
 
     [Test]
+    [Description("Keeps the inline-literal rule for the push-workspace source path in its owner article, with the gate row only pointing to it.")]
+    public void PageSchemaResourcesGuide_ShouldOwnTheSourcePathLiteralRule()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string pageResources = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance", "mcp", "guides", "page-schema", "resources.md"));
+        string pageModification = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance", "mcp", "guides", "pages", "modification", "index.md"));
+
+        // Act
+        string gateRow = pageModification.Split('\n')
+            .Single(line => line.Contains("| `page-schema-resources` |", StringComparison.Ordinal));
+
+        // Assert
+        pageResources.Should().Contain("SAME RULE ON THE SOURCE PATH (`push-workspace`)",
+            because: "the owner article must state the inline-literal rule for workspace sources");
+        pageResources.Should().Contain("`push-workspace` does NOT reject an inline literal",
+            because: "push-workspace keeps installing literal-bearing pages and only warns");
+        pageResources.Should().Contain("clio 8.1.0.134 and earlier do not have it",
+            because: "tool-dependent guidance must state a checkable clio version boundary");
+        pageResources.Should().Contain("resource binding on the literal-only `crt.ImageInput.tooltip`",
+            because: "push-workspace warns about both text cases update-page rejects, not only inline literals");
+        pageResources.Should().Contain("A schema file it cannot read gets its own warning with the file path",
+            because: "an unreadable schema is skipped with a per-file warning while the other schemas are still checked");
+        pageResources.Should().NotContain("clio/issues/1639",
+            because: "guidance must name a clio version, not an internal issue, as the compatibility boundary");
+        gateRow.Should().Contain("see `page-schema-resources` for how `push-workspace` handles inline literals",
+            because: "the gate row must point to the owner article for the source-path rule");
+        gateRow.Should().NotContain("warns per page schema",
+            because: "the gate row must not restate the owner's push-workspace behavior");
+    }
+
+    [Test]
     [Description("Pins the page-translation safety rules, their single owner, and the route that reaches them.")]
     public void PageTranslationGuide_ShouldPublishSafetyRulesOwnerAndRoute()
     {
