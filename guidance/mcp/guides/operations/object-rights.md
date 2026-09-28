@@ -41,8 +41,7 @@ An unknown or misspelled argument name is refused before any write.
   1. Call it WITHOUT confirm. That writes nothing and returns a PREVIEW: every object the call would change
      (the root and each connected lookup), what the grantee gets, its current state — which roles hold
      rights on it, and which objects are "not administered" and will have operation permissions turned ON
-     (the server then adds an "All employees" row with full rights, observed on Creatio 8.3.4, see below) —
-     and a confirmation-code. A root that cannot be read or does not exist fails the preview: no code.
+     (with the existing rows of other roles that become effective, see below) — and a confirmation-code. A root that cannot be read or does not exist fails the preview: no code.
   2. Show that preview to the user and ask explicitly. Only after they approve, repeat the SAME call with
      confirm=true and that confirmation-code. If they reject part of it, drop include-connected and grant
      the approved objects one by one (each with its own preview).
@@ -60,13 +59,12 @@ An unknown or misspelled argument name is refused before any write.
   revoke empties it — refused when it is the object's last row, see below), and the object is saved.
 - Granting to an object that does not yet use operation permissions TURNS THEM ON — an access NARROWING for
   every other internal role. The tool reports it per object, connected lookups included, so a fan-out that
-  turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. On Creatio
-  8.3.4 the server then adds an "All employees" row with read/create/edit/delete on its own — for the root
-  and for every connected lookup the fan-out enables, section objects and plain dictionaries alike — so
-  internal users keep their access. Not verified on other versions, so the tool reads the object back after
-  turning permissions on, names the roles that hold rights, and FAILS when only the grantee does (every
-  other internal user lost access — the change is already saved, fix it with a follow-up grant). For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row
-  after the first grant.
+  turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. So internal
+  users keep their access, the same save adds an "All employees" row with read/create/edit/delete when the
+  object has none (an existing one is left as it is). Existing rows of other roles become effective too — the
+  preview names them. The tool reads the object back, names the roles that hold rights, and FAILS when
+  "All employees" holds no read afterwards (the change is already saved — fix it with a follow-up grant).
+  For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row after the first grant.
 - A revoke only narrows. A revoke that would remove the object's LAST effective grant is REFUSED (writes
   nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
   turned off — "available to ALL internal users", an access WIDENING. Pass disable-operation-permissions
