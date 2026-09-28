@@ -129,6 +129,10 @@ public sealed class LocalizationGuidanceTests
             because: "push-workspace keeps installing literal-bearing pages and only warns");
         pageResources.Should().Contain("clio 8.1.0.134 and earlier do not have it",
             because: "tool-dependent guidance must state a checkable clio version boundary");
+        pageResources.Should().Contain("resource binding on the literal-only `crt.ImageInput.tooltip`",
+            because: "push-workspace warns about both text cases update-page rejects, not only inline literals");
+        pageResources.Should().Contain("A schema file it cannot read gets its own warning with the file path",
+            because: "an unreadable schema is skipped with a per-file warning while the other schemas are still checked");
         pageResources.Should().NotContain("clio/issues/1639",
             because: "guidance must name a clio version, not an internal issue, as the compatibility boundary");
         gateRow.Should().Contain("see `page-schema-resources` for how `push-workspace` handles inline literals",
