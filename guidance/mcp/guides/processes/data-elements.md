@@ -111,6 +111,9 @@ filter; see `process-access-rights`.
   `[#[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#] == true`.
   This form is stored as written and gets NO load check: include the column in `readData.columns`, or omit
   the list, yourself. The same holds for the UId form inside any raw `expression`.
+  In a raw `expression` mapping onto a process parameter, and in a Formula body, that UId token was
+  measured to deliver a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
+  (Creatio 10.1.37, .NET Framework, MSSQL; CrtProcessBuilder 1.6.6.22; 2026-09-24).
   Describe again and require `kind: "conditional"` plus the exact text, then run with a matching and a
   non-matching record: a read-back proves authoring, NOT routing.
   Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;

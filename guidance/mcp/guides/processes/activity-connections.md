@@ -192,10 +192,10 @@ R2  End event: no outgoing flow; one or more incoming.
 R3  At least one start event, at most ONE SIMPLE start; every path reaches an end event. Signal, timer
     and message starts may be SEVERAL - one per trigger - which is how one process runs both when a
     record is added and when it is changed; only the manual launch is capped, a second one being a
-    second way to start by hand with nothing to tell them apart. Until ENG-98559 the rule read "exactly
+    second way to start by hand with nothing to tell them apart. The rule used to read "exactly
     one start event" and refused a shape the platform ships (PublishDraftToArticle has two start
     signals). Two independent floors: CrtProcessBuilder 1.6.2.24 on the environment (older refuses the
-    build) and a clio carrying ENG-98559 (clio#1559; older reports an R3 error first).
+    build) and clio 8.1.0.131 or later (older reports an R3 error first).
 R4  Terminate end kills the whole instance; Simple end ends only its path.
 R5  Start triggers: Simple=user/run; Signal(object)=record add/modify/delete; custom signal=broadcast; message=directed; timer=schedule/CRON.
 R6  Diverging gateway: 1 in, >=2 out. Converging gateway: >=2 in, 1 out.

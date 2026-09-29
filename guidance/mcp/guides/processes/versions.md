@@ -11,7 +11,7 @@ get-guidance topic to fetch, not a section to scroll to.
 (These are PLATFORM facts, not authoring rules. Nothing you write changes them, and every one of them
 has bitten an agent that assumed the ordinary "one schema, many revisions" shape instead.)
 Evidence, so you can weigh each one rather than trust the list: V1-V4 were read off a live
-Creatio (core 10.1.448.0, ENG-94374, 2026-09-03) -- the stock family `InvoiceVisaProcess` /
+Creatio (core 10.1.448.0, 2026-09-03) -- the stock family `InvoiceVisaProcess` /
 `InvoiceVisaProcessInvoice1` in package `Invoice`, queried through the process-library view and then
 through `describe-business-process`; 14 such families are visible in the process library on a stock
 install (18 version schemas exist, and the view does not show them all), so this is the default
@@ -106,7 +106,8 @@ The fields:
 Read `isActiveVersion` BEFORE you explain or edit anything. That is the whole reason the fields exist:
 resolving a versioned process by `process-name` returns the root, and the root is normally inactive.
 Three outcomes, and only the first two are ordinary:
-  * TRUE -- you hold the version that runs. Proceed.
+  * TRUE -- you hold the version that runs. Proceed under `process-modeling`'s modify rules: overwriting it
+    needs the user's explicit yes.
   * FALSE WITH an `activeVersionSchemaUId` -- the graph you are holding is NOT the one that runs.
     Describe again by that UId and work from the result. This is the common case on a versioned process.
   * FALSE with NO `activeVersionSchemaUId`, or the version fields absent -- there is no graph to redirect
@@ -162,7 +163,7 @@ So: `process-caption` when you want what runs, `process-uid` when you want a spe
 `process-name` only when you know it is the member you mean.
 
 Do NOT tell a builder to prefer the CODE over the caption for the question "what runs". That advice
-inverts this section, and it has been given: in an ENG-94374 test session the assistant wrote "resolving
+inverts this section, and it has been given: in a test session the assistant wrote "resolving
 this process by its caption is ambiguous and silently picks v2 ... if you script anything against it,
 use the schema code, not the caption". Both halves are wrong. Caption -> ACTIVE is the designed
 resolution, not a silent pick; and the code resolves to ONE schema, which for the name a builder knows

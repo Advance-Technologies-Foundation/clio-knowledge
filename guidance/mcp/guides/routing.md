@@ -31,6 +31,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
   - reuse JavaScript helpers across Freedom UI web pages (client-unit schemas and AMD dependencies) -> name=shared-client-logic
+  - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
@@ -39,6 +40,11 @@ guards — it says whose rule it is and names that guide for the rest.
     modify-safety rules). After it, read the ONE matching sub-guide:
   - which elements exist, which of them `create-business-process` builds today, and the element catalog
     (data-id -> label -> purpose) -> name=process-element-catalog
+  - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> ALSO
+    name=process-sub-process-when, BEFORE you plan the graph, every time:
+    it decides how many processes the request becomes. One by default; the exceptions — the same work
+    for each item of a set, a fragment repeated in the plan, two or more long human stages — are hard
+    to recognise without its rules, so do not skip it because none seems to apply
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
@@ -83,7 +89,8 @@ guards — it says whose rule it is and names that guide for the rest.
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
     how to convert an element, where the callee's contract moves to, and how a per-item value is addressed
-    -> name=process-sub-process
+    -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
+    and which execution mode it takes)
   - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
     what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data

@@ -10,7 +10,7 @@ never repeated here.
 
 == Writing a version, and making it actual ==
 Evidence for this section and the three that follow, graded the way V1-V7 are: both operations were
-exercised END TO END on a stand (CrtProcessBuilder 1.6.1.9, ENG-94374, 2026-09-11), and a three-member
+exercised END TO END on a stand (CrtProcessBuilder 1.6.1.9, 2026-09-11), and a three-member
 family was switched in every direction -- v2 -> v1 -> v0 -> v2 -- with exactly one member active at each
 hop and the process-library view agreeing independently. Numbering came out consecutive, every version
 was created inactive, and activation warned about the whole-family re-save before doing it. Those HAPPY
@@ -65,7 +65,7 @@ and six ambiguous transport errors rather than a call you can retry. The databas
 handled (two writers on one number are refused after the save); the load is not.
 
 == Ask once, then behave predictably ==
-Two questions, asked ONCE, at the first edit of a session:
+Two questions, asked ONCE, BEFORE the first edit of a session:
   1. Do edits go to the CURRENT version, or to a NEW one?
   2. Once a new version exists, do you want it made the ACTUAL one?
 Then hold those answers for the rest of the session and say what you did in EVERY reply -- "edited the
@@ -74,7 +74,11 @@ who has to re-derive which of those happened has lost the thing versioning was f
 
 The two answers do NOT carry the same authority, and this paragraph decides any sentence that seems
 to say otherwise. Q1 is a ROUTING answer: it picks which tool every later edit uses, and picking a
-tool changes nothing on the environment by itself. Q2 is a PREFERENCE, not a consent: it decides
+tool changes nothing on the environment by itself. Ask Q1 with its consequence -- CURRENT overwrites the
+running graph and nothing brings the old one back -- because a CURRENT answer is also the explicit yes
+`process-modeling` requires for an in-place edit of the ACTIVE version. It covers THAT process on THAT
+environment for the rest of the session; ask again before an in-place edit of another. The edit request
+alone is never that yes. Q2 is a PREFERENCE, not a consent: it decides
 whether you OFFER activation once a version exists, and it authorises no call. Every
 `set-active-business-process-version` call needs its own request, naming the version to be made actual
 and the environment -- a session answer is never that request, per `core-rules`, where an answer given
@@ -109,7 +113,7 @@ Activating an earlier version IS the rollback, and it is bounded:
   * ANY member is a valid target, the family ROOT included. "Go back to the original" IS activating
     the root, because the root is what ran before the family existed -- the PLATFORM accepts it and
     reports it as actual afterwards like any other member (measured on CrtProcessBuilder 1.6.1.9 and
-    again on 1.6.2.4, ENG-94374). Do not refuse it yourself, and do not offer a copy or yet another
+    again on 1.6.2.4). Do not refuse it yourself, and do not offer a copy or yet another
     version in its place.
     The TOOL says otherwise and is WRONG. No shipped clio carries the correction yet, so the
     `set-active-business-process-version` description you are reading almost certainly still says "it
@@ -143,7 +147,7 @@ is the one worth not repeating: `modify-business-process-as-new-version` has bee
 CrtProcessBuilder 1.6.1.1. `create-business-process` has NOT -- the same fix was never applied to the
 build path, and 1.6.1.9 still answers a descriptor-validation failure with "a partially created process
 schema '<your process>' may still exist in the package and has to be deleted manually", with nothing in
-the environment to delete (measured, ENG-94374). A fix is in flight; no version is named here until it
+the environment to delete (measured). A fix is in flight; no version is named here until it
 ships, because naming one in advance is exactly how this paragraph came to be wrong. The package
 refusal path carries no such text at all and is clean: "Package '<name>' does not accept edits on this
 environment, so a new version of '<process>' cannot be saved into it."

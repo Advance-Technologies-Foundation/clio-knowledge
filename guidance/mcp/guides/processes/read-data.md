@@ -27,8 +27,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
       },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
-- `mode` and what each one produces (the output is what `describe-business-process` marks `isResult: true`,
-  and what a downstream mapping's `sourceElementParameter` names):
+- `mode` and what each one produces (the output is what `describe-business-process` lists in `readData.outputs`
+  and marks `isOutput: true` — NOT `isResult`, which the designer sets on `ResultEntity` in `first` mode only, so
+  every other mode's output reads back `isResult: false` — and what a downstream mapping's
+  `sourceElementParameter` names):
   * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
   * `collection` — EVERY matching record, into TWO outputs: `ResultEntityCollection` (the raw list) and
     `ResultCompositeObjectList` (one column per selected column). Mirror the second into a `Collection` process
@@ -71,7 +73,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   mapping that names the current one would survive pointing at a parameter the runtime no longer fills; the
   designer reverts the same edit for the same reason. Re-map or remove the dependents first (or remove and re-add
   the element). A conversion that proceeds clears the previous mode's parameters, moves the
-  result flag to the new mode's output, and clears the column selection / sort on entering count /
+  OUTPUT to the new mode's parameter (see `readData.outputs`), and clears the column selection / sort on entering count /
   aggregation. The record `filter` is KEPT — it is the one block every mode carries (the designer shows "How to
   filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
   retarget clears the filter. LEAVING collection additionally clears its top-N pair and empties
@@ -80,7 +82,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   `FeatureReadDataUserTaskEntityReadOldMode` it still decides how many rows a `first` read takes. A
   `setElement.readData` update naming another mode performs that conversion — it is NOT remove+recreate.
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
-  output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
+  output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the output from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output STOPS BEING FILLED
   (the parameter still exists and is still mappable) — re-read the element with `describe-business-process`
   after such a change and re-point anything that consumed it.

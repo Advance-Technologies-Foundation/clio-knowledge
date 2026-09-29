@@ -55,7 +55,7 @@ section to scroll to.
       then empty, which brings the formula field back. A formula written
       there is REFUSED: it would run while the designer showed an empty panel and never the text —
       write the completing buttons as `flows[].results` instead.
-      `process-activity-result-branches` owns the rule. Say so before building.
+      `process-activity-result-branches` owns the rule.
     * `performer` OMITTED on a build defaults to the CURRENT USER — the server writes the same performer the
       designer's card does for a new element, so you do not have to send one. Send it when the task belongs
       to somebody else.

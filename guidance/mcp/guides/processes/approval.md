@@ -109,8 +109,8 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   never a formula field. A condition written there with `setFlowCondition` is NOT refused and it RUNS,
   but no human can read or edit it: every checkbox reads unticked, the connector is marked invalid the
   first time somebody opens its card, and the expression is rendered in neither page mode.
-  `process-activity-result-branches` owns the dialect, its refusals and what to tell the user BEFORE
-  building; read it first.
+  `process-activity-result-branches` owns the dialect and its refusals; read it before you branch
+  this element.
 
 == Modifying an existing Approval element ==
 - `modify-business-process` → `setElement` with an `approval` block reconfigures it IN PLACE; only the
