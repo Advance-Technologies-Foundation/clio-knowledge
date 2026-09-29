@@ -36,7 +36,9 @@ MANDATORY catalog discipline (get-request-info)
     including `RequestBindingConfig` (the binding contract itself).
   * `documentation` — the per-request authoring recipe (canonical wiring, pitfalls,
     checklist) when the producer published one. Follow it over memory; its recipes are
-    verified against platform sources and production schemas.
+    verified against platform sources and production schemas. `get-request-info-to-file`
+    (clio <CLIO-VERSION-TBD> and later) takes the same arguments plus `output-file`, writes the
+    recipe to that file and returns its headings in `documentationSections`.
 - HARD RULE for environment-dependent values: a parameter carrying a `valueSource`
   annotation (kind `environment`) is filled ONLY from the result of the probe tool the
   annotation names - e.g. `templateId` -> `list-printables`, `processName` ->
