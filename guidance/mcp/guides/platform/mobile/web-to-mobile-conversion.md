@@ -501,17 +501,17 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
 - REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
   ARE handled for you. An ACTION-ONLY component (`crt.Button`, `crt.MenuItem` — they exist only to fire
-  one) is DROPPED when the Mobile app does NOT support its request, and so is one left with NO action
-  and NO menu item: a `droppedElements` entry, whose reason names the request in the first case and
-  carries no params in the second. NO OTHER component type is ever dropped over a request: some
-  legitimately use a system request absent from the registry, and losing it would lose valid UI.
-  What happens to a SURVIVING component's binding depends on which of the two it is:
-    • KNOWN-unsupported (the rules name it and give no mobile counterpart) — the binding is REMOVED
-      and the component ships without that action, in `requestConversions.droppedRequests[]` under
-      `drop-request-unsupported`;
-    • UNKNOWN (in neither the map nor the registry — often a custom `usr.*`) — the binding is KEPT
-      VERBATIM and flagged in `requestConversions.flaggedRequests[]` under `flag-request-unmapped`,
-      for you to verify.
+  one) whose request the Mobile app does NOT support is DROPPED, and so is one left with NO action and
+  NO menu item: a `droppedElements` entry, under `drop-unsupported-request` when the rules name the
+  request and give no mobile counterpart, `drop-unknown-request` when it is in neither the rules nor
+  the registry (often a custom `usr.*`), and the bare code with no params in the second case.
+  NO OTHER component type is ever dropped over a request: some legitimately use a system request absent
+  from the registry, and losing it would lose valid UI. Such a component SURVIVES, and the same two
+  cases decide its binding:
+    • KNOWN-unsupported — REMOVED, the component shipping without that action, in
+      `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
+    • UNKNOWN — KEPT VERBATIM and flagged in `requestConversions.flaggedRequests[]` under
+      `flag-request-unmapped`, for you to verify.
   A supported request is kept in viewConfigDiff[].values with the mobile name already applied — paste
   the values verbatim.
   guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
