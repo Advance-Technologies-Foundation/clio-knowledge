@@ -1048,9 +1048,6 @@
       "description": "Canonical MCP guidance for converting a source page into a Freedom UI MOBILE page via get-mobile-page-conversion-guide: advisory guide (detected sourceType, recommended template, container map, component suggestions, inline mobile contracts), the model-driven flow where you build the body with create-page/update-page/validate-page, the five component categories, the Freedom-UI-only precondition (Classic UI must be converted to Freedom UI web first), mobile constraints, and how to finish in Freedom UI Mobile Designer.",
       "topicId": "creatio.freedom-page-web-to-mobile-conversion",
       "role": "guidance",
-      "requiredFeatures": [
-        "mobile-page-converter"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-web-to-mobile-conversion"
@@ -1065,9 +1062,6 @@
       "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
-      "requiredFeatures": [
-        "mobile-page-converter"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-mobile-reason-codes"
