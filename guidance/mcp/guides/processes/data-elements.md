@@ -70,7 +70,12 @@ filter; see `process-access-rights`.
 - Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
 
 == A column of a Read data record as a source ==
-- Requires CrtProcessBuilder 1.6.6.40 or later on the environment.
+- Use it ONLY when the clio you are calling advertises it: the `get-tool-contract` entry for
+  `create-business-process` / `modify-business-process` mentions `sourceColumn`. An older clio's entry does
+  not, and its server drops the field WITHOUT an error, so the source silently becomes the whole record.
+  Without it, do NOT send `sourceColumn`, `elementParameter.column` or a three-segment name. Tell the user
+  that reading a record's column needs a newer clio. A clio that advertises it also checks the environment
+  and refuses anything below CrtProcessBuilder 1.6.6.40, naming the fix (`install-process-builder`).
 - ONE column of the record a first-record `readData` element read (its `ResultEntity`) is a value source,
   named by the column's CODE. The server resolves it on the read object, type-checks it against the target
   and writes the platform's three-segment meta path, so there are no UIds to find. This article owns the

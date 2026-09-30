@@ -92,7 +92,7 @@ values in EITHER mode, so a leftover set would be live configuration nobody aske
 per column, exactly ONE of `value` (a constant — TEXT columns only and non-empty; a date/lookup/numeric
 constant is refused because the runtime reads those columns typed), `processParameter`,
 `sourceElement` + `sourceElementParameter` (an EARLIER element's output, + `sourceColumn` for one column of
-its record), or `expression` (a raw macro — and
+its record - `process-data-elements` says when a clio offers it), or `expression` (a raw macro — and
 this is how a LOOKUP value is set: `[#Lookup.{objectSchemaUId}.{recordId}#]`).
 `recordId` takes exactly ONE of `value` (a fixed record Id — the server wraps it into the lookup macro
 against the page's own object, so you never need that object's UId), `processParameter`,

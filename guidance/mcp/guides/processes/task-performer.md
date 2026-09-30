@@ -45,7 +45,7 @@ LAYER 2 — the OwnerId parameter (Lookup -> Contact), for a SPECIFIC PERSON onl
 * another element's Contact/Guid output parameter;
 * a Contact column of a record another element READ — "the contact's owner" — with `sourceColumn`:
   `sourceElement: "ReadContact"`, `sourceElementParameter: "ResultEntity"`, `sourceColumn: "Owner"`
-  (`process-data-elements` owns the source and its refusals);
+  (`process-data-elements` owns the source, its refusals and when a clio offers it);
 * `expression: "[#SysVariable.CurrentUserContact#]"` for "whoever started the process".
 A Lookup -> SysAdminUnit PARAMETER source is likewise REJECTED (incompatible reference object).
 A team is NEVER routed through OwnerId -- LAYER 1's `performer` block with type "role" is the only
