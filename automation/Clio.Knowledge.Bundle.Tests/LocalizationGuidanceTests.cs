@@ -163,8 +163,12 @@ public sealed class LocalizationGuidanceTests
         JsonElement requirements = source.RootElement.GetProperty("requirements");
 
         // Assert
-        translation.Should().Contain("never send an empty string",
-            because: "localize-page stores an empty string as the value, so the guide must forbid sending one");
+        translation.Should().Contain("Empty and whitespace-only values are REFUSED",
+            because: "localize-page refuses a blank value, so the guide must not promise that one is stored");
+        translation.Should().NotContain("does NOT reject an empty string",
+            because: "that rule was true only before the blank-value check and misleads an agent now");
+        translation.Should().Contain("`captionInherited`",
+            because: "a page created from a template reads back the template's translated title, which is not a translation");
         translation.Should().Contain("`culture: \"en-US\"` is REJECTED",
             because: "the default culture is changed through update-page, never through localize-page");
         translation.Should().Contain("writes ONE culture of ONE page per call",
