@@ -1772,7 +1772,7 @@
     {
       "itemId": "record-rights",
       "title": "Record rights",
-      "description": "Canonical MCP guidance for record-level access rights: read/change who can access a record or dashboard with get-record-rights / set-record-rights, addressing a dashboard as SysSchemaAdminUnit + schema UId, and the record-level (SysSchemaAdminUnitRight) vs operation-level (SysSchemaOperationRight) distinction.",
+      "description": "Canonical MCP guidance for record-level access rights: read/change who can access a record or dashboard with get-record-rights / set-record-rights, addressing a dashboard as SysSchemaAdminUnit + schema UId, and the record-level (SysSchemaAdminUnitRight) vs operation-level (SysEntitySchemaOperationRight) distinction.",
       "topicId": "creatio.record-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/record-rights",

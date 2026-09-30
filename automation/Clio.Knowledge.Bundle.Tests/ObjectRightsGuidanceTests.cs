@@ -47,7 +47,7 @@ public sealed class ObjectRightsGuidanceTests
         // Assert
         guide.Should().Contain("name=object-rights",
             because: "the enable, revoke and disable rules are owned by the object-rights article");
-        guide.Should().Contain("enable-operation-permissions",
+        guide.Should().Contain("a grant turns it on only with `enable-operation-permissions`",
             because: "a grant turns operation permissions on only with that flag");
         restatesLifecycle.Should().BeFalse(
             because: "restating the revoke lifecycle here drifts from the owner and contradicts its refusals");
@@ -68,7 +68,7 @@ public sealed class ObjectRightsGuidanceTests
         // Assert
         normalized.Should().Contain("no row that grants any operation is REFUSED",
             because: "the owning article must keep the refusal an agent relies on");
-        normalized.Should().Contain("disable-operation-permissions",
+        normalized.Should().Contain("Passing disable-operation-permissions instead turns operation permissions OFF",
             because: "the explicit opt-in is the only path to turning operation permissions off");
     }
 
@@ -83,7 +83,20 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("nothing is granted by default", TestName = "ObjectRights_ShouldStateThatOperationsAreRequired")]
     [TestCase("REFUSED (nothing is written) unless enable-operation-permissions is passed",
         TestName = "ObjectRights_ShouldStateThatEnablingIsExplicit")]
-    [TestCase("Ask the developer BEFORE any write", TestName = "ObjectRights_ShouldRequireAskingBeforeEachWrite")]
+    [TestCase("ASK THE DEVELOPER IN CHAT BEFORE EVERY WRITE",
+        TestName = "ObjectRights_ShouldRequireAskingInChatBeforeEveryWrite")]
+    [TestCase("an auto-approve mode skips that approval",
+        TestName = "ObjectRights_ShouldStateThatTheHostApprovalIsNotTheDevelopersYes")]
+    [TestCase("first call it with preview=true", TestName = "ObjectRights_ShouldPreviewBeforeAsking")]
+    [TestCase("When the role has NO row it lists every row",
+        TestName = "ObjectRights_ShouldStateWhatTheReadShowsForARoleWithoutARow")]
+    [TestCase("a stored one is kept AS STORED", TestName = "ObjectRights_ShouldStateThatAStoredAllEmployeesRowIsKeptAsStored")]
+    [TestCase("For an INTERNAL grantee, do not turn operation permissions on just to grant",
+        TestName = "ObjectRights_ShouldNotEnableForAnInternalGranteeByDefault")]
+    [TestCase("It does NOT list lookups the object inherits",
+        TestName = "ObjectRights_ShouldStateWhatTheConnectedListingLeavesOut")]
+    [TestCase("`All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008`",
+        TestName = "ObjectRights_ShouldOwnTheAllEmployeesId")]
     [TestCase("returns success with ZERO rows", TestName = "ObjectRights_ShouldStateThatADeniedReadIsNotAnError")]
     [Description("object-rights keeps each rule of the one-object, explicit-flag contract that an agent must weigh before a write; losing one of them in an edit turns the article back into the old contract.")]
     public void ObjectRights_ShouldStateTheContractRule(string rule)
@@ -98,22 +111,49 @@ public sealed class ObjectRightsGuidanceTests
         normalized.Should().Contain(rule, because: "the owning article must keep every rule of the tool contract");
     }
 
+    // Every published body plus the bundle manifest, whose item descriptions agents read as well.
+    private static IEnumerable<string> PublishedTexts() =>
+        Directory.EnumerateFiles(Path.Combine(Root(), "guidance"), "*.md", SearchOption.AllDirectories)
+            .Append(Path.Combine(Root(), "bundle-source.json"));
+
     [TestCase("confirmation-code")]
     [TestCase("connected-operations")]
     [TestCase("allow-security-object")]
-    [Description("No guidance article names a set-object-rights argument the tool has retired: the tool refuses an unknown argument before any read or write, so an agent that follows such an article fails every call.")]
+    [Description("No guidance article and no bundle description names a set-object-rights argument the tool has retired: the tool refuses an unknown argument before any read or write, so an agent that follows such text fails every call.")]
     public void Guidance_ShouldNotNameARetiredSetObjectRightsArgument(string retired)
     {
         // Arrange
-        string guidance = Path.Combine(Root(), "guidance");
+        IEnumerable<string> texts = PublishedTexts();
 
         // Act
-        string[] naming = Directory.EnumerateFiles(guidance, "*.md", SearchOption.AllDirectories)
+        string[] naming = texts
             .Where(path => File.ReadAllText(path).Contains(retired, StringComparison.OrdinalIgnoreCase))
             .Select(path => Path.GetRelativePath(Root(), path))
             .ToArray();
 
         // Assert
         naming.Should().BeEmpty(because: $"'{retired}' is no longer a set-object-rights argument");
+    }
+
+    [Test]
+    [Description("No guidance line puts include-connected on a set-object-rights call: set changes one object per call and refuses the argument; include-connected belongs to get-object-rights only.")]
+    public void Guidance_ShouldNotPassIncludeConnectedToSetObjectRights()
+    {
+        // Arrange
+        IEnumerable<string> texts = PublishedTexts();
+
+        // Act
+        string[] offending = texts
+            .SelectMany(path => File.ReadAllLines(path).Select(line => (path, line)))
+            .Where(entry =>
+            {
+                int set = entry.line.IndexOf("set-object-rights", StringComparison.OrdinalIgnoreCase);
+                return set >= 0 && entry.line.IndexOf("include-connected", set, StringComparison.OrdinalIgnoreCase) > set;
+            })
+            .Select(entry => $"{Path.GetRelativePath(Root(), entry.path)}: {entry.line.Trim()}")
+            .ToArray();
+
+        // Assert
+        offending.Should().BeEmpty(because: "include-connected is an argument of get-object-rights, never of set-object-rights");
     }
 }
