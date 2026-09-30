@@ -104,6 +104,8 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "this is the measured collision an alias exists to break");
         guide.Should().Contain("the run-time lookup is case-sensitive",
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
+        guide.Should().Contain("Activate that version only after its compile succeeded",
+            because: "activating an uncompiled version breaks every new instance of the process");
         guide.Should().Contain("The text is C# CLASS MEMBERS, not statements",
             because: "the methods text is pasted into the generated class, so statements there do not compile");
     }
