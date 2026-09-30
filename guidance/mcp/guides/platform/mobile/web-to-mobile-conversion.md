@@ -303,10 +303,10 @@ FLOW
      carries the type and EVERY source property the mobile component supports — never drop any of
      them. It also already carries the CONVERTED event-binding requests (a button's `clicked`, a
      field's `valueChange`/`updated`): supported requests are kept (remapped when the mobile name
-     differs). A `crt.Button` whose request the mobile app does NOT support is not inserted at all — it
-     was already DROPPED (see its `droppedElements` entry), so you never see it here. Any OTHER
-     component type IS here even when its request was not supported: the component survives and only its
-     binding was dealt with — see REQUESTS in HARD MOBILE RULES for which of the two happened to it. Do NOT re-add or
+     differs). An ACTION-ONLY component (`crt.Button`, `crt.MenuItem`) whose request the mobile app does
+     NOT support is not inserted at all — it was already DROPPED; see its `droppedElements` entry. One still
+     holding a live menu item IS here. Any OTHER component type IS here even when its request was not supported:
+     only its binding was dealt with — see REQUESTS in HARD MOBILE RULES for which of the two. Do NOT re-add or
      hand-edit these bindings — paste values as-is. There is NOTHING to add: the value binding is in
      `values` too, under `control`, which is the same wire name on both web and mobile (the mobile
      runtime reads the JSON key `control`; a Dart field named `value` is what it deserializes INTO, and
@@ -499,24 +499,24 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   passing its `rule` VERBATIM to create-page-business-rule on the MOBILE page (after approval).
   droppedRules[] did not convert (every referenced element drops) — report them.
   OBJECT-/entity-level business rules are shared across web and mobile — do NOT re-create or touch them.
-- REQUESTS (actions) on component event bindings (a button's `clicked`, a field's `valueChange`/`updated`)
-  ARE handled for you. ONLY a `crt.Button` whose request the Creatio Mobile app does NOT support (and
-  that does not remap to a supported one) is DROPPED (a `droppedElements` entry whose reason names the
-  request) — a dead button is not shipped. NO OTHER component type is ever dropped over a request: some
-  legitimately use a system request absent from the list, and losing the component would lose valid UI.
-  What happens to that surviving component's BINDING depends on which of the two it is, and they are
-  opposite reports:
-    • the request is KNOWN-unsupported (the conversion rules name it and give no mobile counterpart) —
-      the binding is REMOVED and the component ships without that action, reported in
+- REQUESTS (actions) on component event bindings ARE handled for you. An ACTION-ONLY component
+  (`crt.Button`, `crt.MenuItem` — they exist only to fire one) whose request the Mobile app does NOT
+  support is DROPPED, and so is one left with NO action and NO menu item. Always a `droppedElements`
+  entry: `drop-unsupported-request` when the rules name the request and give no mobile counterpart,
+  `drop-unknown-request` when it is in neither the rules nor the registry (often a custom `usr.*`), and
+  the bare code, no params, when EMPTINESS removed it. One exception, and the one to expect on a menu:
+  a component still HOLDING a live menu item or submenu is NOT dropped over its own dead request, which
+  would take the live child with it.
+  NO OTHER component type is ever dropped over a request: some legitimately fire a system request the
+  registry lacks, and losing them would lose valid UI. Such a component SURVIVES, and the same two
+  cases decide its binding:
+    • KNOWN-unsupported — REMOVED, the component shipping without it, in
       `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
-    • the request is UNKNOWN (in neither the map nor the bundled set — often a custom `usr.*`) — the
-      binding is KEPT VERBATIM and flagged in `requestConversions.flaggedRequests[]` under
-      `flag-request-unmapped`, for you to verify with the user.
-  A supported request is kept in
-  viewConfigDiff[].values (the operation's name is already the mobile one) — paste the values verbatim.
+    • UNKNOWN — KEPT VERBATIM, flagged in `requestConversions.flaggedRequests[]` under
+      `flag-request-unmapped`, for you to verify.
   guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
-  a SURVIVING component — a loss `droppedElements` never shows), flaggedRequests,
-  unresolvedTargetRequests, and missingTargetPages (both above). Tell the user which action components
+  a SURVIVING component, a loss `droppedElements` never shows), flaggedRequests,
+  unresolvedTargetRequests and missingTargetPages (both above). Tell the user which action components
   were removed AND which surviving components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
