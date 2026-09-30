@@ -51,7 +51,8 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
   inherits (CreatedBy/ModifiedBy → Contact and the like), detail (child) objects, or their lookups — read
   those by name. Security and system objects — SysAdmin*, SysUser*, SysSchema*, SysPackage*, SysSettings*,
   SysLic*, SysProcess*, Vw* and *Right/*Rights — are never listed as connected objects; they are named in
-  a warning. A read that times out stops the listing and names the objects not read yet.
+  a warning. A read that times out stops the listing and names the objects not read yet; so does, on MCP,
+  a listing past 90 s (each read there is one attempt of at most 30 s) — read those objects one by one.
 - It reports facts and draws no verdict about who can actually reach the object. It FAILS
   (success=false) when the object is not found or cannot be read; a connected object that cannot be read,
   or a connected set that cannot be enumerated, is reported with a warning — that object is NOT verified.
@@ -117,8 +118,10 @@ Revoke:
   disable-operation-permissions instead turns operation permissions OFF: the object becomes available to
   ALL internal users (and closed to external ones) — an access WIDENING. Pass it only when that is the
   intent. The rows are kept and apply again if the switch is turned back on.
-- Without disable-operation-permissions, a revoke from a role that has no row, or of operations the row
-  does not hold, changes nothing.
+- disable-operation-permissions is accepted ONLY in that case. A disable the revoke does not need — other
+  rows still grant, or the revoke changes no row — is refused and writes nothing, because it would open the
+  object to every internal user while the call reads as a revoke; re-run without the flag.
+- A revoke from a role that has no row, or of operations the row does not hold, changes nothing.
 
 Refused as well: a grantee with more than one row on the object (which one decides depends on the other
 rows) — remove the duplicates in the designer, then re-run.
@@ -130,9 +133,10 @@ Results:
   get-object-rights before retrying.
 - A save that reports an error may still have been committed: the object is read back, and the call
   succeeds with a warning only when the read-back shows the planned change.
-- Re-running a call that already landed is safe: it reports no change. One exception: a revoke with
-  disable-operation-permissions from All employees that left the object with no stored rows is refused on retry
-  as "not administered" — that is the state the first call left, not a failure.
+- Re-running a call that already landed is safe: it reports no change.
+- The save is sent once, with no automatic retry. A save that did not answer in time may still land after
+  the read-back: its failure says so — re-read the object with get-object-rights before retrying or
+  reporting a failure.
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. It does NOT change column or record permissions.
 

@@ -97,6 +97,10 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateWhatTheConnectedListingLeavesOut")]
     [TestCase("`All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008`",
         TestName = "ObjectRights_ShouldOwnTheAllEmployeesId")]
+    [TestCase("disable-operation-permissions is accepted ONLY in that case",
+        TestName = "ObjectRights_ShouldStateThatADisableTheRevokeDoesNotNeedIsRefused")]
+    [TestCase("The save is sent once, with no automatic retry",
+        TestName = "ObjectRights_ShouldStateThatTheSaveIsNotRetried")]
     [TestCase("returns success with ZERO rows", TestName = "ObjectRights_ShouldStateThatADeniedReadIsNotAnError")]
     [Description("object-rights keeps each rule of the one-object, explicit-flag contract that an agent must weigh before a write; losing one of them in an edit turns the article back into the old contract.")]
     public void ObjectRights_ShouldStateTheContractRule(string rule)
