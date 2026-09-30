@@ -130,7 +130,9 @@ Results:
   get-object-rights before retrying.
 - A save that reports an error may still have been committed: the object is read back, and the call
   succeeds with a warning only when the read-back shows the planned change.
-- Re-running a call that already landed is safe: it reports no change.
+- Re-running a call that already landed is safe: it reports no change. One exception: a revoke with
+  disable-operation-permissions from All employees that left the object with no stored rows is refused on retry
+  as "not administered" — that is the state the first call left, not a failure.
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. It does NOT change column or record permissions.
 
