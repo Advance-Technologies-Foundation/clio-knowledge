@@ -1,101 +1,156 @@
 clio MCP object-rights guide
 
 Manage OBJECT operation permissions — who may read/create/edit/delete ANY record of an entity (the
-SysSchemaOperationRight / "Object permissions" layer) — for ANY role, with two tools, NOT with
+SysEntitySchemaOperationRight / "Object permissions" layer) — for ANY role, with two tools, NOT with
 hand-written ESQ into the rights tables:
-- get-object-rights — read the per-role operation permissions of an object.
-- set-object-rights — grant or revoke a role's operations. DESTRUCTIVE — writes immediately, no publish
-  step. Whether users who are already logged in see the change without a new session is NOT verified,
-  so check the effect as a user who logged in AFTER the change.
+- get-object-rights — read the rows of an object's operation permissions. Read-only.
+- set-object-rights — grant or revoke operations for ONE role on ONE object. DESTRUCTIVE: it writes in
+  one call, with no publish step, and the change reaches users who are already logged in immediately.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`.
 
 grantee is a SysAdminUnit id (a role or user id). Names are NOT unique — resolve a name to its id
-yourself (e.g. execute-esq on SysAdminUnit by Name), the tools take the id.
+yourself (e.g. execute-esq on SysAdminUnit by Name); the tools take the id.
 
-get-object-rights args: entity-schema-name (required), grantee (optional), include-connected (optional).
-- With no grantee it lists EVERY role's rights on the object; with a grantee it reports just that role.
-  Internal roles holding the "…any data" system operations can reach records beyond what this reports —
+## How the platform decides — read this before any write
+- The rows are a PRIORITY LIST, not a union of flags. Position 0 is the highest. A user who is in several
+  roles gets the operations of the HIGHEST MATCHING ROW, and that row decides per row, not per operation:
+  a row with read only DENIES create/edit/delete to its members even when a lower row grants them. So:
+  - a row with no operations is an explicit DENY for its members, not "nothing";
+  - a row below a broader role can be shadowed: with `[0] All employees: read` and
+    `[1] Sales managers: read/create/edit`, a sales manager can still only read;
+  - removing a row lets the next matching row decide, which can WIDEN access.
+- The "Use operation permissions" switch. While an object is NOT administered by operation permissions,
+  company employees have full access (the rows are ignored), EXTERNAL users have NO access, and technical
+  users follow the rows. External / portal users are therefore deny-by-default: they reach an object only
+  through an explicit grant.
+- Turning the switch ON is a narrowing: from then on only the rows decide, for every role.
+- Internal roles holding the "…any data" system operations reach records whatever the object rows say —
   see `get-guidance name=entity-operation-access`.
-- It reports facts per object — the operations each role (or the grantee) holds, "NO object operations
-  granted", or "not administered by operation permissions" — and draws no verdict.
-- An object not administered by operation permissions is available to all INTERNAL users only:
-  external/portal users are DENY-BY-DEFAULT and reach an object only through an explicit grant.
+
+Evidence: the priority rule is Creatio Academy's (a user in several roles gets the permissions of the
+highest role in the list). It was reproduced per row as a non-admin internal user on a Creatio 8.3.4 stand
+(2026-09-29), with the switch rules as the designer states them, the change reaching a logged-in session
+at once, and a denied read returning zero rows.
+
+## get-object-rights
+Args: entity-schema-name (required), grantee (optional), include-connected (optional).
+- Lists the rows in priority order, each with its [position], and states the priority rule. Per object
+  it reports one of: administered, with the rows; administered with NO rows (only holders of the "…any
+  data" system operations reach it); or NOT administered — then it also lists the rows that would start
+  to decide if operation permissions were turned on.
+- With grantee it shows that role's row (or "has NO row") and the rows ABOVE it: for a user who is also
+  in one of those roles, those rows decide first.
 - include-connected also reads the object's OWN lookup objects (inherited BaseEntity audit lookups such
   as CreatedBy/ModifiedBy are skipped). Security and system objects — SysAdmin*, SysUser*, SysSchema*,
-  SysPackage*, SysSettings*, SysLic*, SysProcess*, Vw* and *Right/*Rights — are never part of the connected set; both tools name them
-  in a warning.
-- Read-only; use it to see current access and to verify a set-object-rights change. It FAILS
-  (success=false) when the root object is not found or cannot be read; a connected object that cannot be
-  read, or a connected set that cannot be enumerated, is reported with a warning.
+  SysPackage*, SysSettings*, SysLic*, SysProcess*, Vw* and *Right/*Rights — are never listed as connected
+  objects; they are named in a warning. This is the DISCOVERY step before granting.
+- It reports facts and draws no verdict about who can actually reach the object. It FAILS
+  (success=false) when the object is not found or cannot be read; a connected object that cannot be read,
+  or a connected set that cannot be enumerated, is reported with a warning — that object is NOT verified.
 
-set-object-rights args: entity-schema-name + grantee (required); operations=read,create,edit,delete for
-the ROOT object (default read,create,edit — delete is NOT granted unless you pass it); revoke=true to
-remove; include-connected=true to fan out to the object's own lookup objects (security/system objects
-excluded, as above), which get connected-operations (default READ only on a grant — create/edit are never
-fanned out to shared lookups implicitly); disable-operation-permissions (see below);
-allow-security-object (a security/system ROOT — SysAdmin*, SysUser*, … — may otherwise only be granted
-read, and never have its operation permissions turned off); --confirm on the CLI. The grantee must exist in SysAdminUnit — an unknown id fails before any write.
-An unknown or misspelled argument name is refused before any write.
-- EVERY set-object-rights write is TWO calls, and the user approves in between:
-  1. Call it WITHOUT confirm. That writes nothing and returns a PREVIEW: every object the call would change
-     (the root and each connected lookup), what the grantee gets, its current state — which roles hold
-     rights on it, and which objects are "not administered" and will have operation permissions turned ON
-     (with the existing rows of other roles that become effective, see below) — and a confirmation-code. A root that cannot be read or does not exist fails the preview: no code.
-  2. Show that preview to the user and ask explicitly. Only after they approve, repeat the SAME call with
-     confirm=true and that confirmation-code. If they reject part of it, drop include-connected and grant
-     the approved objects one by one (each with its own preview).
-  The confirmed call is refused when the code no longer matches — the targets or any role's rights on them
-  changed since the preview, or the arguments differ; run a new preview and ask again. confirm=true without a code
-  is refused outright. Never pass confirm=true without having shown the user that preview.
-- Failures never report success: a root object that is not found fails (nothing was written); if the
-  connected objects cannot be enumerated nothing is written and the call fails; when the root was not
-  written the connected objects are not attempted; a connected object that fails is named and the rest are still
-  attempted (the call fails); a connected lookup that is not found only warns.
-- revoke with include-connected leaves the connected lookups UNTOUCHED unless connected-operations names
-  what to revoke there — the read-only grant default must not strip READ from shared lookups that other
-  sections of the same audience still need.
-- Read-modify-write: the per-role grid is read, the grantee's row is added/updated (or removed when a
-  revoke empties it — refused when it is the object's last row, see below), and the object is saved.
-- Granting to an object that does not yet use operation permissions TURNS THEM ON — an access NARROWING for
-  every other internal role. The tool reports it per object, connected lookups included, so a fan-out that
-  turns operation permissions on for a SHARED lookup narrows that lookup system-wide and says so. So internal
-  users keep their access, the same save adds an "All employees" row with read/create/edit/delete when the
-  object has none (an existing one is left as it is). Existing rows of other roles become effective too — the
-  preview names them. The tool reads the object back, names the roles that hold rights, and FAILS when
-  "All employees" holds no read afterwards (the change is already saved — fix it with a follow-up grant).
-  For EXCLUSIVE access — only the grantee — revoke or narrow that "All employees" row after the first grant.
-- A revoke only narrows. A revoke that would remove the object's LAST effective grant is REFUSED (writes
-  nothing, fails) because the only end states are "reachable by nobody" or — with operation permissions
-  turned off — "available to ALL internal users", an access WIDENING. Pass disable-operation-permissions
-  only when widening to every internal user is the intent; it applies to the ROOT object only, never to a
-  connected lookup. To empty the row, revoke every operation the role holds (operations=read,create,edit,
-  delete). Whether a revoke hits the last row depends on the other rows present (for example an
-  "All employees" row), so read the object back with get-object-rights before and after.
+## set-object-rights
+Args: entity-schema-name + grantee + operations (all REQUIRED); revoke; enable-operation-permissions;
+disable-operation-permissions; preview. On the CLI, --confirm applies without a prompt.
+- ONE object per call. It never touches the object's lookups: each lookup is its own call.
+- operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
+  call, grant and revoke — nothing is granted by default. Pass only what the scenario needs.
+- On MCP the call applies the change. The host's approval of the call is the confirmation, and the
+  arguments name the whole effect: the object, the role, the operations, and whether the switch turns on
+  or off. preview=true writes nothing and shows the planned change, or why it would be refused.
+- An unknown or misspelled argument name is refused before any read or write. The grantee must exist in
+  SysAdminUnit.
+
+Grant:
+- A role with no row gets a new row at the LOWEST priority, as in the designer. The result names the rows
+  ABOVE it: for a user who is also in one of those roles, that higher row decides, so the grant does
+  nothing for that user.
+- Every INTERNAL user is in All employees. So when an "All employees" row sits above the grantee's row,
+  the grant changes nothing for internal users — they get what the All employees row says. The tool never
+  reorders rows: a grant that must take effect for internal users needs the grantee's row moved ABOVE the
+  All employees row in the Object permissions designer. Tell the developer BEFORE the write.
+- External users are not in All employees, so a grant to All external users (or another external role)
+  is not shadowed by the All employees row.
+- A role that has a row gets the named operations added to it; the row keeps its position.
+- A grant on an object that is NOT administered is REFUSED (nothing is written) unless
+  enable-operation-permissions is passed. The refusal names the rows that would start to decide. With the
+  flag the switch turns ON, and so that internal users keep their access the same save keeps the
+  object's "All employees" row, or adds one with read/create/edit/delete below the stored rows when the
+  object has stored rows but none for All employees. Stored rows ABOVE that row then restrict their
+  members — the result names each of them.
+- EXCLUSIVE access (only the grantee's members): narrowing the All employees row while it sits above the
+  grantee's row denies the grantee's internal members too. It needs the grantee's row above All employees
+  first (the designer), then a revoke on the All employees row.
+- enable-operation-permissions is valid only on a grant; disable-operation-permissions only on a revoke.
+
+Revoke:
+- A revoke clears the named operations on the grantee's row and KEEPS the row. For a user whose highest
+  matching row it is, the cleared operations are then DENIED — even if a lower row grants them. No row is
+  ever removed; removing a role's row is done in the designer.
+- A revoke on an object that is NOT administered is REFUSED: company employees reach it whatever its rows
+  say. To limit access, first turn operation permissions on (a grant with enable-operation-permissions),
+  then revoke from the "All employees" row what employees must not have. A role that must keep MORE than
+  employees needs its row above the All employees row — the designer sets the order.
+- A revoke that would leave the object with no row that grants any operation is REFUSED. Passing
+  disable-operation-permissions instead turns operation permissions OFF: the object becomes available to
+  ALL internal users (and closed to external ones) — an access WIDENING. Pass it only when that is the
+  intent. The rows are kept and apply again if the switch is turned back on.
+- A revoke from a role that has no row, or of operations the row does not hold, changes nothing.
+
+Refused as well: a grantee with more than one row on the object (which one decides depends on the other
+rows) — remove the duplicates in the designer, then re-run.
+
+Results:
+- The object is read back and compared with the plan, row by row. A row this call writes that is missing
+  from the read-back, or a switch that is not as planned, FAILS the call. A read-back that itself fails
+  after the save reports "saved, but NOT verified" (the call fails) — read the object with
+  get-object-rights before retrying.
+- A save that reports an error may still have been committed: the object is read back, and the call
+  succeeds with a warning only when the read-back shows the planned change.
+- Re-running the same call is safe: it reports no change.
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
-  overwritten. Read the result back when concurrent edits are possible.
-- Idempotent: re-applying the same grant/revoke is safe, and the connected set is re-resolved on every
-  call, so a lookup added to the object later is picked up by a re-run. It does NOT change column
-  permissions.
+  overwritten. It does NOT change column or record permissions.
+
+## Give a role access to an object and its lookups
+1. Read: get-object-rights entity-schema-name=<Object> grantee=<role id> include-connected=true. Note,
+   per object, whether it is administered, the grantee's row, and the rows above it.
+2. Ask the developer BEFORE any write. Show every object you propose to change, the operations for each,
+   and, per object, whether operation permissions turn ON (and which rows then start to decide) and which
+   rows above the grantee's would shadow the grant. Two facts to say out loud:
+   - read on a SHARED lookup (Contact, Account, price lists and the like) is read on the WHOLE table for
+     that role, not only on the rows this app uses;
+   - turning operation permissions on for a shared lookup makes its rows decide for every role,
+     system-wide, wherever that lookup is used.
+   Grant only the objects the developer approves; a security or system object is granted only when the
+   developer asks for that object by name.
+3. Make one set-object-rights call per approved object, each with its own operations — typically the
+   scenario's operations on the object itself and read on its lookups — and enable-operation-permissions
+   where the object is not administered.
+4. Verify with the same get-object-rights read.
+
+## Verify the effect
+- Re-read with get-object-rights. It shows the stored rows, not what a given user can do.
+- To prove what a user can do, test AS that user (a non-admin, not a holder of the "…any data" system
+  operations). A DataService read that is denied returns success with ZERO rows, not an error — "the query
+  succeeded" does not prove read access. A denied create fails with a security error.
 
 Use cases (all one general capability):
 - Grant or revoke any role's object access — the general audit-and-fix use.
-- Make a Freedom PORTAL section's object available to external users — `get-guidance name=portal-sections`
-  owns that flow.
-- Enable operation permissions on an object from scratch by granting the first role.
+- Make a Freedom PORTAL section's object available to external users (the `All external users` role):
+  they are deny-by-default, so the object and each lookup they must see need an explicit grant.
+- Enable operation permissions on an object from scratch: the first grant with
+  enable-operation-permissions.
 
-Where the rights live: SysSchemaOperationRight (per role, per operation), served by the native
+Where the rights live: SysEntitySchemaOperationRight (one row per role, per object), served by the native
 RightManagementService. get-object-rights reads it for you — do not query the table directly. For the
-"is this object administered, and does this role hold a grant" decision, get-object-rights /
+"is this object administered, and which rows decide" question, get-object-rights /
 RightManagementService is authoritative; get-entity-schema-properties reports DESIGN-TIME schema metadata
-that can disagree with it, so use that tool to inspect the schema and to drive the connected-object
-fan-out, not to settle that decision.
+that can disagree with it, so use that tool to inspect the schema, not to settle that question.
 
-Scope boundary: object operation permissions for a role on an object (and, with include-connected, its
-own lookup objects). NOT column permissions, NOT record-level rights, NOT role/user provisioning.
+Scope boundary: object operation permissions for a role on one object. NOT column permissions, NOT
+record-level rights, NOT role/user provisioning.
 
 <!-- Version boundary: set-object-rights / get-object-rights ship in clio
 <SET-OBJECT-RIGHTS-CLIO-VERSION-TBD>. Replace this placeholder with the released clio version before
 merging (merging publishes; an unresolved boundary is refused by the producer contract suite). Until
 then this article stays on a draft PR. -->
-
