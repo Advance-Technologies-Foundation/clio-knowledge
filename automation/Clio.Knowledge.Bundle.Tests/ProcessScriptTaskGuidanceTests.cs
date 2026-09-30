@@ -98,6 +98,8 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "an edited, uncompiled script runs the old code silently, which no save reports");
         guide.Should().Contain("There is NO `System.Linq`, and no `Terrasoft.Configuration`",
             because: "the two namespaces a script most often needs are exactly the two it does not get");
+        guide.Should().Contain("An entry describe marks `ignored`",
+            because: "describe marks the usings the code generator skips, and a rebuild from describe must leave them out");
         guide.Should().Contain("An ALIAS on a default namespace is refused",
             because: "the generator drops such an entry with its alias, so the alias would not exist at compile time");
         guide.Should().Contain("makes `SysSettings` ambiguous (CS0104)",
