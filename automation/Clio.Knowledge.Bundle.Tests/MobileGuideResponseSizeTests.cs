@@ -130,9 +130,22 @@ public sealed class MobileGuideResponseSizeTests
     /// keeps the size from drifting.
     /// </para>
     /// </remarks>
+    /// <remarks>
+    /// LOWERED AGAIN, 62,576 -> 62,564, in another change that ADDS content. Two statements about the
+    /// drop were still wrong. The first: an action-only component whose request does not convert is NOT
+    /// always dropped - one still HOLDING a live menu item or submenu is kept, because dropping it would
+    /// take that live child off the page, and the article promised the drop unconditionally in both the
+    /// FLOW step and the HARD MOBILE RULES bullet. The second was a wording defect rather than a false
+    /// fact: "the bare code with no params in the second case" sat immediately after a list of two CODES,
+    /// so it read as drop-unknown-request, which always carries params.request; the emptiness case is
+    /// named outright now. Paid for inside the same bullet, per the ratchet-down rule: the sentence
+    /// restating that a supported request is kept in viewConfigDiff[].values came out (the FLOW step
+    /// three paragraphs up already says it, in more detail), and so did the second copy of the
+    /// clicked / valueChange / updated parenthetical from the same place.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_576),
+        ("freedom-page-web-to-mobile-conversion", 62_564),
         ("freedom-page-mobile-reason-codes", 18_732)
     ];
 
