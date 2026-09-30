@@ -109,7 +109,7 @@ public sealed class ProcessScriptTaskGuidanceTests
         guide.Should().Contain("compile the new version, verify it on a run, and only then activate it",
             because: "activating an uncompiled version breaks every new instance of the process");
         guide.Should().Contain("\"until the configuration is compiled\"",
-            because: "the guide quotes the phrase clio keys its compile note on (CommandExecutionResult.CompileRequiredWarningMarker), so the two must not drift apart");
+            because: "the guide quotes the phrase the compile-required warning carries - a wording pin only: the constant clio keys on (CommandExecutionResult.CompileRequiredWarningMarker) lives in clio, so rewording it there must update this article by hand");
         guide.Should().Contain("The text is C# CLASS MEMBERS, not statements",
             because: "the methods text is pasted into the generated class, so statements there do not compile");
     }
