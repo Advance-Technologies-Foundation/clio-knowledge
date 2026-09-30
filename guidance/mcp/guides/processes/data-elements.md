@@ -70,6 +70,7 @@ filter; see `process-access-rights`.
 - Read `process-add-data`: the block, both modes, the value sources and the refused transitions.
 
 == A column of a Read data record as a source ==
+- Requires CrtProcessBuilder 1.6.6.40 or later on the environment.
 - ONE column of the record a first-record `readData` element read (its `ResultEntity`) is a value source,
   named by the column's CODE. The server resolves it on the read object, type-checks it against the target
   and writes the platform's three-segment meta path, so there are no UIds to find. This article owns the
@@ -80,8 +81,8 @@ filter; see `process-access-rights`.
   * a `changeData` / `addData` / `openEditPage` value - the same trio; the entry's `column` is its TARGET:
         { "column": "Owner", "sourceElement": "ReadContact", "sourceElementParameter": "ResultEntity",
           "sourceColumn": "Owner" }
-  * an `openEditPage` `recordId` - the trio, with a LOOKUP column that points at the page's object (or the
-    `Id` column);
+  * an `openEditPage` `recordId` - the trio, with a LOOKUP column that points at the page's object, or the
+    `Id` of a record of the page's object;
   * a filter's right-hand side - `"elementParameter": { "elementName": "ReadContact", "parameter":
     "ResultEntity", "column": "Owner" }`;
   * a branch condition at CREATE, or a Formula body - `[#ReadContact.ResultEntity.DoNotUseCall#] == true`.
@@ -92,11 +93,14 @@ filter; see `process-access-rights`.
   use the list outputs); a column outside a non-empty `readData.columns` list
   (the platform fetches only the listed columns, so it would arrive EMPTY - list it or omit `columns`; the
   primary column `Id` is always fetched); a type that does not fit the target, by the rule
-  parameter-to-parameter mappings use (`OwnerId` <- `Owner` builds, <- `Account` is refused). A later
+  parameter-to-parameter mappings use (`OwnerId` <- `Owner` builds, <- `Account` is refused) - on a filter the
+  target is the filter's own column, and a record's `Id` counts as a reference to its OWN object (`OwnerId` <-
+  a read account's `Id` is refused). A later
   `setElement readData.columns` that drops a column something still reads is refused too. A column name in
   `sourceElementParameter` (`"Email"`) is still "element has no parameter": the column goes in
-  `sourceColumn`. Nothing checks ORDER on a mapping, filter or condition, so place the read before its
-  consumers in the flow yourself.
+  `sourceColumn`. On create, a column source whose element is declared LATER in `elements[]` is refused for
+  the order; the FLOW order and the modify path are not checked, so place the read before its consumers in
+  the flow yourself.
 - Verified at run time on Creatio 10.1.37 (.NET Framework, MSSQL), CrtProcessBuilder 1.6.6.27, 2026-09-25: one
   create call built signalStart (Contact added) -> readData (Id = RecordId) -> exclusiveGateway on
   `[#ReadContact.ResultEntity.DoNotUseCall#] == false` -> Perform task with `OwnerId` <- `sourceColumn: "Owner"`.
