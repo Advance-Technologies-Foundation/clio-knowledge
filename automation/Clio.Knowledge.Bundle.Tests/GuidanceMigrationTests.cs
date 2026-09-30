@@ -210,7 +210,7 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
-    [Description("Declares freedom-page-web-to-mobile-conversion as feature-gated, pins every process article the ENG-96132 go-live covers as un-gated - the seven ENG-96212 produced and the four ENG-96536 extracted from them - and keeps requiredFeatures optional in both v1 contracts.")]
+    [Description("Pins both mobile conversion articles as un-gated after the ENG-94638 GA, pins every process article the ENG-96132 go-live covers as un-gated - the seven ENG-96212 produced and the four ENG-96536 extracted from them - and keeps requiredFeatures optional in both v1 contracts.")]
     public void FeatureGating_ShouldBeDeclaredByTheResourceAndBothSchemas()
     {
         // Arrange
@@ -226,12 +226,17 @@ public sealed class GuidanceMigrationTests
             "schemas/v1/knowledge-bundle.schema.json")));
 
         // Act
-        JsonElement webToMobileConversion = source.RootElement.GetProperty("resources")
+        // ENG-94638 took the converter to GA. The tool half of the gate is the [FeatureToggle] Clio
+        // deleted from MobilePageConversionGuideTool; this is the guidance half, and BOTH articles move
+        // together - routing sends a caller from the conversion guide to the reason codes, so leaving the
+        // second gated would strand it mid-flow with a topic that resolves as unknown.
+        string[] gaMobileArticles =
+            ["freedom-page-web-to-mobile-conversion", "freedom-page-mobile-reason-codes"];
+        string[] regatedMobileArticles = source.RootElement.GetProperty("resources")
             .EnumerateArray()
-            .Single(resource => resource.GetProperty("itemId").GetString() == "freedom-page-web-to-mobile-conversion");
-        string[] requiredFeatures = webToMobileConversion.GetProperty("requiredFeatures")
-            .EnumerateArray()
-            .Select(feature => feature.GetString()!)
+            .Where(resource => gaMobileArticles.Contains(resource.GetProperty("itemId").GetString()))
+            .Where(resource => resource.TryGetProperty("requiredFeatures", out _))
+            .Select(resource => resource.GetProperty("itemId").GetString()!)
             .ToArray();
         JsonElement processModeling = source.RootElement.GetProperty("resources")
             .EnumerateArray()
@@ -273,8 +278,15 @@ public sealed class GuidanceMigrationTests
             .GetProperty("resource");
 
         // Assert
-        requiredFeatures.Should().Equal(["mobile-page-converter"],
-            because: "freedom-page-web-to-mobile-conversion must not be advertised while its experimental Clio feature is disabled");
+        source.RootElement.GetProperty("resources").EnumerateArray()
+            .Select(resource => resource.GetProperty("itemId").GetString())
+            .Should().Contain(gaMobileArticles,
+                because: "the scan below proves nothing unless both articles it names are actually in the library - "
+                    + "a rename would otherwise empty the filter and leave the gate green");
+        regatedMobileArticles.Should().BeEmpty(
+            because: "the converter went GA in ENG-94638, so neither conversion article may be withheld behind a "
+                + "feature nobody is asked to enable; re-gating either one would hide guidance whose tool is "
+                + "advertised to every caller, so the loss shows up as a bad conversion rather than as a missing guide");
         processModeling.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
             because: "process-designer shipped enabled by default (ENG-96132); re-gating this article would hide "
                 + "the guide the GA business-process tools name as mandatory reading");
