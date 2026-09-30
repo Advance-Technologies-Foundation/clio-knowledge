@@ -21,7 +21,7 @@ empty section, a blank list, or nothing in the menu, with no error.
 This flow is the FREEDOM UI portal mechanism. The Classic self-service-portal (SSP) artifacts —
 `Portal_SysModule`, `SysModuleEntityInPortal`, `SysPortal` (package SSP), and `PortalSchemaAccessList` /
 `PortalColumnAccessList` — are NOT part of it and must NOT be written for a Freedom portal section; a
-Freedom section grants access through `SysSchemaOperationRight` (the object-rights step below), and
+Freedom section grants access through `SysEntitySchemaOperationRight` (the object-rights step below), and
 `PortalSchemaAccessList` stays empty. Evidence: the visibility mechanism was read from the creatio-ui
 source (`ObjectPermissionsValidator` in the related-pages designer) and confirmed against
 `RightManagementService` on a live stand (Creatio 10.2.129.0). Writing the Classic tables for a Freedom
@@ -57,36 +57,32 @@ assumes the earlier one exists.
    go there for the writes and their data bindings. Confirm placement and audience with the user, as
    that guide requires.
 
-4. Grant OBJECT access to the portal audience — owner: `object-rights`. Give `All external users`
-   operation permissions on the section's object AND its lookup objects, or the list and fields are
-   empty even though the section and page exist. `--include-connected` grants read to the WHOLE external
-   audience on every connected lookup too, so REVIEW WHAT THE FAN-OUT EXPOSES BEFORE GRANTING — a
-   connected lookup can carry PII or internal reference data (`Account`, `Contact`, price lists,
-   catalogs) that must not become world-readable to every external user:
-   1. PREVIEW the grant: call `set-object-rights --entity-schema-name <Object>
-      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --operations read --include-connected` WITHOUT
-      confirm (on the CLI: `--preview`). It writes nothing and lists the object and every lookup the grant
-      would touch, their current state, which get operation permissions turned on, and a
-      confirmation-code. Security and system lookups (for example `SysAdminUnit`) are never in the fan-out
-      — the preview names them in a warning; granting one is a separate decision.
-   2. ASK THE USER with that preview, as `object-rights` requires for every write: for the portal case add
-      that the WHOLE external audience gets read on those objects. Where a shared lookup holds sensitive
-      data, do NOT fan it out — grant per-object (drop `--include-connected` and preview/grant only the safe
-      objects) and handle the sensitive lookup another way.
-   3. Only after approval, repeat the SAME call with `confirm=true` and the `confirmation-code` (on the
-      CLI: `--confirmation-code <code>`). A code that no longer matches means the targets changed —
-      preview and ask again.
-   Pin `--operations read` explicitly. The root default (read/create/edit) would hand the WHOLE external
-   audience create and edit on the section's object; the connected lookups get read only unless
-   `--connected-operations` widens them. Grant only what the portal scenario needs, and add
-   `create`/`edit` only where external users genuinely author records.
-   This read-exposure review mirrors the write caution — a fan-out grant is a disclosure decision, not a
-   mechanical step. Finally VERIFY with the same `get-object-rights … --include-connected` read. The tool
-   reports facts, not a verdict, so read them for the portal audience: every object must show
-   `All external users` with at least `read`. An object reported as `not administered by operation
-   permissions` is CLOSED to external users (it is open only to internal ones) and still needs the grant;
-   one with `NO object operations granted` needs it too. An object that could not be read, or a connected
-   set that could not be enumerated, is not verified — re-run the read; do not treat it as done.
+4. Grant OBJECT access to the portal audience — owner: `object-rights`; read it before this step (it
+   owns the row priority, the enable flag and the ask-before-write rule). Give `All external users`
+   operation permissions on the section's object AND on each lookup the portal pages show, or the list
+   and fields are empty even though the section and page exist. Each object is its own grant, and each
+   grant is a disclosure decision, not a mechanical step:
+   1. LIST: `get-object-rights --entity-schema-name <Object>
+      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected`. It reads the object and its
+      own lookups with their rows and writes nothing. Security and system lookups (for example
+      `SysAdminUnit`) are never listed; granting one is a separate decision.
+   2. ASK THE USER before any write, per object: the operations, and whether operation permissions turn
+      on (with the rows that then start to decide). Say that EVERY external user gets that access, on
+      EVERY record of the object: a shared lookup (`Account`, `Contact`, price lists, catalogs) can carry
+      PII or internal reference data that must not become readable to every external user — leave such a
+      lookup out and handle it another way. Limiting external users to their own records is record-level
+      access (`record-permissions`), not this step.
+   3. GRANT each approved object in its own call: `set-object-rights --entity-schema-name <Object>
+      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --operations read`, plus
+      `--enable-operation-permissions` when the object is not administered yet — such an object is closed
+      to external users, so their first grant on it always needs the flag. `--operations` is required:
+      `read`, plus `create`/`edit` on the section's object only where external users genuinely author
+      records. The All employees row does not decide for external users, so it does not shadow this grant.
+   4. VERIFY with the same `get-object-rights … --include-connected` read. The tool reports facts, not a
+      verdict: every approved object must show an `All external users` row with at least `read`. An
+      object reported as `not administered by operation permissions` is still CLOSED to external users;
+      an object that could not be read, or a connected set that could not be enumerated, is not verified
+      — re-run the read; do not treat it as done.
 
 ## Fixed ids
 - `All external users` role (the portal audience, used in steps 2–4):
@@ -99,9 +95,9 @@ Reading each step back (the related-page entry, the `SysModuleInWorkplace` row, 
 confirms stored configuration, not that a portal user sees the section. The authoritative check is a
 portal-LICENSED external user, a member of `All external users`, logging into the portal and opening the
 section with data visible — and, per `workplaces`, navigation caches per session, so that user must log
-in AFTER step 3 (a re-login, not F5). Evidence boundary: the grant mechanism (a `SysSchemaOperationRight`
-grant to `All external users`) is grounded in the creatio-ui source and confirmed at the
-`RightManagementService` layer; whether portal visibility additionally depends on the workplace's
+in AFTER step 3 (a re-login, not F5). Evidence boundary: the grant mechanism (a
+`SysEntitySchemaOperationRight` grant to `All external users`) is grounded in the creatio-ui source and
+confirmed at the `RightManagementService` layer; whether portal visibility additionally depends on the workplace's
 `SysWorkplace.Type` being `Portal` versus the audience grant alone was NOT isolated on a live stand
 (it needs a portal-licensed external user to A/B). Treat the external-user round-trip as the acceptance
 test, not the per-step read-backs.
