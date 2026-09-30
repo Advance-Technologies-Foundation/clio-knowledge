@@ -35,6 +35,12 @@ public sealed class PortalSectionsGuidanceTests
     [TestCase("ASK THE USER before any write", TestName = "PortalSections_ShouldAskBeforeEachWrite")]
     [TestCase("EVERY external user gets that access, on EVERY record of the object",
         TestName = "PortalSections_ShouldStateWhatTheWholeAudienceGets")]
+    [TestCase("the object of each detail on the page, and the lookup object of each column shown",
+        TestName = "PortalSections_ShouldListEveryObjectThePortalPagesShow")]
+    [TestCase("it does not list lookups the object inherits",
+        TestName = "PortalSections_ShouldStateWhatTheConnectedListingLeavesOut")]
+    [TestCase("with the facts of a preview of the planned call",
+        TestName = "PortalSections_ShouldPreviewBeforeAsking")]
     [Description("The object-access step lists, asks, then grants each approved object in its own set-object-rights call, naming the operations and the enable flag.")]
     public void PortalSections_ShouldFollowTheObjectRightsContract(string rule)
     {
@@ -46,6 +52,27 @@ public sealed class PortalSectionsGuidanceTests
 
         // Assert
         normalized.Should().Contain(rule, because: "the portal grant follows the set-object-rights contract");
+    }
+
+    [Test]
+    [Description("No line of the article puts include-connected on a set-object-rights call: set changes one object per call and refuses the argument.")]
+    public void PortalSections_ShouldNotPassIncludeConnectedToSetObjectRights()
+    {
+        // Arrange
+        string[] lines = File.ReadAllLines(Path.Combine(Root(), PortalSectionsPath));
+
+        // Act
+        string[] offending = lines
+            .Where(line =>
+            {
+                int set = line.IndexOf("set-object-rights", StringComparison.OrdinalIgnoreCase);
+                return set >= 0 && line.IndexOf("include-connected", set, StringComparison.OrdinalIgnoreCase) > set;
+            })
+            .Select(line => line.Trim())
+            .ToArray();
+
+        // Assert
+        offending.Should().BeEmpty(because: "include-connected is an argument of get-object-rights, never of set-object-rights");
     }
 
     [TestCase("confirmation-code")]

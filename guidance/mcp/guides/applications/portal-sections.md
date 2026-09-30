@@ -40,7 +40,7 @@ assumes the earlier one exists.
 
 1. The SECTION and its page must exist. A portal section is an ordinary Freedom section
    (`SysModule`, Type=0) with a Freedom form page — there is no separate "portal section" object.
-   Create them the normal way (`app-modeling` for the section/app, `pages/creation` for a page) if they
+   Create them the normal way (`app-modeling` for the section/app, `page-creation` for a page) if they
    do not exist yet. Nothing here is portal-specific.
 
 2. Bind the page for the portal audience — owner: `related-page-binding`. Give the record page an
@@ -59,19 +59,23 @@ assumes the earlier one exists.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`; read it before this step (it
    owns the row priority, the enable flag and the ask-before-write rule). Give `All external users`
-   operation permissions on the section's object AND on each lookup the portal pages show, or the list
+   operation permissions on the section's object AND on every object the portal pages show, or the list
    and fields are empty even though the section and page exist. Each object is its own grant, and each
    grant is a disclosure decision, not a mechanical step:
-   1. LIST: `get-object-rights --entity-schema-name <Object>
-      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected`. It reads the object and its
-      own lookups with their rows and writes nothing. Security and system lookups (for example
-      `SysAdminUnit`) are never listed; granting one is a separate decision.
-   2. ASK THE USER before any write, per object: the operations, and whether operation permissions turn
-      on (with the rows that then start to decide). Say that EVERY external user gets that access, on
-      EVERY record of the object: a shared lookup (`Account`, `Contact`, price lists, catalogs) can carry
-      PII or internal reference data that must not become readable to every external user — leave such a
-      lookup out and handle it another way. Limiting external users to their own records is record-level
-      access (`record-permissions`), not this step.
+   1. LIST: build the list from what the portal pages show — the section's object, the object of each
+      detail on the page, and the lookup object of each column shown. `get-object-rights
+      --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected`
+      reads the object and its OWN lookups with their rows and writes nothing; it does not list lookups
+      the object inherits (for example `Created by` → `Contact`), detail objects or their lookups, so
+      read each of those by name. Security and system lookups (for example `SysAdminUnit`) are never
+      listed; granting one is a separate decision.
+   2. ASK THE USER before any write, per object, with the facts of a preview of the planned call
+      (`preview=true`): the operations, and whether operation permissions turn on (with the rows that
+      then start to decide). Say that EVERY external user gets that access, on EVERY record of the
+      object: a shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
+      reference data that must not become readable to every external user — leave such a lookup out and
+      handle it another way. Limiting external users to their own records is record-level access
+      (`record-permissions`), not this step.
    3. GRANT each approved object in its own call: `set-object-rights --entity-schema-name <Object>
       --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --operations read`, plus
       `--enable-operation-permissions` when the object is not administered yet — such an object is closed
