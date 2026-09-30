@@ -48,7 +48,8 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
     `create-business-process` call find a shape rather than an empty list; re-selecting re-shapes in place,
     keeping surviving item ids. A multi-instance Sub-process element CONSUMES a collection - map
     `ResultCompositeObjectList` onto its `InputRecordCollection` and the called process runs once per item;
-    see `process-sub-process`. Reading one column out of the list into a scalar is not supported yet.
+    see `process-sub-process`. A column of one ITEM of the list is not a source; a first-record read's
+    column is (see below).
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
     MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element, but `describe`
     does NOT list `ResultRowsCount` on a builder- or designer-made count element (see the `describe` coverage
@@ -97,18 +98,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
   reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- A read record's individual COLUMN values ARE reachable in a flow condition and in a formula — the platform parses a
-  third meta-path segment (`FillMatchedData` routes an `EntityColumn` segment into `SubParameterMetaPath`
-  and `TryGetParameterMapPath` carries it). describe reports no column UIds, but that is a
-  DISCOVERABILITY gap, not a refusal: `get-entity-schema-properties` supplies the UId describe does not.
-  `process-data-elements` owns both recipes (steps, verified evidence).
-  One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
-  `[[element:Read.ResultEntity.Column]]`. The element's only output parameter
-  is `ResultEntity` (the whole record, `isOutput:true` in describe); the record's columns are still NOT
-  element parameters, so a STRUCTURED reference to one (e.g. `sourceElementParameter: "Email"` on the
-  read element) FAILS the build with "element has no parameter". To carry a column onward, put it into a
-  process parameter with a formula (`process-data-elements`). To key work off a specific record, use a
-  `signalStart` trigger output (`RecordId`) or a process parameter.
+- ONE column of a first-record read's `ResultEntity` IS a source, by its code (`sourceColumn`,
+  `elementParameter.column`, `[#Read.ResultEntity.Column#]`); `process-data-elements` owns the forms and every
+  refusal, including the two this block causes (a column outside a non-empty `columns`
+  list, and a read in any mode but first). The element's only output PARAMETER is still `ResultEntity`.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",
