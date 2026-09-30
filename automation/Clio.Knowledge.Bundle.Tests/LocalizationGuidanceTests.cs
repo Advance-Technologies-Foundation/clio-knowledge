@@ -107,6 +107,96 @@ public sealed class LocalizationGuidanceTests
             because: "Git consumers must read the canonical human-authored article");
     }
 
+    [Test]
+    [Description("Keeps the inline-literal rule for the push-workspace source path in its owner article, with the gate row only pointing to it.")]
+    public void PageSchemaResourcesGuide_ShouldOwnTheSourcePathLiteralRule()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string pageResources = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance", "mcp", "guides", "page-schema", "resources.md"));
+        string pageModification = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance", "mcp", "guides", "pages", "modification", "index.md"));
+
+        // Act
+        string gateRow = pageModification.Split('\n')
+            .Single(line => line.Contains("| `page-schema-resources` |", StringComparison.Ordinal));
+
+        // Assert
+        pageResources.Should().Contain("SAME RULE ON THE SOURCE PATH (`push-workspace`)",
+            because: "the owner article must state the inline-literal rule for workspace sources");
+        pageResources.Should().Contain("`push-workspace` does NOT reject an inline literal",
+            because: "push-workspace keeps installing literal-bearing pages and only warns");
+        pageResources.Should().Contain("clio 8.1.0.134 and earlier do not have it",
+            because: "tool-dependent guidance must state a checkable clio version boundary");
+        pageResources.Should().Contain("resource binding on the literal-only `crt.ImageInput.tooltip`",
+            because: "push-workspace warns about both text cases update-page rejects, not only inline literals");
+        pageResources.Should().Contain("A schema file it cannot read gets its own warning with the file path",
+            because: "an unreadable schema is skipped with a per-file warning while the other schemas are still checked");
+        pageResources.Should().NotContain("clio/issues/1639",
+            because: "guidance must name a clio version, not an internal issue, as the compatibility boundary");
+        gateRow.Should().Contain("see `page-schema-resources` for how `push-workspace` handles inline literals",
+            because: "the gate row must point to the owner article for the source-path rule");
+        gateRow.Should().NotContain("warns per page schema",
+            because: "the gate row must not restate the owner's push-workspace behavior");
+    }
+
+    [Test]
+    [Description("Pins the page-translation safety rules, their single owner, and the route that reaches them.")]
+    public void PageTranslationGuide_ShouldPublishSafetyRulesOwnerAndRoute()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string guidesRoot = Path.Combine(repositoryRoot, "guidance", "mcp", "guides");
+        string translation = File.ReadAllText(Path.Combine(guidesRoot, "page-schema", "translation.md"));
+        string maintenance = File.ReadAllText(Path.Combine(guidesRoot, "applications",
+            "existing-app-maintenance.md"));
+        string localizableValues = File.ReadAllText(Path.Combine(guidesRoot, "localizable-values.md"));
+        string routing = File.ReadAllText(Path.Combine(guidesRoot, "routing.md"));
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(
+            repositoryRoot, "bundle-source.json")));
+
+        // Act
+        JsonElement resource = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == "page-schema-translation");
+        JsonElement requirements = source.RootElement.GetProperty("requirements");
+
+        // Assert
+        translation.Should().Contain("Empty and whitespace-only values are REFUSED",
+            because: "localize-page refuses a blank value, so the guide must not promise that one is stored");
+        translation.Should().NotContain("does NOT reject an empty string",
+            because: "that rule was true only before the blank-value check and misleads an agent now");
+        translation.Should().Contain("`captionInherited`",
+            because: "a page created from a template reads back the template's translated title, which is not a translation");
+        translation.Should().Contain("`culture: \"en-US\"` is REJECTED",
+            because: "the default culture is changed through update-page, never through localize-page");
+        translation.Should().Contain("writes ONE culture of ONE page per call",
+            because: "each call must leave every other culture unchanged");
+        maintenance.Should().Contain(
+            "MUST call `get-tool-contract` for `update-app-section` before ANY update of an existing section",
+            because: "an earlier clio ignores caption-culture and every section update deletes other-language titles");
+        localizableValues.Should().Contain("owned by `page-schema-translation`",
+            because: "the localize-page workflow has exactly one owning article");
+        localizableValues.Should().NotContain("resource registration, and the `localize-page` workflow",
+            because: "page-schema-resources no longer owns the localize-page workflow");
+        routing.Should().Contain("translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation",
+            because: "agents must be routed to the owner of the page-translation workflow");
+        resource.GetProperty("uri").GetString().Should().Be(
+            "docs://knowledge/com.creatio.clio/page-schema-translation",
+            because: "the article needs one stable canonical route");
+        resource.GetProperty("sourcePath").GetString().Should().Be(
+            "guidance/mcp/guides/page-schema/translation.md",
+            because: "Git consumers must read the canonical human-authored article");
+        requirements.GetProperty("itemIds").EnumerateArray()
+            .Select(item => item.GetString()).Should().Contain("page-schema-translation",
+                because: "activation requirements must include the page-translation guide item");
+        requirements.GetProperty("resourceUris").EnumerateArray()
+            .Select(item => item.GetString()).Should().Contain(
+                "docs://knowledge/com.creatio.clio/page-schema-translation",
+                because: "activation requirements must include the page-translation guide URI");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
