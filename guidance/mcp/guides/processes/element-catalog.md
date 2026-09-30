@@ -123,8 +123,10 @@ leaf rather than through `process-modeling`.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
-    `webService` (also marked READ-ONLY below),
-  and reading one COLUMN out of a read collection — all
+    `webService` (also marked READ-ONLY in the
+    catalog below, where silence used to read as "buildable"),
+  and reading one COLUMN out of a read COLLECTION's items (a first-record read's column IS a source,
+  `sourceColumn` - see `process-data-elements`) — all
   four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance
   Sub-process element iterates one, once per item (see the `callActivity` entry below).
   Use the catalog below to reason about a solution and to READ existing processes
