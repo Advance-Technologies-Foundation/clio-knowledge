@@ -507,16 +507,15 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   `drop-unknown-request` when it is in neither the rules nor the registry (often a custom `usr.*`), and
   the bare code, no params, when EMPTINESS removed it. One exception, and the one to expect on a menu:
   a component still HOLDING a live menu item or submenu is NOT dropped over its own dead request, which
-  would take the live child with it.
-  NO OTHER component type is ever dropped over a request: some legitimately fire a system request the
-  registry lacks, and losing them would lose valid UI. Such a component SURVIVES, and the same two
-  cases decide its binding:
+  would take the live child with it — keeping the CONTROL is not keeping its ACTION.
+  NO OTHER component type is dropped over a request: some legitimately fire a system request the
+  registry lacks, and losing them would lose valid UI. That owner and every other SURVIVING component
+  have their bindings decided by the same two cases:
     • KNOWN-unsupported — REMOVED, the component shipping without it, in
       `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
     • UNKNOWN — KEPT VERBATIM, flagged in `requestConversions.flaggedRequests[]` under
       `flag-request-unmapped`, for you to verify.
-  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
-  a SURVIVING component, a loss `droppedElements` never shows), flaggedRequests,
+  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests, flaggedRequests,
   unresolvedTargetRequests and missingTargetPages (both above). Tell the user which action components
   were removed AND which surviving components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
