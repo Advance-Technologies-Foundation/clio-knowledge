@@ -108,10 +108,45 @@ public sealed class MobileGuideResponseSizeTests
     /// `crt.OpenPageRequest` rather than a fixed key, and trimmed the surrounding sentence to net shrink
     /// the article (62,684 -> 62,614) rather than raise the ceiling, per the ratchet-down rule.
     /// </remarks>
+    /// <remarks>
+    /// LOWERED BOTH, 62,614 -> 62,576 and 18,809 -> 18,732, in a change that ADDS content (ENG-96178).
+    /// Three statements had become false and one had never been true: a second component type is now
+    /// dropped over a request (crt.MenuItem, declared by the rules' actionComponents), that code also
+    /// arrives with NO params for a control left with nothing to do, drop-unknown-request's
+    /// "params.scope is ALWAYS present ... emitted from one site" was wrong on both halves once the
+    /// reason helper became shared across three sites, and the "bundled set" it names was deleted from
+    /// clio by ENG-96589 in favour of the mobile request registry. A fifth: the conversion article named
+    /// no drop code at all for an action-only component, though both paths that drop one route through
+    /// the same helper and split `drop-unsupported-request` from `drop-unknown-request`, so a leaf button
+    /// carrying a custom `usr.*` request arrives under the latter. Both ceilings still went DOWN, because
+    /// the two request bullets and the surviving-binding lead-in were paid down to cover the additions.
+    /// The conversion article is the one under the STANDING PROBLEM above, so growing it was not an option
+    /// this change was willing to take.
+    /// <para>
+    /// This fixture cannot tell you the corrections are COMPLETE, and an earlier draft of this remark
+    /// claimed they were while two of the four still had a second, untouched occurrence elsewhere in the
+    /// same article. Counting characters cannot see that. What checks it is
+    /// <c>MobileDropReasonCodeCoverageTests.Articles_ShouldNotCarryARetiredWording</c>; this one only
+    /// keeps the size from drifting.
+    /// </para>
+    /// </remarks>
+    /// <remarks>
+    /// LOWERED AGAIN, 62,576 -> 62,564, in another change that ADDS content. Two statements about the
+    /// drop were still wrong. The first: an action-only component whose request does not convert is NOT
+    /// always dropped - one still HOLDING a live menu item or submenu is kept, because dropping it would
+    /// take that live child off the page, and the article promised the drop unconditionally in both the
+    /// FLOW step and the HARD MOBILE RULES bullet. The second was a wording defect rather than a false
+    /// fact: "the bare code with no params in the second case" sat immediately after a list of two CODES,
+    /// so it read as drop-unknown-request, which always carries params.request; the emptiness case is
+    /// named outright now. Paid for inside the same bullet, per the ratchet-down rule: the sentence
+    /// restating that a supported request is kept in viewConfigDiff[].values came out (the FLOW step
+    /// three paragraphs up already says it, in more detail), and so did the second copy of the
+    /// clicked / valueChange / updated parenthetical from the same place.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_614),
-        ("freedom-page-mobile-reason-codes", 18_809)
+        ("freedom-page-web-to-mobile-conversion", 62_564),
+        ("freedom-page-mobile-reason-codes", 18_732)
     ];
 
     /// <summary>

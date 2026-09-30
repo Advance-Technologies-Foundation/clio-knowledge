@@ -29,6 +29,7 @@ public sealed class GuidanceMigrationTests
         "process-sub-process-when",
         "portal-service-routing",
         "external-organizations",
+        "page-schema-translation",
         "object-rights"
     ];
 

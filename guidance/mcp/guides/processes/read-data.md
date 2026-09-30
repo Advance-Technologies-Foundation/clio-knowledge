@@ -27,8 +27,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
       },
       "filter": { "object": "Contact",
         "conditions": [ { "column": "Name", "comparison": "contains", "value": "Creatio" } ] } }
-- `mode` and what each one produces (the output is what `describe-business-process` marks `isResult: true`,
-  and what a downstream mapping's `sourceElementParameter` names):
+- `mode` and what each one produces (the output is what `describe-business-process` lists in `readData.outputs`
+  and marks `isOutput: true` — NOT `isResult`, which the designer sets on `ResultEntity` in `first` mode only, so
+  every other mode's output reads back `isResult: false` — and what a downstream mapping's
+  `sourceElementParameter` names):
   * `first` — the FIRST record of the sorted selection → `ResultEntity` (the whole record).
   * `collection` — EVERY matching record, into TWO outputs: `ResultEntityCollection` (the raw list) and
     `ResultCompositeObjectList` (one column per selected column). Mirror the second into a `Collection` process
@@ -46,7 +48,8 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
     `create-business-process` call find a shape rather than an empty list; re-selecting re-shapes in place,
     keeping surviving item ids. A multi-instance Sub-process element CONSUMES a collection - map
     `ResultCompositeObjectList` onto its `InputRecordCollection` and the called process runs once per item;
-    see `process-sub-process`. Reading one column out of the list into a scalar is not supported yet.
+    see `process-sub-process`. A column of one ITEM of the list is not a source; a first-record read's
+    column is (see below).
   * `count` — how many records match → `ResultCount` (Integer). Takes NO column and NO `columns`/`sort`.
     MUST map `ResultCount`, NOT `ResultRowsCount`. Both are Integer outputs of the element, but `describe`
     does NOT list `ResultRowsCount` on a builder- or designer-made count element (see the `describe` coverage
@@ -70,7 +73,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   mapping that names the current one would survive pointing at a parameter the runtime no longer fills; the
   designer reverts the same edit for the same reason. Re-map or remove the dependents first (or remove and re-add
   the element). A conversion that proceeds clears the previous mode's parameters, moves the
-  result flag to the new mode's output, and clears the column selection / sort on entering count /
+  OUTPUT to the new mode's parameter (see `readData.outputs`), and clears the column selection / sort on entering count /
   aggregation. The record `filter` is KEPT — it is the one block every mode carries (the designer shows "How to
   filter records?" in all of them), so a mode change does not need a `setFilter` after it; only a `source`
   retarget clears the filter. LEAVING collection additionally clears its top-N pair and empties
@@ -79,7 +82,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   `FeatureReadDataUserTaskEntityReadOldMode` it still decides how many rows a `first` read takes. A
   `setElement.readData` update naming another mode performs that conversion — it is NOT remove+recreate.
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
-  output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the result flag from
+  output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the output from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output STOPS BEING FILLED
   (the parameter still exists and is still mappable) — re-read the element with `describe-business-process`
   after such a change and re-point anything that consumed it.
@@ -95,18 +98,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   section of `process-data-source-filters`). Unlike a signalStart filter, a readData filter MAY
   reference `processParameter` /
   `elementParameter` — the element runs inside a live process instance.
-- A read record's individual COLUMN values ARE reachable in a flow condition and in a formula — the platform parses a
-  third meta-path segment (`FillMatchedData` routes an `EntityColumn` segment into `SubParameterMetaPath`
-  and `TryGetParameterMapPath` carries it). describe reports no column UIds, but that is a
-  DISCOVERABILITY gap, not a refusal: `get-entity-schema-properties` supplies the UId describe does not.
-  `process-data-elements` owns both recipes (steps, verified evidence).
-  One exception, whose form `process-send-email` owns: a Send email BODY macro reaches a column by NAME,
-  `[[element:Read.ResultEntity.Column]]`. The element's only output parameter
-  is `ResultEntity` (the whole record, `isResult:true` in describe); the record's columns are still NOT
-  element parameters, so a STRUCTURED reference to one (e.g. `sourceElementParameter: "Email"` on the
-  read element) FAILS the build with "element has no parameter". To carry a column onward, put it into a
-  process parameter with a formula (`process-data-elements`). To key work off a specific record, use a
-  `signalStart` trigger output (`RecordId`) or a process parameter.
+- ONE column of a first-record read's `ResultEntity` IS a source, by its code (`sourceColumn`,
+  `elementParameter.column`, `[#Read.ResultEntity.Column#]`); `process-data-elements` owns the forms and every
+  refusal, including the two this block causes (a column outside a non-empty `columns`
+  list, and a read in any mode but first). The element's only output PARAMETER is still `ResultEntity`.
 - Change an EXISTING element in place with the `setElement` op's `readData` field (preserves the element
   and its flows):
     { "op": "setElement", "elementName": "ReadNewestContact",
