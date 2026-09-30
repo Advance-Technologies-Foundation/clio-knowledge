@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.90",
+  "libraryVersion": "1.15.91",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1061,9 +1061,6 @@
       "description": "Canonical MCP guidance for converting a source page into a Freedom UI MOBILE page via get-mobile-page-conversion-guide: advisory guide (detected sourceType, recommended template, container map, component suggestions, inline mobile contracts), the model-driven flow where you build the body with create-page/update-page/validate-page, the five component categories, the Freedom-UI-only precondition (Classic UI must be converted to Freedom UI web first), mobile constraints, and how to finish in Freedom UI Mobile Designer.",
       "topicId": "creatio.freedom-page-web-to-mobile-conversion",
       "role": "guidance",
-      "requiredFeatures": [
-        "mobile-page-converter"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-web-to-mobile-conversion"
@@ -1078,9 +1075,6 @@
       "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
-      "requiredFeatures": [
-        "mobile-page-converter"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-mobile-reason-codes"
@@ -1414,7 +1408,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) and the Sub-process element (subProcess, from 1.6.3.26) -- while inclusive/event-based gateways, timer/message and intermediate events, scriptTask and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.14). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula (formulaTask), Sub-process (subProcess) and Script task (scriptTask) elements -- while inclusive/event-based gateways, timer/message and intermediate events and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.14). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1755,7 +1749,7 @@
     {
       "itemId": "process-script-task",
       "title": "Process ScriptTask C#",
-      "description": "Guides C# inside an existing Creatio process ScriptTask: exact process parameter codes, Get/Set access, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and target-environment verification.",
+      "description": "When to add a Creatio process ScriptTask (it makes the process need a compile) and how to write one: the scriptTask block, exact case-sensitive Get/Set parameter access, the namespaces the generated code imports, process usings and methods and when an alias is needed, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and compiling and verifying on the target environment.",
       "topicId": "creatio.process-script-task",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-script-task",

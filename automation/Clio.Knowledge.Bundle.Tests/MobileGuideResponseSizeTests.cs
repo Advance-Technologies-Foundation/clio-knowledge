@@ -143,9 +143,19 @@ public sealed class MobileGuideResponseSizeTests
     /// three paragraphs up already says it, in more detail), and so did the second copy of the
     /// clicked / valueChange / updated parenthetical from the same place.
     /// </remarks>
+    /// <remarks>
+    /// LOWERED AGAIN, 62,564 -> 62,418, in a change that ADDS content (ENG-94638). The converter went GA
+    /// for the PHONE canvas only, and nothing in the article said so: it described medium/large as
+    /// "tablet/desktop keep the web columns" with no caveat, so a reader would take a tablet rendering
+    /// for a supported result. The article had ZERO headroom - it sat exactly on its ceiling - so the
+    /// caveat was paid for inside the same bullet, per the ratchet-down rule: the ADAPTIVE LAYOUT
+    /// standing rule restated the per-breakpoint mechanics and the report-it-as-fact instruction that
+    /// FLOW step 5b already gives in more detail, so the restatement came out and the bullet now points
+    /// at 5b. Net -146 even after the addition.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_564),
+        ("freedom-page-web-to-mobile-conversion", 62_418),
         ("freedom-page-mobile-reason-codes", 18_732)
     ];
 
