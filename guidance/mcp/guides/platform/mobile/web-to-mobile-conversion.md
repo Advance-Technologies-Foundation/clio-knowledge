@@ -345,7 +345,8 @@ FLOW
    client renders the plain layout). Nothing extra to apply — do NOT emit a separate merge for the
    container's adaptive (it is already inside the container's inserted values; a separate merge
    would duplicate the operation). REPORT it to the user in plain language as a FACT of the conversion
-   ("fields in <container> stack on the phone and keep <n> columns on a tablet") — do NOT ask whether to
+   ("fields in <container> stack on the phone and keep <n> columns on a tablet; tablet is experimental,
+   check it on a device") — do NOT ask whether to
    apply it. There is no field to decline it with: the values are already in the operations you pasted, so
    a "no" has no represented outcome. The only change path is hand-editing those values before pasting,
    and that is the developer's to take, not a question for the gate.
@@ -565,13 +566,11 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   NOT retargeted at all — the guide drops it (reason code `drop-inherited-chrome`), because a duplicate
   would shadow the native element. A page-AUTHORED element (above the web-template baseline) is not
   chrome and DOES convert.
-- ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and the guide builds AND bakes both sides
-  into values for you: the container's per-breakpoint columns (small = 1, medium/large = the web
-  columns) and each child's layoutConfig.adaptive (small = single-column stack; medium/large = the web
-  placement). A single-column grid gets NO adaptive — the mobile client renders the plain config. Just
-  paste values verbatim; do not hand-build adaptive. The mobile runtime reflows children by
-  `row` / `column`. adaptiveLayout is a readable INDEX of what was baked in, not a proposal — the
-  response carries no mechanism to decline it; report it at the gate as fact.
+- ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and both sides are baked into values for
+  you; step 5b has the mechanics and the reporting rule. Just paste values verbatim; do not hand-build
+  adaptive. The mobile runtime reflows children by `row` / `column`.
+  Supported canvas: Mobile (`small`) ONLY. `medium`/`large` (tablet/desktop) are baked in but stay
+  EXPERIMENTAL, outside supported scope. Say so at the gate; tell the user to check on a tablet.
 - TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and is
   no more a proposal than adaptiveLayout is: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
