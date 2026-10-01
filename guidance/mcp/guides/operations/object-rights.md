@@ -41,8 +41,7 @@ name the chosen id and type in the preview you show. Fixed platform roles:
   the rows give them. For EXTERNAL users it can WIDEN access: every stored row that grants an external
   role (All external users, another portal role, a portal user) starts to apply. Before an enable you
   MUST name each such row to the developer.
-- Internal roles holding the "…any data" system operations reach records whatever the object rows say —
-  see `get-guidance name=entity-operation-access`.
+- Internal roles holding the "…any data" system operations reach records whatever the object rows say.
 
 Evidence: the priority rule is Creatio Academy's (a user in several roles gets the permissions of the
 highest role in the list). It was reproduced per row as a non-admin internal user on a Creatio 8.3.4 stand

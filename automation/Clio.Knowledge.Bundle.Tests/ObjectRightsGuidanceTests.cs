@@ -97,6 +97,8 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatAnEnableCanWidenExternalAccess")]
     [TestCase("Before an enable you MUST name each such row to the developer",
         TestName = "ObjectRights_ShouldRequireNamingTheExternalRowsAnEnableRevives")]
+    [TestCase("Internal roles holding the \"…any data\" system operations reach records whatever the object rows say.",
+        TestName = "ObjectRights_ShouldStateThatTheAnyDataOperationsOverrideTheRows")]
     [TestCase("When several rows match, you MUST NOT pick one",
         TestName = "ObjectRights_ShouldForbidPickingAmongSeveralGranteeMatches")]
     [TestCase("clears the named operations on the grantee's row and KEEPS the row",
