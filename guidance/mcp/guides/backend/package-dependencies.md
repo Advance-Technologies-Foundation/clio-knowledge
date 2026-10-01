@@ -74,7 +74,9 @@ CREATING A NEW PACKAGE
 - Arguments: environment-name, package-name; optional description, dependencies (array of package
   names) and application-code (creates the package inside that installed application).
 - The environment's SchemaNamePrefix is prepended when package-name lacks it ("Calls" becomes
-  "UsrCalls"). Use the RETURNED package-name for every later call, never the one you sent.
+  "UsrCalls"). Use the RETURNED package-name for every later call, never the one you sent: pass it as
+  package to get-target-package to confirm the new package as the write target, and as the package
+  argument of every later write in the same run.
 - Result: package-created=false means nothing changed (duplicate name, unknown dependency or
   application, rejected name). package-created=true with success=false means the package exists but a
   later step failed; error says which: dependencies not applied (add them with add-package-dependency)
@@ -86,4 +88,5 @@ CREATING A NEW PACKAGE
 
 NOTES
 - A dependency change may report compilation-required; follow the package-scoped compilation and activation policy in `core-rules` for the affected package.
-- Both operations need the same elevated package-management access as other package tools.
+- add-package-dependency and remove-package-dependency need the same elevated package-management
+  access as other package tools. create-package needs a user with administrator permission.
