@@ -71,8 +71,10 @@ CREATING A NEW PACKAGE
   call it through clio-run-destructive. When the running clio does not expose it, ask the user to create
   the package in the Configuration section; do NOT fall back to push-workspace, SQL, OData or
   DataService.
-- Arguments: environment-name, package-name; optional description, dependencies (array of package
-  names) and application-code (creates the package inside that installed application).
+- Arguments: environment-name, package-name; optional description, dependencies and application-code
+  (creates the package inside that installed application). dependencies here is a plain array of
+  package names, e.g. dependencies: ["CrtBase"], NOT the [{ name: ... }] objects add-package-dependency
+  takes.
 - The environment's SchemaNamePrefix is prepended when package-name lacks it ("Calls" becomes
   "UsrCalls"). Use the RETURNED package-name for every later call, never the one you sent: pass it as
   package to get-target-package to confirm the new package as the write target, and as the package
