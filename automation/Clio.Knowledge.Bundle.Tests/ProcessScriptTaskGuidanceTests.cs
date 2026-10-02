@@ -106,6 +106,14 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "this is the measured collision an alias exists to break");
         guide.Should().Contain("the run-time lookup is case-sensitive",
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
+        guide.Should().Contain("(`process-versions` has the measurement)",
+            because: "the article the fold is measured in is called process-versions; a bare `versions` names no guide");
+        guide.Should().Contain("Activation is the user's decision (`process-version-writes`)",
+            because: "the consent rule lives in process-version-writes, and a bare `version-writes` names no guide");
+        guide.Should().Contain("compile SUCCEEDED (no compiler errors)",
+            because: "a compile that failed, or one followed by another edit, covers nothing");
+        guide.Should().Contain("a new version only once it is active",
+            because: "the general verification paragraph must not send a new version to run-process before activation");
         guide.Should().Contain("that warning does not ask for a SECOND compile",
             because: "a version compiled before its activation ran its new C# without another compile, and the activation answer used to read as demanding one");
         guide.Should().Contain("activate it with `set-active-business-process-version` only when the user decides to; then verify it on a run",
