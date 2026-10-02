@@ -106,7 +106,7 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "this is the measured collision an alias exists to break");
         guide.Should().Contain("the run-time lookup is case-sensitive",
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
-        guide.Should().Contain("That warning does not ask for a SECOND compile",
+        guide.Should().Contain("that warning does not ask for a SECOND compile",
             because: "a version compiled before its activation ran its new C# without another compile, and the activation answer used to read as demanding one");
         guide.Should().Contain("activate it with `set-active-business-process-version` only when the user decides to; then verify it on a run",
             because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
