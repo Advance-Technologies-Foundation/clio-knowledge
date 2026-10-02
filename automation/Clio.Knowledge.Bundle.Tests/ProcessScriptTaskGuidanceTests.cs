@@ -108,6 +108,12 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
         guide.Should().Contain("compile the new version, activate it with `set-active-business-process-version`, then verify it on a run",
             because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
+        guide.Should().Contain("a Latin letter (a-z, A-Z)",
+            because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
+        guide.Should().Contain("not a C# keyword",
+            because: "a keyword name breaks the configuration compile once the process is compiled instead of interpreted");
+        guide.Should().Contain("A verbatim string (`@\"...\"`) that spans lines gains tabs",
+            because: "the generator indents every line of the body, so such a string changes its value");
         guide.Should().Contain("the code of a version that is not active runs the ACTIVE version",
             because: "a run of the new version's code before activation executes the previous version, so it proves nothing");
         guide.Should().NotContain("verify it on a run, and only then activate it",
