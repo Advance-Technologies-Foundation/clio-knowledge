@@ -41,6 +41,23 @@ public sealed class ProcessVersionsGuidanceTests
     private static readonly Regex PlaceholderToken = new("<[A-Z][A-Z0-9-]*TBD>", RegexOptions.Compiled);
 
     [Test]
+    [Description("Pins the measured fold: the code of a version that is not active runs the ACTIVE version, so run-process cannot run a new version before activation - the question the guide used to leave open.")]
+    public void Guide_ShouldStateThatANonActiveCodeRunsTheActiveVersion()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string guide = Collapsed(repositoryRoot, GuidePath);
+
+        // Assert
+        guide.Should().Contain("`run-process` cannot run a version that is not active",
+            because: "a run of a new version's code before activation executes the previous version, so its result proves nothing");
+        guide.Should().NotContain("still not established",
+            because: "the fold is measured (ENG-101880), and leaving it open invites the run-before-activation check that cannot work");
+    }
+
+    [Test]
     [Description("Pins the five platform facts about the version model that an agent cannot derive: flat family, one active version, instances pinned to their version, rollback affecting later runs only, and no delete.")]
     public void Guide_ShouldStateTheVersionModel()
     {

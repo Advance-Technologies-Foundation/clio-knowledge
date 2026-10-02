@@ -106,7 +106,7 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "this is the measured collision an alias exists to break");
         guide.Should().Contain("the run-time lookup is case-sensitive",
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
-        guide.Should().Contain("compile the new version, activate it with `set-active-business-process-version`, then verify it on a run",
+        guide.Should().Contain("activate it with `set-active-business-process-version` only when the user decides to; then verify it on a run",
             because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
         guide.Should().Contain("a Latin letter (a-z, A-Z)",
             because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
