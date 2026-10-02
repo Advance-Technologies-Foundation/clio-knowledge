@@ -112,7 +112,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
-  - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
+  - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies, schema ownership, transitive paths or read-only dependency impact -> name=package-dependencies
   - the user asks for a new, separate package in the environment -> name=package-dependencies (create-package)
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
