@@ -29,7 +29,7 @@ public sealed class CreatePackageGuidanceTests
             because: "the create-package rules need one section an agent can find");
         guide.Should().Contain("Use create-package ONLY when the user asks for a separate package",
             because: "page and schema writes resolve their own target package; an unasked-for package is clutter");
-        guide.Should().Contain("find it with get-tool-contract and call it through clio-run-destructive",
+        guide.Should().Contain("find it with get-tool-contract and call it through clio-run.",
             because: "create-package is a destructive long-tail tool and is not called directly");
         guide.Should().Contain("do NOT fall back to push-workspace, SQL, OData or DataService",
             because: "those paths create a locked or half-registered package instead of an editable one");
