@@ -67,7 +67,11 @@ typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only
 can be opened; any other page is REFUSED. That refusal is protecting you, not being strict: the designer
 resolves an element's stored page against its own list, so a page outside it makes the card render
 "Which page to open?" EMPTY and the next human save wipes the whole element. Discover valid pages with
-`list-entity-client-schemas` for the object (union its `sections[]` and `editPages[]`) and PREFER an entry
+`list-entity-client-schemas` for the object (union its `sections[]` and `editPages[]`; when the list is too
+long to read inline, `list-entity-client-schemas-to-file` (clio 8.1.0.136 and later) takes the same arguments
+plus a required `output-file`, writes the same response to that file and returns the file path and the
+classic, freedom and unknown counts instead of the list; the file must be inside the workspace or the OS temp directory and must not exist yet)
+and PREFER an entry
 whose `kind` is `freedom`, falling back to `classic` — but state the preference CONDITIONALLY: an
 environment with the platform's 8.x-pages feature off offers Classic pages ONLY, so "we will use the Freedom
 UI page" is a promise you cannot keep everywhere. Rank `kind: "unknown"` last and confirm with the user that
