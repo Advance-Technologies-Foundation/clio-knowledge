@@ -106,6 +106,25 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "this is the measured collision an alias exists to break");
         guide.Should().Contain("the run-time lookup is case-sensitive",
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
+        guide.Should().Contain("\"until the configuration is compiled\"",
+            because: "the guide quotes the phrase the compile-required warning carries - a wording pin only: the constant clio keys on (CommandExecutionResult.CompileRequiredWarningMarker) lives in clio, so rewording it there must update this article by hand");
+        guide.Should().Contain("The text is C# CLASS MEMBERS, not statements",
+            because: "the methods text is pasted into the generated class, so statements there do not compile");
+    }
+
+    [Test]
+    [Description("Pins the rules the second QA round (ENG-92711) added: no run of a new version before activation, consent for activation, no second compile after a compile that succeeded, the retry before a restart while the runtime reloads, the Latin and keyword name rules, and the multi-line verbatim string. Each came from a stand measurement or a QA finding; losing one sends an agent into a run that proves nothing, a needless compile or restart, or a string that changes its value.")]
+    public void Guide_ShouldKeepTheQaRoundTwoVersionCompileAndNameRules()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+
+        // Act
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance/mcp/guides/processes/process-script-task.md"));
+        string coreRules = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/core-rules.md"));
+
+        // Assert
         guide.Should().Contain("(`process-versions` has the measurement)",
             because: "the article the fold is measured in is called process-versions; a bare `versions` names no guide");
         guide.Should().Contain("Activation is the user's decision (`process-version-writes`)",
@@ -122,8 +141,10 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
         guide.Should().Contain("not a C# keyword",
             because: "a keyword name breaks the configuration compile once the process is compiled instead of interpreted");
-        guide.Should().Contain("run it again a minute later, and restart only if it still does",
-            because: "the reload can trail the compile's answer, and a restart reloads the runtime for every user");
+        guide.Should().Contain("run it again about two minutes later, and restart only if it still does",
+            because: "the reload trailed the compile's answer by about two minutes, and a restart reloads the runtime for every user");
+        guide.Should().Contain("Ask the user before that second run when the process has side effects",
+            because: "the second run repeats what the elements before the script did");
         guide.Should().NotContain("if the run still shows the old code, restart;",
             because: "that sent an agent to a restart a short wait would have made unnecessary");
         guide.Should().Contain("CrtProcessBuilder 1.6.6.61 and later name such a string on the save",
@@ -134,10 +155,10 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "a run of the new version's code before activation executes the previous version, so it proves nothing");
         guide.Should().NotContain("verify it on a run, and only then activate it",
             because: "that order cannot be followed: run-process folds a non-active version's code onto the active one");
-        guide.Should().Contain("\"until the configuration is compiled\"",
-            because: "the guide quotes the phrase the compile-required warning carries - a wording pin only: the constant clio keys on (CommandExecutionResult.CompileRequiredWarningMarker) lives in clio, so rewording it there must update this article by hand");
-        guide.Should().Contain("The text is C# CLASS MEMBERS, not statements",
-            because: "the methods text is pasted into the generated class, so statements there do not compile");
+        coreRules.Should().Contain("run it again about two minutes later (asking first when the process has side effects) and ask before a restart",
+            because: "core-rules carries the same exception for a process-name compile, and every operation reads it");
+        coreRules.Should().NotContain("run it again a minute later",
+            because: "one minute was shorter than the measured reload");
     }
 
     private static string FindRepositoryRoot()
