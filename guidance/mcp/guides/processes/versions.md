@@ -187,9 +187,11 @@ standing is UNKNOWN or because no active version was established, launch NOTHING
 and ask which code to run. Do not fall back to the code you are already holding -- on a versioned
 process that is usually the root, which is usually not the one that runs.
 Measured on a stand (2026-09-11): a launch resolves to the ACTIVE version and the process log records the
-run against it, not against the root whose name is the familiar one. Whether the endpoint would fold a
-NON-active code onto the active version is still not established, and you never need to know: pass the
-active version's code explicitly and the answer is the same either way. `run-process` refuses a display
+run against it, not against the root whose name is the familiar one. A NON-active version's code is folded onto the active version
+too (measured 2026-10-01: a process with three versions ran the active one for every code, and
+`SysProcessLog.SysSchemaId` names it), so `run-process` cannot run a version that is not active. Pass the
+active version's code explicitly; to see a new version run before activating it, use the process
+designer route `process-script-task` describes. `run-process` refuses a display
 caption, and the refusal names the code it resolved to -- on a clio carrying this feature that is the
 active version's code, but treat it as a lead to confirm with `describe-business-process` rather than an
 answer to paste into a launch.

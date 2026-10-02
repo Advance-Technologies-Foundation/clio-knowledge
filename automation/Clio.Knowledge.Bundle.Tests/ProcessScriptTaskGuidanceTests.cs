@@ -106,8 +106,12 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "this is the measured collision an alias exists to break");
         guide.Should().Contain("the run-time lookup is case-sensitive",
             because: "Get/Set resolve names ordinally, unlike every name lookup in the builder");
-        guide.Should().Contain("compile the new version, verify it on a run, and only then activate it",
-            because: "activating an uncompiled version breaks every new instance of the process");
+        guide.Should().Contain("compile the new version, activate it with `set-active-business-process-version`, then verify it on a run",
+            because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
+        guide.Should().Contain("the code of a version that is not active runs the ACTIVE version",
+            because: "a run of the new version's code before activation executes the previous version, so it proves nothing");
+        guide.Should().NotContain("verify it on a run, and only then activate it",
+            because: "that order cannot be followed: run-process folds a non-active version's code onto the active one");
         guide.Should().Contain("\"until the configuration is compiled\"",
             because: "the guide quotes the phrase the compile-required warning carries - a wording pin only: the constant clio keys on (CommandExecutionResult.CompileRequiredWarningMarker) lives in clio, so rewording it there must update this article by hand");
         guide.Should().Contain("The text is C# CLASS MEMBERS, not statements",
