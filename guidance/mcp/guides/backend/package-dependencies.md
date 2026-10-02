@@ -19,25 +19,54 @@ WHEN YOU NEED THIS (the canonical symptom)
   `Custom`) that depends only on `CrtCore` → the designer fails until the package also
   depends on `CrtLeadOppMgmtApp` (the app that owns the Opportunity layer).
 
-AUTOMATIC RESOLUTION
-clio automatically detects when GetSchemaDesignItem fails because of a missing
-dependency: it finds the package containing the target schema, adds it as a
-dependency, and retries the operation — one transparent recovery cycle. This
-applies ONLY to WRITE operations (modify-entity-schema-column, update-entity-schema,
-create-entity) and ONLY when exactly one candidate package is found.
-When multiple candidates exist, clio refuses to auto-resolve (ambiguous) and
-instructs the user to add the correct dependency manually.
-Read-only operations (get-entity-schema-properties, get-entity-schema-column-properties)
-never trigger auto-resolution.
+DIAGNOSTICS ARE READ-ONLY
+Current Clio reports ranked candidate packages; it never automatically adds a dependency,
+including when exactly one candidate remains. An HTML error page does not identify its cause:
+it can also be a proxy or server failure. Confirm schema visibility before changing packages.
+On a server advertising dependency contract v1, candidates already reachable through indirect
+package dependencies are excluded. On older or incomplete servers the diagnostic explicitly
+marks dependencies as unknown; candidates may already be reachable. Do not interpret them
+as confirmed missing edges.
 
-NOT THIS CASE: a transient network flap (DNS resolution failure, connection reset,
-timeout, gateway 502/503/504) is a DIFFERENT failure class from a missing dependency.
-`sync-schemas` retries transient network faults per operation on its own and, on a
-mid-batch abort, returns a `resume-plan` — resubmit only `resume-plan.operations`. Do
-NOT add a package dependency in response to a DNS/timeout error; add one only for the
-"GetSchemaDesignItem returned an HTML error page" missing-dependency symptom above.
+A transient network failure is a different failure class. sync-schemas retries transient network
+faults and returns a resume-plan after a mid-batch abort: resubmit only resume-plan.operations.
+Do not add package dependencies to repair DNS, timeout, authentication or gateway errors.
 
-MANUAL RECOVERY (when auto-resolution is not available)
+EXPERIMENTAL DEPENDENCY CONTRACT V1 (ENG-100222)
+Use this workflow only when get-tool-contract advertises the named tools AND the target Creatio
+server advertises dependency contract v1. The source-branch implementation was validated on a
+10.2.344 seed, .NET 10 and PostgreSQL; the stock version number alone does not imply support.
+Discover these long-tail tools with get-tool-contract and invoke them through clio-run.
+Older Creatio servers are explicitly unsupported; do not substitute legacy endpoints silently.
+
+1) find-pkg-by-schema with schema and manager-name uses exact, case-insensitive matching.
+   With package-name and purpose=reference or extend, it asks the ENTITY designer for visibility.
+   Use status=resolved and availableSchemaUIds as the answer. Candidates alone do not select a
+   valid schema layer. ambiguous, notVisible, notFound and incomplete require investigation.
+   Context resolution supports EntitySchemaManager only; do not extrapolate to client modules.
+2) get-pkg-dependencies with package and transitive=true explains existing indirect visibility.
+   pkg-dependency-path with from and to shows a shortest directed path. dependants=true reverses
+   traversal for get-pkg-dependencies. export-pkg-graph returns JSON or DOT for larger analysis.
+3) pkg-dependency-why with from and to summarizes registered metadata references; details=true
+   includes individual reasons. check-removal=true previews removing that specific direct edge.
+   check-pkg-dependency with action=add or remove is also a READ-ONLY preview. Mutations still
+   use add-package-dependency or remove-package-dependency after the intended change is clear.
+4) blocked identifies known problems. noKnownBlockers means only that the reported checkedKinds
+   found no blocker; it is NOT a safe-to-delete guarantee or write authorization. Always read
+   uncheckedKinds. Raw JavaScript/AMD body imports are not automatically registered as client
+   metadata dependencies: source-only imports can be absent even when a real dependency exists.
+   Review source and run the application's tests before removal. An empty reasons array is not
+   proof that an edge is unused. A nonempty array is not proof it is essential: alternate paths
+   can retain visibility after removing a redundant direct edge.
+
+contains=true performs a literal substring search (% and _ are not wildcards). limit is 1..200.
+hasMore=true means incomplete results: narrow the query; do not select an owner from a truncated
+set. A graph revision covers packages/dependency topology only, not a schema snapshot or a
+concurrency precondition. Rerun inspection after edits. Unknown/busy/timeout/incomplete-graph
+errors never authorize mutation. Future optional fields may be ignored; a new contract major
+requires explicit client support while existing servers can continue serving v1.
+
+MANUAL RECOVERY (after confirming the missing visibility)
 1) Identify the owning app/package of the object's upper layer (for Opportunity it is
    `CrtLeadOppMgmtApp`; use get-app-info / find-entity-schema to confirm the owner of
    other objects).
