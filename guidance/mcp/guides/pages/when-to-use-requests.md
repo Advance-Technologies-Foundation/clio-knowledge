@@ -40,7 +40,9 @@ MANDATORY catalog discipline (get-request-info)
     (clio 8.1.0.136 and later) takes the same arguments plus `output-file`, writes the
     recipe to that file and returns its path in `documentationFile` and its headings in
     `documentationSections`. `output-file` must be inside the workspace or the OS temp
-    directory and must not exist yet, so a retry must use a different path.
+    directory and must not exist yet, so a retry must use a different path. When the
+    request has no `documentation`, no file is written and the response is the same as
+    from `get-request-info`.
 - HARD RULE for environment-dependent values: a parameter carrying a `valueSource`
   annotation (kind `environment`) is filled ONLY from the result of the probe tool the
   annotation names - e.g. `templateId` -> `list-printables`, `processName` ->
