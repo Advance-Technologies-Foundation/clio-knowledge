@@ -36,6 +36,7 @@
       "app-modeling",
       "sequences",
       "workplaces",
+      "portal-sections",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
@@ -213,6 +214,7 @@
       "docs://knowledge/com.creatio.clio/app-modeling",
       "docs://knowledge/com.creatio.clio/sequences",
       "docs://knowledge/com.creatio.clio/workplaces",
+      "docs://knowledge/com.creatio.clio/portal-sections",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -467,6 +469,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/applications/workplaces.md",
       "bundlePath": "resources/workplaces.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "portal-sections",
+      "title": "Portal sections",
+      "description": "Orchestration guide for registering a Freedom UI section so PORTAL (self-service / external) users can open it: sequences page binding, workplace placement, and object-access grant, all carrying the All external users audience, on the deny-by-default external-user model. The Freedom mechanism (SysEntitySchemaOperationRight), one object-rights grant per approved object, not the Classic SSP tables.",
+      "topicId": "creatio.portal-sections",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/portal-sections",
+      "sourcePath": "guidance/mcp/guides/applications/portal-sections.md",
+      "bundlePath": "resources/portal-sections.md",
       "mediaType": "text/plain"
     },
     {
