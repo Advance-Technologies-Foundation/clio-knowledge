@@ -122,7 +122,7 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
         guide.Should().Contain("not a C# keyword",
             because: "a keyword name breaks the configuration compile once the process is compiled instead of interpreted");
-        guide.Should().Contain("CrtProcessBuilder 1.6.6.60 and later name such a string on the save",
+        guide.Should().Contain("CrtProcessBuilder 1.6.6.61 and later name such a string on the save",
             because: "the save's notice is what lets the agent fix the string before the compile, not after the run");
         guide.Should().Contain("A verbatim string (`@\"...\"`) that spans lines gains tabs",
             because: "the generator indents every line of the body, so such a string changes its value");
