@@ -37,7 +37,7 @@ MANDATORY catalog discipline (get-request-info)
   * `documentation` — the per-request authoring recipe (canonical wiring, pitfalls,
     checklist) when the producer published one. Follow it over memory; its recipes are
     verified against platform sources and production schemas. `get-request-info-to-file`
-    (clio <CLIO-VERSION-TBD> and later) takes the same arguments plus `output-file`, writes the
+    (clio 8.1.0.136 and later) takes the same arguments plus `output-file`, writes the
     recipe to that file and returns its headings in `documentationSections`.
 - HARD RULE for environment-dependent values: a parameter carrying a `valueSource`
   annotation (kind `environment`) is filled ONLY from the result of the probe tool the

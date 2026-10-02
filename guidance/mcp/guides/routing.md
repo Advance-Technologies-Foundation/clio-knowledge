@@ -107,12 +107,13 @@ guards — it says whose rule it is and names that guide for the rest.
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
     family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
-  - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
+  - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
+  - the user asks for a new, separate package in the environment -> name=package-dependencies (create-package)
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
