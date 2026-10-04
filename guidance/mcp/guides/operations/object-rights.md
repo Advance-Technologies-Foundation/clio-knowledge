@@ -159,7 +159,8 @@ The switch alone (no grantee, no operations, no revoke):
 - enable-operation-permissions alone turns operation permissions ON with the stored rows as they are,
   under the same All employees rule as an enabling grant (the table under Grant). Every stored row starts
   to decide again — name the rows of external roles, as for any enable. It is refused when no row would
-  grant any operation: grant operations to a role in the same call instead.
+  grant any operation: grant the operations in the same call instead — for internal users to All
+  employees, whose row decides before a new row of any other role.
 - A switch call on a switch already in place reports no change.
 
 Refused as well: a grantee with more than one row on the object (which one decides depends on the other
