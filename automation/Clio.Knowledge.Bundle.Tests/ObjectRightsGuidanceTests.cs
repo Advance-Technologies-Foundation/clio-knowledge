@@ -70,7 +70,7 @@ public sealed class ObjectRightsGuidanceTests
         });
 
     [Test]
-    [Description("object-rights states the refusal of a revoke that would leave no granting row, and that disable-operation-permissions is the only way to turn operation permissions off.")]
+    [Description("object-rights states the refusal of a revoke that would leave no granting row, that a revoke never turns operation permissions off, and that the disable alone turns them off while keeping every row.")]
     public void ObjectRights_ShouldOwnTheNoGrantingRowRefusal()
     {
         // Arrange
@@ -82,8 +82,11 @@ public sealed class ObjectRightsGuidanceTests
         // Assert
         normalized.Should().Contain("no row that grants any operation is REFUSED",
             because: "the owning article must keep the refusal an agent relies on");
-        normalized.Should().Contain("Passing disable-operation-permissions instead turns operation permissions OFF",
-            because: "the explicit opt-in is the only path to turning operation permissions off");
+        normalized.Should().Contain("A revoke never turns operation permissions off",
+            because: "the switch is never a side effect of a revoke");
+        normalized.Should().Contain(
+            "disable-operation-permissions alone turns operation permissions OFF and keeps every row exactly as it is",
+            because: "the disable is its own call, and it keeps the rows' operations like the designer's switch");
     }
 
     [TestCase("Owns: the row priority rule of object operation permissions",
@@ -108,12 +111,20 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("The tool never reorders rows", TestName = "ObjectRights_ShouldStateThatTheToolNeverReordersRows")]
     [TestCase("ONE object per call", TestName = "ObjectRights_ShouldStateOneObjectPerCall")]
     [TestCase("nothing is granted by default", TestName = "ObjectRights_ShouldStateThatOperationsAreRequired")]
-    [TestCase("a call without it (or with a value that names no operation) is refused before any read or write",
+    [TestCase("a grant or revoke without it (or with a value that names no operation) is refused before any read or write",
         TestName = "ObjectRights_ShouldStateThatACallWithoutOperationsIsRefusedFirst")]
     [TestCase("REFUSED (nothing is written) unless enable-operation-permissions is passed",
         TestName = "ObjectRights_ShouldStateThatEnablingIsExplicit")]
-    [TestCase("enable-operation-permissions is valid only on a grant; disable-operation-permissions only on a revoke",
+    [TestCase("enable-operation-permissions goes with a grant or alone; disable-operation-permissions always goes alone",
         TestName = "ObjectRights_ShouldStateWhichCallEachTransitionFlagBelongsTo")]
+    [TestCase("enable-operation-permissions alone turns operation permissions ON with the stored rows as they are",
+        TestName = "ObjectRights_ShouldStateWhatAnEnableAloneDoes")]
+    [TestCase("A switch call on a switch already in place reports no change",
+        TestName = "ObjectRights_ShouldStateThatARepeatedSwitchCallChangesNothing")]
+    [TestCase("You MUST name the object by schema name AND title",
+        TestName = "ObjectRights_ShouldRequireNamingTheObjectBySchemaNameAndTitle")]
+    [TestCase("you MUST NOT decide which object is meant: ask before reading or writing",
+        TestName = "ObjectRights_ShouldForbidPickingAnObjectByAWordThatIsNotItsTitle")]
     [TestCase("You MUST ask the developer in chat before every write",
         TestName = "ObjectRights_ShouldRequireAskingInChatBeforeEveryWrite")]
     [TestCase("an auto-approve mode skips that approval",
@@ -133,8 +144,8 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("A revoke on an object that is NOT administered is REFUSED",
         TestName = "ObjectRights_ShouldStateThatARevokeOnANonAdministeredObjectIsRefused")]
     [TestCase("an access WIDENING", TestName = "ObjectRights_ShouldStateThatADisableWidensAccess")]
-    [TestCase("disable-operation-permissions is accepted ONLY in that case",
-        TestName = "ObjectRights_ShouldStateThatADisableTheRevokeDoesNotNeedIsRefused")]
+    [TestCase("Before a disable you MUST name to the developer each row of an external role that stops applying",
+        TestName = "ObjectRights_ShouldRequireNamingTheExternalRowsADisableCloses")]
     [TestCase("Refused as well: a grantee with more than one row on the object",
         TestName = "ObjectRights_ShouldStateThatDuplicateRowsAreRefused")]
     [TestCase("saved, but NOT verified", TestName = "ObjectRights_ShouldStateThatAnUnverifiedSaveFails")]
