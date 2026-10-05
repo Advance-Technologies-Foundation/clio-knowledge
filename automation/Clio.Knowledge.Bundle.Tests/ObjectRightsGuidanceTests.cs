@@ -125,6 +125,10 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldRequireNamingTheObjectBySchemaNameAndTitle")]
     [TestCase("you MUST NOT decide which object is meant: ask before reading or writing",
         TestName = "ObjectRights_ShouldForbidPickingAnObjectByAWordThatIsNotItsTitle")]
+    [TestCase("Both tools show each object by its title next to its code",
+        TestName = "ObjectRights_ShouldStateThatTheToolsShowTheTitleNextToTheCode")]
+    [TestCase("set-object-rights refuses a title, naming the code it belongs to",
+        TestName = "ObjectRights_ShouldStateThatAWriteRefusesATitle")]
     [TestCase("You MUST ask the developer in chat before every write",
         TestName = "ObjectRights_ShouldRequireAskingInChatBeforeEveryWrite")]
     [TestCase("an auto-approve mode skips that approval",

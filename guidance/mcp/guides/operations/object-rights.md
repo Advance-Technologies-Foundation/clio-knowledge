@@ -25,13 +25,16 @@ name the chosen id and type in the preview you show. Fixed platform roles:
 `All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008` (every internal user is in it) and
 `All external users` = `720b771c-e7a7-4f31-9cfb-52cd21c3739f` (the external / portal audience).
 
-entity-schema-name is the object's SCHEMA name. The word a developer uses for an object can be its title
-or its schema name, and the two can differ: the object titled "Feature" can be schema Specification,
-while schema Feature is titled "Creatio functionality". find-entity-schema matches schema names only;
-get-entity-schema-properties shows an object's title. You MUST name the object by schema name AND title
-in what you show the developer — Feature ("Creatio functionality") — and when the developer's word is not
-exactly that object's title, you MUST NOT decide which object is meant: ask before reading or writing,
-because the same word can be another object's title.
+entity-schema-name is the object's SCHEMA name (its code). The word a developer uses for an object can be
+its title or its schema name, and the two can differ: the object titled "Feature" can be schema
+Specification, while schema Feature is titled "Creatio functionality". Both tools show each object by its
+title next to its code — 'Creatio functionality' (Feature) — and the code always wins: get-object-rights
+reads an object by its title only when no object has that code (several objects with the title are
+refused, listed by title and code), and set-object-rights refuses a title, naming the code it belongs to.
+find-entity-schema matches schema names only; get-entity-schema-properties shows an object's title. You
+MUST name the object by schema name AND title in what you show the developer — 'Creatio functionality'
+(Feature) — and when the developer's word is not exactly that object's title, you MUST NOT decide which
+object is meant: ask before reading or writing, because the same word can be another object's title.
 
 ## How the platform decides — read this before any write
 - The rows are a PRIORITY LIST, not a union of flags. Position 0 is the highest. A user who is in several
