@@ -105,12 +105,13 @@ Name mapping
 - Anti-example: do NOT return `{ "UpperCaseValidator": { message: config.message } }` because the error key must equal the validator type, not the local alias.
 
 CRITICAL — Error return and params shape
-- The validator MUST declare `{ "name": "message" }` in `params` so the runtime can pass the localized message.
+- The validator MUST declare `{ "name": "message" }` in `params` so the runtime can pass the localized message. The platform also reads this parameter itself: renaming it to `messageTemplate` without retaining a declared `message` causes `Property message is not defined in validator params config`, even when the returned error object has a `message`. This error is not limited to primitive returns.
 - The inner function MUST return `{ "<ValidatorType>": { message: config.message } }` when invalid, and `null` when valid.
+- When `config.message` is non-empty, Creatio replaces a non-null validation error with an error built from this parameter. The tooltip therefore displays `config.message`, not a different `message` supplied only in the returned object. This wrapper behavior applies to synchronous and asynchronous schema validators. Keep the prescribed return shape; for dynamic text, update `config.message` before returning the error (see the dynamic-message example below).
 - Wrong returns that clio validation WILL REJECT:
-  - `return { "usr.OnlyDigits": true }` — primitive value causes a Creatio runtime error "Property message is not defined in validator params config"
-  - `return { "usr.OnlyDigits": {} }` — empty object: no message is shown to the user, params must not be empty
-  - `return { "usr.OnlyDigits": { message: "Only digits allowed" } }` with `params: []` — undeclared property rejected by runtime
+  - `return { "usr.OnlyDigits": true }` — unsupported primitive error value; use the required error-object shape
+  - `return { "usr.OnlyDigits": {} }` — missing error message; do not rely on the platform wrapper to repair an unsupported return shape
+  - `return { "usr.OnlyDigits": { message: "Only digits allowed" } }` with `params: []` — the wrapper reads undeclared `message` and throws; declaring a returned-object property does not declare a validator parameter
   - `"params": []` — ALWAYS wrong for a custom validator; use `[{ "name": "message" }]` at minimum
 - Correct pattern (always use this shape):
     "params": [{ "name": "message" }],
@@ -266,13 +267,42 @@ Async validator template (SysSettingsService example)
     }
   }/**SCHEMA_VALIDATORS*/
 
+Dynamic message from a sys-setting
+- Start with the localized string `Minimum price is {0} USD` under resource key `UsrMinPrice_Message`; register it through the page write tool's `resources` parameter.
+- Bind a numeric attribute to `usr.MinFromSysSettingValidator` with `params: { "settingCode": "UsrMinPrice", "message": "#ResourceString(UsrMinPrice_Message)#" }`. `UsrMinPrice` must be an existing numeric sys-setting. Keep the control bound to that same attribute.
+- The resource macro is already resolved when the validator receives `config.message`. Capture that template before formatting, assign the formatted text back to `config.message`, then return the required error object. Formatting only the returned `message` leaves `{0}` in the tooltip.
+- Keep the AMD `devkit` dependency from the async template above.
+
+```js
+"usr.MinFromSysSettingValidator": {
+  validator: function (config) {
+    const template = config.message;
+    return async function (control) {
+      const value = control.value;
+      if (value == null || value === "") return null;
+      const setting = await new devkit.SysSettingsService().getByCode(config.settingCode);
+      const minValue = setting?.value;
+      if (minValue == null || value >= minValue) return null;
+      config.message = template.replace("{0}", minValue);
+      return { "usr.MinFromSysSettingValidator": { message: config.message } };
+    };
+  },
+  params: [{ name: "settingCode" }, { name: "message" }],
+  async: true
+}
+```
+
+- After replacement the formatted string has no `{0}`. Always format from the original template, not an already formatted message. For a setting that can change while the page is open, preserve an immutable template separately and retain the required `message` parameter; do not assume a factory-local copy survives factory recreation. `SysSettingsService` can cache values, so do not assume another `getByCode` observes an external update without reloading the page.
+- Verify an invalid value in the rendered field: the tooltip must contain the setting value and no `{0}`. Verify a valid value clears the error.
+- Evidence: [Clio issue #1728](https://github.com/Advance-Technologies-Foundation/clio/issues/1728#issuecomment-5923855167), disposable Creatio 10.2.301.0 / .NET 10.0.12 / PostgreSQL. Async validators read the real `MoneyDisplayPrecision` setting (0): input -1 returned `Minimum price is 0 USD` but displayed the unresolved template until `config.message` was updated; input 0 cleared both errors. The platform's `SchemaValidatorFactory.validate` explains the message replacement and undeclared-param error. The missing-param case was source-traced; the reporter's .NET Framework/FSM combination and changing settings without a page reload were not independently exercised.
+
 BEFORE SAVE CHECKLIST
 - The live body format was detected first: `viewModelConfig` vs `viewModelConfigDiff`.
 - The validator lives under model attributes, not under a UI element in `viewConfigDiff`.
 - The attribute `validators` property is an object and `type` matches the `SCHEMA_VALIDATORS` key.
 - The control binds to the same declared attribute as the validators.
 - No duplicate patch `merge` was added to override an existing control binding.
-- `params.message` uses `#ResourceString(...)#`.
+- `params.message` uses `#ResourceString(...)#`. Dynamic text is assigned back to `config.message` before returning the error; formatting only the returned message does not change the tooltip.
 - `"params"` contains `{ "name": "message" }` — NOT an empty array `[]`.
 - The inner function returns `{ "<ValidatorType>": { message: config.message } }` — NOT `true`, NOT `{}`, NOT a hardcoded string.
 - The returned error key equals the validator type name.
