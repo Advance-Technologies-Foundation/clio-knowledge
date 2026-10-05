@@ -8,8 +8,9 @@ Manage OBJECT operation permissions — who may read/create/edit/delete ANY reco
 SysEntitySchemaOperationRight / "Object permissions" layer) — for ANY role, with two tools, NOT with
 hand-written ESQ into the rights tables:
 - get-object-rights — read the rows of an object's operation permissions. Read-only.
-- set-object-rights — grant or revoke operations for ONE role on ONE object. DESTRUCTIVE: it writes in
-  one call, with no publish step, and the change reaches users who are already logged in immediately.
+- set-object-rights — grant or revoke operations for ONE role on ONE object, or turn the object's
+  operation permissions on or off. DESTRUCTIVE: it writes in one call, with no publish step, and the
+  change reaches users who are already logged in immediately.
 
 Version boundary: get-object-rights and set-object-rights require clio <SET-OBJECT-RIGHTS-CLIO-VERSION-TBD>
 or later. On an older clio neither tool exists: change object permissions in the Object permissions
@@ -25,6 +26,14 @@ you MUST NOT pick one: show each candidate's id, name and type, ask the develope
 name the chosen id and type in the preview you show. Fixed platform roles:
 `All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008` (every internal user is in it) and
 `All external users` = `720b771c-e7a7-4f31-9cfb-52cd21c3739f` (the external / portal audience).
+
+entity-schema-name is the object's SCHEMA name. The word a developer uses for an object can be its title
+or its schema name, and the two can differ: the object titled "Feature" can be schema Specification,
+while schema Feature is titled "Creatio functionality". find-entity-schema matches schema names only;
+get-entity-schema-properties shows an object's title. You MUST name the object by schema name AND title
+in what you show the developer — Feature ("Creatio functionality") — and when the developer's word is not
+exactly that object's title, you MUST NOT decide which object is meant: ask before reading or writing,
+because the same word can be another object's title.
 
 ## How the platform decides — read this before any write
 - The rows are a PRIORITY LIST, not a union of flags. Position 0 is the highest. A user who is in several
@@ -72,12 +81,14 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
   or a connected set that cannot be enumerated, is reported with a warning — that object is NOT verified.
 
 ## set-object-rights
-Args: entity-schema-name + grantee + operations (all REQUIRED); revoke; enable-operation-permissions;
-disable-operation-permissions; preview.
+Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke;
+enable-operation-permissions; disable-operation-permissions; preview.
 - ONE object per call. It never touches the object's lookups: each lookup is its own call.
 - operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
-  call, grant and revoke — nothing is granted by default, and a call without it (or with a value that
-  names no operation) is refused before any read or write. Pass only what the scenario needs.
+  grant and revoke — nothing is granted by default, and a grant or revoke without it (or with a value
+  that names no operation) is refused before any read or write. Pass only what the scenario needs.
+- The switch and the rows change separately: a revoke never turns operation permissions off, and turning
+  them on or off alone changes no row (see "The switch alone").
 - You MUST ask the developer in chat before every write, even a single grant or revoke. On MCP the host
   approves the clio-run call that carries set-object-rights, and an auto-approve mode skips that
   approval, so it is not the developer's yes. The arguments name the object, the role, the operations
@@ -123,7 +134,8 @@ Grant:
 - EXCLUSIVE access (only the grantee's members): narrowing the All employees row while it sits above the
   grantee's row denies the grantee's internal members too. It needs the grantee's row above All employees
   first (the designer), then a revoke on the All employees row.
-- enable-operation-permissions is valid only on a grant; disable-operation-permissions only on a revoke.
+- enable-operation-permissions goes with a grant or alone; disable-operation-permissions always goes alone;
+  neither goes with a revoke.
 
 Revoke:
 - A revoke clears the named operations on the grantee's row and KEEPS the row. For a user whose highest
@@ -135,14 +147,23 @@ Revoke:
   enable-operation-permissions — name all four: where the object has stored rows but no All employees
   row, the new row gets only the operations named, see Grant), then revoke from that row what employees must not have. A role that must
   keep MORE than employees needs its row above the All employees row — the designer sets the order.
-- A revoke that would leave the object with no row that grants any operation is REFUSED. Passing
-  disable-operation-permissions instead turns operation permissions OFF: the object becomes available to
-  ALL internal users (and closed to external ones) — an access WIDENING. You MUST NOT pass it unless that
-  widening is the developer's intent. The rows are kept and apply again if the switch is turned back on.
-- disable-operation-permissions is accepted ONLY in that case. A disable the revoke does not need — other
-  rows still grant, or the revoke changes no row — is refused and writes nothing, because it would open the
-  object to every internal user while the call reads as a revoke; re-run without the flag.
+- A revoke that would leave the object with no row that grants any operation is REFUSED. A revoke never
+  turns operation permissions off; to turn them off instead, make the disable call (The switch alone).
 - A revoke from a role that has no row, or of operations the row does not hold, changes nothing.
+
+The switch alone (no grantee, no operations, no revoke):
+- disable-operation-permissions alone turns operation permissions OFF and keeps every row exactly as it
+  is, operations included, as the designer's switch does; the rows apply again when it is turned back on.
+  The object becomes available to ALL internal users — an access WIDENING — and EXTERNAL users lose the
+  access its rows gave them (they have none while it is off); technical users keep following the rows.
+  Before a disable you MUST name to the developer each row of an external role that stops applying, and
+  you MUST NOT disable unless that widening is the developer's intent.
+- enable-operation-permissions alone turns operation permissions ON with the stored rows as they are,
+  under the same All employees rule as an enabling grant (the table under Grant). Every stored row starts
+  to decide again — name the rows of external roles, as for any enable. It is refused when no row would
+  grant any operation: grant the operations in the same call instead — for internal users to All
+  employees, whose row decides before a new row of any other role.
+- A switch call on a switch already in place reports no change.
 
 Refused as well: a grantee with more than one row on the object (which one decides depends on the other
 rows) — remove the duplicates in the designer, then re-run.
@@ -198,6 +219,7 @@ Use cases (all one general capability):
   tool.
 - Enable operation permissions on an object from scratch: the first grant with
   enable-operation-permissions.
+- Turn an object's operation permissions off and back on, keeping its rows: the switch alone.
 
 Where the rights live: SysEntitySchemaOperationRight (one row per role, per object), served by the native
 RightManagementService. get-object-rights reads it for you; you MUST NOT query the table directly. For the
