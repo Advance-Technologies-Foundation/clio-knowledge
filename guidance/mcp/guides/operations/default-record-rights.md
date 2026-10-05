@@ -41,7 +41,7 @@ decide first: a user without read on the object reaches no record, whatever the 
   rules (Account: `All external users` → `All employees`).
 - The platform replaces the whole rule list on every save and checks nothing: a rule with no right is
   dropped, two rules for one author + grantee pair keep only the last one. set-default-record-rights
-  therefore changes one rule per call, saves every other rule exactly as read, and refuses a stored list
+  therefore changes one rule per call, saves every other rule exactly as stored, and refuses a stored list
   with duplicate pairs or invalid levels.
 
 Evidence: Creatio Academy ("Record permissions"); reproduced on Creatio 10.2 stands (10.2.367 on 2026-10-02,
@@ -59,26 +59,40 @@ account (an account without "view any data" counts only what it can see).
 Args: entity-schema-name (required); author + grantee + operations (a rule change, all three together);
 level (granted|delegated, default granted); do-not-apply-for-manager (true|false); revoke;
 enable-record-permissions; disable-record-permissions; preview.
-- A call is EITHER a rule change (author, grantee and operations — read,edit,delete — together; nothing is
-  granted by default) OR a switch-only change (none of them, plus enable-record-permissions or
-  disable-record-permissions). Anything else is refused before any read. author and grantee are SysAdminUnit
-  ids and must exist; names are NOT unique — resolve the id yourself and ask when several match.
+- entity-schema-name is the object's SCHEMA name, and a developer's word for an object can be its title
+  instead (the owner of this rule is `get-guidance name=object-rights`). One call changes who reaches EVERY
+  record of the object, so you MUST name the object by schema name AND title in the preview you show, and
+  when the developer's word is not exactly that object's title you MUST ask which object is meant before
+  reading or writing.
+- A call is EITHER a rule change — author, grantee and operations (read,edit,delete) together, nothing is
+  granted by default, optionally with enable-record-permissions, never with disable-record-permissions — OR
+  a switch-only change: none of them, plus exactly one of enable-record-permissions /
+  disable-record-permissions. Anything else is refused before any read. disable-record-permissions is a call
+  of its own (it keeps every rule), and a revoke never changes the switch, so it goes with neither flag.
+- The first enable and its first rule SHOULD go in one call (a grant with enable-record-permissions): two
+  calls leave the object ON with no rule in between, and if the second one is not made, every user keeps
+  seeing only the records they create.
+- author and grantee are SysAdminUnit ids and must exist; names are NOT unique — resolve the id yourself and
+  ask when several match.
 - You MUST ask the developer in chat before every write, as for set-object-rights: call it with preview=true
   first, show the planned change, get the yes, then make the same call without preview. On the CLI: --preview
   first, then --confirm.
 - Before an enable you MUST tell the developer what the object becomes: with no rule, every user sees only
   the records they create; with stored rules, each of them comes into effect (the preview names them);
   existing records get no rights until applied.
-- A grant sets each named operation to level and leaves the other two as read; it can lower delegated to
-  granted, and the result shows every level before → after. do-not-apply-for-manager, when given, sets the
-  rule's flag; omitted, an existing rule keeps its flag and a new rule gets false.
+- When a rule's author or grantee is `All external users` or a portal role, you MUST say in the
+  confirmation that portal / external users will reach the records the rule covers (a grant) or lose them (a
+  revoke); for an enable, name each stored rule of such a role that comes into effect.
+- A grant sets each named operation to level and leaves the other two operations unchanged (as stored); it
+  can lower delegated to granted, and the result shows every level before → after. do-not-apply-for-manager,
+  when given, sets the rule's flag; omitted, an existing rule keeps its flag and a new rule gets false.
 - A revoke sets the named operations to "not set". A rule left with no right is REMOVED, and the result says
   so. A revoke is allowed while the switch is OFF: it is how a stale stored rule is cleaned up BEFORE an
   enable brings it into effect, and it changes nobody's access now.
 - Refused, writing nothing: a grant on an object whose switch is OFF without enable-record-permissions;
-  disable-record-permissions together with a grant; both switch flags; a stored list with two rules for one
-  author + grantee pair, or with a level that is not not set / granted / delegated, when the call would save
-  the list — repair those in the designer.
+  disable-record-permissions together with any rule argument; revoke together with either switch flag; both
+  switch flags; a stored list with two rules for one author + grantee pair, or with a level that is not
+  not set / granted / delegated, when the call would save the list — repair those in the designer.
 - disable-record-permissions opens every record to every user with read operation rights. You MUST NOT pass
   it unless that widening is the developer's intent.
 - Results: the object is read back and compared with the plan — the switch and EVERY rule. Any difference,
@@ -88,16 +102,28 @@ enable-record-permissions; disable-record-permissions; preview.
   to existing records.
 
 ## Apply the rules to existing records — the user's decision
-- You MUST NOT run apply-default-record-rights on your own initiative. After any enable or rule change, tell
-  the user the number of existing records (in the result), that those records keep their current rights
-  (none after a first enable) until the rules are applied, and that the update is heavy on large tables
-  (minutes or more; run it at low load) — then ASK whether and when to run it. Run it only on a yes.
+- You MUST NOT run apply-default-record-rights on your own initiative. After an enable or a rule change that
+  leaves the switch ON, tell the user the number of existing records (in the result), that those records
+  keep their current rights (none after a first enable) until the rules are applied, and that the update is
+  heavy on large tables (minutes or more; run it at low load) — then ASK whether and when to run it. Run it
+  only on a yes. While the switch is OFF there is nothing to apply: apply is refused then.
 - Make all the rule changes first, then run it once: each call starts a full run.
 - It deletes the rights that came from default rules (including rules deleted since) and applies the current
   rules to every existing record; rights granted by hand with set-record-rights stay.
-- It is refused while the switch is OFF. With wait (the default) it reports completed, failed, or still
-  running with the process id. A run still going is NOT a failure: do NOT start it again — check the
-  SysProcessLog row with that Id later.
+- The launch is sent once. With wait (the default) the result is one of:
+  - completed — done;
+  - ended as an error (success=false) — the run is over; its log is in SysProcessLog;
+  - not started (success=false, "was not started", or a refusal before the launch) — nothing runs;
+  - still running, with the process id — NOT a failure;
+  - started, but its status could not be read, with the process id;
+  - queued, with no process id to follow;
+  - the launch got no usable answer (success=false) — the run MAY already be going.
+  On MCP the wait is at most 60 s inside a call of about 100 s, so on a large table "still running" is the
+  usual result. A new launch is safe only after "not started" or a run that ended (completed or error). In
+  every other case the run may still be going: you MUST NOT start it again — check SysProcessLog for that
+  process (or the newest ObjectRecordRightsActualizationProcess row), and ask the developer before any new
+  launch. When the result warns that an update is already running on the environment, tell the developer
+  before going on.
 
 ## Verify the effect
 - Re-read with get-object-rights; check one record with get-record-rights (its rows show where each right

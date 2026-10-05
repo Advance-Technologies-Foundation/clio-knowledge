@@ -56,11 +56,40 @@ public sealed class DefaultRecordRightsGuidanceTests
         TestName = "DefaultRecordRights_ShouldAllowTheCleanUpRevokeWhileOff")]
     [TestCase("A call is EITHER a rule change",
         TestName = "DefaultRecordRights_ShouldStateTheTwoCallShapes")]
-    [TestCase("do NOT start it again", TestName = "DefaultRecordRights_ShouldForbidRestartingARunStillGoing")]
+    [TestCase("optionally with enable-record-permissions, never with disable-record-permissions",
+        TestName = "DefaultRecordRights_ShouldAllowTheEnableWithAGrant")]
+    [TestCase("The first enable and its first rule SHOULD go in one call",
+        TestName = "DefaultRecordRights_ShouldKeepTheFirstEnableAndRuleTogether")]
+    [TestCase("you MUST name the object by schema name AND title",
+        TestName = "DefaultRecordRights_ShouldNameTheObjectBySchemaNameAndTitle")]
+    [TestCase("you MUST ask which object is meant before reading or writing",
+        TestName = "DefaultRecordRights_ShouldAskWhenTheWordIsNotTheTitle")]
+    [TestCase("leaves the other two operations unchanged (as stored)",
+        TestName = "DefaultRecordRights_ShouldKeepTheOtherOperationsOfAGrant")]
+    [TestCase("you MUST say in the confirmation that portal / external users will reach the records",
+        TestName = "DefaultRecordRights_ShouldStateTheExternalExposure")]
+    [TestCase("`All external users` (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`) or a portal role",
+        TestName = "DefaultRecordRights_ShouldStateHowPortalUsersReachARecord")]
+    [TestCase("re-read before retrying", TestName = "DefaultRecordRights_ShouldReReadAfterAnUnansweredSave")]
+    [TestCase("After an enable or a rule change that leaves the switch ON",
+        TestName = "DefaultRecordRights_ShouldOfferApplyOnlyWhenTheSwitchIsOn")]
+    [TestCase("While the switch is OFF there is nothing to apply: apply is refused then",
+        TestName = "DefaultRecordRights_ShouldStateThatApplyIsRefusedWhileOff")]
+    [TestCase("Make all the rule changes first, then run it once",
+        TestName = "DefaultRecordRights_ShouldRunApplyOnce")]
+    [TestCase("A new launch is safe only after \"not started\" or a run that ended",
+        TestName = "DefaultRecordRights_ShouldNameWhenANewLaunchIsSafe")]
+    [TestCase("you MUST NOT start it again", TestName = "DefaultRecordRights_ShouldForbidRestartingARunStillGoing")]
+    [TestCase("the launch got no usable answer (success=false) — the run MAY already be going",
+        TestName = "DefaultRecordRights_ShouldTreatAnUnansweredLaunchAsMaybeGoing")]
     [TestCase("rights granted by hand with set-record-rights stay",
         TestName = "DefaultRecordRights_ShouldStateThatManualGrantsSurviveTheUpdate")]
     [TestCase("You MUST NOT pass it unless that widening is the developer's intent",
         TestName = "DefaultRecordRights_ShouldGuardTheDisable")]
+    [TestCase("disable-record-permissions is a call of its own",
+        TestName = "DefaultRecordRights_ShouldKeepTheDisableACallOfItsOwn")]
+    [TestCase("a revoke never changes the switch",
+        TestName = "DefaultRecordRights_ShouldKeepTheSwitchOutOfARevoke")]
     [Description("default-record-rights keeps each rule an agent must weigh before changing the record layer; losing one in an edit would let a call widen or narrow access, or start a heavy run, without the developer's decision.")]
     public void DefaultRecordRights_ShouldStateTheContractRule(string rule)
     {
@@ -87,7 +116,7 @@ public sealed class DefaultRecordRightsGuidanceTests
     }
 
     [Test]
-    [Description("The article is published, routed, and reached from the record-permissions entry point, record-rights and object-rights, and every guide it cites is declared.")]
+    [Description("The article is published, routed, and reached from the record-permissions entry point (its decision-table row), record-rights, object-rights and processes/access-rights, and every guide it cites is declared.")]
     public void DefaultRecordRights_ShouldBePublishedRoutedAndCiteOnlyDeclaredGuides()
     {
         // Arrange
@@ -106,11 +135,16 @@ public sealed class DefaultRecordRightsGuidanceTests
         undeclared.Should().BeEmpty(because: "a guide the bundle does not declare is not published");
         Read("guidance/mcp/guides/routing.md").Should().Contain("name=default-record-rights",
             because: "a request to turn record permissions on must reach the owner");
-        Read("guidance/mcp/guides/operations/record-permissions.md").Should().Contain("`default-record-rights`",
-            because: "the decision entry point routes the object's default rules to their owner");
+        Normalized(Read("guidance/mcp/guides/operations/record-permissions.md")).Should().Contain(
+            "| Records created by role X are available to role Y by default; turn record permissions on/off for an "
+            + "object; apply the rules to existing records | Default record rules of the object | `default-record-rights` |",
+            because: "the decision table routes the object's default rules to their owner");
         Read("guidance/mcp/guides/operations/record-rights.md").Should().Contain("name=default-record-rights",
             because: "per-record grants and default rules are different tools");
         Read("guidance/mcp/guides/operations/object-rights.md").Should().Contain("name=default-record-rights",
             because: "get-object-rights reports the record layer, owned there");
+        Normalized(Read("guidance/mcp/guides/processes/access-rights.md")).Should().Contain(
+            "turning them on is `get-guidance name=default-record-rights`: ask the developer first",
+            because: "a process build that needs record permissions must reach the owner with its guard");
     }
 }
