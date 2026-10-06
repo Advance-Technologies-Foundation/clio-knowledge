@@ -255,6 +255,13 @@ plus the element or parameter name:
 | `[#Price#] > 100` | `Formula value error: Expression expected (at index 0).` | that is not a macro family; reference the parameter by UId |
 | `[#[Parameter:{a-uid-not-in-this-process}]#] > 0` | `has an invalid value for the parameter "ConditionExpression". It references the process parameter <uid>, which is not in this process. Add the parameter first, or correct the reference.` | create the parameter, or fix the UId |
 
+A meta path missing a dot fails that gate with `Value for argument "parameterUId" must be specified`, naming
+nothing: add the dot. Under the MODIFY PATH contract of `process-branch-conditions` the server checks a
+hand-written meta path first and names the flow or field (measured, CrtProcessBuilder 1.6.6.76): a misspelling
+gets `is not spelled exactly as a reference to that item is written ... Send '[#…#]'` - send that token; an
+unknown UId gets `references parameter {<uid>}, which is not a parameter of this process`; a column outside
+`readData.columns` gets `is not among the columns the element reads`.
+
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions
 here, each of which references its parameters by UId meta-path like everything else.)
