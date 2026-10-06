@@ -41,7 +41,8 @@ is the one contract all three share, which is why it reads as its own subject.
   a `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }`
   is refused; compare against ONE column of the read record with `column`:
   `{ "elementName": "ReadNewestContact", "parameter": "ResultEntity", "column": "Id" }`, see
-  `process-data-elements`), `expression` (a raw token), or
+  `process-data-elements`), `expression` (the BARE meta path of such a reference - see the `expression`
+  bullet after the macro vocabulary), or
   `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
@@ -52,6 +53,17 @@ is the one contract all three share, which is why it reads as its own subject.
   `NextNDaysOfYear` | `PreviousNDaysOfYear` | `DayOfYearTodayPlusDaysOffset`; **recurring "every year"**
   `DayOfYearToday` (the ONLY DayOfYear macro that takes NO argument); **system / lookup** `CurrentUser` |
   `CurrentUserContact`.
+- `expression` is another SPELLING of a `processParameter` / `elementParameter` (+ `column`) reference, never
+  a value of its own: the BARE meta path - `[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]`, or
+  `...[Element:{uid}].[Parameter:{uid}]`, optionally `.[EntityColumn:{uid}]` - exactly as
+  `describe-business-process` reports it. Unlike a formula, a flow condition or a mapping value, a filter
+  NEVER evaluates a `[#…#]` wrapper: a wrapped parameter reference fails the element at run time, and a
+  wrapped column reference matches NO record with no error. CrtProcessBuilder 1.6.6.71+ refuses at build a
+  wrapped value, any other spelling (no `.` before `[EntityColumn:…]`, the prefix-less short form, extra
+  text), an element / parameter / column the process does not have, and a column of a process parameter;
+  the refusal names the exact token to resend. The checks of `elementParameter` + `column` (a record read in
+  first-record mode, a column it loads, a compatible type) apply unchanged. Below 1.6.6.71 those shapes save
+  green and fail, or act on no record, at run time - so prefer the structured sources, which build the token.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
   `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
@@ -92,6 +104,7 @@ is the one contract all three share, which is why it reads as its own subject.
   on -- on a `changeData` element that is a bulk update on live records.
 - `describe-business-process` reads a filter back: an element carries a decoded `filter` (the same
   object / logicalOperation / conditions / groups shape) when it has one, so you can inspect it or
-  round-trip it into a `setFilter`. A parameter reference comes back as its raw meta-path `expression`.
+  round-trip it into a `setFilter`. A parameter reference comes back as its BARE meta-path `expression`,
+  which re-applies unchanged - send it exactly as read, never wrapped in `[#…#]`.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
