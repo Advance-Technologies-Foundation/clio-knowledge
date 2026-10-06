@@ -73,8 +73,9 @@ uses one. A parameter is referenced by its **UId**, never by its name.
 > — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
 > not exist yet (see `process-branch-conditions`); and a Formula element's `body` takes it on EVERY route
 > that writes one — create, `addElement`, `setElement` (`process-element-catalog` owns that element). A
-> `mappings[].expression`, a filter, a condition set through `modify-business-process` and everything
-> else on this page still take the UId, and the failures below are what a name gets you there.
+> `mappings[].expression`, a condition set through `modify-business-process` and everything else on this
+> page still take the UId, and the failures below are what a name gets you there. A filter takes the UId
+> too, but as a BARE meta path, never `[#…#]` (`process-data-source-filters`).
 
 Outside those two there is no name-based form — and the four wrong shapes do not all fail the same
 way, which matters:
@@ -198,7 +199,8 @@ the platform's macro converters, whose regexes have no match timeout, so a bound
 too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is about 60 characters, so roughly thirty of
 them exhaust it, and the cap applies to the text as you write it, before macros are resolved. The same
 bound covers the paths that store a formula without any other check — a `changeData` value `expression`, a
-Send email recipient, a performer contact, a connection expression, a filter condition expression.
+Send email recipient, a performer contact, a connection expression. A filter condition `expression` gets
+the same bound but is no formula: it must be the bare meta path of one reference (`process-data-source-filters`).
 
 There is no per-REQUEST budget; a large batch is bounded by the request-item cap (1 000 items).
 

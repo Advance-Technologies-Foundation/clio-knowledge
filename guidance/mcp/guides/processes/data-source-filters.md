@@ -58,14 +58,16 @@ is the one contract all three share, which is why it reads as its own subject.
   `...[Element:{uid}].[Parameter:{uid}]`, optionally `.[EntityColumn:{uid}]` - exactly as
   `describe-business-process` reports it. Unlike a formula, a flow condition or a mapping value, a filter
   NEVER evaluates a `[#…#]` wrapper: a wrapped parameter reference fails the element at run time, and a
-  wrapped column reference matches NO record with no error. CrtProcessBuilder 1.6.6.72+ refuses at build a
-  wrapped value, any other spelling (no `.` before `[EntityColumn:…]`, the prefix-less short form, extra
-  text), an element / parameter / column the process does not have, and a column of a process parameter.
-  For a wrapped or misspelled reference the refusal names the exact token to resend; for a missing one it
-  names what is missing. The checks of `elementParameter` + `column` (a record read in first-record mode, a
-  column it loads, a compatible type) apply unchanged. Below 1.6.6.72 those shapes save green - only a column
-  the record's object does not have is refused, by the platform's own validation - and then fail, or act on
-  no record, at run time. So prefer the structured sources, which build the token.
+  wrapped column reference matches NO record with no error (both measured on a stand, 2026-10-06).
+  CrtProcessBuilder 1.6.6.74+ refuses at build a wrapped value, any other spelling (no `.` before
+  `[EntityColumn:…]`, the prefix-less short form, a repeated segment, extra text), an element / parameter /
+  column the process does not have, and a column of a process parameter. When it can tell which item the
+  value means, the refusal names that item's canonical token; otherwise it says what is missing or repeated.
+  That token is only the right SPELLING: the checks of `elementParameter` + `column` (a record read in
+  first-record mode, a column it loads, a compatible type) still apply when you resend it. Below 1.6.6.74
+  those values save green - only a column the record's object does not have is refused, by the platform's
+  own validation - and a wrapped, dangling or dot-less one then fails, or acts on no record, at run time,
+  while the prefix-less short form does resolve. So prefer the structured sources, which build the token.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
   `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
@@ -107,10 +109,15 @@ is the one contract all three share, which is why it reads as its own subject.
 - `describe-business-process` reads a filter back: an element carries a decoded `filter` (the same
   object / logicalOperation / conditions / groups shape) when it has one, so you can inspect it or
   round-trip it into a `setFilter`. A parameter reference comes back as its BARE meta-path `expression`,
-  which re-applies unchanged - send it exactly as read, never wrapped in `[#…#]`. An `expression` that reads
-  back in another form was stored before the build checked it: a WRAPPED one never resolved at run time, a
-  differently spelled one (the prefix-less short form, say) may have. Neither is accepted any more, and since
-  `setFilter` re-sends the whole filter, that one condition refuses the edit - replace it with the bare form
-  (or a structured source) in the same `setFilter`.
+  which re-applies as read while the element it names still passes the checks above - send it exactly as
+  read, never wrapped in `[#…#]`. An `expression` that reads back in another form was stored before the
+  build checked it: a WRAPPED one never resolved at run time, a differently spelled one (the prefix-less
+  short form, say) may have. Neither is accepted any more, and since `setFilter` re-sends the whole filter,
+  that one condition refuses the edit - replace it with the bare form (or a structured source) in the same
+  `setFilter`. MUST: repairing a condition that never resolved changes what the element does - it failed, or
+  acted on no record, and from then on it selects records. Tell the user, and on a `changeData` /
+  `deleteData` / `changeAccessRights` element get their confirmation before you send it (for `deleteData`,
+  with the record count `process-delete-data` requires). When you cannot tell which item a legacy value meant
+  (a repeated segment, say), ask the user rather than pick one.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
