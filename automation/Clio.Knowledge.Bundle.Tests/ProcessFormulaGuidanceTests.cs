@@ -67,8 +67,10 @@ public sealed class ProcessFormulaGuidanceTests
         ("converter left it, not as you wrote",
             "the refusal quotes the CONVERTED expression, so a caller who cannot find their own text "
             + "concludes the wrong formula was validated"),
-        ("[#[Parameter:{", "the reference form is the one thing an agent cannot derive or guess"),
-        ("[#[Element:{",
+        ("[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{",
+            "the reference form is the one thing an agent cannot derive or guess - pinned in the prefixed "
+            + "spelling the platform writes since ENG-102114, which checks a hand-written meta path"),
+        ("[#[IsOwnerSchema:false].[IsSchema:false].[Element:{",
             "the ELEMENT-scoped form, which occurs ONCE in this article and was pinned by nothing: an agent "
             + "who has the process-parameter form still cannot derive this one, and losing it costs the "
             + "commonest mapping there is - one element's output into another element's input"),

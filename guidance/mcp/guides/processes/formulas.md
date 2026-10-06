@@ -69,12 +69,14 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
 uses one. A parameter is referenced by its **UId**, never by its name.
 
-> **TWO EXCEPTIONS, both narrow:** a `flows[].condition` on `create-business-process` takes the NAME
-> — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
-> not exist yet (see `process-branch-conditions`); and a Formula element's `body` takes it on EVERY route
-> that writes one — create, `addElement`, `setElement` (`process-element-catalog` owns that element). A
-> `mappings[].expression`, a condition set through `modify-business-process` and everything else on this
-> page still take the UId, and the failures below are what a name gets you there. A filter takes the UId
+> **TWO EXCEPTIONS, both narrow:** a flow CONDITION takes the NAME — `[#Amount#]`, `[#Element.Parameter#]`
+> — and the server expands it: always on `create-business-process`, because on create the UId does not
+> exist yet (see `process-branch-conditions`), and on `modify-business-process` when
+> its `get-tool-contract` says a hand-written meta path must have "every segment dot-separated";
+> and a Formula element's `body` takes it on EVERY route that writes one — create, `addElement`, `setElement`
+> (`process-element-catalog` owns that element). A `mappings[].expression`, a modify condition under any
+> other contract and everything else on this page still take the UId, and the failures below are what a
+> name gets you there. A filter takes the UId
 > too, but as the BARE meta path `[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]` - prefix
 > included, never `[#…#]` (`process-data-source-filters`).
 
@@ -96,8 +98,13 @@ unknown setting. Build the token yourself, in two steps:
 1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
    return a ready-made meta-path, so there is nothing to copy — you assemble it);
 2. write the token around that UId, braces included:
-   * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
-   * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
+   * a PROCESS parameter -> `[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`
+   * an ELEMENT output parameter ->
+     `[#[IsOwnerSchema:false].[IsSchema:false].[Element:{elementUid}].[Parameter:{parameterUid}]#]`
+
+   That prefix is what the platform writes; the same token without it is accepted too. Every segment is
+   dot-separated - a missing dot fails the save, and under the contract `process-branch-conditions` names
+   (MODIFY PATH) any other spelling is refused with the correct token handed back.
 
 For a COLUMN inside a read element's `ResultEntity`: a Formula BODY takes the name form
 `[#ReadContact.ResultEntity.Owner#]`, expanded on every write path; a raw `expression` takes the UId form with a
@@ -110,7 +117,7 @@ reports a process parameter `PriceParameter` with
 `uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUpParameter`:
 
     {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUpParameter",
-     "expression":"Math.Ceiling([#[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
+     "expression":"Math.Ceiling([#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
 
 The designer then displays this as `RoundUp([#PriceParameter#])` — it resolves the UId back to the name, and it
 shows the designer's own spelling of the function. Both directions of that conversion are the platform's;

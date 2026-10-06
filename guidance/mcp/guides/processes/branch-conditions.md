@@ -55,7 +55,7 @@ everything exists.
 `[#Element.Parameter.Column#]` for ONE column of the record it returned. A `readData` in `first` mode exposes
 exactly one output and it is a RECORD (`ResultEntity`), so a column test reads
 `[#ReadContact.ResultEntity.DoNotUseCall#] == true`; the column is resolved by its code on the read object,
-and `process-data-elements` owns that source, its refusals and the UId form a MODIFY-path condition needs.
+and `process-data-elements` owns that source, its refusals and its UId form.
 That is not a corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and
 245 are not.
 
@@ -64,15 +64,18 @@ That is not a corner: of the 487 element-output conditions in the shipped corpus
 > `function` mode with `FunctionType == Count`, and returns before it in every other mode. On anything clio
 > builds it stays 0, so `> 0` never fires and the fallback always runs. See `process-data-elements`.
 
-`[#SysSettings.Code<Type>#]`, `[#Lookup.Schema.Record#]` and an already-written meta-path are passed
-through untouched. A name that resolves to nothing is refused before anything is saved, naming the flow
+`[#SysSettings.Code<Type>#]` and `[#Lookup.Schema.Record#]` are passed through untouched, and so is an
+already-written meta-path - which, under the contract named in the next paragraph, must also have every
+segment dot-separated (the `[IsOwnerSchema:false].[IsSchema:false].` prefix optional) and name an item of
+this process, or it is refused naming the flow and handing back the correct token. A name that resolves to nothing is refused before anything is saved, naming the flow
 and listing the parameters that do exist — which is the whole reason to write the name rather than
 guess: without it the platform answers `Formula value error: Expression expected (at index 0)`, naming
 neither, and the entire call is aborted.
 
-**ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
-exists, so `describe-business-process` reports the element and parameter UIds (column UIds come from the
-`process-data-elements` recipe). The two-step route — build the flow plain,
+**ON THE MODIFY PATH, CHECK THE CONTRACT FIRST.** When `get-tool-contract` for `modify-business-process` says a hand-written meta path must have "every segment dot-separated", `addFlow`,
+`setFlow` and `setFlowCondition` expand the same names as here. With any other contract there is no
+expansion on modify: write the meta-path from the UIds `describe-business-process` reports (column UIds come
+from the `process-data-elements` recipe). The two-step route — build the flow plain,
 then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
 one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`,
 (for a conditional one) `condition`, and an optional `label`.
