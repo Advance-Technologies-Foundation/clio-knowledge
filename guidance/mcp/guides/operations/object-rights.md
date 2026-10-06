@@ -12,9 +12,9 @@ hand-written ESQ into the rights tables:
   operation permissions on or off. DESTRUCTIVE: it writes in one call, with no publish step, and the
   change reaches users who are already logged in immediately.
 
-Version boundary: get-object-rights and set-object-rights require clio <SET-OBJECT-RIGHTS-CLIO-VERSION-TBD>
-or later. On an older clio neither tool exists: change object permissions in the Object permissions
-designer instead.
+Version boundary: get-object-rights and set-object-rights require a clio release newer than 8.1.0.137;
+clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
+permissions designer instead.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`.
 
