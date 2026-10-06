@@ -69,6 +69,8 @@ is the one contract all three share, which is why it reads as its own subject.
   those values save green - only a column the record's object does not have is refused, by the platform's
   own validation - and a wrapped, dangling or dot-less one then fails, or acts on no record, at run time,
   while the prefix-less short form does resolve. So prefer the structured sources, which build the token.
+  When the user asks for a `[#…#]`-wrapped or otherwise misspelled filter value, say that a filter does not
+  accept that form and which bare token you send instead (or already have) - never report it as the same value.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
   `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
