@@ -58,11 +58,11 @@ is the one contract all three share, which is why it reads as its own subject.
   `...[Element:{uid}].[Parameter:{uid}]`, optionally `.[EntityColumn:{uid}]` - exactly as
   `describe-business-process` reports it. Unlike a formula, a flow condition or a mapping value, a filter
   NEVER evaluates a `[#…#]` wrapper: a wrapped parameter reference fails the element at run time, and a
-  wrapped column reference matches NO record with no error. CrtProcessBuilder 1.6.6.71+ refuses at build a
+  wrapped column reference matches NO record with no error. CrtProcessBuilder 1.6.6.72+ refuses at build a
   wrapped value, any other spelling (no `.` before `[EntityColumn:…]`, the prefix-less short form, extra
   text), an element / parameter / column the process does not have, and a column of a process parameter;
   the refusal names the exact token to resend. The checks of `elementParameter` + `column` (a record read in
-  first-record mode, a column it loads, a compatible type) apply unchanged. Below 1.6.6.71 those shapes save
+  first-record mode, a column it loads, a compatible type) apply unchanged. Below 1.6.6.72 those shapes save
   green and fail, or act on no record, at run time - so prefer the structured sources, which build the token.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
   `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
@@ -105,6 +105,9 @@ is the one contract all three share, which is why it reads as its own subject.
 - `describe-business-process` reads a filter back: an element carries a decoded `filter` (the same
   object / logicalOperation / conditions / groups shape) when it has one, so you can inspect it or
   round-trip it into a `setFilter`. A parameter reference comes back as its BARE meta-path `expression`,
-  which re-applies unchanged - send it exactly as read, never wrapped in `[#…#]`.
+  which re-applies unchanged - send it exactly as read, never wrapped in `[#…#]`. An `expression` that reads
+  back WRAPPED, or otherwise not in that form, was stored before the build checked it and never resolved at
+  run time; since `setFilter` re-sends the whole filter, that one condition refuses the edit - replace it with
+  the bare form (or a structured source) in the same `setFilter`.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
