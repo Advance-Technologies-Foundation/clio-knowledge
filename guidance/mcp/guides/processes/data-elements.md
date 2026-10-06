@@ -115,16 +115,17 @@ filter; see `process-access-rights`.
   `sourceColumn` beside the raw `value`, only when those names would re-apply to the identical value
   (same spelling, a fitting type, a loaded column).
 - On the MODIFY path a condition takes the same name (`[#ReadContact.ResultEntity.DoNotUseCall#] == true`)
-  when `get-tool-contract` for `modify-business-process` says a hand-written meta path must have "every segment dot-separated"; with any other contract, write the UId form there. A raw `expression` always takes
-  the UId form: the read element's `uid` and its `ResultEntity` parameter's `uid` from describe, the column's
-  `u-id` from `get-entity-schema-properties` (merged view, no `package-name`) -
+  under the contract `process-branch-conditions` names (ON THE MODIFY PATH); with any other contract,
+  write the UId form there. A raw `expression` always takes the UId form: the read element's `uid` and
+  its `ResultEntity` parameter's `uid` from describe, the column's `u-id` from
+  `get-entity-schema-properties` (merged view, no `package-name`) -
   `[#[IsOwnerSchema:false].[IsSchema:false].[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#]`.
   Every segment is dot-separated; the form without the `[IsOwnerSchema:false].[IsSchema:false].` prefix is
   accepted too. Under that contract the server checks a UId form like the name: a column outside
-  `readData.columns` is refused, and so is any other spelling, naming the flow or field and handing the
-  correct token back. Under any other contract the UId form is stored as written and gets NO load check
-  (a column the read does not load arrives EMPTY): include the column in `readData.columns`, or omit the
-  list, yourself.
+  `readData.columns` is refused, and so is any other spelling, naming the flow or field (and, for a
+  misspelling, handing the correct token back). Under any other contract the UId form is stored as
+  written and gets NO load check (a column the read does not load arrives EMPTY): include the column in
+  `readData.columns`, or omit the list, yourself.
   In a raw `expression` mapping onto a process parameter, and in a Formula body, that UId token was
   measured to deliver a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
   (Creatio 10.1.37, .NET Framework, MSSQL; CrtProcessBuilder 1.6.6.22; 2026-09-24).
