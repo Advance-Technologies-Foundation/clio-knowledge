@@ -66,18 +66,19 @@ That is not a corner: of the 487 element-output conditions in the shipped corpus
 > builds it stays 0, so `> 0` never fires and the fallback always runs. See `process-data-elements`.
 
 `[#SysSettings.Code<Type>#]` and `[#Lookup.Schema.Record#]` are passed through untouched, and so is an
-already-written meta-path - which, under the contract named in the next paragraph, must also have every
-segment dot-separated (the `[IsOwnerSchema:false].[IsSchema:false].` prefix optional) and name an item of
-this process, or it is refused naming the flow - and, for a misspelling, handing back the correct token. A
-name that resolves to nothing is refused before anything is saved, naming the flow and listing the
-parameters that do exist — which is the whole reason to write the name rather than guess: without it the
-platform answers `Formula value error: Expression expected (at index 0)`, naming neither, and the entire
-call is aborted.
+already-written meta-path - which, under the contract named in the next paragraph, must be spelled exactly
+as the platform writes it (every segment dot-separated, braces included, the
+`[IsOwnerSchema:false].[IsSchema:false].` prefix whole or absent) and name an item of this process, or it is
+refused naming the flow - and, for a misspelling, handing back the correct token. A name that resolves to
+nothing is refused before anything is saved, naming the flow and listing the parameters that do exist —
+which is the whole reason to write the name rather than guess: without it the platform answers `Formula
+value error: Expression expected (at index 0)`, naming neither, and the entire call is aborted.
 
 **ON THE MODIFY PATH, CHECK THE CONTRACT FIRST.** When the `modify-business-process` contract from
 `get-tool-contract` contains the exact phrase `every segment dot-separated`, `addFlow`, `setFlow` and
 `setFlowCondition` expand the same names as here, and the server checks every hand-written meta path - in a
-condition, an `expression` mapping or value and a Formula body, on create as well - as above. With any other
+condition, an `expression` mapping or value and a Formula body, on create as well - as above; an echoed
+designer condition too, so one reading a column its Read data does not load is refused. With any other
 contract there is no expansion on modify: write the meta-path from the UIds `describe-business-process`
 reports (column UIds come from the `process-data-elements` recipe). The two-step route — build the flow
 plain, then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a

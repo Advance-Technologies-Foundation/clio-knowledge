@@ -120,14 +120,14 @@ filter; see `process-access-rights`.
   its `ResultEntity` parameter's `uid` from describe, the column's `u-id` from
   `get-entity-schema-properties` (merged view, no `package-name`) -
   `[#[IsOwnerSchema:false].[IsSchema:false].[Element:{<elementUid>}].[Parameter:{<ResultEntityUid>}].[EntityColumn:{<columnUid>}]#]`.
-  Every segment is dot-separated; the form without the `[IsOwnerSchema:false].[IsSchema:false].` prefix is
-  accepted too. Under that contract the server checks a UId form like the name: a column outside
+  Spell it exactly so - every segment dot-separated, braces included; the form without the whole
+  `[IsOwnerSchema:false].[IsSchema:false].` prefix is accepted too. Under that contract the server checks a UId form like the name: a column outside
   `readData.columns` is refused, and so is any other spelling, naming the flow or field (and, for a
-  misspelling, handing the correct token back). Under any other contract the UId form is stored as
-  written and gets NO load check (a column the read does not load arrives EMPTY): include the column in
+  misspelling, handing the correct token back). Under any other contract the UId form may be stored as
+  written with NO load check (a column the read does not load arrives EMPTY): include the column in
   `readData.columns`, or omit the list, yourself.
-  In a raw `expression` mapping onto a process parameter, and in a Formula body, that UId token was
-  measured to deliver a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
+  In a raw `expression` mapping onto a process parameter, and in a Formula body, that UId token (in its
+  prefix-less form) was measured to deliver a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
   (Creatio 10.1.37, .NET Framework, MSSQL; CrtProcessBuilder 1.6.6.22; 2026-09-24).
   Describe again and require `kind: "conditional"` plus the exact text, then run with a matching and a
   non-matching record: a read-back proves authoring, NOT routing.

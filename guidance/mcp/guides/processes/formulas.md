@@ -101,7 +101,8 @@ unknown setting. Build the token yourself, in two steps:
    * an ELEMENT output parameter ->
      `[#[IsOwnerSchema:false].[IsSchema:false].[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
-   The platform writes that prefix; the token without it is accepted too. Every segment is dot-separated.
+   The platform writes that prefix; the token without all of it is accepted too. Spell the rest exactly:
+   every segment dot-separated, braces included.
 
 For a COLUMN inside a read element's `ResultEntity`: a Formula BODY takes the name form
 `[#ReadContact.ResultEntity.Owner#]`, expanded on every write path; a raw `expression` takes the UId form with a
@@ -202,15 +203,16 @@ own, because the gate would ACCEPT it.
 **Length, at most 2048 characters**, applied before anything is stored — the pre-save gate is what runs
 the platform's macro converters, whose regexes have no match timeout, so a bound applied there would be
 too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is
-90 to 200 characters, so ten to twenty of them exhaust it, and the cap applies to the text as you write it,
-before macros are resolved. The same bound covers a `changeData` value
+55 to 200 characters, so ten to thirty-five of them exhaust it - counted as you write it and, in a condition
+or Formula body, again after names expand. The same bound covers a `changeData` value
 `expression`, a connection expression, a Send email recipient and a performer contact. A filter condition
 `expression` gets the same bound but is no formula: it must be the bare meta path of one reference
 (`process-data-source-filters`).
 
 **A hand-written meta path** (MODIFY PATH contract, `process-branch-conditions`) in a condition, an
-`expression` mapping or value or a Formula body must spell an item of THIS process as the platform does
-(prefix optional), and a column its record loads. Recipients and performer contacts are not checked.
+`expression` mapping, connection or value, a `recordId` or a Formula body must spell an item of THIS process
+as the platform does (prefix optional), and a column its record loads. Send email recipients and template
+entities and performer contacts are not checked.
 
 There is no per-REQUEST budget; a large batch is bounded by the request-item cap (1 000 items).
 
@@ -229,16 +231,12 @@ inflates it, so an expression with no brackets at all can arrive deeply nested. 
 character bound is not a mitigation: it bounds LENGTH, and the dangerous expression is short and dense
 rather than long and flat.
 
-ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words — and an older package
-refuses MORE, not less (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW
-condition). A refusal from a pre-1.4.0.41 environment is therefore not evidence the formula is bad:
-update the package. Below 1.4.0.0 an `expression` mapping was stored unchecked and `setFlowCondition` did
-not exist. clio refuses `create-business-process` / `modify-business-process` against an
-environment below its enforced floor; the fix is `install-process-builder`, not a workaround.
-
-THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE SET UNREACHABLE — they are history,
-not a branch to take. On a refusal from a CURRENT clio, run `install-process-builder`; never re-send a
-call in an older dialect, because clio refused before it left and no dialect reached the server.
+ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words, and an older package
+refuses MORE (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW condition),
+so a refusal from a pre-1.4.0.41 environment is not evidence the formula is bad. clio refuses
+`create-business-process` / `modify-business-process` below its enforced floor, which makes every "on an
+older package" fallback in this guide set history, not a branch: run `install-process-builder`, and never
+re-send a call in an older dialect - clio refused it before it left.
 
 WHAT A REFUSAL LOOKS LIKE. Every row is a verbatim measurement, prefixed by `Process validation failed:`
 plus the element or parameter name:
@@ -255,15 +253,15 @@ plus the element or parameter name:
 | `1.5` into an Integer parameter | `Error while executing expression "1.5m": Formula value error: Cannot convert type "Decimal" to "Int32"` | the target type cannot hold it — note the quoted `1.5m` |
 | an Integer parameter as a whole condition | `Error while executing expression "Amount": Formula value error: Cannot convert type "Int32" to "Boolean"` | a condition must be bool — compare it |
 | `[#Price#] > 100` in a mapping | `Formula value error: Expression expected (at index 0).` | that is not a macro family; reference the parameter by UId |
-| `[#[Parameter:{a-uid-not-in-this-process}]#] > 0` (older package) | `has an invalid value for the parameter "ConditionExpression". It references the process parameter <uid>, which is not in this process. Add the parameter first, or correct the reference.` | create the parameter, or fix the UId |
+| `[#[Parameter:{a-uid-not-in-this-process}]#] > 0` (any other contract) | `has an invalid value for the parameter "ConditionExpression". It references the process parameter <uid>, which is not in this process. Add the parameter first, or correct the reference.` | create the parameter, or fix the UId |
 
 A dot missing before `[EntityColumn:…]` fails that gate with `Value for argument "parameterUId" must be
-specified`, naming nothing; one missing before `[Parameter:…]` is told to add a PROCESS parameter; one
-missing after `[IsSchema:false]` passes it and runs. Under the MODIFY PATH contract clio checks first,
-naming the flow or field (measured, 1.6.6.77): a misspelling gets `is not spelled exactly as a reference to
-that item is written ... Send '[#…#]'`; an unknown UId gets `references parameter {<uid>}, which is not a
-parameter of this process`; a column outside `readData.columns` gets `is not among the columns the element
-reads`.
+specified`, naming nothing; one missing between `[Element:…]` and `[Parameter:…]` is told to add a PROCESS
+parameter; one missing after `[IsSchema:false]` passes it and runs. Under the MODIFY PATH contract clio
+checks first, naming the flow or field (measured, 1.6.6.77): a misspelling gets `is not spelled exactly as a
+reference to that item is written ... Send '[#…#]'`; an unknown process parameter `… which is not a
+parameter of this process`, an unknown element `… which this process does not have`; a column outside
+`readData.columns` gets `is not among the columns the element reads`.
 
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions
