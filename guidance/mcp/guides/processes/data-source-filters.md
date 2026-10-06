@@ -62,7 +62,8 @@ is the one contract all three share, which is why it reads as its own subject.
   CrtProcessBuilder 1.6.6.74+ refuses at build a wrapped value, any other spelling (no `.` before
   `[EntityColumn:…]`, the prefix-less short form, a repeated segment, extra text), an element / parameter /
   column the process does not have, and a column of a process parameter. When it can tell which item the
-  value means, the refusal names that item's canonical token; otherwise it says what is missing or repeated.
+  value means, the refusal names that item's canonical token; otherwise it names the problem, or points you to
+  `describe-business-process` for the right token.
   That token is only the right SPELLING: the checks of `elementParameter` + `column` (a record read in
   first-record mode, a column it loads, a compatible type) still apply when you resend it. Below 1.6.6.74
   those values save green - only a column the record's object does not have is refused, by the platform's
@@ -116,8 +117,8 @@ is the one contract all three share, which is why it reads as its own subject.
   that one condition refuses the edit - replace it with the bare form (or a structured source) in the same
   `setFilter`. MUST: repairing a condition that never resolved changes what the element does - it failed, or
   acted on no record, and from then on it selects records. Tell the user, and on a `changeData` /
-  `deleteData` / `changeAccessRights` element get their confirmation before you send it (for `deleteData`,
-  with the record count `process-delete-data` requires). When you cannot tell which item a legacy value meant
+  `deleteData` / `changeAccessRights` element, or an `addData` element in `selection` mode, get their
+  confirmation before you send it (for `deleteData`, with the record count `process-delete-data` requires). When you cannot tell which item a legacy value meant
   (a repeated segment, say), ask the user rather than pick one.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.

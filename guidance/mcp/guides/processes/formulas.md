@@ -75,7 +75,8 @@ uses one. A parameter is referenced by its **UId**, never by its name.
 > that writes one — create, `addElement`, `setElement` (`process-element-catalog` owns that element). A
 > `mappings[].expression`, a condition set through `modify-business-process` and everything else on this
 > page still take the UId, and the failures below are what a name gets you there. A filter takes the UId
-> too, but as a BARE meta path, never `[#…#]` (`process-data-source-filters`).
+> too, but as the BARE meta path `[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]` - prefix
+> included, never `[#…#]` (`process-data-source-filters`).
 
 Outside those two there is no name-based form — and the four wrong shapes do not all fail the same
 way, which matters:
