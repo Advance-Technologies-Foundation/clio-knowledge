@@ -75,7 +75,7 @@ change is **behavioral**; otherwise it is **editorial**.
 
 | Editorial | Behavioral |
 |---|---|
-| Fixing a typo, grammar, or Markdown formatting. | Adding, removing, or reversing a `MUST`, `MUST NOT`, or `SHOULD`. |
+| Fixing a typo, grammar, or Markdown formatting. | Adding, removing, or reversing a `MUST`, `MUST NOT`, `SHOULD`, `UNSUPPORTED`, or `EXPERIMENTAL`. |
 | Reordering sections within one article without changing any rule. | Renaming a tool or parameter, or changing a value, an order of operations, or a stop condition. |
 | Replacing an example with one that leads to the same calls. | Moving a version boundary, an applicability limit, a safety precondition, or a routing target. |
 
@@ -93,12 +93,13 @@ evidence, not whether the change ships.
 The pull request description states, for each behavioral change:
 
 - **Applicability**: the Creatio versions, runtime, database, and product boundaries it holds for,
-  and the known exclusions.
+  and the known exclusions; a boundary nobody has established is stated as `unknown`, not omitted.
 - **Compatibility**: the Clio version or MCP tool contract it needs. When that is newer than
   `compatibility.clio.min` in `bundle-source.json`, the article states the boundary inline next to the
   instruction it gates (for example `clio 8.1.0.136 or later`).
-- **Evidence**: a source from [Preserve evidence](#preserve-evidence), specific enough to re-check: a
-  test name, a source path at a commit, a lab scenario, or an observed response with its version.
+- **Evidence**: a source of a kind listed in [Preserve evidence](#preserve-evidence), identified
+  precisely enough to re-check, for example a test name, a source path at a commit, or a reference
+  implementation at its exact release.
 
 A reviewer MUST NOT approve a behavioral change whose evidence is missing or does not cover the stated
 applicability. The reviewer asks for the evidence, for the change to be narrowed to what the evidence
@@ -126,14 +127,17 @@ Supersession and retirement are behavioral.
 - **An item is retired**: the pull request names it and its successor, removes it from `resources`,
   `requirements.itemIds`, and `requirements.resourceUris`, rewrites every `name=` or
   `docs://knowledge/` citation of it to the successor, and moves its `legacyUris` to the successor so
-  pre-v1 `docs://mcp/guides/...` routes keep resolving. The retired `itemId` and `uri` cannot be
+  pre-v1 `docs://mcp/...` routes keep resolving. The retired `itemId` and `uri` cannot be
   aliased: Clio resolves a `docs://knowledge/` URI by exact `itemId` and a bare name by `itemId` or
   `topicId`, never through `legacyUris` (`KnowledgeResolution.cs`, Clio 8.1.0.97 to 8.1.0.139), so
   listing them in `legacyUris` passes the builder and does nothing. The pull request states that
-  retirement breaks callers of the old ID.
-- **Citations**: guidance, advisories, and references cite an item by `itemId`
-  (`get-guidance name=<itemId>`) or canonical `uri`, never by title. An advisory names each item it
-  affects the same way, next to the supersession condition that
+  retirement breaks callers of the old ID. Clio's own source names the required inventory in
+  [README.md](README.md#status) (`core-rules`, `routing`, `when-to-use-requests`), so those items are
+  never retired or renamed without a coordinated Clio change.
+- **Citations**: cite a `guidance` item by `get-guidance name=<itemId>` and an item of any other role
+  by its canonical `docs://knowledge/...` `uri`, never by title. Clio resolves a bare name only for the
+  `guidance` role, so `name=` finds no `reference` or `reference-example` item. An advisory names each
+  item it affects the same way, next to the supersession condition that
   [Advisory changes](#advisory-changes) asks for.
 
 ## Publishing a change to consumers
