@@ -75,6 +75,50 @@ Git transport does not use this builder; it reads the repository manifest and so
 The NuGet distribution project invokes the builder into its intermediate output directory while
 packing. Generated ZIP files are build artifacts and must not be committed.
 
+## Reference integrity
+
+Identifiers and the references between published items are checked by `dotnet test` on
+`automation/Clio.Knowledge.Bundle.Tests`. That is the suite the required **Producer contract suite**
+pull-request check runs, and the release workflow runs it again before it builds a bundle, so the same
+command fails locally and in CI. A reference counts as resolved only when Clio would resolve it the same
+way: a `get-guidance` name must be the `itemId` or `topicId` of a `guidance`-role item, and a route must
+equal a declared `uri` or `legacyUris` entry exactly.
+
+| Identifier or reference | Resolves against | Checked by |
+|---|---|---|
+| `itemId`, `topicId`: format, uniqueness, unique topic and role pair | — | `BundleBuilder` (`BundleBuilderTests`) |
+| `uri` derived from `libraryId` and `itemId`; `legacyUris` unique across items | — | `BundleBuilder` |
+| `requirements.itemIds`, `requirements.resourceUris` | the declared resources; a mismatch names the ids on each side | `BundleBuilder` |
+| `requiredFeatures`: format and uniqueness | — | `BundleBuilder` |
+| `sourcePath` | an existing file under the role's root; every guidance and reference file is declared | `BundleBuilder`, `GuidanceInventoryTests`, `ReferenceGuidanceMigrationTests` |
+| `get-guidance` names in any published body: `name=<id>` and ``get-guidance … `<id>` `` | `itemId` or `topicId` of a `guidance`-role item | `ReferenceIntegrityTests` |
+| `docs://knowledge/…` and `docs://mcp/…` routes in any published body | a declared `uri` or `legacyUris` entry | `ReferenceIntegrityTests` |
+| Relative markdown links in any published body | a file declared as a `sourcePath` | `ReferenceIntegrityTests` |
+| Top-level `id:` of a catalog entry | the entry's manifest `itemId` | `ReferenceIntegrityTests` |
+| Every supporting reference is linked from a primary guide | the declared `reference` items | `ReferenceGuidanceMigrationTests` |
+| Section citations between process articles | the cited article's headings | `ProcessGuideCrossReferenceTests` |
+
+`ReferenceIntegrityTests` reports every dangling reference in one run, one per line, as
+`<source file>:<line>: <reference> -> <what is missing>`.
+
+Not checked yet:
+
+- Catalog `primaryUseCase.id` and `supportingCapabilities`: `capabilities/` holds no registry yet, so
+  there is no declared set to resolve them against. They become checkable when the registry lands.
+- Advisory IDs: no advisory is published yet.
+- `requiredFeatures` values: they name Clio feature toggles, which Clio declares, not this repository; no
+  item declares one today.
+- Anchors in relative links (`#section`): no published body has a relative link today, and heading
+  slugs differ between renderers and the `== … ==` heading style.
+- A guide named in other prose forms: a bare backticked name (``the `run-process-button` guide``), a
+  table cell under a "get-guidance with name" header, or an unquoted name after `get-guidance`. Without a
+  marker these cannot be told apart from tool or component names.
+- `docs://help/…` routes: Clio serves them itself; they are not part of this library.
+- A route into another library (`docs://knowledge/<other-library>/…`): none exists. The scan reports one as
+  dangling, because this repository cannot vouch for another library's items.
+- Feature gating: a reference from an ungated article to a gated one resolves here but is hidden where the
+  feature is off.
+
 ## NuGet runtime spike
 
 `Clio.Knowledge.NuGetSpike` uses the official NuGet Client SDK in-process to discover, download,
