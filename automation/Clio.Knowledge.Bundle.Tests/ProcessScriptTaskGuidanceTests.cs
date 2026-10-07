@@ -162,7 +162,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile keeps running, so poll compile-status rather than compiling again, and read last-compilation-log when compile-status has no record. Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s, and the reporter's agents had no rule that named last-compilation-log.")]
+    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile keeps running, so poll compile-status rather than compiling again, and read last-compilation-log - whose verdict carries no time - when compile-status has no record. Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. The rule lives in core-rules; process-script-task only points to it.")]
     public void Guides_ShouldSayWhatToDoAfterAClientSideCompileTimeout()
     {
         // Arrange
@@ -178,14 +178,18 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "core-rules owns the long-running rule every operation reads, and a client-side timeout is the case it did not cover");
         coreRules.Should().Contain("do NOT call it again to check; poll compile-status / restart-status",
             because: "a second compile-creatio is a second runtime reload for every user, or a refusal, never a status");
-        coreRules.Should().Contain("not that nothing ran: read the environment's latest compile verdict with last-compilation-log",
+        coreRules.Should().Contain("`not-found` means this MCP server session holds no record, not that nothing ran",
             because: "a not-found that reads as 'nothing ran' is what sent agents to recompile or guess");
+        coreRules.Should().Contain("latest FINISHED compile; it carries no time",
+            because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
+        coreRules.Should().Contain("never restart on that answer alone",
+            because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile");
         guide.Should().Contain("If your client reports the call timed out (for example `Request timed out`)",
             because: "a process-name compile is the long call a ScriptTask author meets, so the article names the case where it happens");
-        guide.Should().Contain("do NOT call `compile-creatio` again; poll `compile-status`",
-            because: "the compile is still running on the stand, and compile-status reports its verdict with the compiler errors");
-        guide.Should().Contain("as `core-rules` (Long-running tools) says",
-            because: "the rule has one owner; the article points to it rather than restating its fallback");
+        guide.Should().Contain("follow the Long-running tools rule in `core-rules`",
+            because: "the rule has one owner; the article points to it instead of restating it");
+        guide.Should().NotContain("last-compilation-log",
+            because: "the fallback and its no-timestamp caveat live in core-rules only, so the two cannot drift apart");
     }
 
     private static string FindRepositoryRoot()
