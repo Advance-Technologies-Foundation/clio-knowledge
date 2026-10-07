@@ -155,8 +155,10 @@ public sealed class MobileGuideResponseSizeTests
     /// </remarks>
     /// <remarks>
     /// LOWERED, 62,418 -> 62,410 (ENG-102508). The quick-filter mechanism cited an internal task id as its
-    /// evidence; it now states the observation inline ("observed on Creatio Mobile in August 2026"), which
-    /// is shorter, so the ceiling follows the article down.
+    /// evidence; it now states it inline ("investigated on Creatio Mobile in August 2026"), which is
+    /// shorter, so the ceiling follows the article down. "investigated" replaced a first-draft "observed"
+    /// that overstated a code-level investigation; its four extra characters were paid for in the same
+    /// sentence ("verify against" -> "verify for") rather than by moving the ceiling back up.
     /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [

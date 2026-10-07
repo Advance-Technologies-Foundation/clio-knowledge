@@ -102,7 +102,7 @@ Git-first workspace: capture DB-first schemas before pushing
 - `export-schema` is useful for a separately reviewable single-schema transfer, but its standalone bundle is consumed by `import-schema`; merely exporting it does NOT update the workspace package or make a subsequent `push-workspace` safe. Pull the affected package before pushing it.
 - This recipe does not override an FSM workspace's deployment rules: follow the local workspace `AGENTS.md` deployment section; when it prohibits `push-workspace`, keep using its prescribed filesystem workflow.
 - Read installed tool contracts for current arguments and defaults. Do not assume ordinary schemas are parentless by default or that creation accepts only one column.
-- Evidence and scope: the reporter confirmed on clio 8.1.0.130 (September 2026) that this ordering is still needed. clio itself does not warn before `push-workspace` deletes DB-only schemas.
+- Evidence and scope: a user report confirmed on clio 8.1.0.130 (September 2026) that this ordering is still needed. As of clio 8.1.0.139, clio does not warn before `push-workspace` deletes DB-only schemas.
 
 Page editing guardrails
 - `list-pages` identifies page candidates by `schema-name`.

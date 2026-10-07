@@ -86,6 +86,18 @@ public sealed class InternalTaskReferenceTests
     [TestCase("verified for clio issue 1249: both", "issue 1249", TestName = "issue N without hash")]
     [TestCase("FSM descriptor compatibility (Clio issue #1416)", "issue #1416", TestName = "issue #N")]
     [TestCase("as reported in pull request 57", "pull request 57", TestName = "pull request N")]
+    [TestCase("tracked in _ENG-92761_ for now", "ENG-92761", TestName = "Jira key in underscore emphasis")]
+    [TestCase("tracked in __ENG-92761__ for now", "ENG-92761", TestName = "Jira key in double underscore emphasis")]
+    [TestCase("fixed in ENG\u2011123", "ENG\u2011123", TestName = "Jira key with a non-breaking hyphen")]
+    [TestCase("fixed in ENG\u2013123", "ENG\u2013123", TestName = "Jira key with an en dash")]
+    [TestCase("see _clio#1574_ and _#1138_", "clio#1574", TestName = "repo#N in underscore emphasis")]
+    [TestCase("see _clio#1574_ and _#1138_", "#1138", TestName = "bare #N in underscore emphasis")]
+    [TestCase("see github.com/o/r/issues/1364", "github.com/o/r/issues/1364", TestName = "issue URL without a scheme")]
+    [TestCase("https://bitbucket.org/ws/repo/pull-requests/12/overview",
+        "https://bitbucket.org/ws/repo/pull-requests/12", TestName = "Bitbucket pull request URL")]
+    [TestCase("https://bb.example.com/projects/P/repos/r/pull-requests/7",
+        "https://bb.example.com/projects/P/repos/r/pull-requests/7", TestName = "Bitbucket Server pull request URL")]
+    [TestCase("The #1138 fix prevents filling an empty slot.", "#1138", TestName = "bare #N on a line with a colour word")]
     public void Scan_ShouldReport_ATaskReference(string text, string expected)
     {
         TaskReferenceScanner.Scan(text).Select(hit => hit.Text)
@@ -95,12 +107,20 @@ public sealed class InternalTaskReferenceTests
     [TestCase("UTF-8 bytes", TestName = "UTF-8")]
     [TestCase("an independent SHA-256 checksum", TestName = "SHA-256")]
     [TestCase("pass ISO-8601, e.g. 2026-05-01", TestName = "ISO-8601")]
+    [TestCase("HTTP-2 server push", TestName = "HTTP-2")]
+    [TestCase("meets WCAG-2 contrast", TestName = "WCAG-2")]
+    [TestCase("RFC-7231 semantics", TestName = "RFC-7231")]
+    [TestCase("patched for CVE-2024-12345", TestName = "CVE id")]
+    [TestCase("an ECMA-262 regular expression", TestName = "ECMA-262")]
     [TestCase("\"value\": \"CRM-000042\"", TestName = "example data with a leading zero")]
     [TestCase("E52BD583-7825-E011-8165-00155D043204 is ActivityType Call", TestName = "GUID")]
     [TestCase("the id starts E52BD583-7825-E011-8165…", TestName = "GUID fragment")]
     [TestCase("color: #333;", TestName = "three-digit decimal colour")]
     [TestCase("\"backgroundColor\": \"#999\"", TestName = "quoted decimal colour")]
     [TestCase("border: 1px solid #000000", TestName = "colour with a leading zero")]
+    [TestCase("border: 1px solid #333", TestName = "decimal colour in a border shorthand")]
+    [TestCase("--text-color: #8080;", TestName = "four-digit decimal colour in a custom property")]
+    [TestCase("use the text colour #808 here", TestName = "decimal colour after the word colour")]
     [TestCase("text #808080 on white", TestName = "six-digit decimal colour")]
     [TestCase("one of #A6DE00, #20A959, #7848EE, #247EE5", TestName = "hex colours with letters")]
     [TestCase("## 2. Configure the page", TestName = "markdown heading")]
@@ -114,6 +134,14 @@ public sealed class InternalTaskReferenceTests
     {
         TaskReferenceScanner.Scan(text).Select(hit => hit.Text)
             .Should().BeEmpty();
+    }
+
+    [TestCase("Background colour: #333; fixed in #1138.", TestName = "colour and bare #N on one line")]
+    [TestCase("Background is fixed in #1138.", TestName = "colour word, no colour value")]
+    public void Scan_ShouldReportTheTaskReference_NotTheColour(string text)
+    {
+        TaskReferenceScanner.Scan(text).Select(hit => hit.Text)
+            .Should().Equal("#1138");
     }
 
     [Test]
@@ -142,26 +170,36 @@ public sealed class InternalTaskReferenceTests
 /// <summary>
 /// Finds internal task references in a published body. Each pattern was checked against the whole
 /// published corpus; the exclusions are the tokens of the same shape that the corpus really contains.
+/// Boundaries are letters and digits only, so Markdown emphasis (<c>_ENG-1_</c>, <c>__clio#2__</c>) does
+/// not hide a reference.
 /// </summary>
 internal static class TaskReferenceScanner
 {
     internal sealed record Hit(int Line, string Text);
 
     /// <summary>
-    /// A Jira key: an upper-case project of 2–10 characters, a hyphen, a number without a leading zero
-    /// (example data such as <c>CRM-000042</c> has one). Not glued to a preceding word or hyphen, and not
-    /// followed by a GUID's next group, so the groups of <c>E52BD583-7825-E011-…</c> do not match.
+    /// A Jira key: an upper-case project of 2–10 characters, a hyphen (ASCII or a Unicode hyphen or dash),
+    /// a number without a leading zero (example data such as <c>CRM-000042</c> has one). Not glued to a
+    /// preceding letter, digit or hyphen, and not followed by a GUID's next group, so the groups of
+    /// <c>E52BD583-7825-E011-…</c> do not match.
     /// </summary>
     private static readonly Regex JiraKey = new(
-        @"(?<![\w-])(?<project>[A-Z][A-Z0-9]{1,9})-[1-9][0-9]*(?!\w)(?!-[0-9A-Fa-f]{4}-)",
+        @"(?<![\p{L}\p{N}\-‐-―])(?<project>[A-Z][A-Z0-9]{1,9})[\-‐-―][1-9][0-9]*"
+            + @"(?![\p{L}\p{N}])(?!-[0-9A-Fa-f]{4}-)",
         RegexOptions.Compiled);
 
     /// <summary>Standard names with the Jira-key shape. Add a prefix here only for a published standard.</summary>
-    private static readonly HashSet<string> StandardNames = new(StringComparer.Ordinal) { "UTF", "SHA", "ISO" };
+    private static readonly HashSet<string> StandardNames = new(StringComparer.Ordinal)
+    {
+        "CVE", "ECMA", "HTTP", "ISO", "RFC", "SHA", "UTF", "WCAG"
+    };
 
-    /// <summary>An issue or pull request URL on any GitHub host (github.com, creatio.ghe.com).</summary>
+    /// <summary>
+    /// An issue or pull request URL, with or without a scheme: GitHub and GitHub Enterprise
+    /// (<c>/issues/N</c>, <c>/pull/N</c>) and Bitbucket (<c>/pull-requests/N</c>).
+    /// </summary>
     private static readonly Regex IssueUrl = new(
-        @"https?://[^\s/()\[\]<>]+/[^\s/()\[\]<>]+/[^\s/()\[\]<>]+/(?:issues|pull)/[0-9]+",
+        @"(?:https?://|(?<![^\s(\[<""'`*_]))(?:[^\s/()\[\]<>""'`]+/){3,7}(?:issues|pull|pull-requests)/[0-9]+",
         RegexOptions.Compiled);
 
     /// <summary>
@@ -169,29 +207,33 @@ internal static class TaskReferenceScanner
     /// anchor on a file (<c>page.md#12</c>) is not read as a repository.
     /// </summary>
     private static readonly Regex RepoQualifiedReference = new(
-        @"(?<![\w./-])[A-Za-z][\w-]*(?:/[A-Za-z][\w-]*)?#[1-9][0-9]*(?![\w-])",
+        @"(?<![\p{L}\p{N}./-])[A-Za-z][\w-]*(?:/[A-Za-z][\w-]*)?#[1-9][0-9]*(?![\p{L}\p{N}-])",
         RegexOptions.Compiled);
 
     /// <summary>
-    /// A bare <c>#1301</c>: two to five digits without a leading zero, not glued to a word, an entity
-    /// (<c>&amp;#</c>), a path or an anchor. A single digit is a ranking (<c>the #1 mistake</c>); six or more
+    /// A bare <c>#1301</c>: two to five digits without a leading zero, not glued to a letter, digit, entity
+    /// (<c>&amp;#</c>), path or anchor. A single digit is a ranking (<c>the #1 mistake</c>); six or more
     /// digits, a leading zero or a hex letter make a colour.
     /// </summary>
     private static readonly Regex BareReference = new(
-        @"(?<![\w&#/.-])#[1-9][0-9]{1,4}(?![\w-])",
+        @"(?<![\p{L}\p{N}&#/.-])#[1-9][0-9]{1,4}(?![\p{L}\p{N}-])",
         RegexOptions.Compiled);
 
     /// <summary>
-    /// A decimal-only colour such as <c>#333</c> has the bare-reference shape; it is told apart by the line
-    /// naming a colour property.
+    /// What may stand directly before a three- or four-digit decimal colour such as <c>#333</c>, which has
+    /// the bare-reference shape: a colour property and its value position (<c>color: </c>,
+    /// <c>"backgroundColor": "</c>, <c>border: 1px solid </c>), or the word colour. Only the text right
+    /// before the token counts, so a colour word elsewhere on the line does not excuse a reference.
     /// </summary>
-    private static readonly Regex ColourContext = new(
-        @"colou?r|background|border|fill|stroke",
+    private static readonly Regex ColourValuePrefix = new(
+        @"(?:(?:colou?r|background|border|outline|fill|stroke|shadow)[\w-]*[""']?\s*[:=]\s*[""']?"
+            + @"(?:(?:[0-9.]+(?:px|em|rem|%)?|solid|dashed|dotted|double|inset|none)\s+)*"
+            + @"|\bcolou?rs?\s+)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary><c>issue 1249</c>, <c>issue #1416</c>, <c>PR 12</c>, <c>pull request 57</c>.</summary>
     private static readonly Regex KeywordReference = new(
-        @"\b(?:issue|PR|pull request)\s+#?[1-9][0-9]*\b",
+        @"(?<![\p{L}\p{N}])(?:issue|PR|pull\s+request)\s+#?[1-9][0-9]*(?![\p{L}\p{N}])",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     internal static IReadOnlyList<Hit> Scan(string text)
@@ -208,7 +250,7 @@ internal static class TaskReferenceScanner
 
         foreach (Match match in BareReference.Matches(text))
         {
-            if (!ColourContext.IsMatch(LineOf(text, match.Index)))
+            if (!IsColourValue(text, match))
             {
                 spans.Add((match.Index, match.Index + match.Length));
             }
@@ -230,13 +272,18 @@ internal static class TaskReferenceScanner
             .ToArray();
     }
 
+    /// <summary>A three- or four-digit bare match standing in a colour-value position.</summary>
+    private static bool IsColourValue(string text, Match match)
+    {
+        int digits = match.Length - 1;
+        if (digits is not (3 or 4))
+        {
+            return false;
+        }
+        int lineStart = text.LastIndexOf('\n', Math.Max(match.Index - 1, 0)) + 1;
+        return ColourValuePrefix.IsMatch(text[lineStart..match.Index]);
+    }
+
     private static int LineNumber(string text, int index) =>
         text.AsSpan(0, index).Count('\n') + 1;
-
-    private static string LineOf(string text, int index)
-    {
-        int start = text.LastIndexOf('\n', Math.Max(index - 1, 0)) + 1;
-        int end = text.IndexOf('\n', index);
-        return text[start..(end < 0 ? text.Length : end)];
-    }
 }

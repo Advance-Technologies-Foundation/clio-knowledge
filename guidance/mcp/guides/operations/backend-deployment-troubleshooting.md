@@ -14,7 +14,7 @@ Diagnose the first boundary that fails
 | --- | --- | --- |
 | Server source differs from the intended edit | `get-schema`, schema/package identity; in FSM also the linked source path and import result | Correct the source/synchronization path before building. |
 | Compile reports an error | Complete result, compiler diagnostics, source filename/line and fresh build-log timestamps | Fix that diagnostic, then verify the saved/generated source before a new compile. |
-| Compile says Done but behavior remains old | Current operation status, compiler log entries from that invocation, source and artifact identity | Treat success as unproven. A CLI exit code alone is insufficient on affected versions. |
+| Compile says Done but behavior remains old | Current operation status, compiler log entries from that invocation, source and artifact identity | Treat success as unproven. An exit code proves the build only when the compile waited for it to finish (`core-rules`). |
 | Assembly exists or its timestamp changed | Expected output path, package/runtime, hash and build diagnostics | Existence/timestamp does not establish which source compiled or which assembly the process loaded. |
 | Build/install completed but process serves the old result | Restart completion/readiness and an authenticated call of the changed behavior | Follow the activation cycle in `core-rules`, then assert the expected result. |
 | Restart completed but endpoint fails | Authentication response, actual route, application logs and runtime compatibility | Separate authentication/routing/startup failure from a source compilation failure. Do not restart repeatedly without new evidence. |
@@ -28,7 +28,7 @@ Compiler diagnostics
 
 Acceptance and applicability
 - Disposable Creatio 10.1.585, .NET 8, PostgreSQL, database mode; clio source revision `e53009498`: created a package service returning `guidance-v1`, compiled/restarted and verified the authenticated response.
-- Deliberately introduced an undefined symbol. One package compile returned exit code 0 / Done while the compiler log recorded CS0103 and the endpoint still returned v1. This demonstrates a reporting hazard, not a claim that all versions or all compile calls fail silently. From clio 8.1.0.135 `compile-package` fails on a C# compile error instead of printing `Done`.
+- Deliberately introduced an undefined symbol. One package compile returned exit code 0 / Done while the compiler log recorded CS0103 and the endpoint still returned v1. This demonstrates a reporting hazard, not a claim that all versions or all compile calls fail silently. A compile that waits for the finished build (clio 8.1.0.135 and later) reports such an error; without the wait, `Done` can still come before the build has finished. `core-rules` owns which calls wait.
 - Corrected source to v2. The first subsequent response surfaced the prior CS0103; inspection showed generated source already contained v2. A later completed package compile followed by restart/readiness and an authenticated service call returned `guidance-v2`.
 - This lab validates the diagnostic boundaries and source-package activation. It does not prove arbitrary precompiled package compatibility or every FSM build configuration.
 

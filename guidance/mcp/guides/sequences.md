@@ -70,5 +70,5 @@ Only use OData when a specific required operation has no suitable DataService/na
 
 Evidence and bounds
 - clio 8.1.0.131: discovery, native enrollment, mixed DataService batch/readback, bounded diagnostics and fresh package installation/reinstallation. Focused tests include SequenceContextCommandTests, SequenceEnrollmentCommandTests, DataServiceBatchCommandTests and DataBindingToolE2ETests.
-- Clio implementation baseline: commit ee29c8866e5171d5b77811de613d0136ebb3ad93; rich-text portability repair 98b2a8bd4df755a1ac67f7a3a3a4d93fd7789eca.
+- Clio implementation baseline: commit ee29c8866e5171d5b77811de613d0136ebb3ad93; rich-text portability repair fddd6cc9516c7eab8797c21360534b211299c53f.
 - The package target showed three ordered step cards after reopen; explicit activation/enrollment produced one native first task. No real email was sent. These observations do not establish all platform versions, mailbox providers, automatic sending, macro expansion, DST cases or cross-user assignment.

@@ -187,7 +187,7 @@ child elements. Putting them in its "values" — an array, or a lone object, of 
   Target slot already holds ELEMENTS  -> the differ STRIPS the whole property out of the merge
                                          before copying anything. The save reports success, the
                                          operation stays in the page body, and the children reach
-                                         NOTHING. This is the reported defect.
+                                         NOTHING. This is the defect this rule exists for.
   Target slot absent or empty         -> the merge applies and you get what you asked for.
 
 "Elements" is the applier's own test, not a guess about shape: it looks at the target slot's FIRST

@@ -20,7 +20,7 @@ independently released knowledge system trustworthy while the v1 multi-source pu
 
 ### Write for agents and humans
 
-Lead with the required outcome. Use direct language and explicitly distinguish `MUST`, `MUST NOT`, `SHOULD`, `UNSUPPORTED`, and `EXPERIMENTAL` behavior. Explain why a non-obvious constraint exists and link it to evidence.
+Lead with the required outcome. Use direct language and explicitly distinguish `MUST`, `MUST NOT`, `SHOULD`, `UNSUPPORTED`, and `EXPERIMENTAL` behavior. Explain why a non-obvious constraint exists and link it to evidence — a lab, test or source revision, not an issue or task (see `AGENTS.md`).
 
 ### Preserve evidence
 
