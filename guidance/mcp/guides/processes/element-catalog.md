@@ -180,8 +180,10 @@ System actions (palette group "System actions"):
       * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). A process
         parameter may be referenced by NAME — `[#Amount#]` — on EVERY route that writes a body: create,
         `addElement` and `setElement` alike, because the expansion lives in the applier they all go
-        through. A body already in the meta-path form `describe-business-process` reports passes through
-        untouched, so echoing a read-back is safe.
+        through. A body already in the meta-path form is never rewritten: under the contract
+        `process-branch-conditions` names (ON THE MODIFY PATH) it is checked instead: a read-back passes
+        unless it reads a column its Read data does not load - then the refusal names it, and that
+        reference reads EMPTY at run time today.
       * BOTH the body and a target are required when the element is created, and naming two targets is
         refused rather than resolved by precedence. On modify the block is a PARTIAL update: a body-only
         edit keeps the target, a target-only edit keeps the expression.
