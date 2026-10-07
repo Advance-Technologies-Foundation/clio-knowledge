@@ -161,6 +161,33 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "one minute was shorter than the measured reload");
     }
 
+    [Test]
+    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile keeps running, so poll compile-status rather than compiling again, and read last-compilation-log when compile-status has no record. Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s, and the reporter's agents had no rule that named last-compilation-log.")]
+    public void Guides_ShouldSayWhatToDoAfterAClientSideCompileTimeout()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+
+        // Act
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance/mcp/guides/processes/process-script-task.md"));
+        string coreRules = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/core-rules.md"));
+
+        // Assert
+        coreRules.Should().Contain("If YOUR MCP client stops waiting first",
+            because: "core-rules owns the long-running rule every operation reads, and a client-side timeout is the case it did not cover");
+        coreRules.Should().Contain("do NOT call it again to check; poll compile-status / restart-status",
+            because: "a second compile-creatio is a second runtime reload for every user, or a refusal, never a status");
+        coreRules.Should().Contain("not that nothing ran: read the environment's latest compile verdict with last-compilation-log",
+            because: "a not-found that reads as 'nothing ran' is what sent agents to recompile or guess");
+        guide.Should().Contain("If your client reports the call timed out (for example `Request timed out`)",
+            because: "a process-name compile is the long call a ScriptTask author meets, so the article names the case where it happens");
+        guide.Should().Contain("do NOT call `compile-creatio` again; poll `compile-status`",
+            because: "the compile is still running on the stand, and compile-status reports its verdict with the compiler errors");
+        guide.Should().Contain("as `core-rules` (Long-running tools) says",
+            because: "the rule has one owner; the article points to it rather than restating its fallback");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
