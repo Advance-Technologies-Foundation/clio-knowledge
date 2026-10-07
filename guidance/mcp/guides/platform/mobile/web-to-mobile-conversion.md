@@ -534,7 +534,7 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   value): when the guide returns a quick filter with `parentName: HeaderContainer, propertyName: items`,
   insert it under exactly that parent — and under whatever parent the entry names in any other conversion.
   Do NOT relocate it into crt.QuickFilterGroup because get-component-info (mobile) calls crt.QuickFilterGroup
-  the container for crt.QuickFilter. Mechanism (per the ENG-94937 investigation on Creatio Mobile — verify
+  the container for crt.QuickFilter. Mechanism (observed on Creatio Mobile in August 2026 — verify
   against your target platform version): crt.QuickFilterGroup is model-driven, so it builds its chips at
   RUNTIME from the `QuickFilterGroup_Value` attribute via `crt.QuickFilterGroupAttributeConverter` (driven by
   the `FilterGroupButton` in HeaderContainer); a crt.QuickFilter inserted as a static child of its `items` is

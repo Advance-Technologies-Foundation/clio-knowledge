@@ -3,7 +3,7 @@ clio MCP sequences guide
 Scope and compatibility
 - This guide owns Sales Engagement sequence definition, execution and portability decisions. It does not define a new sequence engine.
 - Verified on Creatio 10.1.752.0, .NET 8, PostgreSQL with Sales Engagement installed. Other versions require capability discovery and the same readback assertions. Email delivery, exhaustive timezone/DST combinations and two-user assignment were not verified.
-- Resolve `get-sequence-context`, `execute-dataservice-batch` and `enroll-sequence-participants` with `get-tool-contract` first. These contracts are introduced by clio#1574; older released clients may not have them. If absent, report the missing capability; do not upgrade the client without user authorization. Do not pretend an unknown tool ran. The native package rich-text fix is clio#1579.
+- Resolve `get-sequence-context`, `execute-dataservice-batch` and `enroll-sequence-participants` with `get-tool-contract` first. These contracts ship in clio 8.1.0.131 and later; older clients do not have them. If absent, report the missing capability; do not upgrade the client without user authorization. Do not pretend an unknown tool ran. The native package rich-text fix ships in the same release.
 - Call these long-tail tools through `clio-run`, with `command` and `args`. Use the live contract for required arguments and limits. Read `core-rules` for transport safety, `esq` plus `esq-filters-frontend` for DataService reads, `data-bindings` for package files, and `package-dependencies` for package references.
 
 Choose the operation
@@ -69,6 +69,6 @@ OData fallback
 Only use OData when a specific required operation has no suitable DataService/native path and state that reason. Follow the discovered OData contract for lookup/filter names and temporal literals, including explicit offsets where required. Do not switch to OData merely because an ESQ request or permission check failed; fix the request or use the established privileged operation when appropriate.
 
 Evidence and bounds
-- clio#1575–#1579: discovery, native enrollment, mixed DataService batch/readback, bounded diagnostics and fresh package installation/reinstallation. Focused tests include SequenceContextCommandTests, SequenceEnrollmentCommandTests, DataServiceBatchCommandTests and DataBindingToolE2ETests.
-- Clio implementation baseline: commit ee29c8866e5171d5b77811de613d0136ebb3ad93; rich-text portability repair 98b2a8bd4df755a1ac67f7a3a3a4d93fd7789eca (clio#1579).
+- clio 8.1.0.131: discovery, native enrollment, mixed DataService batch/readback, bounded diagnostics and fresh package installation/reinstallation. Focused tests include SequenceContextCommandTests, SequenceEnrollmentCommandTests, DataServiceBatchCommandTests and DataBindingToolE2ETests.
+- Clio implementation baseline: commit ee29c8866e5171d5b77811de613d0136ebb3ad93; rich-text portability repair 98b2a8bd4df755a1ac67f7a3a3a4d93fd7789eca.
 - The package target showed three ordered step cards after reopen; explicit activation/enrollment produced one native first task. No real email was sent. These observations do not establish all platform versions, mailbox providers, automatic sending, macro expansion, DST cases or cross-user assignment.

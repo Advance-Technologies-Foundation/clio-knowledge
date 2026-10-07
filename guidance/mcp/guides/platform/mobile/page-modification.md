@@ -140,7 +140,7 @@ BUTTON PLACEMENT below for where a button may go and the full shape it needs.
 processName / processRunType appear in both examples because a crt.RunBusinessProcessRequest button
 that omits them is REJECTED. `recordIdProcessParameterName` appears too because these run
 `ForTheSelectedPage`: that run type passes the current record into a named process parameter, so the
-record binding is REQUIRED (ENG-95822) — `ProcessSchemaParameter1` is a stand-in for the CODE
+record binding is REQUIRED (enforced since clio 8.1.0.117) — `ProcessSchemaParameter1` is a stand-in for the CODE
 get-process-signature echoes; resolve the real one (see the run-process-button guide). Use
 `RegardlessOfThePage` instead when no record is passed. These three are STRUCTURAL and offline, so
 both validate-page and update-page reject a button that omits them. One thing still needs the
@@ -172,7 +172,7 @@ these checks, and sync-pages with validate:false skips them.
 Scope: the differ is shared with the web client, so the same shape defect breaks web pages
 identically — but clio enforces this rule on MOBILE bodies only.
 
-Evidence: verified on a live stand for ENG-95429 — writing the wrong shape to a real mobile page
+Evidence: verified on a live stand in August 2026 — writing the wrong shape to a real mobile page
 and re-reading the server-merged viewConfig returned the element with NO "type", while a
 neighbouring template button kept its own. Platform build not pinned; verify against your target
 platform version.
@@ -187,7 +187,7 @@ child elements. Putting them in its "values" — an array, or a lone object, of 
   Target slot already holds ELEMENTS  -> the differ STRIPS the whole property out of the merge
                                          before copying anything. The save reports success, the
                                          operation stays in the page body, and the children reach
-                                         NOTHING. This is the ENG-95429 report.
+                                         NOTHING. This is the reported defect.
   Target slot absent or empty         -> the merge applies and you get what you asked for.
 
 "Elements" is the applier's own test, not a guess about shape: it looks at the target slot's FIRST
@@ -245,7 +245,7 @@ whose slots may be empty — is refused too, even though the merge would have ap
 two-step idiom above rather than reaching for sync-pages validate:false: a plain insert into a slot
 that template genuinely lacks is the shape that throws.
 
-Evidence: the STRIP outcome is verified on a live stand for ENG-95429 — a merge on Scaffold
+Evidence: the STRIP outcome is verified on a live stand in August 2026 — a merge on Scaffold
 carrying a crt.Button in values.actions saved successfully, stayed in the page's own body, and
 appeared ZERO times in the server-merged viewConfig, which still held only the template's own
 buttons. Platform build not pinned; verify against your target platform version.
@@ -253,7 +253,7 @@ buttons. Platform build not pinned; verify against your target platform version.
 The rest of this section is READ FROM THE APPLIER, not observed on a stand: that an insert throws
 on a property the element does not carry, that the merge group runs before inserts, and that a
 single-element slot is reachable only by a merge. clio ships the same reading as a validator
-(ENG-95429), so guide and tool agree by construction rather than by independent confirmation.
+(since 8.1.0.108), so guide and tool agree by construction rather than by independent confirmation.
 
 ─────────────────────────────────────────────────────────────
 VALIDATORS, CONVERTERS, HANDLERS — mobile constraints
@@ -363,7 +363,7 @@ Scope and limits of this rule:
   which get-page cannot show you yet.
 - clio warns — never blocks — on exactly one shape: an insert of crt.Button into Scaffold/"actions".
   "leading" is advice; no validator checks it.
-- Verified for "actions" (ENG-95429, live stand): a button inserted there is absent from the
+- Verified for "actions" (live stand, August 2026): a button inserted there is absent from the
   designer canvas. "leading" is an extrapolation from the same observation — the designer omits
   that entire navigation bar, the template's own buttons included — and was not tested separately.
 - NOT claimed: that either slot fails to render in the Creatio Mobile app. That was never tested.
@@ -424,18 +424,18 @@ NO DATA SOURCE NEEDED — an analytics widget fetches its own data from `config.
 
 ONE SERIES PER CHART — the mobile runtime loads data for the FIRST series only. Its renderer can draw
   several same-type series and the Mobile Designer canvas does, but the later series' collections are never
-  fetched, so on the device they arrive empty (multi-series is ENG-87329, still open). Mixed types collapse
-  further: the client keeps the first series alone. A multi-category ask therefore becomes one chart PER
-  category, or ONE series grouped by the category column — a TOTAL cannot be a grouping value. Neither the
-  canvas nor a saved-body read-back catches this; only the app does.
+  fetched, so on the device they arrive empty (a known Creatio Mobile defect, unfixed in August 2026).
+  Mixed types collapse further: the client keeps the first series alone. A multi-category ask therefore
+  becomes one chart PER category, or ONE series grouped by the category column — a TOTAL cannot be a
+  grouping value. Neither the canvas nor a saved-body read-back catches this; only the app does.
 
 RUNTIME GAPS TO DESIGN AROUND — the mobile analytics runtime trails the web one, and no design-time
   check reveals it. A DATE column under SUM/AVG fails the runtime request outright (server
   `UnsupportedTypeException`) and under MIN/MAX draws an empty chart, so aggregate a number or COUNT the
-  primary column and put the date in the grouping instead (ENG-89575); negative values do not render
-  (ENG-88682); grouping through a related object can disagree with the web result (ENG-89059). Tell the
-  user when their request needs one of these rather than shipping a widget that renders blank on the
-  device.
+  primary column and put the date in the grouping instead; negative values do not render; grouping
+  through a related object can disagree with the web result (known Creatio Mobile defects, August 2026).
+  Tell the user when their request needs one of these rather than shipping a widget that renders blank
+  on the device.
 
 PARENT — insert into a grid container the page already has: `MainContainer` (root grid of every
   mobile template), `ListContainer` (list/section pages), or a tab's `…TabContainer` /
@@ -529,7 +529,7 @@ VERIFY IN THE APP — a mobile widget cannot be verified in a browser. Check the
 
 Evidence: schemas produced by the Mobile Designer on Creatio 8.3.4 / 10.0 for a record page
 (`MobilePageWithTabsFreedomTemplate`) and a section page (`BaseMobileListTemplate`), read back with
-`get-page` (ENG-95577).
+`get-page` in August 2026.
 
 ─────────────────────────────────────────────────────────────
 ADAPTIVE BREAKPOINTS
@@ -748,7 +748,7 @@ crt.RunBusinessProcessRequest
   recordIdProcessParameterName alone does NOT select the run type. And the reverse also
   holds: 'ForTheSelectedPage' REQUIRES recordIdProcessParameterName (the process parameter
   CODE that receives the current record) — validate-page and update-page both reject a
-  ForTheSelectedPage button that omits it (ENG-95822); use 'RegardlessOfThePage' when no
+  ForTheSelectedPage button that omits it (since clio 8.1.0.117); use 'RegardlessOfThePage' when no
   record is passed.
   FULL parameter contract is the request catalog (single source of truth): call
   get-request-info request-type=crt.RunBusinessProcessRequest schema-type=mobile and resolve

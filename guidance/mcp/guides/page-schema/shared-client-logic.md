@@ -49,4 +49,4 @@ This excerpt is not a replacement for a complete page. Declare `SharedLabel` in 
 
 ## Evidence boundary
 
-Validated on a disposable Creatio 10.1.585 / .NET 8 / PostgreSQL instance through Clio MCP and the real browser: one helper, two BlankPageTemplate-derived web pages, distinct v1 labels, then a helper-only edit and both v2 labels after reload. The rejected layout expression and successful handler-based alternative were exercised. This does not establish mobile support or cross-package dependency installation on every Creatio version. See [validation evidence](https://github.com/Advance-Technologies-Foundation/clio-knowledge/issues/208).
+Validated in September 2026 on a disposable Creatio 10.1.585 / .NET 8 / PostgreSQL instance through Clio MCP and the real browser: one helper, two BlankPageTemplate-derived web pages, distinct v1 labels, then a helper-only edit and both v2 labels after reload. The rejected layout expression and successful handler-based alternative were exercised. This does not establish mobile support or cross-package dependency installation on every Creatio version.

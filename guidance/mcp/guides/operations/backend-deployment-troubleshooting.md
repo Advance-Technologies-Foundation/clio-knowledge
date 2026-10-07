@@ -28,8 +28,8 @@ Compiler diagnostics
 
 Acceptance and applicability
 - Disposable Creatio 10.1.585, .NET 8, PostgreSQL, database mode; clio source revision `e53009498`: created a package service returning `guidance-v1`, compiled/restarted and verified the authenticated response.
-- Deliberately introduced an undefined symbol. One package compile returned exit code 0 / Done while the compiler log recorded CS0103 and the endpoint still returned v1. This demonstrates a reporting hazard, not a claim that all versions or all compile calls fail silently. Executable repair is tracked separately in [clio #1633](https://github.com/Advance-Technologies-Foundation/clio/issues/1633).
+- Deliberately introduced an undefined symbol. One package compile returned exit code 0 / Done while the compiler log recorded CS0103 and the endpoint still returned v1. This demonstrates a reporting hazard, not a claim that all versions or all compile calls fail silently. From clio 8.1.0.135 `compile-package` fails on a C# compile error instead of printing `Done`.
 - Corrected source to v2. The first subsequent response surfaced the prior CS0103; inspection showed generated source already contained v2. A later completed package compile followed by restart/readiness and an authenticated service call returned `guidance-v2`.
 - This lab validates the diagnostic boundaries and source-package activation. It does not prove arbitrary precompiled package compatibility or every FSM build configuration.
 
-Evidence: [disposable validation and issue](https://github.com/Advance-Technologies-Foundation/clio-knowledge/issues/211), [parent report](https://github.com/Advance-Technologies-Foundation/clio/issues/1638).
+Evidence: the disposable lab above, September 2026.

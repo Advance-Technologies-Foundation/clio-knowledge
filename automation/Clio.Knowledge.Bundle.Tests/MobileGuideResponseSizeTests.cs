@@ -153,9 +153,14 @@ public sealed class MobileGuideResponseSizeTests
     /// FLOW step 5b already gives in more detail, so the restatement came out and the bullet now points
     /// at 5b. Net -146 even after the addition.
     /// </remarks>
+    /// <remarks>
+    /// LOWERED, 62,418 -> 62,410 (ENG-102508). The quick-filter mechanism cited an internal task id as its
+    /// evidence; it now states the observation inline ("observed on Creatio Mobile in August 2026"), which
+    /// is shorter, so the ceiling follows the article down.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_418),
+        ("freedom-page-web-to-mobile-conversion", 62_410),
         ("freedom-page-mobile-reason-codes", 18_732)
     ];
 
