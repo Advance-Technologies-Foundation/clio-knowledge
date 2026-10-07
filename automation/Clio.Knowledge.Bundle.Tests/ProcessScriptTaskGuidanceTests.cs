@@ -182,8 +182,10 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "a not-found that reads as 'nothing ran' is what sent agents to recompile or guess");
         coreRules.Should().Contain("latest FINISHED compile; it carries no time",
             because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
-        coreRules.Should().Contain("never restart on that answer alone",
-            because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile");
+        coreRules.Should().Contain("do not rely on it, or restart on it, before then",
+            because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile; after the compile has finished, a restart the workflow needs is still owed, so the rule is about timing, not a ban");
+        coreRules.Should().NotContain("never restart on that answer alone",
+            because: "that wording read as a permanent ban and contradicted the package-compile activation cycle");
         guide.Should().Contain("If your client reports the call timed out (for example `Request timed out`)",
             because: "a process-name compile is the long call a ScriptTask author meets, so the article names the case where it happens");
         guide.Should().Contain("follow the Long-running tools rule in `core-rules`",
