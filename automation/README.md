@@ -81,8 +81,9 @@ Identifiers and the references between published items are checked by `dotnet te
 `automation/Clio.Knowledge.Bundle.Tests`. That is the suite the required **Producer contract suite**
 pull-request check runs, and the release workflow runs it again before it builds a bundle, so the same
 command fails locally and in CI. A reference counts as resolved only when Clio would resolve it the same
-way: a `get-guidance` name must be the `itemId` or `topicId` of a `guidance`-role item, and a route must
-equal a declared `uri` or `legacyUris` entry exactly.
+way: a `get-guidance` name must equal the `itemId` or `topicId` of a `guidance`-role item, and a route must
+equal a declared `uri` or `legacyUris` entry. Both comparisons are exact — case, a trailing `-` or `_`, and a
+suffix such as `?x` all count; only trailing sentence punctuation is ignored.
 
 | Identifier or reference | Resolves against | Checked by |
 |---|---|---|
@@ -93,7 +94,7 @@ equal a declared `uri` or `legacyUris` entry exactly.
 | `sourcePath` | an existing file under the role's root; every guidance and reference file is declared | `BundleBuilder`, `GuidanceInventoryTests`, `ReferenceGuidanceMigrationTests` |
 | `get-guidance` names in any published body: `name=<id>` and ``get-guidance … `<id>` `` | `itemId` or `topicId` of a `guidance`-role item | `ReferenceIntegrityTests` |
 | `docs://knowledge/…` and `docs://mcp/…` routes in any published body | a declared `uri` or `legacyUris` entry | `ReferenceIntegrityTests` |
-| Relative markdown links in any published body | a file declared as a `sourcePath` | `ReferenceIntegrityTests` |
+| Relative markdown links in any published body | nothing: every one is reported. Git delivery reads a body at its `sourcePath`, but a release bundle stores it flat as `resources/<itemId>.md`, so only a `docs://` route survives every transport | `ReferenceIntegrityTests` |
 | Top-level `id:` of a catalog entry | the entry's manifest `itemId` | `ReferenceIntegrityTests` |
 | Every supporting reference is linked from a primary guide | the declared `reference` items | `ReferenceGuidanceMigrationTests` |
 | Section citations between process articles | the cited article's headings | `ProcessGuideCrossReferenceTests` |
@@ -108,8 +109,6 @@ Not checked yet:
 - Advisory IDs: no advisory is published yet.
 - `requiredFeatures` values: they name Clio feature toggles, which Clio declares, not this repository; no
   item declares one today.
-- Anchors in relative links (`#section`): no published body has a relative link today, and heading
-  slugs differ between renderers and the `== … ==` heading style.
 - A guide named in other prose forms: a bare backticked name (``the `run-process-button` guide``), a
   table cell under a "get-guidance with name" header, or an unquoted name after `get-guidance`. Without a
   marker these cannot be told apart from tool or component names.
