@@ -59,6 +59,83 @@ While the repository is experimental:
 5. Explain whether the change is experimental, candidate, validated, or canonical.
 6. Request review from the relevant capability or content owner.
 
+## Reviewing a change under a stable ID
+
+A published item keeps its `itemId`, `topicId`, `uri` and `legacyUris` while its content changes, so
+its identity never tells a reader that the instructions behind it moved. Review classifies every change
+to a published body or its `bundle-source.json` entry. These rules govern the v1 candidate contract and
+change with it; they do not declare that contract stable.
+
+### Editorial or behavioral
+
+Decision test: would an agent following the old text and one following the new text call different
+tools, pass different parameters or values, act in a different order, proceed where the other stops or
+asks, or apply the rule to different Creatio or Clio versions? If yes, or if you cannot tell, the
+change is **behavioral**; otherwise it is **editorial**.
+
+| Editorial | Behavioral |
+|---|---|
+| Fixing a typo, grammar, or Markdown formatting. | Adding, removing, or reversing a `MUST`, `MUST NOT`, or `SHOULD`. |
+| Reordering sections within one article without changing any rule. | Renaming a tool or parameter, or changing a value, an order of operations, or a stop condition. |
+| Replacing an example with one that leads to the same calls. | Moving a version boundary, an applicability limit, a safety precondition, or a routing target. |
+
+Borderline cases are behavioral: rewording `MUST` as `SHOULD` lets an agent skip a step it could not
+skip before; deleting the reason for a constraint lets an agent decide it does not apply; changing the
+only example that shows a parameter value changes the value agents copy.
+
+The pull request description states the kind; a pull request mixing both is reviewed as behavioral.
+Both kinds change published bytes and need the bump in
+[Publishing a change to consumers](#publishing-a-change-to-consumers): the kind decides the review
+evidence, not whether the change ships.
+
+### What a behavioral change must state
+
+The pull request description states, for each behavioral change:
+
+- **Applicability**: the Creatio versions, runtime, database, and product boundaries it holds for,
+  and the known exclusions.
+- **Compatibility**: the Clio version or MCP tool contract it needs. When that is newer than
+  `compatibility.clio.min` in `bundle-source.json`, the article states the boundary inline next to the
+  instruction it gates (for example `clio 8.1.0.136 or later`).
+- **Evidence**: a source from [Preserve evidence](#preserve-evidence), specific enough to re-check: a
+  test name, a source path at a commit, a lab scenario, or an observed response with its version.
+
+A reviewer MUST NOT approve a behavioral change whose evidence is missing or does not cover the stated
+applicability. The reviewer asks for the evidence, for the change to be narrowed to what the evidence
+covers, or for the unproven part to be labeled `EXPERIMENTAL`. An editorial change needs none of these;
+the reviewer confirms only that the decision test holds.
+
+### Identity
+
+[AGENTS.md](AGENTS.md#working-rules) owns the stable-ID rule; review applies it as follows. Renaming a
+`title`, a heading, or a source file changes the same item, so `itemId`, `topicId`, `uri`, and
+`legacyUris` stay as they were. A new `itemId` is only for a genuinely new item: a subject no published
+item owns, or a piece split out of an existing article; an end-to-end rewrite under a new title keeps
+its identity. A split or move follows
+[An article must fit in one `get-guidance` response](#an-article-must-fit-in-one-get-guidance-response).
+
+### Supersession and references
+
+The v1 contract has no `supersedes`, `replaces`, or `affects` field: the `schemas/v1/` resource
+contract and the builder both reject unknown properties. Adding one is a schema change in its own pull
+request; until then, record the relationship in the pull request description and the article text.
+Supersession and retirement are behavioral.
+
+- **A rule moves to another item**: the item that loses it drops the rule and cites the new owner by
+  `itemId`; the pull request names both items.
+- **An item is retired**: the pull request names it and its successor, removes it from `resources`,
+  `requirements.itemIds`, and `requirements.resourceUris`, rewrites every `name=` or
+  `docs://knowledge/` citation of it to the successor, and moves its `legacyUris` to the successor so
+  pre-v1 `docs://mcp/guides/...` routes keep resolving. The retired `itemId` and `uri` cannot be
+  aliased: Clio resolves a `docs://knowledge/` URI by exact `itemId` and a bare name by `itemId` or
+  `topicId`, never through `legacyUris` (`KnowledgeResolution.cs`, Clio 8.1.0.97 to 8.1.0.139), so
+  listing them in `legacyUris` passes the builder and does nothing. The pull request states that
+  retirement breaks callers of the old ID.
+- **Citations**: guidance, advisories, and references cite an item by `itemId`
+  (`get-guidance name=<itemId>`) or canonical `uri`, never by title. An advisory names each item it
+  affects the same way, next to the supersession condition that
+  [Advisory changes](#advisory-changes) asks for.
+
 ## Publishing a change to consumers
 
 `master` is protected. It accepts no direct push and no force push, so every change lands through a
