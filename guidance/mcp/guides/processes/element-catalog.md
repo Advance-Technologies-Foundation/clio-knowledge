@@ -140,7 +140,7 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `readData`/ReadDataUserTask. FOUR user tasks have their own dedicated build type and must NOT be built as
 a generic `userTask`: `preconfiguredPageUserTask` -> `type:"preconfiguredPage"`, see
 `process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, so it is
-REFUSED from CrtProcessBuilder 1.6.6.86, and an older package builds a page-less element that fails at run
+REFUSED from CrtProcessBuilder 1.6.6.87, and an older package builds a page-less element that fails at run
 time; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
 modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
 `process-send-email`, and `process-send-email-template` for the template mode;
