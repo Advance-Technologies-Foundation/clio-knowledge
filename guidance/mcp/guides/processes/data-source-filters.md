@@ -124,3 +124,11 @@ is the one contract all three share, which is why it reads as its own subject.
   (a repeated segment, say), ask the user rather than pick one.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
+- LEGACY `isNotNull` (CrtProcessBuilder 1.6.6.79 and earlier): those builds stored an is-null condition
+  without the platform's own `isNull` flag, which the runtime reads instead of the comparison and which
+  defaults to null. Every `isNotNull` they wrote therefore runs as IS NULL and selects the OPPOSITE records
+  (measured on a stand, October 2026); `isNull` was unaffected. 1.6.6.81 and later write the flag. On 1.6.6.81 or
+  later such an element still reads back as `isNotNull` but with `filterDecodedCompletely: false`;
+  re-sending the filter with `setFilter` rewrites the condition (follows from `setFilter` replacing the
+  whole filter; not tried on a legacy process). The repair changes which records the element acts on, so
+  the repair MUST above applies.

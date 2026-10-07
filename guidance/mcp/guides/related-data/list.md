@@ -145,7 +145,9 @@ In a diff-form (replacing/diff body), carry the same three pieces through diff e
 static body (see `page-modification` for the static-vs-diff body decision):
 - `viewModelConfigDiff`: `{ "operation": "merge", "path": ["attributes"], "values": { "UsrContactGrid": { ... } } }`
 - `modelConfigDiff`: one `{ "operation": "merge", "path": ["dataSources"], "values": { "UsrContactDS": { ... } } }`
-  and one `{ "operation": "merge", "path": ["dependencies"], "values": { "UsrContactDS": [ { "attributePath": "UsrClient", "relationPath": "PDS.Id" } ] } }`
+  and one `{ "operation": "merge", "path": [], "values": { "dependencies": { "UsrContactDS": [ { "attributePath": "UsrClient", "relationPath": "PDS.Id" } ] } } }`
+  (root path, not `path: ["dependencies"]`: that merge is skipped when no layer has declared `dependencies` yet —
+  see the merge-path rule in `page-modification-overview`)
 
 Wiring rules
 - `attributePath` is the CHILD entity's foreign-key column that points back at the master (here
