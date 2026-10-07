@@ -69,14 +69,15 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
 uses one. A parameter is referenced by its **UId**, never by its name.
 
-> **TWO EXCEPTIONS, both narrow:** a `flows[].condition` on `create-business-process` takes the NAME
-> — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
-> not exist yet (see `process-branch-conditions`); and a Formula element's `body` takes it on EVERY route
-> that writes one — create, `addElement`, `setElement` (`process-element-catalog` owns that element). A
-> `mappings[].expression`, a condition set through `modify-business-process` and everything else on this
-> page still take the UId, and the failures below are what a name gets you there. A filter takes the UId
-> too, but as the BARE meta path `[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]` - prefix
-> included, never `[#…#]` (`process-data-source-filters`).
+> **TWO EXCEPTIONS, both narrow:** a flow CONDITION takes the NAME — `[#Amount#]`, `[#Element.Parameter#]` —
+> and the server expands it: always on `create-business-process`, because on create the UId does not exist
+> yet (see `process-branch-conditions`), and on `modify-business-process` under its MODIFY PATH contract;
+> and a Formula element's `body` takes it on EVERY route that writes one — create, `addElement`,
+> `setElement` (`process-element-catalog` owns that element). A `mappings[].expression`, a modify condition
+> under any other contract and everything else on this page still take the UId, and the failures below are
+> what a name gets you there. A filter takes the UId too, but as the BARE meta path
+> `[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]` - prefix included, never `[#…#]`
+> (`process-data-source-filters`).
 
 Outside those two there is no name-based form — and the four wrong shapes do not all fail the same
 way, which matters:
@@ -96,8 +97,12 @@ unknown setting. Build the token yourself, in two steps:
 1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
    return a ready-made meta-path, so there is nothing to copy — you assemble it);
 2. write the token around that UId, braces included:
-   * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
-   * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
+   * a PROCESS parameter -> `[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`
+   * an ELEMENT output parameter ->
+     `[#[IsOwnerSchema:false].[IsSchema:false].[Element:{elementUid}].[Parameter:{parameterUid}]#]`
+
+   The platform writes that prefix; the token without all of it is accepted too. Spell the rest exactly:
+   every segment dot-separated, braces included.
 
 For a COLUMN inside a read element's `ResultEntity`: a Formula BODY takes the name form
 `[#ReadContact.ResultEntity.Owner#]`, expanded on every write path; a raw `expression` takes the UId form with a
@@ -110,7 +115,7 @@ reports a process parameter `PriceParameter` with
 `uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUpParameter`:
 
     {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUpParameter",
-     "expression":"Math.Ceiling([#[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
+     "expression":"Math.Ceiling([#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
 
 The designer then displays this as `RoundUp([#PriceParameter#])` — it resolves the UId back to the name, and it
 shows the designer's own spelling of the function. Both directions of that conversion are the platform's;
@@ -144,7 +149,7 @@ reads as success and silently replaces an expression that recomputes with a numb
 
 WHAT IS CHECKED, and BY WHOM. The **platform** validates every formula — an `expression` mapping and a
 flow condition alike — at its own pre-save gate. From `CrtProcessBuilder` 1.4.0.41 the package adds
-nothing to that verdict beyond the two checks under *What CLIO still checks* below. Two consequences
+nothing to that verdict beyond the checks under *What CLIO still checks* below. Two consequences
 that change how you read a failure:
 
 - **A bad formula fails the WHOLE call.** The refusal comes from the save, not from the operation that
@@ -189,7 +194,7 @@ What the gate refuses. Every message quoted here and in the table below is verba
   comes back EMPTY. A bare carriage return with no line feed is NOT refused: the platform checks for `\n`
   only, and CR is whitespace to the interpreter, so such a formula parses and stores on one line.
 
-What CLIO still checks, and it is two things.
+What CLIO still checks:
 
 **A blank `condition` is refused up front.** An empty condition is not "no condition": the platform
 substitutes the literal `true`, producing an always-taken branch nobody asked for. This check is clio's
@@ -197,11 +202,17 @@ own, because the gate would ACCEPT it.
 
 **Length, at most 2048 characters**, applied before anything is stored — the pre-save gate is what runs
 the platform's macro converters, whose regexes have no match timeout, so a bound applied there would be
-too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is about 60 characters, so roughly thirty of
-them exhaust it, and the cap applies to the text as you write it, before macros are resolved. The same
-bound covers the paths that store a formula without any other check — a `changeData` value `expression`, a
-Send email recipient, a performer contact, a connection expression. A filter condition `expression` gets
-the same bound but is no formula: it must be the bare meta path of one reference (`process-data-source-filters`).
+too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is
+54 to 200 characters, so ten to thirty-seven of them exhaust it - counted as you write it and, in a condition
+or Formula body, again after names expand. The same bound covers a `changeData` value
+`expression`, a connection expression, a Send email recipient and a performer contact. A filter condition
+`expression` gets the same bound but is no formula: it must be the bare meta path of one reference
+(`process-data-source-filters`).
+
+**A hand-written meta path** (MODIFY PATH contract, `process-branch-conditions`) in a condition, an
+`expression` mapping, connection or value, a `recordId` or a Formula body must spell an item of THIS process
+as the platform does (prefix optional), and a column its record loads. Send email recipients and template
+entities and performer contacts are not checked.
 
 There is no per-REQUEST budget; a large batch is bounded by the request-item cap (1 000 items).
 
@@ -220,16 +231,12 @@ inflates it, so an expression with no brackets at all can arrive deeply nested. 
 character bound is not a mitigation: it bounds LENGTH, and the dangerous expression is short and dense
 rather than long and flat.
 
-ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words — and an older package
-refuses MORE, not less (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW
-condition). A refusal from a pre-1.4.0.41 environment is therefore not evidence the formula is bad:
-update the package. Below 1.4.0.0 an `expression` mapping was stored unchecked and `setFlowCondition` did
-not exist. clio refuses `create-business-process` / `modify-business-process` against an
-environment below its enforced floor; the fix is `install-process-builder`, not a workaround.
-
-THAT REFUSAL MAKES EVERY "on an older package" FALLBACK IN THIS GUIDE SET UNREACHABLE — they are history,
-not a branch to take. On a refusal from a CURRENT clio, run `install-process-builder`; never re-send a
-call in an older dialect, because clio refused before it left and no dialect reached the server.
+ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words, and an older package
+refuses MORE (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW condition),
+so a refusal from a pre-1.4.0.41 environment is not evidence the formula is bad. clio refuses
+`create-business-process` / `modify-business-process` below its enforced floor, which makes every "on an
+older package" fallback in this guide set history, not a branch: run `install-process-builder`, and never
+re-send a call in an older dialect - clio refused it before it left.
 
 WHAT A REFUSAL LOOKS LIKE. Every row is a verbatim measurement, prefixed by `Process validation failed:`
 plus the element or parameter name:
@@ -245,12 +252,20 @@ plus the element or parameter name:
 | `1 +` | `Formula value error: Invalid Operation (at index 3).` | the expression is incomplete |
 | `1.5` into an Integer parameter | `Error while executing expression "1.5m": Formula value error: Cannot convert type "Decimal" to "Int32"` | the target type cannot hold it — note the quoted `1.5m` |
 | an Integer parameter as a whole condition | `Error while executing expression "Amount": Formula value error: Cannot convert type "Int32" to "Boolean"` | a condition must be bool — compare it |
-| `[#Price#] > 100` | `Formula value error: Expression expected (at index 0).` | that is not a macro family; reference the parameter by UId |
-| `[#[Parameter:{a-uid-not-in-this-process}]#] > 0` | `has an invalid value for the parameter "ConditionExpression". It references the process parameter <uid>, which is not in this process. Add the parameter first, or correct the reference.` | create the parameter, or fix the UId |
+| `[#Price#] > 100` in a mapping | `Formula value error: Expression expected (at index 0).` | that is not a macro family; reference the parameter by UId |
+| `[#[Parameter:{a-uid-not-in-this-process}]#] > 0` (any other contract) | `has an invalid value for the parameter "ConditionExpression". It references the process parameter <uid>, which is not in this process. Add the parameter first, or correct the reference.` | create the parameter, or fix the UId |
+
+A dot missing before `[EntityColumn:…]` fails that gate with `Value for argument "parameterUId" must be
+specified`, naming nothing; one missing between `[Element:…]` and `[Parameter:…]` is told to add a PROCESS
+parameter; one missing after `[IsSchema:false]` passes it and runs. Under the MODIFY PATH contract clio
+checks first, naming the flow or field (measured, 1.6.6.77): a misspelling gets `is not spelled exactly as a
+reference to that item is written ... Send '[#…#]'`; an unknown process parameter `… which is not a
+parameter of this process`, an unknown element `… which this process does not have`; a column outside
+`readData.columns` gets `is not among the columns the element reads`.
 
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions
-here, each of which references its parameters by UId meta-path like everything else.)
+here.)
 
 == Conditional flows and branch conditions ==
 
