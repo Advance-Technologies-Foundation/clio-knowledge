@@ -68,14 +68,14 @@ public sealed class InternalTaskReferenceTests
     }
 
     [TestCase("Tracked as ENG-92761 until it ships.", "ENG-92761", TestName = "Jira key")]
-    [TestCase("see https://creatio.atlassian.net/browse/ENG-1 for details", "ENG-1", TestName = "Jira key in a browse URL")]
+    [TestCase("see https://example.atlassian.net/browse/ENG-1 for details", "ENG-1", TestName = "Jira key in a browse URL")]
     [TestCase("branch feature/ENG-102333-compile-timeout", "ENG-102333", TestName = "Jira key in a branch name")]
     [TestCase("See https://github.com/Advance-Technologies-Foundation/clio/issues/1364 for evidence.",
         "https://github.com/Advance-Technologies-Foundation/clio/issues/1364", TestName = "GitHub issue URL")]
     [TestCase("[comment](https://github.com/o/r/issues/1619#issuecomment-5726093804)",
         "https://github.com/o/r/issues/1619", TestName = "GitHub issue comment URL")]
-    [TestCase("Merged in https://creatio.ghe.com/engineering/creatio-ui/pull/42/files.",
-        "https://creatio.ghe.com/engineering/creatio-ui/pull/42", TestName = "GHE pull request URL")]
+    [TestCase("Merged in https://ghe.example.com/org/repo/pull/42/files.",
+        "https://ghe.example.com/org/repo/pull/42", TestName = "GHE pull request URL")]
     [TestCase("introduced by clio#1574;", "clio#1574", TestName = "repo#N")]
     [TestCase("the lab for clio-knowledge#161 used", "clio-knowledge#161", TestName = "hyphenated repo#N")]
     [TestCase("issue Advance-Technologies-Foundation/clio#1138 captured", "Advance-Technologies-Foundation/clio#1138",
@@ -98,10 +98,20 @@ public sealed class InternalTaskReferenceTests
     [TestCase("https://bb.example.com/projects/P/repos/r/pull-requests/7",
         "https://bb.example.com/projects/P/repos/r/pull-requests/7", TestName = "Bitbucket Server pull request URL")]
     [TestCase("The #1138 fix prevents filling an empty slot.", "#1138", TestName = "bare #N on a line with a colour word")]
+    [TestCase("fixed the colour #1416 regression", "#1416", TestName = "bare #N after the word colour")]
+    [TestCase("discovery in #1575-#1579", "#1575", TestName = "bare #N opening an ASCII-hyphen range")]
+    [TestCase("discovery in #1575-#1579", "#1579", TestName = "bare #N closing an ASCII-hyphen range")]
+    [TestCase("clio#1575-#1579: discovery", "clio#1575", TestName = "repo#N opening an ASCII-hyphen range")]
+    [TestCase("builds with the #1138-fix", "#1138", TestName = "bare #N with a hyphen suffix")]
+    [TestCase("merged in PR 12", "PR 12", TestName = "PR N")]
+    [TestCase("merged in pr 7", "pr 7", TestName = "lower-case pr N")]
+    [TestCase("see https://github.com/o/r/pull/88 for details", "https://github.com/o/r/pull/88",
+        TestName = "GitHub pull request URL")]
+    [Description("Each reference form an author writes is reported, so the gate cannot pass it silently.")]
     public void Scan_ShouldReport_ATaskReference(string text, string expected)
     {
         TaskReferenceScanner.Scan(text).Select(hit => hit.Text)
-            .Should().Contain(expected);
+            .Should().Contain(expected, because: "this text names an internal task an agent cannot open");
     }
 
     [TestCase("UTF-8 bytes", TestName = "UTF-8")]
@@ -120,7 +130,6 @@ public sealed class InternalTaskReferenceTests
     [TestCase("border: 1px solid #000000", TestName = "colour with a leading zero")]
     [TestCase("border: 1px solid #333", TestName = "decimal colour in a border shorthand")]
     [TestCase("--text-color: #8080;", TestName = "four-digit decimal colour in a custom property")]
-    [TestCase("use the text colour #808 here", TestName = "decimal colour after the word colour")]
     [TestCase("text #808080 on white", TestName = "six-digit decimal colour")]
     [TestCase("one of #A6DE00, #20A959, #7848EE, #247EE5", TestName = "hex colours with letters")]
     [TestCase("## 2. Configure the page", TestName = "markdown heading")]
@@ -128,20 +137,23 @@ public sealed class InternalTaskReferenceTests
     [TestCase("[#Read.ResultEntity.Column#] and #SysSettings.Code#", TestName = "process macro")]
     [TestCase("&#123; is an HTML entity", TestName = "HTML entity")]
     [TestCase("see docs/page.md#12", TestName = "numeric anchor")]
+    [TestCase("see [step 12](#12-configure-the-page)", TestName = "in-page heading anchor")]
     [TestCase("the tool issues requests in batches", TestName = "issues as a verb")]
     [TestCase("source revision `e53009498` and commit 410b124f7", TestName = "commit hash")]
+    [Description("Tokens of the same shape that the corpus really contains are not reported.")]
     public void Scan_ShouldIgnore_ATokenThatIsNotATaskReference(string text)
     {
         TaskReferenceScanner.Scan(text).Select(hit => hit.Text)
-            .Should().BeEmpty();
+            .Should().BeEmpty(because: "a false positive would push authors to the allow-list for ordinary text");
     }
 
     [TestCase("Background colour: #333; fixed in #1138.", TestName = "colour and bare #N on one line")]
     [TestCase("Background is fixed in #1138.", TestName = "colour word, no colour value")]
+    [Description("A colour value on the same line neither hides the reference nor is reported itself.")]
     public void Scan_ShouldReportTheTaskReference_NotTheColour(string text)
     {
         TaskReferenceScanner.Scan(text).Select(hit => hit.Text)
-            .Should().Equal("#1138");
+            .Should().Equal(["#1138"], because: "only the task reference is a hit, the colour value is not");
     }
 
     [Test]
@@ -207,28 +219,28 @@ internal static class TaskReferenceScanner
     /// anchor on a file (<c>page.md#12</c>) is not read as a repository.
     /// </summary>
     private static readonly Regex RepoQualifiedReference = new(
-        @"(?<![\p{L}\p{N}./-])[A-Za-z][\w-]*(?:/[A-Za-z][\w-]*)?#[1-9][0-9]*(?![\p{L}\p{N}-])",
+        @"(?<![\p{L}\p{N}./-])[A-Za-z][\w-]*(?:/[A-Za-z][\w-]*)?#[1-9][0-9]*(?![\p{L}\p{N}])",
         RegexOptions.Compiled);
 
     /// <summary>
     /// A bare <c>#1301</c>: two to five digits without a leading zero, not glued to a letter, digit, entity
-    /// (<c>&amp;#</c>), path or anchor. A single digit is a ranking (<c>the #1 mistake</c>); six or more
+    /// (<c>&amp;#</c>), path or anchor (<c>page.md#12</c>, <c>](#12-configure)</c>). A hyphen is no boundary,
+    /// so <c>#1575-#1579</c> and <c>#1138-fix</c> are reported. A single digit is a ranking (<c>the #1 mistake</c>); six or more
     /// digits, a leading zero or a hex letter make a colour.
     /// </summary>
     private static readonly Regex BareReference = new(
-        @"(?<![\p{L}\p{N}&#/.-])#[1-9][0-9]{1,4}(?![\p{L}\p{N}-])",
+        @"(?<![\p{L}\p{N}&#/.])(?<!\]\()#[1-9][0-9]{1,4}(?![\p{L}\p{N}])",
         RegexOptions.Compiled);
 
     /// <summary>
     /// What may stand directly before a three- or four-digit decimal colour such as <c>#333</c>, which has
     /// the bare-reference shape: a colour property and its value position (<c>color: </c>,
-    /// <c>"backgroundColor": "</c>, <c>border: 1px solid </c>), or the word colour. Only the text right
-    /// before the token counts, so a colour word elsewhere on the line does not excuse a reference.
+    /// <c>"backgroundColor": "</c>, <c>border: 1px solid </c>). The bare word colour does not count, so
+    /// "the colour #1416 regression" is still reported. Only the text right before the token counts.
     /// </summary>
     private static readonly Regex ColourValuePrefix = new(
         @"(?:(?:colou?r|background|border|outline|fill|stroke|shadow)[\w-]*[""']?\s*[:=]\s*[""']?"
-            + @"(?:(?:[0-9.]+(?:px|em|rem|%)?|solid|dashed|dotted|double|inset|none)\s+)*"
-            + @"|\bcolou?rs?\s+)$",
+            + @"(?:(?:[0-9.]+(?:px|em|rem|%)?|solid|dashed|dotted|double|inset|none)\s+)*)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary><c>issue 1249</c>, <c>issue #1416</c>, <c>PR 12</c>, <c>pull request 57</c>.</summary>

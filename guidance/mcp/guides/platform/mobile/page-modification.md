@@ -253,7 +253,7 @@ buttons. Platform build not pinned; verify against your target platform version.
 The rest of this section is READ FROM THE APPLIER, not observed on a stand: that an insert throws
 on a property the element does not carry, that the merge group runs before inserts, and that a
 single-element slot is reachable only by a merge. clio ships the same reading as a validator
-(since 8.1.0.108), so guide and tool agree by construction rather than by independent confirmation.
+(since clio 8.1.0.108), so guide and tool agree by construction rather than by independent confirmation.
 
 ─────────────────────────────────────────────────────────────
 VALIDATORS, CONVERTERS, HANDLERS — mobile constraints
