@@ -140,6 +140,7 @@
       "process-script-task",
       "product-telemetry",
       "record-rights",
+      "object-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
       "reference.atf-repository-dev.provider-and-context",
@@ -211,7 +212,8 @@
       "backend-deployment-troubleshooting",
       "portal-service-routing",
       "external-organizations",
-      "reference.portal-service-lab-validation"
+      "reference.portal-service-lab-validation",
+      "page-schema-translation"
     ],
     "resourceUris": [
       "docs://knowledge/com.creatio.clio/administration",
@@ -324,6 +326,7 @@
       "docs://knowledge/com.creatio.clio/process-script-task",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
+      "docs://knowledge/com.creatio.clio/object-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
@@ -395,7 +398,8 @@
       "docs://knowledge/com.creatio.clio/backend-deployment-troubleshooting",
       "docs://knowledge/com.creatio.clio/portal-service-routing",
       "docs://knowledge/com.creatio.clio/external-organizations",
-      "docs://knowledge/com.creatio.clio/reference.portal-service-lab-validation"
+      "docs://knowledge/com.creatio.clio/reference.portal-service-lab-validation",
+      "docs://knowledge/com.creatio.clio/page-schema-translation"
     ]
   },
   "resources": [
@@ -1062,9 +1066,6 @@
       "description": "Canonical MCP guidance for converting a source page into a Freedom UI MOBILE page via get-mobile-page-conversion-guide: advisory guide (detected sourceType, recommended template, container map, component suggestions, inline mobile contracts), the model-driven flow where you build the body with create-page/update-page/validate-page, the five component categories, the Freedom-UI-only precondition (Classic UI must be converted to Freedom UI web first), mobile constraints, and how to finish in Freedom UI Mobile Designer.",
       "topicId": "creatio.freedom-page-web-to-mobile-conversion",
       "role": "guidance",
-      "requiredFeatures": [
-        "mobile-page-converter"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-web-to-mobile-conversion"
@@ -1079,9 +1080,6 @@
       "description": "The one closed vocabulary behind every reason code get-mobile-page-conversion-guide returns — for a dropped element, a dropped or flagged action binding, a page business rule that does not convert, and a skipped property normalization — and what to tell the user about each: which outcomes are not conversion loss and must be re-created NOWHERE, which are genuine loss, and which report a conversion-rules defect. Read it to classify what was NOT built; guide.viewConfigDiff holds everything to apply and carries no reason at all. Companion lookup table to freedom-page-web-to-mobile-conversion, split out so both fit in one get-guidance response.",
       "topicId": "creatio.freedom-page-mobile-reason-codes",
       "role": "guidance",
-      "requiredFeatures": [
-        "mobile-page-converter"
-      ],
       "uri": "docs://knowledge/com.creatio.clio/freedom-page-mobile-reason-codes",
       "legacyUris": [
         "docs://mcp/guides/freedom-page-mobile-reason-codes"
@@ -1205,7 +1203,7 @@
     {
       "itemId": "package-dependencies",
       "title": "Package dependencies",
-      "description": "Canonical MCP guidance for managing Creatio package dependencies: the schema-designer 'GetSchemaDesignItem returned an HTML error page' recovery via add-package-dependency (missing dependency on the owner of the extended object's upper layer), the symmetric remove-package-dependency cleanup, and the anti-patterns (no writes into the owning managed package, no raw SQL/OData/DataService dependency edits).",
+      "description": "Canonical MCP guidance for creating a new package with create-package and for managing Creatio package dependencies: the schema-designer 'GetSchemaDesignItem returned an HTML error page' recovery via add-package-dependency (missing dependency on the owner of the extended object's upper layer), the symmetric remove-package-dependency cleanup, and the anti-patterns (no writes into the owning managed package, no raw SQL/OData/DataService dependency edits).",
       "topicId": "creatio.package-dependencies",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/package-dependencies",
@@ -1373,7 +1371,7 @@
     {
       "itemId": "page-schema-resources",
       "title": "Page schema resources",
-      "description": "Canonical MCP guidance for Freedom UI page localizable strings: $Resources.Strings.* as the recommended binding, #ResourceString()# required for validator params (and conventional for grid captions), resources parameter usage, and common mistakes.",
+      "description": "Canonical MCP guidance for Freedom UI page localizable strings: $Resources.Strings.* as the recommended binding, #ResourceString()# required for validator params (and conventional for grid captions), resources parameter usage, and common mistakes. Translating a page into another culture: page-schema-translation.",
       "topicId": "creatio.page-schema-resources",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-resources",
@@ -1426,7 +1424,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula element (formulaTask, from CrtProcessBuilder 1.6.3.16) and the Sub-process element (subProcess, from 1.6.3.26) -- while inclusive/event-based gateways, timer/message and intermediate events, scriptTask and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.14). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula (formulaTask), Sub-process (subProcess) and Script task (scriptTask) elements -- while inclusive/event-based gateways, timer/message and intermediate events and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.14). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1844,7 +1842,7 @@
     {
       "itemId": "process-script-task",
       "title": "Process ScriptTask C#",
-      "description": "Guides C# inside an existing Creatio process ScriptTask: exact process parameter codes, Get/Set access, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and target-environment verification.",
+      "description": "When to add a Creatio process ScriptTask (it makes the process need a compile) and how to write one: the scriptTask block, exact case-sensitive Get/Set parameter access, the namespaces the generated code imports, process usings and methods and when an alias is needed, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and compiling and verifying on the target environment.",
       "topicId": "creatio.process-script-task",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1872,7 +1870,7 @@
     {
       "itemId": "record-rights",
       "title": "Record rights",
-      "description": "Canonical MCP guidance for record-level access rights: read/change who can access a record or dashboard with get-record-rights / set-record-rights, addressing a dashboard as SysSchemaAdminUnit + schema UId, and the record-level (SysSchemaAdminUnitRight) vs operation-level (SysSchemaOperationRight) distinction.",
+      "description": "Canonical MCP guidance for record-level access rights: read/change who can access a record or dashboard with get-record-rights / set-record-rights, addressing a dashboard as SysSchemaAdminUnit + schema UId, and the record-level (SysSchemaAdminUnitRight) vs operation-level (SysEntitySchemaOperationRight) distinction.",
       "topicId": "creatio.record-rights",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/record-rights",
@@ -1881,6 +1879,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/operations/record-rights.md",
       "bundlePath": "resources/record-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "object-rights",
+      "title": "Object rights",
+      "description": "Canonical MCP guidance for OBJECT operation permissions (the SysEntitySchemaOperationRight / \"Object permissions\" layer): read the rows of an object with get-object-rights and grant or revoke one role's read/create/edit/delete on ONE object per call with set-object-rights, for ANY role. Owns the row priority rule (the highest matching row decides, a cleared row denies), the explicit enable and disable of operation permissions, the list-ask-then-grant flow for an object's lookups, and the object-level vs record-level distinction.",
+      "topicId": "creatio.object-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/object-rights",
+      "sourcePath": "guidance/mcp/guides/operations/object-rights.md",
+      "bundlePath": "resources/object-rights.md",
       "mediaType": "text/plain"
     },
     {
@@ -2890,6 +2899,17 @@
       "sourcePath": "references/portal-service-lab-validation.md",
       "bundlePath": "resources/references/portal-service-lab-validation.md",
       "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "page-schema-translation",
+      "title": "Page translation",
+      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
+      "topicId": "creatio.page-schema-translation",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-schema-translation",
+      "sourcePath": "guidance/mcp/guides/page-schema/translation.md",
+      "bundlePath": "resources/page-schema-translation.md",
+      "mediaType": "text/plain"
     }
   ]
 }

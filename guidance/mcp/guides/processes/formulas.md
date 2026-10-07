@@ -73,12 +73,15 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 REFERENCING A PARAMETER — the one thing that is not guessable, so read this before writing a formula that
 uses one. A parameter is referenced by its **UId**, never by its name.
 
-> **TWO EXCEPTIONS, both narrow:** a `flows[].condition` on `create-business-process` takes the NAME
-> — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId does
-> not exist yet (see `process-branch-conditions`); and a Formula element's `body` takes it on EVERY route
-> that writes one — create, `addElement`, `setElement` (`process-element-catalog` owns that element). A
-> `mappings[].expression`, a filter, a condition set through `modify-business-process` and everything
-> else on this page still take the UId, and the failures below are what a name gets you there.
+> **TWO EXCEPTIONS, both narrow:** a flow CONDITION takes the NAME — `[#Amount#]`, `[#Element.Parameter#]` —
+> and the server expands it: always on `create-business-process`, because on create the UId does not exist
+> yet (see `process-branch-conditions`), and on `modify-business-process` under its MODIFY PATH contract;
+> and a Formula element's `body` takes it on EVERY route that writes one — create, `addElement`,
+> `setElement` (`process-element-catalog` owns that element). A `mappings[].expression`, a modify condition
+> under any other contract and everything else on this page still take the UId, and the failures below are
+> what a name gets you there. A filter takes the UId too, but as the BARE meta path
+> `[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]` - prefix included, never `[#…#]`
+> (`process-data-source-filters`).
 
 Outside those two there is no name-based form — and the four wrong shapes do not all fail the same
 way, which matters:
@@ -98,13 +101,17 @@ unknown setting. Build the token yourself, in two steps:
 1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
    return a ready-made meta-path, so there is nothing to copy — you assemble it);
 2. write the token around that UId, braces included:
-   * a PROCESS parameter -> `[#[Parameter:{uid}]#]`
-   * an ELEMENT output parameter -> `[#[Element:{elementUid}].[Parameter:{parameterUid}]#]`
+   * a PROCESS parameter -> `[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`
+   * an ELEMENT output parameter ->
+     `[#[IsOwnerSchema:false].[IsSchema:false].[Element:{elementUid}].[Parameter:{parameterUid}]#]`
 
-For a COLUMN inside a read element's `ResultEntity`, read `process-data-elements`: it owns discovering
-the column UId through `get-entity-schema-properties` and authoring the third segment, in a branch
-condition and in a formula. A missing column UId in describe does not make either unauthorable, and
-no name form can say that segment.
+   The platform writes that prefix; the token without all of it is accepted too. Spell the rest exactly:
+   every segment dot-separated, braces included.
+
+For a COLUMN inside a read element's `ResultEntity`: a Formula BODY takes the name form
+`[#ReadContact.ResultEntity.Owner#]`, expanded on every write path; a raw `expression` takes the UId form with a
+third segment. `process-data-elements` owns that form, where its column UId comes from and what it does NOT
+check - and a plain column mapping is `sourceColumn`, not a formula.
 
 Worked example — note the target is a FLOAT parameter: `Math.Ceiling` returns `decimal`, and a decimal
 result into an Integer parameter is refused by the result-type rule below. `describe-business-process`
@@ -112,7 +119,7 @@ reports a process parameter `PriceParameter` with
 `uid: c3f5635c-2aa2-4279-9464-b0b94b2f7a85`. To round it up into `PriceUpParameter`:
 
     {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUpParameter",
-     "expression":"Math.Ceiling([#[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
+     "expression":"Math.Ceiling([#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
 
 A COMPUTED DEFAULT for a parameter of ANY type is a mapping, not a `value`. `addParameter` / `setParameter`
 take `value` as a literal constant, so an arithmetic or macro-bearing default cannot go there; the route is
@@ -131,7 +138,7 @@ reads as success and silently replaces an expression that recomputes with a numb
 
 WHAT IS CHECKED, and BY WHOM. The **platform** validates every formula — an `expression` mapping and a
 flow condition alike — at its own pre-save gate. From `CrtProcessBuilder` 1.4.0.41 the package adds
-nothing to that verdict beyond the two checks under *What CLIO still checks* below. Two consequences
+nothing to that verdict beyond the checks under *What CLIO still checks* below. Two consequences
 that change how you read a failure:
 
 - **A bad formula fails the WHOLE call.** The refusal comes from the save, not from the operation that
@@ -176,7 +183,7 @@ verbatim from a stand at core 10.0.731.0 — none of it is paraphrased or inferr
   comes back EMPTY. A bare carriage return with no line feed is NOT refused: the platform checks for `\n`
   only, and CR is whitespace to the interpreter, so such a formula parses and stores on one line.
 
-What CLIO still checks, and it is two things.
+What CLIO still checks:
 
 **A blank `condition` is refused up front.** An empty condition is not "no condition": the platform
 substitutes the literal `true`, producing an always-taken branch nobody asked for. This check is clio's
@@ -184,10 +191,17 @@ own, because the gate would ACCEPT it.
 
 **Length, at most 2048 characters**, applied before anything is stored — the pre-save gate is what runs
 the platform's macro converters, whose regexes have no match timeout, so a bound applied there would be
-too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is about 60 characters, so roughly thirty of
-them exhaust it, and the cap applies to the text as you write it, before macros are resolved. The same
-bound covers the paths that store a formula without any other check — a `changeData` value `expression`, a
-Send email recipient, a performer contact, a connection expression, a filter condition expression.
+too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is
+54 to 200 characters, so ten to thirty-seven of them exhaust it - counted as you write it and, in a condition
+or Formula body, again after names expand. The same bound covers a `changeData` value
+`expression`, a connection expression, a Send email recipient and a performer contact. A filter condition
+`expression` gets the same bound but is no formula: it must be the bare meta path of one reference
+(`process-data-source-filters`).
+
+**A hand-written meta path** (MODIFY PATH contract, `process-branch-conditions`) in a condition, an
+`expression` mapping, connection or value, a `recordId` or a Formula body must spell an item of THIS process
+as the platform does (prefix optional), and a column its record loads. Send email recipients and template
+entities and performer contacts are not checked.
 
 What is NOT refused: the SHAPE of an expression — deep bracket nesting, long unary runs, long `? :`
 chains — exactly as the visual designer accepts them, and neither clio's length bound nor the platform's
@@ -206,4 +220,4 @@ rather than long and flat.
 
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions
-here, each of which references its parameters by UId meta-path like everything else.)
+here.)

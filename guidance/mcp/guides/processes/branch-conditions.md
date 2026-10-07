@@ -15,11 +15,13 @@ notice or a package-version refusal, or when you need the evidence behind a rule
 == Conditional flows and branch conditions ==
 
 HOW A CONDITION NAMES A PARAMETER DEPENDS ON WHICH CALL YOU ARE IN, and getting it wrong costs the
-whole call. The RUNTIME only ever resolves a UId meta-path — `[#[Parameter:{uid}]#]`. On
-`modify-business-process` that is what you write, and `describe-business-process` gives you the UIds.
-On `create-business-process` you write the NAME instead — `[#Amount#]`, `[#Element.Parameter#]` — and
-the server expands it, because on create the UId does not exist yet. Both are spelled out below; read
-"REFERENCING A PARAMETER" under FORMULAS for the meta-path form itself.
+whole call. The RUNTIME only ever resolves a UId meta-path —
+`[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`. On `create-business-process` you write
+the NAME — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId
+does not exist yet. On `modify-business-process` you write the name too when its contract carries the
+gate under **ON THE MODIFY PATH**; otherwise the meta-path, from the UIds `describe-business-process`
+reports. Both are spelled out below; `process-formulas` ("REFERENCING A PARAMETER") owns the meta-path
+form itself.
 
 A branch is a flow with a CONDITION, and you DECLARE it where you declare the flow:
 
@@ -32,41 +34,62 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 `kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
 `condition`. The same fields are on `addFlow`.
 
-**ON THE BUILD PATH, WRITE THE NAME.** This is the one exception to the UId rule above and it exists
-because it has to: on `create-business-process` the UIds do not exist yet — the parameters and elements
-are made by that same call — so `flows[].condition` takes a name and the server expands it once
-everything exists.
+**LABEL BOTH ARMS.** `flows[].label` is the text the designer draws ON the connector, and on a branch it
+is not decoration: without it a two-branch decision renders as two identical unlabelled arrows and a
+reader has to open each one's properties to tell them apart. It is what the shipped product does on the
+large majority of its conditional flows and a quarter of its default ones, and almost never on a plain
+sequence flow — so label the arms and leave an ordinary continuation bare. `process-naming` N10 carries
+the measured figures and their population.
+
+Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
+`Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
+because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule in
+full. EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
+caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
+`describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
+human's label is there to be erased.
+
+**ON THE BUILD PATH, WRITE THE NAME.** It exists because it has to: on `create-business-process` the UIds do
+not exist yet — the parameters and elements are made by that same call — so `flows[].condition` takes a name
+and the server expands it once everything exists.
 
     { "source": "Check", "target": "Approve", "kind": "conditional",
       "condition": "[#Amount#] > 100", "label": "Approved" }        // a process parameter
     { "source": "Check", "target": "Escalate", "kind": "conditional",
       "condition": "[#Priority#] == \"High\"", "label": "Escalated" } // and another
 
-`[#Element.Parameter#]` is expanded too, for an element's OWN output parameter — but read what that reaches
-before you rely on it. A `readData` in `first` mode exposes exactly one output
-and it is a RECORD (`ResultEntity`). Testing one of its COLUMNS needs a third meta-path segment
-(`[EntityColumn:]`) that the create-time name form cannot express, so a column test goes through the modify
-path. `process-data-elements` owns the recipe: discover the column UId with
-`get-entity-schema-properties`, then combine it with the element/parameter UIds from describe. That is not a
-corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
+`[#Element.Parameter#]` is expanded too, for an element's OWN output parameter, and
+`[#Element.Parameter.Column#]` for ONE column of the record it returned. A `readData` in `first` mode exposes
+exactly one output and it is a RECORD (`ResultEntity`), so a column test reads
+`[#ReadContact.ResultEntity.DoNotUseCall#] == true`; the column is resolved by its code on the read object,
+and `process-data-elements` owns that source, its refusals and its UId form.
+That is not a corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and
+245 are not.
 
 > Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
 > condition stores, and `describe` reads back clean — but `ReadDataUserTask.HandleResult` assigns it only in
 > `function` mode with `FunctionType == Count`, and returns before it in every other mode. On anything clio
 > builds it stays 0, so `> 0` never fires and the fallback always runs. See `process-data-elements`.
 
-`[#SysSettings.Code<Type>#]`, `[#Lookup.Schema.Record#]` and an already-written meta-path are passed
-through untouched. A name that resolves to nothing is refused before anything is saved, naming the flow
-and listing the parameters that do exist — which is the whole reason to write the name rather than
-guess: without it the platform answers `Formula value error: Expression expected (at index 0)`, naming
-neither, and the entire call is aborted.
+`[#SysSettings.Code<Type>#]` and `[#Lookup.Schema.Record#]` are passed through untouched, and so is an
+already-written meta-path - which, under the contract named in the next paragraph, must be spelled exactly
+as the platform writes it (every segment dot-separated, braces included, the
+`[IsOwnerSchema:false].[IsSchema:false].` prefix whole or absent) and name an item of this process, or it is
+refused naming the flow - and, for a misspelling, handing back the correct token. A name that resolves to
+nothing is refused before anything is saved, naming the flow and listing the parameters that do exist —
+which is the whole reason to write the name rather than guess: without it the platform answers `Formula
+value error: Expression expected (at index 0)`, naming neither, and the entire call is aborted.
 
-**ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
-exists, so `describe-business-process` reports the element and parameter UIds (column UIds come from the
-`process-data-elements` recipe). The two-step route — build the flow plain,
-then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
-one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`,
-(for a conditional one) `condition`, and an optional `label`.
+**ON THE MODIFY PATH, CHECK THE CONTRACT FIRST.** When the `modify-business-process` contract from
+`get-tool-contract` contains the exact phrase `every segment dot-separated`, `addFlow`, `setFlow` and
+`setFlowCondition` expand the same names as here, and the server checks every hand-written meta path - in a
+condition, an `expression` mapping or value and a Formula body, on create as well - as above; an echoed
+designer condition too, so one reading a column its Read data does not load is refused. With any other
+contract there is no expansion on modify: write the meta-path from the UIds `describe-business-process`
+reports (column UIds come from the `process-data-elements` recipe). The two-step route — build the flow
+plain, then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a
+designer-authored one. To change an existing flow's kind in either direction, `setFlow` takes `source`,
+`target`, `kind`, (for a conditional one) `condition`, and an optional `label`.
 
 The `label` argument has THREE states and the difference is destructive: OMITTING it keeps whatever
 label the flow has, an EMPTY string CLEARS it, and text replaces it. Omitting is what you want on any
@@ -203,3 +226,10 @@ evaluated BEFORE any formula branch, whatever order the flows are written in.
 behind it, how to write the dialect with `flows[].results` and `setFlowResults`, how to read it back,
 and exactly when the checkbox editor appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
 edit page with results by column.
+
+Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
+`B` stand for a REFERENCE (a meta-path token, a `[#Name#]` the server expands, a system variable, a system
+setting):
+`X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
+boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
+`A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.

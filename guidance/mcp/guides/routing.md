@@ -31,6 +31,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
   - reuse JavaScript helpers across Freedom UI web pages (client-unit schemas and AMD dependencies) -> name=shared-client-logic
+  - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
@@ -126,12 +127,13 @@ guards — it says whose rule it is and names that guide for the rest.
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
     family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
-  - write or repair C# inside an existing process ScriptTask -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
+  - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
+  - the user asks for a new, separate package in the environment -> name=package-dependencies (create-package)
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
@@ -160,6 +162,7 @@ guards — it says whose rule it is and names that guide for the rest.
 - Record-level permission model, stored grants versus runtime/dynamic access rules, or permission-extension interfaces -> name=record-permissions
 - Runtime record-permission implementation, activation and combination modes -> name=record-permission-extensions
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+- Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer), for any role, one object per call — read with get-object-rights, grant/revoke with set-object-rights; making a portal section's object available to external users is one case -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
 

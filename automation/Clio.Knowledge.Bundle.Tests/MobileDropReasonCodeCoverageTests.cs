@@ -178,6 +178,55 @@ public sealed class MobileDropReasonCodeCoverageTests
                 + "branch that never runs, and a REAL code renamed in clio hides behind the stale entry");
     }
 
+    /// <summary>
+    /// Wordings these articles RETIRED, with what replaced each. A retired phrase is not merely stale: both
+    /// of these named a rule the converter no longer follows, and a reader who meets the old sentence acts on
+    /// it.
+    /// </summary>
+    /// <remarks>
+    /// This guard exists because correcting a statement ONCE is not the same as correcting it. ENG-96178
+    /// rewrote both of these where the change was obvious and left the second occurrence of each standing —
+    /// <c>flag-request-unmapped</c> three lines below the entry that was fixed, and the viewConfigDiff
+    /// paragraph two hundred lines below the rule it contradicts. Nothing could have caught it: the size
+    /// ratchet counts characters, the coverage tests above read CODE NAMES, and an article that argues with
+    /// itself passes both. Whichever sentence the reader meets first is the one they act on.
+    /// </remarks>
+    private static readonly (string Retired, string Reason)[] RetiredWordings =
+    [
+        ("bundled set",
+            "clio deleted the 14-entry MobileSupportedRequests constant in ENG-96589; the fallback is the "
+                + "mobile request registry, which is a different and much larger set"),
+        ("ONLY a `crt.Button`",
+            "ENG-96178 drops every type the rules' actionComponents section declares — crt.MenuItem as well — "
+                + "so a sentence promising the reader that only a button ever goes is false")
+    ];
+
+    [Test]
+    [Description("Neither mobile article still carries a wording it retired. The point is that a correction applied in ONE place is not a correction: both of these appeared twice, were fixed once, and left the article contradicting itself — which every other guard here passes, because they count characters or read code names.")]
+    public void Articles_ShouldNotCarryARetiredWording()
+    {
+        // Arrange
+        (string Path, string Text)[] articles =
+        [
+            (CodeArticle, ReadGuide(CodeArticle)),
+            (ConversionArticle, ReadGuide(ConversionArticle))
+        ];
+
+        // Act
+        List<string> survivors =
+        [
+            .. from article in articles
+               from wording in RetiredWordings
+               where article.Text.Contains(wording.Retired, StringComparison.OrdinalIgnoreCase)
+               select $"{article.Path} still says '{wording.Retired}' — {wording.Reason}"
+        ];
+
+        // Assert
+        survivors.Should().BeEmpty(
+            because: "a retired wording states a rule the converter no longer follows, and a reader who meets "
+                + "it acts on it. " + string.Join("; ", survivors));
+    }
+
     private static string ReadGuide(string relativePath) =>
         File.ReadAllText(Path.Combine(FindRepositoryRoot(), relativePath.Replace('/', Path.DirectorySeparatorChar)));
 

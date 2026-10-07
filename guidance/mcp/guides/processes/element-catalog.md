@@ -118,12 +118,16 @@ anything, including when you entered at this leaf rather than through `process-m
   refused outright, naming the ones it does build. It calls ANOTHER process (the BPMN call activity) —
   naming the callee is what copies that process's parameters onto the element — see `process-sub-process`
   for the block.
+- `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C# the process must be COMPILED for -
+  `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
+  and the methods.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
   intermediate events,
-    `scriptTask`, `webService` (each also marked READ-ONLY in the
+    `webService` (also marked READ-ONLY in the
     catalog below, where silence used to read as "buildable"),
-  and reading one COLUMN out of a read collection — all
+  and reading one COLUMN out of a read COLLECTION's items (a first-record read's column IS a source,
+  `sourceColumn` - see `process-data-elements`) — all
   four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance
   Sub-process element iterates one, once per item (see the `callActivity` entry below).
   Use the catalog below to reason about a solution and to READ existing processes
@@ -177,8 +181,10 @@ System actions (palette group "System actions"):
       * `body` is the SAME dialect as a flow condition (`process-formulas` owns the vocabulary). A process
         parameter may be referenced by NAME — `[#Amount#]` — on EVERY route that writes a body: create,
         `addElement` and `setElement` alike, because the expansion lives in the applier they all go
-        through. A body already in the meta-path form `describe-business-process` reports passes through
-        untouched, so echoing a read-back is safe.
+        through. A body already in the meta-path form is never rewritten: under the contract
+        `process-branch-conditions` names (ON THE MODIFY PATH) it is checked instead: a read-back passes
+        unless it reads a column its Read data does not load - then the refusal names it, and that
+        reference reads EMPTY at run time today.
       * BOTH the body and a target are required when the element is created, and naming two targets is
         refused rather than resolved by precedence. On modify the block is a PARTIAL update: a body-only
         edit keeps the target, a target-only edit keeps the expression.
@@ -194,7 +200,7 @@ System actions (palette group "System actions"):
     Still true, and still the cheaper answer for a one-off value: a mapping with an `expression` source
     computes a value without an element at all. Reach for this element when the computation deserves to
     be visible on the diagram, or when the result must be written between two steps.
-- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs publication). READ-ONLY here.
+- `scriptTask`        Script task  — custom C# (ends with `return true;`; needs a compile), from 1.6.6.30.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.

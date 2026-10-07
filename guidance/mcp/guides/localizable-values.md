@@ -1,6 +1,6 @@
 clio MCP localizable-values guide
 
-Scope: use when backend C# code needs user-visible text, when deciding which Creatio schema owns a resource, or when testing localization and fallback. For Freedom UI page authoring details, also read `page-schema-resources`; that guide owns page bindings and resource registration.
+Scope: use when backend C# code needs user-visible text, when deciding which Creatio schema owns a resource, when writing a value in a culture other than the default, or when testing localization and fallback. For Freedom UI page authoring, also read `page-schema-resources`; that guide owns page bindings and resource registration. For page translation, read `page-schema-translation`; that guide owns the `localize-page` workflow.
 
 ## Ownership
 
@@ -9,6 +9,18 @@ Scope: use when backend C# code needs user-visible text, when deciding which Cre
 - A dedicated source-code schema MAY own package-level backend values only when no more specific schema is a natural owner.
 - Do not use one source-code schema as a package-wide registry for unrelated page, process, object, and backend values.
 - Starting with Clio 8.1.0.111, `clio add-package <PackageName> --as-app` (`clio ap <PackageName> -a`) creates a small package-level source-code owner and an injectable `ILocalizableStringResolver` adapter. On an older Clio version, add the interface and adapter using `packages/AtfLocalizationLab/Files/src/cs/LocalizableStrings/LocalizableStringResolver.cs` from the pinned reference lab, or upgrade. Keep the schema narrow; the resolver does not change resource ownership.
+
+## Cultures available in an environment
+
+This section owns the culture rules every per-culture write depends on.
+
+- A value can be stored only in a culture that is a row of the environment's Languages section (System Designer → Languages; entity `SysCulture`). Creatio silently DROPS a value in any other culture — a non-culture name or a real culture the environment lacks, such as `fi-FI` — and still answers `success:true`. Measured for page resources, entity column captions, and section titles alike.
+- Culture names use the canonical `ll-CC` form (`es-ES`). A lower-case name is accepted and stored canonically (`de-de` → `de-DE`).
+- An INACTIVE culture is stored, but users cannot select it until it is activated in the Languages section. Translating first and activating afterwards is a valid order. Activation alone does not make the UI load in that culture: a full configuration compile must follow (`page-schema-translation` workflow step 7).
+- clio builds whose `get-tool-contract` index lists `localize-page` check the culture before writing, in `localize-page`, in the entity tools' `title-localizations` / `description-localizations`, and in `update-app-section` `caption-culture`: an absent culture fails before any write with an error that names the Languages section and lists the available cultures; an inactive culture is written with a warning. Recovery: add the culture in the Languages section (or pick one from the list), then retry. On an earlier clio the entity tools do not check the culture, and `update-app-section` has no `caption-culture` (`existing-app-maintenance`).
+- A culture present in a read does not prove a translation: right after creation, schema titles show the English text or the parent schema's title in every culture. Translate each target culture explicitly. Not every write tool compares the stored value in the target culture: `existing-app-maintenance` owns what the entity tools check (a column title is not compared) and how to verify the rest.
+
+Evidence boundary: measured on Creatio 10.2.254 / .NET Framework for ENG-90576.
 
 ## Backend resource and lookup contract
 
@@ -93,7 +105,7 @@ A configuration web service validates transport input, creates an application sc
 
 ## Freedom UI boundary
 
-Read `page-schema-resources` before creating or changing a Freedom UI page resource. It owns binding syntax, the `resources` parameter, data-source caption auto-provisioning, validator macros, and the decision whether a custom page resource must be registered. Do not infer one binding or registration rule for every page resource, and do not copy those rules here.
+Read `page-schema-resources` before creating, changing, or translating a Freedom UI page resource. Freedom UI page captions in another culture are written with `localize-page` (owned by `page-schema-translation`); the culture-XML steps above are for backend `LocalizableStrings`, not for page captions. `page-schema-resources` owns binding syntax, the `resources` parameter, data-source caption auto-provisioning, validator macros, and the decision whether a custom page resource must be registered. Do not infer one binding or registration rule for every page resource, and do not copy those rules here.
 
 After deployment, use `get-page` and inspect `bundle.resources.strings.<Key>` as the platform oracle for an explicitly registered custom page resource. A resource XML file on disk is not sufficient proof that the Freedom UI runtime can resolve it. For data-source-bound captions and other resource types, follow the decision rules in `page-schema-resources`; absence from this node is not by itself proof of a defect.
 

@@ -70,8 +70,10 @@ public sealed class ProcessFormulaGuidanceTests
         ("converter left it, not as you wrote",
             "the refusal quotes the CONVERTED expression, so a caller who cannot find their own text "
             + "concludes the wrong formula was validated"),
-        ("[#[Parameter:{", "the reference form is the one thing an agent cannot derive or guess"),
-        ("[#[Element:{",
+        ("[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{",
+            "the reference form is the one thing an agent cannot derive or guess - pinned in the prefixed "
+            + "spelling the platform writes since ENG-102114, which checks a hand-written meta path"),
+        ("[#[IsOwnerSchema:false].[IsSchema:false].[Element:{",
             "the ELEMENT-scoped form, which occurs ONCE in this article and was pinned by nothing: an agent "
             + "who has the process-parameter form still cannot derive this one, and losing it costs the "
             + "commonest mapping there is - one element's output into another element's input"),
@@ -195,9 +197,10 @@ public sealed class ProcessFormulaGuidanceTests
             because: "the flow-condition path parses a third segment - FillMatchedData routes EntityColumn "
                 + "into SubParameterMetaPath and TryGetParameterMapPath carries it - so the platform does not "
                 + "refuse what this calls impossible");
-        readData.Should().Contain("describe reports no column UIds",
-            because: "the real limit is discoverability, and it is the half a reader can act on: you cannot "
-                + "author a segment whose UId no read API hands you");
+        readData.Should().Contain("sourceColumn",
+            because: "the discoverability limit that used to be the half a reader could act on is gone: the "
+                + "column is named by its CODE and the server resolves the UId, so the article must point at "
+                + "that form rather than at the missing UId (ENG-91844)");
         string dataElements = ReadGuide(DataElementsGuide);
         dataElements.Should().Contain("get-entity-schema-properties",
             because: "column UIds are discoverable through entity metadata even though process describe omits them");
@@ -209,6 +212,36 @@ public sealed class ProcessFormulaGuidanceTests
             because: "branch authors need the canonical column-discovery recipe");
         ReadGuide(FormulaGuide).Should().Contain("process-data-elements",
             because: "formula authors need the canonical column-discovery recipe");
+    }
+
+    [Test]
+    [Description("ENG-91844 made one column of a read record a source by NAME (sourceColumn, elementParameter.column, [#Read.ResultEntity.Column#]). The claims it retired are swept over the whole declared process set, because each of them lived in a different article and a single-file check goes green the moment a sentence moves: that a column cannot be authored, that a formula takes two segments rather than three, that first-record is the only Read data mode clio builds, and that column sources wait on ENG-91844.")]
+    public void ProcessGuides_ShouldNotRestateTheRetiredColumnLimits() {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string[] retired = [
+            "You cannot author one",
+            "author two segments, not three",
+            "the only mode clio builds",
+            "still needs ENG-91844",
+            "NOT authorable today (ENG-91844)",
+            "not referenceable from a MAPPING"
+        ];
+
+        // Act
+        string[] restating = [.. ProcessGuideSet.Declared(repositoryRoot)
+            .SelectMany(article => retired
+                .Where(phrase => ProcessGuideSet.Read(repositoryRoot, article.SourcePath)
+                    .Contains(phrase, StringComparison.Ordinal))
+                .Select(phrase => article.ItemId + ": " + phrase))];
+
+        // Assert
+        restating.Should().BeEmpty(
+            because: "each of these sends an agent around a source that now builds - the session that motivated "
+                + "ENG-91844 built two filtered signal starts instead of one gateway on exactly such a sentence. "
+                + "Found: " + string.Join("; ", restating));
+        ReadGuide(DataElementsGuide).Should().Contain("\"sourceColumn\": \"Owner\"",
+            because: "the owning article must carry the worked mapping, not only name the field");
     }
 
     [Test]

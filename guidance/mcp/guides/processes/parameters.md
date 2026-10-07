@@ -73,7 +73,8 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).
-  SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter) |
+  SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
+  add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
   processParameter (a process parameter by name) | value (a constant) | expression (a raw formula).
   Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process` output an element parameter
   is usable as a mapping source when `isOutput: true` — key on that, NOT on `isResult` or `direction`. Those are
@@ -132,18 +133,14 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   `[#Lookup…#]` macro cannot — see `process-data-elements`.
   EXCEPTION — an Activity CONNECTION: there you send a bare `recordId` to `setConnections` and the server
   composes the token from the target column, so hand-writing it is both unnecessary and easy to get wrong.
-- To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping (above) — the server builds the correct reference. Do NOT hand-write an element-output reference —
-  in the saved metadata it is a server-generated UId meta-path
-  (`[#...[Element:{uid}].[Parameter:{uid}].[EntityColumn:{uid}]#]`), NOT a friendly `Element.Property`
-  path — ALWAYS use `sourceElement` for a MAPPING. Formulas are strictly typed (convert with `.ToString()`
+- To read another element's output, PREFER the structured `sourceElement` + `sourceElementParameter` mapping
+  (above), plus `sourceColumn` for ONE column of its record — the server builds the correct reference. Do NOT
+  hand-write an element-output reference for a MAPPING: in the saved metadata it is a server-generated UId
+  meta-path (`[#...[Element:{uid}].[Parameter:{uid}]#]`, with a third `.[EntityColumn:{uid}]` segment for a
+  column), NOT a friendly `Element.Property` path. Formulas are strictly typed (convert with `.ToString()`
   etc.).
-  This applies to the `sourceElement` mapping ONLY. It does NOT mean a formula cannot reference a
-  parameter: inside an `expression` there is no structured alternative, and the UId meta-path is exactly
-  what you write. `process-formulas` owns that form — you build it from the `uid` that
-  `describe-business-process` reports, and it is the only accepted one.
-  The third segment above, `[EntityColumn:{uid}]`, addresses ONE COLUMN of the record, and it IS
-  authorable: the column UId comes from `get-entity-schema-properties`, not from describe.
-  `process-data-elements` owns the recipe, in a condition and in a formula — a Formula element or an
-  `expression` mapping is how a column reaches a process parameter. A structured `sourceElementParameter` still cannot name a column.
-  An email BODY macro reaches a column by name instead,
-  `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).
+  This applies to MAPPINGS only. It does NOT mean a formula cannot reference a parameter: inside an
+  `expression` there is no structured alternative, and the UId meta-path is exactly what you write.
+  `process-formulas` owns that form — built from the `uid`s `describe-business-process` reports; the column
+  form (a third segment) is `process-data-elements`'. An email BODY macro reaches a column with its own
+  grammar, `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).
