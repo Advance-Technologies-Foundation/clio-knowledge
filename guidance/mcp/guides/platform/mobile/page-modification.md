@@ -103,6 +103,9 @@ DO NOT add: "handlers", "converters", "validators" — these are AMD/web-only co
 DO NOT wrap the body in define(...).
 DO NOT add any AMD marker pairs (SCHEMA_DEPS, SCHEMA_VIEW_CONFIG_DIFF, etc.).
 For append mode, send a fragment containing only the `*Diff` arrays you want to merge; missing keys are skipped.
+The empty arrays above show the shape, not a body to send in replace mode. A generated mobile form page declares
+`PDS` in its own root `modelConfigDiff` merge, and a replace body with `"modelConfigDiff": []` drops it — see
+"A `replace` body must carry the page's own data sources" in `page-modification-overview`.
 
 ─────────────────────────────────────────────────────────────
 OPERATION SHAPE — the component "type" MUST be inside "values"
