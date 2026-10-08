@@ -114,6 +114,8 @@ the reviewer confirms only that the decision test holds.
 item owns, or a piece split out of an existing article; an end-to-end rewrite under a new title keeps
 its identity. A split or move follows
 [An article must fit in one `get-guidance` response](#an-article-must-fit-in-one-get-guidance-response).
+The same test applies to capability, advisory, and reference-example IDs: renaming their title or
+file keeps the ID, and a new ID is only for a new subject.
 
 ### Supersession and references
 
@@ -129,9 +131,10 @@ Supersession and retirement are behavioral.
   `docs://knowledge/` citation of it to the successor, and moves its `legacyUris` to the successor so
   pre-v1 `docs://mcp/...` routes keep resolving. The retired `itemId` and `uri` cannot be
   aliased: Clio resolves a `docs://knowledge/` URI by exact `itemId` and a bare name by `itemId` or
-  `topicId`, never through `legacyUris` (`KnowledgeResolution.cs`, Clio 8.1.0.97 to 8.1.0.139), so
-  listing them in `legacyUris` passes the builder and does nothing. The pull request states that
-  retirement breaks callers of the old ID. Clio's own source names the required inventory in
+  `topicId`, never through `legacyUris` (`clio/Command/McpServer/Knowledge/KnowledgeResolution.cs` in
+  the Clio repository, read at commit `7ab76575`; the behavior is unchanged from Clio 8.1.0.97 to
+  8.1.0.139), so listing them in `legacyUris` passes the builder and does nothing. The pull request
+  states that retirement breaks callers of the old ID. Clio's own source names the required inventory in
   [README.md](README.md#status) (`core-rules`, `routing`, `when-to-use-requests`), so those items are
   never retired or renamed without a coordinated Clio change.
 - **Citations**: cite a `guidance` item by `get-guidance name=<itemId>` and an item of any other role
