@@ -41,7 +41,7 @@ public sealed class ProcessDigestTests
     /// <para>
     /// Why it is not smaller: a first cut was 12.4 K and a refute-first check against the owners found that
     /// the short form had dropped conditions an agent acts on - the email-to-each-item D1 case, the result
-    /// SELECTION rule for branches off Approval or Perform task, the three user tasks with their own build
+    /// SELECTION rule for branches off Approval or Perform task, the four user tasks with their own build
     /// type, the version floor for a second signal start, the existing-process restructure ban. Restoring
     /// them is what the extra 3 K is. Shrink the card by moving a DETAIL to its owner, never by dropping a
     /// condition that changes what the agent does.
@@ -81,9 +81,11 @@ public sealed class ProcessDigestTests
         ("process-modeling", "You MUST read `isActiveVersion` from the describe output before ANY modify"),
         ("process-modeling", "The modify path runs NO structural validation"),
         ("process-modeling", "Do NOT run `compile-creatio` to"),
+        ("process-modeling", "unless its save WARNED it cannot run until compiled (a `scriptTask`; then pass `process-name`)"),
         ("process-modeling", "Pass the descriptor as the JSON object itself"),
         ("process-modeling", "CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later"),
         ("process-modeling", "prefer additive edits, do not remove or rewire"),
+        ("process-element-catalog", "`scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**"),
         ("process-element-catalog", "FOUR user tasks have their own dedicated build type and must NOT be built as a generic `userTask`"),
         ("process-sub-process-when", "Never restructure an existing process without being asked")
     ];
@@ -155,6 +157,30 @@ public sealed class ProcessDigestTests
         foreignOwners.Should().BeEmpty(
             because: "restating a fifth article is a decision to make on purpose, with rows in the clause table "
                 + "above - not a heading edit. Found: " + string.Join(", ", foreignOwners));
+    }
+
+    [Test]
+    [Description("No element type the digest lists as buildable also appears in its UNSUPPORTED list.")]
+    public void TheDigest_ShouldNotListABuildableTypeAsUnsupported()
+    {
+        // Arrange
+        string text = Collapse(ReadDigest(ProcessGuideSet.FindRepositoryRoot()));
+        string buildable = Regex.Match(text, @"Buildable `type`s:(?<list>.+?)\.\s").Groups["list"].Value;
+        string unsupported = Regex.Match(text, @"UNSUPPORTED through `create-business-process`:(?<list>.+?)\.\s").Groups["list"].Value;
+
+        // Act
+        string[] both = [.. Regex.Matches(buildable, @"`(?<type>[A-Za-z]+)`")
+            .Select(match => match.Groups["type"].Value)
+            .Where(type => unsupported.Contains($"`{type}`", StringComparison.Ordinal))
+            .Distinct()];
+
+        // Assert
+        buildable.Should().NotBeEmpty(because: "anti-vacuity: the card lists what builds today");
+        unsupported.Should().NotBeEmpty(because: "anti-vacuity: the card lists what does not build");
+        both.Should().BeEmpty(
+            because: "the RestatedClauses rows pin only the list headings, so a type moved between the lists on "
+                + "one side would pass them; an agent that reads the card alone then refuses or misbuilds it. "
+                + "Found in both: " + string.Join(", ", both));
     }
 
     private static string ReadDigest(string repositoryRoot) =>

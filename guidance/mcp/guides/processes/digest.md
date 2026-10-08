@@ -36,9 +36,10 @@ page. Read the articles of the elements you actually use, and only those.
 - Buildable `type`s: `startEvent`, `signalStart`, `endEvent` (builds a Terminate end), `userTask`
   with a `userTaskName` from `list-user-tasks` (aliases `readData`, `changeData`, `addData`,
   `deleteData`, `performTask`, `changeAccessRights`), `sendEmail`, `approval`, `openEditPage`,
-  `preconfiguredPage`, `exclusiveGateway`, `parallelGateway`, `formulaTask`, `subProcess`.
+  `preconfiguredPage`, `exclusiveGateway`, `parallelGateway`, `formulaTask`, `subProcess`, and
+  `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C#, see `process-script-task`.
   FOUR user tasks have their own dedicated build type and must NOT be built as a generic
-  `userTask`: `sendEmail`, `openEditPage`, `approval`, `preconfiguredPage` (named for their elements).
+  `userTask`: `sendEmail`, `openEditPage`, `approval`, `preconfiguredPage`.
 - Flows are declared on the flow: `flows[].kind` (`sequence` | `conditional` | `default`),
   `flows[].condition` on a conditional one, and `flows[].label`. A conditional flow leaving an
   activity that enumerates results - Perform task, User dialog, Open edit page, Auto-generated page,
@@ -56,12 +57,12 @@ page. Read the articles of the elements you actually use, and only those.
   and Change access rights (show the object, the record filter and every grantee with its
   operations and level, and get an explicit yes - `process-access-rights`).
 - UNSUPPORTED through `create-business-process`: the inclusive and event-based gateways, timer and
-  message starts, intermediate events, `scriptTask`, `webService`, and reading one COLUMN out of a
+  message starts, intermediate events, `webService`, and reading one COLUMN out of a
   read collection. They are read-only; do not plan around them.
 - The "Connected to" links of an Activity a task creates are NOT in a build descriptor - add the
   element, then `setConnections` (`process-activity-connections`).
-- Read `process-element-catalog` itself for any element not listed here, for `useBackgroundMode`, or
-  to read a process that contains read-only constructs.
+- An element not listed here, `useBackgroundMode`: `process-element-catalog`; reading a process
+  with read-only constructs: `process-element-catalog-details`.
 
 == Names and codes, N1-N10 (owner: `process-naming`) ==
 - N1 process `caption`: sentence case. N2 process `name`: `<prefix><Object>_<Action>` in PascalCase
@@ -112,12 +113,12 @@ page. Read the articles of the elements you actually use, and only those.
 - Set what was asked for, and nothing else: an OPTIONAL field the request did not mention stays out of
   the descriptor. When the server names a missing value that is a BUSINESS decision (who approves,
   who performs, whom to notify), ask.
-- Do NOT run `compile-creatio` to make a process runnable, and do NOT read a raw system record
+- Do NOT run `compile-creatio` to make a process runnable unless its save WARNED it cannot run until
+  compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read` / `execute-esq`) to decide readiness - read status back with `describe-business-process`.
-  WITHIN A PROCESS only a `scriptTask` and a `userTask` carrying an after-activity-save script - C#
-  you authored - pull a compile in; a CUSTOM user-task schema carries its own compile obligation
-  (`process-element-catalog`). On a file-design-mode stand a built process is not runtime-active until
-  it is loaded FS->DB and published, so a signal will not fire yet.
+  A CUSTOM user-task schema carries its own compile obligation (`process-element-catalog`). On a
+  file-design-mode stand a built process is not runtime-active until it is loaded FS->DB and
+  published, so a signal will not fire yet.
 
 == Descriptor skeleton (owner: `process-modeling`) ==
 { "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "<package-name from get-target-package>",

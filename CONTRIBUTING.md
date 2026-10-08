@@ -182,7 +182,7 @@ A restatement drifts unless something ties it to its owner, so three rules apply
 - A pull request that changes a rule the card restates changes the card in the SAME pull request.
   `ProcessDigestTests.RestatedClauses` pins one verbatim clause per restated rule in both files; a
   reword on one side fails the suite. Add a row when you restate a new rule.
-- The card stays a card. `ProcessDigestTests` holds it to a 12 000-character budget, far under the
+- The card stays a card. `ProcessDigestTests` holds it to a 16 500-character budget (JSON-escaped, as the bundle ships it), far under the
   article budget: detail belongs to the owner, and the card says when to open it.
 - The card names only those four owners (plus `process-versions` for the edit block). Restating a
   fifth article is a decision, not an edit.

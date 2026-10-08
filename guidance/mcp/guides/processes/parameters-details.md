@@ -10,7 +10,7 @@ date/time/lookup default-value rule; read that first.
 
 == Sub-process element parameters at run time ==
 - A SUB-PROCESS element's parameters are the CALLED process's contract, copied onto the element and
-  re-derived whenever the platform builds a schema instance. `process-element-catalog` owns the BUILD
+  re-derived whenever the platform builds a schema instance. `process-sub-process` owns the BUILD
   contract - how the callee is named, which directions keep a value, what `resync` refuses. This guide
   owns what the call does at RUN TIME and how little of it you can observe:
   * THE RULE: after any change to a called process's parameters, re-synchronize every caller with

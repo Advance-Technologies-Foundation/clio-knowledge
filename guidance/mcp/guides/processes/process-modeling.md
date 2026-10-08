@@ -1,10 +1,10 @@
 clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 == Which process article to read ==
-This article is the ENTRY POINT. It owns the build lifecycle: what the tools are, what the
+A build starts at `process-digest`; this article owns the build lifecycle: what the tools are, what the
 descriptor looks like, the recipe, and the safety rules for editing an existing process. What is
-buildable today and the element catalog live in `process-element-catalog`, because both grow with
-every element the platform gains. Everything else has its own article and its own authoritative
+buildable today lives in `process-element-catalog` and the element catalog in
+`process-element-catalog-details`, because both grow with every element the platform gains. Everything else has its own article and its own authoritative
 owner -- read the one your task needs instead of guessing:
   * `process-digest` - the BUILD CARD: owns nothing; restates, naming each owner, what an ordinary build
     needs from this article and three others.
