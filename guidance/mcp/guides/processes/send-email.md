@@ -11,6 +11,14 @@ these rules, why a no-mode element runs as a template, the designer-removal exce
 result contradicts a rule here or a user disputes one.
 
 == Element: Send email (sendEmail -> EmailTemplateUserTask) ==
+- A `sendEmail` element left in template mode with NO template (no block gives exactly that), or sending
+  automatically with NO recipient, is NOT refused - finishing it with `setElement` in the same or a later
+  request is supported - but the response carries a Warning naming it (CrtProcessBuilder 1.6.6.90 and later -
+  an older package stays silent, so silence proves nothing), judged at the END of the request. Treat that
+  Warning as a to-do: until it is fixed the element fails on its first run (manual mode too) or sends nothing.
+  A custom message with an empty body, and a manual email with no recipient, are not reported: neither fails.
+  Settle the missing part WITH the user rather than inventing it, and while it stays unfinished say plainly
+  that the element is incomplete.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask), in either of the designer's two
   message modes — a CUSTOM MESSAGE (an HTML `body` you write) or a TEMPLATE MESSAGE (an existing email
   `template` the platform renders; owned by `process-send-email-template`). The `email` block configures everything:

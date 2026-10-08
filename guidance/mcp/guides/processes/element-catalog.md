@@ -124,7 +124,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
   `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
   and the methods.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
-  in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
+  in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
+  page (REFUSED), timer/message start,
   intermediate events,
     `webService` (also marked READ-ONLY in the
     catalog in `process-element-catalog-details`, where silence used to read as "buildable"),
