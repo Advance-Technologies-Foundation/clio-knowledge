@@ -21,10 +21,11 @@ public sealed class ObjectRightsGuidanceTests
     // How far from a retired name a set-object-rights mention still makes the text read as that tool's argument.
     private const int SetObjectRightsContext = 300;
 
-    // The boundary line. Until the clio release it carries the placeholder the publish gate in
-    // validate-pull-request.yml refuses; the released version replaces it.
+    // The boundary line. It names the first released clio that has both tools ("or later"), or, when the
+    // article is published before that release, the last released clio that has neither ("newer than");
+    // while drafting it may carry the placeholder that the publish gate in validate-pull-request.yml refuses.
     private static readonly Regex VersionBoundary = new(
-        @"Version boundary: get-object-rights and set-object-rights require clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){2,3}) or later\.",
+        @"Version boundary: get-object-rights and set-object-rights require (?:clio (?:<[A-Z][A-Z0-9-]*TBD>|\d+(?:\.\d+){2,3}) or later\.|a clio release newer than \d+(?:\.\d+){2,3}[;.])",
         RegexOptions.Compiled);
 
     // A set-object-rights call written out with include-connected among its arguments, in MCP form (name=value)
@@ -125,6 +126,10 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldRequireNamingTheObjectBySchemaNameAndTitle")]
     [TestCase("you MUST NOT decide which object is meant: ask before reading or writing",
         TestName = "ObjectRights_ShouldForbidPickingAnObjectByAWordThatIsNotItsTitle")]
+    [TestCase("Both tools show each object by its title next to its code",
+        TestName = "ObjectRights_ShouldStateThatTheToolsShowTheTitleNextToTheCode")]
+    [TestCase("set-object-rights refuses a title, naming the code it belongs to",
+        TestName = "ObjectRights_ShouldStateThatAWriteRefusesATitle")]
     [TestCase("You MUST ask the developer in chat before every write",
         TestName = "ObjectRights_ShouldRequireAskingInChatBeforeEveryWrite")]
     [TestCase("an auto-approve mode skips that approval",

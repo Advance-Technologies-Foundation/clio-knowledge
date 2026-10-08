@@ -30,25 +30,34 @@ guards — it says whose rule it is and names that guide for the rest.
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
-  - reuse JavaScript helpers across Freedom UI web pages (client-unit schemas and AMD dependencies) -> name=shared-client-logic
+  - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables — for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
-  filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-modeling
-  - process-modeling is the ENTRY and owns the build lifecycle (tools, descriptor, the recipe, the
-    modify-safety rules). After it, read the ONE matching sub-guide:
-  - which elements exist, which of them `create-business-process` builds today, and the element catalog
-    (data-id -> label -> purpose) -> name=process-element-catalog
-  - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> ALSO
-    name=process-sub-process-when, BEFORE you plan the graph, every time:
-    it decides how many processes the request becomes. One by default; the exceptions — the same work
-    for each item of a set, a fragment repeated in the plan, two or more long human stages — are hard
-    to recognise without its rules, so do not skip it because none seems to apply
+  filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
+  ALONE and FIRST: request it in a call of its own and read it before you request any other process
+  article, then the article of each element you use (the rows below)
+  - process-digest is the BUILD CARD: it restates, naming each owner, what every build and edit needs
+    from `process-modeling` (the build-lifecycle owner: tools, descriptor, the recipe, the modify-safety
+    rules), `process-element-catalog`, `process-naming` and `process-sub-process-when`. For an ordinary
+    build do NOT open those four - the card is what you read instead; open one only when the card sends
+    you there. After the card, read the ONE matching sub-guide per element:
+  - which elements exist beyond the card's buildable list, and how a data-id maps to a build type ->
+    name=process-element-catalog
+    - the element catalog (data-id -> label -> purpose), to read an existing process or reason about an
+      element the card does not list -> name=process-element-catalog-details
+  - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> check the D1,
+    D2 and D4 triggers in process-digest BEFORE you plan the graph, every time, and read
+    name=process-sub-process-when itself when one fires: it decides how many processes the request
+    becomes. One by default; the exceptions — the same work for each item of a set, a fragment repeated
+    in the plan, two or more long human stages — are hard to recognise without their rules, so do not
+    skip the check because none seems to apply
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
-  - name the process, its elements, or its parameters (the N1-N10 rules) -> name=process-naming
+  - name the process, its elements, or its parameters (the N1-N10 rules, restated in process-digest)
+    -> name=process-naming when the card sends you there
   - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
   - READ records from inside a process (one record, a collection, a count or an aggregate) ->
@@ -61,8 +70,12 @@ guards — it says whose rule it is and names that guide for the rest.
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
+  - verify a stored formula or condition, match a formula refusal message to its fix, or a formula refusal
+    about the CrtProcessBuilder version -> name=process-formulas-details (after name=process-formulas)
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
+    - a parallel-split NOTICE or a package-version refusal on a branch build, or the evidence behind a branch
+      rule (label figures, version floors, corpus condition shapes) -> name=process-branch-conditions-details
   - branch on WHICH RESULT an activity was completed with - an approval's verdict, a perform task's
     result, a page's completing button - a SELECTION and not a formula -> name=process-activity-result-branches
   - the Perform task element — a human step, what it produces, its parameter table ->
@@ -77,10 +90,16 @@ guards — it says whose rule it is and names that guide for the rest.
     name=process-task-category before following it
   - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
+    - a step that will not complete although its condition is met, the evidence behind its defaults, or
+      feeding its `describe` read-back into a write -> name=process-open-edit-page-details
   - grant or revoke RECORD permissions from a process (the Change access rights element) ->
-    name=process-access-rights
+    name=process-access-rights; add name=process-access-rights-details only when the environment's
+    CrtProcessBuilder (or the one your clio bundles) may predate 1.6.0.2, or to decide what a MISSING
+    read-back warning proves
   - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
     name=process-send-email
+    - the evidence behind a Send email rule, or a result that contradicts one (why a no-mode element runs as a
+      template, the designer-removal exceptions) -> name=process-send-email-details
   - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
     against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
@@ -92,11 +111,14 @@ guards — it says whose rule it is and names that guide for the rest.
     -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
     and which execution mode it takes)
   - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
-    what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters
+    what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters-details (after
+    name=process-parameters)
   - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
     sources are read facts, never invented -> name=process-preconfigured-page
-  - the "Connected to" links of the activity a task creates, and the R1-R20 connection rules ->
-    name=process-activity-connections
+  - the "Connected to" links of the activity a task creates -> name=process-activity-connections
+  - plan or validate a graph against the R1-R20 connection rules, a validate-process-graph finding names an
+    R rule, a described connection is refused on re-apply, or the designer does not show a connection you
+    registered -> name=process-activity-connections-details
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
   - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
@@ -113,6 +135,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
+  - the user asks for a new, separate package in the environment -> name=package-dependencies (create-package)
   - entity business rules (create/change/remove) / lookup filtering / dependent fields -> name=business-rules; static filters -> name=business-rule-filters
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
