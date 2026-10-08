@@ -18,6 +18,9 @@ public sealed class SendEmailGuidanceTests
     private const string Article = "guidance/mcp/guides/processes/send-email.md";
     private const string TemplateArticle = "guidance/mcp/guides/processes/send-email-template.md";
 
+    /// <summary>ENG-100156 moved the evidence behind the Send email rules into this article.</summary>
+    private const string DetailsArticle = "guidance/mcp/guides/processes/send-email-details.md";
+
     [Test]
     [Description("Auto mode teaches all four mandatory fields and the missing-body trap that build and describe both miss.")]
     public void Guide_ShouldKeepAutoModeChecklistAndMissingBodyTrap()
@@ -183,17 +186,21 @@ public sealed class SendEmailGuidanceTests
 	public void Guide_ShouldExplainTheMissingMessageTrapFromTheModeDispatch()
 	{
 		string guide = ReadGuide();
+		// The mechanism moved to the details article with ENG-100156; the checklist that names the trap stayed.
+		string details = ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), DetailsArticle);
 
-		guide.Should().Contain("RUNS in TEMPLATE mode with no template",
+		details.Should().Contain("RUNS in TEMPLATE mode with no template",
 			because: "an unset BodyTemplateType reads as 0, which is the template provider - the mechanism behind the run-time text (CrtProcessDesigner 7.8.0 sources, 2026-09-09)");
 		guide.Should().Contain("`messageSource` and `template` are OMITTED from\n  the read-back (clio's describe has always dropped null fields",
 			because: "clio's describe serializer uses WhenWritingNull, so an agent never sees messageSource:null; the check must name the absence");
 		ShouldNotClaim(guide, @"messageSource\s*:\s*null", "process-send-email",
 			because: "describing a null key the agent will never see sends it looking for the wrong signal");
-		ShouldNotClaim(guide, @"subject-only element points at a body template that does not exist", "process-send-email",
-			because: "that explanation attributed the template provider's text to a custom-message element and was wrong");
-		ShouldNotClaim(guide, @"which cannot produce it", "process-send-email",
-			because: "only the no-mode run was observed; the custom-provider corollary is stated as unsupported by the sources, not as a verified fact");
+		foreach (string text in new[] { guide, details }) {
+			ShouldNotClaim(text, @"subject-only element points at a body template that does not exist", "process-send-email",
+				because: "that explanation attributed the template provider's text to a custom-message element and was wrong");
+			ShouldNotClaim(text, @"which cannot produce it", "process-send-email",
+				because: "only the no-mode run was observed; the custom-provider corollary is stated as unsupported by the sources, not as a verified fact");
+		}
 	}
 
 }

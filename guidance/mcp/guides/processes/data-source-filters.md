@@ -1,6 +1,7 @@
 clio MCP process-data-source-filters guide — the `filter` that decides WHICH records an element acts on
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the data source `filter`: its shape, the column dot-path, the
 comparison set, every right-hand value source, the COMPLETE relative-date macro vocabulary, the `datePart`
 left-hand modifier, the signal-start restriction, and how a filter is set, cleared and read back.
