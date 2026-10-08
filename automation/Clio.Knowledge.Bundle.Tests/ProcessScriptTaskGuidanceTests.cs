@@ -162,7 +162,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile keeps running, so poll compile-status rather than compiling again, and read last-compilation-log - whose verdict carries no time - when compile-status has no record. Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. The rule lives in core-rules; process-script-task only points to it.")]
+    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile keeps running, so poll compile-status rather than compiling again, and, when compile-status has no record, read the timed compilation history its not-found answer lists - last-compilation-log, whose verdict carries no time, is the fallback when that field is absent (unreadable history or an older clio). Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. The rule lives in core-rules; process-script-task only points to it.")]
     public void Guides_ShouldSayWhatToDoAfterAClientSideCompileTimeout()
     {
         // Arrange
@@ -180,7 +180,19 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "a second compile-creatio is a second runtime reload for every user, or a refusal, never a status");
         coreRules.Should().Contain("`not-found` means this MCP server session holds no record, not that nothing ran",
             because: "a not-found that reads as 'nothing ran' is what sent agents to recompile or guess");
-        coreRules.Should().Contain("latest FINISHED compile; it carries no time",
+        coreRules.Should().Contain("lists the environment's newest compilation-history rows",
+            because: "compile-status's not-found answer carries the environment's own history, which survives a client restarting the MCP server");
+        coreRules.Should().Contain("rows written since you called compile-creatio can be your compile's",
+            because: "the finish time is what ties a history row to the agent's own compile, and other compiles write rows too");
+        coreRules.Should().Contain("finished only when its newest row is more than five minutes old",
+            because: "a compile writes a row per project as each ends, so its first row is not its end");
+        coreRules.Should().Contain("ask the user before compiling again",
+            because: "an agent whose compile wrote no row needs a way out, and every compile needs the user's confirmation");
+        coreRules.Should().NotContain("you may start it again",
+            because: "the guidance must not license a compile the user did not confirm");
+        coreRules.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log",
+            because: "last-compilation-log's undated verdict is the fallback for an unreadable history or an older clio, not the first answer");
+        coreRules.Should().Contain("latest FINISHED compile and carries no time",
             because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
         coreRules.Should().Contain("do not rely on it, or restart on it, before then",
             because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile; after the compile has finished, a restart the workflow needs is still owed, so the rule is about timing, not a ban");
