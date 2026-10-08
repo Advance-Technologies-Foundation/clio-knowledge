@@ -196,7 +196,7 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the still-running case refers to the agent's own call, not to the five-minute rule just before it");
         coreRules.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log (through clio-run) - unless",
             because: "last-compilation-log's undated verdict is the fallback for an unreadable history or an older clio, not the first answer");
-        coreRules.Should().Contain("latest FINISHED compile and carries no time",
+        coreRules.Should().Contain("Note that last-compilation-log reads the latest FINISHED compile and carries no time",
             because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
         coreRules.Should().Contain("do not rely on it, or restart on it, before then",
             because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile; after the compile has finished, a restart the workflow needs is still owed, so the rule is about timing, not a ban");
