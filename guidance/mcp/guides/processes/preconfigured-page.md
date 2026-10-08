@@ -11,9 +11,9 @@ section to scroll to.
 - `preconfiguredPage` — Pre-configured page: shows a Freedom UI page to a user and resumes when the user
   presses a completing button. It is the only page element that can hand a user a purpose-built page.
   Build it ONLY as `type:"preconfiguredPage"` with its `preconfiguredPage` block. A generic `userTask` naming
-  `PreconfiguredPageUserTask` cannot carry the block: it is REFUSED from CrtProcessBuilder 1.6.6.87, and an
-  older package builds a page-less element that fails at run time. An element that already has no page is
-  repaired with `setElement` and the same block.
+  `PreconfiguredPageUserTask` cannot carry the block, so it could only build a page-less element that fails
+  at run time, and it is REFUSED. An existing element with no page is repaired with `setElement` and the same
+  block.
   CRITICAL: the page's buttons and data sources are FACTS you must read first, not values you may invent —
   a page inherits its buttons from its template chain, so they are only knowable from the merged page and
   the server cannot see them. Call `get-process-page-facts --schema-name <page>` and pass its
