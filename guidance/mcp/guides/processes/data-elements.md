@@ -1,6 +1,7 @@
 clio MCP process-data-elements guide — record triggers and Modify data
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of starting a process from a record event and of the Modify data
 element; Read data has its own article, `process-read-data`; Add data has `process-add-data`; Delete data
 has `process-delete-data`. The `filter` these elements
@@ -44,7 +45,7 @@ filter; see `process-access-rights`.
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
   `removeElement` is DESTRUCTIVE and no pre-save validation restores what it breaks: it cascades to every flow
   touching the element without re-joining the gap. The rules that make a removal safe — describe first,
-  validate the graph AS IT WILL BE, confirm with the user — are in `process-modeling`. Read them before
+  validate the graph AS IT WILL BE, confirm with the user — are restated in `process-digest` and owned by `process-modeling`. Read them before
   removing anything, not after.
 - To change an EXISTING signal's trigger or tracked columns IN PLACE (without re-adding it), use the
   `setSignal` op — it preserves the element and its flows:
