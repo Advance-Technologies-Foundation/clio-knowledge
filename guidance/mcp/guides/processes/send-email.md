@@ -1,6 +1,7 @@
 clio MCP process-send-email guide — the Send email element (EmailTemplateUserTask)
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Send email element: the `email` block, its send modes, sender
 and recipients, the auto-mode checklist, and the CUSTOM message (the HTML `body` and its process macros). The
 TEMPLATE message — `template`, `templateEntity`, their refusals, the subject override, mode switching and the

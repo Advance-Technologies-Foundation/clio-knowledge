@@ -1,6 +1,7 @@
 clio MCP process-sub-process guide — the Sub-process element (callActivity / subProcess)
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Sub-process element (`callActivity`, built via
 `type:"subProcess"`): the `subProcess` block, naming the callee, how values cross through the element's
 own mirrored parameters, `resync`, MULTI-INSTANCE (running the callee once per item of a collection),
@@ -12,8 +13,8 @@ WHETHER a request calls for this element at all — the one-process default, per
 fragment, long phases — and which execution mode a per-item loop needs is owned by
 `process-sub-process-when`: read it before you plan one.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
-leaf rather than through `process-modeling`.
+owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
+name anything, and `process-naming` itself only for a case the card does not cover.
 
 == Element: Sub-process (callActivity -> subProcess) ==
 - `callActivity` Sub-process — call ANOTHER process (the BPMN call activity) and run it once, passing

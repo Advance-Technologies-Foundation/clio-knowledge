@@ -1,6 +1,7 @@
 # Branching on an activity result
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 Split out of `process-branch-conditions`, which had no budget headroom left and owns the FORMULA
 branch - flow kinds, precedence, the gateway rules and the hazard of clearing a condition. This
 article owns the OTHER predicate dialect and is the authority on when a formula is the wrong one.

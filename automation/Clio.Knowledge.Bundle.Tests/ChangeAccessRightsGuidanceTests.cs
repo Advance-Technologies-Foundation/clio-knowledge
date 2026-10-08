@@ -33,7 +33,8 @@ public sealed class ChangeAccessRightsGuidanceTests
 
     /// <summary>ENG-100156 split the version boundaries and read-back specifics out of the owning article.</summary>
     private const string DetailsArticle = "guidance/mcp/guides/processes/access-rights-details.md";
-    private const string EntryArticle = "guidance/mcp/guides/processes/element-catalog.md";
+    /// <summary>ENG-100156 moved the element catalog, and with it this element's entry, out of process-element-catalog.</summary>
+    private const string EntryArticle = "guidance/mcp/guides/processes/element-catalog-details.md";
     private const string FilterArticle = "guidance/mcp/guides/processes/data-source-filters.md";
 
     [Test]

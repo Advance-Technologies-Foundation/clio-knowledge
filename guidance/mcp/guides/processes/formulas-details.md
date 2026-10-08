@@ -1,6 +1,6 @@
 clio MCP process-formulas-details guide — the designer's rendering, read-back, the refusal table, older packages
 
-A details article of the process guide set, reached through `process-formulas`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-formulas`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of how the designer renders a stored formula and how a stored
 formula or condition reads back in `describe-business-process`, the verbatim table of formula refusals and
 their fixes, the per-request limit, and what an older CrtProcessBuilder package did with a formula. Split

@@ -1,6 +1,6 @@
 clio MCP process-activity-connections-details guide — the R1-R20 connection rules and the connection read-back
 
-A details article of the process guide set, reached through `process-activity-connections`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-activity-connections`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of the R1-R20 connection rules (the ids `validate-process-graph`
 reports), the four stored connection shapes that read back from `describe-business-process` but refuse
 on re-apply together with what else a `connections[]` entry carries, and the mechanism that lets a

@@ -33,6 +33,7 @@ public sealed class GuidanceMigrationTests
         "process-open-edit-page-details",
         "process-access-rights-details",
         "process-activity-connections-details",
+        "process-element-catalog-details",
         "process-formulas-details",
         "process-parameters-details",
         "portal-service-routing",

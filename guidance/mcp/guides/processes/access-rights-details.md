@@ -1,6 +1,6 @@
 clio MCP process-access-rights-details guide — the Change access rights read-back check, its version boundaries, describe's full field shape and the provenance of restrict
 
-A details article of the process guide set, reached through `process-access-rights`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-access-rights`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of the two VERSION BOUNDARIES of the Change access rights element
 (which CrtProcessBuilder lands the `accessRights` block, and which clio tells you when it does not), of
 when clio's read-back check runs on a `clearFilter` batch, of the field-by-field shape

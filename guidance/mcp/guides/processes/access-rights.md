@@ -1,6 +1,7 @@
 clio MCP process-access-rights guide — the Change access rights element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 This article is the authoritative owner of the Creatio **Change access rights** element
 (`changeAccessRights` / `ChangeAdminRightsUserTask`): its `accessRights` block, the permission entries,

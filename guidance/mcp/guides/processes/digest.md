@@ -1,16 +1,14 @@
 clio MCP process-digest guide - the build card: what every process build needs, and where an edit starts, in one read
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. This card is where a build starts.
 For an ORDINARY BUILD, do NOT open `process-modeling`, `process-element-catalog`, `process-naming` or
 `process-sub-process-when` - including any you already planned to read: this card is what you read
-instead. It OWNS NO RULE; it restates, in short form, the rules every build of a NEW process needs from
-those four - `process-modeling` (tools, descriptor, recipe, modify safety), `process-element-catalog`
-(what builds today), `process-naming` (N1-N10) and `process-sub-process-when` (how many processes) -
-and each block names its owner. Open an owner only when a line below sends you there, or when your case
-is not the ordinary one a line describes. The owner always wins over this card. Editing an existing process starts at `process-versions` (last block).
-Each ELEMENT you put in the process has its own article; the routing map's Business processes rows and
-the index in `process-modeling` name it - a record signal and Modify data: `process-data-elements`,
-gateways and flow conditions: `process-branch-conditions`. No article owns User dialog or Auto-generated
+instead. It OWNS NO RULE; it restates what every build needs from those four, and each block names its
+owner. Open an owner only when a line below sends you there, or when your case is not the ordinary one.
+The owner always wins over this card. Editing an existing process starts at `process-versions` (last
+block). Each ELEMENT you use has its own article, named by the routing map's Business processes rows -
+a record signal and Modify data: `process-data-elements`, gateways and flow conditions:
+`process-branch-conditions`. No article owns User dialog or Auto-generated
 page. Read the articles of the elements you actually use, and only those.
 
 == How many processes (owner: `process-sub-process-when`) ==
@@ -49,6 +47,9 @@ page. Read the articles of the elements you actually use, and only those.
   is owned by `process-open-edit-page`: read its ROUTING section before choosing.
 - `formulaTask` and `subProcess` need a recent CrtProcessBuilder on the environment; an older one
   refuses the type outright and names the types it does build.
+- `formulaTask` carries a `formula` block: `body` plus exactly ONE target, `resultProcessParameter` or
+  `elementName` + `elementParameter`; both are required on create. `body` is the flow-condition dialect
+  (`process-formulas`) and may name a process parameter, `[#Amount#]`.
 - Two buildable elements are DESTRUCTIVE and owe the user a confirmation BEFORE you build them:
   `deleteData` (count the records its filter matches, name the object as the designer names it, and
   get an explicit yes - `process-delete-data` carries the message, read it before planning the step)

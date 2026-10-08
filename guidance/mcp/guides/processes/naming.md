@@ -1,6 +1,7 @@
 clio MCP process-naming guide — name a business process, its elements and its parameters
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, parameter codes, and sequence-flow labels.
 
 == Naming and codes (N1-N10) ==

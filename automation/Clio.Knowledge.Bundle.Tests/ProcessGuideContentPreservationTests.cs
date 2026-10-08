@@ -171,7 +171,7 @@ public sealed class ProcessGuideContentPreservationTests
             "Activity.AllowedResult",
             "the trap: the column a reader reaches for to verify the degradation derives from conditional "
             + "flows, not from the category, so it confirms the wrong thing either way"),
-        ("process-element-catalog", "Use the catalog below",
+        ("process-element-catalog", "Use the catalog in `process-element-catalog-details`",
             "NOT yet buildable",
             "the article exists to say what cannot be built; silence here used to read as buildable, which "
             + "is the defect its own text records"),
@@ -182,19 +182,19 @@ public sealed class ProcessGuideContentPreservationTests
         // CrtProcessBuilder 1.6.3.16, so the marker would now be a lie. What the entry must still carry is
         // the floor - without it an agent on an older environment reads "buildable" and gets a refusal
         // naming types it did not ask about.
-        ("process-element-catalog", "`formulaTask`       Formula", "1.6.3.16",
+        ("process-element-catalog-details", "`formulaTask`       Formula", "1.6.3.16",
             "the version floor on the one entry in this catalog that CHANGED from read-only to buildable"),
         // scriptTask lost its READ-ONLY pin in ENG-92711 the same way: buildable from CrtProcessBuilder
         // 1.6.6.30 through type:"scriptTask". The floor is what the entry must still carry.
-        ("process-element-catalog", "`scriptTask`        Script task", "1.6.6.30",
+        ("process-element-catalog-details", "`scriptTask`        Script task", "1.6.6.30",
             "the version floor on the entry that changed from read-only to buildable"),
-        ("process-element-catalog", "`webService`        Call web service", "READ-ONLY here",
+        ("process-element-catalog-details", "`webService`        Call web service", "READ-ONLY here",
             "the per-entry marker on the entry with no other signal that it cannot be built"),
         // callActivity lost its READ-ONLY pin in ENG-92707, the same way formulaTask lost its own in
         // ENG-92712: the element became buildable via type:"subProcess". What the entry must still carry
         // is the version floor — without it an agent on an older environment reads "buildable" and gets a
         // refusal naming types it did not ask about.
-        ("process-element-catalog", "`callActivity`      Sub-process", "1.6.3.26",
+        ("process-element-catalog-details", "`callActivity`      Sub-process", "1.6.3.26",
             "the version floor on the entry that changed from read-only to buildable"),
         ("process-element-catalog", "Add the element", "NOT in a build descriptor",
             "the OTHER cannot-build fact, and the one a short form of this list dropped: the Connected-to "

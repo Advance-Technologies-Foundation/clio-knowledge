@@ -1,6 +1,7 @@
 clio MCP process-formulas guide - expression sources and the formula vocabulary a condition also uses
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the `expression` mapping source, the formula vocabulary the
 platform's interpreter accepts - which a flow condition uses too - how a parameter is referenced inside a
 formula, and what the server validates and refuses. The BRANCH itself, including precedence and the

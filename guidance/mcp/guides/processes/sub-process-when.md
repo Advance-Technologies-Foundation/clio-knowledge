@@ -1,6 +1,7 @@
 clio MCP process-sub-process-when guide — when a request calls for a Sub-process, and when it does not
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the DECISION to put logic into a separate, called process:
 the one-process default, the three triggers D1, D2 and D4, what an existing process allows, how to
 talk to the user about it, the never-list, and where a helper process lives. HOW to build the element

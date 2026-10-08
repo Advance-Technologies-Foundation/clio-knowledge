@@ -1,6 +1,7 @@
 clio MCP process-preconfigured-page guide — the Pre-configured page element (PreconfiguredPageUserTask)
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Pre-configured page element: the page facts you must read
 before building one, the completing buttons, the data sources and the record they carry, the performer and
 its showPage rule, and what a later edit re-synchronizes. A rule that lives in another article is cited by

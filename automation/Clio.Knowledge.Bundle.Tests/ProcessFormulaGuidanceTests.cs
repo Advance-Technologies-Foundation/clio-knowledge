@@ -43,7 +43,8 @@ public sealed class ProcessFormulaGuidanceTests
     /// among them, so the false sentence is caught wherever in the set it is written; this constant is
     /// only for the positive half, which has one right home.
     /// </summary>
-    private const string ElementCatalogGuide = "guidance/mcp/guides/processes/element-catalog.md";
+    // ENG-100156: the element catalog entries live in the details article.
+    private const string ElementCatalogGuide = "guidance/mcp/guides/processes/element-catalog-details.md";
 
     /// <summary>
     /// Clauses in the formula-vocabulary article. Each is pinned with the reason it protects, so a

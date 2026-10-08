@@ -10,8 +10,8 @@ owner -- read the one your task needs instead of guessing:
     needs from this article and three others.
   * `process-custom-elements` - author custom user-task elements with Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
-  * `process-element-catalog` - what `create-business-process` can build TODAY, what it cannot, and the
-    element catalog (data-id -> label -> purpose).
+  * `process-element-catalog` - what `create-business-process` can build TODAY and what it cannot; the
+    element catalog (data-id -> label -> purpose) is `process-element-catalog-details`.
   * `process-diagram-layout` - how the diagram is drawn, and the re-draw refusal.
   * `process-naming` - N1-N10: the process caption and code, element captions and codes, parameter
     codes. Read it (or its restatement in `process-digest`) BEFORE you name anything.

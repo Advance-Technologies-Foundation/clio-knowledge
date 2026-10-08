@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.16.2",
+  "libraryVersion": "1.16.3",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -135,6 +135,7 @@
       "process-sub-process-when",
       "process-activity-connections",
       "process-activity-connections-details",
+      "process-element-catalog-details",
       "process-version-writes",
       "process-versions",
       "process-script-task",
@@ -321,6 +322,7 @@
       "docs://knowledge/com.creatio.clio/process-sub-process-when",
       "docs://knowledge/com.creatio.clio/process-activity-connections",
       "docs://knowledge/com.creatio.clio/process-activity-connections-details",
+      "docs://knowledge/com.creatio.clio/process-element-catalog-details",
       "docs://knowledge/com.creatio.clio/process-version-writes",
       "docs://knowledge/com.creatio.clio/process-versions",
       "docs://knowledge/com.creatio.clio/process-script-task",
@@ -1399,7 +1401,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Entry point and build-lifecycle owner for Creatio business processes: the tools, the create-business-process descriptor, the recipe and the modify safety rules. Read process-element-catalog before planning a graph. Routes onward: process-digest, process-element-catalog, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole.",
+      "description": "Entry point and build-lifecycle owner for Creatio business processes: the tools, the create-business-process descriptor, the recipe and the modify safety rules. A build starts at process-digest; routes onward: process-element-catalog, process-element-catalog-details, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1424,7 +1426,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: Simple/Signal start, end, user tasks, the fully configurable Send email element (custom and template modes), sequence flows, process parameters and mappings, useBackgroundMode, which elements take a readData/changeData/addData/deleteData block, all four Read data modes (first-record, collection, count, aggregation), all three FLOW KINDS with the flow (flows[].kind + flows[].condition) and each flow's LABEL, the exclusive/parallel gateway ELEMENTS, the Formula (formulaTask), Sub-process (subProcess) and Script task (scriptTask) elements -- while inclusive/event-based gateways, timer/message and intermediate events and webService remain read-only. A read collection IS consumed now: a multi-instance Sub-process element iterates one (from 1.6.6.14). Also owns the data-id -> label -> purpose vocabulary, READ-ONLY markers, and the custom user-task compile rule.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: starts, end, user tasks, Send email (custom and template modes), flows with kind, condition and label, parameters and mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all four Read data modes, the exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess) and Script task (scriptTask) -- while inclusive/event-based gateways, timer/message and intermediate events and webService remain read-only. A read collection IS consumed: a multi-instance Sub-process iterates one (from 1.6.6.14). Also owns how a data-id maps to a build type and the custom user-task compile rule. The data-id -> label -> purpose catalog and its READ-ONLY markers are in process-element-catalog-details.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1433,6 +1435,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/element-catalog.md",
       "bundlePath": "resources/process-element-catalog.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-element-catalog-details",
+      "title": "Process element catalog: every element",
+      "description": "Owns the process element catalog: every element as the data-id validate-process-graph speaks and describe-business-process reports, its designer label and purpose, whether create-business-process builds it and with which block, and its READ-ONLY marker. Split out of process-element-catalog, which keeps what builds today, what does not, how a data-id maps to a build type, and the custom user-task compile rule.",
+      "topicId": "creatio.process-element-catalog-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-element-catalog-details",
+      "sourcePath": "guidance/mcp/guides/processes/element-catalog-details.md",
+      "bundlePath": "resources/process-element-catalog-details.md",
       "mediaType": "text/plain"
     },
     {

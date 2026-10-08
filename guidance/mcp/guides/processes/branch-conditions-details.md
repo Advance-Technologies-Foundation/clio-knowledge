@@ -1,6 +1,6 @@
 clio MCP process-branch-conditions-details guide — the evidence, provenance and rare cases behind the branch rules
 
-A details article of the process guide set, reached through `process-branch-conditions`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-branch-conditions`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of the evidence, version provenance and rarer cases behind the
 branch rules, in the order the core states them: why both arms of a branch are labelled (the wording
 rule itself is `process-naming` N10's), the CrtProcessBuilder floor that both condition paths need (the

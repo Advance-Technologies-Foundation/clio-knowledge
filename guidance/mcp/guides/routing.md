@@ -43,8 +43,10 @@ guards — it says whose rule it is and names that guide for the rest.
     rules), `process-element-catalog`, `process-naming` and `process-sub-process-when`. For an ordinary
     build do NOT open those four - the card is what you read instead; open one only when the card sends
     you there. After the card, read the ONE matching sub-guide per element:
-  - which elements exist beyond the card's buildable list, and the element catalog (data-id -> label ->
-    purpose) -> name=process-element-catalog
+  - which elements exist beyond the card's buildable list, and how a data-id maps to a build type ->
+    name=process-element-catalog
+    - the element catalog (data-id -> label -> purpose), to read an existing process or reason about an
+      element the card does not list -> name=process-element-catalog-details
   - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> check the D1,
     D2 and D4 triggers in process-digest BEFORE you plan the graph, every time, and read
     name=process-sub-process-when itself when one fires: it decides how many processes the request

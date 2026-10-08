@@ -1,11 +1,12 @@
 clio MCP process-activity-connections guide — bind an Activity's "Connected to" links
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the "Connected to" links of the Activity a task creates.
 Moved to `process-activity-connections-details`: the R1-R20 connection rules, the four stored shapes that read back but refuse on re-apply with the rest of what a described `connections[]` entry carries, and why a connection still writes when the registration step is skipped. Read it when you plan or validate a graph or a `validate-process-graph` finding names an R rule, when a connection you read back is refused on re-apply, or when the designer does not show a connection you registered.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
-leaf rather than through `process-modeling`.
+owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
+name anything, and `process-naming` itself only for a case the card does not cover.
 
 == Activity connections ("Connected to") ==
 - WHAT: which records the Activity a task creates is attached to — a contact, an account, and whatever else

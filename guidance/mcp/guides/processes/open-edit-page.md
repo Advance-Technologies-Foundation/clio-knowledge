@@ -1,6 +1,7 @@
 clio MCP process-open-edit-page guide — the Open edit page element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 == What this article owns ==
 This article owns the Open edit page element: its `openEditPage` block, every field in it, the rule for

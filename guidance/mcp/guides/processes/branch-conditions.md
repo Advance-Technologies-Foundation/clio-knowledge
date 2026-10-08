@@ -1,6 +1,7 @@
 # Conditional flows and branch conditions
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 Split out of `process-formulas` because that article had no budget headroom left: the two halves are
 read at different times - the vocabulary while authoring any formula, this while planning a BRANCH.
 The formula vocabulary, the reference syntax, what each refusal names and the length bound stay there
@@ -43,8 +44,8 @@ the measured figures and their population.
 
 Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
 `Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
-because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule in
-full. EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
+because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule
+(restated in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
 caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
 `describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
 human's label is there to be erased.
@@ -109,7 +110,8 @@ Deliberate, not tidiness: where two flows join the same pair, honouring the edit
 `removeFlow`.** Version-dependent, so do not rely on it as a backstop: the `removeFlow` refusal ships
 from `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**; below those the
 extra fields are accepted and silently dropped, clio does no client-side check, and stripping them
-yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule in full.
+yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule;
+`process-digest` restates it.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in

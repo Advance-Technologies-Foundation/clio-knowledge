@@ -1,6 +1,6 @@
 clio MCP process-open-edit-page-details guide — the Open edit page element's evidence and read-back
 
-A details article of the process guide set, reached through `process-open-edit-page`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-open-edit-page`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of `useBackgroundMode` on the Open edit page element, the measured
 evidence behind its Log activity default, why its record type follows the page, the designer's value-source
 menu for its fields, the `showPage` value written at create, and reading an existing element back with

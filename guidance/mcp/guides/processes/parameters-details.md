@@ -1,6 +1,6 @@
 clio MCP process-parameters-details guide — a Sub-process element's parameters at run time and after a re-sync
 
-A details article of the process guide set, reached through `process-parameters`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-parameters`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of what a SUB-PROCESS element's parameters do at RUN TIME: the rule to
 re-synchronize every caller, which `setElement` shapes re-synchronize, what a re-synchronization costs and
 reports, how values cross by name, which version of a versioned callee runs, what `inSync` and describe can and

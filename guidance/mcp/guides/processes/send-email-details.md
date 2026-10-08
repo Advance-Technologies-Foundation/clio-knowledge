@@ -1,6 +1,6 @@
 clio MCP process-send-email-details guide — the evidence and rare cases behind the Send email rules
 
-A details article of the process guide set, reached through `process-send-email`, which points here; `process-modeling` is the set's entry point.
+A details article of the process guide set, reached through `process-send-email`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of the evidence and rare cases behind the Send email rules: what an
 Add data emulation cannot write, the acceptance tests behind the run-time-only sender, why a no-mode element
 runs as a template, the subject-only element, why the mailbox record survives an address change, the
