@@ -28,7 +28,7 @@ public sealed class DesignerSaveGuidanceTests
         // Assert
         guidance.Should().Contain("What survives an Interface Designer save (web pages)",
                 because: "routing and shared-client-logic point at this section by name")
-            .And.Contain("Kept verbatim: the contents of `SCHEMA_DEPS`, `SCHEMA_ARGS`, `SCHEMA_HANDLERS`, `SCHEMA_CONVERTERS` and `SCHEMA_VALIDATORS`.",
+            .And.Contain("Kept verbatim: the contents of `SCHEMA_DEPS`, `SCHEMA_ARGS`, `SCHEMA_HANDLERS`, `SCHEMA_CONVERTERS` and `SCHEMA_VALIDATORS`, including comments and formatting.",
                 because: "agents must know which regions a Designer save keeps")
             .And.Contain("Deleted: everything else in the `define` factory body",
                 because: "code placed in the factory body is lost on the next Designer save")
