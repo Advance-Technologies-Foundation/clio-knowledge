@@ -184,7 +184,7 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "compile-status's not-found answer carries the environment's own history, which survives a client restarting the MCP server");
         coreRules.Should().Contain("rows written since you called compile-creatio can be your compile's",
             because: "the finish time is what ties a history row to the agent's own compile, and other compiles write rows too");
-        coreRules.Should().Contain("finished only when its newest row is more than five minutes old",
+        coreRules.Should().Contain("finished only when its newest row is more than seven minutes old",
             because: "a compile writes a row per project as each ends, so its first row is not its end");
         coreRules.Should().Contain("ask the user before compiling again",
             because: "an agent whose compile wrote no row needs a way out, and every compile needs the user's confirmation");
