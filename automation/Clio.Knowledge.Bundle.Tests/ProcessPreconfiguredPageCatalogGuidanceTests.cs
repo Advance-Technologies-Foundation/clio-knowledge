@@ -7,7 +7,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class ProcessPreconfiguredPageCatalogGuidanceTests
 {
     [Test]
-    [Description("ENG-102112: the element catalog lists the Pre-configured page among the user tasks with a dedicated build type. It was missing from that list, so an agent could legitimately pick the generic userTask route, which carries no page and is refused from CrtProcessBuilder 1.6.6.87.")]
+    [Description("The element catalog lists the Pre-configured page among the user tasks with a dedicated build type. It was missing from that list, so an agent could legitimately pick the generic userTask route, which carries no page and is refused.")]
     public void ElementCatalog_ShouldRoutePreconfiguredPageToItsDedicatedType()
     {
         // Arrange
@@ -24,7 +24,7 @@ public sealed class ProcessPreconfiguredPageCatalogGuidanceTests
     }
 
     [Test]
-    [Description("ENG-102112: the article that owns the Pre-configured page states the build-type rule itself, so an agent that fetches only process-preconfigured-page still learns the generic userTask route is refused.")]
+    [Description("The article that owns the Pre-configured page states the build-type rule itself, so an agent that fetches only process-preconfigured-page still learns the generic userTask route is refused.")]
     public void PreconfiguredPageArticle_ShouldStateTheGenericRouteIsRefused()
     {
         // Arrange
