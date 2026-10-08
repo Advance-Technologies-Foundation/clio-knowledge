@@ -18,7 +18,8 @@ permissions designer instead.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`. The
 "Use record permissions" switch and the object's DEFAULT record rules (which rights a new record gets) are
-`get-guidance name=default-record-rights`; get-object-rights reports them too, after the operation rows.
+`get-guidance name=default-record-rights`; from the clio version named there, get-object-rights reports them
+too, after the operation rows.
 
 grantee is a SysAdminUnit id (a role or user id). Names are NOT unique — resolve a name to its id
 yourself (e.g. execute-esq on SysAdminUnit by Name); the tools take the id. When several rows match,
