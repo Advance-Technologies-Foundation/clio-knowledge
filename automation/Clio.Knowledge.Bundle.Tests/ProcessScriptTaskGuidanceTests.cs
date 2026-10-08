@@ -200,6 +200,10 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
         coreRules.Should().Contain("do not rely on it, or restart on it, before then",
             because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile; after the compile has finished, a restart the workflow needs is still owed, so the rule is about timing, not a ban");
+        coreRules.Should().Contain("When restart-status answers `requestfailed`, the restart request itself failed and no restart happened: ask the user, then retry once.",
+            because: "the restart request runs inside the deadline race, so a failed request is reported after the answer, and checking that the environment answers would point the wrong way - it answers because it never restarted");
+        coreRules.Should().Contain("or, for a restart, possibly not yet confirmed",
+            because: "a restart's in-progress answer can come before its request is confirmed");
         coreRules.Should().NotContain("never restart on that answer alone",
             because: "that wording read as a permanent ban and contradicted the package-compile activation cycle");
         guide.Should().Contain("If your client reports the call timed out (for example `Request timed out`)",
