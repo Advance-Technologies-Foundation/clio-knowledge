@@ -190,7 +190,11 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "an agent whose compile wrote no row needs a way out, and every compile needs the user's confirmation");
         coreRules.Should().NotContain("you may start it again",
             because: "the guidance must not license a compile the user did not confirm");
-        coreRules.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log",
+        coreRules.Should().Contain("ask the user before a restart that rests on them alone",
+            because: "any schema publisher can write a row, so a restart for every user cannot rest on rows alone");
+        coreRules.Should().Contain("If no row was written since your call, it is still running",
+            because: "the still-running case refers to the agent's own call, not to the five-minute rule just before it");
+        coreRules.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log (through clio-run) - unless",
             because: "last-compilation-log's undated verdict is the fallback for an unreadable history or an older clio, not the first answer");
         coreRules.Should().Contain("latest FINISHED compile and carries no time",
             because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
