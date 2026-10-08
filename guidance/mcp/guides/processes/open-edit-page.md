@@ -12,9 +12,11 @@ shape live in `process-modeling`; the element catalog and what is buildable toda
 
 == The element and its block ==
 - An `openEditPage` element left with NO page (no block, or a `setElement.openEditPage` that never named a
-  `page`) is NOT refused - finishing it with `setElement` in the same or a later request is supported - but the
-  response carries a Warning naming it, judged at the END of the request. Treat that Warning as a to-do: until
-  it is fixed the element fails on its first run.
+  `page`) is NOT refused - finishing it with `setElement` in the same or a later request is supported - but
+  the response carries a Warning naming it (CrtProcessBuilder 1.6.6.90 and later - an older package stays
+  silent, so silence proves nothing), judged at the END of the request. Treat that Warning as a to-do: until
+  it is fixed the element fails on its first run. Settle the missing part WITH the user rather than inventing
+  it, and while it stays unfinished say plainly that the element is incomplete.
 The Open edit page element (`openEditPage` / OpenEditPageUserTask) shows a record's edit page to a user and
 waits. The `openEditPage` block configures it:
 `{ "name": "CollectAccountDetails", "type": "openEditPage", "caption": "Fill in the account details",

@@ -60,6 +60,14 @@ row through another role looks exactly like success.
 Always supply a record `filter` with an explicit `object`, and never leave BOTH collections empty —
 one of the two may legitimately be empty or omitted.
 
+- A `changeAccessRights` element left with NO object (no `accessRights` block, and no
+  `setElement.accessRights` after it) is NOT refused - finishing it with `setElement` in the same or a later
+  request is supported - but the response carries a Warning naming it (CrtProcessBuilder 1.6.6.90 and later -
+  an older package stays silent, so silence proves nothing), judged at the END of the request. Treat that
+  Warning as a to-do: until it is fixed the element completes having changed no permission. Settle the missing
+  part WITH the user rather than inventing it, and while it stays unfinished say plainly that the element is
+  incomplete.
+
 == The accessRights block ==
 Set it on a `changeAccessRights` element at create, or later with `modify-business-process`
 `setElement`. `object` is required at create; on `setElement` an omitted `object` keeps the current one.
@@ -201,9 +209,6 @@ delete live records, so show the user the target object, the record `filter` tha
 are affected, and every grantee with its operations and level, and get an explicit yes before building.
 
 == Changing it later (setElement) ==
-- A `changeAccessRights` element left with NO object (no `accessRights` block, and no `setElement.accessRights`
-  after it) is NOT refused - finishing it with `setElement` in the same or a later request is supported - but the response carries a Warning naming it, judged at the END of the request. Treat that
-  Warning as a to-do: until it is fixed the element completes having changed no permission.
 MUST, before you apply any of this to a live environment: a supplied `add`, a `remove` entry, a `[]`
 clear, an `object` retarget, and a `setFilter`/`clearFilter` on this element all CHANGE OR DESTROY
 record permissions that people currently rely on — the filter is gated for the same reason as the
