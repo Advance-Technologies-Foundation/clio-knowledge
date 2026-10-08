@@ -113,6 +113,10 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   this element.
 
 == Modifying an existing Approval element ==
+- An `approval` element left with NO object (no block, and no `setElement.approval` after it) is NOT refused -
+  finishing it with `setElement` in the same or a later request is supported - but the response carries a
+  Warning naming it, judged at the END of the request. Treat that Warning as a to-do: until it is fixed the
+  element fails on its first run.
 - `modify-business-process` → `setElement` with an `approval` block reconfigures it IN PLACE; only the
   fields you pass change. Omit `object` to keep the current approval object, omit `recordId` to keep the
   current record, omit `approver` to keep the current approver.

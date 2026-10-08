@@ -137,6 +137,11 @@ filter; see `process-access-rights`.
   process parameter; `process-send-email` owns both.
 
 == Modify data element (changeData) ==
+- A `changeData` element left with no target object, no values, or no record filter that selects anything is NOT
+  refused - finishing it with `setElement` in the same or a later request is supported - but the response
+  carries a Warning naming it, judged at the END of the request. Treat that Warning as a to-do: until it is
+  fixed the element does not run as asked: with no target it stays Running forever with no error, with no values
+  it changes nothing, with no filter it fails on the empty-filter error.
 - A `changeData` element updates every record matching its `filter` with the declared column values:
     { "name": "UpdateContact", "type": "changeData", "caption": "Update the contact",
       "changeData": {

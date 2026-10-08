@@ -15,6 +15,10 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
 `process-element-catalog`.
 
 == Read data element (readData) — first / collection / count / aggregation modes ==
+- A `readData` element left with NO source object (no block, and no `setElement.readData` after it) is NOT
+  refused - finishing it with `setElement` in the same or a later request is supported - but the response
+  carries a Warning naming it, judged at the END of the request. Treat that Warning as a to-do: until it is
+  fixed the element fails on its first run.
 - A `readData` element reads from one object in one of FOUR modes, all buildable (count and aggregation from
   CrtProcessBuilder 1.6.2.6 — not the earlier 1.6.0.9, a pre-merge cut that never shipped — and collection
   from the version this guidance ships with). Configure it with the element's `readData` block:

@@ -13,6 +13,9 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
 `process-element-catalog`.
 
 == Add data element (addData) ==
+- An `addData` element left with NO target object is NOT refused - finishing it with `setElement` in the same or
+  a later request is supported - but the response carries a Warning naming it, judged at the END of the request.
+  Treat that Warning as a to-do: until it is fixed the element completes having added nothing.
 - An `addData` element CREATES records. Two modes, chosen by `mode`: `one` (the default) adds ONE record;
   `selection` adds one record PER RECORD of a filtered selection from another object.
 - Add ONE record:
