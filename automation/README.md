@@ -92,7 +92,7 @@ suffix such as `?x` all count; only trailing sentence punctuation is ignored.
 | `requirements.itemIds`, `requirements.resourceUris` | the declared resources; a mismatch names the ids on each side | `BundleBuilder` |
 | `requiredFeatures`: format and uniqueness | — | `BundleBuilder` |
 | `sourcePath` | an existing file under the role's root; every guidance and reference file is declared | `BundleBuilder`, `GuidanceInventoryTests`, `ReferenceGuidanceMigrationTests` |
-| `get-guidance` names in any published body: `name=<id>` and ``get-guidance … `<id>` `` | `itemId` or `topicId` of a `guidance`-role item | `ReferenceIntegrityTests` |
+| `get-guidance` names in any published body: every bare `name=<id>` token (with or without a preceding `get-guidance`, as routing writes `-> name=<id>`) and ``get-guidance … `<id>` `` | `itemId` or `topicId` of a `guidance`-role item | `ReferenceIntegrityTests` |
 | `docs://knowledge/…` and `docs://mcp/…` routes in any published body | a declared `uri` or `legacyUris` entry | `ReferenceIntegrityTests` |
 | Relative markdown links in any published body | nothing: every one is reported. Git delivery reads a body at its `sourcePath`, but a release bundle stores it flat as `resources/<itemId>.md`, so only a `docs://` route survives every transport | `ReferenceIntegrityTests` |
 | Top-level `id:` of a catalog entry | the entry's manifest `itemId` | `ReferenceIntegrityTests` |

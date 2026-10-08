@@ -61,13 +61,13 @@ public sealed class ReferenceIntegrityTests
         RegexOptions.Compiled);
 
     /// <summary>
-    /// A knowledge route, taken whole up to whitespace, a quote, a bracket or a backtick, so a suffix such as
-    /// <c>?x</c> or <c>#x</c> stays part of what is compared. One that continues into <c>&lt;</c> or holds
+    /// A knowledge route, taken whole up to whitespace, a quote, a bracket, a backtick or a markdown <c>*</c>
+    /// (which no stable id contains), so a suffix such as <c>?x</c> or <c>#x</c> stays part of what is compared. One that continues into <c>&lt;</c> or holds
     /// <c>{</c> is a template (<c>docs://knowledge/&lt;library-id&gt;/&lt;item-id&gt;</c>) and names nothing.
     /// <c>docs://help/...</c> is a Clio-owned resource and out of scope.
     /// </summary>
     private static readonly Regex Route = new(
-        @"docs://(?:knowledge|mcp)/[^\s`'""()<>\[\]]*",
+        @"docs://(?:knowledge|mcp)/[^\s`'""()<>\[\]*]*",
         RegexOptions.Compiled);
 
     /// <summary>A markdown link whose target has no URI scheme and is not a bare in-page anchor.</summary>
@@ -75,9 +75,12 @@ public sealed class ReferenceIntegrityTests
         @"\]\((?![a-zA-Z][a-zA-Z0-9+.-]*:|#)([^)\s]+)\)",
         RegexOptions.Compiled);
 
-    /// <summary>The top-level <c>id:</c> of a catalog entry, which must be the item's manifest identity.</summary>
+    /// <summary>
+    /// The top-level <c>id:</c> of a catalog entry, which must be the item's manifest identity. One pair of
+    /// surrounding quotes and a trailing <c>#</c> comment are YAML spelling, not part of the id.
+    /// </summary>
     private static readonly Regex CatalogId = new(
-        @"^id:[ \t]*(\S+)[ \t\r]*$",
+        @"^id:[ \t]*[""']?([^\s""'#]+)[""']?[ \t]*(?:#.*)?\r?$",
         RegexOptions.Multiline | RegexOptions.Compiled);
 
     [Test]
@@ -112,7 +115,7 @@ public sealed class ReferenceIntegrityTests
     }
 
     [Test]
-    [Description("The scanner itself, on a synthetic body: each reference form is compared exactly the way Clio resolves it, near misses in case, punctuation or suffix are reported, every relative link is reported, each with file and line, and shapes that only look like references (other tools' name arguments, placeholders, templates, web links, sentence punctuation) are ignored. The real corpus has no relative link and no broken catalog id today, so without this those rules would be untested.")]
+    [Description("The scanner itself, on a synthetic body: each reference form is compared exactly the way Clio resolves it, near misses in case, punctuation or suffix are reported, markdown emphasis around a route and YAML quotes or comments around a catalog id are not, every relative link is reported, each with file and line, and shapes that only look like references (other tools' name arguments, placeholders, templates, web links, sentence punctuation) are ignored. The real corpus has no relative link and no broken catalog id today, so without this those rules would be untested.")]
     public void Scan_ShouldReportEachDanglingReferenceWithFileAndLine()
     {
         // Arrange
@@ -135,12 +138,19 @@ public sealed class ReferenceIntegrityTests
             "not `docs://mcp/guides/operations/core-rules` nor docs://knowledge/<library-id>/<item-id>",
             "[sibling](core-rules.md) [bad](../missing.md#anchor) [web](https://example.com) [here](#top)",
             "name=core-rules- name=core-rules_ name=Core-rules get-guidance `Core-rules`",
-            "docs://knowledge/lib/core-rules?bad and docs://mcp/guides/{family}/{guide}");
+            "docs://knowledge/lib/core-rules?bad and docs://mcp/guides/{family}/{guide}",
+            "**docs://knowledge/lib/core-rules** _docs://mcp/guides/core-rules_ docs://mcp/guides/core-rules_");
         const string catalog = "schemaVersion: 0\nid: example-renamed\ntitle: x\n";
+        const string quotedCatalog = "schemaVersion: 0\nid: \"example\"\n";
+        const string commentedCatalog = "schemaVersion: 0\nid: 'example'  # stable\r\ntitle: x\n";
+        const string nestedIdOnlyCatalog = "schemaVersion: 0\nprimaryUseCase:\n  id: example\n";
 
         // Act
         string[] reported = [.. Scan(library.Bodies[0], text, library)
             .Concat(Scan(library.Bodies[2], catalog, library))
+            .Concat(Scan(library.Bodies[2], quotedCatalog, library))
+            .Concat(Scan(library.Bodies[2], commentedCatalog, library))
+            .Concat(Scan(library.Bodies[2], nestedIdOnlyCatalog, library))
             .Where(reference => reference.Missing is not null)
             .Select(reference => reference.ToString())];
 
@@ -159,9 +169,11 @@ public sealed class ReferenceIntegrityTests
             $"guidance/core-rules.md:9: get-guidance `Core-rules` -> {NoGuide}",
             $"guidance/core-rules.md:7: docs://mcp/guides/operations/core-rules -> {NoRoute}",
             $"guidance/core-rules.md:10: docs://knowledge/lib/core-rules?bad -> {NoRoute}",
+            $"guidance/core-rules.md:11: docs://mcp/guides/core-rules_ -> {NoRoute}",
             $"guidance/core-rules.md:8: ](core-rules.md) -> {FlatLayout}",
             $"guidance/core-rules.md:8: ](../missing.md#anchor) -> {FlatLayout}",
-            "catalog/example.yaml:2: id: example-renamed -> manifest itemId is example");
+            "catalog/example.yaml:2: id: example-renamed -> manifest itemId is example",
+            "catalog/example.yaml:1: id: -> no top-level id; manifest itemId is example");
     }
 
     /// <summary>Every reference one body makes, each with what is missing for it, or null when it resolves.</summary>
@@ -192,6 +204,11 @@ public sealed class ReferenceIntegrityTests
                 continue;
             }
             string route = match.Value.TrimEnd(SentencePunctuation);
+            if (match.Index > 0 && text[match.Index - 1] == '_' && route.EndsWith('_'))
+            {
+                // _docs://.../x_ is markdown emphasis; a lone trailing _ is still a near miss and is reported.
+                route = route[..^1];
+            }
             yield return new(RouteKind, body.SourcePath, LineOf(text, match.Index), route,
                 library.Routes.Contains(route) ? null : "no declared uri or legacyUris entry");
         }
