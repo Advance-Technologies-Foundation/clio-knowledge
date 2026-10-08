@@ -121,10 +121,10 @@ leaf rather than through `process-modeling`.
   `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
   and the methods.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
-  in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, timer/message start,
+  in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
+  page (REFUSED), timer/message start,
   intermediate events,
-    `webService` (also marked READ-ONLY in the
-    catalog below, where silence used to read as "buildable"),
+    `webService` (also READ-ONLY in the catalog below),
   and reading one COLUMN out of a read COLLECTION's items (a first-record read's column IS a source,
   `sourceColumn` - see `process-data-elements`) — all
   four Read data modes DO build, see the catalog entry below. A collection IS consumed now: a multi-instance

@@ -201,8 +201,8 @@ delete live records, so show the user the target object, the record `filter` tha
 are affected, and every grantee with its operations and level, and get an explicit yes before building.
 
 == Changing it later (setElement) ==
-- An element left with NO object is NOT refused - finishing it with `setElement` in the same or a later request
-  is supported - but the response carries a Warning naming it, judged at the END of the request. Treat that
+- A `changeAccessRights` element left with NO object (no `accessRights` block, and no `setElement.accessRights`
+  after it) is NOT refused - finishing it with `setElement` in the same or a later request is supported - but the response carries a Warning naming it, judged at the END of the request. Treat that
   Warning as a to-do: until it is fixed the element completes having changed no permission.
 MUST, before you apply any of this to a live environment: a supplied `add`, a `remove` entry, a `[]`
 clear, an `object` retarget, and a `setFilter`/`clearFilter` on this element all CHANGE OR DESTROY

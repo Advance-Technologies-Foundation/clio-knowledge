@@ -11,8 +11,8 @@ shape live in `process-modeling`; the element catalog and what is buildable toda
 `process-data-source-filters`. Do not infer a rule that lives in one of those from what this article says.
 
 == The element and its block ==
-- An `openEditPage` element left with NO page - no block, or a `setElement.openEditPage` that never named a
-  `page` - is NOT refused - finishing it with `setElement` in the same or a later request is supported - but the
+- An `openEditPage` element left with NO page (no block, or a `setElement.openEditPage` that never named a
+  `page`) is NOT refused - finishing it with `setElement` in the same or a later request is supported - but the
   response carries a Warning naming it, judged at the END of the request. Treat that Warning as a to-do: until
   it is fixed the element fails on its first run.
 The Open edit page element (`openEditPage` / OpenEditPageUserTask) shows a record's edit page to a user and
