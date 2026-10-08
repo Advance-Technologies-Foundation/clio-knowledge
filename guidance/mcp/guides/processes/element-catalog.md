@@ -140,8 +140,10 @@ name anything, and `process-naming` itself only for a case the card does not cov
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask. THREE user tasks have their own dedicated build type and must NOT be built as
-a generic `userTask`: `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
+`readData`/ReadDataUserTask. FOUR user tasks have their own dedicated build type and must NOT be built as
+a generic `userTask`: `preconfiguredPageUserTask` -> `type:"preconfiguredPage"`, see
+`process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, so it could
+only build a page-less element that fails at run time, and it is REFUSED; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
 modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
 `process-send-email`, and `process-send-email-template` for the template mode;
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; and `approvalUserTask` ->

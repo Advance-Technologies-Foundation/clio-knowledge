@@ -37,8 +37,9 @@ page. Read the articles of the elements you actually use, and only those.
   with a `userTaskName` from `list-user-tasks` (aliases `readData`, `changeData`, `addData`,
   `deleteData`, `performTask`, `changeAccessRights`), `sendEmail`, `approval`, `openEditPage`,
   `preconfiguredPage`, `exclusiveGateway`, `parallelGateway`, `formulaTask`, `subProcess`.
-  THREE user tasks have their own dedicated build type and must NOT be built as a generic
-  `userTask`: Send email -> `sendEmail`, Open edit page -> `openEditPage`, Approval -> `approval`.
+  FOUR user tasks have their own dedicated build type and must NOT be built as a generic
+  `userTask`: Send email -> `sendEmail`, Open edit page -> `openEditPage`, Approval -> `approval`,
+  Pre-configured page -> `preconfiguredPage`.
 - Flows are declared on the flow: `flows[].kind` (`sequence` | `conditional` | `default`),
   `flows[].condition` on a conditional one, and `flows[].label`. A conditional flow leaving an
   activity that enumerates results - Perform task, User dialog, Open edit page, Auto-generated page,

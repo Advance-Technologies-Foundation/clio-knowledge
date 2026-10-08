@@ -84,7 +84,7 @@ public sealed class ProcessDigestTests
         ("process-modeling", "Pass the descriptor as the JSON object itself"),
         ("process-modeling", "CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later"),
         ("process-modeling", "prefer additive edits, do not remove or rewire"),
-        ("process-element-catalog", "THREE user tasks have their own dedicated build type and must NOT be built as a generic `userTask`"),
+        ("process-element-catalog", "FOUR user tasks have their own dedicated build type and must NOT be built as a generic `userTask`"),
         ("process-sub-process-when", "Never restructure an existing process without being asked")
     ];
 
