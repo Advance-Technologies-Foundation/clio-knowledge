@@ -1,10 +1,15 @@
 clio MCP process-formulas guide - expression sources and the formula vocabulary a condition also uses
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the `expression` mapping source, the formula vocabulary the
 platform's interpreter accepts - which a flow condition uses too - how a parameter is referenced inside a
 formula, and what the server validates and refuses. The BRANCH itself, including precedence and the
 hazard of clearing the last one, belongs to `process-branch-conditions`.
+Moved to `process-formulas-details`: how the designer shows a stored formula and how it reads back in
+`describe-business-process`, the verbatim refusal table with each fix, and what an older package did with
+a formula. Read it when you verify a stored formula or condition, work from a formula as the designer
+displays it, match a refusal message to its fix, or meet a refusal about the package version.
 == Formulas (`expression` sources and flow conditions) ==
 
 A formula is NOT C#, and knowing what it actually is stops most wrong guesses. Creatio evaluates it with an
@@ -117,21 +122,6 @@ reports a process parameter `PriceParameter` with
     {"op":"addMapping","mapping":{"targetProcessParameter":"PriceUpParameter",
      "expression":"Math.Ceiling([#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{c3f5635c-2aa2-4279-9464-b0b94b2f7a85}]#])"}}
 
-The designer then displays this as `RoundUp([#PriceParameter#])` — it resolves the UId back to the name, and it
-shows the designer's own spelling of the function. Both directions of that conversion are the platform's;
-you write the C# spelling and the UId, and the designer renders the friendly form.
-
-CONFIRM IT WITHOUT THE DESIGNER. No tool returns a designer link, so do not offer one — an invented URL is
-worse than none. The check you can actually run is `describe-business-process`: a stored formula reads back
-on the parameter as `source: "Script"` with your expression in `value` (NOT in an `expression` field — the
-describe contract has no such field on a parameter). `source: "ConstValue"` there means the formula was
-never stored as one and a constant went in instead. For a flow, the read-back is `kind: "conditional"` with
-the `condition` text — which on a connector whose source enumerates activity results cannot tell a live
-condition from one a result selection has superseded; `branchesOnActivityResult` is the field that can, and
-`process-activity-result-branches` owns that dialect whole - including which of the two wins at run
-time when a connector has both kinds of sibling. If a human is at a browser, `RoundUp([#PriceParameter#])` in the
-designer is the same confirmation in friendlier spelling.
-
 A COMPUTED DEFAULT for a parameter of ANY type is a mapping, not a `value`. `addParameter` / `setParameter`
 take `value` as a literal constant, so an arithmetic or macro-bearing default cannot go there; the route is
 a mapping with `targetProcessParameter` + `expression`, exactly as above. This is NOT a date/time special
@@ -165,8 +155,8 @@ that change how you read a failure:
   division gains a `((decimal)…)` wrapper. So `[#[Parameter:{24a7…}]#]` comes back as `Amount` and `1.5`
   comes back as `1.5m`; do not read that as the wrong formula having been validated.
 
-What the gate refuses. Every message quoted here and in the table below is verbatim from a stand at core
-10.0.731.0 — none of it is paraphrased or inferred:
+What the gate refuses. Every message quoted here and in the refusal table of `process-formulas-details` is
+verbatim from a stand at core 10.0.731.0 — none of it is paraphrased or inferred:
 
 - it must PARSE — `1 +` gives `Formula value error: Invalid Operation (at index 3).`;
 - every identifier must resolve. An unknown one is named: `System.Math.Abs(-1)` gives
@@ -214,8 +204,6 @@ or Formula body, again after names expand. The same bound covers a `changeData` 
 as the platform does (prefix optional), and a column its record loads. Send email recipients and template
 entities and performer contacts are not checked.
 
-There is no per-REQUEST budget; a large batch is bounded by the request-item cap (1 000 items).
-
 What is NOT refused: the SHAPE of an expression — deep bracket nesting, long unary runs, long `? :`
 chains — exactly as the visual designer accepts them, and neither clio's length bound nor the platform's
 gate looks at it. Keep expressions FLAT, and never build one by concatenation or in a loop. The reason is
@@ -231,46 +219,6 @@ inflates it, so an expression with no brackets at all can arrive deeply nested. 
 character bound is not a mitigation: it bounds LENGTH, and the dangerous expression is short and dense
 rather than long and flat.
 
-ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words, and an older package
-refuses MORE (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW condition),
-so a refusal from a pre-1.4.0.41 environment is not evidence the formula is bad. clio refuses
-`create-business-process` / `modify-business-process` below its enforced floor, which makes every "on an
-older package" fallback in this guide set history, not a branch: run `install-process-builder`, and never
-re-send a call in an older dialect - clio refused it before it left.
-
-WHAT A REFUSAL LOOKS LIKE. Every row is a verbatim measurement, prefixed by `Process validation failed:`
-plus the element or parameter name:
-
-| you wrote | message contains | the fix |
-|---|---|---|
-| `FormulaUtilities.Sum(1, 2) > 0` | `Formula value error: No applicable method 'Sum' exists in type 'FormulaUtilities' (at index 17).` | the function does not exist — there is no Sum |
-| `System.Math.Abs(-1) > 0` | `Formula value error: Parameter "System" not found` | drop the namespace: `Math.Abs(-1)` |
-| `math.Round(1.5) > 0` | `Formula value error: Parameter "math" not found` | case matters: `Math.Round(1.5)` |
-| `DateTimeUtilities.GetStartOfMonth(DateTime.Now) > DateTime.MinValue` | `Formula value error: No applicable method 'GetStartOfMonth' exists in type 'DateTimeUtilities' (at index 18).` | drop the `Get` prefix: `StartOfMonth` |
-| a formula split across two lines | `Formula value error: Expression contains invalid line break symbol. Use \n as new line character` | put it on one line — and note the expression is quoted as EMPTY here |
-| `[Price] > 100` | `Formula value error: Expression expected (at index 0).` | brackets are not a reference; use the UId metapath |
-| `1 +` | `Formula value error: Invalid Operation (at index 3).` | the expression is incomplete |
-| `1.5` into an Integer parameter | `Error while executing expression "1.5m": Formula value error: Cannot convert type "Decimal" to "Int32"` | the target type cannot hold it — note the quoted `1.5m` |
-| an Integer parameter as a whole condition | `Error while executing expression "Amount": Formula value error: Cannot convert type "Int32" to "Boolean"` | a condition must be bool — compare it |
-| `[#Price#] > 100` in a mapping | `Formula value error: Expression expected (at index 0).` | that is not a macro family; reference the parameter by UId |
-| `[#[Parameter:{a-uid-not-in-this-process}]#] > 0` (any other contract) | `has an invalid value for the parameter "ConditionExpression". It references the process parameter <uid>, which is not in this process. Add the parameter first, or correct the reference.` | create the parameter, or fix the UId |
-
-A dot missing before `[EntityColumn:…]` fails that gate with `Value for argument "parameterUId" must be
-specified`, naming nothing; one missing between `[Element:…]` and `[Parameter:…]` is told to add a PROCESS
-parameter; one missing after `[IsSchema:false]` passes it and runs. Under the MODIFY PATH contract clio
-checks first, naming the flow or field (measured, 1.6.6.77): a misspelling gets `is not spelled exactly as a
-reference to that item is written ... Send '[#…#]'`; an unknown process parameter `… which is not a
-parameter of this process`, an unknown element `… which this process does not have`; a column outside
-`readData.columns` gets `is not among the columns the element reads`.
-
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions
 here.)
-
-== Conditional flows and branch conditions ==
-
-Moved to its own guide, `process-branch-conditions` (`get-guidance name=process-branch-conditions`).
-It owns turning a plain flow into a conditional one, what a condition may contain, branch PRECEDENCE,
-the activity-result case, and
-the parallel-split hazard of clearing the last condition. This guide owns the formula vocabulary both
-use.
