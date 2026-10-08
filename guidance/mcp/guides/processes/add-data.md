@@ -1,6 +1,7 @@
 clio MCP process-add-data guide — the Add data element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 == What this article owns ==
 This article owns the Add data element: its `addData` block, both adding modes, every value source the
