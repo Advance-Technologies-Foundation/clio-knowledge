@@ -13,7 +13,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 ///
 /// The scanned set is <c>bundle-source.json</c> itself (its descriptions reach agents through the catalog)
 /// plus every <c>sourcePath</c> it declares, so an article added to the manifest is scanned without an edit
-/// here.
+/// here. Every <c>guidance/**/*.md</c> file is declared there:
+/// <see cref="GuidanceInventoryTests.PublishedGuidance_ShouldCorrespondExactlyToTheGuidanceSourceTree"/> fails
+/// on an undeclared article (only the unpublished <c>guidance/README.md</c> is outside the manifest).
 /// </summary>
 [TestFixture]
 public sealed class InternalTaskReferenceTests
@@ -70,6 +72,8 @@ public sealed class InternalTaskReferenceTests
     [TestCase("Tracked as ENG-92761 until it ships.", "ENG-92761", TestName = "Jira key")]
     [TestCase("see https://example.atlassian.net/browse/ENG-1 for details", "ENG-1", TestName = "Jira key in a browse URL")]
     [TestCase("branch feature/ENG-102333-compile-timeout", "ENG-102333", TestName = "Jira key in a branch name")]
+    [TestCase("branch feature/ENG-1234-feed-post", "ENG-1234", TestName = "Jira key before a hex-looking word")]
+    [TestCase("branch bugfix-ENG-123", "ENG-123", TestName = "Jira key after a hyphen")]
     [TestCase("See https://github.com/Advance-Technologies-Foundation/clio/issues/1364 for evidence.",
         "https://github.com/Advance-Technologies-Foundation/clio/issues/1364", TestName = "GitHub issue URL")]
     [TestCase("[comment](https://github.com/o/r/issues/1619#issuecomment-5726093804)",
@@ -99,6 +103,8 @@ public sealed class InternalTaskReferenceTests
         "https://bb.example.com/projects/P/repos/r/pull-requests/7", TestName = "Bitbucket Server pull request URL")]
     [TestCase("The #1138 fix prevents filling an empty slot.", "#1138", TestName = "bare #N on a line with a colour word")]
     [TestCase("fixed the colour #1416 regression", "#1416", TestName = "bare #N after the word colour")]
+    [TestCase("Autofill: #1416", "#1416", TestName = "bare #N after a word ending in fill")]
+    [TestCase("Backfill: #1234", "#1234", TestName = "bare #N after another word ending in fill")]
     [TestCase("discovery in #1575-#1579", "#1575", TestName = "bare #N opening an ASCII-hyphen range")]
     [TestCase("discovery in #1575-#1579", "#1579", TestName = "bare #N closing an ASCII-hyphen range")]
     [TestCase("clio#1575-#1579: discovery", "clio#1575", TestName = "repo#N opening an ASCII-hyphen range")]
@@ -192,12 +198,20 @@ internal static class TaskReferenceScanner
     /// <summary>
     /// A Jira key: an upper-case project of 2–10 characters, a hyphen (ASCII or a Unicode hyphen or dash),
     /// a number without a leading zero (example data such as <c>CRM-000042</c> has one). Not glued to a
-    /// preceding letter, digit or hyphen, and not followed by a GUID's next group, so the groups of
-    /// <c>E52BD583-7825-E011-…</c> do not match.
+    /// preceding letter or digit; a hyphen before it is a boundary, so <c>bugfix-ENG-123</c> is reported. A
+    /// match inside a GUID (<see cref="GuidShape"/>) is dropped in <see cref="Scan"/>.
     /// </summary>
     private static readonly Regex JiraKey = new(
-        @"(?<![\p{L}\p{N}\-‐-―])(?<project>[A-Z][A-Z0-9]{1,9})[\-‐-―][1-9][0-9]*"
-            + @"(?![\p{L}\p{N}])(?!-[0-9A-Fa-f]{4}-)",
+        @"(?<![\p{L}\p{N}])(?<project>[A-Z][A-Z0-9]{1,9})[\-‐-―][1-9][0-9]*(?![\p{L}\p{N}])",
+        RegexOptions.Compiled);
+
+    /// <summary>
+    /// A GUID or a GUID fragment of at least three groups (<c>E52BD583-7825-E011-…</c>). Its groups have the
+    /// Jira-key shape, so a key that falls inside one is not reported; a key merely followed by a
+    /// hex-looking word (<c>ENG-1234-feed-post</c>) still is.
+    /// </summary>
+    private static readonly Regex GuidShape = new(
+        @"(?<![\p{L}\p{N}])[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}(?:-[0-9A-Fa-f]{4}(?:-[0-9A-Fa-f]{12})?)?",
         RegexOptions.Compiled);
 
     /// <summary>Standard names with the Jira-key shape. Add a prefix here only for a published standard.</summary>
@@ -236,10 +250,11 @@ internal static class TaskReferenceScanner
     /// What may stand directly before a three- or four-digit decimal colour such as <c>#333</c>, which has
     /// the bare-reference shape: a colour property and its value position (<c>color: </c>,
     /// <c>"backgroundColor": "</c>, <c>border: 1px solid </c>). The bare word colour does not count, so
-    /// "the colour #1416 regression" is still reported. Only the text right before the token counts.
+    /// "the colour #1416 regression" is still reported, and the property name must start a word, so
+    /// <c>Autofill: #1416</c> is reported too. Only the text right before the token counts.
     /// </summary>
     private static readonly Regex ColourValuePrefix = new(
-        @"(?:(?:colou?r|background|border|outline|fill|stroke|shadow)[\w-]*[""']?\s*[:=]\s*[""']?"
+        @"(?<![\p{L}\p{N}])(?:(?:colou?r|background|border|outline|fill|stroke|shadow)[\w-]*[""']?\s*[:=]\s*[""']?"
             + @"(?:(?:[0-9.]+(?:px|em|rem|%)?|solid|dashed|dotted|double|inset|none)\s+)*)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -251,10 +266,14 @@ internal static class TaskReferenceScanner
     internal static IReadOnlyList<Hit> Scan(string text)
     {
         List<(int Start, int End)> spans = [];
+        (int Start, int End)[] guids = GuidShape.Matches(text)
+            .Select(match => (match.Index, match.Index + match.Length))
+            .ToArray();
 
         foreach (Match match in JiraKey.Matches(text))
         {
-            if (!StandardNames.Contains(match.Groups["project"].Value))
+            if (!StandardNames.Contains(match.Groups["project"].Value)
+                && !guids.Any(guid => guid.Start <= match.Index && match.Index + match.Length <= guid.End))
             {
                 spans.Add((match.Index, match.Index + match.Length));
             }

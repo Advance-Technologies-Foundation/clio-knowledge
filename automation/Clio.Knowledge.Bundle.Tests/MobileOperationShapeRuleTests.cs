@@ -52,7 +52,8 @@ public sealed class MobileOperationShapeRuleTests
     private static readonly (string Fragment, string Because)[] OperationShapeClauses =
     [
         ("from \"values\" ALONE", "the mechanism — the element is built from values and nothing else — is what makes the rule true"),
-        ("verified on a live stand in August 2026", "AGENTS.md requires evidence for a prescriptive runtime claim; it is stated inline, not as a task id"),
+        ("verified on a live stand in August 2026", "AGENTS.md requires evidence for a prescriptive runtime claim; it is stated inline, not as a task id. "
+            + "The pin is matched within this section only (it ends at AUTHORING CHILDREN), so the similar STRIP sentence there cannot satisfy it"),
         ("target platform version", "AGENTS.md requires a version boundary for a prescriptive runtime claim"),
         ("MOBILE bodies only", "the differ is shared with web, so the enforcement boundary must stay explicit"),
         ("still be refused by update-page", "a body can pass validate-page and fail the write; dropping this teaches a false green"),
