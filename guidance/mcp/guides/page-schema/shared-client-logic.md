@@ -1,8 +1,10 @@
 # Shared Freedom UI client logic
 
-Owns reusing a JavaScript helper across Freedom UI **web** pages. Use a client-unit schema for a small AMD helper; use `ui-project` when the requirement is an Angular remote module or custom component. Mobile page bodies are not AMD web pages; follow `mobile-page-modification` for those.
+Owns where a Freedom UI **web** page keeps JavaScript that is not inside a handler, converter or validator function: helper functions, constants, caches and string tables, whether one page uses them or several. They go into a client-unit schema imported through `SCHEMA_DEPS` / `SCHEMA_ARGS`, never into the page factory body — an Interface Designer save deletes the factory body (`page-modification-overview`, "What survives an Interface Designer save"). Use `ui-project` when the requirement is an Angular remote module or custom component. Mobile page bodies are not AMD web pages; follow `mobile-page-modification` for those.
 
 ## Create once, consume from each page
+
+The same steps apply to a helper used by a single page: create the module, then import it in that one page.
 
 1. Read `page-modification` before changing an existing page. Resolve its owning package and read its current body. Discover `create-client-unit-schema`, `update-client-unit-schema`, `get-client-unit-schema` and `update-page` with `get-tool-contract`; dispatch long-tail tools through `clio-run`.
 2. Create the helper with `schema-name`, `package-name` and `environment-name`. This creates the schema; it does not write your implementation. Save its full body with `update-client-unit-schema` and read it back.
@@ -38,14 +40,14 @@ define("UsrExamplePage", /**SCHEMA_DEPS*/["UsrSharedText"]/**SCHEMA_DEPS*/,
 This excerpt is not a replacement for a complete page. Declare `SharedLabel` in the page's view-model attributes and bind a label's caption to `$SharedLabel`; retain its model, view, converters, validators and other handlers. `page-schema-handlers` owns handler composition and SDK request dispatch.
 
 6. Save consumers with `update-page` and verify their readback. Keep expressions such as `sharedText.label(...)` inside executable handlers/converters. `SCHEMA_VIEW_CONFIG_DIFF` is JSON: inserting a function call there fails validation. Do not disable validation to force that pattern through.
-7. Open both pages in the actual browser. Verify distinct expected outputs produced by the same helper. Change only the helper, refresh the browser, and verify both outputs change. An already loaded AMD module can remain cached in the current browser session; a successful server save is not proof that the open tab loaded its new body.
+7. Open each consuming page (both, when two pages share the helper) in the actual browser. Verify the expected output of the helper on each page. Change only the helper, refresh the browser, and verify every output changes. An already loaded AMD module can remain cached in the current browser session; a successful server save is not proof that the open tab loaded its new body.
 
 ## Failure checks
 
 - Missing module/load failure: verify the exact schema name, persisted helper body, package dependency, and browser load errors. Do not copy the helper into each page to hide an unresolved dependency.
 - Undefined helper argument: check the order and count of AMD dependencies and factory arguments.
 - Empty label: check that the attribute exists, the handler ran, and the control binds that attribute. Read `page-schema-handlers` for request lifecycle issues.
-- Old result after saving: refresh the browser and repeat the behavioral check on both pages before changing backend deployment settings. Client-only JavaScript edits do not need C# compilation; `core-rules` owns compilation and activation policy.
+- Old result after saving: refresh the browser and repeat the behavioral check on each consuming page before changing backend deployment settings. Client-only JavaScript edits do not need C# compilation; `core-rules` owns compilation and activation policy.
 
 ## Evidence boundary
 
