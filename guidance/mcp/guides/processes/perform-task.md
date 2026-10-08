@@ -1,14 +1,15 @@
 clio MCP process-perform-task guide — the Perform task element (ActivityUserTask)
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Perform task element -- what it produces, its parameters,
 and what the runtime writes back. Two of its settings are their own subject and have their own articles:
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
 written -- and what silently degrades when it is written as a formula -- is owned by
 `process-task-category`. The ids, the two refusal texts and their remedy are here.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
-leaf rather than through `process-modeling`.
+owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
+name anything, and `process-naming` itself only for a case the card does not cover.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with
@@ -25,7 +26,7 @@ leaf rather than through `process-modeling`.
   record does not make it one: it gets no binding to this process element and no completion listener, so the
   process runs straight past it, never learns that the task was completed or with which result, and cannot
   branch on that result (`ActivityUserTask`, `UserTaskActivityHandler`, `AddDataUserTask`). A task for each
-  record of a set is decided by D1 in `process-sub-process-when`.
+  record of a set is decided by D1 (restated in `process-digest`; owner `process-sub-process-when`).
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with

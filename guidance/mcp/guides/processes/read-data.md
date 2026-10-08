@@ -1,6 +1,7 @@
 clio MCP process-read-data guide — the Read data element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 == What this article owns ==
 This article owns the Read data element: its `readData` block, all four read modes and what each one
@@ -11,8 +12,8 @@ elements (record triggers, Modify data) stay there, and Add data and Delete data
 articles, `process-add-data` and `process-delete-data`.
 The record `filter` this element carries is owned by `process-data-source-filters` — this article says
 WHETHER it takes one and what it means here, that one says what a filter may contain. The build
-lifecycle and descriptor shape live in `process-modeling`; what is buildable today lives in
-`process-element-catalog`.
+lifecycle, the descriptor shape and what is buildable today are restated in `process-digest` (owners
+`process-modeling` and `process-element-catalog`).
 
 == Read data element (readData) — first / collection / count / aggregation modes ==
 - A `readData` element reads from one object in one of FOUR modes, all buildable (count and aggregation from

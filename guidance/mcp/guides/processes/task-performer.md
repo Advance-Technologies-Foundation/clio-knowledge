@@ -1,6 +1,7 @@
 clio MCP process-task-performer guide — who performs a Perform task
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of "Who performs the task?" for a Perform task element: the two
 layers it can be answered on, the element-level `performer` block that is the ONLY way to assign work to
 a TEAM, the OwnerId parameter for one named person, which sources each layer accepts and which it
