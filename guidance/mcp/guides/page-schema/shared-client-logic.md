@@ -1,6 +1,6 @@
 # Shared Freedom UI client logic
 
-Owns where a Freedom UI **web** page keeps JavaScript that is not inside a handler, converter or validator function: helper functions, constants, caches and string tables, whether one page uses them or several. They go into a client-unit schema imported through `SCHEMA_DEPS` / `SCHEMA_ARGS`, never into the page factory body — an Interface Designer save deletes the factory body (`page-modification-overview`, "What survives an Interface Designer save"). Use `ui-project` when the requirement is an Angular remote module or custom component. Mobile page bodies are not AMD web pages; follow `mobile-page-modification` for those.
+Owns where a Freedom UI **web** page keeps JavaScript that is not inside a handler, converter or validator function: helper functions, constants, caches of page-independent data and string tables, whether one page uses them or several (state that depends on the page or record is passed in, see step 4). They go into a client-unit schema imported through `SCHEMA_DEPS` / `SCHEMA_ARGS`, never into the page factory body — an Interface Designer save deletes the factory body (`page-modification-overview`, "What survives an Interface Designer save"). Use `ui-project` when the requirement is an Angular remote module or custom component. Mobile page bodies are not AMD web pages; follow `mobile-page-modification` for those.
 
 ## Create once, consume from each page
 

@@ -80,23 +80,9 @@ public sealed class DesignerSaveGuidanceTests
         // Act
         foreach (string path in Directory.EnumerateFiles(guidanceRoot, "*.md", SearchOption.AllDirectories))
         {
-            string text = File.ReadAllText(path);
-            foreach (Match opening in PageFactoryOpening.Matches(text))
+            foreach (string factoryBody in ScanFactoryBodies(File.ReadAllText(path)))
             {
-                string afterOpening = text[(opening.Index + opening.Length)..];
-                string withoutComments = Comments.Replace(afterOpening, comment => new string(' ', comment.Length));
-                Match factoryReturn = FactoryReturn.Match(withoutComments);
-                if (!factoryReturn.Success)
-                {
-                    continue;
-                }
-                if (afterOpening[..factoryReturn.Index].Contains("/**SCHEMA_", StringComparison.Ordinal))
-                {
-                    // An excerpt that shows only a marker region, not the factory body.
-                    continue;
-                }
                 checkedFactories++;
-                string factoryBody = withoutComments[..factoryReturn.Index].Trim();
                 if (factoryBody.Length > 0)
                 {
                     offenders.Add($"{Path.GetRelativePath(guidanceRoot, path)}: {factoryBody.Split('\n')[0]}");
@@ -109,6 +95,64 @@ public sealed class DesignerSaveGuidanceTests
             because: "the scan must reach the published page examples, or an empty offender list proves nothing");
         offenders.Should().BeEmpty(
             because: "an Interface Designer save deletes factory-body code, so an example that teaches it breaks the page");
+    }
+
+    [TestCase(
+        "define(\"UsrPage\", /**SCHEMA_DEPS*/[]/**SCHEMA_DEPS*/, function/**SCHEMA_ARGS*/()/**SCHEMA_ARGS*/ {\n    const senderName = \"x\";\n    return {};\n});",
+        true,
+        TestName = "FactoryBodyScan_ShouldReportAConstBeforeReturn")]
+    [TestCase(
+        "define(\"UsrPage\", /**SCHEMA_DEPS*/[]/**SCHEMA_DEPS*/, function/**SCHEMA_ARGS*/()/**SCHEMA_ARGS*/ {\n    function f() { return 1; }\n    return {};\n});",
+        true,
+        TestName = "FactoryBodyScan_ShouldReportAHelperFunctionBeforeReturn")]
+    [TestCase(
+        "define(\"UsrPage\", /**SCHEMA_DEPS*/[]/**SCHEMA_DEPS*/, function/**SCHEMA_ARGS*/()/**SCHEMA_ARGS*/ {\n    // Preserve the rest of the page body.\n    /* block note */\n    return {};\n});",
+        false,
+        TestName = "FactoryBodyScan_ShouldIgnoreACommentOnlyBody")]
+    [Description("Proves the factory-body scanner flags an offender and ignores comment-only bodies.")]
+    public void FactoryBodyScan_ShouldFlagOnlyCode_WhenScanningAPageFactory(string text, bool expectedOffender)
+    {
+        // Act
+        List<string> bodies = ScanFactoryBodies(text).ToList();
+
+        // Assert
+        bodies.Should().ContainSingle(because: "the snippet defines exactly one page factory");
+        (bodies[0].Length > 0).Should().Be(expectedOffender,
+            because: "only code before the factory return is deleted by a Designer save");
+    }
+
+    [Test]
+    [Description("Skips an excerpt that shows only a marker region instead of the factory body.")]
+    public void FactoryBodyScan_ShouldSkipTheFactory_WhenTheExcerptShowsOnlyAMarkerRegion()
+    {
+        // Arrange
+        const string text = "define(\"UsrPage\", /**SCHEMA_DEPS*/[]/**SCHEMA_DEPS*/, function/**SCHEMA_ARGS*/()/**SCHEMA_ARGS*/ {\n    validators: /**SCHEMA_VALIDATORS*/{ usrCheck: { validator: function() { return null; } } }/**SCHEMA_VALIDATORS*/\n});";
+
+        // Act
+        List<string> bodies = ScanFactoryBodies(text).ToList();
+
+        // Assert
+        bodies.Should().BeEmpty(because: "a marker-only excerpt does not show the factory body, so it cannot be judged");
+    }
+
+    private static IEnumerable<string> ScanFactoryBodies(string text)
+    {
+        foreach (Match opening in PageFactoryOpening.Matches(text))
+        {
+            string afterOpening = text[(opening.Index + opening.Length)..];
+            string withoutComments = Comments.Replace(afterOpening, comment => new string(' ', comment.Length));
+            Match factoryReturn = FactoryReturn.Match(withoutComments);
+            if (!factoryReturn.Success)
+            {
+                continue;
+            }
+            if (afterOpening[..factoryReturn.Index].Contains("/**SCHEMA_", StringComparison.Ordinal))
+            {
+                // An excerpt that shows only a marker region, not the factory body.
+                continue;
+            }
+            yield return withoutComments[..factoryReturn.Index].Trim();
+        }
     }
 
     private static string FindRepositoryRoot()
