@@ -1,6 +1,7 @@
 clio MCP process-approval guide — the Approval element (ApprovalUserTask)
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Approval element and its `approval` block.
 A rule that lives in another article is cited by its article NAME and never repeated here, so a
 name in backticks is a get-guidance topic to fetch, not a section to scroll to.
@@ -111,6 +112,13 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   first time somebody opens its card, and the expression is rendered in neither page mode.
   `process-activity-result-branches` owns the dialect and its refusals; read it before you branch
   this element.
+- An `approval` element left with NO object (no block, and no `setElement.approval` after it) is NOT refused -
+  finishing it with `setElement` in the same or a later request is supported - but the response carries a
+  Warning naming it (CrtProcessBuilder 1.6.6.90 and later - an older package stays silent, so silence proves
+  nothing), judged at the END of the request. Treat that Warning as a to-do: until it is fixed the element
+  fails on its first run. One with an object but no approval schema is reported too: re-apply the object with
+  `setElement.approval {object}`, which derives it. Settle the missing part WITH the user rather than
+  inventing it, and while it stays unfinished say plainly that the element is incomplete.
 
 == Modifying an existing Approval element ==
 - `modify-business-process` → `setElement` with an `approval` block reconfigures it IN PLACE; only the

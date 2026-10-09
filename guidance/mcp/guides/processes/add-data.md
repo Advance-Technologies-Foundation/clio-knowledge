@@ -1,6 +1,7 @@
 clio MCP process-add-data guide — the Add data element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 == What this article owns ==
 This article owns the Add data element: its `addData` block, both adding modes, every value source the
@@ -13,6 +14,12 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
 `process-element-catalog`.
 
 == Add data element (addData) ==
+- An `addData` element left with NO target object is NOT refused - finishing it with `setElement` in the same
+  or a later request is supported - but the response carries a Warning naming it (CrtProcessBuilder 1.6.6.90
+  and later - an older package stays silent, so silence proves nothing), judged at the END of the request.
+  Treat that Warning as a to-do: until it is fixed the element completes having added nothing. Settle the
+  missing part WITH the user rather than inventing it, and while it stays unfinished say plainly that the
+  element is incomplete.
 - An `addData` element CREATES records. Two modes, chosen by `mode`: `one` (the default) adds ONE record;
   `selection` adds one record PER RECORD of a filtered selection from another object.
 - Add ONE record:
