@@ -112,8 +112,10 @@ Reading a trace
    Process parameter values are in `ProcessData`, left out above because every row repeats the whole snapshot:
    when the question is about them, add the column on ONE row - the `element` filter on the task in question.
 3. A task missing from that result did not complete: it failed or still waits, and only its start row exists
-   (measured: a failed Add data left only `TraceEvent` 0, its element-log row in Status Error). For the inputs it
-   was given, read that row: the same call with `done` set to 0 and the `element` filter on that task.
+   (measured: a failed Add data left only `TraceEvent` 0, its element-log row in Status Error). That holds only
+   when fewer rows than `rowCount` came back - a full result may have been cut, so then ask with the `element`
+   filter on the task first. For the inputs it was given, read that row: the same call with `done` set to 0 and
+   the `element` filter on that task.
    A Read data element set to read all columns fetches only the columns a later element of the process uses
    (platform feature `FetchOnlyUsedColumnValues`; on on the measured stand, where nothing used the result), so its
    traced ResultEntity holds those, the Id and the sort column - not the whole record. That is what the run read,
