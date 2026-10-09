@@ -45,10 +45,12 @@ How to switch it
   `setTracing` does not save the process: no re-layout, no new modified stamp, nothing for the pre-save gate to
   refuse. Combined with other operations it is written AFTER the edit saves, so a refused edit leaves tracing
   unchanged. One `setTracing` per request; `enabled` on any other operation is refused.
-- `modify-business-process-as-new-version` takes the same operation, but switching tracing is NOT a graph edit:
-  send `setTracing` ALONE to `modify-business-process` - naming any member of the family reaches the root - even
-  when the user chose to take edits as new versions (`process-version-writes`). Sent alone to the version tool it
-  saves a version that can never be deleted, only to flip a switch.
+- Switching tracing is NOT a graph edit: send `setTracing` ALONE to `modify-business-process` - naming any member
+  of the family reaches the root - even when the user chose to take edits as new versions
+  (`process-version-writes`). `modify-business-process-as-new-version` REFUSES a batch made only of `setTracing`,
+  because it would save a version that can never be deleted only to flip a switch; nothing is created. Beside real
+  edits it is accepted there, and then the switch applies to the whole family at once - the version that runs now
+  included - while the new version's edits wait until it is made actual.
 - If the switch fails after an edit saved, the error says the edit WAS saved: send `setTracing` again ON ITS OWN,
   never the whole batch.
 

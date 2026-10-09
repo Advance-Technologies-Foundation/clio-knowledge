@@ -60,7 +60,9 @@ public sealed class ProcessTracingGuidanceTests
         guide.Should().Contain("Switching it needs the `CanManageSolution` right on top of process design",
             because: "the package refuses a caller without it, and the agent should know why before it tries");
         guide.Should().Contain("send `setTracing` ALONE to `modify-business-process`",
-            because: "sent alone to the version tool, setTracing saves a version that can never be deleted");
+            because: "sent alone to the version tool, setTracing is refused");
+        guide.Should().Contain("REFUSES a batch made only of `setTracing`",
+            because: "the package refuses it, and an agent told otherwise would retry the version tool");
         guide.Should().Contain("the `tracing` block is the proof, never the success of the write",
             because: "an older clio and package pair drops isTracing in silence, so the write's success proves nothing");
     }
