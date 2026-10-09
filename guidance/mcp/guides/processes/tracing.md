@@ -78,8 +78,8 @@ reports `tracing: {enabled: true, turnOffDate: "yyyy-MM-dd"}` - the last traced 
 `tracing` key means runs are not traced (or, rarely, that the server could not read the switch - it logs that -
 or that the environment's CrtProcessBuilder predates 1.6.6.92 and never reports it). A block WITHOUT `turnOffDate`
 has two opposite meanings: the setting is 0, so tracing never switches off, or the switch-on date could not be
-read, so the date is unknown and the platform may switch it off at its next nightly run - the warning of the write
-that switched it on says which. Switching on a process that is already traced writes nothing and does NOT
+read, so the date is unknown and the platform may switch it off at its next nightly run. The setting tells them
+apart - 0 is the first case, above 0 the second - and it holds even when someone else switched tracing on. Switching on a process that is already traced writes nothing and does NOT
 move the date (the warning says so); to restart the countdown, switch it off and on again.
 
 Reading a trace
