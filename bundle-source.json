@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.115",
+  "libraryVersion": "1.15.116",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -139,6 +139,7 @@
       "process-version-writes",
       "process-versions",
       "process-script-task",
+      "process-tracing",
       "product-telemetry",
       "record-rights",
       "object-rights",
@@ -326,6 +327,7 @@
       "docs://knowledge/com.creatio.clio/process-version-writes",
       "docs://knowledge/com.creatio.clio/process-versions",
       "docs://knowledge/com.creatio.clio/process-script-task",
+      "docs://knowledge/com.creatio.clio/process-tracing",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/object-rights",
@@ -1864,6 +1866,20 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
       "bundlePath": "resources/process-script-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-tracing",
+      "title": "Process tracing",
+      "description": "Switching Creatio process tracing on and off with clio (create-business-process isTracing, the setTracing operation, the describe tracing block) and reading the trace: what the element log already shows, what SysPrcElementTraceLog adds, the data and volume costs to tell the user, one switch per version family on the root, the automatic switch-off date, and how to query a traced run.",
+      "topicId": "creatio.process-tracing",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-tracing",
+      "legacyUris": [
+        "docs://mcp/guides/process-tracing"
+      ],
+      "sourcePath": "guidance/mcp/guides/processes/tracing.md",
+      "bundlePath": "resources/process-tracing.md",
       "mediaType": "text/plain"
     },
     {
