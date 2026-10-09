@@ -162,7 +162,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile keeps running, so poll compile-status rather than compiling again, and, when compile-status has no record, read the timed compilation history its not-found answer lists - last-compilation-log, whose verdict carries no time, is the fallback when that field is absent (unreadable history or an older clio). Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. Round 3 (QA): no row since the call can mean the request was lost with a restarted server, so it ends with the user, not with last-compilation-log. The rule lives in core-rules; process-script-task only points to it.")]
+    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile may still be running, so poll compile-status rather than compiling again, and, when compile-status has no record, read the timed compilation history its not-found answer lists - last-compilation-log, whose verdict carries no time, is the fallback when that field is absent (unreadable history or an older clio). Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. Round 3 (QA): no row since the call can mean the request was lost with a restarted server, so it ends with the user, not with last-compilation-log. The rule lives in core-rules; process-script-task only points to it.")]
     public void Guides_ShouldSayWhatToDoAfterAClientSideCompileTimeout()
     {
         // Arrange
