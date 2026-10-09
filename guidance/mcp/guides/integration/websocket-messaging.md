@@ -95,7 +95,6 @@ Freedom UI subscription pattern
 ```javascript
 define("UsrSome_Page", /**SCHEMA_DEPS*/["@creatio-devkit/common"]/**SCHEMA_DEPS*/,
 	function/**SCHEMA_ARGS*/(sdk)/**SCHEMA_ARGS*/ {
-	const senderName = "WebsocketLab.Message";
 	return {
 		handlers: /**SCHEMA_HANDLERS*/[
 			{
@@ -106,6 +105,7 @@ define("UsrSome_Page", /**SCHEMA_DEPS*/["@creatio-devkit/common"]/**SCHEMA_DEPS*
 						request.$context.websocketSubscriptionPending) {
 						return;
 					}
+					const senderName = "WebsocketLab.Message";
 					const channel = new sdk.MessageChannelService();
 					const pending = channel.subscribe(
 						senderName,

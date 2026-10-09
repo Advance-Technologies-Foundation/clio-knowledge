@@ -1289,7 +1289,7 @@
     {
       "itemId": "page-modification-overview",
       "title": "Page modification lifecycle",
-      "description": "Page-body save-lifecycle sub-guide of the page-modification family: canonical get-page/update-page/sync-pages flow, replacing-schema concept, design-package resolution, write modes (replace/append/diff), do-not-resend-full-body, external-modification conflicts, body formatting, and known limitations.",
+      "description": "Page-body save-lifecycle sub-guide of the page-modification family: canonical get-page/update-page/sync-pages flow, replacing-schema concept, design-package resolution, write modes (replace/append/diff), do-not-resend-full-body, external-modification conflicts, body formatting, what survives an Interface Designer save, and known limitations.",
       "topicId": "creatio.page-modification-overview",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-modification-overview",
@@ -2826,7 +2826,7 @@
     {
       "itemId": "shared-client-logic",
       "title": "Shared Freedom UI client logic",
-      "description": "Create one AMD client-unit helper and consume it from multiple Freedom UI web pages; verify imports, handlers and browser refresh without duplicating logic.",
+      "description": "Keep Freedom UI web page helpers, constants and caches in an AMD client-unit module imported through SCHEMA_DEPS, for one page or many, because an Interface Designer save deletes the page factory body; verify imports, handlers and browser refresh.",
       "topicId": "creatio.shared-client-logic",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/shared-client-logic",
