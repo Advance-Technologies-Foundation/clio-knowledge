@@ -67,8 +67,10 @@ public sealed class ProcessTracingGuidanceTests
             because: "the word made agents split a graph edit and the switch into two writes");
         guide.Should().Contain("REFUSES a batch made only of `setTracing`",
             because: "the package refuses it, and an agent told otherwise would retry the version tool");
-        guide.Should().Contain("the `tracing` block is the proof, never the success of the write",
-            because: "an older clio and package pair drops isTracing in silence, so the write's success proves nothing");
+        guide.Should().Contain("a success WITHOUT that warning means tracing was NOT switched on",
+            because: "an older clio and package pair drops isTracing in silence, so a bare success proves nothing");
+        guide.Should().Contain("do not re-read the process with\n`describe-business-process` to confirm one",
+            because: "the ON warning names the date, so a read-back after every switch only repeats it (17 redundant reads in the 2026-10-09 stand run)");
     }
 
     [Test]
@@ -90,21 +92,25 @@ public sealed class ProcessTracingGuidanceTests
     }
 
     [Test]
-    [Description("The trace query in the article is a literal, parseable clio-run call whose SelectQuery sits under 'query': a prose recipe made agents send rootSchemaName/columns/filters as top-level execute-esq arguments, which is refused (8 of 11 failed execute-esq calls in the 2026-10-09 stand run).")]
+    [Description("The trace query in the article is a literal, parseable clio-run call whose SelectQuery sits under 'query' and reads only completion rows: a prose recipe made agents send rootSchemaName/columns/filters as top-level execute-esq arguments, which is refused (8 of 11 failed execute-esq calls in the 2026-10-09 stand run), and reading both rows doubled the volume.")]
     public void Guide_ShouldCarryARunnableTraceQuery()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
         string guide = File.ReadAllText(Path.Combine(repositoryRoot, ArticlePath));
-        const string Opening = "{\"command\":\"execute-esq\"";
-        int start = guide.IndexOf(Opening, StringComparison.Ordinal);
-        int end = guide.IndexOf("\n   Keep the `element` filter", start, StringComparison.Ordinal);
+        int start = guide.IndexOf("{\"command\":\"execute-esq\"", StringComparison.Ordinal);
+        int end = guide.IndexOf("\n   When only one task matters", start, StringComparison.Ordinal);
+        int elementStart = guide.IndexOf("\"element\":{", end, StringComparison.Ordinal);
+        int elementEnd = guide.IndexOf("\n   Every value it returns", elementStart, StringComparison.Ordinal);
 
         // Act
         string call = string.Concat(guide[start..end].Split('\n').Select(line => line.Trim()));
+        string elementItem = "{" + string.Concat(guide[elementStart..elementEnd].Split('\n').Select(line => line.Trim())) + "}";
         using JsonDocument document = JsonDocument.Parse(call);
+        using JsonDocument element = JsonDocument.Parse(elementItem);
         JsonElement args = document.RootElement.GetProperty("args");
         JsonElement query = args.GetProperty("query");
+        JsonElement filters = query.GetProperty("filters").GetProperty("items");
 
         // Assert
         start.Should().BeGreaterThan(0, because: "the article must carry the call, not describe it");
@@ -114,9 +120,13 @@ public sealed class ProcessTracingGuidanceTests
             because: "the trace rows live in SysPrcElementTraceLog");
         query.GetProperty("columns").GetProperty("items").EnumerateObject().Select(column => column.Name)
             .Should().Contain(new[] { "TraceEvent", "ElementData", "ProcessData" },
-                because: "those are the columns the comparison in step 3 reads");
-        query.GetProperty("filters").GetProperty("items").GetProperty("run").GetProperty("leftExpression")
-            .GetProperty("columnPath").GetString().Should().Be("SysProcessElementLog.SysProcess",
+                because: "those are the columns step 2 reports from");
+        filters.GetProperty("run").GetProperty("leftExpression").GetProperty("columnPath").GetString()
+            .Should().Be("SysProcessElementLog.SysProcess",
                 because: "a trace row reaches its run through its element-log row");
+        filters.GetProperty("done").GetProperty("rightExpression").GetProperty("parameter").GetProperty("value")
+            .GetInt32().Should().Be(1, because: "the completion row holds inputs and outputs; the start row would double the volume");
+        element.RootElement.GetProperty("element").GetProperty("leftExpression").GetProperty("columnPath").GetString()
+            .Should().Be("SysProcessElementLog.Caption", because: "the optional item narrows the read to one task");
     }
 }

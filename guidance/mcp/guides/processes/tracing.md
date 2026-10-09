@@ -8,8 +8,13 @@ elements received and returned, and whenever a request asks to switch process tr
 itself belongs to `process-modeling`; which version of a process runs belongs to `process-versions`.
 Needs CrtProcessBuilder 1.6.6.92 or later on the environment, and a clio whose `create-business-process` and
 `modify-business-process` contracts name `isTracing` and `setTracing` (check `get-tool-contract`) - that clio refuses
-an older package up front. An older pair accepts `isTracing` and drops it in silence, so after ANY switch confirm it
-with `describe-business-process`: the `tracing` block is the proof, never the success of the write.
+an older package up front. The write's own result is the proof of a switch - do not re-read the process with
+`describe-business-process` to confirm one. Switching ON took effect only when the result carries the warning
+`Tracing is now ON ...` or `Tracing was already ON ...`, which also names the switch-off date. An older pair accepts
+`isTracing` and drops it in silence, so a success WITHOUT that warning means tracing was NOT switched on: read
+`describe-business-process` then, and tell the user. Switching OFF carries no warning; the success of the batch that
+held it is the proof, because an older package refuses the operation it does not know
+(`Operation 'setTracing' is not supported`).
 Switching it needs the `CanManageSolution` right on top of process design (`CanManageProcessDesign`). The product's
 own checkbox accepts that right too (or `CanManageDcm`, which clio does not accept). Without it the call is refused
 before anything is saved; say so to the user rather than looking for another route.
@@ -20,7 +25,7 @@ element (Caption, Status, StartDate, CompleteDate, SysProcess; the start event w
 stopped, and it needs no tracing; read it when the question is where a run stopped.
 Tracing is the platform's "Enable tracing" checkbox on the Process Library record page. While it is on, every run
 also writes two `SysPrcElementTraceLog` rows per executed ACTIVITY - a task such as Read data; events write none -
-`TraceEvent` 0 when it starts and 1 when it completes - and each row carries two JSON arrays: `ElementData`, every parameter value of that element, and
+`TraceEvent` 0 when it starts and 1 when it completes; a task that failed or still waits has only its 0 row - and each row carries two JSON arrays: `ElementData`, every parameter value of that element, and
 `ProcessData`, every process parameter value at that moment. Each array item is
 {Parameter:{UId, Name, Caption, Direction}, Value}. That answers WHAT the element saw and what it produced.
 Measured on a .NET Framework stand on 2026-10-09 - CrtProcessBuilder 1.6.6.91 with tracing switched through the
@@ -74,9 +79,12 @@ move the date (the warning says so); to restart the countdown, switch it off and
 
 Reading a trace
 1. Run the process (`run-process`, or the trigger it normally runs on) and keep the `processId` it returns.
-2. Values: ONE `execute-esq` call. `execute-esq` takes a whole SelectQuery in `query` - `rootSchemaName`, `columns`
-   and `filters` are NOT top-level arguments, and that shape is refused. Send this, with the two placeholders filled
-   (measured on 2026-10-09: two rows, about 10 KB):
+2. Values: ONE `execute-esq` call for the COMPLETION rows (`TraceEvent` 1) of the run. A completion row holds
+   every parameter value at completion - the inputs the task was given AND the outputs it produced - so the start
+   row adds nothing for a task that completed, and skipping it halves the volume (measured on 2026-10-09: about
+   5 KB per task; a three-task run took 15 KB, where both rows took 36 KB). `execute-esq` takes a whole
+   SelectQuery in `query` - `rootSchemaName`, `columns` and `filters` are NOT top-level arguments, and that shape
+   is refused. Send this, with the placeholders filled:
    {"command":"execute-esq","args":{"environment-name":"<env>","query":{"rootSchemaName":"SysPrcElementTraceLog",
    "operationType":0,"allColumns":false,"rowCount":20,"columns":{"items":{
    "CreatedOn":{"orderDirection":1,"orderPosition":0,"expression":{"expressionType":0,"columnPath":"CreatedOn"}},
@@ -88,13 +96,18 @@ Reading a trace
    "run":{"filterType":1,"comparisonType":3,"isEnabled":true,
    "leftExpression":{"expressionType":0,"columnPath":"SysProcessElementLog.SysProcess"},
    "rightExpression":{"expressionType":2,"parameter":{"dataValueType":0,"value":"<processId>"}}},
+   "done":{"filterType":1,"comparisonType":3,"isEnabled":true,
+   "leftExpression":{"expressionType":0,"columnPath":"TraceEvent"},
+   "rightExpression":{"expressionType":2,"parameter":{"dataValueType":4,"value":1}}}}}}}}
+   When only one task matters, or the run executed many, add this item to `filters.items` (one row, about 5 KB):
    "element":{"filterType":1,"comparisonType":3,"isEnabled":true,
    "leftExpression":{"expressionType":0,"columnPath":"SysProcessElementLog.Caption"},
-   "rightExpression":{"expressionType":2,"parameter":{"dataValueType":1,"value":"<element caption>"}}}}}}}}
-   Keep the `element` filter: the JSON is long, `execute-esq` fails a response over its size budget, and every
-   value it returns is record data you then hold. Drop it only for a process with few tasks. Report to the user
-   the values that explain the run, not the whole payload.
-3. Compare ElementData at TraceEvent 0 and 1: the inputs the element was given, and the outputs it produced.
+   "rightExpression":{"expressionType":2,"parameter":{"dataValueType":1,"value":"<element caption>"}}}
+   Every value it returns is record data you then hold: report to the user the values that explain the run, not
+   the whole payload.
+3. A task missing from that result did not complete: it failed or still waits, and only its start row exists
+   (measured: a failed Add data left only `TraceEvent` 0, its element-log row in Status Error). For the inputs it
+   was given, read that row: the same call with `done` set to 0 and the `element` filter on that task.
    A Read data element set to read all columns fetches only the columns a later element of the process uses
    (platform feature `FetchOnlyUsedColumnValues`; on on the measured stand, where nothing used the result), so its
    traced ResultEntity holds those, the Id and the sort column - not the whole record. That is what the run read,
