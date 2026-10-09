@@ -1,6 +1,7 @@
 clio MCP process-delete-data guide — the Delete data element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 This article is the authoritative owner of the Creatio **Delete data** element (`deleteData` /
 `DeleteDataUserTask`): its one-field `deleteData` block, the record filter that decides what is destroyed,

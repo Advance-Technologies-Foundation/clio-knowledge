@@ -1,6 +1,7 @@
 clio MCP process-preconfigured-page guide — the Pre-configured page element (PreconfiguredPageUserTask)
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Pre-configured page element: the page facts you must read
 before building one, the completing buttons, the data sources and the record they carry, the performer and
 its showPage rule, and what a later edit re-synchronizes. A rule that lives in another article is cited by
@@ -10,6 +11,10 @@ section to scroll to.
 == Element: Pre-configured page (preconfiguredPage -> PreconfiguredPageUserTask) ==
 - `preconfiguredPage` — Pre-configured page: shows a Freedom UI page to a user and resumes when the user
   presses a completing button. It is the only page element that can hand a user a purpose-built page.
+  Build it ONLY as `type:"preconfiguredPage"` with its `preconfiguredPage` block. A generic `userTask` naming
+  `PreconfiguredPageUserTask` cannot carry the block, so it could only build a page-less element that fails
+  at run time, and it is REFUSED. An existing element with no page is repaired with `setElement` and the same
+  block.
   CRITICAL: the page's buttons and data sources are FACTS you must read first, not values you may invent —
   a page inherits its buttons from its template chain, so they are only knowable from the merged page and
   the server cannot see them. Call `get-process-page-facts --schema-name <page>` and pass its

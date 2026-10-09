@@ -27,9 +27,19 @@ public sealed class GuidanceMigrationTests
         "process-add-data",
         "process-read-data",
         "process-sub-process-when",
+        "process-digest",
+        "process-send-email-details",
+        "process-branch-conditions-details",
+        "process-open-edit-page-details",
+        "process-access-rights-details",
+        "process-activity-connections-details",
+        "process-element-catalog-details",
+        "process-formulas-details",
+        "process-parameters-details",
         "portal-service-routing",
         "external-organizations",
-        "page-schema-translation"
+        "page-schema-translation",
+        "object-rights"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

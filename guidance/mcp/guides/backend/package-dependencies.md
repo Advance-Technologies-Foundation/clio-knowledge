@@ -68,7 +68,7 @@ CREATING A NEW PACKAGE
   package was named: page and schema writes already resolve their own target package
   (get-target-package, the application's current package).
 - create-package is a destructive, non-idempotent long-tail tool: find it with get-tool-contract and
-  call it through clio-run-destructive. When the running clio does not expose it, ask the user to create
+  call it through clio-run. When the running clio does not expose it, ask the user to create
   the package in the Configuration section; do NOT fall back to push-workspace, SQL, OData or
   DataService.
 - Arguments: environment-name, package-name; optional description, dependencies and application-code

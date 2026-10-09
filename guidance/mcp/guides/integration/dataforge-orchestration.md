@@ -12,7 +12,7 @@ Architecture split
 Invocation (DataForge tools are long-tail, not resident)
 - As of ENG-92761 the DataForge tools (`dataforge-status`, `dataforge-context`, `dataforge-find-tables`, `dataforge-find-lookups`, `dataforge-get-relations`, `dataforge-get-table-columns`, `dataforge-initialize`, `dataforge-update`) are NOT advertised in `tools/list`. They are long-tail tools discoverable through `get-tool-contract` (each carries a `resident: false` flag); their absence from `tools/list` is expected, not a blocker.
 - Invoke a read-only DataForge tool through the `clio-run` executor: `{"command": "<dataforge-tool>", "args": { …target args… }}`. Do not call it by bare name — strict/HTTP MCP clients cannot dispatch an unadvertised bare name.
-- Invoke the destructive DataForge tools `dataforge-initialize` and `dataforge-update` through `clio-run-destructive` with the same shape. Both executors dispatch directly; the destructive gate is enforced at the host level via the tool's `Destructive=true` flag, not by the executor.
+- Invoke the destructive DataForge tools `dataforge-initialize` and `dataforge-update` through the same `clio-run` executor with the same shape (`clio-run-destructive` is a deprecated alias of it). clio builds older than 8.1.0.72 reject destructive tools in `clio-run`; on those builds call `dataforge-initialize` and `dataforge-update` through `clio-run-destructive` instead. The destructive gate is enforced at the host level via the tool's `Destructive=true` flag, not by the executor.
 
 Layer 0 — Health preflight
 When: once, at the start of a workflow that will span multiple write operations.
