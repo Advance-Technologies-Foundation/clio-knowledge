@@ -124,8 +124,8 @@ contract and the builder both reject unknown properties. Adding one is a schema 
 request; until then, record the relationship in the pull request description and the article text.
 Supersession and retirement are behavioral.
 
-- **A rule moves to another item**: the item that loses it drops the rule and cites the new owner by
-  `itemId`; the pull request names both items.
+- **A rule moves to another item**: the item that loses it drops the rule and cites the new owner as
+  described under Citations below; the pull request names both items.
 - **An item is retired**: the pull request names it and its successor, removes it from `resources`,
   `requirements.itemIds`, and `requirements.resourceUris`, rewrites every `name=` or
   `docs://knowledge/` citation of it to the successor, and moves its `legacyUris` to the successor so
