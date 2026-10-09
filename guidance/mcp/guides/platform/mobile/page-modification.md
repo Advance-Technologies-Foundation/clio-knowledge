@@ -537,8 +537,9 @@ Evidence: schemas produced by the Mobile Designer on Creatio 8.3.4 / 10.0 for a 
 ─────────────────────────────────────────────────────────────
 ADAPTIVE BREAKPOINTS
 ─────────────────────────────────────────────────────────────
-The web→mobile conversion PROPOSES an adaptive layout for containers that group 2+ fields
-(stack on phone, 2 columns on tablet) — present it to the user, who can adjust or decline.
+The web→mobile conversion bakes an adaptive layout into every multi-column grid it converts
+(stack on phone; on tablet one weighted column per child of the web grid's fullest row) — how it is
+reported is owned by the web-to-mobile-conversion guide.
 Apply this section whenever you want per-screen placement; otherwise rely on the static
 `columns` / `layoutConfig` values.
 
@@ -548,8 +549,10 @@ The mobile designer "Tablet portrait" / "Tablet landscape" preview switcher maps
 Adaptive layout has TWO sides — you must edit both for a real responsive layout:
 
 (1) CONTAINER side — `adaptive` on crt.GridContainer (sibling of `columns`).
-    Defines how many grid columns exist at each breakpoint.
-    Both string ("1fr 1fr") and array (["1fr","1fr"]) forms are accepted by the runtime.
+    Defines how many grid columns exist at each breakpoint, and how wide each one is.
+    Write `columns` as an ARRAY, one entry per column: the runtime reads a single string such as
+    "1fr 1fr" as ONE column. An integer "<n>fr" is that column's weight (["2fr","1fr"] is a 2:1
+    split); "minmax(...)" or "1.5fr" fall back to an equal share.
 
     {
       "operation": "merge",
@@ -623,7 +626,10 @@ Rules of thumb:
   - Use 1-based `row` and `column` — the runtime reflows children by these per breakpoint
     (one item per cell). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
     designer's format, but are NOT honored per-item by the runtime; do not rely on them to
-    span cells. To make an item wider, give the container fewer columns at that breakpoint.
+    span cells. To make an item wider, give the container fewer columns at that breakpoint, or a
+    larger "<n>fr" weight to the item's column.
+  - Each column is an independent stack ordered by `row`: items that share a `row` in neighbouring
+    columns are NOT aligned to each other on the device, even though the designer preview aligns them.
   - Keep all three breakpoints (`small`, `medium`, `large`) populated even when two
     share the same cell — the designer always serialises the full set and partial maps
     may render as empty cells on the missing breakpoint.

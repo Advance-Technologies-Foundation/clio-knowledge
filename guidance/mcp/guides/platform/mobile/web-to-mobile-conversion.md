@@ -81,7 +81,7 @@ Creatio or disk. The guide contains:
   - modelConfig / viewModelConfig — the same configs in full-object form, for REFERENCE only.
     viewModelConfig is already FILTERED (attributes used only by dropped components removed).
   - adaptiveLayout — the responsive layout for each MULTI-column grid container (phone collapses to
-    1 column and stacks; tablet/desktop keep the web columns). BOTH sides are already baked into
+    1 column and stacks; tablet columns are derived from the web grid). BOTH sides are already baked into
     values (the container's adaptive columns into its own values, each child's placement into
     viewConfigDiff[].values.layoutConfig.adaptive) — nothing separate to apply. It is a READABLE INDEX
     of what the conversion did, not a switch: present it at the gate as fact, and if the user wants it
@@ -339,17 +339,15 @@ FLOW
    the page's modelConfigDiff / viewModelConfigDiff (see DATA SECTIONS below). Do NOT rebuild them
    by hand, and NEVER copy the data-source section from a pre-existing / reference body.
 5b. Adaptive layout (when guide.adaptiveLayout is present): for every MULTI-column crt.GridContainer the
-   guide has ALREADY baked both sides into values you pasted in step 4 — the container's per-breakpoint
-   columns (small = 1, medium/large = the web columns) and each child's layoutConfig.adaptive (phone stacks
-   in one column; tablet/desktop keep the web placement). A single-column grid gets no adaptive (the mobile
-   client renders the plain layout). Nothing extra to apply — do NOT emit a separate merge for the
-   container's adaptive (it is already inside the container's inserted values; a separate merge
-   would duplicate the operation). REPORT it to the user in plain language as a FACT of the conversion
-   ("fields in <container> stack on the phone and keep <n> columns on a tablet; tablet is experimental,
-   check it on a device") — do NOT ask whether to
-   apply it. There is no field to decline it with: the values are already in the operations you pasted, so
-   a "no" has no represented outcome. The only change path is hand-editing those values before pasting,
-   and that is the developer's to take, not a question for the gate.
+   guide has ALREADY baked both sides into values you pasted in step 4 — the container's columns per
+   breakpoint (small = 1; medium = large = adaptiveLayout.columnsByBreakpoint.medium, which may differ from
+   the web count) and each child's layoutConfig.adaptive. A single-column grid gets no adaptive. Nothing extra
+   to apply — do NOT emit a separate merge for the container's adaptive (it would duplicate the operation).
+   REPORT it as a FACT of the conversion ("fields in <container> stack on the phone and sit in <n> columns on
+   a tablet; tablet is experimental, check it on a device" — <n> = length of columnsByBreakpoint.medium) —
+   do NOT ask whether to apply it: the values are already in the operations you pasted, so a "no" has no
+   represented outcome. The only change path is hand-editing those values before pasting, and that is the
+   developer's to take, not a question for the gate.
 5c. Tab body + Area (when guide.tabAreaLayers is present): every tab the CONVERTER creates already carries
    its synthesized inserts in viewConfigDiff — the tab-body grid, then its Area card — because on
    mobile a tab's content lives in an Area card, not directly in the tab body. Each of that tab's
