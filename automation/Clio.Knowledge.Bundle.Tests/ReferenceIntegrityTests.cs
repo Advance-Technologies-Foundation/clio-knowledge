@@ -55,9 +55,10 @@ public sealed class ReferenceIntegrityTests
     /// The prose form: <c>get-guidance</c> followed by a backtick-quoted name, optionally through "with",
     /// "name" and "set to" (<c>call `get-guidance` with `name` set to `workplaces`</c>). The quoted value is
     /// taken exactly. Whitespace may cross a line break, because a wrapped citation is still a citation.
+    /// A quoted <c>name=&lt;id&gt;</c> is left to <see cref="NameToken"/>, so it is not checked twice.
     /// </summary>
     private static readonly Regex ProseGuideName = new(
-        @"get-guidance`?(?:\s+with)?(?:\s+`?name`?)?(?:\s+set\s+to)?\s+`([^`\s]+)`",
+        @"get-guidance`?(?:\s+with)?(?:\s+`?name`?)?(?:\s+set\s+to)?\s+`([^`\s=]+)`",
         RegexOptions.Compiled);
 
     /// <summary>
@@ -139,7 +140,7 @@ public sealed class ReferenceIntegrityTests
             "[sibling](core-rules.md) [bad](../missing.md#anchor) [web](https://example.com) [here](#top)",
             "name=core-rules- name=core-rules_ name=Core-rules get-guidance `Core-rules`",
             "docs://knowledge/lib/core-rules?bad and docs://mcp/guides/{family}/{guide}",
-            "**docs://knowledge/lib/core-rules** _docs://mcp/guides/core-rules_ docs://mcp/guides/core-rules_");
+            "**docs://knowledge/lib/core-rules** _docs://mcp/guides/core-rules_ docs://mcp/guides/core-rules_ get-guidance `name=core-rules`");
         const string catalog = "schemaVersion: 0\nid: example-renamed\ntitle: x\n";
         const string quotedCatalog = "schemaVersion: 0\nid: \"example\"\n";
         const string commentedCatalog = "schemaVersion: 0\nid: 'example'  # stable\r\ntitle: x\n";
