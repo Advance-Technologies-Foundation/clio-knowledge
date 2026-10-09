@@ -153,10 +153,24 @@ public sealed class MobileGuideResponseSizeTests
     /// FLOW step 5b already gives in more detail, so the restatement came out and the bullet now points
     /// at 5b. Net -146 even after the addition.
     /// </remarks>
+    /// <remarks>
+    /// LOWERED BOTH AGAIN, 62,418 -> 62,409 and 18,732 -> 18,713, in a change that ADDS content
+    /// (ENG-96178, review round). The conversion article gained the sentence a reviewer asked for - that an
+    /// elementName in droppedRequests/flaggedRequests can name a node carried inside another element's
+    /// values, which has no viewConfigDiff operation of its own, so an agent patching by elementName alone
+    /// never finds it. The article had SEVENTEEN bytes of headroom, so the sentence was paid for inside the
+    /// same bullet, per the ratchet-down rule: the per-code "when each applies" clauses came out (the
+    /// bullet already points at freedom-page-mobile-reason-codes for exactly that, and that article states
+    /// both more fully than the restatement did), and the `requestConversions.` prefix came off the two
+    /// collection names in the bullets - the sentence immediately below them names the parent, and
+    /// reason-codes carries the full path. The reason-codes article lost the claim that flag-request-unmapped
+    /// means the request is in neither catalog: the flag branch never reads the registry, so the wording
+    /// promised an exclusion clio had not established.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_418),
-        ("freedom-page-mobile-reason-codes", 18_732)
+        ("freedom-page-web-to-mobile-conversion", 62_409),
+        ("freedom-page-mobile-reason-codes", 18_713)
     ];
 
     /// <summary>

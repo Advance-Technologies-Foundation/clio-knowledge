@@ -503,21 +503,21 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 - REQUESTS (actions) on component event bindings ARE handled for you. An ACTION-ONLY component
   (`crt.Button`, `crt.MenuItem` — they exist only to fire one) whose request the Mobile app does NOT
   support is DROPPED, and so is one left with NO action and NO menu item. Always a `droppedElements`
-  entry: `drop-unsupported-request` when the rules name the request and give no mobile counterpart,
-  `drop-unknown-request` when it is in neither the rules nor the registry (often a custom `usr.*`), and
-  the bare code, no params, when EMPTINESS removed it. One exception, and the one to expect on a menu:
+  entry: `drop-unsupported-request`, `drop-unknown-request` (often a custom `usr.*`), or the bare code,
+  no params, when EMPTINESS removed it. One exception, and the one to expect on a menu:
   a component still HOLDING a live menu item or submenu is NOT dropped over its own dead request, which
   would take the live child with it — keeping the CONTROL is not keeping its ACTION.
   NO OTHER component type is dropped over a request: some legitimately fire a system request the
-  registry lacks, and losing them would lose valid UI. That owner and every other SURVIVING component
-  have their bindings decided by the same two cases:
-    • KNOWN-unsupported — REMOVED, the component shipping without it, in
-      `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
-    • UNKNOWN — KEPT VERBATIM, flagged in `requestConversions.flaggedRequests[]` under
-      `flag-request-unmapped`, for you to verify.
+  registry lacks, and losing them would lose valid UI. That owner and every SURVIVING component have
+  their bindings decided by the same two cases:
+    • KNOWN-unsupported — REMOVED, the component shipping without it, in `droppedRequests[]` under
+      `drop-request-unsupported`;
+    • UNKNOWN — KEPT VERBATIM, flagged in `flaggedRequests[]` under `flag-request-unmapped`, for you
+      to verify.
   guide.requestConversions has FIVE collections: convertedRequests, droppedRequests, flaggedRequests,
-  unresolvedTargetRequests and missingTargetPages (both above). Tell the user which action components
-  were removed AND which surviving components lost an action.
+  unresolvedTargetRequests and missingTargetPages (both above). An `elementName` in them may name a
+  node carried inside another element's `values`, which has no operation of its own — find it there.
+  Tell the user which action components were removed AND which surviving components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
   get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info
