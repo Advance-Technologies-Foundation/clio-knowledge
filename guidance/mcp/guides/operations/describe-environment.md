@@ -80,8 +80,8 @@ INTERPRETING A SPARSE REPORT
   failure; do not reinstall cliogate without another failure signal.
 
 EVIDENCE AND VERSION BOUNDARY
-- GitHub issue Advance-Technologies-Foundation/clio#1138 captured a real false-positive warning:
+- A real false-positive warning was observed in August 2026:
   package listing reported cliogate 2.0.0.45 and gate-dependent commands worked, while get-info
   claimed cliogate 2.0.0.32+ was absent or incompatible.
-- The capability-first warning rules apply to clio builds containing the #1138 fix. Older clio
+- The capability-first warning rules apply to clio 8.1.0.108 and later. Older clio
   8.1 builds can emit the former generic warning; verify with list-packages before acting on it.

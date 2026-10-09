@@ -132,8 +132,7 @@ filter; see `process-access-rights`.
   (Creatio 10.1.37, .NET Framework, MSSQL; CrtProcessBuilder 1.6.6.22; 2026-09-24).
   Describe again and require `kind: "conditional"` plus the exact text, then run with a matching and a
   non-matching record: a read-back proves authoring, NOT routing.
-  Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24;
-  [validation evidence](https://github.com/Advance-Technologies-Foundation/clio/issues/1645#issuecomment-5760323479).
+  Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24; 2026-09-21.
 - A Send email BODY macro reaches a column with its own grammar, and a recipient reaches one through a
   process parameter; `process-send-email` owns both.
 

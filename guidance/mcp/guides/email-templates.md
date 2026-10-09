@@ -3,7 +3,7 @@ clio MCP email-template content guide
 Scope and applicability
 - Use this guide for reading, editing, or copying content for a Creatio marketing email (`BulkEmail`) or message template (`EmailTemplate`).
 - Resolve the live schemas for `get-email-template` and `update-email-template` through `get-tool-contract` before the first call. This article owns workflow and storage semantics, not request-schema duplication.
-- The dedicated tools require a Creatio environment whose OData surface exposes the host record and relevant content entities. Current-designer behavior was verified on Creatio 10.1.687.0 (.NET Framework 4.8) with `BfEmailTemplate` from `CrtEmailDesigner`; legacy fields were also observed on Creatio 10.1.623.0. The same probes were recorded against a Creatio 8.x cloud demo (Advance-Technologies-Foundation/clio#1218), so a stand whose `describe-environment` reports 8.x matches this guide as well; both notations are in use for these stands. Treat other versions as capability-probed: read first and report a missing entity or route instead of inventing a fallback format.
+- The dedicated tools require a Creatio environment whose OData surface exposes the host record and relevant content entities. Current-designer behavior was verified on Creatio 10.1.687.0 (.NET Framework 4.8) with `BfEmailTemplate` from `CrtEmailDesigner`; legacy fields were also observed on Creatio 10.1.623.0. The same probes were recorded against a Creatio 8.x cloud demo (August 2026), so a stand whose `describe-environment` reports 8.x matches this guide as well; both notations are in use for these stands. Treat other versions as capability-probed: read first and report a missing entity or route instead of inventing a fallback format.
 
 Storage model
 - `BulkEmail` and `EmailTemplate` are host records. The `email-id` argument is the host record GUID, not a `BfEmailTemplate` row GUID.
@@ -37,6 +37,6 @@ Platform-service boundary
 - Conditional-display metadata maintained by platform-internal copy logic is not represented by the email-content tools. When a source template depends on conditional-display records, report that limitation and verify the copied template in the Creatio designer rather than claiming a complete semantic clone.
 
 Evidence
-- Advance-Technologies-Foundation/clio#1218: live `BfEmailTemplate` and legacy storage probes, source inspection, and checksum-guarded Beefree MCP round trip.
-- Advance-Technologies-Foundation/clio#1259 (commit `410b124f7`) implements `get-email-template` and `update-email-template`, with `EmailTemplateToolTests` and `EmailTemplateToolE2ETests` as its focused unit and MCP E2E coverage.
-- Applicable versions: no released clio serves these tools yet. The workflows here become available with the clio release that ships clio#1259; until then `get-tool-contract` will not resolve them.
+- August 2026: live `BfEmailTemplate` and legacy storage probes, source inspection, and checksum-guarded Beefree MCP round trip.
+- clio commit `410b124f7` implements `get-email-template` and `update-email-template`, with `EmailTemplateToolTests` and `EmailTemplateToolE2ETests` as its focused unit and MCP E2E coverage.
+- Applicable versions: clio 8.1.0.121 and later serve these tools; on an older clio `get-tool-contract` does not resolve them.
