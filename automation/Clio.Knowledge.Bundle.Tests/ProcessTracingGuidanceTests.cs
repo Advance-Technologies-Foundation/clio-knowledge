@@ -57,6 +57,8 @@ public sealed class ProcessTracingGuidanceTests
             because: "re-enabling is not a way to extend the countdown");
         guide.Should().Contain("tracing: {enabled: true, turnOffDate: \"yyyy-MM-dd\"}",
             because: "describe reports the switch only while it is on");
+        guide.Should().Contain("Switching it needs the `CanManageSolution` right on top of process design",
+            because: "the package refuses a caller without it, and the agent should know why before it tries");
         guide.Should().Contain("send `setTracing` ALONE to `modify-business-process`",
             because: "sent alone to the version tool, setTracing saves a version that can never be deleted");
         guide.Should().Contain("the `tracing` block is the proof, never the success of the write",

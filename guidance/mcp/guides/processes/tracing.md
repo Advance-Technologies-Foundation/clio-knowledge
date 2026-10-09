@@ -10,6 +10,9 @@ Needs CrtProcessBuilder 1.6.6.92 or later on the environment, and a clio whose `
 `modify-business-process` contracts name `isTracing` and `setTracing` (check `get-tool-contract`) - that clio refuses
 an older package up front. An older pair accepts `isTracing` and drops it in silence, so after ANY switch confirm it
 with `describe-business-process`: the `tracing` block is the proof, never the success of the write.
+Switching it needs the `CanManageSolution` right on top of process design (`CanManageProcessDesign`) - the same
+right the product's own checkbox asks for. Without it the call is refused before anything is saved; say so to the
+user rather than looking for another route.
 
 What tracing is, and what you get without it
 Every run of a clio-built process already writes the ELEMENT LOG: a `SysProcessElementLog` row per executed
