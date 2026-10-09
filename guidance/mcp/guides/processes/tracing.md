@@ -17,7 +17,7 @@ before anything is saved; say so to the user rather than looking for another rou
 What tracing is, and what you get without it
 Every run of a clio-built process already writes the ELEMENT LOG: a `SysProcessElementLog` row per executed
 element (Caption, Status, StartDate, CompleteDate, SysProcess; the start event wrote none in the measured run). That answers WHICH elements ran and where a run
-stopped, and it needs no tracing. Read it first.
+stopped, and it needs no tracing; read it when the question is where a run stopped.
 Tracing is the platform's "Enable tracing" checkbox on the Process Library record page. While it is on, every run
 also writes two `SysPrcElementTraceLog` rows per executed ACTIVITY - a task such as Read data; events write none -
 `TraceEvent` 0 when it starts and 1 when it completes - and each row carries two JSON arrays: `ElementData`, every parameter value of that element, and
@@ -45,8 +45,10 @@ How to switch it
   `setTracing` does not save the process: no re-layout, no new modified stamp, nothing for the pre-save gate to
   refuse. Combined with other operations it is written AFTER the edit saves, so a refused edit leaves tracing
   unchanged. One `setTracing` per request; `enabled` on any other operation is refused.
-- Switching tracing is NOT a graph edit: send `setTracing` ALONE to `modify-business-process` - naming any member
-  of the family reaches the root - even when the user chose to take edits as new versions
+- Edits and the switch in one request travel together: when the request also edits the graph, put `setTracing` in
+  the SAME batch as those edits, sent to whichever tool takes them - never a second call for the switch alone.
+- Switching tracing is NOT a graph edit: when it is the ONLY change, send it to `modify-business-process` - naming
+  any member of the family reaches the root - even when the user chose to take edits as new versions
   (`process-version-writes`). `modify-business-process-as-new-version` REFUSES a batch made only of `setTracing`,
   because it would save a version that can never be deleted only to flip a switch; nothing is created. Beside real
   edits it is accepted there, and then the switch applies to the whole family at once - the version that runs now
@@ -72,15 +74,33 @@ move the date (the warning says so); to restart the countdown, switch it off and
 
 Reading a trace
 1. Run the process (`run-process`, or the trigger it normally runs on) and keep the `processId` it returns.
-2. Element log: `execute-esq` on `SysProcessElementLog`, filter `SysProcess` = processId, columns Caption,
-   Status.Name, StartDate, CompleteDate. A row without CompleteDate is an element still waiting (a human step, an
-   approval), not a hang.
-3. Values: `execute-esq` on `SysPrcElementTraceLog`, filter `SysProcessElementLog.SysProcess` = processId, columns
-   TraceEvent, SysProcessElementLog.Caption, ElementData, ProcessData. Read only the element in question (filter on
-   `SysProcessElementLog.Caption`), with those columns selected explicitly: the JSON is long, `execute-esq` fails a
-   response over its size budget, and every value it returns is record data you then hold. Report to the user the
-   values that explain the run, not the whole payload.
-4. Compare ElementData at TraceEvent 0 and 1 for the element in question: the inputs it was given, and the
-   outputs it produced.
+2. Values: ONE `execute-esq` call. `execute-esq` takes a whole SelectQuery in `query` - `rootSchemaName`, `columns`
+   and `filters` are NOT top-level arguments, and that shape is refused. Send this, with the two placeholders filled
+   (measured on 2026-10-09: two rows, about 10 KB):
+   {"command":"execute-esq","args":{"environment-name":"<env>","query":{"rootSchemaName":"SysPrcElementTraceLog",
+   "operationType":0,"allColumns":false,"rowCount":20,"columns":{"items":{
+   "CreatedOn":{"orderDirection":1,"orderPosition":0,"expression":{"expressionType":0,"columnPath":"CreatedOn"}},
+   "TraceEvent":{"expression":{"expressionType":0,"columnPath":"TraceEvent"}},
+   "Element":{"expression":{"expressionType":0,"columnPath":"SysProcessElementLog.Caption"}},
+   "ElementData":{"expression":{"expressionType":0,"columnPath":"ElementData"}},
+   "ProcessData":{"expression":{"expressionType":0,"columnPath":"ProcessData"}}}},
+   "filters":{"filterType":6,"logicalOperation":0,"isEnabled":true,"items":{
+   "run":{"filterType":1,"comparisonType":3,"isEnabled":true,
+   "leftExpression":{"expressionType":0,"columnPath":"SysProcessElementLog.SysProcess"},
+   "rightExpression":{"expressionType":2,"parameter":{"dataValueType":0,"value":"<processId>"}}},
+   "element":{"filterType":1,"comparisonType":3,"isEnabled":true,
+   "leftExpression":{"expressionType":0,"columnPath":"SysProcessElementLog.Caption"},
+   "rightExpression":{"expressionType":2,"parameter":{"dataValueType":1,"value":"<element caption>"}}}}}}}}
+   Keep the `element` filter: the JSON is long, `execute-esq` fails a response over its size budget, and every
+   value it returns is record data you then hold. Drop it only for a process with few tasks. Report to the user
+   the values that explain the run, not the whole payload.
+3. Compare ElementData at TraceEvent 0 and 1: the inputs the element was given, and the outputs it produced.
+   A Read data element set to read all columns fetches only the columns a later element of the process uses
+   (platform feature `FetchOnlyUsedColumnValues`; on on the measured stand, where nothing used the result), so its
+   traced ResultEntity holds those, the Id and the sort column - not the whole record. That is what the run read,
+   not a gap in the trace.
+4. Only to find WHERE a run stopped, read the element log: the same call with `rootSchemaName`
+   `SysProcessElementLog`, columns Caption, Status.Name, StartDate, CompleteDate, and the one filter `SysProcess` =
+   processId. A row without CompleteDate is an element still waiting (a human step, an approval), not a hang.
 Then switch tracing off with {"op":"setTracing","enabled":false}. Off stays stored as a `False` value on the root,
 which is the same state the platform's own switch-off leaves; the trace rows of the runs you made stay in the log.

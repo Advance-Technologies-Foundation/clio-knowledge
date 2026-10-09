@@ -59,8 +59,12 @@ public sealed class ProcessTracingGuidanceTests
             because: "describe reports the switch only while it is on");
         guide.Should().Contain("Switching it needs the `CanManageSolution` right on top of process design",
             because: "the package refuses a caller without it, and the agent should know why before it tries");
-        guide.Should().Contain("send `setTracing` ALONE to `modify-business-process`",
+        guide.Should().Contain("when it is the ONLY change, send it to `modify-business-process`",
             because: "sent alone to the version tool, setTracing is refused");
+        guide.Should().Contain("put `setTracing` in\n  the SAME batch as those edits",
+            because: "agents read the former 'send it ALONE' as 'always a separate call' and split one request into two writes (stand run 2026-10-09, TC-06 and TC-09)");
+        guide.Should().NotContain("ALONE",
+            because: "the word made agents split a graph edit and the switch into two writes");
         guide.Should().Contain("REFUSES a batch made only of `setTracing`",
             because: "the package refuses it, and an agent told otherwise would retry the version tool");
         guide.Should().Contain("the `tracing` block is the proof, never the success of the write",
@@ -83,5 +87,36 @@ public sealed class ProcessTracingGuidanceTests
         guide.Should().Contain("personal data", because: "a trace stores record data");
         guide.Should().Contain("never as a default", because: "tracing is a diagnostic, not a setting");
         guide.Should().Contain("`SysPrcElementTraceLog`", because: "the agent has to know where to read the trace");
+    }
+
+    [Test]
+    [Description("The trace query in the article is a literal, parseable clio-run call whose SelectQuery sits under 'query': a prose recipe made agents send rootSchemaName/columns/filters as top-level execute-esq arguments, which is refused (8 of 11 failed execute-esq calls in the 2026-10-09 stand run).")]
+    public void Guide_ShouldCarryARunnableTraceQuery()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot, ArticlePath));
+        const string Opening = "{\"command\":\"execute-esq\"";
+        int start = guide.IndexOf(Opening, StringComparison.Ordinal);
+        int end = guide.IndexOf("\n   Keep the `element` filter", start, StringComparison.Ordinal);
+
+        // Act
+        string call = string.Concat(guide[start..end].Split('\n').Select(line => line.Trim()));
+        using JsonDocument document = JsonDocument.Parse(call);
+        JsonElement args = document.RootElement.GetProperty("args");
+        JsonElement query = args.GetProperty("query");
+
+        // Assert
+        start.Should().BeGreaterThan(0, because: "the article must carry the call, not describe it");
+        args.TryGetProperty("rootSchemaName", out _).Should().BeFalse(
+            because: "execute-esq refuses a top-level rootSchemaName; it belongs inside 'query'");
+        query.GetProperty("rootSchemaName").GetString().Should().Be("SysPrcElementTraceLog",
+            because: "the trace rows live in SysPrcElementTraceLog");
+        query.GetProperty("columns").GetProperty("items").EnumerateObject().Select(column => column.Name)
+            .Should().Contain(new[] { "TraceEvent", "ElementData", "ProcessData" },
+                because: "those are the columns the comparison in step 3 reads");
+        query.GetProperty("filters").GetProperty("items").GetProperty("run").GetProperty("leftExpression")
+            .GetProperty("columnPath").GetString().Should().Be("SysProcessElementLog.SysProcess",
+                because: "a trace row reaches its run through its element-log row");
     }
 }
