@@ -1,6 +1,7 @@
 clio MCP process-sub-process-when guide — when a request calls for a Sub-process, and when it does not
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the DECISION to put logic into a separate, called process:
 the one-process default, the three triggers D1, D2 and D4, what an existing process allows, how to
 talk to the user about it, the never-list, and where a helper process lives. HOW to build the element
@@ -67,7 +68,7 @@ it calls.
   tell the user the helper exists and what it is.
 - ASK: not about the loop. It is the only per-item loop the process designer and this toolset offer,
   so there is no design choice to put to the user; explain it in the result summary in business
-  words. A flow routed back through a gateway (R15, `process-activity-connections`) repeats steps but
+  words. A flow routed back through a gateway (R15, `process-activity-connections-details`) repeats steps but
   hands them no item — do not hand-roll a per-item loop that way. Questions the request leaves open
   elsewhere — who performs the task, for example — are still asked, by the rules of the article that
   owns them.

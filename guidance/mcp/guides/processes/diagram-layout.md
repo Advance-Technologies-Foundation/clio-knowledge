@@ -1,6 +1,7 @@
 clio MCP process-diagram-layout guide — how the diagram is drawn, what you can read back, and what an edit does to it
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the PICTURE: where elements are placed, how connectors are
 routed, what `describe-business-process` reports about them, and what happens to a diagram somebody
 arranged by hand when you edit the process. A rule that lives in another article is cited by its

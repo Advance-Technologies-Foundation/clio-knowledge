@@ -1,7 +1,7 @@
 clio MCP page modification guide
 
 ENTRY guide for editing a Freedom UI page: run the pre-edit GATE checklist below, then read the ONE sub-guide matching your edit (each fits a single get-guidance response):
-- save lifecycle (flow, replacing schema, write modes, conflicts, formatting) -> `page-modification-overview`
+- save lifecycle (flow, replacing schema, write modes, conflicts, formatting, what survives an Interface Designer save) -> `page-modification-overview`
 - insert a data-bound field (viewModelConfigDiff binding, label/resource rule, payload, diagnostics) -> `page-modification-field-contract`
 - pick where a component goes (bundle.json, jq recipes, valid `parentName`) -> `page-modification-containers`
 - compose a viewConfigDiff insert (button+handler, operation/type/name rules, reading get-component-info) -> `page-modification-components`
