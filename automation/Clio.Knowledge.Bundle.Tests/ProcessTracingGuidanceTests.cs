@@ -119,8 +119,10 @@ public sealed class ProcessTracingGuidanceTests
         query.GetProperty("rootSchemaName").GetString().Should().Be("SysPrcElementTraceLog",
             because: "the trace rows live in SysPrcElementTraceLog");
         query.GetProperty("columns").GetProperty("items").EnumerateObject().Select(column => column.Name)
-            .Should().Contain(new[] { "TraceEvent", "ElementData", "ProcessData" },
-                because: "those are the columns step 2 reports from");
+            .Should().Contain(new[] { "TraceEvent", "ElementData" },
+                because: "those are the columns step 2 reports from")
+            .And.NotContain("ProcessData",
+                because: "every row repeats the whole process-parameter snapshot, so the default read leaves it out and the article adds it on one row");
         filters.GetProperty("run").GetProperty("leftExpression").GetProperty("columnPath").GetString()
             .Should().Be("SysProcessElementLog.SysProcess",
                 because: "a trace row reaches its run through its element-log row");

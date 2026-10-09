@@ -75,7 +75,8 @@ who has to re-derive which of those happened has lost the thing versioning was f
 
 The two answers do NOT carry the same authority, and this paragraph decides any sentence that seems
 to say otherwise. Q1 is a ROUTING answer: it picks which tool every later edit uses, and picking a
-tool changes nothing on the environment by itself. Ask Q1 with its consequence -- CURRENT overwrites the
+tool changes nothing on the environment by itself. Switching process tracing is not an edit and does not follow Q1
+(`process-tracing`). Ask Q1 with its consequence -- CURRENT overwrites the
 running graph and nothing brings the old one back -- because a CURRENT answer is also the explicit yes
 `process-modeling` requires for an in-place edit of the ACTIVE version. It covers THAT process on THAT
 environment for the rest of the session; ask again before an in-place edit of another. The edit request

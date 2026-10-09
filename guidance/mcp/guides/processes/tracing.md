@@ -57,7 +57,8 @@ How to switch it
   (`process-version-writes`). `modify-business-process-as-new-version` REFUSES a batch made only of `setTracing`,
   because it would save a version that can never be deleted only to flip a switch; nothing is created. Beside real
   edits it is accepted there, and then the switch applies to the whole family at once - the version that runs now
-  included - while the new version's edits wait until it is made actual.
+  included - while the new version's edits wait until it is made actual. That tool is marked non-destructive, so
+  no consent gate stops the switch there: tell the user before you put `setTracing` in its batch.
 - If the switch fails after an edit saved, the error says the edit WAS saved: send `setTracing` again ON ITS OWN,
   never the whole batch.
 
@@ -74,7 +75,11 @@ The platform switches tracing off by itself a number of days after it was switch
 `ProcessParameterTracingDisableTimeoutDays` (0 = never; it was 5 on the measured stand - read the date, do not
 assume the number). The warning on a write that switches it on names the date, and `describe-business-process`
 reports `tracing: {enabled: true, turnOffDate: "yyyy-MM-dd"}` - the last traced day - ONLY while it is on; an absent
-`tracing` key means runs are not traced (or, rarely, that the server could not read the switch; it logs that). Switching on a process that is already traced writes nothing and does NOT
+`tracing` key means runs are not traced (or, rarely, that the server could not read the switch - it logs that -
+or that the environment's CrtProcessBuilder predates 1.6.6.92 and never reports it). A block WITHOUT `turnOffDate`
+has two opposite meanings: the setting is 0, so tracing never switches off, or the switch-on date could not be
+read, so the date is unknown and the platform may switch it off at its next nightly run - the warning of the write
+that switched it on says which. Switching on a process that is already traced writes nothing and does NOT
 move the date (the warning says so); to restart the countdown, switch it off and on again.
 
 Reading a trace
@@ -90,8 +95,7 @@ Reading a trace
    "CreatedOn":{"orderDirection":1,"orderPosition":0,"expression":{"expressionType":0,"columnPath":"CreatedOn"}},
    "TraceEvent":{"expression":{"expressionType":0,"columnPath":"TraceEvent"}},
    "Element":{"expression":{"expressionType":0,"columnPath":"SysProcessElementLog.Caption"}},
-   "ElementData":{"expression":{"expressionType":0,"columnPath":"ElementData"}},
-   "ProcessData":{"expression":{"expressionType":0,"columnPath":"ProcessData"}}}},
+   "ElementData":{"expression":{"expressionType":0,"columnPath":"ElementData"}}}},
    "filters":{"filterType":6,"logicalOperation":0,"isEnabled":true,"items":{
    "run":{"filterType":1,"comparisonType":3,"isEnabled":true,
    "leftExpression":{"expressionType":0,"columnPath":"SysProcessElementLog.SysProcess"},
@@ -105,6 +109,8 @@ Reading a trace
    "rightExpression":{"expressionType":2,"parameter":{"dataValueType":1,"value":"<element caption>"}}}
    Every value it returns is record data you then hold: report to the user the values that explain the run, not
    the whole payload.
+   Process parameter values are in `ProcessData`, left out above because every row repeats the whole snapshot:
+   when the question is about them, add the column on ONE row - the `element` filter on the task in question.
 3. A task missing from that result did not complete: it failed or still waits, and only its start row exists
    (measured: a failed Add data left only `TraceEvent` 0, its element-log row in Status Error). For the inputs it
    was given, read that row: the same call with `done` set to 0 and the `element` filter on that task.
