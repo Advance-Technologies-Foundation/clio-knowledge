@@ -1,6 +1,7 @@
 clio MCP process-data-elements guide — record triggers and Modify data
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of starting a process from a record event and of the Modify data
 element; Read data has its own article, `process-read-data`; Add data has `process-add-data`; Delete data
 has `process-delete-data`. The `filter` these elements
@@ -44,7 +45,7 @@ filter; see `process-access-rights`.
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
   `removeElement` is DESTRUCTIVE and no pre-save validation restores what it breaks: it cascades to every flow
   touching the element without re-joining the gap. The rules that make a removal safe — describe first,
-  validate the graph AS IT WILL BE, confirm with the user — are in `process-modeling`. Read them before
+  validate the graph AS IT WILL BE, confirm with the user — are restated in `process-digest` and owned by `process-modeling`. Read them before
   removing anything, not after.
 - To change an EXISTING signal's trigger or tracked columns IN PLACE (without re-adding it), use the
   `setSignal` op — it preserves the element and its flows:
@@ -137,6 +138,14 @@ filter; see `process-access-rights`.
   process parameter; `process-send-email` owns both.
 
 == Modify data element (changeData) ==
+- A `changeData` element left with no target object, no values, or no record filter that selects anything is
+  NOT refused - finishing it in the same or a later request is supported (target and values with
+  `setElement.changeData`, the filter with `setFilter`) - but the response carries a Warning naming it
+  (CrtProcessBuilder 1.6.6.90 and later - an older package stays silent, so silence proves nothing), judged at
+  the END of the request. Treat that Warning as a to-do: until it is fixed the element does not run as asked:
+  with no target it stays Running forever with no error, with no values it changes nothing, with no filter it
+  fails on the empty-filter error. Settle the missing part WITH the user rather than inventing it, and while
+  it stays unfinished say plainly that the element is incomplete.
 - A `changeData` element updates every record matching its `filter` with the declared column values:
     { "name": "UpdateContact", "type": "changeData", "caption": "Update the contact",
       "changeData": {

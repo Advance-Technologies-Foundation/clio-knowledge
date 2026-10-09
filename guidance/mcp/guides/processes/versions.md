@@ -1,6 +1,7 @@
 clio MCP process-versions guide — read which version of a process you are looking at, and which one runs
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the version MODEL and of the version fields of
 `describe-business-process`. CREATING a version and making one actual live in
 `process-version-writes`; this article is what that one assumes you have read. A rule that lives in
@@ -205,8 +206,8 @@ read as "this process has no versions".
 == Where the other rules live ==
   * creating a version, making one actual, rolling back -> `process-version-writes`
   * consent before a high-impact write -- launching one is one -> `core-rules`
-  * naming a process, its elements and its parameters    -> `process-naming`
-  * building and editing a process at all                -> `process-modeling`
+  * naming a process, its elements and its parameters    -> `process-digest` (N1-N10), owner `process-naming`
+  * building and editing a process at all                -> `process-digest`, then `process-modeling`
   * what a described element or parameter contains       -> `process-modeling`, then the article it routes to
 This article owns the version model and the version fields, and nothing else. It does not restate the
 descriptor, the element catalog (`process-element-catalog`) or the connection rules.
