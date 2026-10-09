@@ -142,6 +142,7 @@
       "product-telemetry",
       "record-rights",
       "object-rights",
+      "default-record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
       "reference.atf-repository-dev.provider-and-context",
@@ -329,6 +330,7 @@
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/object-rights",
+      "docs://knowledge/com.creatio.clio/default-record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
@@ -1892,6 +1894,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/operations/record-rights.md",
       "bundlePath": "resources/record-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "default-record-rights",
+      "title": "Default record rights",
+      "description": "Canonical MCP guidance for the RECORD layer of object permissions: the \"Use record permissions\" switch and the object's default record rules (records created by an author role get read/edit/delete levels for a grantee role), read with get-object-rights and changed one rule per call with set-default-record-rights. Owns the switch semantics (ON with no rule = every user sees only their own records; existing records get no rights until applied), the full-list save, and the rule that apply-default-record-rights runs only when the user decides.",
+      "topicId": "creatio.default-record-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/default-record-rights",
+      "sourcePath": "guidance/mcp/guides/operations/default-record-rights.md",
+      "bundlePath": "resources/default-record-rights.md",
       "mediaType": "text/plain"
     },
     {

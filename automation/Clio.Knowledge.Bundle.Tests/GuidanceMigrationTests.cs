@@ -39,7 +39,8 @@ public sealed class GuidanceMigrationTests
         "portal-service-routing",
         "external-organizations",
         "page-schema-translation",
-        "object-rights"
+        "object-rights",
+        "default-record-rights"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

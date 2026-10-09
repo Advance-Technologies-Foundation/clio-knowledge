@@ -244,7 +244,8 @@ with a zero count is proof there is nothing there. The `allRolesAndUsers` kind i
 
 == What is refused at build ==
   - a record `filter` with no `object` (it names no root entity to filter on);
-  - an object that does not use record permissions;
+  - an object that does not use record permissions (turning them on is `get-guidance name=default-record-rights`:
+    ask the developer first — an enable changes who reaches every existing record);
   - an unknown object, or a present-but-blank `object`;
   - `level` on a remove entry;
   - an empty `operations` list;
