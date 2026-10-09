@@ -52,6 +52,7 @@ internal static class ProcessGuideSet
     internal static readonly string[] GoLiveFloor =
     [
         "process-modeling",
+        "process-digest",
         "process-element-catalog",
         "process-naming",
         "process-data-elements",

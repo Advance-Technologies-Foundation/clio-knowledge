@@ -1,6 +1,7 @@
 clio MCP process-version-writes guide — save a change as a new version, and roll back to another one
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article owns the two WRITE operations on a process version family and what they do and do not
 change. The version MODEL they operate on — what a version is, what the family is, which member runs
 and how to read that standing — is `process-versions`, and this article assumes it. V1-V7 are that
@@ -178,7 +179,7 @@ another version actual instead.
 
 == Where the other rules live ==
   * consent for a high-impact write, and what an earlier answer does NOT authorise -> `core-rules`
-  * naming a process, its elements and its parameters                              -> `process-naming`
+  * naming a process, its elements and its parameters                              -> `process-digest` (N1-N10), owner `process-naming`
   * the version model, the version fields, and which identity resolves to what     -> `process-versions`
   * the operations array these edits carry                                         -> `process-modeling`
 This article owns only the two write operations and their outcomes. It does not restate the version
