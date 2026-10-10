@@ -320,6 +320,14 @@ To add content inside the Scaffold:
              putting child elements in there is blocked, see AUTHORING CHILDREN above
 - Add child: { "operation": "insert", ..., "parentName": "Scaffold", "propertyName": "items" }
 
+"propertyName" is REQUIRED on every "insert" AND "move" that names a "parentName" — the web
+`propertyName` rule in `page-modification-components` applies unchanged. A "move" of a template
+element is no exception: { "operation": "move", "name": "AreaProfileContainer", "parentName":
+"FeedTabContainer", "propertyName": "items", "index": 0 }. Without "propertyName" the Mobile Page
+Designer canvas never loads. The Scaffold collection slots are "items", "actions" and "leading"
+(buttons do not belong in the last two, see BUTTON PLACEMENT below); "floatAction" holds one
+element and is not an insert target (see SINGLE-ELEMENT SLOTS above).
+
 viewConfigDiff INSERTS ADDRESS THE SLOT BY propertyName ONLY — never use "path" in a
 viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is
 the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
