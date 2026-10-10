@@ -42,4 +42,4 @@ This constant-row fixture proves the plumbing; replace its SELECT with the requi
 
 ## Evidence boundary
 
-Validated through Clio MCP on two disposable Creatio 10.1.585 / .NET 8 / PostgreSQL instances using the Clio implementation at `e53009498`: saved `db-view: true`, a package SQL script, the PostgreSQL view and deterministic OData row, and package transfer. The older-contract silent-ignore failure was reproduced separately. MSSQL view DDL, schema-changing view upgrades and writable views are not validated here. [Acceptance evidence](https://github.com/Advance-Technologies-Foundation/clio-knowledge/issues/209).
+Validated in September 2026 through Clio MCP on two disposable Creatio 10.1.585 / .NET 8 / PostgreSQL instances using the Clio implementation at `e53009498`: saved `db-view: true`, a package SQL script, the PostgreSQL view and deterministic OData row, and package transfer. The older-contract silent-ignore failure was reproduced separately. MSSQL view DDL, schema-changing view upgrades and writable views are not validated here.

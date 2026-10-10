@@ -92,7 +92,7 @@ View-backed grids — inspect the navigation target before writing
   `virtual: false`. Its binding read back, appeared in the browser's entity page configuration after
   logout/login, and a native Freedom UI grid link opened the bound Freedom form with the same record
   Id; the form loaded the selected record's name. This verifies that path, not every view or version.
-- [Clio issue #1301](https://github.com/Advance-Technologies-Foundation/clio/issues/1301) reports a
+- A user report (August 2026) describes a
   different result for a campaign's `VwBulkEmailInCampaign` grid on Creatio 10.0.0.858 / PostgreSQL /
   .NET Framework: a stored binding did not change navigation after re-login. That campaign path was
   not reproduced by the Studio fixture above. The reporter's follow-up leaves the schema classification

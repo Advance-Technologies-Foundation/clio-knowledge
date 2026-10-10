@@ -19,6 +19,7 @@ This repository is the knowledge control plane for Clio. It owns guidance conten
 - Preserve stable IDs. Renaming a title must not silently change an article, capability, advisory, or reference-example identity.
 - Use immutable repository tags or commit hashes for published reference metadata. Never publish a mutable default branch as verified evidence.
 - Keep compatibility declarations explicit. Guidance that references a Clio tool must declare a compatible tool contract or Clio version.
+- Do not reference internal tasks in published guidance: no Jira keys, issue or pull request links, or `repo#N`. A version boundary is the Clio version that shipped the change; evidence is stated inline (what was measured, on which version, when). `InternalTaskReferenceTests` enforces this.
 - Keep examples independent. Catalog changes must not require cloning every reference repository to consume ordinary guidance.
 - Prefer small, reviewable content changes. Do not mix a schema redesign with unrelated guidance edits.
 - Treat the primary checkout at the repository root as coordination-only. Do not edit files, stage
