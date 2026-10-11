@@ -125,7 +125,7 @@ guards — it says whose rule it is and names that guide for the rest.
     process -> name=process-versions
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
     name=process-version-writes; add name=process-versions for the model it assumes and
-    name=process-modeling for the operation reference
+    name=process-modeling for the operation reference (rare cases: name=process-modeling-details)
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
     family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
