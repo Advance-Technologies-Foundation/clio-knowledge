@@ -124,11 +124,11 @@ guards — it says whose rule it is and names that guide for the rest.
   - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
     process -> name=process-versions
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
-    name=process-version-writes; add name=process-versions for the model it assumes and
-    name=process-modeling for the operation reference (rare cases: name=process-modeling-details)
+    name=process-version-writes; add name=process-versions for the model it assumes; the operations are in
+    the modify contract and the card's 'Changing an existing process' block (rare cases: name=process-modeling-details)
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
-    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
-    operation reference
+    family root, and editing it edits a graph the runtime does not run; the card's 'Changing an existing
+    process' block and the modify contract carry the operations
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
