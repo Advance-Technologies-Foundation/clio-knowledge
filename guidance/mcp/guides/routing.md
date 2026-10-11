@@ -38,11 +38,8 @@ guards — it says whose rule it is and names that guide for the rest.
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
   article, then the article of each element you use (the rows below)
-  - process-digest is the BUILD CARD: it restates, naming each owner, what every build and edit needs
-    from `process-modeling` (the build-lifecycle owner: tools, descriptor, the recipe, the modify-safety
-    rules), `process-element-catalog`, `process-naming` and `process-sub-process-when`. For an ordinary
-    build do NOT open those four - the card is what you read instead; open one only when the card sends
-    you there. After the card, read the ONE matching sub-guide per element:
+  - process-digest is the BUILD CARD: a short router - the build path, and for each element its type,
+    its block and the article that owns it. After the card, read the ONE matching sub-guide per element:
   - which elements exist beyond the card's buildable list, and how a data-id maps to a build type ->
     name=process-element-catalog
     - the element catalog (data-id -> label -> purpose), to read an existing process or reason about an

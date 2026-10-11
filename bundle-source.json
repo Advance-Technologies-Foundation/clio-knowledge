@@ -1467,7 +1467,7 @@
     {
       "itemId": "process-digest",
       "title": "Process build digest",
-      "description": "The build CARD for Creatio business processes: owns no rule, and restates in short form - each block naming its owner - what every build of a new process and every edit of an existing one needs from process-modeling (tools, descriptor, recipe, modify safety), process-element-catalog (what builds today), process-naming (N1-N10) and process-sub-process-when (the D1/D2/D4 triggers for more than one process). Read it instead of those four for an ordinary build, and open an owner when the card sends you there.",
+      "description": "The build CARD for Creatio business processes: a short router that owns no rule - the build path (how many processes, naming, package, create and verify, edits) and, for each element, its build type, its descriptor block and the article that owns it. Read it first, then only the articles of the elements you use.",
       "topicId": "creatio.process-digest",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-digest",
