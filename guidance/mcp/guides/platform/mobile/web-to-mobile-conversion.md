@@ -566,8 +566,9 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and both sides are baked into values for
   you; step 5b has the mechanics and the reporting rule. Just paste values verbatim; do not hand-build
   adaptive. The mobile runtime reflows children by `row` / `column`.
-  Supported canvases: phone (`small`) and tablet (`medium` = `large`). Known tablet limits: rows in
-  neighbouring columns do not line up, and a list inside a wrapper keeps one column.
+  Supported canvases: phone portrait (`small`) and tablet (`medium` = `large`, from 600 dp, so a phone in
+  landscape gets them too). Known tablet limits: rows in neighbouring columns do not line up, and a list
+  inside a wrapper keeps one column.
 - TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and is
   no more a proposal than adaptiveLayout is: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
