@@ -3,8 +3,9 @@ clio MCP process-version-writes guide — save a change as a new version, and ro
 Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
 the card or this article sends you there.
 This article owns the two WRITE operations on a process version family and what they do and do not
-change. The version MODEL they operate on — what a version is, what the family is, which member runs
-and how to read that standing — is `process-versions`, and this article assumes it. V1-V7 are that
+change, and what counts as an EXISTING process (a build in progress does not). The version MODEL they
+operate on — what a version is, what the family is, which member runs and how to read that standing —
+is `process-versions`, and this article assumes it. V1-V7 are that
 article's numbered facts, cited here by number and stated THERE: fetch it if a citation below is the
 first you have seen of one. A rule that lives in another article is cited by its article NAME and
 never repeated here.
@@ -64,6 +65,19 @@ point of these six processes" is one instruction and six of them -- but concurre
 Framework stand trip IIS rapid-fail and take the app pool down, so the failure is an environment outage
 and six ambiguous transport errors rather than a call you can retry. The database half of the race is
 handled (two writers on one number are refused after the save); the load is not.
+
+== A process you built in this task is a build in progress ==
+This section owns what "existing process" means wherever a process article or `routing` says it: a
+process that was there before this task, or one another person has since edited, activated or
+launched by hand. A process YOU created in this same task is NOT one -- it is a BUILD IN PROGRESS.
+Fixing, re-saving, re-activating or launching it follows the build path, `process-digest` plus the
+element articles, NOT `process-versions` or this article: do not ask the two questions below, and
+`process-modeling`'s `isActiveVersion` rule does not apply, whatever the flag reads.
+`core-rules` and the element articles' own confirmations still apply.
+  * The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version
+    task by request, so the version articles apply to those steps in full.
+  * A run you started, or its signal firing on any record save, does not make it existing.
+  * Built in an EARLIER task or session, or you cannot tell: existing -- you cannot know who used it since.
 
 == Ask once, then behave predictably ==
 Two questions, asked ONCE, BEFORE the first edit of a session:
@@ -183,5 +197,5 @@ another version actual instead.
   * naming a process, its elements and its parameters                              -> `process-digest` (N1-N10), owner `process-naming`
   * the version model, the version fields, and which identity resolves to what     -> `process-versions`
   * the operations array these edits carry                                         -> `process-modeling`
-This article owns only the two write operations and their outcomes. It does not restate the version
-model, the descriptor or the element catalog (`process-element-catalog`).
+This article owns only the two write operations, their outcomes and the build-in-progress exemption. It
+does not restate the version model, the descriptor or the element catalog (`process-element-catalog`).

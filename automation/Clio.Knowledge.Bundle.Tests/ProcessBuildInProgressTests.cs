@@ -1,0 +1,138 @@
+using System.Text.RegularExpressions;
+using FluentAssertions;
+using NUnit.Framework;
+
+namespace Clio.Knowledge.Bundle.Tests;
+
+/// <summary>
+/// Pins the BUILD-IN-PROGRESS exemption (ENG-103019): a process the agent created in this same task is not an
+/// "existing process", so fixing, re-saving or re-activating it follows the build card and the element
+/// articles, not the version path.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Measured in CAADT (Copilot, claude-sonnet-5): process runs read process-versions and process-version-writes
+/// (about 34 KB together) plus the owners the card says an ordinary build must not open - about 80 KB per run,
+/// re-paid as cache-read on every later request - because every self-correcting modify of a process the agent
+/// had just built read as an edit of an "existing process", and its <c>isActiveVersion</c> is TRUE, which
+/// <c>process-modeling</c> answers with a confirmation.
+/// </para>
+/// <para>
+/// The rule has ONE owner, <c>process-version-writes</c>: it owns the gates the exemption lifts (the session
+/// questions and what counts as the explicit yes for an in-place edit of the active version), and
+/// <c>process-versions</c> is already past the inline reply budget. Everyone else carries a pointer. These are
+/// TRIM ALARMS like the rest of the suite: they fail when a clause is reworded or dropped.
+/// </para>
+/// </remarks>
+[TestFixture]
+public sealed class ProcessBuildInProgressTests
+{
+    private const string OwnerItemId = "process-version-writes";
+    private const string SectionHeading = "== A process you built in this task is a build in progress ==";
+    private const string RoutingPath = "guidance/mcp/guides/routing.md";
+
+    /// <summary>The definition and its edge cases, as the owner words them.</summary>
+    private static readonly string[] OwnerClauses =
+    [
+        "This section owns what \"existing process\" means wherever a process article or `routing` says it",
+        "a process that was there before this task, or one another person has since edited, activated or launched by hand.",
+        "A process YOU created in this same task is NOT one -- it is a BUILD IN PROGRESS.",
+        "Fixing, re-saving, re-activating or launching it follows the build path, `process-digest` plus the element articles, NOT `process-versions` or this article",
+        "do not ask the two questions below",
+        "`process-modeling`'s `isActiveVersion` rule does not apply, whatever the flag reads.",
+        "`core-rules` and the element articles' own confirmations still apply.",
+        "The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version task by request, so the version articles apply to those steps in full.",
+        "A run you started, or its signal firing on any record save, does not make it existing.",
+        "Built in an EARLIER task or session, or you cannot tell: existing"
+    ];
+
+    [Test]
+    [Description("The owner defines the exemption and its edge cases in one section, before the session questions it lifts.")]
+    public void TheOwner_ShouldDefineTheExemptionAndItsEdgeCases()
+    {
+        // Arrange
+        string owner = Collapse(Article(OwnerItemId));
+
+        // Act
+        int section = owner.IndexOf(SectionHeading, StringComparison.Ordinal);
+        int questions = owner.IndexOf("== Ask once, then behave predictably ==", StringComparison.Ordinal);
+        string[] missing = [.. OwnerClauses.Where(clause => !owner.Contains(Collapse(clause), StringComparison.Ordinal))];
+
+        // Assert
+        section.Should().BeGreaterThan(0, because: "the exemption is a section of its owner, not a scattered aside");
+        questions.Should().BeGreaterThan(section,
+            because: "the exemption says 'do not ask the two questions below', so it has to sit above them");
+        missing.Should().BeEmpty(
+            because: "each clause decides whether a run reads ~34 KB of version guidance or asks a confirmation "
+                + "nobody needs, or - the other way - whether a genuinely existing process loses its safety "
+                + "rules. Missing: " + string.Join("; ", missing));
+    }
+
+    [Test]
+    [Description("Only the owner defines the exemption; the card, routing and process-modeling point at it.")]
+    public void TheExemption_ShouldHaveOneOwnerAndPointers()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string card = Collapse(Article("process-digest"));
+        string modeling = Collapse(Article("process-modeling"));
+        string routing = Collapse(ProcessGuideSet.Read(repositoryRoot, RoutingPath));
+
+        // Act
+        string[] otherDefiners = [.. ProcessGuideSet.Declared(repositoryRoot)
+            .Where(article => article.ItemId != OwnerItemId)
+            .Where(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))
+                .Contains("it is a BUILD IN PROGRESS", StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+        string cardEditRoute = Regex.Match(card, @"- edit or launch an existing process:.*\z").Value;
+        string routingRow = Regex.Match(routing,
+            @"- which VERSION of a process you are reading.*?(?= - save a change as a NEW version)").Value;
+
+        // Assert
+        otherDefiners.Should().BeEmpty(
+            because: "AGENTS.md gives every rule one owner; a second definition drifts from the first");
+        cardEditRoute.Should().Contain("`process-versions`, then `process-modeling`",
+            because: "a genuinely existing process still starts at the version path");
+        cardEditRoute.Should().Contain("One YOU built in this task is not existing: fix it here (`process-version-writes`).",
+            because: "the card is what every build reads, so its edit route is where an agent decides whether "
+                + "its own fresh process sends it down the version path");
+        routingRow.Should().Contain("ANY existing process -> name=process-versions first",
+            because: "the version path stays the entry for a genuinely existing process");
+        routingRow.Should().Contain(
+            "A process YOU built in this task is not existing: fix it from name=process-digest (owner name=process-version-writes)",
+            because: "routing is read before any article, so the row that sends an edit to process-versions must "
+                + "carry the exemption too");
+        modeling.Should().Contain(
+            "You MUST read `isActiveVersion` from the describe output before ANY modify of a process you did not build in this task (`process-version-writes`):",
+            because: "the isActiveVersion rule is the line that otherwise overrides the exemption: a fresh build is "
+                + "the active version, so TRUE would demand a confirmation, and on a file-design-mode stand FALSE would "
+                + "forbid fixing it");
+    }
+
+    [Test]
+    [Description("Every article this change touched stays inside the inline reply budget.")]
+    public void TheArticlesCarryingTheExemption_ShouldFitTheInlineReplyBudget()
+    {
+        // Arrange
+        string[] touched = [OwnerItemId, "process-modeling", "process-digest"];
+
+        // Act
+        (string ItemId, int Size)[] over = [.. touched
+            .Select(itemId => (itemId, Size: GuidanceInlineReplyBudgetTests.ReplyBytes(Article(itemId))))
+            .Where(article => article.Size > GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes)];
+
+        // Assert
+        over.Should().BeEmpty(
+            because: "an article that spills out of the inline reply is read back in pieces, one request each - "
+                + "the cost this exemption exists to remove");
+    }
+
+    private static string Article(string itemId)
+    {
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        return ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.Declared(repositoryRoot)
+            .Single(article => article.ItemId == itemId).SourcePath);
+    }
+
+    private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();
+}

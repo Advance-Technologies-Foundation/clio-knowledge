@@ -2,11 +2,11 @@ clio MCP process-digest guide - process build card
 
 Part of the process guide set. Owners win: `process-modeling`, `process-element-catalog`,
 `process-naming`, `process-sub-process-when`; open one only when a line sends you. Read ONLY the
-articles named here for what you build.
+articles named here.
 
 == Recipe (`process-modeling`) ==
-0. A request produces ONE process, unless D1 (same work per item of a set, e.g. a task or email per
-   record), D2 (3+ element fragment at 2+ places) or D4 (2+ long human phases) fires: read
+0. A request produces ONE process, unless D1 (same work per item of a set, e.g. a task per record),
+   D2 (3+ element fragment at 2+ places) or D4 (2+ long human phases) fires: read
    `process-sub-process-when` first.
 1. ONE START PER TRIGGER (add + change = two `signalStart`s in one process; CrtProcessBuilder
    1.6.2.24+, clio 8.1.0.131+).
@@ -41,4 +41,5 @@ plus a `Parameter` suffix. LABEL EVERY CONDITIONAL AND DEFAULT ARM.
 - a page `process-open-edit-page`; Sub-process `process-sub-process`
 - access rights (confirm first) `process-access-rights`
 - "Connected to" `process-activity-connections`; Script task `process-script-task`
-- edit or launch an existing process: `process-versions`, then `process-modeling`.
+- edit or launch an existing process: `process-versions`, then `process-modeling`. One YOU built
+  in this task is not existing: fix it here (`process-version-writes`).
