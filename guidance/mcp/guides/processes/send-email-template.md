@@ -11,8 +11,8 @@ message mode selects ONLY the message: `mode`, `sender`, `to`/`cc`/`bcc`, `impor
 `performer` behave identically in both modes and are owned there; `useBackgroundMode` is an element-level
 field outside the `email` block. Split out of process-send-email.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+owned by `process-naming` and summarised in `process-digest` — read the card's Names block BEFORE you
+name anything, and `process-naming` itself for any rule the card does not spell out.
 
 == Template message (messageSource "template") ==
 - TEMPLATE MODE (CrtProcessBuilder 1.6.2.1 or newer): `template` names an existing template by NAME, by `EmailTemplate` record id, or as the

@@ -19,7 +19,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
   Boolean, Date, Date-time, Time, Guid, Lookup, and Collection (a record collection, `CompositeObjectList`,
   whose direction defaults to `Out` unless you set one) — other types (composite object / entity / file / ...) are not
-  supported yet. Name a process parameter per N8 in `process-naming` (restated in `process-digest`).
+  supported yet. Name a process parameter per N8 in `process-naming` (summarised in `process-digest`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.

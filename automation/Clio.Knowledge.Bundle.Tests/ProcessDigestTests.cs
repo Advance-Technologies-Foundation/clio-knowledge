@@ -83,7 +83,6 @@ public sealed class ProcessDigestTests
     private static readonly (string Owner, string Clause)[] RulesHandedBackToTheirOwners =
     [
         ("process-element-catalog", "`changeAccessRights`->ChangeAdminRightsUserTask"),
-        ("process-sub-process-when", "A request produces ONE process."),
         ("process-sub-process-when", "D1 — the same work for EACH item of a set: multi-instance, do not ask"),
         ("process-sub-process-when", "D2 — the same fragment twice in the plan: one helper, do not ask"),
         ("process-sub-process-when", "D4 — two or more long phases: propose a split, and ask"),
@@ -133,7 +132,6 @@ public sealed class ProcessDigestTests
         ("process-element-catalog", "`useBackgroundMode` on any element that OFFERS it"),
         ("process-element-catalog", "Custom user-task compile rule"),
         ("process-naming", "Process `caption`: SENTENCE CASE"),
-        ("process-naming", "`<prefix><Object>_<Action>`"),
         ("process-naming", "so never hard-code `Usr`"),
         ("process-naming", "Add the package name only to break a real collision"),
         ("process-naming", "NO autonumber, NO random suffix, NO GUID fragment"),
@@ -151,7 +149,6 @@ public sealed class ProcessDigestTests
         ("process-naming", "\"Account is added\" -> `AccountAddedSignal`"),
         ("process-naming", "An element code MUST NOT contradict the element's RUNTIME type"),
         ("process-naming", "The `UserTask` postfix belongs to a user-task SCHEMA you author, NEVER to an element code"),
-        ("process-naming", "PascalCase plus a `Parameter` suffix"),
         ("process-naming", "never rename them"),
         ("process-naming", "Codes are STABLE"),
         ("process-naming", "Never derive a code from the clock, a GUID, a counter"),

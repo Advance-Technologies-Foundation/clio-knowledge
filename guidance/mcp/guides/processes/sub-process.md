@@ -13,8 +13,8 @@ WHETHER a request calls for this element at all — the one-process default, per
 fragment, long phases — and which execution mode a per-item loop needs is owned by
 `process-sub-process-when`: read it before you plan one.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+owned by `process-naming` and summarised in `process-digest` — read the card's Names block BEFORE you
+name anything, and `process-naming` itself for any rule the card does not spell out.
 
 == Element: Sub-process (callActivity -> subProcess) ==
 - `callActivity` Sub-process — call ANOTHER process (the BPMN call activity) and run it once, passing

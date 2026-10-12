@@ -8,8 +8,8 @@ WHO performs the task is owned by `process-task-performer`, and HOW a category o
 written -- and what silently degrades when it is written as a formula -- is owned by
 `process-task-category`. The ids, the two refusal texts and their remedy are here.
 Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+owned by `process-naming` and summarised in `process-digest` — read the card's Names block BEFORE you
+name anything, and `process-naming` itself for any rule the card does not spell out.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with
