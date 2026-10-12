@@ -344,7 +344,7 @@ FLOW
    the web count) and each child's layoutConfig.adaptive. A single-column grid gets no adaptive. Nothing extra
    to apply — do NOT emit a separate merge for the container's adaptive (it would duplicate the operation).
    REPORT it as a FACT of the conversion ("fields in <container> stack on the phone and sit in <n> columns on
-   a tablet; tablet is experimental, check it on a device" — <n> = length of columnsByBreakpoint.medium) —
+   a tablet" — <n> = length of columnsByBreakpoint.medium) —
    do NOT ask whether to apply it: the values are already in the operations you pasted, so a "no" has no
    represented outcome. The only change path is hand-editing those values before pasting, and that is the
    developer's to take, not a question for the gate.
@@ -566,8 +566,8 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and both sides are baked into values for
   you; step 5b has the mechanics and the reporting rule. Just paste values verbatim; do not hand-build
   adaptive. The mobile runtime reflows children by `row` / `column`.
-  Supported canvas: Mobile (`small`) ONLY. `medium`/`large` (tablet/desktop) are baked in but stay
-  EXPERIMENTAL, outside supported scope. Say so at the gate; tell the user to check on a tablet.
+  Supported canvases: phone (`small`) and tablet (`medium` = `large`). Known tablet limits: rows in
+  neighbouring columns do not line up, and a list inside a wrapper keeps one column.
 - TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and is
   no more a proposal than adaptiveLayout is: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
