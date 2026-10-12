@@ -57,8 +57,12 @@ name anything, and `process-naming` itself only for a case the card does not cov
         re-sync; that cure lasts only until the next save of the callee through an older toolset.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
-        is a self-call) — point it elsewhere; retargeting while a parameter or flow condition still reads
-        from this element (live dependents) — remove or re-point them first; the called process has no
+        is a self-call) — point it elsewhere; retargeting while a parameter or flow condition reads from
+        this element (live dependents) — remove or re-point them in a SEPARATE, EARLIER call: from
+        CrtProcessBuilder 1.6.6.96 the guard checks the process as the request FOUND it as well as its
+        current state, so a reader cleared or re-pointed earlier in the SAME batch still refuses the retarget
+        (the refusal names it as one that "reads from it, or did when this request started"), and nothing
+        in that batch is saved; the called process has no
         Simple start event (rule R16, enforced at BUILD time in this element's own applier, not by
         `validate-process-graph` — see `process-activity-connections-details`) — add one to it, or call another;
         an ambiguous caption or disagreeing `processName`/`processUId` — see above. Being MULTI-INSTANCE is
