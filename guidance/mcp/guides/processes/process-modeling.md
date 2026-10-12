@@ -224,7 +224,8 @@ first (restated in `process-digest`): they decide how many processes the request
   CrtProcessBuilder 1.6.3.26, `process-element-catalog`) and the build path does warn you. It gets its
   own caveat, on a different axis: CREATING one is safe, REWIRING an existing one — retargeting its
   called process, deleting it, editing its parameters — is high-risk. The build path REFUSES a retarget
-  while live dependents still read from the element; let that refusal stand rather than routing around it.
+  while anything reads from the element, or did when the request started; the remedy is in
+  `process-sub-process` — never clear the reader in the same batch.
   An element that is already MULTI-INSTANCE is no longer refused: it is de-converted, the work is done
   against a single-instance element with every guard, and it is re-converted (`process-sub-process`).
   Multi-instance is not an edge case — 61 of the 416 sub-process elements in the shipped package corpus
