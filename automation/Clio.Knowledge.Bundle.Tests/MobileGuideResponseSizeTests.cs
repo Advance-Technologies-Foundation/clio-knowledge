@@ -167,9 +167,27 @@ public sealed class MobileGuideResponseSizeTests
     /// means the request is in neither catalog: the flag branch never reads the registry, so the wording
     /// promised an exclusion clio had not established.
     /// </remarks>
+    /// <remarks>
+    /// LOWERED IN PARALLEL on master, 62,418 -> 62,410 (ENG-102508). The quick-filter mechanism cited an
+    /// internal task id as its evidence; it now states it inline ("investigated on Creatio Mobile in August
+    /// 2026"), which is shorter, so the ceiling follows the article down. "investigated" replaced a
+    /// first-draft "observed" that overstated a code-level investigation; its four extra characters were
+    /// paid for in the same sentence ("verify against" -> "verify for") rather than by moving the ceiling
+    /// back up.
+    /// </remarks>
+    /// <remarks>
+    /// RECONCILED at 62,401 when master merged into the ENG-96178 branch. The two reductions above were
+    /// authored against the same 62,418 on branches that never saw each other, and they land in different
+    /// bullets of HARD MOBILE RULES - the dropped-request bullet and the crt.QuickFilter placement bullet -
+    /// so the article now carries -9 and -8 at once and the ceiling is their SUM rather than either side's
+    /// number. Keeping 62,409 or 62,410 would hand the article eight or nine bytes of headroom nothing
+    /// paid for, which is the drift this ratchet exists to refuse; a merge is not a licence to stop at the
+    /// larger of two recorded sizes. The reason-codes ceiling stays at the ENG-96178 number, 18,713,
+    /// because the master side left that article untouched.
+    /// </remarks>
     private static readonly (string ItemId, int Ceiling)[] MeasuredArticles =
     [
-        ("freedom-page-web-to-mobile-conversion", 62_409),
+        ("freedom-page-web-to-mobile-conversion", 62_401),
         ("freedom-page-mobile-reason-codes", 18_713)
     ];
 

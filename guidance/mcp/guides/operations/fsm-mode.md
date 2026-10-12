@@ -69,4 +69,4 @@ Startup latency after switching FSM on
 
 Disposable acceptance
 - Creatio 10.1.585, .NET 8, PostgreSQL; clio source revision `e53009498`: switching on returned a partial-success error after writing configuration; a later `get-fsm-mode` reported on. After unlocking the package and completing export, schema metadata was present. Copied the exported package into a local repository, linked it with preparation already complete, edited one client schema on disk, ran `pkg-to-db`, and read the new body through `get-client-unit-schema`. Restored the physical package directory before teardown.
-- This proves switch recovery, complete export, link and definition import. It does not claim package data installation or backend DLL activation from `pkg-to-db`. Evidence: [clio #1638](https://github.com/Advance-Technologies-Foundation/clio/issues/1638).
+- This proves switch recovery, complete export, link and definition import. It does not claim package data installation or backend DLL activation from `pkg-to-db`. Evidence: the disposable run above, September 2026.

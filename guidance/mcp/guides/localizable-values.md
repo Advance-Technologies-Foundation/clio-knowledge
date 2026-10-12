@@ -20,7 +20,7 @@ This section owns the culture rules every per-culture write depends on.
 - clio builds whose `get-tool-contract` index lists `localize-page` check the culture before writing, in `localize-page`, in the entity tools' `title-localizations` / `description-localizations`, and in `update-app-section` `caption-culture`: an absent culture fails before any write with an error that names the Languages section and lists the available cultures; an inactive culture is written with a warning. Recovery: add the culture in the Languages section (or pick one from the list), then retry. On an earlier clio the entity tools do not check the culture, and `update-app-section` has no `caption-culture` (`existing-app-maintenance`).
 - A culture present in a read does not prove a translation: right after creation, schema titles show the English text or the parent schema's title in every culture. Translate each target culture explicitly. Not every write tool compares the stored value in the target culture: `existing-app-maintenance` owns what the entity tools check (a column title is not compared) and how to verify the rest.
 
-Evidence boundary: measured on Creatio 10.2.254 / .NET Framework for ENG-90576.
+Evidence boundary: measured on Creatio 10.2.254 / .NET Framework in September 2026.
 
 ## Backend resource and lookup contract
 

@@ -130,6 +130,8 @@ guards — it says whose rule it is and names that guide for the rest.
     family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
+  - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
+    tracing on or off -> name=process-tracing
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
   - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge

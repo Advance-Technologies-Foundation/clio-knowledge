@@ -33,7 +33,7 @@ public sealed class MobileOperationShapeRuleTests
     [
         ("STRIPS the whole property", "the mechanism — the property is removed before anything is copied — is what makes the rule true"),
         ("Target slot absent or empty", "the other outcome is NOT a failure, and hiding it would make the rule read as universal when it is not"),
-        ("verified on a live stand for ENG-95429", "AGENTS.md requires an evidence pointer, and the bare ticket id also appears in the prose above, so only the full sentence pins it"),
+        ("STRIP outcome is verified on a live stand in August 2026", "AGENTS.md requires evidence, and the OPERATION SHAPE section carries a similar sentence, so only the full phrase pins this one"),
         ("target platform version", "AGENTS.md requires a version boundary for a prescriptive runtime claim"),
         ("READ FROM THE APPLIER", "the claims that were reasoned rather than observed must stay labelled as such"),
         ("merge group runs before inserts", "the two-step idiom only works because of the ordering; dropping it leaves the remedy unexplained"),
@@ -52,7 +52,8 @@ public sealed class MobileOperationShapeRuleTests
     private static readonly (string Fragment, string Because)[] OperationShapeClauses =
     [
         ("from \"values\" ALONE", "the mechanism — the element is built from values and nothing else — is what makes the rule true"),
-        ("ENG-95429", "AGENTS.md requires an evidence pointer for a prescriptive runtime claim"),
+        ("verified on a live stand in August 2026", "AGENTS.md requires evidence for a prescriptive runtime claim; it is stated inline, not as a task id. "
+            + "The pin is matched within this section only (it ends at AUTHORING CHILDREN), so the similar STRIP sentence there cannot satisfy it"),
         ("target platform version", "AGENTS.md requires a version boundary for a prescriptive runtime claim"),
         ("MOBILE bodies only", "the differ is shared with web, so the enforcement boundary must stay explicit"),
         ("still be refused by update-page", "a body can pass validate-page and fail the write; dropping this teaches a false green"),
@@ -63,7 +64,7 @@ public sealed class MobileOperationShapeRuleTests
 
     private static readonly (string Fragment, string Because)[] ButtonPlacementClauses =
     [
-        ("ENG-95429", "AGENTS.md requires an evidence pointer for a prescriptive claim"),
+        ("live stand, August 2026", "AGENTS.md requires evidence for a prescriptive claim; it is stated inline, not as a task id"),
         ("falls back to the root", "an unresolved parentName PERSISTS the element at the root; describing it as dropped is wrong and was corrected once already"),
         ("extrapolation", "only the actions slot was tested — the leading slot must stay labelled as an extension of that observation"),
         ("NOT claimed", "the guide must keep disclaiming any statement about runtime rendering, which was never tested"),
