@@ -34,7 +34,7 @@ public sealed class DesignerSaveGuidanceTests
                 because: "code placed in the factory body is lost on the next Designer save")
             .And.Contain("Do not move a removed helper back above the `return` statement",
                 because: "re-adding the helper there only loses it again on the next save")
-            .And.Contain("https://github.com/Advance-Technologies-Foundation/clio/issues/1697",
+            .And.Contain("on Creatio 10.0.0.858 an actual Designer save removed a factory constant and function",
                 because: "the deletion claim must keep its live-stand evidence");
     }
 

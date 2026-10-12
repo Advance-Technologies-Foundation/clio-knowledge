@@ -501,22 +501,21 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
 - REQUESTS (actions) on component event bindings ARE handled for you. An ACTION-ONLY component
   (`crt.Button`, `crt.MenuItem` — they exist only to fire one) whose request the Mobile app does NOT
   support is DROPPED, and so is one left with NO action and NO menu item. Always a `droppedElements`
-  entry: `drop-unsupported-request` when the rules name the request and give no mobile counterpart,
-  `drop-unknown-request` when it is in neither the rules nor the registry (often a custom `usr.*`), and
-  the bare code, no params, when EMPTINESS removed it. One exception, and the one to expect on a menu:
+  entry: `drop-unsupported-request`, `drop-unknown-request` (often a custom `usr.*`), or the bare code,
+  no params, when EMPTINESS removed it. One exception, and the one to expect on a menu:
   a component still HOLDING a live menu item or submenu is NOT dropped over its own dead request, which
-  would take the live child with it.
-  NO OTHER component type is ever dropped over a request: some legitimately fire a system request the
-  registry lacks, and losing them would lose valid UI. Such a component SURVIVES, and the same two
-  cases decide its binding:
-    • KNOWN-unsupported — REMOVED, the component shipping without it, in
-      `requestConversions.droppedRequests[]` under `drop-request-unsupported`;
-    • UNKNOWN — KEPT VERBATIM, flagged in `requestConversions.flaggedRequests[]` under
-      `flag-request-unmapped`, for you to verify.
-  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests (a binding lost on
-  a SURVIVING component, a loss `droppedElements` never shows), flaggedRequests,
-  unresolvedTargetRequests and missingTargetPages (both above). Tell the user which action components
-  were removed AND which surviving components lost an action.
+  would take the live child with it — keeping the CONTROL is not keeping its ACTION.
+  NO OTHER component type is dropped over a request: some legitimately fire a system request the
+  registry lacks, and losing them would lose valid UI. That owner and every SURVIVING component have
+  their bindings decided by the same two cases:
+    • KNOWN-unsupported — REMOVED, the component shipping without it, in `droppedRequests[]` under
+      `drop-request-unsupported`;
+    • UNKNOWN — KEPT VERBATIM, flagged in `flaggedRequests[]` under `flag-request-unmapped`, for you
+      to verify.
+  guide.requestConversions has FIVE collections: convertedRequests, droppedRequests, flaggedRequests,
+  unresolvedTargetRequests and missingTargetPages (both above). An `elementName` in them may name a
+  node carried inside another element's `values`, which has no operation of its own — find it there.
+  Tell the user which action components were removed AND which surviving components lost an action.
   Page `handlers` (the web-only AMD section) are NEVER transferred — re-implement that behavior as entity-level business rules.
 - ELEMENT PLACEMENT IS AUTHORITATIVE (scope: placing viewConfigDiff operations when building a page from
   get-mobile-page-conversion-guide — this rule owns per-page placement on a converted page; get-component-info
@@ -532,8 +531,8 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   value): when the guide returns a quick filter with `parentName: HeaderContainer, propertyName: items`,
   insert it under exactly that parent — and under whatever parent the entry names in any other conversion.
   Do NOT relocate it into crt.QuickFilterGroup because get-component-info (mobile) calls crt.QuickFilterGroup
-  the container for crt.QuickFilter. Mechanism (per the ENG-94937 investigation on Creatio Mobile — verify
-  against your target platform version): crt.QuickFilterGroup is model-driven, so it builds its chips at
+  the container for crt.QuickFilter. Mechanism (investigated on Creatio Mobile in August 2026 — verify
+  for your target platform version): crt.QuickFilterGroup is model-driven, so it builds its chips at
   RUNTIME from the `QuickFilterGroup_Value` attribute via `crt.QuickFilterGroupAttributeConverter` (driven by
   the `FilterGroupButton` in HeaderContainer); a crt.QuickFilter inserted as a static child of its `items` is
   never bound. Placement alone is necessary but NOT sufficient here: a working page ALSO needs that model side

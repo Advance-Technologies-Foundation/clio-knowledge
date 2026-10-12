@@ -132,33 +132,51 @@ public sealed class ReferenceGuidanceMigrationTests
         // Arrange
         string repositoryRoot = FindRepositoryRoot();
         using JsonDocument source = ReadManifest(repositoryRoot);
-        string[] publishedUris = ReferenceResources(source)
+        HashSet<string> publishedUris = ReferenceResources(source)
             .Select(resource => resource.GetProperty("uri").GetString()!)
-            .OrderBy(uri => uri, StringComparer.Ordinal)
+            .ToHashSet(StringComparer.Ordinal);
+        (string RelativePath, string Text)[] guidanceFiles = Directory.GetFiles(
+                Path.Combine(repositoryRoot, "guidance", "mcp", "guides"),
+                "*.md",
+                SearchOption.AllDirectories)
+            .Select(path => (
+                RelativePath: Path.GetRelativePath(repositoryRoot, path).Replace('\\', '/'),
+                Text: File.ReadAllText(path)))
+            .OrderBy(file => file.RelativePath, StringComparer.Ordinal)
             .ToArray();
-        string[] guidanceFiles = Directory.GetFiles(
-            Path.Combine(repositoryRoot, "guidance", "mcp", "guides"),
-            "*.md",
-            SearchOption.AllDirectories);
 
         // Act
-        string completeGuidance = string.Join("\n", guidanceFiles.Select(File.ReadAllText));
-        string[] canonicalLinks = Regex.Matches(
-                completeGuidance,
-                "docs://knowledge/com\\.creatio\\.clio/reference\\.[a-z0-9.-]+",
-                RegexOptions.CultureInvariant)
-            .Select(match => match.Value)
+        // Collected per file, so a failure names the article carrying the bad link instead of reporting it
+        // against the concatenation of every guide.
+        (string RelativePath, string Uri)[] canonicalLinks = guidanceFiles
+            .SelectMany(file => Regex.Matches(
+                    file.Text,
+                    "docs://knowledge/com\\.creatio\\.clio/reference\\.[a-z0-9.-]+",
+                    RegexOptions.CultureInvariant)
+                .Select(match => (file.RelativePath, match.Value)))
+            .ToArray();
+        string[] undeclaredLinks = canonicalLinks
+            .Where(link => !publishedUris.Contains(link.Uri))
+            .Select(link => $"{link.RelativePath}: {link.Uri}")
             .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        string[] unlinkedReferences = publishedUris
+            .Except(canonicalLinks.Select(link => link.Uri), StringComparer.Ordinal)
             .OrderBy(uri => uri, StringComparer.Ordinal)
             .ToArray();
 
         // Assert
-        completeGuidance.Should().NotContain(LegacyPrefix,
-            because: "new guidance must not depend on a legacy reference URI template");
-        completeGuidance.Should().NotMatchRegex(@"references/[a-z0-9-]+\.md",
-            because: "flat guide folders cannot resolve family-specific relative reference paths safely");
-        canonicalLinks.Should().Equal(publishedUris,
-            because: "every migrated supporting article must be reachable from its primary guide and every link must resolve");
+        guidanceFiles.Where(file => file.Text.Contains(LegacyPrefix, StringComparison.Ordinal))
+            .Select(file => file.RelativePath)
+            .Should().BeEmpty(because: "new guidance must not depend on a legacy reference URI template");
+        guidanceFiles.Where(file => Regex.IsMatch(file.Text, @"references/[a-z0-9-]+\.md"))
+            .Select(file => file.RelativePath)
+            .Should().BeEmpty(
+                because: "flat guide folders cannot resolve family-specific relative reference paths safely");
+        undeclaredLinks.Should().BeEmpty(
+            because: "every link to a supporting article must resolve to one the manifest publishes");
+        unlinkedReferences.Should().BeEmpty(
+            because: "every migrated supporting article must be reachable from its primary guide");
     }
 
     [Test]
