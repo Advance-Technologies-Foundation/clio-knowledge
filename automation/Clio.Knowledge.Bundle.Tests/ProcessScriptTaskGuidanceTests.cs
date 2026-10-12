@@ -131,12 +131,14 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the consent rule lives in process-version-writes, and a bare `version-writes` names no guide");
         guide.Should().Contain("compile SUCCEEDED (no compiler errors)",
             because: "a compile that failed, or one followed by another edit, covers nothing");
-        guide.Should().Contain("a new version only once it is active",
-            because: "the general verification paragraph must not send a new version to run-process before activation");
+        guide.Should().Contain("a new version by its own code before it is activated, on the clio the version order above names",
+            because: "the general verification paragraph must send a new version to run-process before activation only where that run executes it");
         guide.Should().Contain("that warning does not ask for a SECOND compile",
             because: "a version compiled before its activation ran its new C# without another compile, and the activation answer used to read as demanding one");
-        guide.Should().Contain("activate it with `set-active-business-process-version` only when the user decides to; then verify it on a run",
-            because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
+        guide.Should().Contain("compile the new version; verify it on a run of its own code; activate it with `set-active-business-process-version` only when the user decides to",
+            because: "activating an uncompiled version breaks every new instance, and a clio that runs the named version lets the new code be checked before it reaches them");
+        guide.Should().Contain("names `versionName`",
+            because: "the run-before-activation check is valid only on a clio whose run-process runs the named version, and the contract field is how an agent tells");
         guide.Should().Contain("a Latin letter (a-z, A-Z)",
             because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
         guide.Should().Contain("not a C# keyword",
@@ -152,7 +154,7 @@ public sealed class ProcessScriptTaskGuidanceTests
         guide.Should().Contain("A verbatim string (`@\"...\"`) that spans lines gains tabs",
             because: "the generator indents every line of the body, so such a string changes its value");
         guide.Should().Contain("the code of a version that is not active runs the ACTIVE version",
-            because: "a run of the new version's code before activation executes the previous version, so it proves nothing");
+            because: "on an older clio a run of the new version's code before activation executes the previous version, so it proves nothing");
         guide.Should().NotContain("verify it on a run, and only then activate it",
             because: "that order cannot be followed: run-process folds a non-active version's code onto the active one");
         coreRules.Should().Contain("run it again about two minutes later (asking first when the process has side effects) and ask before a restart",

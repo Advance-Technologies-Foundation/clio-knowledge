@@ -181,18 +181,23 @@ are not, and there is no `process-caption` to pass to either of them.
 
 == Launching a versioned process ==
 `run-process` takes a process CODE, and a code names ONE version (V1). The version the platform's own
-triggers and schedules execute is the ACTIVE one (V3), which is usually not the root you reach by the
-base name. Read `isActiveVersion` from `describe-business-process` and launch the code reported in
+triggers, schedules and sub-process calls execute is the ACTIVE one (V3), which is usually not the root
+you reach by the base name. To run what the environment runs, read `isActiveVersion` from `describe-business-process` and launch the code reported in
 `activeVersionName` -- and only when the response carries that field. When it does not, because the
 standing is UNKNOWN or because no active version was established, launch NOTHING: report the standing
 and ask which code to run. Do not fall back to the code you are already holding -- on a versioned
 process that is usually the root, which is usually not the one that runs.
-Measured on a stand (2026-09-11): a launch resolves to the ACTIVE version and the process log records the
-run against it, not against the root whose name is the familiar one. A NON-active version's code is
-folded onto the active version too (measured 2026-10-01: a process with three versions ran the active one
-for every code, and `SysProcessLog.SysSchemaId` names it), so `run-process` cannot run a version that is
-not active. Pass the active version's code explicitly; to see a new version run before it is activated,
-ask the user to run it from the process designer, as `process-script-task` describes. `run-process` refuses a display
+Which version a launch executes depends on the clio. Measured on a stand (2026-10-12): a clio whose
+`get-tool-contract` for `run-process` names `versionName` runs EXACTLY the version whose code it is given,
+active or not - it launches through the platform's version-pinned route, the one the designer's Run uses -
+and answers with `versionName`, `isActiveVersion` and `activeVersionName`, warning when that version is not
+the active one. There the base name runs the ROOT, and a new version's own code runs the new version -
+which is how to verify it before it is activated; activating stays the user's call
+(`process-version-writes`). An older clio, whose contract lacks `versionName`, folds every code onto the
+ACTIVE version (measured 2026-10-01: a process with three versions ran the active one for every code, and
+`SysProcessLog.SysSchemaId` names it), so it cannot run a version that is not active: pass the active
+version's code, and to see a new version run before it is activated, ask the user to run it from the
+process designer, as `process-script-task` describes. `run-process` refuses a display
 caption, and the refusal names the code it resolved to -- on a clio carrying this feature that is the
 active version's code, but treat it as a lead to confirm with `describe-business-process` rather than an
 answer to paste into a launch.

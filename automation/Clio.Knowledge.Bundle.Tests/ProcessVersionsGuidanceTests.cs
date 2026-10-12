@@ -41,8 +41,8 @@ public sealed class ProcessVersionsGuidanceTests
     private static readonly Regex PlaceholderToken = new("<[A-Z][A-Z0-9-]*TBD>", RegexOptions.Compiled);
 
     [Test]
-    [Description("Pins the measured fold: the code of a version that is not active runs the ACTIVE version, so run-process cannot run a new version before activation - the question the guide used to leave open.")]
-    public void Guide_ShouldStateThatANonActiveCodeRunsTheActiveVersion()
+    [Description("Pins the two measured launch behaviours: a clio whose run-process contract names versionName runs exactly the named version, so a new version can be verified before activation, while an older clio folds a non-active code onto the ACTIVE version.")]
+    public void Guide_ShouldStateWhichVersionALaunchRunsOnEachClio()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
@@ -51,10 +51,12 @@ public sealed class ProcessVersionsGuidanceTests
         string guide = Collapsed(repositoryRoot, GuidePath);
 
         // Assert
-        guide.Should().Contain("`run-process` cannot run a version that is not active",
-            because: "a run of a new version's code before activation executes the previous version, so its result proves nothing");
+        guide.Should().Contain("names `versionName` runs EXACTLY the version whose code it is given",
+            because: "the run-before-activation check is valid only on a clio that runs the named version, and the contract field is how an agent tells which clio it has");
+        guide.Should().Contain("folds every code onto the ACTIVE version",
+            because: "on an older clio a run of a new version's code before activation executes the previous version, so its result proves nothing");
         guide.Should().NotContain("still not established",
-            because: "the fold is measured (ENG-101880), and leaving it open invites the run-before-activation check that cannot work");
+            because: "both behaviours are measured, and leaving either open invites a check whose result proves nothing");
     }
 
     [Test]
