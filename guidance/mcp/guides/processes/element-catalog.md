@@ -20,7 +20,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
-  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
+  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask,
+  `changeAccessRights`->ChangeAdminRightsUserTask, owned by `process-access-rights`).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `collection` |
   `count` | `aggregation`), result columns and
   sort (`first` / `collection` — refused for `count`/`aggregation`; REQUIRED for `collection`), a

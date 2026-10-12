@@ -7,8 +7,8 @@ caller reports a mapping that resolves to nothing, or for a rule's evidence.
 == Which process article to read ==
 A build starts at `process-digest`. This article owns the build lifecycle (tools, descriptor, recipe,
 modify safety); every other topic has its own owner -- read the one your task needs, never guess:
-  * `process-digest` - the BUILD CARD: what an ordinary build needs from this article and three
-    others, naming each owner.
+  * `process-digest` - the BUILD CARD: recipe, names and buildable types in short, and the ONE
+    article per element.
   * `process-custom-elements` - custom user-task elements: Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog` - what `create-business-process` can build TODAY and what it cannot; the
@@ -101,7 +101,7 @@ one; read that article.
 Before step 1 you MUST read `process-element-catalog` (or `process-digest`, while every element you
 plan is on its buildable list): a plan around something `create-business-process` cannot build fails
 only at build time. For a NEW process, or a change for EACH item of a set,
-you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (restated in
+you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (in short on
 `process-digest`): they decide how many processes the request is.
 1. Translate the request into a graph (starts, activities, flows, ends, parameters, mappings) and
    name them per N1-N10 in `process-naming`. ONE START PER TRIGGER the process must react to: a process

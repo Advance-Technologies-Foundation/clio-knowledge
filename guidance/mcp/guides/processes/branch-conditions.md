@@ -110,8 +110,7 @@ Deliberate, not tidiness: where two flows join the same pair, honouring the edit
 `removeFlow`.** Version-dependent, so do not rely on it as a backstop: the `removeFlow` refusal ships
 from `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**; below those the
 extra fields are accepted and silently dropped, clio does no client-side check, and stripping them
-yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule;
-`process-digest` restates it.
+yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in

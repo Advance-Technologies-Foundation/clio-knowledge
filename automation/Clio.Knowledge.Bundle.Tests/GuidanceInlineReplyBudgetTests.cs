@@ -62,7 +62,7 @@ public sealed class GuidanceInlineReplyBudgetTests
     /// calling <c>get-guidance</c> and subtracting the JSON-escaped UTF-8 length of the article text.
     /// </para>
     /// </summary>
-    private const int EnvelopeAllowanceBytes = 1_300;
+    internal const int EnvelopeAllowanceBytes = 1_300;
 
     /// <summary>
     /// The pieces of the split, written down rather than derived: an edit that drops one from the manifest

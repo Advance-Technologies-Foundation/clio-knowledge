@@ -26,7 +26,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
   record does not make it one: it gets no binding to this process element and no completion listener, so the
   process runs straight past it, never learns that the task was completed or with which result, and cannot
   branch on that result (`ActivityUserTask`, `UserTaskActivityHandler`, `AddDataUserTask`). A task for each
-  record of a set is decided by D1 (restated in `process-digest`; owner `process-sub-process-when`).
+  record of a set is decided by D1 (owner `process-sub-process-when`, which also says what is NOT D1).
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with

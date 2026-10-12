@@ -70,7 +70,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   used to be an unnamed serialised error carrying only a parameter UId; from 1.4.0.41 the package rewrites
   that one message into a sentence naming the reference and the remedy.)
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
-  describe-first and confirm-the-removal rules (`process-digest`; owner `process-modeling`) still apply.
+  describe-first and confirm-the-removal rules (owner `process-modeling`) still apply.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).
