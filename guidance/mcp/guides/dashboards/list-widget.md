@@ -84,7 +84,7 @@ every empty list as this defect or bypass permissions.
 Do not reject a list solely because its source is absent from the leaf body. This guidance adds
 an authoring gate, not a claim that clio now hard-rejects every dangling list binding.
 
-Evidence: the disposable lab for clio#1412 / clio-knowledge#161 used Creatio 10.1.585, .NET 8,
+Evidence: the disposable lab (September 2026) used Creatio 10.1.585, .NET 8,
 PostgreSQL and clio 8.1.0.127. A view-only clone passed validation and save but showed the loading
 placeholder; copying the complete entity-backed binding repaired the target and loaded the same
 five known contacts. A second clone copied the referenced predefined filter and, after navigation
