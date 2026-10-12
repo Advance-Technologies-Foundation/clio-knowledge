@@ -41,8 +41,8 @@ specifics and the workplace binding.
 5. Choose and read the target workplace(s): read `SysWorkplace` (select `Id`, `Name`, `HomePageUId`)
    via `odata-read` or `execute-esq` — if one path errors, try the other. A workplace has one home
    page, so bind each workplace the page should apply to.
-   - If the user did NOT name a workplace, do not pick one yourself. Ask ONE question and offer the
-     options in THIS order — the order is the recommendation, so do not reorder it:
+   - If the user did NOT name a workplace, do not pick one yourself. When you cannot ask, leave the
+     page unbound and say so (step 1). Otherwise ask ONE question and offer the options in THIS order — the order is the recommendation, so do not reorder it:
      1. a NEW workplace named for the app — mark it RECOMMENDED whenever the page belongs to an app
         being scaffolded, because it keeps the app's navigation self-contained (`workplaces` owns
         the creation). Never omit this option: without it the user can only pick among workplaces
