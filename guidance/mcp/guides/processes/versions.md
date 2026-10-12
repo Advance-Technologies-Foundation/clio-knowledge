@@ -187,14 +187,18 @@ you reach by the base name. To run what the environment runs, read `isActiveVers
 standing is UNKNOWN or because no active version was established, launch NOTHING: report the standing
 and ask which code to run. Do not fall back to the code you are already holding -- on a versioned
 process that is usually the root, which is usually not the one that runs.
-Which version a launch executes depends on the clio. Measured on a stand (2026-10-12): a clio whose
-`get-tool-contract` for `run-process` names `versionName` runs EXACTLY the version whose code it is given,
-active or not - it launches through the platform's version-pinned route, the one the designer's Run uses -
-and answers with `versionName`, `isActiveVersion` and `activeVersionName`, warning when that version is not
-the active one. There the base name runs the ROOT, and a new version's own code runs the new version -
-which is how to verify it before it is activated; activating stays the user's call
-(`process-version-writes`). An older clio, whose contract lacks `versionName`, folds every code onto the
-ACTIVE version (measured 2026-10-01: a process with three versions ran the active one for every code, and
+Which version a launch executes depends on the clio. Measured on a stand (2026-10-12, .NET Framework,
+CrtProcessBuilder 1.6.6.93; a .NET host not measured): a clio whose `get-tool-contract` for `run-process`
+says it "runs EXACTLY the version whose code it is given" launches through the platform's version-pinned
+route, the one the designer's Run uses, and answers with `versionName`, `isActiveVersion` and
+`activeVersionName`, warning when that version is not the active one. There the base name runs the ROOT,
+and a new version's own code runs the new version - which is how to verify it before it is activated;
+activating stays the user's call (`process-version-writes`). The one exception is a run the platform QUEUES:
+it answers `queued-background`, and the platform's background queue starts the ACTIVE version (traced in
+the platform source, not measured), so a queued answer is NOT evidence that the named version ran. A run
+meant to verify a version that is not active therefore passes `result-parameters`, which make it
+synchronous, and counts only a `completed` answer whose `versionName` is that version. An older clio,
+whose contract does not say so, folds every code onto the ACTIVE version (measured 2026-10-01: a process with three versions ran the active one for every code, and
 `SysProcessLog.SysSchemaId` names it), so it cannot run a version that is not active: pass the active
 version's code, and to see a new version run before it is activated, ask the user to run it from the
 process designer, as `process-script-task` describes. `run-process` refuses a display
