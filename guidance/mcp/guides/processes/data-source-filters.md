@@ -127,8 +127,13 @@ is the one contract all three share, which is why it reads as its own subject.
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
 - LEGACY `isNotNull` (CrtProcessBuilder earlier than 1.6.6.81): those builds stored an is-null condition
   without the platform's own `isNull` flag, which the runtime reads instead of the comparison and which
-  defaults to null. Every `isNotNull` they wrote therefore runs as IS NULL and selects the OPPOSITE records
-  (measured on a .NET Framework / MSSQL stand, October 2026); `isNull` was unaffected. 1.6.6.81 and later write the flag. On 1.6.6.81 or
+  defaults to null. Every `isNotNull` they wrote is therefore built as IS NULL (read from platform source,
+  not run on a legacy process): it acts on records whose column is EMPTY, so it typically matches nothing
+  you expected - a reported PostgreSQL process with such a filter never started and its Read data returned
+  0 rows. A legacy `isNull` should be unaffected by the same reasoning, but that report also saw `isNull` on
+  a DateTime column never match, which is not explained; treat any legacy is-null condition as suspect.
+  1.6.6.81 and later write the flag (both conditions measured correct on a .NET Framework / MSSQL stand,
+  October 2026, including DateTime columns). On 1.6.6.81 or
   later such an element still reads back as `isNotNull` but with `filterDecodedCompletely: false`;
   re-sending the filter with `setFilter` rewrites the condition (follows from `setFilter` replacing the
   whole filter; not tried on a legacy process). The repair flips which records the element acts on: tell the
