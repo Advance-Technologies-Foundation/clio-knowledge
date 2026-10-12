@@ -236,6 +236,11 @@ So size is a delivery contract, not a matter of taste:
   `automation/Clio.Knowledge.Bundle.Tests/ProcessGuideResponseSizeTests.cs`, which is the enforcing
   check. Measure the JSON-escaped payload, not the file on disk — escaping inflates a
   backtick-dense article by 20–35%.
+- Keep every guidance article's reply within the inline budget in
+  `automation/Clio.Knowledge.Bundle.Tests/GuidanceInlineReplyBudgetTests.cs`: 19,000 UTF-8 bytes as
+  clio writes the reply, below the size a Copilot CLI agent receives inline instead of spilling it to
+  a file. The articles already over it are listed there with a ceiling at their size; they may shrink,
+  never grow, and a new article over the budget fails the suite.
 - When an article outgrows the budget, split it at a section boundary rather than trimming
   evidence. Give each piece its own `itemId` in `bundle-source.json`, keep the original `itemId`,
   `uri` and `legacyUris` on the piece that stays the entry point, and have that entry index the
