@@ -64,6 +64,12 @@ IdentityService
 - The default `configurationMode` is `db-first`, but until direct DB seeding is fully proven the command
   falls back to the supported REST/sys-settings configuration path.
 
+uninstall-creatio
+- Destructive: confirm the target environment with the user first (`core-rules`).
+- uninstall-creatio may complete with a WarningMessage, a warning stage, and a success-with-warnings terminal when Windows cannot remove a locked IIS application-pool profile or dbHub live verification is unavailable (exit code 0 / IsError=false); show the warning detail, but do not retry the destructive command. The conditional remove-dbhub-source stage runs only after destructive cleanup and before unregister; an earlier failure skips it and retains the source for reconciliation.
+- uninstall-creatio preserves an application pool and its Windows profile when another IIS application still uses that pool; a skipped profile stage in this case is expected and requires no manual cleanup. Recorded IdentityService attachment and standalone/combined removal rules are under Identity attachment and removal below; read them when an identity component is attached.
+- uninstall-creatio resolves a named target from the environment's registered `EnvironmentPath`, not its URI. It requires a complete, unfiltered IIS inventory, resolves existing filesystem aliases, removes every safely validated site or application with that physical directory identity (including classic nested `/0` applications), and handles every pool assigned to the selected applications while preserving pools shared with unrelated applications. Operations using the same environment name or physical directory are serialized, and unregister succeeds only while the registered path still matches. Incomplete IIS discovery is a hard failure before database or file deletion. If a complete inventory has no matching target, it continues as a local non-IIS uninstall. A missing, relative, environment-variable-based, or filesystem-root `EnvironmentPath` is also a hard failure: do not infer a filesystem path from IIS bindings or the environment URI.
+
 Identity attachment and removal (experimental)
 - Evidence: [Clio lifecycle implementation and validation](https://github.com/Advance-Technologies-Foundation/clio/blob/fdb88217c65b1d31c1465f1a4d72cf8ebf11fd57/spec/identity-uninstall/identity-uninstall-validation.md).
 - Applicability: verify that the installed contracts describe recorded identity attachments.

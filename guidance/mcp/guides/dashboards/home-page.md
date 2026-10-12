@@ -26,7 +26,8 @@ specifics and the workplace binding.
      audience of the workplace you bind it to (see Access / roles). Read the concrete roles off the
      environment for that question — `workplaces`, "Ask where things belong before you write",
      prescribes the option set; do not offer only `System administrators` vs everyone. `workplaces`
-     owns workplace creation and the elicitation script. Step 5 then only applies the answer.
+     owns workplace creation and the elicitation script. Step 5 then only applies the answer. When you
+     cannot ask, `core-rules` (Navigation placement) applies: leave the page unbound; say so.
 2. `create-page` with `template` = `BaseHomePage`, a `schema-name` (active prefix, e.g.
    `UsrMyHomePage`), and the target `package-name`. Capture the returned `schemaUId` — that UId is
    the value you bind in step 6. `create-page` assigns the home-page schema group automatically
