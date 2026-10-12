@@ -4,10 +4,9 @@ Map the task to the guide(s) you MUST read with get-guidance before planning or 
 Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
 `esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
-how a guide points at a rule it does not own. Backticks around anything else are ordinary code:
-columns, ops, and page-body sections such as `handlers` or `converters` are not topics. Where a guide
-restates something another guide owns — a destructive precondition, kept next to the instruction it
-guards — it says whose rule it is and names that guide for the rest.
+how a guide points at a rule it does not own. Other backticks are ordinary code (columns, ops,
+page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
+precondition kept next to the instruction it guards — names that guide as the owner.
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -28,7 +27,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
-  - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser" — the placeholder is the pre-load state, and that section says when it is instead a real failure)
+  - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser", which says when the placeholder is a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
   - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables — for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
@@ -39,10 +38,10 @@ guards — it says whose rule it is and names that guide for the rest.
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
   article, then the article of each element you use (the rows below)
   - process-digest is the BUILD CARD: it restates, naming each owner, what every build and edit needs
-    from `process-modeling` (the build-lifecycle owner: tools, descriptor, the recipe, the modify-safety
-    rules), `process-element-catalog`, `process-naming` and `process-sub-process-when`. For an ordinary
-    build do NOT open those four - the card is what you read instead; open one only when the card sends
-    you there. After the card, read the ONE matching sub-guide per element:
+    from `process-modeling` (the build-lifecycle owner), `process-element-catalog`, `process-naming` and
+    `process-sub-process-when`. For an ordinary build do NOT open those four - read the card instead and
+    open one only when the card sends you there. After the card, read the ONE matching sub-guide per
+    element:
   - which elements exist beyond the card's buildable list, and how a data-id maps to a build type ->
     name=process-element-catalog
     - the element catalog (data-id -> label -> purpose), to read an existing process or reason about an
@@ -50,9 +49,8 @@ guards — it says whose rule it is and names that guide for the rest.
   - BUILDING A NEW PROCESS, or making an existing one do work for EACH item of a set -> check the D1,
     D2 and D4 triggers in process-digest BEFORE you plan the graph, every time, and read
     name=process-sub-process-when itself when one fires: it decides how many processes the request
-    becomes. One by default; the exceptions — the same work for each item of a set, a fragment repeated
-    in the plan, two or more long human stages — are hard to recognise without their rules, so do not
-    skip the check because none seems to apply
+    becomes. One by default; the exceptions (the same work per item of a set, a fragment repeated in the
+    plan, two or more long human stages) are easy to miss, so never skip the check
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
@@ -75,7 +73,7 @@ guards — it says whose rule it is and names that guide for the rest.
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
     - a parallel-split NOTICE or a package-version refusal on a branch build, or the evidence behind a branch
-      rule (label figures, version floors, corpus condition shapes) -> name=process-branch-conditions-details
+      rule -> name=process-branch-conditions-details
   - branch on WHICH RESULT an activity was completed with - an approval's verdict, a perform task's
     result, a page's completing button - a SELECTION and not a formula -> name=process-activity-result-branches
   - the Perform task element — a human step, what it produces, its parameter table ->
@@ -98,7 +96,7 @@ guards — it says whose rule it is and names that guide for the rest.
     read-back warning proves
   - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
     name=process-send-email
-    - the evidence behind a Send email rule, or a result that contradicts one (why a no-mode element runs as a
+    - the evidence behind a Send email rule, or a result that contradicts one (a no-mode element running as a
       template, the designer-removal exceptions) -> name=process-send-email-details
   - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
     against, the refusals, the subject override, switching modes -> name=process-send-email-template
@@ -107,14 +105,12 @@ guards — it says whose rule it is and names that guide for the rest.
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
-    how to convert an element, where the callee's contract moves to, and how a per-item value is addressed
-    -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
+    converting an element, where the callee's contract moves to -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
     and which execution mode it takes)
-  - a called process CHANGED its parameters and the CALLERS have to be fixed — what crosses at run time,
-    what a re-sync reports, what `inSync` can and cannot show -> name=process-parameters-details (after
-    name=process-parameters)
-  - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
-    sources are read facts, never invented -> name=process-preconfigured-page
+  - a called process CHANGED its parameters and the CALLERS have to be fixed -> name=process-parameters-details
+    (after name=process-parameters)
+  - show a user a Freedom UI page mid-process and wait for a completing button ->
+    name=process-preconfigured-page
   - the "Connected to" links of the activity a task creates -> name=process-activity-connections
   - plan or validate a graph against the R1-R20 connection rules, a validate-process-graph finding names an
     R rule, a described connection is refused on re-apply, or the designer does not show a connection you
@@ -129,11 +125,13 @@ guards — it says whose rule it is and names that guide for the rest.
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
     family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
+  - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
+    name=process-modeling-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
   - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
     tracing on or off -> name=process-tracing
 - Entities & schemas: create/modify schema, app / schema modeling -> name=app-modeling
-  - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling (owns capture-before-push ordering)
+  - DB-first schema creation in a Git-first workspace, or preparing a workspace push after server-side changes -> name=app-modeling
   - resolve a Git conflict in a Creatio package artifact -> name=creatio-three-way-merge
   - virtual entity object, IEntityQueryExecutor reads, or EntityEventListener writes -> name=virtual-entities
   - schema designer fails with "GetSchemaDesignItem returned an HTML error page" / package dependencies -> name=package-dependencies
@@ -166,7 +164,7 @@ guards — it says whose rule it is and names that guide for the rest.
 - Record-level permission model, stored grants versus runtime/dynamic access rules, or permission-extension interfaces -> name=record-permissions
 - Runtime record-permission implementation, activation and combination modes -> name=record-permission-extensions
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
-- Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer), for any role, one object per call — read with get-object-rights, grant/revoke with set-object-rights; making a portal section's object available to external users is one case -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
+- Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer; get-object-rights / set-object-rights), including making a portal section's object available to external users -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
 
