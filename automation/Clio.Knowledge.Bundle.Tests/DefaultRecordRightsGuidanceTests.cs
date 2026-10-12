@@ -76,6 +76,8 @@ public sealed class DefaultRecordRightsGuidanceTests
         TestName = "DefaultRecordRights_ShouldNameTheObjectBySchemaNameAndTitle")]
     [TestCase("you MUST ask which object is meant before reading or writing",
         TestName = "DefaultRecordRights_ShouldAskWhenTheWordIsNotTheTitle")]
+    [TestCase("or matches more than one object by schema",
+        TestName = "DefaultRecordRights_ShouldAskWhenTheWordMatchesSeveralObjects")]
     [TestCase("leaves the other two operations unchanged (as stored)",
         TestName = "DefaultRecordRights_ShouldKeepTheOtherOperationsOfAGrant")]
     [TestCase("you MUST say in the confirmation who gains or loses what, by direction",

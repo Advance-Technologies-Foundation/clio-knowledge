@@ -23,7 +23,9 @@ decide first: a user without read on the object reaches no record, whatever the 
 ## How the platform decides — read this before any write
 - The switch. While "Use record permissions" is OFF, record rights are not evaluated: every user with read
   operation rights on the object reaches every record. While it is ON, a record is reachable only through
-  its record rights (plus its author/owner, their managers, and holders of "view any data").
+  its record rights (plus its author/owner, their managers, and holders of "view any data"). The author/owner
+  of a record always reaches it: that is the platform's built-in default, not a right a rule writes, so it
+  holds for existing records after a first enable too.
 - A default rule says: records created by members of the AUTHOR role get read / edit / delete rights for the
   GRANTEE role. Each operation has a level: not set, granted, or delegated (granted with the right to
   delegate it). "Do not apply for manager" stops the grantee role's managers from inheriting the rule. Rules
@@ -46,12 +48,6 @@ decide first: a user without read on the object reaches no record, whatever the 
   therefore changes one rule per call, saves every other rule exactly as stored, and refuses a stored list
   with duplicate pairs or invalid levels.
 
-Evidence: Creatio Academy ("Record permissions"); reproduced on Creatio 10.2 stands (10.2.367 on 2026-10-02,
-10.2.370 on 2026-10-04): the switch, the rules on insert, the full-list save, and the update process that
-replaces default-origin rights and keeps manual grants. The author/owner of a record always reaches it: that
-is the platform's built-in default, not a right a rule writes, so it holds for existing records after a first
-enable too.
-
 ## get-object-rights (the record part)
 Per object, after the operation rows: `Record permissions: ON|OFF`, then every default rule — author → grantee,
 the three levels, "do not apply for manager", with both SysAdminUnit ids. While the switch is OFF the rules
@@ -66,8 +62,8 @@ enable-record-permissions; disable-record-permissions; preview.
 - entity-schema-name is the object's SCHEMA name, and a developer's word for an object can be its title
   instead (the owner of this rule is `get-guidance name=object-rights`). One call changes who reaches EVERY
   record of the object, so you MUST name the object by schema name AND title in the preview you show, and
-  when the developer's word is not exactly that object's title you MUST ask which object is meant before
-  reading or writing.
+  when the developer's word is not exactly that object's title, or matches more than one object by schema
+  name or title, you MUST ask which object is meant before reading or writing.
 - A call is EITHER a rule change — author, grantee and operations (read,edit,delete) together, nothing is
   granted by default, optionally with enable-record-permissions, never with disable-record-permissions — OR
   a switch-only change: none of them, plus exactly one of enable-record-permissions /
