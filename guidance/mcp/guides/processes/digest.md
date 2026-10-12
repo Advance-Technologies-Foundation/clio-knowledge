@@ -5,7 +5,7 @@ Part of the process guide set. Owners win: `process-modeling`, `process-element-
 articles named here.
 
 == Recipe (`process-modeling`) ==
-0. A request produces ONE process, unless D1 (same work per item of a set, e.g. a task per record),
+0. A request produces ONE process, unless D1 (same work per item of a set, e.g. an email per record),
    D2 (3+ element fragment at 2+ places) or D4 (2+ long human phases) fires: read
    `process-sub-process-when` first.
 1. ONE START PER TRIGGER (add + change = two `signalStart`s in one process; CrtProcessBuilder 1.6.2.24+, clio 8.1.0.131+).

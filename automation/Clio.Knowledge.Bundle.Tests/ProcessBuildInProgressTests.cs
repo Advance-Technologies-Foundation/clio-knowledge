@@ -34,13 +34,13 @@ public sealed class ProcessBuildInProgressTests
     /// <summary>The definition and its edge cases, as the owner words them.</summary>
     private static readonly string[] OwnerClauses =
     [
-        "This section owns what \"existing process\" means wherever a process article or `routing` says it.",
+        "This section owns what \"existing process\" means for the version path and `isActiveVersion`.",
         "The unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when another person has since edited, activated or launched it by hand.",
-        "A family YOU created in this same task is a BUILD IN PROGRESS.",
+        "A family YOU created in this same task is a BUILD IN PROGRESS, within the limits below.",
         "Fixing, re-saving or launching it follows the build path, `process-digest` plus the element articles, NOT `process-versions` or this article",
         "do not ask the two questions below",
         "`process-modeling`'s `isActiveVersion` rule does not apply.",
-        "`core-rules` and the element articles' own confirmations still apply.",
+        "Its other modify rules (describe first, `removeFlow`, `removeElement`), `core-rules` and the element articles' own confirmations still apply.",
         "A version you add to a family that existed before this task is NOT a build in progress: the family is existing, so the version articles and the `isActiveVersion` rule apply in full.",
         "The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version task by request, so the version articles apply to those steps in full.",
         "ACTIVATING it is part of the build only when the request asks for a working or active process; otherwise the request has to say so.",
@@ -71,6 +71,8 @@ public sealed class ProcessBuildInProgressTests
                 + "rules. Missing: " + string.Join("; ", missing));
     }
 
+    private const string DefinitionClause = "is a BUILD IN PROGRESS";
+
     [Test]
     [Description("Only the owner defines the exemption; the card, routing and process-modeling point at it.")]
     public void TheExemption_ShouldHaveOneOwnerAndPointers()
@@ -85,13 +87,15 @@ public sealed class ProcessBuildInProgressTests
         string[] otherDefiners = [.. ProcessGuideSet.Declared(repositoryRoot)
             .Where(article => article.ItemId != OwnerItemId)
             .Where(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))
-                .Contains("it is a BUILD IN PROGRESS", StringComparison.Ordinal))
+                .Contains(DefinitionClause, StringComparison.Ordinal))
             .Select(article => article.ItemId)];
         string cardEditRoute = Regex.Match(card, @"- edit or launch an existing process:.*\z").Value;
         string routingRow = Regex.Match(routing,
             @"- which VERSION of a process you are reading.*?(?= - save a change as a NEW version)").Value;
 
         // Assert
+        Collapse(Article(OwnerItemId)).Should().Contain(DefinitionClause,
+            because: "anti-vacuity: the single-owner check looks for the owner's own defining words");
         otherDefiners.Should().BeEmpty(
             because: "AGENTS.md gives every rule one owner; a second definition drifts from the first");
         cardEditRoute.Should().Contain("`process-versions`, then `process-modeling`",

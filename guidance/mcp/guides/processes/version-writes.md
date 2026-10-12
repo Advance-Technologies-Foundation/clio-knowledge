@@ -67,13 +67,14 @@ and six ambiguous transport errors rather than a call you can retry. The databas
 handled (two writers on one number are refused after the save); the load is not.
 
 == A process you built in this task is a build in progress ==
-This section owns what "existing process" means wherever a process article or `routing` says it. The
+This section owns what "existing process" means for the version path and `isActiveVersion`. The
 unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when
 another person has since edited, activated or launched it by hand. A family YOU created in this same
-task is a BUILD IN PROGRESS. Fixing, re-saving or launching it follows the build path, `process-digest`
-plus the element articles, NOT `process-versions` or this article: do not ask the two questions below,
-and `process-modeling`'s `isActiveVersion` rule does not apply. `core-rules` and the element articles'
-own confirmations still apply. The limits:
+task is a BUILD IN PROGRESS, within the limits below. Fixing, re-saving or launching it follows the
+build path, `process-digest` plus the element articles, NOT `process-versions` or this article: do not
+ask the two questions below, and `process-modeling`'s `isActiveVersion` rule does not apply. Its other
+modify rules (describe first, `removeFlow`, `removeElement`), `core-rules` and the element articles' own
+confirmations still apply. The limits:
   * A version you add to a family that existed before this task is NOT a build in progress: the family
     is existing, so the version articles and the `isActiveVersion` rule apply in full.
   * The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version
