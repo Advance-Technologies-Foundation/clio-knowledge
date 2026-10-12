@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.123",
+  "libraryVersion": "1.15.124",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -34,8 +34,10 @@
       "agent-execution",
       "application-listener",
       "app-modeling",
+      "app-modeling-details",
       "sequences",
       "workplaces",
+      "workplaces-details",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
@@ -77,6 +79,7 @@
       "esq-filters-backend",
       "esq-filters-frontend",
       "existing-app-maintenance",
+      "existing-app-maintenance-details",
       "feature-toggle",
       "feature-toggle-tests",
       "freedom-page-web-to-mobile-conversion",
@@ -104,6 +107,7 @@
       "page-schema-resources",
       "page-schema-validators",
       "process-modeling",
+      "process-modeling-details",
       "process-digest",
       "process-element-catalog",
       "process-naming",
@@ -222,8 +226,10 @@
       "docs://knowledge/com.creatio.clio/agent-execution",
       "docs://knowledge/com.creatio.clio/application-listener",
       "docs://knowledge/com.creatio.clio/app-modeling",
+      "docs://knowledge/com.creatio.clio/app-modeling-details",
       "docs://knowledge/com.creatio.clio/sequences",
       "docs://knowledge/com.creatio.clio/workplaces",
+      "docs://knowledge/com.creatio.clio/workplaces-details",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -265,6 +271,7 @@
       "docs://knowledge/com.creatio.clio/esq-filters-backend",
       "docs://knowledge/com.creatio.clio/esq-filters-frontend",
       "docs://knowledge/com.creatio.clio/existing-app-maintenance",
+      "docs://knowledge/com.creatio.clio/existing-app-maintenance-details",
       "docs://knowledge/com.creatio.clio/feature-toggle",
       "docs://knowledge/com.creatio.clio/feature-toggle-tests",
       "docs://knowledge/com.creatio.clio/freedom-page-web-to-mobile-conversion",
@@ -292,6 +299,7 @@
       "docs://knowledge/com.creatio.clio/page-schema-resources",
       "docs://knowledge/com.creatio.clio/page-schema-validators",
       "docs://knowledge/com.creatio.clio/process-modeling",
+      "docs://knowledge/com.creatio.clio/process-modeling-details",
       "docs://knowledge/com.creatio.clio/process-digest",
       "docs://knowledge/com.creatio.clio/process-element-catalog",
       "docs://knowledge/com.creatio.clio/process-naming",
@@ -450,6 +458,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "app-modeling-details",
+      "title": "Application modeling details",
+      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
+      "topicId": "creatio.app-modeling-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/app-modeling-details",
+      "sourcePath": "guidance/mcp/guides/applications/app-modeling-details.md",
+      "bundlePath": "resources/app-modeling-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "application-listener",
       "title": "Creatio application and session lifecycle listeners",
       "description": "Canonical guidance for all four IAppEventListener and AppEventListenerBase hooks: reflection activation, stateless delegation to package singletons, application start/end, session start/end, cross-runtime limits, failure handling, and tests.",
@@ -489,6 +508,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/applications/workplaces.md",
       "bundlePath": "resources/workplaces.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "workplaces-details",
+      "title": "Workplace deletion, removals and evidence",
+      "description": "Owns the rarer workplace operations and the evidence behind the workplaces rules: the ordered procedure for deleting a workplace (binding names read first, children before the parent, which child rows go through remove-data-binding-row-db versus odata-delete) and recovery when the parent was deleted first; removing one section placement or a role grant, and changing a role; moving a section into a product-owned workplace and the exact error a missing target binding raises; when the My applications bindings may be removed; and the verified evidence behind the client-type, binding-column, Position, home-page and session-cache rules. Split out of workplaces.",
+      "topicId": "creatio.workplaces-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/workplaces-details",
+      "sourcePath": "guidance/mcp/guides/applications/workplaces-details.md",
+      "bundlePath": "resources/workplaces-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1037,6 +1067,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "existing-app-maintenance-details",
+      "title": "Existing application maintenance details",
+      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; how update-app-section preserves section-title languages and the translations evidence boundary; and the full schema-reuse example. Split out of existing-app-maintenance.",
+      "topicId": "creatio.existing-app-maintenance-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance-details",
+      "sourcePath": "guidance/mcp/guides/applications/existing-app-maintenance-details.md",
+      "bundlePath": "resources/existing-app-maintenance-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "feature-toggle",
       "title": "Feature toggles",
       "description": "Implement or review Creatio feature-toggle checks in C# package code such as packages/PkgOne/Files/src/cs or packages/PkgOne/src/cs. Use when gating behavior on a Creatio feature flag, adding `Creatio.FeatureToggling.Features.GetIsEnabled(...)`, or moving feature names into `Constants.cs`. If the task includes unit tests, also use feature-toggle-tests.",
@@ -1403,7 +1444,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Build-lifecycle owner for Creatio business processes: the tools, the create-business-process descriptor, the recipe and the modify safety rules. A build starts at process-digest; routes onward: process-element-catalog, process-element-catalog-details, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole.",
+      "description": "Build-lifecycle owner for Creatio business processes: tools, create-business-process descriptor, recipe and modify safety rules. A build starts at process-digest; routes to: process-element-catalog, process-element-catalog-details, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole; rare cases: process-modeling-details.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1412,6 +1453,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-modeling.md",
       "bundlePath": "resources/process-modeling.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-modeling-details",
+      "title": "Process modeling evidence and rare cases",
+      "description": "Owns the evidence, version history and reasoning behind the process-modeling rules, in the order the core states them: the tool read-backs (the two schemas captioned Send email, the three cases where writesConnectionsAtRuntime is null), why the element handle is name, why a second start used to be refused and the CrtProcessBuilder/clio floor that lifted it, the VwSysProcess dirty flags that are not compile instructions, why an optional field the request did not mention stays out, the version floor of the removeFlow refusal, the platform chain behind a designer retarget of a Sub-process element and the shipped-corpus multi-instance figures, and the stranded mapping row on a Sub-process element with its UId test. Split out of process-modeling, which keeps every rule and is read first.",
+      "topicId": "creatio.process-modeling-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-modeling-details",
+      "sourcePath": "guidance/mcp/guides/processes/process-modeling-details.md",
+      "bundlePath": "resources/process-modeling-details.md",
       "mediaType": "text/plain"
     },
     {
