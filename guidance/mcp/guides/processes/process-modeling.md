@@ -99,8 +99,8 @@ one; read that article.
 
 == Build recipe (intent -> running process) ==
 Before step 1 you MUST read `process-element-catalog` (or `process-digest`, while every element you
-plan is on its buildable list and is not `formulaTask`, `subProcess` or `scriptTask`, which need the
-CrtProcessBuilder version the catalog gives): a plan around something `create-business-process` cannot build fails
+plan is on its buildable list and is not `formulaTask`, `subProcess` or `scriptTask`, version-gated
+in the catalog): a plan around something `create-business-process` cannot build fails
 only at build time. For a NEW process, or a change for EACH item of a set,
 you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (in short on
 `process-digest`): they decide how many processes the request is.
