@@ -113,7 +113,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins the rules the second QA round (ENG-92711) added: no run of a new version before activation, consent for activation, no second compile after a compile that succeeded, the retry before a restart while the runtime reloads, the Latin and keyword name rules, and the multi-line verbatim string. Each came from a stand measurement or a QA finding; losing one sends an agent into a run that proves nothing, a needless compile or restart, or a string that changes its value.")]
+    [Description("Pins the rules the second QA round (ENG-92711) added, as amended when run-process began running the named version: a run of a new version before activation only on a clio that runs the named version, synchronously, consent for activation, no second compile after a compile that succeeded, the retry before a restart while the runtime reloads, the Latin and keyword name rules, and the multi-line verbatim string. Each came from a stand measurement or a QA finding; losing one sends an agent into a run that proves nothing, a needless compile or restart, or a string that changes its value.")]
     public void Guide_ShouldKeepTheQaRoundTwoVersionCompileAndNameRules()
     {
         // Arrange
@@ -131,12 +131,22 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the consent rule lives in process-version-writes, and a bare `version-writes` names no guide");
         guide.Should().Contain("compile SUCCEEDED (no compiler errors)",
             because: "a compile that failed, or one followed by another edit, covers nothing");
-        guide.Should().Contain("a new version only once it is active",
-            because: "the general verification paragraph must not send a new version to run-process before activation");
+        guide.Should().Contain("a new version by its own code before it is activated, on the clio the version order above names",
+            because: "the general verification paragraph must send a new version to run-process before activation only where that run executes it");
         guide.Should().Contain("that warning does not ask for a SECOND compile",
             because: "a version compiled before its activation ran its new C# without another compile, and the activation answer used to read as demanding one");
-        guide.Should().Contain("activate it with `set-active-business-process-version` only when the user decides to; then verify it on a run",
-            because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
+        guide.Should().Contain("compile the new version; verify it on a run of its own code; activate it with `set-active-business-process-version` only when the user decides to",
+            because: "activating an uncompiled version breaks every new instance, and a clio that runs the named version lets the new code be checked before it reaches them");
+        guide.Should().Contain("for `run-process` says it \"runs EXACTLY the version whose code it is given\"",
+            because: "the run-before-activation check is valid only on a clio whose run-process runs the named version, and an older contract also contains `versionName` inside `activeVersionName`, so the gate quotes a sentence only the newer contract carries");
+        guide.Should().Contain("with `run-process` and `result-parameters` (they keep the run synchronous)",
+            because: "a run the platform queues starts the ACTIVE version, so a run without result-parameters can verify the old code");
+        guide.Should().Contain("a `queued-background` answer is NOT evidence that the new version ran",
+            because: "the queue re-resolves to the active version, and that answer must not be read as a verification");
+        guide.Should().Contain("Ask first when the process has side effects",
+            because: "the run of a version not yet activated is a real run in a customer environment");
+        guide.Should().Contain("on that clio the user opens the version in the process designer",
+            because: "on an older clio the designer run is the only way to see a new version run before activation (TC-07)");
         guide.Should().Contain("a Latin letter (a-z, A-Z)",
             because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
         guide.Should().Contain("not a C# keyword",
@@ -152,9 +162,9 @@ public sealed class ProcessScriptTaskGuidanceTests
         guide.Should().Contain("A verbatim string (`@\"...\"`) that spans lines gains tabs",
             because: "the generator indents every line of the body, so such a string changes its value");
         guide.Should().Contain("the code of a version that is not active runs the ACTIVE version",
-            because: "a run of the new version's code before activation executes the previous version, so it proves nothing");
-        guide.Should().NotContain("verify it on a run, and only then activate it",
-            because: "that order cannot be followed: run-process folds a non-active version's code onto the active one");
+            because: "on an older clio a run of the new version's code before activation executes the previous version, so it proves nothing");
+        guide.Should().NotContain("Do NOT run the new version before activating it to check it",
+            because: "the blanket ban was lifted for a clio that runs the named version; the older-clio route is gated, not unconditional");
         coreRules.Should().Contain("run it again about two minutes later (asking first when the process has side effects) and ask before a restart",
             because: "core-rules carries the same exception for a process-name compile, and every operation reads it");
         coreRules.Should().NotContain("run it again a minute later",
