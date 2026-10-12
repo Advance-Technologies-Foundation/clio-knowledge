@@ -162,10 +162,10 @@ carry the same action. Each entry says which of the two it is; read the entry, n
                                drop-parent-excluded) has the detail, and those codes' "re-insert NOTHING"
                                rule covers the binding too.
 
-  flag-request-unmapped        KEPT, NOT LOST. The entry's request is in neither the conversion map nor
-                               the mobile request registry, so it was carried VERBATIM onto the element.
-                               The component works; the action may or may not — clio cannot tell.
-                               Ask the user to verify it exists on mobile. Do NOT remove the
+  flag-request-unmapped        KEPT, NOT LOST. The entry's request is NOT IN THE CONVERSION MAP, so it
+                               was carried VERBATIM onto the element; the registry is not consulted.
+                               The component works; the action is UNVERIFIED, not denied.
+                               Check the registry before asking the user. Do NOT remove the
                                binding and do NOT report it as conversion loss.
 
 

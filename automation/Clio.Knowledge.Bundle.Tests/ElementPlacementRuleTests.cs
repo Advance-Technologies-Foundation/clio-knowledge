@@ -46,7 +46,7 @@ public sealed class ElementPlacementRuleTests
         ("for component SHAPE", "the scope boundary keeps get-component-info authoritative for component shape"),
         ("QuickFilterGroup_Value", "the runtime mechanism must name the model attribute the chips are built from"),
         ("crt.QuickFilterGroupAttributeConverter", "the runtime mechanism must name the converter that materializes the chips"),
-        ("ENG-94937", "AGENTS.md requires an evidence pointer for a prescriptive runtime claim"),
+        ("investigated on Creatio Mobile in August 2026", "AGENTS.md requires evidence for a prescriptive runtime claim; it is stated inline, not as a task id"),
         ("target platform version", "AGENTS.md requires a version boundary for a prescriptive runtime claim"),
         ("necessary but NOT sufficient", "placement alone must not be presented as enough — the model side is also required"),
         ("incomplete guide output", "a missing model side must route to STOP-and-report, not hand-authoring (no improvising)")
