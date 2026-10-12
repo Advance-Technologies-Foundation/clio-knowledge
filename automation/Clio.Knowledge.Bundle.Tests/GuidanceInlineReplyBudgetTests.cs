@@ -8,39 +8,39 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Keeps every guidance article's <c>get-guidance</c> reply inside what a Copilot CLI agent receives
-/// INLINE, and stops the articles already past that line from growing.
+/// Keeps the articles of the ENG-102795 split inside what a Copilot CLI agent receives INLINE from
+/// <c>get-guidance</c>.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The CAADT release gate runs its agent through Copilot CLI, which hands a tool result to the model whole
 /// up to about 19.8 KB and, from about 20.7 KB, writes it to a file instead. The agent then reads that
 /// file back in pieces - "Output too large", a view, a grep - and every piece is another model request.
-/// Splitting process-modeling, app-modeling, workplaces and existing-app-maintenance under the line
-/// (ENG-102795) removed the read-backs those articles caused on every run; this fixture is what keeps the
-/// split from eroding, because articles grow back: process-branch-conditions went from 19.8 to 20.3 KB in
-/// two days.
+/// Splitting process-modeling, app-modeling, workplaces and existing-app-maintenance into a core and a
+/// <c>-details</c> article removed the read-backs those articles caused on every run; this fixture is what
+/// keeps the split from eroding, because articles grow back: process-branch-conditions went from 19.8 to
+/// 20.3 KB in two days.
 /// </para>
 /// <para>
-/// It complements <see cref="ProcessGuideResponseSizeTests"/> and <see cref="MobileGuideResponseSizeTests"/>
-/// rather than replacing them. Those measure characters under the default JSON encoder against a cliff
-/// probed in another harness; this measures the UTF-8 BYTES clio writes today (see <see cref="ReplyBytes"/>)
-/// against the inline limit of the harness the release gate uses, and it covers every guidance article,
-/// not one folder.
+/// Scoped to the pieces of that split, deliberately. A library-wide ratchet would freeze the articles other
+/// teams are editing in open pull requests, and the check runs on the merge result, so it would turn them
+/// red without a rebase. Measuring the rest of the library this way is a decision for its owners, not a
+/// side effect of one split. <c>routing</c> is out of scope for the same reason: it is already over this
+/// budget and edited by most guidance pull requests.
 /// </para>
 /// <para>
-/// <see cref="OverBudgetCeilings"/> is a RATCHET over the articles that were already past the budget when
-/// this fixture was added, each held at its exact size then. An article on the list may shrink and never
-/// grow; lower its ceiling when it shrinks, and delete the entry once it fits. An article NOT on the list
-/// must fit the budget - the remedy for one that does not is a split at a section boundary (see
-/// CONTRIBUTING, "An article must fit in one get-guidance response"), not a new entry.
+/// It complements <see cref="ProcessGuideResponseSizeTests"/> and <see cref="MobileGuideResponseSizeTests"/>.
+/// Those measure characters under the default JSON encoder against a cliff probed in another harness; this
+/// measures the UTF-8 BYTES clio writes today (see <see cref="ReplyBytes"/>) against the inline limit of the
+/// harness the release gate uses. An article here that outgrows the budget is split again at a section
+/// boundary (CONTRIBUTING, "An article must fit in one get-guidance response"); the budget is not raised.
 /// </para>
 /// </remarks>
 [TestFixture]
 public sealed class GuidanceInlineReplyBudgetTests
 {
     /// <summary>
-    /// The reply size every guidance article must stay within: 19,000 bytes, about 800 under the largest
+    /// The reply size each article of the split must stay within: 19,000 bytes, about 800 under the largest
     /// reply the release gate's Copilot CLI was seen to pass inline.
     /// </summary>
     private const int InlineReplyBudgetBytes = 19_000;
@@ -65,92 +65,49 @@ public sealed class GuidanceInlineReplyBudgetTests
     private const int EnvelopeAllowanceBytes = 1_300;
 
     /// <summary>
-    /// The articles already over <see cref="InlineReplyBudgetBytes"/> when this fixture was added, each at its
-    /// exact size then. See the class remarks: lower a ceiling when the article shrinks, never raise one.
+    /// The pieces of the split, written down rather than derived: an edit that drops one from the manifest
+    /// must fail here instead of silently leaving the set.
     /// </summary>
-    private static readonly IReadOnlyDictionary<string, int> OverBudgetCeilings =
-        new Dictionary<string, int>(StringComparer.Ordinal)
-        {
-            ["mobile-page-modification"] = 59_475,
-            ["freedom-page-web-to-mobile-conversion"] = 57_179,
-            ["page-schema-handlers"] = 42_771,
-            ["esq-filter-parsing"] = 30_883,
-            ["related-list"] = 29_881,
-            ["esq-filters-frontend"] = 28_272,
-            ["page-modification-overview"] = 28_156,
-            ["esq-filters-backend"] = 25_817,
-            ["page-modification-standard-components"] = 24_809,
-            ["page-schema-validators"] = 23_718,
-            ["process-access-rights"] = 22_753,
-            ["theming"] = 21_929,
-            ["process-script-task"] = 21_311,
-            ["page-schema-creatio-devkit-common"] = 21_233,
-            ["core-rules"] = 21_021,
-            ["process-open-edit-page"] = 20_993,
-            ["page-modification-template-supplied-parts"] = 20_889,
-            ["process-branch-conditions"] = 20_421,
-            ["process-versions"] = 20_336,
-            ["page-modification"] = 20_209,
-            ["object-rights"] = 19_925,
-            ["custom-mcp-tools"] = 19_904,
-            ["process-data-elements"] = 19_673,
-            ["process-formulas"] = 19_480,
-            ["routing"] = 19_411,
-            ["page-schema-resources"] = 19_173,
-            ["process-perform-task"] = 19_056,
-        };
+    private static readonly string[] SplitArticles =
+    [
+        "process-modeling",
+        "process-modeling-details",
+        "app-modeling",
+        "app-modeling-details",
+        "workplaces",
+        "workplaces-details",
+        "existing-app-maintenance",
+        "existing-app-maintenance-details"
+    ];
 
     [Test]
-    [Description("Every guidance article answers get-guidance inline, or - for the articles recorded over the budget - does not grow.")]
-    public void EveryGuidanceArticle_ShouldFitTheInlineReplyBudgetOrItsRecordedCeiling()
+    [Description("Every article of the split answers get-guidance within the inline reply budget.")]
+    public void SplitArticles_ShouldFitTheInlineReplyBudget()
     {
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        (string ItemId, int Size)[] measured = [.. GuidanceArticles(repositoryRoot)
-            .Select(article => (article.ItemId, Size: ReplyBytes(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))))
-            .OrderByDescending(article => article.Size)];
+        Dictionary<string, string> declared = GuidanceArticles(repositoryRoot);
 
-        measured.Should().NotBeEmpty(because: "a scan that measured nothing would prove nothing");
-        foreach ((string itemId, int size) in measured.Where(article => article.Size > InlineReplyBudgetBytes * 0.9))
+        SplitArticles.Except(declared.Keys).Should().BeEmpty(
+            because: "the manifest has to declare every piece of the split as guidance; an article this fixture "
+                + "cannot find is one it has stopped measuring");
+
+        (string ItemId, int Size)[] measured = [.. SplitArticles
+            .Where(declared.ContainsKey)
+            .Select(itemId => (itemId, Size: ReplyBytes(ProcessGuideSet.Read(repositoryRoot, declared[itemId]))))
+            .OrderByDescending(article => article.Size)];
+        foreach ((string itemId, int size) in measured)
         {
             TestContext.WriteLine(
-                $"{itemId,-44} {size,7:N0}  {(double)size / InlineReplyBudgetBytes,6:P1} of budget"
-                + (OverBudgetCeilings.TryGetValue(itemId, out int ceiling) ? $"   ceiling {ceiling:N0}" : string.Empty));
+                $"{itemId,-36} {size,7:N0}  {(double)size / InlineReplyBudgetBytes,6:P1} of budget");
         }
 
-        string[] overBudget = [.. measured
-            .Where(article => !OverBudgetCeilings.ContainsKey(article.ItemId))
-            .Where(article => article.Size > InlineReplyBudgetBytes)
-            .Select(article => $"{article.ItemId} at {article.Size:N0}")];
-        string[] grown = [.. measured
-            .Where(article => OverBudgetCeilings.TryGetValue(article.ItemId, out int ceiling) && article.Size > ceiling)
-            .Select(article => $"{article.ItemId} at {article.Size:N0} (ceiling {OverBudgetCeilings[article.ItemId]:N0})")];
-
-        overBudget.Should().BeEmpty(
-            because: $"a get-guidance reply over {InlineReplyBudgetBytes:N0} bytes is spilled to a file that the "
-                + "agent reads back in pieces, one model request per piece. Split the article at a section "
-                + "boundary rather than adding it to OverBudgetCeilings");
-        grown.Should().BeEmpty(
-            because: "an article already over the inline budget may shrink but not grow: pay for an addition "
-                + "by trimming or splitting the same article, then lower its ceiling to the new size");
-    }
-
-    [Test]
-    [Description("Every recorded ceiling names a declared guidance article that is still over the budget, so the list only ever shrinks.")]
-    public void OverBudgetCeilings_ShouldNameDeclaredArticlesStillOverTheBudget()
-    {
-        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        Dictionary<string, int> sizes = GuidanceArticles(repositoryRoot).ToDictionary(
-            article => article.ItemId,
-            article => ReplyBytes(ProcessGuideSet.Read(repositoryRoot, article.SourcePath)),
-            StringComparer.Ordinal);
-
-        OverBudgetCeilings.Keys.Except(sizes.Keys).Should().BeEmpty(
-            because: "a ceiling for an article the manifest no longer declares guards nothing; when an article "
-                + "is split or retired, its pieces have to fit the budget on their own");
-        OverBudgetCeilings.Keys.Where(sizes.ContainsKey).Where(itemId => sizes[itemId] <= InlineReplyBudgetBytes)
+        measured.Where(article => article.Size > InlineReplyBudgetBytes)
+            .Select(article => $"{article.ItemId} at {article.Size:N0}")
             .Should().BeEmpty(
-                because: "an article that now fits the budget leaves the list, so the budget, not a stale "
-                    + "ceiling, holds it from then on");
+                because: $"a get-guidance reply over {InlineReplyBudgetBytes:N0} bytes is spilled to a file that the "
+                    + "agent reads back in pieces, one model request per piece. Move evidence, history or rare "
+                    + "cases to the -details article, or split again at a section boundary, rather than raising "
+                    + "the budget");
     }
 
     /// <summary>
@@ -174,16 +131,17 @@ public sealed class GuidanceInlineReplyBudgetTests
     private static readonly JsonSerializerOptions RelaxedJson =
         new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
-    /// <summary>Every resource the manifest serves through get-guidance, which answers only the guidance role.</summary>
-    private static IEnumerable<ProcessGuideSet.Article> GuidanceArticles(string repositoryRoot)
+    /// <summary>Every resource the manifest serves through get-guidance (guidance role), by itemId.</summary>
+    private static Dictionary<string, string> GuidanceArticles(string repositoryRoot)
     {
         using JsonDocument manifest = JsonDocument.Parse(
             File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
-        return [.. manifest.RootElement.GetProperty("resources")
+        return manifest.RootElement.GetProperty("resources")
             .EnumerateArray()
             .Where(resource => resource.GetProperty("role").GetString() == "guidance")
-            .Select(resource => new ProcessGuideSet.Article(
-                resource.GetProperty("itemId").GetString()!,
-                resource.GetProperty("sourcePath").GetString()!))];
+            .ToDictionary(
+                resource => resource.GetProperty("itemId").GetString()!,
+                resource => resource.GetProperty("sourcePath").GetString()!,
+                StringComparer.Ordinal);
     }
 }
