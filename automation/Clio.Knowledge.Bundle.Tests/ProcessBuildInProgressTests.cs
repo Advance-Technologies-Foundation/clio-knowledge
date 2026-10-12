@@ -5,9 +5,9 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Pins the BUILD-IN-PROGRESS exemption (ENG-103019): a process the agent created in this same task is not an
-/// "existing process", so fixing, re-saving or re-activating it follows the build card and the element
-/// articles, not the version path.
+/// Pins the BUILD-IN-PROGRESS exemption (ENG-103019): a process family the agent created in this same task is
+/// not an "existing process", so fixing, re-saving or launching it follows the build card and the element
+/// articles, not the version path - within the limits the owner states (activation, live triggers, versions).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -34,15 +34,18 @@ public sealed class ProcessBuildInProgressTests
     /// <summary>The definition and its edge cases, as the owner words them.</summary>
     private static readonly string[] OwnerClauses =
     [
-        "This section owns what \"existing process\" means wherever a process article or `routing` says it",
-        "a process that was there before this task, or one another person has since edited, activated or launched by hand.",
-        "A process YOU created in this same task is NOT one -- it is a BUILD IN PROGRESS.",
-        "Fixing, re-saving, re-activating or launching it follows the build path, `process-digest` plus the element articles, NOT `process-versions` or this article",
+        "This section owns what \"existing process\" means wherever a process article or `routing` says it.",
+        "The unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when another person has since edited, activated or launched it by hand.",
+        "A family YOU created in this same task is a BUILD IN PROGRESS.",
+        "Fixing, re-saving or launching it follows the build path, `process-digest` plus the element articles, NOT `process-versions` or this article",
         "do not ask the two questions below",
-        "`process-modeling`'s `isActiveVersion` rule does not apply, whatever the flag reads.",
+        "`process-modeling`'s `isActiveVersion` rule does not apply.",
         "`core-rules` and the element articles' own confirmations still apply.",
+        "A version you add to a family that existed before this task is NOT a build in progress: the family is existing, so the version articles and the `isActiveVersion` rule apply in full.",
         "The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version task by request, so the version articles apply to those steps in full.",
-        "A run you started, or its signal firing on any record save, does not make it existing.",
+        "ACTIVATING it is part of the build only when the request asks for a working or active process; otherwise the request has to say so.",
+        "Once it is active AND its trigger can fire on records you did not create, an in-place modify of the active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.",
+        "An un-activated draft, or one activated moments ago whose runs touched only records you created, stays exempt: a run you started does not make it existing.",
         "Built in an EARLIER task or session, or you cannot tell: existing"
     ];
 
@@ -103,7 +106,7 @@ public sealed class ProcessBuildInProgressTests
             because: "routing is read before any article, so the row that sends an edit to process-versions must "
                 + "carry the exemption too");
         modeling.Should().Contain(
-            "You MUST read `isActiveVersion` from the describe output before ANY modify of a process you did not build in this task (`process-version-writes`):",
+            "You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not a build in progress (`process-version-writes`):",
             because: "the isActiveVersion rule is the line that otherwise overrides the exemption: a fresh build is "
                 + "the active version, so TRUE would demand a confirmation, and on a file-design-mode stand FALSE would "
                 + "forbid fixing it");

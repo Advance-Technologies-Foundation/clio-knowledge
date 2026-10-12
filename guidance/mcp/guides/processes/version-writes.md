@@ -67,16 +67,23 @@ and six ambiguous transport errors rather than a call you can retry. The databas
 handled (two writers on one number are refused after the save); the load is not.
 
 == A process you built in this task is a build in progress ==
-This section owns what "existing process" means wherever a process article or `routing` says it: a
-process that was there before this task, or one another person has since edited, activated or
-launched by hand. A process YOU created in this same task is NOT one -- it is a BUILD IN PROGRESS.
-Fixing, re-saving, re-activating or launching it follows the build path, `process-digest` plus the
-element articles, NOT `process-versions` or this article: do not ask the two questions below, and
-`process-modeling`'s `isActiveVersion` rule does not apply, whatever the flag reads.
-`core-rules` and the element articles' own confirmations still apply.
+This section owns what "existing process" means wherever a process article or `routing` says it. The
+unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when
+another person has since edited, activated or launched it by hand. A family YOU created in this same
+task is a BUILD IN PROGRESS. Fixing, re-saving or launching it follows the build path, `process-digest`
+plus the element articles, NOT `process-versions` or this article: do not ask the two questions below,
+and `process-modeling`'s `isActiveVersion` rule does not apply. `core-rules` and the element articles'
+own confirmations still apply. The limits:
+  * A version you add to a family that existed before this task is NOT a build in progress: the family
+    is existing, so the version articles and the `isActiveVersion` rule apply in full.
   * The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version
     task by request, so the version articles apply to those steps in full.
-  * A run you started, or its signal firing on any record save, does not make it existing.
+  * ACTIVATING it is part of the build only when the request asks for a working or active process;
+    otherwise the request has to say so.
+  * Once it is active AND its trigger can fire on records you did not create, an in-place modify of the
+    active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.
+    An un-activated draft, or one activated moments ago whose runs touched only records you created,
+    stays exempt: a run you started does not make it existing.
   * Built in an EARLIER task or session, or you cannot tell: existing -- you cannot know who used it since.
 
 == Ask once, then behave predictably ==
