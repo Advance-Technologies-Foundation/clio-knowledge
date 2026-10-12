@@ -27,7 +27,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
-  - a list or a section grid renders only a placeholder and shows no rows -> name=related-list (its "Verifying a list in the browser" section)
+  - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser", which says when the placeholder is a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
   - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables — for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
@@ -96,20 +96,21 @@ precondition kept next to the instruction it guards — names that guide as the 
     read-back warning proves
   - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
     name=process-send-email
-    - the evidence behind a Send email rule, or a result that contradicts one -> name=process-send-email-details
+    - the evidence behind a Send email rule, or a result that contradicts one (a no-mode element running as a
+      template, the designer-removal exceptions) -> name=process-send-email-details
   - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
     against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
-  - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance
-    -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
+  - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
+    converting an element, where the callee's contract moves to -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
     and which execution mode it takes)
   - a called process CHANGED its parameters and the CALLERS have to be fixed -> name=process-parameters-details
     (after name=process-parameters)
-  - show a user a Freedom UI page mid-process and wait for a completing button — its buttons and data
-    sources are read facts, never invented -> name=process-preconfigured-page
+  - show a user a Freedom UI page mid-process and wait for a completing button ->
+    name=process-preconfigured-page
   - the "Connected to" links of the activity a task creates -> name=process-activity-connections
   - plan or validate a graph against the R1-R20 connection rules, a validate-process-graph finding names an
     R rule, a described connection is refused on re-apply, or the designer does not show a connection you
@@ -120,10 +121,12 @@ precondition kept next to the instruction it guards — names that guide as the 
     process -> name=process-versions
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
     name=process-version-writes; add name=process-versions for the model it assumes and
-    name=process-modeling for the operation reference (rare cases: name=process-modeling-details)
+    name=process-modeling for the operation reference
   - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
     family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
     operation reference
+  - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
+    name=process-modeling-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
   - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
     tracing on or off -> name=process-tracing
