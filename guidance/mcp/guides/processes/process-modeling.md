@@ -182,9 +182,9 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 - The SUB-PROCESS element is NOT on that list - it is buildable (`type:"subProcess"`, from
   CrtProcessBuilder 1.6.3.26) and the build path does warn you. CREATING one is safe; REWIRING an
   existing one - retargeting its called process, deleting it, editing its parameters - is high-risk.
-  The build path REFUSES a retarget while live dependents still read from the element; let that refusal
-  stand rather than routing around it (per platform source, a designer retarget leaves the process
-  refusing to START). A
+  The build path REFUSES a retarget while anything reads from the element, or did when the request
+  started; the remedy is in `process-sub-process` - never clear the reader in the same batch (per
+  platform source, a designer retarget leaves the process refusing to START). A
   MULTI-INSTANCE element (a common state) is de-converted, edited with every guard and re-converted
   (`process-sub-process`). `validate-process-graph` has no parameter or mapping rule, so planning
   catches none of this. A caller reporting a mapping that resolves to nothing: see the
