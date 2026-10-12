@@ -45,7 +45,7 @@ the measured figures and their population.
 Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
 `Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
 because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule
-(restated in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
+(summarised in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
 caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
 `describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
 human's label is there to be erased.

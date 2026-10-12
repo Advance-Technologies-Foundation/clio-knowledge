@@ -14,7 +14,7 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-element-catalog` - what `create-business-process` can build TODAY and what it cannot; the
     element catalog is `process-element-catalog-details`.
   * `process-diagram-layout` - how the diagram is drawn, and the re-draw refusal.
-  * `process-naming` - N1-N10 for every caption and code. Read it (or its restatement in
+  * `process-naming` - N1-N10 for every caption and code. Read it (or its summary in
     `process-digest`) BEFORE you name anything.
   * `process-data-elements` - a record-event start (signalStart), and the Modify data element.
   * `process-read-data` - the Read data element: modes, outputs, columns, sort, top-N.
@@ -99,7 +99,8 @@ one; read that article.
 
 == Build recipe (intent -> running process) ==
 Before step 1 you MUST read `process-element-catalog` (or `process-digest`, while every element you
-plan is on its buildable list): a plan around something `create-business-process` cannot build fails
+plan is on its buildable list and is not `formulaTask`, `subProcess` or `scriptTask`, which need the
+CrtProcessBuilder version the catalog gives): a plan around something `create-business-process` cannot build fails
 only at build time. For a NEW process, or a change for EACH item of a set,
 you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (in short on
 `process-digest`): they decide how many processes the request is.

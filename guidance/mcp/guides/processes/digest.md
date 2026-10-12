@@ -13,7 +13,7 @@ articles named here.
 2. `validate-process-graph`; fix every error.
 3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (it lists retired
    `CallUserTask`, `EmailUserTask`, `SendEmailUserTask` too).
-4. ONE `get-target-package` (`clio-run`) -> `packageName`; on `success: false` ask, never guess.
+4. ONE `get-target-package` (`clio-run`, `package` for a named or app package) -> `packageName`; on `success: false` ask, never guess.
    `create-business-process`: pass the descriptor as the JSON object itself, {name, caption,
    packageName, elements[{name, type, caption, <type block>}],
    flows[{source, target, kind, condition, label}], parameters, mappings}.
@@ -27,8 +27,8 @@ userTaskName (readData changeData addData deleteData performTask changeAccessRig
 Process `<prefix><Object>_<Action>` (`get-schema-name-prefix`); a called one ends in `SubProcess`.
 A caption on EVERY element: sentence case, <= 60 chars, activity verb first, event a noun phrase.
 Element `name` = its caption in PascalCase minus only a/an/the/is/are/was/were/be/been/has/have/had;
-`<X>Start`, `<X>Signal`, `End<X>`; no `UserTask` postfix, counter or GUID. Parameter: PascalCase
-plus a `Parameter` suffix. LABEL EVERY CONDITIONAL AND DEFAULT ARM.
+`<X>Start`, `<X>Signal`, `End<X>`; no `UserTask` postfix, counter or GUID. Process parameter:
+PascalCase plus a `Parameter` suffix. LABEL EVERY CONDITIONAL AND DEFAULT ARM.
 
 == Element or need -> article ==
 - record trigger, Modify data `process-data-elements`; Read data `process-read-data`
