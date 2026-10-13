@@ -69,6 +69,8 @@ public sealed class ProcessDigestTests
         ("process-naming", "<= 60"),
         ("process-modeling", "1.6.2.24"),
         ("process-modeling", "8.1.0.131"),
+        ("process-element-catalog", "1.6.3.16"),
+        ("process-element-catalog", "1.6.3.26"),
         ("process-modeling", "`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`"),
         ("process-modeling", "`success: false`")
     ];
@@ -360,6 +362,40 @@ public sealed class ProcessDigestTests
         onCard.Should().Equal(owned,
             because: "a dedicated type built as a generic userTask is refused or builds an element that fails at "
                 + "run time, and the card is the only place an ordinary build reads the list");
+    }
+
+    [Test]
+    [Description("The element articles' naming banner sends a build to the card's Names block, and to process-naming only to relabel.")]
+    public void TheNamingBanners_ShouldNotInviteReadingTheOwnerDuringABuild()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        (string ItemId, string Text)[] articles = [.. ProcessGuideSet.Declared(repositoryRoot)
+            .Select(article => (article.ItemId, Text: Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))))];
+
+        // Act
+        string[] banners = [.. articles.Where(article => article.Text.Contains("Naming anything here?", StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+        string[] withoutTheLimit = [.. articles
+            .Where(article => banners.Contains(article.ItemId))
+            .Where(article => !article.Text.Contains(
+                "for a build, name from the Names block of `process-digest`, its summary. Open `process-naming` only to relabel something that already exists or to settle a name collision.",
+                StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+        string[] inviting = [.. articles
+            .Where(article => article.Text.Contains("any rule the card does not spell out", StringComparison.OrdinalIgnoreCase)
+                || (article.ItemId != "process-naming"
+                    && article.Text.Contains("read it before you name anything", StringComparison.OrdinalIgnoreCase)))
+            .Select(article => article.ItemId)];
+
+        // Assert
+        banners.Should().HaveCountGreaterThanOrEqualTo(5, because: "anti-vacuity: five element articles carry the banner");
+        withoutTheLimit.Should().BeEmpty(
+            because: "the card's N1-N10 summary is what a build names from; a banner that sends a build on to the "
+                + "owner costs every run another ~17 KB. Found: " + string.Join(", ", withoutTheLimit));
+        inviting.Should().BeEmpty(
+            because: "'any rule the card does not spell out' is an open invitation to read process-naming during "
+                + "a build. Found: " + string.Join(", ", inviting));
     }
 
     private static string ReadCard(string repositoryRoot) => Owner(repositoryRoot, DigestItemId);

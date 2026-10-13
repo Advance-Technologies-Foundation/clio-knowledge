@@ -80,7 +80,7 @@ public sealed class ProcessBuildInProgressTests
     /// </summary>
     private static readonly string[] CardPointerClauses =
     [
-        "a family YOU created in THIS task is NOT existing: fix, re-save, run it here",
+        "a family YOU created in THIS task is NOT existing: fix, re-save, run here",
         "no `isActiveVersion` confirmation",
         "unless active with a trigger that can fire on records you did not create (`process-version-writes`).",
         "Else or unsure: existing, `process-versions` then `process-modeling`."

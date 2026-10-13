@@ -10,9 +10,9 @@ here. Split out of `process-modeling` because that article had no budget headroo
 both of these sections grow with every element the platform gains while the lifecycle around them does not.
 `process-modeling` keeps the lifecycle: the tools, the descriptor, the build recipe and the safety
 rules for editing an existing process.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and summarised in `process-digest` — read the card's Names block BEFORE you
-name anything, and `process-naming` itself for any rule the card does not spell out.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element

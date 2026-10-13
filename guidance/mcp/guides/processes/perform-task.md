@@ -7,9 +7,9 @@ and what the runtime writes back. Two of its settings are their own subject and 
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
 written -- and what silently degrades when it is written as a formula -- is owned by
 `process-task-category`. The ids, the two refusal texts and their remedy are here.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and summarised in `process-digest` — read the card's Names block BEFORE you
-name anything, and `process-naming` itself for any rule the card does not spell out.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with

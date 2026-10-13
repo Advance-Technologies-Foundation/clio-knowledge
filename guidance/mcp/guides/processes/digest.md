@@ -4,20 +4,20 @@ Part of the process guide set. Owners win; read only articles named below.
 
 == Recipe ==
 0. A request produces ONE process, unless D1 (same work per item of a set, e.g. email per record),
-   D2 (3+ element fragment at 2+ places) or D4 (2+ long human phases) fires: `process-sub-process-when`.
+   D2 (3+ element fragment at 2+ places) or D4 (2+ long human phases) fires: read `process-sub-process-when`.
 1. ONE START PER TRIGGER (add + change: two `signalStart`s, one process; CrtProcessBuilder 1.6.2.24+, clio 8.1.0.131+).
-2. `validate-process-graph`; fix every error.
-3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (lists retired `CallUserTask`, `EmailUserTask`, `SendEmailUserTask` too).
-4. ONE `get-target-package` (`package` = named/app one) -> `packageName`; on `success: false` ask, never guess.
+2. `validate-process-graph`; fix all errors.
+3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (lists retired `CallUserTask`, `EmailUserTask`, `SendEmailUserTask`).
+4. ONE `get-target-package` (`package`: named/app one) -> `packageName`; on `success: false` ask, never guess.
    `create-business-process`: pass the descriptor as the JSON object itself, {name, caption, packageName,
    elements[{name, type, caption, <type block>}], flows[{source, target, kind, condition, label}], parameters, mappings}.
 5. Verify: `describe-business-process`; `compile-creatio` only if the save warns.
 Set only what was asked; ask who approves, performs, is notified.
 Types (else `process-element-catalog`): startEvent signalStart endEvent exclusiveGateway parallelGateway
-formulaTask subProcess scriptTask; sendEmail approval openEditPage preconfiguredPage
+formulaTask(1.6.3.16+) subProcess(1.6.3.26+) scriptTask; sendEmail approval openEditPage preconfiguredPage
 (never as a userTask); userTask + userTaskName (readData changeData addData deleteData performTask changeAccessRights).
 
-== Names: N1-N10 (`process-naming` only to relabel) ==
+== Names: N1-N10 (`process-naming`: relabel or clash) ==
 Process `<prefix><Object>_<Action>` (`get-schema-name-prefix`); a called one ends in `SubProcess`.
 Caption EVERY element: sentence case, <= 60 chars, activity verb first, event a noun phrase.
 Element `name` = its caption in PascalCase minus only a/an/the/is/are/was/were/be/been/has/have/had;
@@ -33,6 +33,6 @@ plus a `Parameter` suffix. LABEL EVERY CONDITIONAL AND DEFAULT ARM.
 - Perform task `process-perform-task`; performer `process-task-performer`
 - Send email `process-send-email`; Approval `process-approval`; Script task `process-script-task`
 - a page `process-open-edit-page`; Sub-process `process-sub-process`; Connected to `process-activity-connections`
-- edit or launch: a family YOU created in THIS task is NOT existing: fix, re-save, run it here, no
+- edit or launch: a family YOU created in THIS task is NOT existing: fix, re-save, run here, no
   `isActiveVersion` confirmation, unless active with a trigger that can fire on records you did
   not create (`process-version-writes`). Else or unsure: existing, `process-versions` then `process-modeling`.
