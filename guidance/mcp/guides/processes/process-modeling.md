@@ -67,9 +67,9 @@ one; read that article.
     one is a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Every `mode=full` in these
     guides: on clio older than 8.1.0.141, omit `mode`. Per element also
     `connections[]`, `deprecated` (retired user-task schema) and `writesConnectionsAtRuntime`. FALSE:
-    the connections persist and compile but are never written - change the element kind (its runtime
-    never writes them) or set `CreateActivity` true (its activity-creation gate is shut). `null`: not
-    established - not false, NOT permission. `setConnections` is refused on `false` AND `null`.
+    the connections persist and compile but are never written - change the element kind or set
+    `CreateActivity` true. `null`: not established - not false, NOT permission. `setConnections` is
+    refused on `false` AND `null`.
   * validate-process-graph - pre-check a planned graph against the connection rules R1-R20
     (`process-activity-connections-details`).
 - If a tool refuses for a missing or older CrtProcessBuilder, STOP and ask the user before
@@ -114,7 +114,8 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
    when it is CHANGED carries TWO signal starts, not two processes and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
    CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
-   the second start (`process-modeling-details`).
+   the second start (`process-modeling-details`). Branches sharing a parameter each SET it with a
+   `formulaTask`, not a mapping (`process-parameters`).
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON
@@ -146,7 +147,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
    * a sendEmail `email` block - a partial update; to/cc/bcc recipients MATCH-OR-APPEND (a new address
      is added, an identical one is a no-op, none can be removed).
 - On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB
-  and published, so a signal won't fire yet.
+  and published.
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process mode=full`.
