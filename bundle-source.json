@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.133",
+  "libraryVersion": "1.15.134",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -36,6 +36,7 @@
       "app-modeling",
       "app-modeling-details",
       "sequences",
+      "m365-addin-customization",
       "workplaces",
       "workplaces-details",
       "atf-repository-dev",
@@ -229,6 +230,7 @@
       "docs://knowledge/com.creatio.clio/app-modeling",
       "docs://knowledge/com.creatio.clio/app-modeling-details",
       "docs://knowledge/com.creatio.clio/sequences",
+      "docs://knowledge/com.creatio.clio/m365-addin-customization",
       "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/workplaces-details",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
@@ -496,6 +498,18 @@
       ],
       "sourcePath": "guidance/mcp/guides/sequences.md",
       "bundlePath": "resources/sequences.md",
+      "mediaType": "text/markdown"
+    },
+    {
+      "itemId": "m365-addin-customization",
+      "title": "Creatio.ai add-in for Microsoft 365 customization",
+      "description": "Configures the Outlook/Teams CRM panel of the Creatio.ai add-in through its CrmPanelObject and CrmPanelField tables: the rules its own editor enforces, DataService writes, verification, and shipping the configuration as package data bindings.",
+      "topicId": "creatio.m365-addin-customization",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/m365-addin-customization",
+      "legacyUris": [],
+      "sourcePath": "guidance/mcp/guides/m365-addin-customization.md",
+      "bundlePath": "resources/m365-addin-customization.md",
       "mediaType": "text/markdown"
     },
     {
