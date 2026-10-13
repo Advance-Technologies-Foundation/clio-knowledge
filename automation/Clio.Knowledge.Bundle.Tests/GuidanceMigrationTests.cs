@@ -40,10 +40,12 @@ public sealed class GuidanceMigrationTests
         "app-modeling-details",
         "workplaces-details",
         "existing-app-maintenance-details",
+        "core-rules-details",
         "portal-service-routing",
         "external-organizations",
         "page-schema-translation",
-        "object-rights"
+        "object-rights",
+        "m365-addin-customization"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

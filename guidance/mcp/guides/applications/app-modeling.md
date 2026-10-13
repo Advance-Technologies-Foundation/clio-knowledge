@@ -11,7 +11,7 @@ Profile language (detect once, reuse, ask on failure)
 Core contract
 - clio MCP is a stdio MCP server, not an HTTP or browser API. Use discovered tool names exactly as advertised; newer design tools use kebab-case argument names (`environment-name`, `package-name`, `schema-name`).
 - `get-guidance` names: `existing-app-maintenance` (existing-app minimal edits), `data-bindings` (data-binding workflow), `sys-settings` (seeding or reading system settings), `dataforge-orchestration` (full DataForge protocol).
-- GATE — navigation placement and audience. `create-app` registers the section in the `My applications` workplace, which most users cannot see. WHERE it belongs and WHO should see it are the USER's decisions, not yours: when the request names neither, STOP after `create-app`, call `get-guidance` with `name` set to `workplaces` for the elicitation script and binding rules, and ask before any further navigation write. Mentioning workplaces in a summary does not satisfy this gate; the user has to choose.
+- Navigation placement and audience: follow the Navigation placement rule in `core-rules` before `create-app`.
 
 Discovery before invocation
 - Always read `get-tool-contract` before the first invocation of any MCP tool in a workflow (exact parameter names, aliases, required fields, defaults, response shapes).

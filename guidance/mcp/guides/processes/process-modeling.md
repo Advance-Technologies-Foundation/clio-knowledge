@@ -1,21 +1,21 @@
 clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 Moved to `process-modeling-details`: the evidence, version history and reasoning behind these rules,
-and the stranded-mapping-row case. Read it when you rewire an existing Sub-process element, when a
-caller reports a mapping that resolves to nothing, or for a rule's evidence.
+and the stranded-mapping-row case. Read it when you rewire an existing Sub-process element or for a
+rule's evidence.
 
 == Which process article to read ==
 A build starts at `process-digest`. This article owns the build lifecycle (tools, descriptor, recipe,
 modify safety); every other topic has its own owner -- read the one your task needs, never guess:
-  * `process-digest` - the BUILD CARD: what an ordinary build needs from this article and three
-    others, naming each owner.
+  * `process-digest` - the BUILD CARD: recipe, names and buildable types in short, and the ONE
+    article per element.
   * `process-custom-elements` - custom user-task elements: Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog` - what `create-business-process` can build TODAY and what it cannot; the
     element catalog is `process-element-catalog-details`.
   * `process-diagram-layout` - how the diagram is drawn, and the re-draw refusal.
-  * `process-naming` - N1-N10 for every caption and code. Read it (or its restatement in
-    `process-digest`) BEFORE you name anything.
+  * `process-naming` - N1-N10 for every caption and code. A build names from `process-digest`; open
+    this only to relabel or settle a name collision.
   * `process-data-elements` - a record-event start (signalStart), and the Modify data element.
   * `process-read-data` - the Read data element: modes, outputs, columns, sort, top-N.
   * `process-add-data` - the Add data element: modes, selection, value sources, refusals.
@@ -70,6 +70,9 @@ one; read that article.
     established - not false, NOT permission. `setConnections` is refused on `false` AND `null`.
   * validate-process-graph - pre-check a planned graph against the connection rules R1-R20
     (`process-activity-connections-details`).
+- If a tool refuses for a missing or older CrtProcessBuilder, STOP and ask the user before
+  `install-process-builder`: it builds the configuration and restarts the site for every user
+  (`core-rules`).
 
 == Descriptor (create-business-process) ==
 {
@@ -101,12 +104,12 @@ one; read that article.
 Before step 1 you MUST read `process-element-catalog` (or `process-digest`, while every element you
 plan is on its buildable list): a plan around something `create-business-process` cannot build fails
 only at build time. For a NEW process, or a change for EACH item of a set,
-you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (restated in
+you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (in short on
 `process-digest`): they decide how many processes the request is.
 1. Translate the request into a graph (starts, activities, flows, ends, parameters, mappings) and
-   name them per N1-N10 in `process-naming`. ONE START PER TRIGGER the process must react to: a process
-   run both when a record is ADDED and when it is CHANGED carries TWO signal starts, not two processes
-   and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
+   name them per N1-N10 in `process-naming` (a build: the card's Names block).
+   ONE START PER TRIGGER the process must react to: a process run both when a record is ADDED and
+   when it is CHANGED carries TWO signal starts, not two processes and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
    CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
    the second start ("the process has more than one start event" at build, R3 in
@@ -145,8 +148,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process`.
-  No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction (`VwSysProcess` shows
-  `NeedInstall` and its siblings `true` on every freshly-saved process). WITHIN A PROCESS exactly two
+  No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction. WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
   without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task
@@ -198,12 +200,12 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 - Every modify re-draws the WHOLE diagram; where that would REPLACE an arrangement the server REFUSES
   the edit and asks rather than flattening it. Read `process-diagram-layout` (that refusal and its two
   answers) before editing a process whose diagram matters.
-- You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
-  ONE schema you named (a process can be a family of them), and the overwrite is irreversible either
-  way. TRUE: you would overwrite the graph the runtime executes - get explicit confirmation (the edit
-  request is not one; `process-version-writes` says what is) and offer
-  `modify-business-process-as-new-version`: the SAME operations against a new version, or an EMPTY
-  operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not the one
-  that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that member, or
-  report the standing and ask. `process-versions` owns every other outcome and the identity rules;
+- You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not
+  a build in progress (`process-version-writes`): a modify overwrites the ONE schema you named (a process
+  can be a family of them), and the overwrite is irreversible either way. TRUE: you would overwrite the
+  graph the runtime executes - get explicit confirmation (the edit request is not one;
+  `process-version-writes` says what is) and offer `modify-business-process-as-new-version`: the SAME
+  operations against a new version, or an EMPTY operations array first as a snapshot, then the in-place
+  edit. FALSE: the graph you hold is not the one that runs, so do NOT modify it -- re-describe by
+  `activeVersionSchemaUId` and edit that member, or report the standing and ask. `process-versions` owns every other outcome and the identity rules;
   `process-version-writes` owns what to ask before activating.

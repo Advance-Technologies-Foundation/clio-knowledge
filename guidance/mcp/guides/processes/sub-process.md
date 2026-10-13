@@ -12,9 +12,9 @@ when the called process's own parameters change (their CAPTIONS on a re-sync are
 WHETHER a request calls for this element at all — the one-process default, per-item work, a repeated
 fragment, long phases — and which execution mode a per-item loop needs is owned by
 `process-sub-process-when`: read it before you plan one.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Element: Sub-process (callActivity -> subProcess) ==
 - `callActivity` Sub-process — call ANOTHER process (the BPMN call activity) and run it once, passing
@@ -51,9 +51,10 @@ name anything, and `process-naming` itself only for a case the card does not cov
         the same. Captions are display text; nothing binds by them. Before CrtProcessBuilder 1.6.6.20 a callee
         saved through this toolset may still hand its callers the captions from before that save, and saving
         it again through this toolset only moves that lag. So if a caller still shows a caption the called
-        process no longer has after a re-sync, run `install-process-builder` - the install restarts the
-        application, which drops the stale cache - then re-sync. Only when the package cannot be updated, ask
-        the USER to open the called process in the process designer and save it (no change needed), then
+        process no longer has after a re-sync, ask the user to approve `install-process-builder`
+        (`core-rules`) - the install restarts the
+        application, which drops the stale cache - then re-sync. When the package cannot be updated, or the user postpones the
+        install, ask the USER to open the called process in the process designer and save it (no change needed), then
         re-sync; that cure lasts only until the next save of the callee through an older toolset.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that

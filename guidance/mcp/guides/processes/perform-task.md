@@ -7,9 +7,9 @@ and what the runtime writes back. Two of its settings are their own subject and 
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
 written -- and what silently degrades when it is written as a formula -- is owned by
 `process-task-category`. The ids, the two refusal texts and their remedy are here.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with
@@ -26,7 +26,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
   record does not make it one: it gets no binding to this process element and no completion listener, so the
   process runs straight past it, never learns that the task was completed or with which result, and cannot
   branch on that result (`ActivityUserTask`, `UserTaskActivityHandler`, `AddDataUserTask`). A task for each
-  record of a set is decided by D1 (restated in `process-digest`; owner `process-sub-process-when`).
+  record of a set is decided by D1 (owner `process-sub-process-when`, which also says what is NOT D1).
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with
@@ -92,7 +92,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
                       lets the call through and the old package rejects it with "Value '...' is not valid for
                       parameter 'ActivityCategory' of type Lookup: a Lookup constant is a formula token, not a
                       plain value. Set it via a mapping 'expression' instead...". Either way: update the
-                      package (install-process-builder); do NOT fall back to the expression form (see
+                      package (install-process-builder, once the user approves it:
+                      `core-rules`); do NOT fall back to the expression form (see
                       `process-task-category`).
   ActivityPriority    Lookup -> ActivityPriority. Default = ab96fa02-7fe6-df11-971b-001d60e938c6 (Medium).
                       Same bare-Guid `value` route and same version story as ActivityCategory.
