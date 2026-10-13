@@ -236,8 +236,8 @@ So size is a delivery contract, not a matter of taste:
   `automation/Clio.Knowledge.Bundle.Tests/ProcessGuideResponseSizeTests.cs`, which is the enforcing
   check. Measure the JSON-escaped payload, not the file on disk — escaping inflates a
   backtick-dense article by 20–35%.
-- The core and `-details` articles split out of process-modeling, app-modeling, workplaces and
-  existing-app-maintenance are also held to the inline budget in
+- The core and `-details` articles split out of process-modeling, app-modeling, workplaces,
+  existing-app-maintenance and core-rules are also held to the inline budget in
   `automation/Clio.Knowledge.Bundle.Tests/GuidanceInlineReplyBudgetTests.cs`: 19,000 UTF-8 bytes as
   clio writes the reply, below the size a Copilot CLI agent receives inline instead of spilling it to
   a file. An edit that pushes one of them over moves text to its `-details` article; it does not
@@ -260,25 +260,36 @@ So size is a delivery contract, not a matter of taste:
 
 ### The process digest
 
-`process-digest` (`guidance/mcp/guides/processes/digest.md`) is the build CARD for the process domain.
-It owns no rule: it restates, in short form and naming the owner on every block, what every process
-build and edit needs from `process-modeling`, `process-element-catalog`, `process-naming` and
-`process-sub-process-when`, so that an agent reads it INSTEAD of those four for an ordinary build.
-Those four were mandatory reading before any element article, roughly 91 KB per build, and the
-context that consumed was what pushed process runs into compaction (ENG-99970).
+`process-digest` (`guidance/mcp/guides/processes/digest.md`) is the routing CARD for the process
+domain: the build recipe in a few lines, the D1/D2/D4 check and N1-N10 in short form, the buildable
+types, and a table naming the ONE article to read per element or need. For an ordinary build an agent
+reads it INSTEAD of `process-modeling`, `process-element-catalog`, `process-naming` and
+`process-sub-process-when`, and after it reads only the articles of the elements it uses. It owns no
+rule.
 
-A restatement drifts unless something ties it to its owner, so three rules apply:
+It was a block-by-block restatement of those four owners (about 14 KB) until CAADT runs showed agents
+reading it ON TOP of the topic articles: guidance reads per test did not go down, and most of a run's
+cost is the cache-read of context read early. So the card is held small and routes rather than restates:
 
-- A pull request that changes a rule the card restates changes the card in the SAME pull request.
-  `ProcessDigestTests.RestatedClauses` pins one verbatim clause per restated rule in both files; a
-  reword on one side fails the suite. Add a row when you restate a new rule.
-- The card stays a card. `ProcessDigestTests` holds it to a 16 500-character budget (JSON-escaped, as the bundle ships it), far under the
-  article budget: detail belongs to the owner, and the card says when to open it.
-- The card names only those four owners (plus `process-versions` for the edit block). Restating a
-  fifth article is a decision, not an edit.
+- `ProcessDigestTests` holds it to 3 KiB (3,072 bytes) of article text as clio serves it (JSON-escaped UTF-8,
+  about 4.3 KB with the reply envelope). Shrink it by routing to the owner, never by dropping a
+  condition that changes what the agent does.
+- Every article the card names must be a declared guide, and the routing table must name every
+  article in `ProcessDigestTests.RequiredRoutes`.
+- The clauses, tokens and version numbers the card restates verbatim are pinned in both the card and
+  the owner (`RestatedClauses`); its buildable types must be on the buildable list of
+  `process-element-catalog` and its "never as a userTask" types must equal that article's four; its N5
+  drop-word list must equal the one `process-naming` owns. The card's paraphrases (the D1/D2/D4
+  one-liners, the caption and code summary) cannot be pinned verbatim and stay a reviewer's check: a
+  rule the build path no longer reaches in any article it reads is a rule lost, even when its owner
+  still states it. A pull
+  request that changes any rule the card states changes the card in the SAME pull request.
+- Every rule the 14 KB digest restated is pinned in its owner (`RulesHandedBackToTheirOwners`): the
+  card sends the reader there, so an owner that rewords or drops one must update the row, not delete it.
 
-Like any restatement, a destructive or irreversible instruction on the card carries its preconditions
-inline, as a MUST, next to the instruction (see "An article must fit in one `get-guidance` response").
+A destructive or irreversible instruction never goes on the card without its preconditions; the card
+routes such elements ("confirm first") to the article that carries them (see "An article must fit in
+one `get-guidance` response").
 
 ## Advisory changes
 
