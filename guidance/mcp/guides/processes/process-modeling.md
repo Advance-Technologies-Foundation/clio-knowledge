@@ -14,8 +14,8 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-element-catalog` - what `create-business-process` can build TODAY and what it cannot; the
     element catalog is `process-element-catalog-details`.
   * `process-diagram-layout` - how the diagram is drawn, and the re-draw refusal.
-  * `process-naming` - N1-N10 for every caption and code. A build names from the Names block of
-    `process-digest`; open this owner only to relabel something that exists or settle a name collision.
+  * `process-naming` - N1-N10 for every caption and code. A build names from `process-digest`; open
+    this only to relabel or settle a name collision.
   * `process-data-elements` - a record-event start (signalStart), and the Modify data element.
   * `process-read-data` - the Read data element: modes, outputs, columns, sort, top-N.
   * `process-add-data` - the Add data element: modes, selection, value sources, refusals.
@@ -104,9 +104,9 @@ only at build time. For a NEW process, or a change for EACH item of a set,
 you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (in short on
 `process-digest`): they decide how many processes the request is.
 1. Translate the request into a graph (starts, activities, flows, ends, parameters, mappings) and
-   name them per N1-N10 in `process-naming` (a build names from its Names block summary on `process-digest`). ONE START PER TRIGGER the process must react to: a process
-   run both when a record is ADDED and when it is CHANGED carries TWO signal starts, not two processes
-   and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
+   name them per N1-N10 in `process-naming` (a build: the card's Names block).
+   ONE START PER TRIGGER the process must react to: a process run both when a record is ADDED and
+   when it is CHANGED carries TWO signal starts, not two processes and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
    CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
    the second start ("the process has more than one start event" at build, R3 in
