@@ -36,7 +36,7 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 
 **LABEL BOTH ARMS** of a branch and leave an ordinary continuation bare (why: `process-branch-conditions-details`).
 Name the OUTCOME, never the condition. `process-naming` N10 owns the wording rule
-(restated in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
+(summarised in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
 caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
 `describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
 human's label is there to be erased.
@@ -98,8 +98,7 @@ Both resolve the flow by the PAIR, so a `kind` (or, on `removeFlow`, a `conditio
 `removeFlow`.** Version-dependent, so do not rely on it as a backstop: the `removeFlow` refusal ships
 from `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**; below those the
 extra fields are accepted and silently dropped, clio does no client-side check, and stripping them
-yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule;
-`process-digest` restates it.
+yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in

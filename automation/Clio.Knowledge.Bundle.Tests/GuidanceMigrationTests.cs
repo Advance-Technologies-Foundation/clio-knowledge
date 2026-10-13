@@ -44,6 +44,7 @@ public sealed class GuidanceMigrationTests
         "app-modeling-details",
         "workplaces-details",
         "existing-app-maintenance-details",
+        "core-rules-details",
         "portal-service-routing",
         "external-organizations",
         "page-schema-translation",

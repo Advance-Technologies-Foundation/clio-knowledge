@@ -7,9 +7,9 @@ and what the runtime writes back. Two of its settings are their own subject and 
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
 written -- and what silently degrades when it is written as a formula -- is owned by
 `process-task-category`. The ids, the two refusal texts and their remedy are here.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 Moved to `process-perform-task-details`: the reasoning and evidence behind several rules here. Read it
 when asked why a rule holds (approvals, the Call category row) or for its counts.
 
@@ -26,7 +26,7 @@ when asked why a rule holds (approvals, the Call category row) or for its counts
   record does not make it one: it gets no binding to this process element and no completion listener, so the
   process runs straight past it, never learns that the task was completed or with which result, and cannot
   branch on that result (`ActivityUserTask`, `UserTaskActivityHandler`, `AddDataUserTask`). A task for each
-  record of a set is decided by D1 (restated in `process-digest`; owner `process-sub-process-when`).
+  record of a set is decided by D1 (owner `process-sub-process-when`, which also says what is NOT D1).
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with

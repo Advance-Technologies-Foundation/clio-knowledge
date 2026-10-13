@@ -48,7 +48,7 @@ described value reads back raw.
   removeElement the current start, addElement a `signalStart`, addFlow signalStart -> (first activity).
   `removeElement` is DESTRUCTIVE and no pre-save validation restores what it breaks: it cascades to every flow
   touching the element without re-joining the gap. The rules that make a removal safe — describe first,
-  validate the graph AS IT WILL BE, confirm with the user — are restated in `process-digest` and owned by `process-modeling`. Read them before
+  validate the graph AS IT WILL BE, confirm with the user — are owned by `process-modeling`. Read them before
   removing anything, not after.
 - To change an EXISTING signal's trigger or tracked columns IN PLACE (without re-adding it), use the
   `setSignal` op — it preserves the element and its flows:
