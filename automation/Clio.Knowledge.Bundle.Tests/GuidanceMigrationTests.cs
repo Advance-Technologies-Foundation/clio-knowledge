@@ -81,6 +81,34 @@ public sealed class GuidanceMigrationTests
     }
 
     [Test]
+    [Description("Publishes every guidance article at resources/<itemId>.md, so the itemId names its file in the flat resources folder.")]
+    public void BundleSource_ShouldPublishGuidanceAtItsItemIdPath()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+
+        // Act
+        (string ItemId, string BundlePath)[] guidance = [.. source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Where(resource => resource.GetProperty("sourcePath").GetString()!
+                .StartsWith("guidance/", StringComparison.Ordinal))
+            .Select(resource => (resource.GetProperty("itemId").GetString()!,
+                resource.GetProperty("bundlePath").GetString()!))];
+        string[] misnamed = [.. guidance
+            .Where(article => article.BundlePath != $"resources/{article.ItemId}.md")
+            .Select(article => $"{article.ItemId} -> {article.BundlePath}")];
+
+        // Assert
+        guidance.Should().NotBeEmpty(because: "anti-vacuity: the manifest declares guidance articles");
+        misnamed.Should().BeEmpty(
+            because: "resources/ is one flat folder: a path that drops the itemId's prefix (versions-details.md "
+                + "for process-versions-details) hides which item it belongs to and can collide with a later "
+                + "article of another domain");
+    }
+
+    [Test]
     [Description("Keeps the checked-in Git repository manifest associated with its strict source schema and free of publication metadata.")]
     public void BundleSource_ShouldReferenceRepositorySchema_WithoutPublicationMetadata()
     {

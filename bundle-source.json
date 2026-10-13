@@ -1559,7 +1559,7 @@
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-elements-details",
       "sourcePath": "guidance/mcp/guides/processes/data-elements-details.md",
-      "bundlePath": "resources/data-elements-details.md",
+      "bundlePath": "resources/process-data-elements-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1709,7 +1709,7 @@
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-perform-task-details",
       "sourcePath": "guidance/mcp/guides/processes/perform-task-details.md",
-      "bundlePath": "resources/perform-task-details.md",
+      "bundlePath": "resources/process-perform-task-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1957,7 +1957,7 @@
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-versions-details",
       "sourcePath": "guidance/mcp/guides/processes/versions-details.md",
-      "bundlePath": "resources/versions-details.md",
+      "bundlePath": "resources/process-versions-details.md",
       "mediaType": "text/plain"
     },
     {
