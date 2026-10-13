@@ -127,6 +127,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-modeling for the operation reference
   - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
     name=process-modeling-details
+  - the evidence or reasoning behind a rule, after the article itself: record trigger and Modify data ->
+    name=process-data-elements-details; Perform task -> name=process-perform-task-details; the version
+    model -> name=process-versions-details; ScriptTask -> name=process-script-task-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
   - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
     tracing on or off -> name=process-tracing

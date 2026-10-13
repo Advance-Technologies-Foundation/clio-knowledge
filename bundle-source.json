@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.138",
+  "libraryVersion": "1.15.139",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -116,6 +116,7 @@
       "process-read-data",
       "process-add-data",
       "process-data-elements",
+      "process-data-elements-details",
       "process-data-source-filters",
       "process-delete-data",
       "process-parameters",
@@ -126,6 +127,7 @@
       "process-branch-conditions-details",
       "process-activity-result-branches",
       "process-perform-task",
+      "process-perform-task-details",
       "process-task-performer",
       "process-task-category",
       "process-open-edit-page",
@@ -144,7 +146,9 @@
       "process-element-catalog-details",
       "process-version-writes",
       "process-versions",
+      "process-versions-details",
       "process-script-task",
+      "process-script-task-details",
       "process-tracing",
       "product-telemetry",
       "record-rights",
@@ -310,6 +314,7 @@
       "docs://knowledge/com.creatio.clio/process-read-data",
       "docs://knowledge/com.creatio.clio/process-add-data",
       "docs://knowledge/com.creatio.clio/process-data-elements",
+      "docs://knowledge/com.creatio.clio/process-data-elements-details",
       "docs://knowledge/com.creatio.clio/process-data-source-filters",
       "docs://knowledge/com.creatio.clio/process-parameters",
       "docs://knowledge/com.creatio.clio/process-parameters-details",
@@ -319,6 +324,7 @@
       "docs://knowledge/com.creatio.clio/process-branch-conditions-details",
       "docs://knowledge/com.creatio.clio/process-activity-result-branches",
       "docs://knowledge/com.creatio.clio/process-perform-task",
+      "docs://knowledge/com.creatio.clio/process-perform-task-details",
       "docs://knowledge/com.creatio.clio/process-task-performer",
       "docs://knowledge/com.creatio.clio/process-task-category",
       "docs://knowledge/com.creatio.clio/process-open-edit-page",
@@ -338,7 +344,9 @@
       "docs://knowledge/com.creatio.clio/process-element-catalog-details",
       "docs://knowledge/com.creatio.clio/process-version-writes",
       "docs://knowledge/com.creatio.clio/process-versions",
+      "docs://knowledge/com.creatio.clio/process-versions-details",
       "docs://knowledge/com.creatio.clio/process-script-task",
+      "docs://knowledge/com.creatio.clio/process-script-task-details",
       "docs://knowledge/com.creatio.clio/process-tracing",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
@@ -1558,6 +1566,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-data-elements-details",
+      "title": "Process data elements details",
+      "description": "The run-time evidence behind using a column of a Read data record as a value source (the end-to-end signal-to-Perform-task run, the UId token measured in an expression mapping and a Formula body, and the modify-path condition run), how the server resolves such a source, why a record trigger is a signal start, and how describe-business-process reads back a column source and a Modify data value the write path would refuse. Split out of process-data-elements, which keeps every rule and is read first.",
+      "topicId": "creatio.process-data-elements-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-data-elements-details",
+      "sourcePath": "guidance/mcp/guides/processes/data-elements-details.md",
+      "bundlePath": "resources/process-data-elements-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-read-data",
       "title": "Read data element",
       "description": "Owns the Creatio Read data element (readData / ReadDataUserTask) -- the step that READS records. Covers all four buildable modes and the output each one fills (first-record into ResultEntity; collection into both the raw ResultEntityCollection and the shaped ResultCompositeObjectList a Collection process parameter mirrors; count, always ResultCount and taking no column; aggregation, a function/column pair whose output follows the column type), the column selection and sort, collection's own two refusals and its numberOfRecords top-N with the keep-on-omit rule, the write-time shaping that lets a mirror taken in the same call find a shape, and what a mode conversion clears. Split out of process-data-elements, which owns the record trigger and the sibling Modify data element.",
@@ -1635,7 +1654,7 @@
     {
       "itemId": "process-formulas-details",
       "title": "Process formula details",
-      "description": "Owns the read-back and reference material for a stored formula: how the process designer renders it (its own function spelling, parameter names instead of UIds); how a stored formula or condition reads back in describe-business-process (source Script with the expression in value, ConstValue meaning a constant went in instead, kind conditional plus the condition text, branchesOnActivityResult for a result-enumerating connector), and why no designer link can be offered; the verbatim table of formula refusals with the fix for each; the absence of a per-request budget; and what older CrtProcessBuilder packages did with a formula, including why every 'on an older package' fallback in the process guide set is unreachable from a current clio and install-process-builder is the remedy. Split out of process-formulas, which keeps the vocabulary, the reference syntax, what the gate checks and what each refusal names, and the length bound.",
+      "description": "Owns how the designer renders a stored formula and how a stored formula or condition reads back in describe-business-process, the verbatim table of formula refusals with each fix, the per-request limit, what an older CrtProcessBuilder package did with a formula, and the evidence and reasoning behind several process-formulas rules: the decimal suffix, the unrecognised macro family, the line-break check, the blank condition and the flat-expression rule. Split out of process-formulas, which keeps every rule and is read first.",
       "topicId": "creatio.process-formulas-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-formulas-details",
@@ -1660,7 +1679,7 @@
     {
       "itemId": "process-branch-conditions-details",
       "title": "Branch conditions details",
-      "description": "Owns the evidence, version provenance and rarer cases behind the branch rules of process-branch-conditions: why both arms of a branch are labelled and how they are worded (the rule itself is process-naming N10's); the CrtProcessBuilder 1.6.0.3 floor both condition paths need, and why a 1.4.x number proves nothing; the measured fact that a diverging gateway with no fallback still builds (R7/R9 only advise, and an unmatched run fails with 'None of the conditions were met'); the create/modify NOTICE that reports a parallel split from CrtProcessBuilder 1.6.2.10, and its three caveats (on an older stand you get a version-convergence REFUSAL rather than silence, modify reports only the sources the request touched, and a default beside a plain flow goes unreported); how the diagram draws branch evaluation order; and the corpus-attested condition shapes. Split out of process-branch-conditions.",
+      "description": "Authoritative owner of the evidence, version provenance and rarer cases behind the branch rules: why both arms are labelled, the CrtProcessBuilder 1.6.0.3 floor both condition paths need, a diverging gateway that builds with no fallback, the parallel-split NOTICE and its three caveats, the diagram's branch order, the corpus-attested condition shapes, the column-test count, why a pair-resolved edit refuses a stray kind, why R7 has no node to judge off an activity, the no-value gateway measurement, a gateway's own default re-kinded to sequence, and why the article split from process-formulas. Split out of process-branch-conditions, which keeps every rule and is read first.",
       "topicId": "creatio.process-branch-conditions-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-branch-conditions-details",
@@ -1697,6 +1716,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-perform-task-details",
+      "title": "Perform task element details",
+      "description": "Owns the reasoning and evidence behind several Perform task (ActivityUserTask) rules: what the dedicated Approval element does that Perform task does not, why the Task-typed 'Call' ActivityCategory row (CallAsTask) is the one the element needs and the Call-typed row is never offered by the designer, how many parameters describe-business-process shows for a fresh element against how many it carries, why the full parameter set varies with an environment's Activity lookup columns, and how many shipped conditional flows the activity-result branching rule affects. Split out of process-perform-task, which keeps every rule and is read first.",
+      "topicId": "creatio.process-perform-task-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-perform-task-details",
+      "sourcePath": "guidance/mcp/guides/processes/perform-task-details.md",
+      "bundlePath": "resources/process-perform-task-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-delete-data",
       "title": "Delete data element",
       "description": "Owns the Creatio Delete data element (deleteData / DeleteDataUserTask): its one-field block -- the target object, because the record filter is what decides which records are destroyed -- the absence of any delete-everything mode (the runtime always applies the filter and raises its empty-filter error without one, so a filterless element deletes NOTHING and fails), the setElement retarget that clears a filter bound to the old object, the describe read-back, and the confirmation the agent owes the user before building one: count the matching records with a count-only read, state the object, the number, the filter in plain prose and the three consequences, and get an explicit yes. Also records the two states the server itself warns about -- a build with no filter, and a retarget that cleared one.",
@@ -1727,7 +1757,7 @@
     {
       "itemId": "process-access-rights-details",
       "title": "Change access rights details",
-      "description": "Owns the Change access rights element's version and read-back specifics: the two version boundaries (the environment's CrtProcessBuilder must be at least 1.6.0.2 for the accessRights block to land at all, and only a clio that bundles 1.6.0.2 or later carries the read-back check that warns when it does not, so an older clio's silence proves nothing), when that check runs on an operations array containing clearFilter (a mixed batch counts), the field-by-field shape describe-business-process returns for the block (object, objectSchemaUId, considerTimeInFilter, display), and the provenance of the restrict level (enum-derived, not observed). Split out of process-access-rights, which keeps the block, the entries, the grantee kinds, the levels, the record filter, every refusal and every confirmation duty; read that first.",
+      "description": "Owns the Change access rights element's version and read-back specifics and the evidence behind its rules: the two version boundaries (CrtProcessBuilder 1.6.0.2 for the accessRights block to land; only a clio bundling 1.6.0.2 or later warns when it does not, so an older clio's silence proves nothing), when that check runs on a batch containing clearFilter and why a setFilter sent before an object retarget goes unwarned, the field-by-field shape describe-business-process returns for the block, the provenance and row mechanics of the restrict level, how allRolesAndUsers differs from a role entry on a remove, and the platform reasoning behind the record and grantee filter states and the collection-replacement hazard. Split out of process-access-rights, which keeps every rule and is read first.",
       "topicId": "creatio.process-access-rights-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-access-rights-details",
@@ -1780,7 +1810,7 @@
     {
       "itemId": "process-open-edit-page-details",
       "title": "Open edit page details",
-      "description": "Owns the evidence and read-back detail behind the Creatio Open edit page element (openEditPage / OpenEditPageUserTask): the measured useBackgroundMode evidence on this element (the shipped-corpus counts and the silent non-completion with the flag ON); the measured Log activity default and its version dependence; why the record type follows the page; the designer's value-source menu for pre-filled values and the record to open; the showPage value written at create; and reading an existing element back with describe-business-process - the round-trip asymmetry, a switched-on result list with no column, and a completion mode read back with no conditions. Split out of process-open-edit-page, which keeps the block, every field rule and refusal, the destructive-change guards, the background-mode MUST and the routing rule; read that first.",
+      "description": "Authoritative owner of useBackgroundMode on the Open edit page element, the measured evidence behind its Log activity default, why its record type follows the page, the designer's value-source menu, the showPage value written at create, reading an existing element back with describe-business-process, the evidence and reasoning behind the core's field rules (Log activity gate probe and corpus count, the unlisted-page refusal, clearing stale pre-filled values, the filter/completion-mode coupling, the unassigned performer, the interval unit, the page-retarget refusal, the priority default, not asking the user which element to use), and the list-entity-client-schemas-to-file arguments. Split out of process-open-edit-page, which keeps every rule and is read first.",
       "topicId": "creatio.process-open-edit-page-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-open-edit-page-details",
@@ -1934,6 +1964,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-versions-details",
+      "title": "Process versions details",
+      "description": "The evidence and reasoning behind the process version model: which stand, build and date V1-V4 were read on, why V5-V6 are source-read and V7 derived, why a version cannot be deleted, why a numeric name tail proves nothing, why activeVersionSource names its authority and IsMaxVersion is not surfaced, and the quoted wrong advice the identity rule forbids. Split out of process-versions, which keeps every rule and is read first.",
+      "topicId": "creatio.process-versions-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-versions-details",
+      "sourcePath": "guidance/mcp/guides/processes/versions-details.md",
+      "bundlePath": "resources/process-versions-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-script-task",
       "title": "Process ScriptTask C#",
       "description": "When to add a Creatio process ScriptTask (it makes the process need a compile) and how to write one: the scriptTask block, exact case-sensitive Get/Set parameter access, the namespaces the generated code imports, process usings and methods and when an alias is needed, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and compiling and verifying on the target environment.",
@@ -1945,6 +1986,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
       "bundlePath": "resources/process-script-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-script-task-details",
+      "title": "Process ScriptTask C# details",
+      "description": "Owns the evidence, platform mechanics and rare-case fixes behind the ScriptTask rules: why the other elements need no compile and what shipped ScriptTasks look like, what makes Get/Set available, why a process-name compile can outlast the MCP client and why a run right after it can still show the old code (measured: about two minutes, no restart), the save's warning about an unresolved Get/Set name, how to keep a multi-line verbatim string's exact value, how a newer and an older clio report an exception thrown inside a script, why a caption is the better identity for a versioned process, and the compatibility observations behind the global::Common.Logging and one-argument Newtonsoft.Json patterns. Split out of process-script-task, which keeps every rule and is read first.",
+      "topicId": "creatio.process-script-task-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-script-task-details",
+      "sourcePath": "guidance/mcp/guides/processes/process-script-task-details.md",
+      "bundlePath": "resources/process-script-task-details.md",
       "mediaType": "text/plain"
     },
     {
