@@ -539,7 +539,7 @@ ADAPTIVE BREAKPOINTS
 ─────────────────────────────────────────────────────────────
 The web→mobile conversion bakes an adaptive layout into every multi-column grid it converts
 (stack on phone; on tablet weighted columns from the web grid, and a grid whose rows differ in column
-structure becomes a one-column stack of synthesized band grids) — how it is
+structure becomes a one-column stack in which each multi-column band gets its own synthesized grid) — how it is
 reported is owned by the web-to-mobile-conversion guide.
 Apply this section whenever you want per-screen placement; otherwise rely on the static
 `columns` / `layoutConfig` values.
@@ -552,10 +552,10 @@ Adaptive layout has TWO sides — you must edit both for a real responsive layou
 (1) CONTAINER side — `adaptive` on crt.GridContainer (sibling of `columns`).
     Defines how many grid columns exist at each breakpoint, and how wide each one is.
     Write `columns` as an ARRAY, one entry per column: the runtime reads a single string such as
-    "1fr 1fr" as ONE column. An integer "<n>fr" is that column's weight (["2fr","1fr"] is a 2:1
+    "1fr 1fr" as ONE column. A positive integer "<n>fr" is that column's weight (["2fr","1fr"] is a 2:1
     split); a bare number is a fixed width, and any other value ("minmax(...)", "1.5fr") gets weight 1.
-    Editing a breakpoint's column count, or toggling "Use adaptive layout" in the designer, resets that
-    breakpoint to equal 1fr columns.
+    In the designer, editing a breakpoint's column count resets that breakpoint, and toggling "Use
+    adaptive layout" resets the grid, to equal 1fr columns.
 
     {
       "operation": "merge",
@@ -570,7 +570,7 @@ Adaptive layout has TWO sides — you must edit both for a real responsive layou
     }
 
 (2) CHILD side — `layoutConfig.adaptive` on each child component (button, field, label, ...).
-    Defines the explicit grid cell the child occupies at each breakpoint.
+    Defines the column the child takes at each breakpoint and its order (`row`) within that column.
     Per breakpoint keys: `row` (1-based), `column` (1-based), `colSpan`, `rowSpan`.
 
     Without per-breakpoint `layoutConfig.adaptive`, children fall back to the static
@@ -627,7 +627,7 @@ Rules of thumb:
   - Define `adaptive` on the GridContainer AND `layoutConfig.adaptive` on every child
     that needs to move between breakpoints. Skipping either side breaks the layout.
   - Use 1-based `row` and `column` — the runtime reflows children by these per breakpoint
-    (one item per cell). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
+    (items sharing a column stack in `row` order). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
     designer's format, but are NOT honored per-item by the runtime; do not rely on them to
     span cells. To make an item wider, give the container fewer columns at that breakpoint, a
     larger "<n>fr" weight to the item's column, or move rows with a different column structure into
@@ -635,8 +635,8 @@ Rules of thumb:
   - Each column is an independent stack ordered by `row`: items that share a `row` in neighbouring
     columns are NOT aligned to each other on the device, even though the designer preview aligns them.
   - Keep all three breakpoints (`small`, `medium`, `large`) populated even when two
-    share the same cell — the designer always serialises the full set and partial maps
-    may render as empty cells on the missing breakpoint.
+    share the same cell — the designer always serialises the full set and drops the weights of a
+    partial map (the runtime falls back to the next smaller breakpoint).
   - Adaptive child placement is supported inside crt.GridContainer. For crt.FlexContainer,
     reflow happens through the container's own `direction` / `wrap` properties, not
     through child `layoutConfig.adaptive`.
@@ -654,7 +654,7 @@ Default field container pattern:
     "name": "<GroupName>Container",
     "values": {
       "type": "crt.GridContainer",
-      "columns": "1fr",
+      "columns": ["1fr"],
       "color": "primary",
       "borderRadius": "medium",
       "padding": { "top": "medium", "right": "medium", "bottom": "medium", "left": "medium" },
