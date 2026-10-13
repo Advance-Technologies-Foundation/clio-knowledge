@@ -70,9 +70,9 @@ one; read that article.
     established - not false, NOT permission. `setConnections` is refused on `false` AND `null`.
   * validate-process-graph - pre-check a planned graph against the connection rules R1-R20
     (`process-activity-connections-details`).
-- These tools need CrtProcessBuilder at least at the version this clio ships. When one refuses because it
-  is missing or older, STOP and ask the user before `install-process-builder`: it builds the
-  configuration and restarts the site for every user (`core-rules`).
+- If a tool refuses for a missing or older CrtProcessBuilder, STOP and ask the user before
+  `install-process-builder`: it builds the configuration and restarts the site for every user
+  (`core-rules`).
 
 == Descriptor (create-business-process) ==
 {
@@ -200,12 +200,12 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 - Every modify re-draws the WHOLE diagram; where that would REPLACE an arrangement the server REFUSES
   the edit and asks rather than flattening it. Read `process-diagram-layout` (that refusal and its two
   answers) before editing a process whose diagram matters.
-- You MUST read `isActiveVersion` from the describe output before ANY modify: a modify overwrites the
-  ONE schema you named (a process can be a family of them), and the overwrite is irreversible either
-  way. TRUE: you would overwrite the graph the runtime executes - get explicit confirmation (the edit
-  request is not one; `process-version-writes` says what is) and offer
-  `modify-business-process-as-new-version`: the SAME operations against a new version, or an EMPTY
-  operations array first as a snapshot, then the in-place edit. FALSE: the graph you hold is not the one
-  that runs, so do NOT modify it -- re-describe by `activeVersionSchemaUId` and edit that member, or
-  report the standing and ask. `process-versions` owns every other outcome and the identity rules;
+- You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not
+  a build in progress (`process-version-writes`): a modify overwrites the ONE schema you named (a process
+  can be a family of them), and the overwrite is irreversible either way. TRUE: you would overwrite the
+  graph the runtime executes - get explicit confirmation (the edit request is not one;
+  `process-version-writes` says what is) and offer `modify-business-process-as-new-version`: the SAME
+  operations against a new version, or an EMPTY operations array first as a snapshot, then the in-place
+  edit. FALSE: the graph you hold is not the one that runs, so do NOT modify it -- re-describe by
+  `activeVersionSchemaUId` and edit that member, or report the standing and ask. `process-versions` owns every other outcome and the identity rules;
   `process-version-writes` owns what to ask before activating.
