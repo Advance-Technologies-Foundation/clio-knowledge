@@ -39,11 +39,10 @@ precondition kept next to the instruction it guards — names that guide as the 
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
   article, then the article of each element you use (the rows below)
-  - process-digest is the BUILD CARD: it restates, naming each owner, what every build and edit needs
-    from `process-modeling` (the build-lifecycle owner), `process-element-catalog`, `process-naming` and
-    `process-sub-process-when`. For an ordinary build do NOT open those four - read the card instead and
-    open one only when the card sends you there. After the card, read the ONE matching sub-guide per
-    element:
+  - process-digest is the BUILD CARD: the recipe, the D1/D2/D4 check, N1-N10 and the buildable types
+    in short (owners `process-modeling`, `process-sub-process-when`, `process-naming`,
+    `process-element-catalog`), and a table naming the ONE article per element. For an ordinary build do
+    NOT open those four; after the card read ONLY the articles of the elements you use:
   - which elements exist beyond the card's buildable list, and how a data-id maps to a build type ->
     name=process-element-catalog
     - the element catalog (data-id -> label -> purpose), to read an existing process or reason about an
@@ -56,7 +55,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
-  - name the process, its elements, or its parameters (the N1-N10 rules, restated in process-digest)
+  - name the process, its elements, or its parameters (the N1-N10 rules, in short on process-digest)
     -> name=process-naming when the card sends you there
   - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements

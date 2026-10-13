@@ -6,6 +6,8 @@ This article is the authoritative owner of the `expression` mapping source, the 
 platform's interpreter accepts - which a flow condition uses too - how a parameter is referenced inside a
 formula, and what the server validates and refuses. The BRANCH itself, including precedence and the
 hazard of clearing the last one, belongs to `process-branch-conditions`.
+A Formula ELEMENT (`formulaTask`) takes its `formula` block - the body plus exactly one target - from
+`process-element-catalog-details`.
 Moved to `process-formulas-details`: how the designer shows a stored formula and how it reads back in
 `describe-business-process`, the verbatim refusal table with each fix, and what an older package did with
 a formula. Read it when you verify a stored formula or condition, work from a formula as the designer

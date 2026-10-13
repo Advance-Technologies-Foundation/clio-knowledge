@@ -7,15 +7,15 @@ caller reports a mapping that resolves to nothing, or for a rule's evidence.
 == Which process article to read ==
 A build starts at `process-digest`. This article owns the build lifecycle (tools, descriptor, recipe,
 modify safety); every other topic has its own owner -- read the one your task needs, never guess:
-  * `process-digest` - the BUILD CARD: what an ordinary build needs from this article and three
-    others, naming each owner.
+  * `process-digest` - the BUILD CARD: recipe, names and buildable types in short, and the ONE
+    article per element.
   * `process-custom-elements` - custom user-task elements: Classic panels and registration.
   * `process-custom-element-families` - one toolbox entry selecting separate tasks and pages.
   * `process-element-catalog` - what `create-business-process` can build TODAY and what it cannot; the
     element catalog is `process-element-catalog-details`.
   * `process-diagram-layout` - how the diagram is drawn, and the re-draw refusal.
-  * `process-naming` - N1-N10 for every caption and code. Read it (or its restatement in
-    `process-digest`) BEFORE you name anything.
+  * `process-naming` - N1-N10 for every caption and code. A build names from `process-digest`; open
+    this only to relabel or settle a name collision.
   * `process-data-elements` - a record-event start (signalStart), and the Modify data element.
   * `process-read-data` - the Read data element: modes, outputs, columns, sort, top-N.
   * `process-add-data` - the Add data element: modes, selection, value sources, refusals.
@@ -64,8 +64,7 @@ one; read that article.
   * create-business-process - build a NEW process from a JSON descriptor, and save it.
   * modify-business-process - edit an EXISTING process by an ordered list of operations.
   * describe-business-process - read a process back as a structured graph. From clio <CLIO-TBD> a large
-    process answers with a SUMMARY without uids, labels, element blocks or layout: to read any of those,
-    pass `mode=full` (the whole graph) or `element=<name>` (one element). Per element also
+    process gets a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Per element also
     `connections[]`, `deprecated` (retired user-task schema) and `writesConnectionsAtRuntime`. FALSE:
     the connections persist and compile but are never written - change the element kind (its runtime
     never writes them) or set `CreateActivity` true (its activity-creation gate is shut). `null`: not
@@ -103,12 +102,12 @@ one; read that article.
 Before step 1 you MUST read `process-element-catalog` (or `process-digest`, while every element you
 plan is on its buildable list): a plan around something `create-business-process` cannot build fails
 only at build time. For a NEW process, or a change for EACH item of a set,
-you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (restated in
+you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (in short on
 `process-digest`): they decide how many processes the request is.
 1. Translate the request into a graph (starts, activities, flows, ends, parameters, mappings) and
-   name them per N1-N10 in `process-naming`. ONE START PER TRIGGER the process must react to: a process
-   run both when a record is ADDED and when it is CHANGED carries TWO signal starts, not two processes
-   and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
+   name them per N1-N10 in `process-naming` (a build: the card's Names block).
+   ONE START PER TRIGGER the process must react to: a process run both when a record is ADDED and
+   when it is CHANGED carries TWO signal starts, not two processes and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
    CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
    the second start ("the process has more than one start event" at build, R3 in
@@ -148,11 +147,10 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process`.
-  WITHIN A PROCESS exactly two
-  things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
-  `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
-  without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task
-  schema - `process-element-catalog`) carry their own compile obligations.
+  WITHIN A PROCESS exactly two things pull a compile in, both C# YOU authored: a `scriptTask` (with
+  the `methods` it calls) and a `userTask` with an after-activity-save script; all else, USING a
+  compiled user task included, runs without one. Other schemas (source code, business objects, DCM,
+  value lists, a CUSTOM user-task schema - `process-element-catalog`) carry their own compile obligations.
 
 == Set what was asked for, and nothing else ==
 - An OPTIONAL field the request did not mention stays OUT of the descriptor: filling it in changes

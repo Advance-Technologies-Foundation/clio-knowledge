@@ -12,7 +12,7 @@ elements (record triggers, Modify data) stay there, and Add data and Delete data
 articles, `process-add-data` and `process-delete-data`.
 The record `filter` this element carries is owned by `process-data-source-filters` — this article says
 WHETHER it takes one and what it means here, that one says what a filter may contain. The build
-lifecycle, the descriptor shape and what is buildable today are restated in `process-digest` (owners
+lifecycle, the descriptor shape and what is buildable today are summarised in `process-digest` (owners
 `process-modeling` and `process-element-catalog`).
 
 == Read data element (readData) — first / collection / count / aggregation modes ==
