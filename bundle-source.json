@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.128",
+  "libraryVersion": "1.15.134",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -57,6 +57,7 @@
       "configuration-webservice",
       "configuration-webservice-tests",
       "core-rules",
+      "core-rules-details",
       "creatio-three-way-merge",
       "creatio-composable-app-development",
       "creatio-freedom-iframe-section",
@@ -249,6 +250,7 @@
       "docs://knowledge/com.creatio.clio/configuration-webservice",
       "docs://knowledge/com.creatio.clio/configuration-webservice-tests",
       "docs://knowledge/com.creatio.clio/core-rules",
+      "docs://knowledge/com.creatio.clio/core-rules-details",
       "docs://knowledge/com.creatio.clio/creatio-three-way-merge",
       "docs://knowledge/com.creatio.clio/creatio-composable-app-development",
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
@@ -761,7 +763,7 @@
     {
       "itemId": "core-rules",
       "title": "Core rules",
-      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, scratch cleanup, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation.",
+      "description": "The non-negotiable clio MCP invariants (compile/restart, long-running await, profile culture, destructive confirmation, scratch cleanup, navigation placement gate, verification in browser preference, correlation-id) that apply to every operation. The server instructions mandate reading this first on any operation; rarely needed detail is in core-rules-details.",
       "topicId": "creatio.core-rules",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/core-rules",
@@ -770,6 +772,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/core-rules.md",
       "bundlePath": "resources/core-rules.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "core-rules-details",
+      "title": "Core rules details",
+      "description": "Owns the rarely needed detail behind core-rules: the CLI compile-package --wait exit codes; precompiled-package delivery; how to tell whether a compile, restart or process launch ran after a not-found, requestfailed, not-started or still-running answer (compilation-history rows, last-compilation-log fallback, SysProcessLog); and the OData foreign-key rejection checks. Split out of core-rules.",
+      "topicId": "creatio.core-rules-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/core-rules-details",
+      "sourcePath": "guidance/mcp/guides/core-rules-details.md",
+      "bundlePath": "resources/core-rules-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -915,7 +928,7 @@
     {
       "itemId": "deploy-lifecycle",
       "title": "Deployment lifecycle",
-      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> deploy-creatio with automatic configured-range IIS port selection, optional explicit port inspection, deploy-identity, build discovery, registration, and cliogate installation.",
+      "description": "Canonical MCP guidance for the Creatio deploy/provisioning lifecycle: assert-infrastructure -> show-passing-infrastructure -> deploy-creatio with automatic configured-range IIS port selection, optional explicit port inspection, deploy-identity, build discovery, registration, cliogate installation, and uninstall-creatio target resolution and cleanup.",
       "topicId": "creatio.deploy-lifecycle",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/deploy-lifecycle",
@@ -1469,7 +1482,7 @@
     {
       "itemId": "process-digest",
       "title": "Process build digest",
-      "description": "The build CARD for Creatio business processes, under 3 KB: owns no rule; gives the build recipe, the D1/D2/D4 check, N1-N10 and the buildable types in short (owners process-modeling, process-sub-process-when, process-naming, process-element-catalog) and names the ONE article to read per element. Read it instead of those four for an ordinary build; an edit of an existing process starts at process-versions, then process-modeling for the modify safety rules; a family the agent created in this same task is not existing and is fixed from this card with no isActiveVersion confirmation, unless it is active with a trigger that can fire on records the agent did not create.",
+      "description": "The build CARD for Creatio business processes, under 3 KB: owns no rule; gives the build recipe, the D1/D2/D4 check, N1-N10 and the buildable types in short (owners process-modeling, process-sub-process-when, process-naming, process-element-catalog) and names the ONE article to read per element. Read it instead of those four for an ordinary build, and follow the pointers of the articles it names; an existing process is never restructured unasked, and an edit of one starts at process-versions, then process-modeling for the modify safety rules; a family the agent created in this same task is not existing and is fixed from this card with no isActiveVersion confirmation, unless it is active with a trigger that can fire on records the agent did not create.",
       "topicId": "creatio.process-digest",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-digest",

@@ -33,7 +33,7 @@ public sealed class ProcessDigestTests
 
     /// <summary>
     /// The card budget: 3 KiB of article text as clio writes it (JSON-escaped, UTF-8, relaxed encoder -
-    /// <see cref="GuidanceInlineReplyBudgetTests.ReplyBytes"/>), so about 4.3 KB with the reply envelope. The
+    /// <see cref="GuidanceInlineReplyBudgetTests.ArticleBytes"/>), so about 4.3 KB with the reply envelope. The
     /// 14 K digest this replaced was read on top of the articles it summarised; at this size it costs less than
     /// a fifth of one element article. Shrink by routing, never by dropping a condition that changes what the
     /// agent does: the rule stays with its owner, and <see cref="RulesHandedBackToTheirOwners"/> proves it does.
@@ -50,7 +50,8 @@ public sealed class ProcessDigestTests
         "process-data-source-filters", "process-parameters", "process-formulas", "process-branch-conditions",
         "process-activity-result-branches", "process-perform-task", "process-task-performer",
         "process-send-email", "process-approval", "process-open-edit-page", "process-access-rights",
-        "process-sub-process", "process-activity-connections", "process-script-task", "process-versions"
+        "process-sub-process", "process-activity-connections", "process-script-task", "process-versions",
+        "process-modeling", "process-preconfigured-page"
     ];
 
     /// <summary>
@@ -59,29 +60,37 @@ public sealed class ProcessDigestTests
     private static readonly (string Owner, string Clause)[] RestatedClauses =
     [
         ("process-sub-process-when", "A request produces ONE process"),
+        ("process-sub-process-when", "is built as asked"),
+        ("process-sub-process-when", "Never restructure an existing process without being asked"),
         ("process-modeling", "ONE START PER TRIGGER"),
         ("process-modeling", "descriptor as the JSON object itself"),
         ("process-modeling", "key on the schema NAME"),
         ("process-naming", "`<prefix><Object>_<Action>`"),
         ("process-naming", "PascalCase plus a `Parameter` suffix"),
         ("process-naming", "LABEL EVERY CONDITIONAL AND DEFAULT ARM"),
+        ("process-naming", "leave an ordinary continuation bare"),
         ("process-naming", "`get-schema-name-prefix`"),
         ("process-naming", "<= 60"),
         ("process-modeling", "1.6.2.24"),
         ("process-modeling", "8.1.0.131"),
         ("process-element-catalog", "1.6.3.16"),
         ("process-element-catalog", "1.6.3.26"),
+        ("process-element-catalog", "1.6.6.30"),
         ("process-modeling", "`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`"),
         ("process-modeling", "`success: false`")
     ];
 
     /// <summary>
-    /// Every rule the 14 K digest restated and the card no longer does, as its OWNER words it. When the card
-    /// was cut, each of these was checked against the owner and found there (one, the `changeAccessRights`
-    /// alias, was only on the card and was added to <c>process-element-catalog</c>). A row failing means an
-    /// owner reworded or dropped a rule the card hands the reader to that owner for - update the row if the
-    /// rule moved, never delete it to go green.
+    /// Every rule the 14 K digest restated, as its OWNER words it in full. When the card was cut, each of these
+    /// was checked against the owner and found there (one, the `changeAccessRights` alias, was only on the card
+    /// and was added to <c>process-element-catalog</c>). Most are no longer on the card; some the card still
+    /// states in SHORT form, and <see cref="RestatedClauses"/> pins that short form - these rows pin the full
+    /// owner wording, which the short form does not. A row failing means an owner reworded or dropped a rule -
+    /// update the row if the rule moved, never delete it to go green: the table's size is pinned exactly
+    /// (<see cref="HandedBackRuleCount"/>), so a deleted row fails too.
     /// </summary>
+    private const int HandedBackRuleCount = 107;
+
     private static readonly (string Owner, string Clause)[] RulesHandedBackToTheirOwners =
     [
         ("process-element-catalog", "`changeAccessRights`->ChangeAdminRightsUserTask"),
@@ -201,8 +210,8 @@ public sealed class ProcessDigestTests
         string text = ReadCard(ProcessGuideSet.FindRepositoryRoot());
 
         // Act
+        int card = GuidanceInlineReplyBudgetTests.ArticleBytes(text);
         int reply = GuidanceInlineReplyBudgetTests.ReplyBytes(text);
-        int card = reply - GuidanceInlineReplyBudgetTests.EnvelopeAllowanceBytes;
         TestContext.WriteLine($"{DigestItemId}: {card:N0} bytes of card, about {reply:N0} bytes of reply");
 
         // Assert
@@ -221,7 +230,7 @@ public sealed class ProcessDigestTests
         HashSet<string> declared = ProcessGuideSet.DeclaredItemIds(repositoryRoot);
 
         // Act
-        string table = Regex.Match(text, @"^== Element or need -> article ==\s*$(?<rows>.+)\z",
+        string table = Regex.Match(text, @"^== Articles ==\s*$(?<rows>.+)\z",
             RegexOptions.Multiline | RegexOptions.Singleline).Groups["rows"].Value;
         string[] missing = [.. RequiredRoutes.Where(id => !table.Contains($"`{id}`", StringComparison.Ordinal))];
         string[] undeclared = [.. Regex.Matches(text, @"`(?<id>process-[a-z-]+)`")
@@ -245,12 +254,12 @@ public sealed class ProcessDigestTests
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string card = Collapse(ReadCard(repositoryRoot));
+        string card = Collapsed(repositoryRoot, DigestItemId);
 
         // Act
         string[] drifted = [.. RestatedClauses
             .Where(row => !card.Contains(Collapse(row.Clause), StringComparison.Ordinal)
-                || !Collapse(Owner(repositoryRoot, row.Owner)).Contains(Collapse(row.Clause), StringComparison.Ordinal))
+                || !Collapsed(repositoryRoot, row.Owner).Contains(Collapse(row.Clause), StringComparison.Ordinal))
             .Select(row => $"{row.Owner}: \"{row.Clause}\"")];
 
         // Assert
@@ -269,12 +278,13 @@ public sealed class ProcessDigestTests
 
         // Act
         string[] lost = [.. RulesHandedBackToTheirOwners
-            .Where(row => !Collapse(Owner(repositoryRoot, row.Owner)).Contains(Collapse(row.Clause), StringComparison.Ordinal))
+            .Where(row => !Collapsed(repositoryRoot, row.Owner).Contains(Collapse(row.Clause), StringComparison.Ordinal))
             .Select(row => $"{row.Owner}: \"{row.Clause}\"")];
 
         // Assert
-        RulesHandedBackToTheirOwners.Should().HaveCountGreaterThan(100,
-            because: "anti-vacuity: the table is the inventory of what the 14 K digest restated");
+        RulesHandedBackToTheirOwners.Should().HaveCount(HandedBackRuleCount,
+            because: "the table is the inventory of what the 14 K digest restated: a row deleted to go green "
+                + "unpins a rule silently. Update a row whose rule moved; change the count only with a row added");
         lost.Should().BeEmpty(
             because: "the card now sends the agent to the owner for these rules, so an owner that drops or "
                 + "rewords one loses it from the whole guide set. Lost: " + string.Join("; ", lost));
@@ -286,10 +296,16 @@ public sealed class ProcessDigestTests
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string card = Collapse(ReadCard(repositoryRoot));
-        string catalog = Collapse(Owner(repositoryRoot, "process-element-catalog"));
-        string buildable = Regex.Match(catalog,
+        string card = Collapsed(repositoryRoot, DigestItemId);
+        string catalog = Collapsed(repositoryRoot, "process-element-catalog");
+        string buildableSection = Regex.Match(catalog,
             @"== What you can build today \(create-business-process\) ==(?<list>.+?)NOT yet buildable").Groups["list"].Value;
+        // A type counts as buildable only where the section DEFINES it - `type` (Caption), `alias`->Schema,
+        // `type` — Caption, `userTask` referencing, or the last of an enumeration - never where the prose
+        // merely mentions it (NOTE `autoGeneratedPage`'s `Buttons`, a REFUSED type).
+        HashSet<string> buildable = [.. Regex.Matches(buildableSection,
+                @"`(?<type>[a-z][A-Za-z]+)`(?= \(| —|->| referencing|\.)")
+            .Select(match => match.Groups["type"].Value)];
         string unsupported = Regex.Match(catalog, @"NOT yet buildable(?<list>.+?)== Building from a data-id")
             .Groups["list"].Value;
         string typeList = Regex.Match(card, @"Types \(else `process-element-catalog`\):(?<list>.+?)== Names").Groups["list"].Value;
@@ -297,13 +313,16 @@ public sealed class ProcessDigestTests
         // Act
         string[] types = [.. Regex.Matches(typeList.Replace("(never as a userTask)", string.Empty), @"[a-z][A-Za-z]+")
             .Select(match => match.Value)
-            .Where(type => type != "userTaskName")
+            .Where(type => !TypeListProse.Contains(type))
             .Distinct()];
-        string[] notBuildable = [.. types.Where(type => !buildable.Contains($"`{type}`", StringComparison.Ordinal))];
+        string[] notBuildable = [.. types.Where(type => !buildable.Contains(type))];
         string[] unsupportedToo = [.. types.Where(type => unsupported.Contains($"`{type}`", StringComparison.Ordinal))];
 
         // Assert
-        buildable.Should().NotBeEmpty(because: "anti-vacuity: the catalog lists what builds today");
+        buildable.Should().Contain(["startEvent", "endEvent", "userTask", "readData", "preconfiguredPage"],
+            because: "anti-vacuity: the catalog defines what builds today");
+        buildable.Should().NotContain("autoGeneratedPage",
+            because: "the section mentions the REFUSED Auto-generated page by its type name; a mention is not a definition");
         types.Should().HaveCountGreaterThanOrEqualTo(15, because: "anti-vacuity: the card lists what builds today");
         unsupported.Should().NotBeEmpty(because: "anti-vacuity: the catalog lists what does not build");
         notBuildable.Should().BeEmpty(
@@ -320,8 +339,8 @@ public sealed class ProcessDigestTests
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string card = Collapse(ReadCard(repositoryRoot));
-        string naming = Collapse(Owner(repositoryRoot, "process-naming"));
+        string card = Collapsed(repositoryRoot, DigestItemId);
+        string naming = Collapsed(repositoryRoot, "process-naming");
 
         // Act
         string[] onCard = Regex.Match(card, @"minus only (?<list>[a-z/]+);").Groups["list"].Value
@@ -344,8 +363,8 @@ public sealed class ProcessDigestTests
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string card = Collapse(ReadCard(repositoryRoot));
-        string catalog = Collapse(Owner(repositoryRoot, "process-element-catalog"));
+        string card = Collapsed(repositoryRoot, DigestItemId);
+        string catalog = Collapsed(repositoryRoot, "process-element-catalog");
 
         // Act
         string[] onCard = [.. Regex.Match(card, @";(?<list>[^;]+)\(never as a userTask\)").Groups["list"].Value
@@ -370,8 +389,8 @@ public sealed class ProcessDigestTests
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        (string ItemId, string Text)[] articles = [.. ProcessGuideSet.Declared(repositoryRoot)
-            .Select(article => (article.ItemId, Text: Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))))];
+        (string ItemId, string Text)[] articles = [.. Declared(repositoryRoot)
+            .Select(article => (article.ItemId, Text: Collapsed(repositoryRoot, article.ItemId)))];
 
         // Act
         string[] banners = [.. articles.Where(article => article.Text.Contains("Naming anything here?", StringComparison.Ordinal))
@@ -385,7 +404,7 @@ public sealed class ProcessDigestTests
         string[] inviting = [.. articles
             .Where(article => article.Text.Contains("any rule the card does not spell out", StringComparison.OrdinalIgnoreCase)
                 || (article.ItemId != "process-naming"
-                    && article.Text.Contains("read it before you name anything", StringComparison.OrdinalIgnoreCase)))
+                    && InvitationToName.IsMatch(article.Text)))
             .Select(article => article.ItemId)];
 
         // Assert
@@ -398,11 +417,53 @@ public sealed class ProcessDigestTests
                 + "a build. Found: " + string.Join(", ", inviting));
     }
 
+    /// <summary>The words of the card's Types line that are prose, not type names.</summary>
+    private static readonly HashSet<string> TypeListProse = ["userTaskName", "or", "alias", "type"];
+
+    /// <summary>
+    /// "Read it BEFORE you name anything", with anything between - a parenthetical such as "(or its summary
+    /// in `process-digest`)" must not hide the invitation.
+    /// </summary>
+    private static readonly Regex InvitationToName = new(@"\bread it\b[^.]{0,120}?\bbefore you name anything",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    private static readonly Dictionary<string, ProcessGuideSet.Article[]> DeclaredByRoot = [];
+
+    private static readonly Dictionary<(string Root, string ItemId), string> CollapsedByItem = [];
+
     private static string ReadCard(string repositoryRoot) => Owner(repositoryRoot, DigestItemId);
 
+    /// <summary>The manifest's process articles, parsed once per repository root.</summary>
+    private static ProcessGuideSet.Article[] Declared(string repositoryRoot)
+    {
+        lock (DeclaredByRoot)
+        {
+            if (!DeclaredByRoot.TryGetValue(repositoryRoot, out ProcessGuideSet.Article[]? declared))
+            {
+                declared = ProcessGuideSet.Declared(repositoryRoot);
+                DeclaredByRoot[repositoryRoot] = declared;
+            }
+            return declared;
+        }
+    }
+
     private static string Owner(string repositoryRoot, string itemId) =>
-        ProcessGuideSet.Read(repositoryRoot, ProcessGuideSet.Declared(repositoryRoot)
+        ProcessGuideSet.Read(repositoryRoot, Declared(repositoryRoot)
             .Single(article => article.ItemId == itemId).SourcePath);
+
+    /// <summary>An article's whitespace-collapsed text, read and collapsed once per item.</summary>
+    private static string Collapsed(string repositoryRoot, string itemId)
+    {
+        lock (CollapsedByItem)
+        {
+            if (!CollapsedByItem.TryGetValue((repositoryRoot, itemId), out string? text))
+            {
+                text = Collapse(Owner(repositoryRoot, itemId));
+                CollapsedByItem[(repositoryRoot, itemId)] = text;
+            }
+            return text;
+        }
+    }
 
     private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ").Trim();
 }

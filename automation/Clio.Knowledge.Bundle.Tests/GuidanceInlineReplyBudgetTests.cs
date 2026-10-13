@@ -19,7 +19,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// Splitting process-modeling, app-modeling, workplaces and existing-app-maintenance into a core and a
 /// <c>-details</c> article removed the read-backs those articles caused on every run; this fixture is what
 /// keeps the split from eroding, because articles grow back: process-branch-conditions went from 19.8 to
-/// 20.3 KB in two days.
+/// 20.3 KB in two days. core-rules, read on every operation, was split into core-rules and core-rules-details the
+/// same way and is held to the same budget.
 /// </para>
 /// <para>
 /// Scoped to the pieces of that split, deliberately. A library-wide ratchet would freeze the articles other
@@ -62,7 +63,7 @@ public sealed class GuidanceInlineReplyBudgetTests
     /// calling <c>get-guidance</c> and subtracting the JSON-escaped UTF-8 length of the article text.
     /// </para>
     /// </summary>
-    internal const int EnvelopeAllowanceBytes = 1_300;
+    private const int EnvelopeAllowanceBytes = 1_300;
 
     /// <summary>
     /// The pieces of the split, written down rather than derived: an edit that drops one from the manifest
@@ -77,7 +78,9 @@ public sealed class GuidanceInlineReplyBudgetTests
         "workplaces",
         "workplaces-details",
         "existing-app-maintenance",
-        "existing-app-maintenance-details"
+        "existing-app-maintenance-details",
+        "core-rules",
+        "core-rules-details"
     ];
 
     [Test]
@@ -111,21 +114,27 @@ public sealed class GuidanceInlineReplyBudgetTests
     }
 
     /// <summary>
-    /// The size of a <c>get-guidance</c> reply for an article text, in UTF-8 bytes. clio writes tool results
-    /// with <c>McpResultJsonEncoder</c>: <see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/> plus a
-    /// six-character <c>\uXXXX</c> escape for every BMP character of category Format. Under the relaxed
-    /// encoder backticks, dashes and non-ASCII letters go out as themselves, so measuring with the default
-    /// encoder would overstate a backtick-dense article by a fifth or more.
+    /// The size of a <c>get-guidance</c> reply for an article text, in UTF-8 bytes: the article as clio
+    /// writes it (<see cref="ArticleBytes"/>) plus the envelope around it.
     /// </summary>
-    internal static int ReplyBytes(string articleText)
+    internal static int ReplyBytes(string articleText) => ArticleBytes(articleText) + EnvelopeAllowanceBytes;
+
+    /// <summary>
+    /// The size of an article text as clio writes it into a <c>get-guidance</c> reply, in UTF-8 bytes,
+    /// without the envelope. clio writes tool results with <c>McpResultJsonEncoder</c>:
+    /// <see cref="JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/> plus a six-character <c>\uXXXX</c> escape for
+    /// every BMP character of category Format. Under the relaxed encoder backticks, dashes and non-ASCII
+    /// letters go out as themselves, so measuring with the default encoder would overstate a backtick-dense
+    /// article by a fifth or more.
+    /// </summary>
+    internal static int ArticleBytes(string articleText)
     {
         int escapedFormatBytes = articleText
             .Where(character => CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.Format
                 && !char.IsSurrogate(character))
             .Sum(character => 6 - Encoding.UTF8.GetByteCount(character.ToString()));
         return Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(articleText, RelaxedJson))
-            + escapedFormatBytes
-            + EnvelopeAllowanceBytes;
+            + escapedFormatBytes;
     }
 
     private static readonly JsonSerializerOptions RelaxedJson =
