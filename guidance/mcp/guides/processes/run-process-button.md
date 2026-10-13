@@ -4,7 +4,8 @@ Goal: add a Freedom UI button that starts a business process. Reuse the built-in
 request `crt.RunBusinessProcessRequest` (handled by the platform RunBusinessProcessHandler).
 Do NOT write a custom handler — the `handlers` block stays empty for this button.
 Creating a process for this button (rather than reusing one)? Its code and caption and every element and
-parameter code are governed by N1-N10, owned by `process-naming` — read it before you name anything.
+parameter code are governed by N1-N10, owned by `process-naming`; for a build, name from the Names block
+of `process-digest`, its summary.
 
 MANDATORY pre-write step
 - Call `get-process-signature process-name=<code-or-caption> environment-name=<env>` FIRST.
