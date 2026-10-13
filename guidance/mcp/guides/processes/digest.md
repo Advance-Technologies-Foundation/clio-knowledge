@@ -3,7 +3,7 @@ Part of the process guide set. Build card: owners win; follow pointers.
 1. ONE START PER TRIGGER (add + change: two `signalStart`s; CrtProcessBuilder 1.6.2.24+, clio 8.1.0.131+).
 2. `validate-process-graph`; fix all errors.
 3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (retired: `CallUserTask`, `EmailUserTask`, `SendEmailUserTask`).
-4. ONE `get-target-package` (named/app `package`); on `success: false` ask, never guess. `create-business-process`: the descriptor as the JSON object itself, {name, caption, packageName, elements[{name, type, caption, block}], flows[{source, target, kind, condition, label}], parameters, mappings}.
+4. ONE `get-target-package` (named/app `package`); on `success: false` ask, never guess. `create-business-process`: the descriptor as the JSON object itself, {name,caption,packageName,elements[{name,type,caption,block}],flows[{source,target,kind,condition,label}],parameters,mappings}.
 5. `describe-business-process`; `compile-creatio` only if the save warns.
 Missing/old CrtProcessBuilder refusal: STOP and ask the user before `install-process-builder` (`core-rules`).
 Set only what was asked; ask only an unsaid approver, performer or recipient.
@@ -14,4 +14,4 @@ Element `name` = caption in PascalCase minus only a/an/the/is/are/was/were/be/be
 Parameter: PascalCase plus a `Parameter` suffix, caption without; never rename an element's own. LABEL EVERY CONDITIONAL AND DEFAULT ARM; leave an ordinary continuation bare.
 == Articles ==
 `process-read-data` `process-add-data` `process-delete-data` (confirm first) `process-perform-task` `process-task-performer` `process-send-email` `process-approval` `process-script-task` `process-open-edit-page` `process-preconfigured-page` `process-sub-process` `process-formulas` `process-parameters` `process-access-rights` (confirm first) `process-data-source-filters` `process-branch-conditions`; record trigger, Modify data `process-data-elements`; result branches `process-activity-result-branches`; Connected to `process-activity-connections`
-- edit/run YOUR family from THIS task: no `isActiveVersion` ask, unless active with any run (any start) on others' data (`process-version-writes`). Else/unsure: `process-versions`, `process-modeling`.
+- edit/run YOUR family from THIS task: no `isActiveVersion` ask, unless activating, or active with any run (any start) on others' data (`process-version-writes`). Else/unsure: `process-versions`, `process-modeling`.

@@ -82,7 +82,7 @@ public sealed class ProcessBuildInProgressTests
     private static readonly string[] CardPointerClauses =
     [
         "edit/run YOUR family from THIS task: no `isActiveVersion` ask",
-        "unless active with any run (any start) on others' data (`process-version-writes`).",
+        "unless activating, or active with any run (any start) on others' data (`process-version-writes`).",
         "Else/unsure: `process-versions`, `process-modeling`."
     ];
 
@@ -91,7 +91,7 @@ public sealed class ProcessBuildInProgressTests
     [
         "NOT existing: a family YOU created in THIS task.",
         "Fix, re-save or run it from name=process-digest, with no isActiveVersion confirmation",
-        "unless it is active and any of its runs, from any start (record, timer, message, signal, manual), can read or write data you did not create (then name=process-version-writes).",
+        "unless you activate it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can read or write data you did not create (then name=process-version-writes).",
         "Unsure: existing"
     ];
 
@@ -183,6 +183,44 @@ public sealed class ProcessBuildInProgressTests
             because: "the isActiveVersion rule is the line that otherwise overrides the exemption: a fresh build is "
                 + "the active version, so TRUE would demand a confirmation, and on a file-design-mode stand FALSE would "
                 + "forbid fixing it");
+    }
+
+    /// <summary>
+    /// The owner's activation limit (PR #276 review): an agent asked for "a process that does X" builds it, and
+    /// must not activate it unless the request asks for a working or active process. That limit lives only in
+    /// the owner, so both pointers have to send ACTIVATING there - a route that names only the live-process
+    /// limit lets the agent build, re-save and activate without ever reading it.
+    /// </summary>
+    private const string ActivationLimit =
+        "ACTIVATING it is part of the build only when the request asks for a working or active process";
+
+    [Test]
+    [Description("The card and the routing row send an activation of the agent's own fresh process to the owner.")]
+    public void ThePointers_ShouldSendActivationToTheOwner()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string card = Collapse(Article("process-digest"));
+        string routing = Collapse(ProcessGuideSet.Read(repositoryRoot, RoutingPath));
+
+        // Act
+        string cardLimits = Regex.Match(card, @"- edit/run .*?\bunless (?<limits>.*?)\(`process-version-writes`\)")
+            .Groups["limits"].Value;
+        string routingLimits = Regex.Match(routing,
+            @"NOT existing: a family YOU created in THIS task\..*?\bunless (?<limits>.*?)\(then name=process-version-writes\)")
+            .Groups["limits"].Value;
+
+        // Assert
+        Collapse(Article(OwnerItemId)).Should().Contain(ActivationLimit,
+            because: "anti-vacuity: the limit the pointers route to is stated by the owner");
+        cardLimits.Should().NotBeEmpty(because: "anti-vacuity: the card's edit route names its limits");
+        routingLimits.Should().NotBeEmpty(because: "anti-vacuity: the routing row names its limits");
+        cardLimits.Should().Contain("activating",
+            because: "the card is the only article a fresh build reads; without 'activating' among the cases it "
+                + "routes to process-version-writes, an agent activates a process nobody asked to be active, and a "
+                + "record trigger then fires on everyone's records");
+        routingLimits.Should().Contain("activate",
+            because: "routing is read before the card and decides the same case, so it routes activation too");
     }
 
     [Test]

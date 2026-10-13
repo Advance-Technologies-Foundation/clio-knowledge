@@ -119,9 +119,9 @@ precondition kept next to the instruction it guards — names that guide as the 
   - which VERSION of a process you are reading or which one runs, or editing or launching ANY existing
     process -> name=process-versions first (a handed code is usually the family root, which does not
     run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
-    re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless it is active
-    and any of its runs, from any start (record, timer, message, signal, manual), can read or write data
-    you did not create (then name=process-version-writes). Unsure: existing
+    re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
+    it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can
+    read or write data you did not create (then name=process-version-writes). Unsure: existing
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
     name=process-version-writes; add name=process-versions for the model it assumes and
     name=process-modeling for the operation reference
