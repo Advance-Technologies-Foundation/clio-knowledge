@@ -50,7 +50,7 @@ precondition kept next to the instruction it guards — names that guide as the 
     D2 and D4 triggers in process-digest BEFORE you plan the graph, every time, and read
     name=process-sub-process-when itself when one fires: it decides how many processes the request
     becomes. One by default; the exceptions (the same work per item of a set, a fragment repeated in the
-    plan, two or more long human stages) are easy to miss, so never skip the check
+    plan, two or more long human stages) are easy to miss, so never skip the check because none seems to apply
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
@@ -73,7 +73,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - decide a BRANCH with a condition on a flow, set or clear one, or reason about which branch wins ->
     name=process-branch-conditions (and name=process-formulas for the expression itself)
     - a parallel-split NOTICE or a package-version refusal on a branch build, or the evidence behind a branch
-      rule -> name=process-branch-conditions-details
+      rule (label figures, version floors, corpus condition shapes) -> name=process-branch-conditions-details
   - branch on WHICH RESULT an activity was completed with - an approval's verdict, a perform task's
     result, a page's completing button - a SELECTION and not a formula -> name=process-activity-result-branches
   - the Perform task element — a human step, what it produces, its parameter table ->
@@ -105,9 +105,10 @@ precondition kept next to the instruction it guards — names that guide as the 
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
-    converting an element, where the callee's contract moves to -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
+    converting an element, where the callee's contract moves to, how a per-item value is addressed -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
     and which execution mode it takes)
-  - a called process CHANGED its parameters and the CALLERS have to be fixed -> name=process-parameters-details
+  - a called process CHANGED its parameters and the CALLERS have to be fixed, what a re-sync reports, what
+    `inSync` can and cannot show -> name=process-parameters-details
     (after name=process-parameters)
   - show a user a Freedom UI page mid-process and wait for a completing button ->
     name=process-preconfigured-page

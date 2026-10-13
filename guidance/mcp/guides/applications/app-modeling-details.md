@@ -1,4 +1,4 @@
-clio MCP app-modeling-details guide — failure handling, rare schema edits, and the evidence behind the app modeling rules
+clio MCP app-modeling-details guide — error-class meanings, rare schema edits, and the evidence behind the app modeling rules
 
 A details article of the application guide set, reached through `app-modeling`, which points here and is read first.
 This article is the authoritative owner of what each `create-app-section` `error-class` means (`app-modeling` owns how to handle each one), why sections in one app are created one at a time, the `sync-schemas` retry and resume behavior, the rare schema edits (primary-display column, relabeling an inherited column, `Color` columns), the Git-first capture rule's `export-schema` and tool-contract clauses, and the evidence, timings and reasoning behind the `app-modeling` rules. Split out of `app-modeling`, which keeps every rule needed on the common path of creating an app with its sections, entities and pages; read that first.

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.126",
+  "libraryVersion": "1.15.130",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -460,7 +460,7 @@
     {
       "itemId": "app-modeling-details",
       "title": "Application modeling details",
-      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
+      "description": "Owns the error-class meanings, rare schema edits and evidence behind app-modeling (app-modeling owns the handling): what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
       "topicId": "creatio.app-modeling-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/app-modeling-details",
@@ -1069,7 +1069,7 @@
     {
       "itemId": "existing-app-maintenance-details",
       "title": "Existing application maintenance details",
-      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; how update-app-section preserves section-title languages and the translations evidence boundary; and the full schema-reuse example. Split out of existing-app-maintenance.",
+      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; how update-app-section preserves section-title languages and the translations evidence boundary; and the full schema-reuse example. Split out of existing-app-maintenance.",
       "topicId": "creatio.existing-app-maintenance-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance-details",
@@ -1458,7 +1458,7 @@
     {
       "itemId": "process-modeling-details",
       "title": "Process modeling evidence and rare cases",
-      "description": "Owns the evidence, version history and reasoning behind the process-modeling rules, in the order the core states them: the tool read-backs (the two schemas captioned Send email, the three cases where writesConnectionsAtRuntime is null), why the element handle is name, why a second start used to be refused and the CrtProcessBuilder/clio floor that lifted it, the VwSysProcess dirty flags that are not compile instructions, why an optional field the request did not mention stays out, the version floor of the removeFlow refusal, the platform chain behind a designer retarget of a Sub-process element and the shipped-corpus multi-instance figures, and the stranded mapping row on a Sub-process element with its UId test. Split out of process-modeling, which keeps every rule and is read first.",
+      "description": "Owns the evidence, version history and reasoning behind the process-modeling rules, in the order the core states them: the tool read-backs (the two schemas captioned Send email, the three cases where writesConnectionsAtRuntime is null), why the element handle is name, why a second start used to be refused before the floors the core states, the VwSysProcess dirty flags that are not compile instructions, why an optional field the request did not mention stays out, what happens below the removeFlow refusal floor, the platform chain behind a designer retarget of a Sub-process element and the shipped-corpus multi-instance figures, and the stranded mapping row on a Sub-process element with its UId test. Split out of process-modeling, which keeps every rule and is read first.",
       "topicId": "creatio.process-modeling-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling-details",

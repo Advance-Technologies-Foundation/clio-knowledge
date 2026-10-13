@@ -60,7 +60,8 @@ If access mapping is missing in spec/doc, ask developer before implementing endp
 - `SysModuleInWorkplace`: put section into target workplace.
 
 `get-guidance name=workplaces` owns the workplace model (the three tables, which workplace to place the
-section in and how to ask, moving a section between workplaces, and the delete order). Read it before
+section in and how to ask, moving a section between workplaces; `workplaces-details` owns the delete
+order). Read it before
 choosing `WORKPLACE_ID`; this skill covers only the local package-data form of the registration.
 
 4. Data integrity rules:

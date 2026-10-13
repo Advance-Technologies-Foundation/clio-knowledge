@@ -136,12 +136,12 @@ schema name, which creates a PARALLEL binding instead of touching the app's:
   `SysSchema.Name = 'SysWorkplace'`): a bound grant is EXPORTED to every environment installing your
   package, so on a workplace you do not own, say so and keep the grant live-only (unbound) unless the
   user explicitly agrees to ship it everywhere. Removing a role, or changing one (remove the old
-  row, grant the new one): `workplaces-details`.
+  row, grant the new one): you MUST read `workplaces-details` first.
 - Add a section: resolve its `Id` from `SysModule` by code first — codes are NOT unique
   (`Code = 'Contact'` returns two rows on a stock environment); disambiguate by the `SysModuleId` the
   existing `SysModuleInWorkplace` rows use (the zero-GUID check does not catch a wrong-but-real
   `SysModuleId`). Then `odata-create` the `SysModuleInWorkplace` row and bind it. Removing one
-  section row: `workplaces-details`.
+  section row: you MUST read `workplaces-details` first.
 - Move a section between workplaces (how an app leaves `My applications`): the TARGET `SysWorkplace`
   row must already have its OWN `SysWorkplace` binding in the same package — bind it FIRST, or the
   junction binding fails with "Data is not bound for connected object". Then `odata-update` the row's
@@ -191,7 +191,8 @@ empty `My applications` on every target. Do NOT reflexively "clean that up": no 
 without deleting it, and `My applications` is SHARED — deleting it cascades every OTHER custom app's
 placements and grants, unrecoverably. Default to leaving both bindings and telling the user. Remove
 them only when ALL hold: the user agreed after being told the row is deleted live; no other app's
-sections are in it; the CHILD binding goes before the parent (steps: `workplaces-details`).
+sections are in it; the CHILD binding (`SysAdminUnitInWorkplace_MyApps`) goes before the parent. It is
+a workplace delete: the MUST in Deleting a workplace applies.
 
 ## Rules that bite
 - There is NO unique constraint on (`SysModule`, `SysWorkplace`): adding or moving a section already

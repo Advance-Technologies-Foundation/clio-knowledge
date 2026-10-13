@@ -108,9 +108,9 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
    run both when a record is ADDED and when it is CHANGED carries TWO signal starts, not two processes
    and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
-   CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
-   the second start ("the process has more than one start event" at build, R3 in
-   `validate-process-graph`).
+   CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later: an older
+   environment refuses the second start at build time ("the process has more than one start event"),
+   and an older clio reports it as an R3 error from `validate-process-graph` (step 2) before that.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON

@@ -1,13 +1,11 @@
-clio MCP existing-app-maintenance-details guide — column-default round trip, section-creation background, and the evidence behind the maintenance rules
+clio MCP existing-app-maintenance-details guide — column-default round trip, merged reads, section-title languages, and the evidence behind the maintenance rules
 
 A details article of the application guides, reached through `existing-app-maintenance`, which points here and is read first.
-This article owns the field-by-field round trip of a column default (`default-value-config`) through `get-app-info` and `sync-schemas update-entity`, the background behind the section-creation rules and the `error-class` values, why merged column reads return unknown values, how section-title languages are preserved and the evidence behind the translation rules, and the full schema-reuse example. Split out of `existing-app-maintenance`, which keeps every rule, refusal and required order of steps; read that first. Nothing here overrides it.
+This article owns the field-by-field round trip of a column default (`default-value-config`) through `get-app-info` and `sync-schemas update-entity`, why merged column reads return unknown values, how section-title languages are preserved and the evidence behind the translation rules, and the full schema-reuse example. Split out of `existing-app-maintenance`, which keeps every rule, refusal and required order of steps; read that first. Nothing here overrides it.
 
 Discover the target app
 - `find-app` replaces a `list-apps` + per-app `list-app-sections` scan: it searches application name/code/description and section captions and returns the matching app(s) WITH their sections in a single call.
-- Why sections are created one at a time: each `create-app-section` is a long (~90–100 s) backend insert, so overlapping inserts against the same app contend server-side and abort with a detail-less `InsertQuery failed`. clio serializes creations per app in-process and auto-retries a detail-less rejection once with verification; that safety net does not make parallel calls against the same app acceptable.
-- What `creatio-timeout` means: Creatio produced no response within the budget, so the insert may still complete server-side; that is why the core rule reads `list-app-sections` before any retry.
-- What `contention` means: the insert was aborted without a detailed reason. The server returned no detail, so it may be parallel creation in the same app OR a server-side rejection unrelated to concurrency. Because clio already serializes creations and auto-retries once, a single sequential create that still fails points at the server (`clio healthcheck`, Creatio server logs), not at concurrency. `server-error`, by contrast, carries a real, detailed reason. The `section-created` field is the verified side-effect state, so `false` after `contention` is a checked result, not a guess.
+- Why sections are created one at a time, and what each `create-app-section` `error-class` means: `app-modeling-details` owns them; the handling is in `existing-app-maintenance`.
 
 Inspect pages before editing
 - `get-page-hierarchy` returns the full replacing-schema chain ordered root-first (by hierarchy level), with each schema's raw body, in a single round-trip. Pass `metadata-only` for a lightweight listing, or `offset`/`limit` to page a very large chain.

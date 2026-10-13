@@ -44,8 +44,8 @@ modify safety rule; read that first. Nothing here relaxes a rule stated there.
   `validate-process-graph` (R3) and `create-business-process` used to refuse ANY second start, so a
   process reacting to two triggers was unbuildable - although the shape is one the platform itself
   ships (`PublishDraftToArticle` carries two start signals). The change - several starts, the simple
-  one still only once - needs CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131
-  or later; below either floor the second start is still refused, with the symptoms the core names.
+  one still only once - is gated by the two floors `process-modeling` states; below either floor the
+  second start is still refused, with the symptoms the core names.
 - File-design mode: on an FSD stand a built process is saved to the file system, so the designer sees
   it, yet it is not runtime-active until it is loaded FS->DB and published.
 - The readiness trap. Inferring "needs a compile" from a raw column NAME is the mistake the compile rule
@@ -65,9 +65,9 @@ modify safety rule; read that first. Nothing here relaxes a rule stated there.
   context, which is why a missing BUSINESS decision is asked for rather than reused.
 
 == Modifying an existing process — safety rules: evidence and rare cases ==
-- `removeFlow` with `kind` or `condition`: the refusal is version-dependent, so it is not a backstop. It
-  ships from `CrtProcessBuilder` 1.6.0.10; below it the extra fields are accepted and silently dropped
-  rather than refused, and clio does no client-side check either way.
+- `removeFlow` with `kind` or `condition`: the refusal is version-dependent, so it is not a backstop. Below
+  the floor `process-modeling` states, the extra fields are accepted and silently dropped rather than
+  refused, and clio does no client-side check either way.
 - Gateway ELEMENTS, DEFAULT flows and the Formula element used to be on the list of constructs the
   builder cannot create. All three are buildable now; `process-branch-conditions` and
   `process-element-catalog` own them.
