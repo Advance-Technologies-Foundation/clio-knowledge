@@ -32,7 +32,8 @@ ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words, 
 refuses MORE (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW condition),
 so a refusal from a pre-1.4.0.41 environment is not evidence the formula is bad. clio refuses
 `create-business-process` / `modify-business-process` below its enforced floor, which makes every "on an
-older package" fallback in this guide set history, not a branch: run `install-process-builder`, and never
+older package" fallback in this guide set history, not a branch: run `install-process-builder` once the user approves it
+(`core-rules`), and never
 re-send a call in an older dialect - clio refused it before it left.
 
 WHAT A REFUSAL LOOKS LIKE. Every row is a verbatim measurement, prefixed by `Process validation failed:`

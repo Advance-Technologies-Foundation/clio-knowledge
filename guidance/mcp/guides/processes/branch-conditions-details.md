@@ -62,8 +62,8 @@ Three caveats, each a way you would otherwise be told something untrue:
   is. So a clio carrying 1.6.2.10 answers `create-business-process`, `modify-business-process`,
   `describe-business-process` **and `validate-process-graph`** with *"This clio carries
   CrtProcessBuilder 1.6.2.10, but the target environment has X. Update the package in the target
-  environment and retry."* The pre-flight is gated too, so it is not a fallback. Run
-  `install-process-builder` — that is the whole remedy. The build is silent about the split only when
+  environment and retry."* The pre-flight is gated too, so it is not a fallback.
+  `install-process-builder`, once the user approves it (`core-rules`), is the whole remedy. The build is silent about the split only when
   your clio ALSO predates 1.6.2.10, so the two versions converge and nothing is refused — and on that
   stand `validate-process-graph` still reports the shape as R12, which it always has. An
   un-upgraded stand is exactly where the pre-flight earns its keep, not a stand where nothing can
