@@ -104,7 +104,7 @@ public sealed class ProcessFormulaGuidanceTests
             "the version gate is a REFUSAL, not a silence, and the article said the opposite: clio refuses "
             + "whenever the environment records a package older than the one clio ships - floor or no floor "
             + "- and the pre-flight offered as the fallback is gated the same way. An agent told to expect "
-            + "silence reads the refusal as a defect instead of running install-process-builder"),
+            + "silence reads the refusal as a defect instead of asking to run install-process-builder"),
         ("not the whole graph",
             "on modify the notice covers the sources the request touched; a split already in the process "
             + "is unreported, so a clean modify does not mean a clean process - the same trap this article "

@@ -81,10 +81,9 @@ public sealed class ProcessBuildInProgressTests
     /// </summary>
     private static readonly string[] CardPointerClauses =
     [
-        "a family YOU created in THIS task is NOT existing: fix, re-save, run here",
-        "no `isActiveVersion` confirmation",
-        "unless active and any run (any start) can touch data you did not create (`process-version-writes`).",
-        "Else or unsure: existing, `process-versions` then `process-modeling`."
+        "edit/run YOUR family from THIS task: no `isActiveVersion` ask",
+        "unless active with any run (any start) on others' data (`process-version-writes`).",
+        "Else/unsure: `process-versions`, `process-modeling`."
     ];
 
     /// <summary>The same decision on the routing row that sends an edit to process-versions.</summary>
@@ -145,7 +144,7 @@ public sealed class ProcessBuildInProgressTests
             .Where(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))
                 .Contains(DefinitionClause, StringComparison.Ordinal))
             .Select(article => article.ItemId)];
-        string cardEditRoute = Regex.Match(card, @"- edit or launch:.*\z").Value;
+        string cardEditRoute = Regex.Match(card, @"- edit/run .*\z").Value;
         string routingRow = Regex.Match(routing,
             @"- which VERSION of a process you are reading.*?(?= - save a change as a NEW version)").Value;
 
@@ -164,7 +163,7 @@ public sealed class ProcessBuildInProgressTests
         Regex.Matches(card, Regex.Escape("`process-version-writes`")).Should().ContainSingle(
             because: "the card sends the agent into the version owner only when a limit applies; a second mention "
                 + "is an invitation to read ~17 KB for the case the card already decides");
-        cardEditRoute.Should().Contain("did not create (`process-version-writes`)",
+        cardEditRoute.Should().Contain("others' data (`process-version-writes`)",
             because: "that single mention is attached to the limit, not to the exemption");
         routingRow.Should().Contain("ANY existing process -> name=process-versions first",
             because: "the version path stays the entry for a genuinely existing process");

@@ -1,8 +1,8 @@
 clio MCP process-modeling guide — design Creatio business processes (BPMN)
 
 Moved to `process-modeling-details`: the evidence, version history and reasoning behind these rules,
-and the stranded-mapping-row case. Read it when you rewire an existing Sub-process element, when a
-caller reports a mapping that resolves to nothing, or for a rule's evidence.
+and the stranded-mapping-row case. Read it when you rewire an existing Sub-process element or for a
+rule's evidence.
 
 == Which process article to read ==
 A build starts at `process-digest`. This article owns the build lifecycle (tools, descriptor, recipe,
@@ -46,7 +46,7 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-sub-process-when` - WHEN a request needs more than one process: D1, D2, D4.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates.
   * `process-versions` - the version model and which member runs. Read it BEFORE editing or launching
-    ANY existing process, not one you are building.
+    ANY existing process.
   * `process-version-writes` - saving a new version, a restore point, rollback.
 Each is sized to be read WHOLE through `get-guidance`. Never infer another article's rule from this
 one; read that article.
@@ -70,6 +70,9 @@ one; read that article.
     established - not false, NOT permission. `setConnections` is refused on `false` AND `null`.
   * validate-process-graph - pre-check a planned graph against the connection rules R1-R20
     (`process-activity-connections-details`).
+- If a tool refuses for a missing or older CrtProcessBuilder, STOP and ask the user before
+  `install-process-builder`: it builds the configuration and restarts the site for every user
+  (`core-rules`).
 
 == Descriptor (create-business-process) ==
 {
@@ -145,8 +148,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process`.
-  No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction (`VwSysProcess` shows
-  `NeedInstall` and its siblings `true` on every freshly-saved process). WITHIN A PROCESS exactly two
+  No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction. WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
   without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task

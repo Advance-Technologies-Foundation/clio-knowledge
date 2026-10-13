@@ -77,7 +77,8 @@ public sealed class ProcessDigestTests
         ("process-element-catalog", "1.6.3.26"),
         ("process-element-catalog", "1.6.6.30"),
         ("process-modeling", "`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`"),
-        ("process-modeling", "`success: false`")
+        ("process-modeling", "`success: false`"),
+        ("process-modeling", "STOP and ask the user before `install-process-builder`")
     ];
 
     /// <summary>
@@ -186,7 +187,7 @@ public sealed class ProcessDigestTests
         ("process-modeling", "On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB and published"),
         ("process-modeling", "\"name\": \"UsrAccount_Onboard\", \"caption\": \"Account onboarding\""),
         ("process-modeling", "it is `name`, not `id`"),
-        ("process-modeling", "Read it BEFORE editing or launching ANY existing process, not one you are building."),
+        ("process-modeling", "Read it BEFORE editing or launching ANY existing process."),
         ("process-modeling", "ALWAYS `describe-business-process` first, and re-describe after the edit"),
         ("process-modeling", "You MUST read `isActiveVersion` from the describe output before ANY modify"),
         ("process-modeling", "offer `modify-business-process-as-new-version`"),
