@@ -11,12 +11,12 @@ points here; `process-data-elements` owns the record `filter` shape this element
 `record-rights` owns persisted grants (the `Sys<Entity>Right` storage and the direct
 `get-record-rights` / `set-record-rights` path). Choose between them by WHEN the change happens: use
 `record-rights` for an ad-hoc grant or revoke you make now, and this element only when the change must
-happen inside a running process. Note the two surfaces spell levels differently — `record-rights` exposes
-`granted`/`delegated`, this block uses `permit`/`delegate`/`restrict`.
+happen inside a running process.
 Moved to `process-access-rights-details`: the two VERSION BOUNDARIES (CrtProcessBuilder `1.6.0.2`), when
-the read-back check runs on a `clearFilter` batch, describe's full field shape, and the PROVENANCE of
-`restrict`. Read it when the environment's CrtProcessBuilder, or the one your clio bundles, may predate
-`1.6.0.2`, or to decide what a MISSING read-back warning proves.
+the read-back check runs on a `clearFilter` batch, describe's full field shape, the PROVENANCE and row
+mechanics of `restrict`, and the reasoning behind rules here. Read it when the environment's
+CrtProcessBuilder, or the one your clio bundles, may predate `1.6.0.2`, to decide what a MISSING
+read-back warning proves, or for why a rule here holds.
 
 == Read this first: the element cannot tell you it did nothing ==
 This element has **NO output parameters**. Nothing downstream can branch on whether permissions were
@@ -33,9 +33,7 @@ evidence that the element will do anything.
 DANGER — the opposite failure, and the one that actually costs you: an element with NO record `filter`
 at all is **not** a no-op. The runtime never enters the filter block, so the query runs UNFILTERED and
 the permission change lands on EVERY record of the target object. That query also runs with record
-permissions DISABLED, so the radius is every row in the table, not the rows the caller can see. This
-state is refused by nothing on the platform and reported by no output parameter; a clio carrying the
-read-back check warns about it, and a clio predating that check says nothing at all. Never omit the
+permissions DISABLED, so the radius is every row in the table, not the rows the caller can see. Never omit the
 filter to stage or dry-run an element.
 A FOURTH cause produces the same symptom with a different fix: an environment whose deployed
 CrtProcessBuilder predates this element DISCARDS the whole `accessRights` block while deserializing and
@@ -45,9 +43,7 @@ did not land, or when the read-back could not be obtained at all. Treat either w
 permissions were NOT changed".
 But be precise about what that proves: `describe-business-process` is a process DEFINITION read. It
 confirms the `accessRights` block LANDED — the case above — and it proves NOTHING about whether any
-permission changed. It cannot see a record `filter` that matched zero records, a `remove` whose grantee
-still holds the operation through another role or a default right, or an `employee` formula that
-resolved to nobody. To verify the OUTCOME, run the process and then read the permissions on at least
+permission changed. To verify the OUTCOME, run the process and then read the permissions on at least
 one record the filter actually matched, with `get-record-rights` (see `record-rights`). On a REVOKE that
 outcome check is a MUST before you report it as applied: record permissions are additive, so a surviving
 row through another role looks exactly like success.
@@ -88,12 +84,9 @@ carries the payload; the other two are ignored:
   { "type": "employee",          "contact": "<contact record id | [#Lookup…#] macro | any formula>" }
   { "type": "selectedEmployees", "filter":  { /* a Contact-rooted filter */ } }
 
-A successful `remove` DELETES the matching record-right rows; it does not deny. Creatio record
-permissions are grant-based and additive, so the grantee can still hold the operation through another
-role's row or through the object's default rights. If the intent is to BLOCK rather than to un-grant, `level: "restrict"` is the only candidate mechanism —
+A successful `remove` DELETES the matching record-right rows; it does not deny. If the intent is to BLOCK rather than to un-grant, `level: "restrict"` is the only candidate mechanism —
 but it is DESTRUCTIVE, not merely unverified, and its damage runs the opposite way from what an earlier
-version of this article warned about. `UseDenyRecordRights` gates only record positioning, never whether a
-rights row is written. Against a grantee who ALREADY holds Allow for that operation, a `restrict` entry
+version of this article warned about. Against a grantee who ALREADY holds Allow for that operation, a `restrict` entry
 UPDATES that row down to Deny — it destroys a grant the record already had. And a fresh insert writes one
 row per operation: the one you named at your level, and the OTHER TWO at Deny. So
 `operations: ["read"], level: "restrict"` also denies edit and delete for that grantee.
@@ -102,22 +95,17 @@ granted elsewhere, and confirm the result on your stand — never report an acce
 strength of a green build.
 
 == Levels (add entries only) ==
-  `permit`   — the default when `level` is omitted: the grantee gets the operation. This default is
-    applied by the SERVER, which writes the permit value explicitly onto the stored entry, so the
-    platform enum's zero value in the PROVENANCE note of `process-access-rights-details` is never
-    reached by omitting `level`.
+  `permit`   — the default when `level` is omitted: the grantee gets the operation.
   `delegate` — "Permit with rights to delegate": the grantee may pass the right onward.
   `restrict` — the platform Deny level, and the DESTRUCTIVE one: it downgrades an existing Allow row
-    for that grantee to Deny, and on a fresh insert denies the two operations you did NOT name. The
-    record-rights detail captions the same value "NotSet", which is a UI rendering, not the storage.
+    for that grantee to Deny, and on a fresh insert denies the two operations you did NOT name.
 A `level` on a REMOVE entry is REFUSED, not ignored: the runtime never reads one there, so accepting
 it would silently discard your intent.
 
 == The three grantee kinds ==
 - `role` — a user role. Accepts a role NAME (resolved through the platform role view; an ambiguous
   name is refused, so pass the id instead), a record id, or the `[#Lookup…#]` macro that describe
-  echoes back. A user's own `SysAdminUnit` id is not a role and is refused. Same semantics as the
-  Perform task performer's `role`.
+  echoes back. A user's own `SysAdminUnit` id is not a role and is refused.
 - `employee` — one employee, identified by CONTACT. Accepts a contact record id or an echoed
   `[#Lookup…#]` macro (both are checked to exist, then stored as the macro with the record's name as
   the caption), or ANY other formula stored verbatim — a process-parameter meta-path, or
@@ -127,40 +115,30 @@ it would silently discard your intent.
   shape (see `process-data-elements`) and its root is always `Contact`: omit `object` or set it to
   `Contact`; anything else is refused rather than silently ignored, and an omitted `object` does NOT
   pick up the signal-entity default `process-data-elements` documents — write `"object": "Contact"`
-  explicitly. SECURITY NOTE, two parts. The runtime evaluates this filter with record permissions
+  explicitly. The runtime evaluates this filter with record permissions
   DISABLED — it matches every contact the filter describes, regardless of what the user running the
-  process can see. The element's OWN record filter is evaluated the same way, so neither filter is
-  limited to records the running user could see. And a conditionless filter here is REFUSED at build: one with no conditions would
+  process can see. And a conditionless filter here is REFUSED at build: one with no conditions would
   match EVERY contact and grant to the whole organisation, so the applier rejects it rather than storing
-  it. The element's own record `filter` behaves the OPPOSITE way and must not be reasoned about by
-  analogy: one carrying an `object` but no conditions is a silent no-op, while the total ABSENCE of a
-  record filter is the wide state that acts on every record (see "Which records" below). The two filters
-  fail in opposite directions, so always give the grantee filter conditions AND always give the element
+  it. The two filters fail in opposite directions, so always give the grantee filter conditions AND always give the element
   a record filter.
 
 A `role` or `employee` grantee is backed by a generated element parameter (`Role<N>` / `Employee<N>`);
-you never create those yourself. `selectedEmployees` needs no parameter.
+you never create those yourself.
 
 A fourth grantee, `allRolesAndUsers`, takes no payload and is writable on a **`remove` entry only**, at
 most one per collection. It strips EVERY rights row for its operations — that is the lock-a-record shape:
-remove edit+delete from everyone, then grant them back to the approver in `add`. The shipped approval
-processes are built that way, and so is the Academy reference example for this element.
+remove edit+delete from everyone, then grant them back to the approver in `add`.
 
-It is NOT interchangeable with a `role` entry on a remove. The two run different platform operations:
-`allRolesAndUsers` drops every rights row for that operation, while a role drops only that one role's row
-and leaves every individually granted user's access standing — so a role entry there produces a process
+It is NOT interchangeable with a `role` entry on a remove: a role entry there produces a process
 that reports success and does not lock the record.
 
 Refused on `add`: it carries no access level, and "grant to everyone" is not a shape the platform models
-this way — name the role you mean. A second one in the same collection is refused too, matching the
-designer, which hides the option once that collection already has one.
+this way — name the role you mean.
 
 == Which records: the element's own filter ==
 `accessRights` says WHO and WHAT; the element's separate `filter` block says WHICH records — it is a
 sibling of `accessRights` on the element, not a key inside it, and it uses the shape
-`process-data-elements` owns. It is the element's BLAST RADIUS: a filter that matches more records
-than you intended changes permissions on all of them, and one that matches none changes nothing while
-reporting success. To act on a single record, filter `Id` against a process parameter or a trigger
+`process-data-elements` owns. To act on a single record, filter `Id` against a process parameter or a trigger
 output.
 Give the record `filter` an explicit `"object"` equal to the `accessRights` object — see
 `process-data-elements`, which owns that rule for every data element. Three filter states behave
@@ -172,19 +150,15 @@ differently and only one of them is safe:
     This is the state to check for first.
   - a filter with no `"object"` — REFUSED at build, naming the element.
   - a filter with an `"object"` but NO conditions — the runtime changes nothing (silent no-op), taking
-    its "filters empty" exit. The current package also REFUSES it at build, so a caller writing
-    through clio cannot reach it, though a designer-built element can. That refusal is a no-op guard —
-    the same class as the non-administrated-object refusal — NOT a fail-open guard.
+    its "filters empty" exit.
 
 `clearFilter` is what puts a live element into the first state above: it is the widest edit this
 surface offers, because it moves the element from narrowing — whatever the stored filter matched — to
 applying the change to EVERY record of its object with record permissions disabled. It carries no
 `accessRights` block at all, yet it demands the same confirmation one would (see setElement below).
-`setFilter` is not re-read, because it always carries a full `object` plus that filter's conditions as a
-replacement — so on its own it can only leave the element narrowing. That holds only while nothing LATER in
-the same array retargets the element's `object`: a retarget clears a filter that does not already target the
-incoming object, so `[ {setFilter …}, {setElement {accessRights:{object:"Other"}}} ]` ends in the wide state
-with nothing warned, because the read-back is keyed on `clearFilter`. Send the `setFilter` AFTER the
+`setFilter` is not re-read (it always carries a full `object` and conditions), so alone it only leaves the element
+narrowing; but a LATER retarget in the same array clears a filter that does not target the incoming object and ends
+in the wide state with nothing warned, because the read-back is keyed on `clearFilter`. Send the `setFilter` AFTER the
 retarget.
 
   { "name": "GrantRights", "type": "changeAccessRights", "caption": "Grant rights",
@@ -193,8 +167,7 @@ retarget.
     "filter": { "object": "Order", "conditions": [
         { "column": "Id", "comparison": "equal", "processParameter": "OrderIdParameter" } ] } }
 
-Grant to the NARROWEST role that satisfies the request. `All employees` resolves and builds green, so an
-example copied with only the object and filter substituted would ship a grant to the entire user base.
+Grant to the NARROWEST role that satisfies the request.
 The same MUST as `setElement` applies when you BUILD one of these: a grant widens who can read, edit or
 delete live records, so show the user the target object, the record `filter` that decides WHICH records
 are affected, and every grantee with its operations and level, and get an explicit yes before building.
@@ -207,11 +180,7 @@ rest: it decides WHICH records the change lands on, so widening it widens every 
 and the element reports nothing at run time about what it did. Weigh a `level: "restrict"` entry the
 same way you weigh a `remove` entry — both read to the user as a revoke, `restrict` because it denies,
 `remove` because a deleted row reads as one even though it is not — so neither is the innocuous half of
-`add`/`remove`. `add` belongs on that list in both directions: it REPLACES the whole collection, so it
-destroys every grant it does not restate, and it widens access to whoever it names. So does `remove`:
-replacing that collection drops any entry you do not restate, including one that was itself revoking
-access — and dropping a `remove` entry BROADENS access exactly as dropping an `add` entry narrows it, so
-the replacement hazard cuts both ways. Show the user the target object, the record `filter` that decides
+`add`/`remove`. Show the user the target object, the record `filter` that decides
 WHICH records are affected, and every grantee with its operations and level, and get an explicit yes
 before sending the operation — the same destructive-confirmation rule `process-modeling` states for
 `removeElement` / `removeFlow` / `removeParameter`, which owns it in full. When the operations array
@@ -236,11 +205,10 @@ showing the element and the object whose filter is being cleared, and still gett
 - A present-but-blank `object` is refused; omit it to keep the current target.
 
 == Read-back (describe-business-process) ==
-A `selectedEmployees` filter decodes when stored in the modern format; a legacy `FilterEdit`
-value reports the entry without its filter. A stored-but-undecodable collection reports as an EMPTY
+A stored-but-undecodable collection reports as an EMPTY
 array, but `addUnreadable`/`removeUnreadable` say how many entries could NOT be reported (-1 when the
 collection itself did not decode). So `[]` with a non-zero count means UNKNOWN, not empty; only `[]`
-with a zero count is proof there is nothing there. The `allRolesAndUsers` kind is reported truthfully and can be written back on a `remove` entry, so a read-back carrying one re-applies unchanged.
+with a zero count is proof there is nothing there.
 
 == What is refused at build ==
   - a record `filter` with no `object` (it names no root entity to filter on);
@@ -257,6 +225,3 @@ with a zero count is proof there is nothing there. The `allRolesAndUsers` kind i
   - an `accessRights` block on an element that is not a Change access rights element.
 Others exist (an entry with no `grantee`, an unknown `operations` or `level` token, a grantee type
 missing its payload key), so treat this as the shape of what is checked rather than an exhaustive list.
-The one thing it is safe to conclude: of the three no-op causes at the top of this article, only case 2
-(`add` and `remove` both empty) is absent from the refusals and builds green. Cases 1 and 3 ARE refused,
-as stated there.

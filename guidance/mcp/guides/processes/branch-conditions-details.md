@@ -7,7 +7,10 @@ rule itself is `process-naming` N10's), the CrtProcessBuilder floor that both co
 paragraph opening "Both need" means the build-path NAME and the modify-path META-PATH), a diverging
 gateway that builds with no fallback, the build NOTICE that reports a parallel split (the "It" opening
 those paragraphs is that split) and its three caveats, how the diagram draws evaluation order, and the
-corpus-attested condition shapes. Split out of `process-branch-conditions`, which keeps the rules for
+corpus-attested condition shapes; and, since a second split, the reasoning and counts behind the core's
+rules (why the article was split from `process-formulas`, the column-test count, why a pair-resolved edit
+refuses a stray `kind`, why R7 has no node to judge off an activity, the no-value gateway measurement) and
+a gateway's own default re-kinded to `sequence`. Split out of `process-branch-conditions`, which keeps the rules for
 setting a condition, the gateway and default-flow rules, branch precedence, the flow-EDIT contract and
 the parallel-split hazard itself; read that first.
 
@@ -79,9 +82,35 @@ the order you declared them, and the default is on the spine rather than at the 
 worth knowing before you write: declare the main path first when a gateway has no default, and expect a
 gateway that GAINS a default later to move its existing branches down a row.
 
+== Conditional flows and branch conditions — evidence and reasoning ==
+Each paragraph below is the reasoning, evidence or rare case behind a rule `process-branch-conditions`
+states; the rule itself stays there.
+
+Why the branch article exists. Split out of `process-formulas` because that article had no budget headroom
+left: the two halves are read at different times - the vocabulary while authoring any formula, this while
+planning a BRANCH.
+
+A column of a read record in a condition (`[#Element.Parameter.Column#]`). That is not a corner: of the 487
+element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
+
+Why `removeFlow` and `setFlowCondition` refuse a carried-over `kind` or `condition`. Deliberate, not
+tidiness: where two flows join the same pair, honouring the edit while ignoring a `kind` acts on a flow the
+caller did not name.
+
+Why R7 does NOT apply to a plain else-flow off an activity. The gateway is synthesized at generation time
+and never appears as a graph node, so there is no exclusive-diverge node for R7 to judge. Read "satisfied"
+and you would dismiss a genuine R7 finding elsewhere in the graph as already handled.
+
+A fallback catches an unmatched VALUE, not a missing one — the evidence. Measured on a stand: four runs of
+one three-way gateway routed 50, 500 and 5000 correctly and routed the no-value run to `< 100`.
+
+Rare case — a deciding gateway's OWN default. Re-kinding the gateway's OWN default to `sequence` is a
+no-op — it stays the default, silently, because clearing the marker would leave the gateway with no
+fallback at all.
+
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
-`B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
-parameter's name:
+`B` stand for a REFERENCE (a meta-path token, a `[#Name#]` the server expands, a system variable, a system
+setting):
 `X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
 boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
 `A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.
