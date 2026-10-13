@@ -10,7 +10,7 @@ A Formula ELEMENT (`formulaTask`) takes its `formula` block - the body plus exac
 `process-element-catalog-details`.
 Moved to `process-formulas-details`: how the designer shows a stored formula and how it reads back in
 `describe-business-process`, the verbatim refusal table with each fix, and what an older package did with
-a formula. Read it when you verify a stored formula or condition, work from a formula as the designer
+a formula, plus the evidence behind several rules below. Read it when you verify a stored formula or condition, work from a formula as the designer
 displays it, match a refusal message to its fix, or meet a refusal about the package version.
 == Formulas (`expression` sources and flow conditions) ==
 
@@ -36,9 +36,7 @@ EXPRESSION INTERPRETER over a flat, case-sensitive name registry. That means, co
   name — the thing not to rely on is the engine refusing something merely because it is unwise;
 - Write a fractional number PLAIN - `1.2`, never `1.2m`, and this one has no exceptions. The platform's
   converter appends the decimal suffix itself, unconditionally and without checking for one, so a literal
-  you suffixed arrives as `1.2mm` and the formula is refused with `')' or operator expected`. Measured: an
-  agent that had read this article still wrote `1.2m`, because the suffix is documented further down only
-  as something REFUSALS show you. Same for the `((decimal)…)` wrapper around a division - the converter
+  you suffixed arrives as `1.2mm` and the formula is refused with `')' or operator expected`. Same for the `((decimal)…)` wrapper around a division - the converter
   adds it; do not write it.
 - SAFETY, not style: never build a formula by pasting text you do not control - a record field, a user
   message, anything read back from the environment. A quote or bracket in that text does not fail
@@ -91,7 +89,7 @@ way, which matters:
 
 - a bare `Price` is REFUSED naming the identifier: `Formula value error: Parameter "Price" not found`.
 - `[Price]` is REFUSED too, but does NOT name it — it faults on the bracket:
-  `Formula value error: Expression expected (at index 0).` Measured; the two are not interchangeable.
+  `Formula value error: Expression expected (at index 0).`
 - `[#Price#]` and `[#Process parameters.Price#]` are read as an unrecognised macro FAMILY, which no
   converter resolves, so the raw token reaches the interpreter and does not parse. Both are REFUSED, on a
   mapping and on a condition alike: `Formula value error: Expression expected (at index N)`, where N is
@@ -170,9 +168,7 @@ verbatim from a stand at core 10.0.731.0 — none of it is paraphrased or inferr
 - every `[# … #]` macro FAMILY must be one a converter resolves WHERE YOU USED IT. An unrecognised family
   is not converted, so what reaches the interpreter is the raw token and it does not parse: `[#Price#] > 100`
   gives `Formula value error: Expression expected (at index 0).` This is the answer to the tempting
-  `[#Price#]` shorthand — it does not save. Measured over a mapping onto a plain process parameter,
-  `[#UsrUnknownDialect.Something#]`, `[#ColumnValue.Id#]` and `[#SamplingColumnValue.Id#]` are all three
-  refused the same way, the last two being real platform families used in a context no converter covers;
+  `[#Price#]` shorthand — it does not save.
 - the result must fit the target. For a **condition** that target is `bool`, strictly, with no coercion:
   `1 + 1` gives `Formula value error: Cannot convert type "Int32" to "Boolean"`. For a **mapping** it is
   the target parameter's DECLARED type, and conversion is what makes this bite: a fractional literal
@@ -183,14 +179,12 @@ verbatim from a stand at core 10.0.731.0 — none of it is paraphrased or inferr
 - it must be a single line. A newline is refused with `Formula value error: Expression contains invalid
   line break symbol. Use \n as new line character` — the platform's own rule
   (`ProcessParameterValueProvider.ValidateExpression`), and the one class where the quoted expression
-  comes back EMPTY. A bare carriage return with no line feed is NOT refused: the platform checks for `\n`
-  only, and CR is whitespace to the interpreter, so such a formula parses and stores on one line.
+  comes back EMPTY.
 
 What CLIO still checks:
 
 **A blank `condition` is refused up front.** An empty condition is not "no condition": the platform
-substitutes the literal `true`, producing an always-taken branch nobody asked for. This check is clio's
-own, because the gate would ACCEPT it.
+substitutes the literal `true`, producing an always-taken branch nobody asked for.
 
 **Length, at most 2048 characters**, applied before anything is stored — the pre-save gate is what runs
 the platform's macro converters, whose regexes have no match timeout, so a bound applied there would be
@@ -211,15 +205,10 @@ chains — exactly as the visual designer accepts them, and neither clio's lengt
 gate looks at it. Keep expressions FLAT, and never build one by concatenation or in a loop. The reason is
 not style: the platform parses by recursive descent with no stack guard, so a sufficiently nested
 expression ends the worker process rather than failing — uncatchable, taking every concurrent request
-with it, and nothing in this path can refuse it. Measured on one stand (core 10.0.731.0) on 2026-09-01. No
-CrtProcessBuilder version enters into it - the parser is the platform's - so treat it as one measurement,
-not a platform constant, and as a defect only the platform can close.
+with it, and nothing in this path can refuse it.
 
-Two things make "keep it flat" harder than it sounds, which is why the rule is written as a habit
-rather than a limit. The depth you write is NOT the depth the parser sees — the platform's own converter
-inflates it, so an expression with no brackets at all can arrive deeply nested. And clio's
-character bound is not a mitigation: it bounds LENGTH, and the dangerous expression is short and dense
-rather than long and flat.
+The depth you write is NOT the depth the parser sees — the platform's own converter
+inflates it, so an expression with no brackets at all can arrive deeply nested.
 
 PARENTHESISE rather than relying on precedence. A condition like `a && b || c` is legal and its meaning is
 not obvious to the next reader; write `(a && b) || c`. (`a`, `b`, `c` stand for whole sub-expressions

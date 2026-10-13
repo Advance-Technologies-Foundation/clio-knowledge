@@ -4,9 +4,13 @@ A details article of the process guide set, reached through `process-open-edit-p
 This article is the authoritative owner of `useBackgroundMode` on the Open edit page element, the measured
 evidence behind its Log activity default, why its record type follows the page, the designer's value-source
 menu for its fields, the `showPage` value written at create, and reading an existing element back with
-`describe-business-process`. Split out of `process-open-edit-page`, which keeps the `openEditPage` block, every
-field rule and refusal, the destructive-change guards and the ROUTING rule for choosing this element; read that
-first.
+`describe-business-process`; and, since a second split, the evidence and reasoning behind the core's field
+rules (the Log activity gate probe and corpus count, why an unlisted page is refused, why stale pre-filled
+values are cleared, the filter/completion-mode coupling, the unassigned performer, the interval unit, the
+page-retarget refusal, the priority default, and why the element is not chosen by asking the user) and the
+arguments of `list-entity-client-schemas-to-file`. Split out of `process-open-edit-page`, which keeps the
+`openEditPage` block, every field rule, refusal and confirmation duty, the destructive-change guards and the
+ROUTING rule for choosing this element; read that first.
 
 Measured on a 10.1.628 core: a freshly built element comes back from `describe` with `logActivity.enabled: true`,
 a 5-minute duration and `Medium` priority, none of it requested. The shipped 7.8.0 copy of the same schema has
@@ -51,3 +55,56 @@ into a build/modify block with ONE asymmetry — the read reports pre-filled val
 carries both (the write path refuses that pair), so drop the one that does not belong to the reported `editMode`
 before re-applying, and feed `pageTypeUId` back as `recordType`. A `performer` of `null` in the read-back means
 UNASSIGNED, never unsupported.
+
+== The element and its block — evidence and reasoning ==
+Each paragraph below is the reasoning or evidence half of a rule `process-open-edit-page` states; the rule
+itself stays there.
+
+Log activity gate (`logActivity.enabled`). Before turning it off, know what the gate does and does NOT do,
+because the obvious fear is wrong. It does NOT decide whether the performer sees the step: an element built
+with `enabled: false` still shows up in the user's "Business process tasks" list (verified on 10.1.628 against
+a purpose-built probe), so switching it off does not strand the task. Do not reach for "a user task usually
+needs its connections" as a reason: the shipped corpus says the opposite, with `CreateActivity` true on 15 of
+the 120 Open edit page elements in `PackageStore`. Enabling the block has a second effect worth stating to the
+user: the same flag decides whether this element's "Connected to" links are written at run time.
+
+Picking the page — why only a page registered on a section can be opened. That refusal is protecting you, not
+being strict: the designer resolves an element's stored page against its own list, so a page outside it makes
+the card render "Which page to open?" EMPTY and the next human save wipes the whole element.
+
+Discovering pages with a long list — when the list is too long to read inline,
+`list-entity-client-schemas-to-file` (clio 8.1.0.136 and later) takes the same arguments plus a required
+`output-file`, writes the same response to that file and returns the file path and the classic, freedom and
+unknown counts instead of the list; the file must be inside the workspace or the OS temp directory and must
+not exist yet.
+
+`editMode` and the destructive page change. A page swap within the same object needs nothing, which is what
+makes the Classic-to-Freedom move cheap. `defaultValues: []` is accepted on the destructive change because an
+add-mode element without them is an ordinary shape, not a broken one. The old mode's payload is CLEARED
+after such a change. That clearing matters beyond tidiness:
+the runtime applies stored pre-filled values in EITHER mode, so a leftover set would be live configuration
+nobody asked for.
+
+Completion and `setFilter` / `clearFilter`. On this element `setFilter` and `clearFilter` move the completion
+mode themselves, and that is the surprise worth planning for: they change what the step DOES through an
+operation that names only its conditions. On an EMPTY group the mode stays off (an empty group matches everything, so calling it
+conditions is the contradiction the pairing rule prevents). They move together because a bare `setFilter`
+reaches this element without passing through the `openEditPage` block that owns the pairing rule.
+
+`performer` left unassigned — the platform resolves it to the current user's contact at run time, which is
+exactly why the designer's card shows "User" and the current user for an element that stores neither.
+
+`logActivity` intervals — why the unit always travels with a non-zero value: the platform keeps the number and
+the unit in two INDEPENDENT parameters, so a number written alone is measured in whatever unit the element
+already had: stored, compiled and running green while meaning something else.
+
+`resultsByColumn` and a page retarget to another object — the refusal exists because the completion
+conditions and this column both reference the OLD object's columns, and a stranded column leaves the
+designer's field empty with the list still switched on. The list and the column are the part a human cannot
+infer, and they are what this element contributes.
+
+`priority` — an unknown name is refused rather than defaulted, because the designer marks the field required
+and a defaulted priority is indistinguishable from a chosen one. It reads back as the name with the stored id alongside.
+
+Routing — why not to ask the user which page element to use. Choosing the BPMN element is the modelling
+decision they delegated by asking for a process.

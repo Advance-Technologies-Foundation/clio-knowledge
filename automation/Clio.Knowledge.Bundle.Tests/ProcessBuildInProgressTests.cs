@@ -20,7 +20,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <para>
 /// The rule has ONE owner, <c>process-version-writes</c>: it owns the gates the exemption lifts (the session
 /// questions and what counts as the explicit yes for an in-place edit of the active version), and
-/// <c>process-versions</c> is already past the inline reply budget. Everyone else carries a pointer. These are
+/// <c>process-versions</c> fits the inline reply budget only since its evidence moved to
+/// <c>process-versions-details</c> (ENG-103030), with little room left. Everyone else carries a pointer. These are
 /// TRIM ALARMS like the rest of the suite: they fail when a clause is reworded or dropped.
 /// </para>
 /// </remarks>
