@@ -236,8 +236,8 @@ So size is a delivery contract, not a matter of taste:
   `automation/Clio.Knowledge.Bundle.Tests/ProcessGuideResponseSizeTests.cs`, which is the enforcing
   check. Measure the JSON-escaped payload, not the file on disk — escaping inflates a
   backtick-dense article by 20–35%.
-- The core and `-details` articles split out of process-modeling, app-modeling, workplaces and
-  existing-app-maintenance are also held to the inline budget in
+- The core and `-details` articles split out of process-modeling, app-modeling, workplaces,
+  existing-app-maintenance and core-rules are also held to the inline budget in
   `automation/Clio.Knowledge.Bundle.Tests/GuidanceInlineReplyBudgetTests.cs`: 19,000 UTF-8 bytes as
   clio writes the reply, below the size a Copilot CLI agent receives inline instead of spilling it to
   a file. An edit that pushes one of them over moves text to its `-details` article; it does not

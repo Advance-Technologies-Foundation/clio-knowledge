@@ -172,7 +172,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile may still be running, so poll compile-status rather than compiling again, and, when compile-status has no record, read the timed compilation history its not-found answer lists - last-compilation-log, whose verdict carries no time, is the fallback when that field is absent (unreadable history or an older clio). Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. Round 3 (QA): no row since the call can mean the request was lost with a restarted server, so it ends with the user, not with last-compilation-log. The rule lives in core-rules; process-script-task only points to it.")]
+    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile may still be running, so poll compile-status rather than compiling again, and, when compile-status has no record, read the timed compilation history its not-found answer lists - last-compilation-log, whose verdict carries no time, is the fallback when that field is absent (unreadable history or an older clio). Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. Round 3 (QA): no row since the call can mean the request was lost with a restarted server, so it ends with the user, not with last-compilation-log. core-rules owns the rule and its short form (never call it again, poll the status tool); core-rules-details holds how to tell whether it ran; process-script-task only points to core-rules.")]
     public void Guides_ShouldSayWhatToDoAfterAClientSideCompileTimeout()
     {
         // Arrange
@@ -182,57 +182,61 @@ public sealed class ProcessScriptTaskGuidanceTests
         string guide = File.ReadAllText(Path.Combine(repositoryRoot,
             "guidance/mcp/guides/processes/process-script-task.md"));
         string coreRules = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/core-rules.md"));
+        string coreRulesDetails = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/core-rules-details.md"));
+        string longRunningRule = coreRules + "\n" + coreRulesDetails;
 
         // Assert
         coreRules.Should().Contain("If YOUR MCP client stops waiting first",
             because: "core-rules owns the long-running rule every operation reads, and a client-side timeout is the case it did not cover");
+        coreRules.Should().Contain("read `core-rules-details` before calling anything again",
+            because: "the forensics moved to core-rules-details, so the rule every operation reads must still send the agent there before it repeats a compile, restart or launch");
         coreRules.Should().Contain("do NOT call it again to check; poll compile-status / restart-status",
             because: "a second compile-creatio is a second runtime reload for every user, or a refusal, never a status");
-        coreRules.Should().Contain("`not-found` means this MCP server session holds no record, not that nothing ran",
+        coreRulesDetails.Should().Contain("`not-found` means this MCP server session holds no record, not that nothing ran",
             because: "a not-found that reads as 'nothing ran' is what sent agents to recompile or guess");
-        coreRules.Should().Contain("lists the environment's newest compilation-history rows",
+        coreRulesDetails.Should().Contain("lists the environment's newest compilation-history rows",
             because: "compile-status's not-found answer carries the environment's own history, which survives a client restarting the MCP server");
-        coreRules.Should().Contain("only rows that finished after you called compile-creatio can be your compile's: compare their `finished-utc` with the `started-utc` of its in-progress answer, allowing a minute either way",
+        coreRulesDetails.Should().Contain("only rows that finished after you called compile-creatio can be your compile's: compare their `finished-utc` with the `started-utc` of its in-progress answer, allowing a minute either way",
             because: "the finish time is what ties a history row to the agent's own compile, the in-progress answer carries the call's time, and other compiles write rows too");
-        coreRules.Should().Contain("A row that finished clearly before your call is not yours, even one more than seven minutes old",
+        coreRulesDetails.Should().Contain("A row that finished clearly before your call is not yours, even one more than seven minutes old",
             because: "right after a restart the newest row can be over seven minutes old and still predate the call (ENG-102333 QA)");
-        coreRules.Should().Contain("finished only when its newest row is more than seven minutes old",
+        coreRulesDetails.Should().Contain("finished only when its newest row is more than seven minutes old",
             because: "a compile writes a row per project as each ends, so its first row is not its end");
-        coreRules.Should().Contain("ask the user before compiling again",
+        coreRulesDetails.Should().Contain("ask the user before compiling again",
             because: "an agent whose compile wrote no row needs a way out, and every compile needs the user's confirmation");
-        coreRules.Should().NotContain("you may start it again",
+        longRunningRule.Should().NotContain("you may start it again",
             because: "the guidance must not license a compile the user did not confirm");
-        coreRules.Should().Contain("ask the user before a restart that rests on them alone",
+        coreRulesDetails.Should().Contain("ask the user before a restart that rests on them alone",
             because: "any schema publisher can write a row, so a restart for every user cannot rest on rows alone");
-        coreRules.Should().Contain("If no row was written since your call, the compile has either not finished its first project yet or never started",
+        coreRulesDetails.Should().Contain("If no row was written since your call, the compile has either not finished its first project yet or never started",
             because: "a request still on its way when the MCP server restarted is lost with it, so no row is not proof the compile runs (ENG-102333 QA)");
-        coreRules.Should().Contain("treat it as not run and ask the user before compiling again. Do not read last-compilation-log for it",
+        coreRulesDetails.Should().Contain("treat it as not run and ask the user before compiling again. Do not read last-compilation-log for it",
             because: "with no row since the call that undated verdict can only be an earlier compile's, which a QA agent read as its own success");
-        coreRules.Should().NotContain("it is still running: poll again",
+        longRunningRule.Should().NotContain("it is still running: poll again",
             because: "calling a rowless compile running is what let an agent report a compile that never happened");
-        coreRules.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log (through clio-run) - unless",
+        coreRulesDetails.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log (through clio-run) - unless",
             because: "last-compilation-log's undated verdict is the fallback for an unreadable history or an older clio, not the first answer");
-        coreRules.Should().Contain("Note that last-compilation-log reads the latest FINISHED compile and carries no time",
+        coreRulesDetails.Should().Contain("Note that last-compilation-log reads the latest FINISHED compile and carries no time",
             because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
-        coreRules.Should().Contain("do not rely on it, or restart on it, before then",
+        coreRulesDetails.Should().Contain("do not rely on it, or restart on it, before then",
             because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile; after the compile has finished, a restart the workflow needs is still owed, so the rule is about timing, not a ban");
-        coreRules.Should().Contain("When restart-status answers `requestfailed`, the restart request itself failed and no restart happened: ask the user, then retry once.",
+        coreRulesDetails.Should().Contain("When restart-status answers `requestfailed`, the restart request itself failed and no restart happened: ask the user, then retry once.",
             because: "the restart request runs inside the deadline race, so a failed request is reported after the answer, and checking that the environment answers would point the wrong way - it answers because it never restarted");
         coreRules.Should().Contain("for a restart, possibly not yet confirmed",
             because: "a restart's in-progress answer can come before its request is confirmed");
-        coreRules.Should().NotContain("operation accepted",
+        longRunningRule.Should().NotContain("operation accepted",
             because: "at the deadline the request may not have reached the environment, so the answer is 'started', never 'accepted' (ENG-102333 QA)");
-        coreRules.Should().Contain("so report its verdict to the user as unconfirmed",
+        coreRulesDetails.Should().Contain("so report its verdict to the user as unconfirmed",
             because: "a green last-compilation-log cannot show that the agent's own compile ran");
-        coreRules.Should().Contain("A `status: not-started` whose error says the launch request was never sent means nothing ran",
+        coreRulesDetails.Should().Contain("A `status: not-started` whose error says the launch request was never sent means nothing ran",
             because: "run-process now answers at the shared deadline, and its not-started answer is exact - the request is never sent after it");
-        coreRules.Should().Contain("Any other `not-started` is the environment refusing the launch: act on the cause its error names instead of calling again",
+        coreRulesDetails.Should().Contain("Any other `not-started` is the environment refusing the launch: act on the cause its error names instead of calling again",
             because: "a platform refusal shares the status, and retrying it would loop, or repeat elements that already ran");
-        coreRules.Should().Contain("tell the user the environment is not answering",
+        coreRulesDetails.Should().Contain("tell the user the environment is not answering",
             because: "retrying a launch that cannot even be prepared needs an end");
-        coreRules.Should().Contain("`status: still-running` means the request was sent and clio has no verdict - do NOT re-run it",
+        coreRulesDetails.Should().Contain("`status: still-running` means the request was sent and clio has no verdict - do NOT re-run it",
             because: "a sent launch request may have started the run, and a second launch duplicates its work");
-        coreRules.Should().NotContain("never restart on that answer alone",
+        longRunningRule.Should().NotContain("never restart on that answer alone",
             because: "that wording read as a permanent ban and contradicted the package-compile activation cycle");
         guide.Should().Contain("If your client reports the call timed out (for example `Request timed out`)",
             because: "a process-name compile is the long call a ScriptTask author meets, so the article names the case where it happens");
