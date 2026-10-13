@@ -26,7 +26,7 @@ Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record 
 because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule in
 full. EDITING one is destructive and `process-branch-conditions` owns that: an EMPTY `label` CLEARS a
 designer's caption, so read the three-state contract under **ON THE MODIFY PATH** in
-`process-branch-conditions` before any edit, and `describe-business-process` first — it reports each
+`process-branch-conditions` before any edit, and `describe-business-process mode=full` first — it reports each
 flow's `label`, which is the only way to learn a human's label is there to be erased.
 
 Both need `CrtProcessBuilder` **1.6.0.3** or newer; below it the build path takes a system setting

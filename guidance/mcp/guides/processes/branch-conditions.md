@@ -19,7 +19,7 @@ whole call. The RUNTIME only ever resolves a UId meta-path —
 `[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`. On `create-business-process` you write
 the NAME — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId
 does not exist yet. On `modify-business-process` you write the name too when its contract carries the
-gate under **ON THE MODIFY PATH**; otherwise the meta-path, from the UIds `describe-business-process`
+gate under **ON THE MODIFY PATH**; otherwise the meta-path, from the UIds `describe-business-process mode=full`
 reports. Both are spelled out below; `process-formulas` ("REFERENCING A PARAMETER") owns the meta-path
 form itself.
 
@@ -38,7 +38,7 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 Name the OUTCOME, never the condition. `process-naming` N10 owns the wording rule
 (summarised in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
 caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
-`describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
+`describe-business-process mode=full` first — it reports each flow's `label`, which is the only way to learn a
 human's label is there to be erased.
 
 **ON THE BUILD PATH, WRITE THE NAME.** It exists because it has to: on `create-business-process` the UIds do
@@ -75,7 +75,7 @@ value error: Expression expected (at index 0)`, naming neither, and the entire c
 `setFlowCondition` expand the same names as here, and the server checks every hand-written meta path - in a
 condition, an `expression` mapping or value and a Formula body, on create as well - as above; an echoed
 designer condition too, so one reading a column its Read data does not load is refused. With any other
-contract there is no expansion on modify: write the meta-path from the UIds `describe-business-process`
+contract there is no expansion on modify: write the meta-path from the UIds `describe-business-process mode=full`
 reports (column UIds come from the `process-data-elements` recipe). The two-step route — build the flow
 plain, then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a
 designer-authored one. To change an existing flow's kind in either direction, `setFlow` takes `source`,

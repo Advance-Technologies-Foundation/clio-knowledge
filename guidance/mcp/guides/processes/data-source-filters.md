@@ -110,7 +110,7 @@ is the one contract all three share, which is why it reads as its own subject.
   condition, read the current filter back first (below) and send the complete new filter. Sending only
   the condition you care about silently drops every other one, which WIDENS the records the element acts
   on -- on a `changeData` element that is a bulk update on live records.
-- `describe-business-process` reads a filter back: an element carries a decoded `filter` (the same
+- `describe-business-process mode=full` (or `element=<name>`) reads a filter back: an element carries a decoded `filter` (the same
   object / logicalOperation / conditions / groups shape) when it has one, so you can inspect it or
   round-trip it into a `setFilter`. A parameter reference comes back as its BARE meta-path `expression`,
   which re-applies as read while the element it names still passes the checks above - send it exactly as

@@ -172,8 +172,8 @@ when asked why a rule holds (approvals, the Call category row) or for its counts
    <- ActivityCategory CallAsTask. The two "Call" rows, which one to use and why resolving by NAME is a coin
       flip are stated once near the top of this article; do not restate them here.
 
-3) describe-business-process -> every parameter you bound now appears with its source and value.
-   The ones you did NOT bind stay hidden. That is expected; it is not a failure.
+3) describe-business-process mode=full -> every parameter you bound now appears with its source and value.
+   The ones you did NOT bind stay hidden: expected, not a failure.
 
 Variant — the same task ASSIGNED TO A TEAM ("the sales department calls the client"): drop the OwnerId
 mapping from step 2 and set the element-level performer instead (works inline in step 1's element too;
