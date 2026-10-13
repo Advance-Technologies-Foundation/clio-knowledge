@@ -77,7 +77,8 @@ public sealed class ProcessDigestTests
         ("process-element-catalog", "1.6.3.26"),
         ("process-element-catalog", "1.6.6.30"),
         ("process-modeling", "`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`"),
-        ("process-modeling", "`success: false`")
+        ("process-modeling", "`success: false`"),
+        ("process-modeling", "STOP and ask the user before `install-process-builder`")
     ];
 
     /// <summary>

@@ -118,14 +118,15 @@ precondition kept next to the instruction it guards — names that guide as the 
     registered -> name=process-activity-connections-details
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
-    process -> name=process-versions
+  - which VERSION of a process you are reading or which one runs, or editing or launching ANY existing
+    process -> name=process-versions first (a handed code is usually the family root, which does not
+    run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
+    re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
+    it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can
+    read or write data you did not create (then name=process-version-writes). Unsure: existing
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
     name=process-version-writes; add name=process-versions for the model it assumes and
     name=process-modeling for the operation reference
-  - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
-    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
-    operation reference
   - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
     name=process-modeling-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
@@ -143,6 +144,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
+- Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode

@@ -92,7 +92,8 @@ code and caption; for a build, name from the Names block of `process-digest`, it
                       lets the call through and the old package rejects it with "Value '...' is not valid for
                       parameter 'ActivityCategory' of type Lookup: a Lookup constant is a formula token, not a
                       plain value. Set it via a mapping 'expression' instead...". Either way: update the
-                      package (install-process-builder); do NOT fall back to the expression form (see
+                      package (install-process-builder, once the user approves it:
+                      `core-rules`); do NOT fall back to the expression form (see
                       `process-task-category`).
   ActivityPriority    Lookup -> ActivityPriority. Default = ab96fa02-7fe6-df11-971b-001d60e938c6 (Medium).
                       Same bare-Guid `value` route and same version story as ActivityCategory.
