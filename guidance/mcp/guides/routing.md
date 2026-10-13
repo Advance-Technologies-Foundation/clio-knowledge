@@ -1,7 +1,7 @@
 clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
-Pick the domain, then the row (get-guidance name=...). From clio <CLIO-TBD>, `get-guidance name=list` returns the
+Pick the domain, then the row (get-guidance name=...). From clio 8.1.0.141, `get-guidance name=list` returns the
 catalog, one `name: purpose` line per guide, and an unknown name fails with the closest names (an older
 clio answers any unknown name, `list` included, with the bare `availableGuides` list).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,

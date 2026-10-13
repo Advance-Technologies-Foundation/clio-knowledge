@@ -103,7 +103,7 @@ public sealed class ClioToolSyncGuidanceTests
 
         modeling.Should().Contain("pass `mode=full` (the whole graph) or `element=<name>` (one element)",
             because: "the owner says how to get past the summary");
-        modeling.Should().Contain("Every `mode=full` in these guides: on clio older than <CLIO-TBD>, omit `mode`.",
+        modeling.Should().Contain("Every `mode=full` in these guides: on clio older than 8.1.0.141, omit `mode`.",
             because: "an older clio refuses an argument it does not know, which would stall every modify on its first describe");
     }
 

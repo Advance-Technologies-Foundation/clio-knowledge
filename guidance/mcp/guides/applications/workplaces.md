@@ -12,7 +12,7 @@ place by hand, target a product workplace (`Sales`, `Service`, ...), or need a r
 
 ## Place a section, grant roles, leave My applications: the tool
 To place a section in a workplace, grant roles, or move an app out of `My applications`, call
-`place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio <CLIO-TBD> and later).
+`place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio 8.1.0.141 and later).
 Arguments: `environment-name`, `section-code`, `workplace-name`, `package-name`, `roles`; optional
 `mode` `existing`|`new`|`none`, `client-type` (`web` default), `remove-from-my-applications` (default
 true), `position`. It resolves client type, section and roles, binds each row it owns (a

@@ -63,9 +63,9 @@ one; read that article.
     `SendEmailUserTask` creates nothing): always key on the schema NAME, never on a caption.
   * create-business-process - build a NEW process from a JSON descriptor, and save it.
   * modify-business-process - edit an EXISTING process by an ordered list of operations.
-  * describe-business-process - read a process back as a graph; from clio <CLIO-TBD> a large
+  * describe-business-process - read a process back as a graph; from clio 8.1.0.141 a large
     one is a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Every `mode=full` in these
-    guides: on clio older than <CLIO-TBD>, omit `mode`. Per element also
+    guides: on clio older than 8.1.0.141, omit `mode`. Per element also
     `connections[]`, `deprecated` (retired user-task schema) and `writesConnectionsAtRuntime`. FALSE:
     the connections persist and compile but are never written - change the element kind (its runtime
     never writes them) or set `CreateActivity` true (its activity-creation gate is shut). `null`: not

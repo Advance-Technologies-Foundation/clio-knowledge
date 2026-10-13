@@ -21,7 +21,7 @@ needs the user's confirmation right before it.
 
 ## Runtime check
 A runtime check is optional and the user's choice. When you make one, use these tools instead of a hand-rolled
-create/sleep/read/delete loop (clio <CLIO-TBD> and later; `get-tool-contract` first):
+create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` first):
 - `run-process` with `wait` (default true: waits for a parked run; a run parked on a user task answers
   `waitingOn`, not a failure), `watch` (1-5 entities; the records that appeared come back as `created`) and
   `cleanup` (requires `watch`; deletes only the `created` records you created that are tied to this run).
