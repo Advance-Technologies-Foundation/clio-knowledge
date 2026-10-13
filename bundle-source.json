@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.142",
+  "libraryVersion": "1.15.143",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1615,7 +1615,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source, the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. The SUB-PROCESS element's parameters at RUN TIME (the caller re-sync rule, the re-sync notices, values crossing by NAME, inSync, the designer card) moved to process-parameters-details. Formulas themselves are owned by process-formulas.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source (a binding evaluated on read, one per parameter, not a flow-time assignment), the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. The SUB-PROCESS element's parameters at RUN TIME (the caller re-sync rule, the re-sync notices, values crossing by NAME, inSync, the designer card) moved to process-parameters-details. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -1629,7 +1629,7 @@
     {
       "itemId": "process-parameters-details",
       "title": "Sub-process parameter sync",
-      "description": "Owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side: the rule to re-synchronize every caller after a called process's parameters change, and the setElement shapes that perform one (resync:true, a block naming the already-called process, an empty subProcess:{}); what a re-synchronization costs (a dropped parameter's mapping row deleted, replacements carrying new UIds), the full notice set a re-sync answers with, and how far the dangling-reference scan reaches; values crossing by NAME, case-sensitively, with an unmatched name skipped silently, and which version of a versioned callee actually runs; what inSync and multiInstanceOptions.calleeInSync can and cannot see, how a rename is followed and when a value survives it, describe's read-back of direction/isRequired/isResult, and the designer card, whose parameter row has no code column and must not be saved from. Split out of process-parameters.",
+      "description": "Owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side: the rule to re-synchronize every caller after a called process's parameters change, and the setElement shapes that perform one (resync:true, a block naming the already-called process, an empty subProcess:{}); what a re-synchronization costs (a dropped parameter's mapping row deleted, replacements carrying new UIds), the full notice set a re-sync answers with, and how far the dangling-reference scan reaches; values crossing by NAME, case-sensitively, with an unmatched name skipped silently, and which version of a versioned callee actually runs; what inSync and multiInstanceOptions.calleeInSync can and cannot see, how a rename is followed and when a value survives it, describe's read-back of direction/isRequired/isResult, and the designer card, whose parameter row has no code column and must not be saved from. Also the mapping-binding evidence and example. Split out of process-parameters.",
       "topicId": "creatio.process-parameters-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters-details",

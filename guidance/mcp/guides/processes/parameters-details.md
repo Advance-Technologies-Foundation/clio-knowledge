@@ -4,7 +4,8 @@ A details article of the process guide set, reached through `process-parameters`
 This article is the authoritative owner of what a SUB-PROCESS element's parameters do at RUN TIME: the rule to
 re-synchronize every caller, which `setElement` shapes re-synchronize, what a re-synchronization costs and
 reports, how values cross by name, which version of a versioned callee runs, what `inSync` and describe can and
-cannot show, how a rename is followed, and why the designer card cannot check any of it. Split out of
+cannot show, how a rename is followed, and why the designer card cannot check any of it; and the evidence
+for the process-parameter binding rule `process-parameters` owns, with a multi-start example. Split out of
 `process-parameters`, which keeps process parameters, the mappings that bind them, type compatibility and the
 date/time/lookup default-value rule; read that first.
 
@@ -102,3 +103,35 @@ date/time/lookup default-value rule; read that first.
   `direction` and `isRequired` are re-copied from the callee on every synchronization, so they track it;
   `isResult` is copied only when the element parameter is CREATED and is never refreshed, so a callee that
   later flips it leaves the element reporting the old value, and no re-sync reports or fixes that.
+
+== A process-parameter mapping is a binding — evidence and a multi-start example ==
+`process-parameters` owns the rule; this is what it rests on and how to build the case it warns about.
+- Measured on a sandbox stand (October 2026) with `run-process` result parameters and `trigger-smoke`:
+  * a parameter bound to a Read data column read EMPTY in a Formula placed BEFORE the read and the
+    column value in one placed after it - the binding is evaluated on every read, not once at start;
+  * two mappings onto one parameter kept only the LAST one listed, with no error;
+  * two signal starts (record added / record modified), each reading the triggering record and mapping
+    its `Name` into one shared parameter: the run started by the FIRST signal read the parameter EMPTY,
+    because the surviving binding points at the other branch's read, which never ran. The same process
+    with a Formula per branch produced the record's name;
+  * a Formula writing a parameter that still carries a binding wins over it.
+- The shape to build when several starts feed one parameter - each branch assigns it after its own read:
+```
+"elements": [
+  { "name": "RequestAddedSignal", "caption": "Request added", "type": "signalStart", "signal": { "entity": "UsrRequest", "on": "added" } },
+  { "name": "RequestModifiedSignal", "caption": "Request modified", "type": "signalStart", "signal": { "entity": "UsrRequest", "on": "modified" } },
+  { "name": "ReadAddedRequest", "caption": "Read added request", "type": "readData", "readData": { "source": "UsrRequest", "mode": "first" },
+    "filter": { "object": "UsrRequest", "logicalOperation": "and", "conditions": [ { "column": "Id",
+      "comparison": "equal", "elementParameter": { "elementName": "RequestAddedSignal", "parameter": "RecordId" } } ] } },
+  { "name": "ReadModifiedRequest", "caption": "Read modified request", "type": "readData", "readData": { "source": "UsrRequest", "mode": "first" },
+    "filter": { "object": "UsrRequest", "logicalOperation": "and", "conditions": [ { "column": "Id",
+      "comparison": "equal", "elementParameter": { "elementName": "RequestModifiedSignal", "parameter": "RecordId" } } ] } },
+  { "name": "SetDaysLeftFromAdded", "type": "formulaTask", "caption": "Set days left",
+    "formula": { "body": "[#ReadAddedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeft" } },
+  { "name": "SetDaysLeftFromModified", "type": "formulaTask", "caption": "Set days left",
+    "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeft" } }
+]
+```
+  Flow each read into its own Formula and both Formulas into the shared next step; `mappings[]` carries
+  no `targetProcessParameter` entry for `DaysLeft`. One mapping per branch instead is the shape the build
+  warns about, and it reads the default on every run but one branch's.
