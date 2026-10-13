@@ -19,7 +19,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
   Boolean, Date, Date-time, Time, Guid, Lookup, and Collection (a record collection, `CompositeObjectList`,
   whose direction defaults to `Out` unless you set one) — other types (composite object / entity / file / ...) are not
-  supported yet. Name a process parameter per N8 in `process-naming` (restated in `process-digest`).
+  supported yet. Name a process parameter per N8 in `process-naming` (summarised in `process-digest`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.
@@ -70,7 +70,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   used to be an unnamed serialised error carrying only a parameter UId; from 1.4.0.41 the package rewrites
   that one message into a sentence naming the reference and the remedy.)
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
-  describe-first and confirm-the-removal rules (`process-digest`; owner `process-modeling`) still apply.
+  describe-first and confirm-the-removal rules (owner `process-modeling`) still apply.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).

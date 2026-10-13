@@ -12,9 +12,9 @@ when the called process's own parameters change (their CAPTIONS on a re-sync are
 WHETHER a request calls for this element at all — the one-process default, per-item work, a repeated
 fragment, long phases — and which execution mode a per-item loop needs is owned by
 `process-sub-process-when`: read it before you plan one.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Element: Sub-process (callActivity -> subProcess) ==
 - `callActivity` Sub-process — call ANOTHER process (the BPMN call activity) and run it once, passing
