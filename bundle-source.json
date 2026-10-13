@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.126",
+  "libraryVersion": "1.15.130",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1531,6 +1531,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-data-elements-details",
+      "title": "Process data elements details",
+      "description": "PLACEHOLDER Split out of process-data-elements, which keeps every rule and is read first.",
+      "topicId": "creatio.process-data-elements-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-data-elements-details",
+      "sourcePath": "guidance/mcp/guides/processes/data-elements-details.md",
+      "bundlePath": "resources/data-elements-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-read-data",
       "title": "Read data element",
       "description": "Owns the Creatio Read data element (readData / ReadDataUserTask) -- the step that READS records. Covers all four buildable modes and the output each one fills (first-record into ResultEntity; collection into both the raw ResultEntityCollection and the shaped ResultCompositeObjectList a Collection process parameter mirrors; count, always ResultCount and taking no column; aggregation, a function/column pair whose output follows the column type), the column selection and sort, collection's own two refusals and its numberOfRecords top-N with the keep-on-omit rule, the write-time shaping that lets a mirror taken in the same call find a shape, and what a mode conversion clears. Split out of process-data-elements, which owns the record trigger and the sibling Modify data element.",
@@ -1667,6 +1678,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/perform-task.md",
       "bundlePath": "resources/process-perform-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-perform-task-details",
+      "title": "Perform task element details",
+      "description": "PLACEHOLDER Split out of process-perform-task, which keeps every rule and is read first.",
+      "topicId": "creatio.process-perform-task-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-perform-task-details",
+      "sourcePath": "guidance/mcp/guides/processes/perform-task-details.md",
+      "bundlePath": "resources/perform-task-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1907,6 +1929,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-versions-details",
+      "title": "Process versions details",
+      "description": "PLACEHOLDER Split out of process-versions, which keeps every rule and is read first.",
+      "topicId": "creatio.process-versions-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-versions-details",
+      "sourcePath": "guidance/mcp/guides/processes/versions-details.md",
+      "bundlePath": "resources/versions-details.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-script-task",
       "title": "Process ScriptTask C#",
       "description": "When to add a Creatio process ScriptTask (it makes the process need a compile) and how to write one: the scriptTask block, exact case-sensitive Get/Set parameter access, the namespaces the generated code imports, process usings and methods and when an alias is needed, ESQ namespace ownership, collision-safe Common.Logging qualification, portable Newtonsoft.Json serialization, and compiling and verifying on the target environment.",
@@ -1918,6 +1951,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/process-script-task.md",
       "bundlePath": "resources/process-script-task.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-script-task-details",
+      "title": "Process ScriptTask C# details",
+      "description": "PLACEHOLDER Split out of process-script-task, which keeps every rule and is read first.",
+      "topicId": "creatio.process-script-task-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-script-task-details",
+      "sourcePath": "guidance/mcp/guides/processes/process-script-task-details.md",
+      "bundlePath": "resources/process-script-task-details.md",
       "mediaType": "text/plain"
     },
     {

@@ -77,7 +77,23 @@ public sealed class GuidanceInlineReplyBudgetTests
         "workplaces",
         "workplaces-details",
         "existing-app-maintenance",
-        "existing-app-maintenance-details"
+        "existing-app-maintenance-details",
+        "process-access-rights",
+        "process-access-rights-details",
+        "process-script-task",
+        "process-script-task-details",
+        "process-open-edit-page",
+        "process-open-edit-page-details",
+        "process-branch-conditions",
+        "process-branch-conditions-details",
+        "process-versions",
+        "process-versions-details",
+        "process-data-elements",
+        "process-data-elements-details",
+        "process-formulas",
+        "process-formulas-details",
+        "process-perform-task",
+        "process-perform-task-details"
     ];
 
     [Test]
