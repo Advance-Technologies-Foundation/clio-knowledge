@@ -44,8 +44,9 @@ public sealed class ProcessBuildInProgressTests
         "A version you add to a family that existed before this task is NOT a build in progress: the family is existing, so the version articles and the `isActiveVersion` rule apply in full.",
         "The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version task by request, so the version articles apply to those steps in full.",
         "ACTIVATING it is part of the build only when the request asks for a working or active process; otherwise the request has to say so.",
-        "Once it is active AND its trigger can fire on records you did not create, an in-place modify of the active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.",
-        "An un-activated draft, or one activated moments ago whose runs touched only records you created, stays exempt: a run you started does not make it existing.",
+        "Once it is active AND any of its runs, from ANY start type (record signal, timer, message, signal, manual), can read or write data you did not create, an in-place modify of the active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.",
+        "A start that fires on no record still counts: a timer run of a changed graph updates other people's data on its own.",
+        "An un-activated draft, or one activated moments ago whose runs can touch only data you created, stays exempt: a run you started does not make it existing.",
         "Built in an EARLIER task or session: existing"
     ];
 
@@ -75,14 +76,14 @@ public sealed class ProcessBuildInProgressTests
 
     /// <summary>
     /// The card's edit route, clause by clause: the exemption and its key limits (own family, created in this
-    /// task, not live with a trigger on records the agent did not create), the lifted confirmation, the owner
+    /// task, not live with runs of any start type that can touch data the agent did not create), the lifted confirmation, the owner
     /// ONLY for a limit, and the "unsure means existing" default.
     /// </summary>
     private static readonly string[] CardPointerClauses =
     [
         "a family YOU created in THIS task is NOT existing: fix, re-save, run here",
         "no `isActiveVersion` confirmation",
-        "unless active with a trigger that can fire on records you did not create (`process-version-writes`).",
+        "unless active and any run (any start) can touch data you did not create (`process-version-writes`).",
         "Else or unsure: existing, `process-versions` then `process-modeling`."
     ];
 
@@ -91,9 +92,42 @@ public sealed class ProcessBuildInProgressTests
     [
         "NOT existing: a family YOU created in THIS task.",
         "Fix, re-save or run it from name=process-digest, with no isActiveVersion confirmation",
-        "unless it is active with a trigger that can fire on records you did not create (then name=process-version-writes).",
+        "unless it is active and any of its runs, from any start (record, timer, message, signal, manual), can read or write data you did not create (then name=process-version-writes).",
         "Unsure: existing"
     ];
+
+    /// <summary>
+    /// The record-only limit this clause replaced (PR #276 review): a timer, message or signal start fires on no
+    /// record, so "a trigger that can fire on records" left a scheduled run of a changed graph exempt.
+    /// </summary>
+    private const string RecordOnlyLimit = "trigger that can fire on records";
+
+    [Test]
+    [Description("The live-process limit covers every start type, not only record triggers, in the owner and both pointers.")]
+    public void TheLiveProcessLimit_ShouldCoverEveryStartType()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        (string Name, string Text)[] carriers =
+        [
+            (OwnerItemId, Collapse(Article(OwnerItemId))),
+            ("process-digest", Collapse(Article("process-digest"))),
+            (RoutingPath, Collapse(ProcessGuideSet.Read(repositoryRoot, RoutingPath)))
+        ];
+
+        // Act
+        string[] recordOnly = [.. carriers
+            .Where(carrier => carrier.Text.Contains(RecordOnlyLimit, StringComparison.Ordinal))
+            .Select(carrier => carrier.Name)];
+
+        // Assert
+        carriers[0].Text.Should().Contain("from ANY start type (record signal, timer, message, signal, manual)",
+            because: "anti-vacuity: the owner names every start type the limit covers");
+        recordOnly.Should().BeEmpty(
+            because: "a timer-, message- or signal-start process activated in this task runs against other "
+                + "people's data without firing on any record; a record-only limit would let an in-place modify "
+                + "of its active version skip the isActiveVersion confirmation");
+    }
 
     [Test]
     [Description("Only the owner defines the exemption; the card, routing and process-modeling point at it.")]

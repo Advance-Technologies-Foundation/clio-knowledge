@@ -82,10 +82,12 @@ confirmations still apply. The limits:
     task by request, so the version articles apply to those steps in full.
   * ACTIVATING it is part of the build only when the request asks for a working or active process;
     otherwise the request has to say so.
-  * Once it is active AND its trigger can fire on records you did not create, an in-place modify of the
-    active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.
-    An un-activated draft, or one activated moments ago whose runs touched only records you created,
-    stays exempt: a run you started does not make it existing.
+  * Once it is active AND any of its runs, from ANY start type (record signal, timer, message, signal,
+    manual), can read or write data you did not create, an in-place modify of the active version is no
+    longer exempt: save a new version, or get the `process-modeling` confirmation. A start that fires on
+    no record still counts: a timer run of a changed graph updates other people's data on its own. An
+    un-activated draft, or one activated moments ago whose runs can touch only data you created, stays
+    exempt: a run you started does not make it existing.
   * Built in an EARLIER task or session: existing -- you cannot know who used it since.
 
 == Ask once, then behave predictably ==
