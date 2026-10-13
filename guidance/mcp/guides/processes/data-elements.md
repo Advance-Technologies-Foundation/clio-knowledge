@@ -184,7 +184,7 @@ filter; see `process-access-rights`.
   object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
   target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`.
   MUST: that `setFilter` REPLACES the element's whole filter — read the current one back with
-  `describe-business-process` and send it complete, or the records this element updates silently widen.
+  `describe-business-process mode=full` and send it complete, or the records this element updates silently widen.
   `process-data-source-filters` owns the op and its read-back. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
   process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in

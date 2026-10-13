@@ -77,7 +77,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
   add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
   processParameter (a process parameter by name) | value (a constant) | expression (a raw formula).
-  Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process` output an element parameter
+  Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process mode=full` output an element parameter
   is usable as a mapping source when `isOutput: true` — key on that, NOT on `isResult` or `direction`. Those are
   the stored facts it derives from, and a Read data element's non-`first` outputs carry neither
   (`process-read-data`); the same names sit in its `readData.outputs`.
@@ -142,6 +142,6 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   etc.).
   This applies to MAPPINGS only. It does NOT mean a formula cannot reference a parameter: inside an
   `expression` there is no structured alternative, and the UId meta-path is exactly what you write.
-  `process-formulas` owns that form — built from the `uid`s `describe-business-process` reports; the column
+  `process-formulas` owns that form — built from the `uid`s `describe-business-process mode=full` reports; the column
   form (a third segment) is `process-data-elements`'. An email BODY macro reaches a column with its own
   grammar, `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).

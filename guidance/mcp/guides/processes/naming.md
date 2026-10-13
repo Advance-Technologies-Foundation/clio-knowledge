@@ -168,7 +168,7 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     `label` argument, what a relabel must echo back, and the pair-addressing refusals — and
     `process-modeling` owns `removeFlow`. Go there before editing a flow: an EMPTY `label` CLEARS a
     designer's caption.
-    READ BEFORE YOU WRITE. `describe-business-process` reports each flow's `label`, and that field is
+    READ BEFORE YOU WRITE. `describe-business-process mode=full` reports each flow's `label`, and that field is
     the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
     in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
     diff between two processes says nothing at all about their labels. An archive predating the member

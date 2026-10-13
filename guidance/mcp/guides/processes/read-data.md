@@ -120,7 +120,7 @@ lifecycle, the descriptor shape and what is buildable today are restated in `pro
   clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
   `setFilter`) in the same operations array. MUST, before any `setFilter` on a live process: `setFilter`
   REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
-  back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
+  back with `describe-business-process mode=full` and send it complete. `process-data-source-filters` owns the op
   and the read-back shape. `describe-business-process` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`, and `aggregation` as `{function, column}` in aggregation
   mode), so anything the builder made round-trips into create/modify. Read-back limits on a HUMAN-made

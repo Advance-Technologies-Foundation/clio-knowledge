@@ -41,10 +41,20 @@ public sealed class ReferenceIntegrityTests
     private static readonly char[] SentencePunctuation = ['.', ',', ';', ':', ')'];
 
     /// <summary>
+    /// Names <c>get-guidance</c> answers itself with the guide CATALOG instead of an article (clio returns it
+    /// for <c>list</c>, <c>index</c>, <c>catalog</c> and <c>help</c>), so a citation of one resolves without a
+    /// manifest entry. Compared exactly, like every other name: guidance writes them in lower case.
+    /// </summary>
+    internal static readonly HashSet<string> ClioCatalogNames = new(StringComparer.Ordinal)
+    {
+        "list", "index", "catalog", "help"
+    };
+
+    /// <summary>
     /// <c>name=&lt;id&gt;</c> as routing and articles write it. The lookbehind skips other tools' arguments
     /// (<c>schema-name=</c>, <c>event_name=</c>). The WHOLE argument is captured, so a trailing <c>-</c> or
     /// <c>_</c>, or a capital letter, is compared and reported rather than trimmed away or skipped: Clio compares
-    /// the name exactly and answers a near miss with <c>availableGuides</c> only. Placeholders such as
+    /// the name exactly and answers a near miss with a not-found error that suggests close names. Placeholders such as
     /// <c>name=&lt;env&gt;</c> start with a character the argument cannot contain.
     /// </summary>
     private static readonly Regex NameToken = new(
@@ -110,7 +120,7 @@ public sealed class ReferenceIntegrityTests
             Assert.Fail($"{dangling.Length} dangling reference(s) in published bodies:{Environment.NewLine}"
                 + string.Join(Environment.NewLine, dangling) + Environment.NewLine
                 + "A dangling reference reads as a complete instruction while withholding what it points at: "
-                + "get-guidance answers an unknown name with availableGuides only, and an undeclared route "
+                + "get-guidance answers an unknown name with a not-found error, and an undeclared route "
                 + "returns nothing. Point it at a declared itemId/topicId, uri or legacyUris entry.");
         }
     }
@@ -188,7 +198,9 @@ public sealed class ReferenceIntegrityTests
                 continue;
             }
             yield return new(GuideNameKind, body.SourcePath, LineOf(text, match.Groups[1].Index), $"name={name}",
-                library.GuideNames.Contains(name) ? null : "no guidance-role itemId or topicId");
+                library.GuideNames.Contains(name) || ClioCatalogNames.Contains(name)
+                    ? null
+                    : "no guidance-role itemId or topicId");
         }
         foreach (Match match in ProseGuideName.Matches(text))
         {

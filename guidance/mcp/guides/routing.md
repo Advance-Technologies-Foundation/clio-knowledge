@@ -1,7 +1,9 @@
 clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
-Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+Pick the domain, then the row (get-guidance name=...). From clio <CLIO-TBD>, `get-guidance name=list` returns the
+catalog, one `name: purpose` line per guide, and an unknown name fails with the closest names (an older
+clio answers any unknown name, `list` included, with the bare `availableGuides` list).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
 `esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
 how a guide points at a rule it does not own. Other backticks are ordinary code (columns, ops,
@@ -151,7 +153,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
-  - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
+  - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion

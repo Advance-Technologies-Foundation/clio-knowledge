@@ -63,7 +63,9 @@ one; read that article.
     `SendEmailUserTask` creates nothing): always key on the schema NAME, never on a caption.
   * create-business-process - build a NEW process from a JSON descriptor, and save it.
   * modify-business-process - edit an EXISTING process by an ordered list of operations.
-  * describe-business-process - read a process back as a structured graph; per element also
+  * describe-business-process - read a process back as a structured graph. From clio <CLIO-TBD> a large
+    process answers with a SUMMARY without uids, labels, element blocks or layout: to read any of those,
+    pass `mode=full` (the whole graph) or `element=<name>` (one element). Per element also
     `connections[]`, `deprecated` (retired user-task schema) and `writesConnectionsAtRuntime`. FALSE:
     the connections persist and compile but are never written - change the element kind (its runtime
     never writes them) or set `CreateActivity` true (its activity-creation gate is shut). `null`: not
@@ -116,7 +118,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON
    object itself; a clio that answers "must be a string" predates that - pass a string holding the
    same JSON.
-5. Verify with `describe-business-process` (element types, user-task names, parameter sources +
+5. Verify with `describe-business-process mode=full` (element types, user-task names, parameter sources +
    direction - an output you can map FROM has `isOutput:true`, not `isResult` - and the signal
    trigger), never with a raw `execute-esq`/`odata-read` of the process record.
 6. Change it later with `modify-business-process`, same shapes as a build. Ops: addElement /
@@ -145,8 +147,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process`.
-  No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction (`VwSysProcess` shows
-  `NeedInstall` and its siblings `true` on every freshly-saved process). WITHIN A PROCESS exactly two
+  (No `NeedXxx` column is a compile instruction: `process-modeling-details`.) WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
   without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task
@@ -160,7 +161,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
   value carried over from a process built earlier in the session is a guess, not context.
 
 == Modifying an existing process — safety rules (modify-business-process) ==
-- ALWAYS `describe-business-process` first, and re-describe after the edit to verify the result.
+- ALWAYS `describe-business-process mode=full` first, and re-describe after the edit to verify the result.
 - The modify path runs NO structural validation (only the create path validates the graph):
   `removeElement` / `removeFlow` can leave the process unreachable or with dangling paths and the save
   still succeeds. `removeElement` also CASCADES - it deletes every flow touching the element and the

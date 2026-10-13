@@ -99,7 +99,7 @@ way, which matters:
 The same is true of a typo in a real family: `[#SysSettingz.Foo#]` is an unrecognised family, not an
 unknown setting. Build the token yourself, in two steps:
 
-1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
+1. call `describe-business-process mode=full` and take the parameter's `uid` (describe reports `uid`; it does NOT
    return a ready-made meta-path, so there is nothing to copy — you assemble it);
 2. write the token around that UId, braces included:
    * a PROCESS parameter -> `[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`
