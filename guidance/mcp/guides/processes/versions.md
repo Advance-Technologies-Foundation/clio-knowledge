@@ -88,7 +88,8 @@ The fields:
   `versionsTruncatedAt`     - present only when the family was longer than the list published.
   `versionReadWarning`      - present only when the standing could NOT be established.
 
-Read `isActiveVersion` BEFORE you explain or edit anything. That is the whole reason the fields exist:
+Read `isActiveVersion` BEFORE you explain or edit anything (not for a build in progress:
+`process-version-writes`). That is the whole reason the fields exist:
 resolving a versioned process by `process-name` returns the root, and the root is normally inactive.
 Three outcomes, and only the first two are ordinary:
   * TRUE -- you hold the version that runs. Proceed under `process-modeling`'s modify rules: overwriting it
