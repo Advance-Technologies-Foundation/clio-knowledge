@@ -19,7 +19,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// Splitting process-modeling, app-modeling, workplaces and existing-app-maintenance into a core and a
 /// <c>-details</c> article removed the read-backs those articles caused on every run; this fixture is what
 /// keeps the split from eroding, because articles grow back: process-branch-conditions went from 19.8 to
-/// 20.3 KB in two days.
+/// 20.3 KB in two days. core-rules, read on every operation, was split into core-rules and core-rules-details the
+/// same way and is held to the same budget.
 /// </para>
 /// <para>
 /// Scoped to the pieces of that split, deliberately. A library-wide ratchet would freeze the articles other
@@ -77,7 +78,9 @@ public sealed class GuidanceInlineReplyBudgetTests
         "workplaces",
         "workplaces-details",
         "existing-app-maintenance",
-        "existing-app-maintenance-details"
+        "existing-app-maintenance-details",
+        "core-rules",
+        "core-rules-details"
     ];
 
     [Test]
