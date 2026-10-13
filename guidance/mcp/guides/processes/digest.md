@@ -5,6 +5,7 @@ Part of the process guide set. Build card: owners win; follow pointers.
 3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (retired: `CallUserTask`, `EmailUserTask`, `SendEmailUserTask`).
 4. ONE `get-target-package` (named/app `package`); on `success: false` ask, never guess. `create-business-process`: the descriptor as the JSON object itself, {name, caption, packageName, elements[{name, type, caption, block}], flows[{source, target, kind, condition, label}], parameters, mappings}.
 5. `describe-business-process`; `compile-creatio` only if the save warns.
+A tool refusing for a missing or older CrtProcessBuilder: STOP and ask the user before `install-process-builder` (`core-rules`).
 Set only what was asked; ask only an unsaid approver, performer or recipient.
 Types (else `process-element-catalog`): startEvent signalStart endEvent exclusiveGateway parallelGateway formulaTask(1.6.3.16+) subProcess(1.6.3.26+) scriptTask(1.6.6.30+); sendEmail approval openEditPage preconfiguredPage (never as a userTask); userTask + userTaskName or alias type readData changeData addData deleteData performTask changeAccessRights.
 == Names N1-N10 (`process-naming`: relabel, clash) ==
