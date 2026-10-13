@@ -1,5 +1,5 @@
 clio MCP app modeling guide
-Moved to `app-modeling-details`: what each `create-app-section` `error-class` means; `sync-schemas` resume rules; rare schema edits (display column, relabeling an inherited column, `Color` columns); the Git-first rule's `export-schema` and tool-contract clauses; the generated pages' default content; the evidence, timings and reasoning behind these rules. Read it when `create-app-section` fails, a `sync-schemas` batch aborts, you make one of those schema edits, or you capture schemas into a Git-first workspace.
+Moved to `app-modeling-details`: what each `create-app-section` `error-class` means; `sync-schemas` resume rules; rare schema edits (display column, relabeling an inherited column, redirecting an inherited lookup, `Color` columns); the Git-first rule's `export-schema` and tool-contract clauses; the generated pages' default content; the evidence, timings and reasoning behind these rules. Read it when `create-app-section` fails, a `sync-schemas` batch aborts, you make one of those schema edits, or you capture schemas into a Git-first workspace.
 
 Profile language (detect once, reuse, ask on failure)
 - Before creating ANY entity (application, object, page, section, lookup, column), call `get-user-culture` ONCE per session to detect the profile language. Reuse it for all names, labels and captions; do not re-detect per entity (the server caches it per environment), only when the active environment changes.
@@ -59,7 +59,7 @@ Application modeling guardrails
 - Keep semantic types `Email`, `PhoneNumber`, `WebLink` (and `Color` for a swatch/hex value), not `ShortText`; they drive validation and component selection.
 - Image/photo fields (`crt.ImageInput`): `ImageLookup` ("Image link"), NOT binary `Image`; it references `SysImage` itself — no `reference-schema-name`.
 - `Date` and `Time` are write-time aliases of `DateTime` (also in `sync-schemas` `columns` / `update-operations`); expect `DateTime` from `get-entity-schema-properties`. For a date-only field set `pickerType: "date"` on its `crt.DateTimePicker`.
-- Changing a schema's display column, relabeling an inherited column, or adding a `Color` column: read `app-modeling-details` first.
+- Changing a schema's display column, relabeling an inherited column, creating a schema whose parent declares a lookup it must point elsewhere (for example a `BaseItemInFolder` child), or adding a `Color` column: read `app-modeling-details` first.
 
 Git-first workspace: capture DB-first schemas before pushing
 - This rule owns the create -> capture -> review -> push ordering for a workspace deployed with `push-workspace`.
