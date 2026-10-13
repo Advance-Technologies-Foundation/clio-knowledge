@@ -53,8 +53,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
         it again through this toolset only moves that lag. So if a caller still shows a caption the called
         process no longer has after a re-sync, ask the user to approve `install-process-builder`
         (`core-rules`) - the install restarts the
-        application, which drops the stale cache - then re-sync. Only when the package cannot be updated, ask
-        the USER to open the called process in the process designer and save it (no change needed), then
+        application, which drops the stale cache - then re-sync. When the package cannot be updated, or the user postpones the
+        install, ask the USER to open the called process in the process designer and save it (no change needed), then
         re-sync; that cure lasts only until the next save of the callee through an older toolset.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that

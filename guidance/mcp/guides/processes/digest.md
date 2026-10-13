@@ -61,8 +61,7 @@ page. Read the articles of the elements you actually use, and only those.
   read collection. They are read-only; do not plan around them.
 - The "Connected to" links of an Activity a task creates are NOT in a build descriptor - add the
   element, then `setConnections` (`process-activity-connections`).
-- An element not listed here, `useBackgroundMode`: `process-element-catalog`; reading a process
-  with read-only constructs: `process-element-catalog-details`.
+- An element not listed here, `useBackgroundMode`: `process-element-catalog`.
 
 == Names and codes, N1-N10 (owner: `process-naming`) ==
 - N1 process `caption`: sentence case. N2 process `name`: `<prefix><Object>_<Action>` in PascalCase
@@ -133,8 +132,8 @@ page. Read the articles of the elements you actually use, and only those.
   "mappings": [ { "elementName": "NotifyAccountOwner", "elementParameter": "<ParamName>",
     "processParameter": "AccountNameParameter" } ] }
 - `name` is the element handle used by `flows` (`source` / `target`) and `mappings` (`elementName`).
-  Owners: element block - its article; `filter` - `process-data-source-filters`; other
-  mapping sources - `process-parameters`; formula - `process-formulas`; flow condition -
+  Owners: an element's own block (readData, email, approval, ...) - its article; `filter` -
+  `process-data-source-filters`; a mapping source other than a process parameter - `process-parameters`; formula - `process-formulas`; flow condition -
   `process-branch-conditions`.
 
 == Changing an existing process (owners: `process-modeling`, `process-versions`, `process-sub-process-when`) ==
