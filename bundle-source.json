@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.127",
+  "libraryVersion": "1.15.133",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1482,7 +1482,7 @@
     {
       "itemId": "process-digest",
       "title": "Process build digest",
-      "description": "The build CARD for Creatio business processes, under 3 KB: owns no rule; gives the build recipe, the D1/D2/D4 check, N1-N10 and the buildable types in short (owners process-modeling, process-sub-process-when, process-naming, process-element-catalog) and names the ONE article to read per element. Read it instead of those four for an ordinary build; an edit of an existing process starts at process-versions, then process-modeling for the modify safety rules.",
+      "description": "The build CARD for Creatio business processes, under 3 KB: owns no rule; gives the build recipe, the D1/D2/D4 check, N1-N10 and the buildable types in short (owners process-modeling, process-sub-process-when, process-naming, process-element-catalog) and names the ONE article to read per element. Read it instead of those four for an ordinary build, and follow the pointers of the articles it names; an existing process is never restructured unasked, and an edit of one starts at process-versions, then process-modeling for the modify safety rules.",
       "topicId": "creatio.process-digest",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-digest",
