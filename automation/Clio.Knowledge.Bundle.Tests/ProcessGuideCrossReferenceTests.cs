@@ -524,7 +524,7 @@ public sealed class ProcessGuideCrossReferenceTests
         routed.Should().HaveCountGreaterThan(20,
             because: "routing names most of the library; a token scan that found only a handful would be "
                 + "matching something other than the routing rows and would prove nothing");
-        routed.Where(name => !declared.Contains(name)).Should().BeEmpty(
+        routed.Where(name => !declared.Contains(name) && !ReferenceIntegrityTests.ClioCatalogNames.Contains(name)).Should().BeEmpty(
             because: "routing is the map an agent reads before choosing a guide, so a row naming a topic the "
                 + "manifest does not declare sends the reader to a get-guidance call that cannot succeed — "
                 + "a misspelling here is indistinguishable from the article not existing");

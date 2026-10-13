@@ -81,7 +81,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   `values`. On ANY change of
   the target or the selection the stored record filter clears unless it already targets the incoming
   selection object — issue a `setFilter` in the same operations array when it cleared.
-- `describe-business-process` reads the block back with the EFFECTIVE mode, i.e. what the designer's card
+- `describe-business-process mode=full` reads the block back with the EFFECTIVE mode, i.e. what the designer's card
   shows: an element with no stored mode reads as `selection` when it stores a selection object and `one`
   otherwise. A stored "Column from this selection" decodes back to `selectionColumn` when its column resolves
   on that selection object, and stays column-only when it does not.

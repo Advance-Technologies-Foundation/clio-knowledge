@@ -46,7 +46,7 @@ separate at their own rows. Two branches therefore look like one exit each only 
 non-trunk branch to place; three already share.
 
 == Reading the diagram back ==
-`describe-business-process` returns the DIAGRAM as well as the graph: `position` (a shape's top-left
+`describe-business-process mode=full` returns the DIAGRAM as well as the graph: `position` (a shape's top-left
 corner) and `size` per element, and `geometry` per flow — `start`, `points[]`, `end`, `exitSide`,
 `entrySide`, i.e. where the connector actually runs.
 

@@ -5,7 +5,7 @@ This article is the authoritative owner of the RUN-TIME EVIDENCE behind a column
 used as a value source (the end-to-end run, the UId token measured in an `expression` mapping and a
 Formula body, and the modify-path condition run), of HOW the server resolves such a source, of why a
 record trigger is a signal start, and of how
-`describe-business-process` reads back a column source and a Modify data value the write path would
+`describe-business-process mode=full` reads back a column source and a Modify data value the write path would
 refuse. Split out of `process-data-elements`, which keeps the record triggers, the Modify data block,
 every form, refusal, version gate and MUST, and the read-back-proves-authoring-not-routing rule; read
 that first. Nothing here relaxes a rule stated there.
@@ -37,6 +37,6 @@ against the target and writes the platform's three-segment meta path, so there a
 (same spelling, a fitting type, a loaded column).
 
 == Modify data element (changeData) — read-back of a value the write path would refuse ==
-When `describe-business-process` reads a `changeData` block back, a stored value the write path would refuse —
+When `describe-business-process mode=full` reads a `changeData` block back, a stored value the write path would refuse —
 a non-text or empty constant, or a binding that fails the type check — reads back as its COLUMN ALONE rather
 than as something you cannot write back, and any other formula comes back as its raw `[#…#]` in `expression`.

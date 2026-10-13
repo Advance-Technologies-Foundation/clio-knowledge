@@ -49,7 +49,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   on a clear entry is rejected. Clearing an already-unbound column is a no-op, not an error. It REPORTS
   what it cleared, and you need that: a cleared connection disappears from describe, so afterwards
   "cleared" and "never bound" are indistinguishable from the read-back alone.
-- READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
+- READ IT BACK with `describe-business-process mode=full`: each element carries `connections[]`, every entry giving
   both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
   can feed it straight back — with FOUR exceptions that refuse on re-apply (listed in
   `process-activity-connections-details`), none of them values you wrote: they are what a designer, an

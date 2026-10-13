@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.139",
+  "libraryVersion": "1.15.142",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -523,7 +523,7 @@
     {
       "itemId": "workplaces",
       "title": "Workplaces",
-      "description": "Guides Creatio navigation workplace management: creating, updating and deleting a workplace, granting or removing role visibility, adding, removing and moving sections, and shipping every change as a package data binding.",
+      "description": "Guides Creatio navigation workplace management: placing a section in a workplace, granting roles and moving an app out of My applications with the place-section-in-workplace tool after asking where it belongs and who sees it; updating and deleting a workplace, removing role visibility or a section, home-page and My applications follow-ups by hand; and shipping every manual change as a package data binding.",
       "topicId": "creatio.workplaces",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/workplaces",
@@ -537,7 +537,7 @@
     {
       "itemId": "workplaces-details",
       "title": "Workplace deletion, removals and evidence",
-      "description": "Owns the rarer workplace operations and the evidence behind the workplaces rules: the ordered procedure for deleting a workplace (binding names read first, children before the parent, which child rows go through remove-data-binding-row-db versus odata-delete) and recovery when the parent was deleted first; removing one section placement or a role grant, and changing a role; moving a section into a product-owned workplace and the exact error a missing target binding raises; when the My applications bindings may be removed; and the verified evidence behind the client-type, binding-column, Position, home-page and session-cache rules. Split out of workplaces.",
+      "description": "Owns the rarer workplace operations and the evidence behind the workplaces rules: the MANUAL placement recipe (create a workplace, grant a role, add or move a section by hand) for when place-section-in-workplace is unavailable or fails; the ordered procedure for deleting a workplace (binding names read first, children before the parent, which child rows go through remove-data-binding-row-db versus odata-delete) and recovery when the parent was deleted first; removing one section placement or a role grant, and changing a role; moving a section into a product-owned workplace and the exact error a missing target binding raises; when the My applications bindings may be removed; and the verified evidence behind the client-type, binding-column, Position, home-page and session-cache rules. Split out of workplaces.",
       "topicId": "creatio.workplaces-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/workplaces-details",

@@ -2,7 +2,7 @@ clio MCP process-activity-connections-details guide — the R1-R20 connection ru
 
 A details article of the process guide set, reached through `process-activity-connections`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of the R1-R20 connection rules (the ids `validate-process-graph`
-reports), the four stored connection shapes that read back from `describe-business-process` but refuse
+reports), the four stored connection shapes that read back from `describe-business-process mode=full` but refuse
 on re-apply together with what else a `connections[]` entry carries, and the mechanism that lets a
 connection write when the registration step is skipped. Split out of `process-activity-connections`,
 which keeps the "Connected to" links themselves — `setConnections` and `clearConnections`, the sources,

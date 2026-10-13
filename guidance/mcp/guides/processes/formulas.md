@@ -8,8 +8,7 @@ formula, and what the server validates and refuses. The BRANCH itself, including
 hazard of clearing the last one, belongs to `process-branch-conditions`.
 A Formula ELEMENT (`formulaTask`) takes its `formula` block - the body plus exactly one target - from
 `process-element-catalog-details`.
-Moved to `process-formulas-details`: how the designer shows a stored formula and how it reads back in
-`describe-business-process`, the verbatim refusal table with each fix, and what an older package did with
+Moved to `process-formulas-details`: how the designer shows a stored formula and how it reads back, the verbatim refusal table with each fix, and what an older package did with
 a formula, plus the evidence behind several rules below. Read it when you verify a stored formula or condition, work from a formula as the designer
 displays it, match a refusal message to its fix, or meet a refusal about the package version.
 == Formulas (`expression` sources and flow conditions) ==
@@ -64,7 +63,7 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 
 | family | literal form |
 |---|---|
-| process / element parameter | a UId meta-path you BUILD from `describe-business-process` — see below |
+| process / element parameter | a UId meta-path you BUILD from `describe-business-process mode=full` — see below |
 | system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
 | system setting | `[#SysSettings.Code#]`; a form carrying the value-type suffix also round-trips. an UNSET setting THROWS at run time — do not reference one that may be empty without a fallback |
 | lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
@@ -99,7 +98,7 @@ way, which matters:
 The same is true of a typo in a real family: `[#SysSettingz.Foo#]` is an unrecognised family, not an
 unknown setting. Build the token yourself, in two steps:
 
-1. call `describe-business-process` and take the parameter's `uid` (describe reports `uid`; it does NOT
+1. call `describe-business-process mode=full` and take the parameter's `uid` (describe reports `uid`; it does NOT
    return a ready-made meta-path, so there is nothing to copy — you assemble it);
 2. write the token around that UId, braces included:
    * a PROCESS parameter -> `[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`
