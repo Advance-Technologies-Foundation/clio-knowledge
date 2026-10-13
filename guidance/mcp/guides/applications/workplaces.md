@@ -41,12 +41,8 @@ Navigation `SysWorkplace` is NOT `SysWorkspace` (the dev configuration workspace
 `create-workspace` (a local project folder). This guide covers navigation `SysWorkplace` only.
 
 ## Ask where things belong before you write
-Placement and audience are the user's decisions. When the request names no target workplace, STOP
-and ask before any NAVIGATION write (any of the three tables or their bindings). `create-app` makes
-such a write itself (it creates `My applications` and the section placement), so for a NEW app ask
-BEFORE `create-app`, in the same turn you confirm the environment — at the latest right after
-`create-app`, before anything further.
-Offer:
+`core-rules` (Navigation placement) owns WHEN to ask, and what to do when you cannot; it covers every
+NAVIGATION write (any of the three tables or their bindings). When it has you ask, offer:
 - a NEW workplace named for the app — recommend it when SCAFFOLDING a new app. Do NOT lead with it
   when adding a section to an app that already has its own workplace: `Name` is not unique, so a
   second same-named workplace is created silently and competes for every binding. Read
