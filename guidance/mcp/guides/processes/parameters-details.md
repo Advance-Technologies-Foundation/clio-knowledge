@@ -126,12 +126,12 @@ date/time/lookup default-value rule; read that first.
   { "name": "ReadModifiedRequest", "caption": "Read modified request", "type": "readData", "readData": { "source": "UsrRequest", "mode": "first" },
     "filter": { "object": "UsrRequest", "logicalOperation": "and", "conditions": [ { "column": "Id",
       "comparison": "equal", "elementParameter": { "elementName": "RequestModifiedSignal", "parameter": "RecordId" } } ] } },
-  { "name": "SetDaysLeftFromAdded", "type": "formulaTask", "caption": "Set days left",
-    "formula": { "body": "[#ReadAddedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeft" } },
-  { "name": "SetDaysLeftFromModified", "type": "formulaTask", "caption": "Set days left",
-    "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeft" } }
+  { "name": "SetDaysLeftFromAddedRequest", "type": "formulaTask", "caption": "Set days left from added request",
+    "formula": { "body": "[#ReadAddedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeftParameter" } },
+  { "name": "SetDaysLeftFromModifiedRequest", "type": "formulaTask", "caption": "Set days left from modified request",
+    "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeftParameter" } }
 ]
 ```
   Flow each read into its own Formula and both Formulas into the shared next step; `mappings[]` carries
-  no `targetProcessParameter` entry for `DaysLeft`. One mapping per branch instead is the shape the build
+  no `targetProcessParameter` entry for `DaysLeftParameter`. One mapping per branch instead is the shape the build
   warns about, and it reads the default on every run but one branch's.

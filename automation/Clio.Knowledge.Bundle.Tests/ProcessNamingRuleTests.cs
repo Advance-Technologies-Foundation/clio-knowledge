@@ -203,7 +203,7 @@ public sealed class ProcessNamingRuleTests
     /// breaking N8's suffix. A parameter code is also the field a model is likeliest to invent from the
     /// request text rather than copy, which makes it the rule most exposed to a bad example.
     /// </summary>
-    private const string ParameterCodeKeys = @"""processParameter"":\s*""([^""]+)""";
+    private const string ParameterCodeKeys = @"""(?:processParameter|resultProcessParameter)"":\s*""([^""]+)""";
 
     /// <summary>
     /// The verbs the guide's activity captions open with. A curated list is the only way to check
@@ -216,7 +216,7 @@ public sealed class ProcessNamingRuleTests
         "Modify", "Notify", "Open", "Publish", "Read", "Send", "Set", "Show", "Start", "Update", "Wait"
     ];
 
-    private const string ActivityTypes = "userTask|sendEmail|readData|changeAccessRights|performTask|preconfiguredPage";
+    private const string ActivityTypes = "userTask|sendEmail|readData|changeAccessRights|performTask|preconfiguredPage|formulaTask";
     private const string EventTypes = "startEvent|signalStart|endEvent";
 
     [Test]
@@ -498,6 +498,7 @@ public sealed class ProcessNamingRuleTests
         ("performTask", "", ""),
         ("readData", "", ""),
         ("sendEmail", "", ""),
+        ("formulaTask", "", ""),
         ("preconfiguredPage", "", "")
     ];
 
