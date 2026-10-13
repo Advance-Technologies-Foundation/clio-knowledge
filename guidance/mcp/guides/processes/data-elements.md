@@ -30,7 +30,7 @@ filter; see `process-access-rights`.
   rejects it for "added"/"deleted", and rejects a name that is not a column on the entity. Use entity COLUMN
   names (e.g. `Amount`), not field captions; omit `changedColumns` (or pass []) to fire on any change — but an
   array that contains ONLY blank entries is rejected, since that reads as a mistake rather than as a request
-  to widen the trigger (blanks mixed with real names are simply ignored). This is
+  to widen the trigger (blanks mixed with real names are ignored). This is
   INDEPENDENT of `filter`: `changedColumns` narrows WHICH columns count as a change, `filter` narrows WHICH
   records qualify — combine them freely.
 - To fire the trigger ONLY for records matching a condition (e.g. only when Name = "Start"), add a
@@ -185,7 +185,7 @@ filter; see `process-access-rights`.
   target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`.
   MUST: that `setFilter` REPLACES the element's whole filter — read the current one back with
   `describe-business-process mode=full` and send it complete, or the records this element updates silently widen.
-  `process-data-source-filters` owns the op and its read-back. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
+  `process-data-source-filters` owns the op and its read-back. `describe-business-process mode=full` reads the block back (`source` is null when the element's target object is set by a formula/mapping, not a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
   process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
   `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.

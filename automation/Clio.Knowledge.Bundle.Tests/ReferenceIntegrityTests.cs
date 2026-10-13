@@ -41,14 +41,14 @@ public sealed class ReferenceIntegrityTests
     private static readonly char[] SentencePunctuation = ['.', ',', ';', ':', ')'];
 
     /// <summary>
-    /// Names <c>get-guidance</c> answers itself with the guide CATALOG instead of an article (clio returns it
-    /// for <c>list</c>, <c>index</c>, <c>catalog</c> and <c>help</c>), so a citation of one resolves without a
-    /// manifest entry. Compared exactly, like every other name: guidance writes them in lower case.
+    /// The one name <c>get-guidance</c> answers with the guide CATALOG instead of an article that guidance cites,
+    /// so a citation of it resolves without a manifest entry. Only <c>list</c>: routing cites it behind the clio
+    /// version that added the catalog. The other aliases clio accepts are cited nowhere, and exempting them would
+    /// let a new citation of one pass with no such version gate, although a clio without the catalog answers it
+    /// with a not-found error. Compared exactly, like every other name, in both the <c>name=</c> and the prose
+    /// form.
     /// </summary>
-    internal static readonly HashSet<string> ClioCatalogNames = new(StringComparer.Ordinal)
-    {
-        "list", "index", "catalog", "help"
-    };
+    internal static readonly HashSet<string> ClioCatalogNames = new(StringComparer.Ordinal) { "list" };
 
     /// <summary>
     /// <c>name=&lt;id&gt;</c> as routing and articles write it. The lookbehind skips other tools' arguments
@@ -150,7 +150,8 @@ public sealed class ReferenceIntegrityTests
             "[sibling](core-rules.md) [bad](../missing.md#anchor) [web](https://example.com) [here](#top)",
             "name=core-rules- name=core-rules_ name=Core-rules get-guidance `Core-rules`",
             "docs://knowledge/lib/core-rules?bad and docs://mcp/guides/{family}/{guide}",
-            "**docs://knowledge/lib/core-rules** _docs://mcp/guides/core-rules_ docs://mcp/guides/core-rules_ get-guidance `name=core-rules`");
+            "**docs://knowledge/lib/core-rules** _docs://mcp/guides/core-rules_ docs://mcp/guides/core-rules_ get-guidance `name=core-rules`",
+            "get-guidance name=list and get-guidance `list`; name=help name=index get-guidance `catalog` name=List");
         const string catalog = "schemaVersion: 0\nid: example-renamed\ntitle: x\n";
         const string quotedCatalog = "schemaVersion: 0\nid: \"example\"\n";
         const string commentedCatalog = "schemaVersion: 0\nid: 'example'  # stable\r\ntitle: x\n";
@@ -176,8 +177,12 @@ public sealed class ReferenceIntegrityTests
             $"guidance/core-rules.md:9: name=core-rules- -> {NoGuide}",
             $"guidance/core-rules.md:9: name=core-rules_ -> {NoGuide}",
             $"guidance/core-rules.md:9: name=Core-rules -> {NoGuide}",
+            $"guidance/core-rules.md:12: name=help -> {NoGuide}",
+            $"guidance/core-rules.md:12: name=index -> {NoGuide}",
+            $"guidance/core-rules.md:12: name=List -> {NoGuide}",
             $"guidance/core-rules.md:4: get-guidance `also-missing` -> {NoGuide}",
             $"guidance/core-rules.md:9: get-guidance `Core-rules` -> {NoGuide}",
+            $"guidance/core-rules.md:12: get-guidance `catalog` -> {NoGuide}",
             $"guidance/core-rules.md:7: docs://mcp/guides/operations/core-rules -> {NoRoute}",
             $"guidance/core-rules.md:10: docs://knowledge/lib/core-rules?bad -> {NoRoute}",
             $"guidance/core-rules.md:11: docs://mcp/guides/core-rules_ -> {NoRoute}",
@@ -207,7 +212,9 @@ public sealed class ReferenceIntegrityTests
             string name = match.Groups[1].Value;
             yield return new(GuideNameKind, body.SourcePath, LineOf(text, match.Groups[1].Index),
                 $"get-guidance `{name}`",
-                library.GuideNames.Contains(name) ? null : "no guidance-role itemId or topicId");
+                library.GuideNames.Contains(name) || ClioCatalogNames.Contains(name)
+                    ? null
+                    : "no guidance-role itemId or topicId");
         }
         foreach (Match match in Route.Matches(text))
         {

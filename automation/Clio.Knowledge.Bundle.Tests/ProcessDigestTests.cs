@@ -183,7 +183,7 @@ public sealed class ProcessDigestTests
         ("process-modeling", "BUSINESS decision the request did not make - who approves, who performs, whom to notify - ASK"),
         ("process-modeling", "Do NOT run `compile-creatio` to"),
         ("process-modeling", "unless its save WARNED it cannot run until compiled (a `scriptTask`; then pass `process-name`)"),
-        ("process-modeling", "read status back with `describe-business-process`"),
+        ("process-modeling", "read status back with `describe-business-process mode=full`"),
         ("process-modeling", "On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB and published"),
         ("process-modeling", "\"name\": \"UsrAccount_Onboard\", \"caption\": \"Account onboarding\""),
         ("process-modeling", "it is `name`, not `id`"),

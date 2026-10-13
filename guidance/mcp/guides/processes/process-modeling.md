@@ -64,7 +64,8 @@ one; read that article.
   * create-business-process - build a NEW process from a JSON descriptor, and save it.
   * modify-business-process - edit an EXISTING process by an ordered list of operations.
   * describe-business-process - read a process back as a graph; from clio <CLIO-TBD> a large
-    one is a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Per element also
+    one is a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Every `mode=full` in these
+    guides: on clio older than <CLIO-TBD>, omit `mode`. Per element also
     `connections[]`, `deprecated` (retired user-task schema) and `writesConnectionsAtRuntime`. FALSE:
     the connections persist and compile but are never written - change the element kind (its runtime
     never writes them) or set `CreateActivity` true (its activity-creation gate is shut). `null`: not
@@ -122,7 +123,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 5. Verify with `describe-business-process mode=full` (element types, user-task names, parameter sources +
    direction - an output you can map FROM has `isOutput:true`, not `isResult` - and the signal
    trigger), never with a raw `execute-esq`/`odata-read` of the process record. A runtime check is
-   optional (the user's choice); use `run-process` or `trigger-smoke` (`core-rules`).
+   optional (the user's choice); use `run-process` or `trigger-smoke` (`core-rules-details`).
 6. Change it later with `modify-business-process`, same shapes as a build. Ops: addElement /
    removeElement / addFlow / removeFlow / addParameter / addMapping / setParameter / removeParameter /
    setFilter / clearFilter / setSignal (a signalStart's trigger + tracked columns, in place) / setFlow /
@@ -148,7 +149,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   and published, so a signal won't fire yet.
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
-  (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process`.
+  (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process mode=full`.
   No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction. WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
@@ -177,7 +178,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   `process-branch-conditions` owns the same rule for `setFlow` and `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- Constructs the builder cannot create (inclusive and event-based gateways, timer/message starts,
+- Constructs the builder cannot create (inclusive/event-based gateways, timer/message starts,
   intermediate events, `webService`; full list in `process-element-catalog`) survive a save untouched
   as data - but you CAN still remove or rewire them by name and nothing will warn you. Gateway
   ELEMENTS, DEFAULT flows and the Formula element are buildable and NOT on that list
@@ -187,8 +188,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   existing one - retargeting its called process, deleting it, editing its parameters - is high-risk.
   The build path REFUSES a retarget while anything reads from the element, or did when the request
   started; the remedy is in `process-sub-process` - never clear the reader in the same batch. A
-  MULTI-INSTANCE element (a common state) is de-converted, edited with every guard and re-converted
-  (`process-sub-process`). `validate-process-graph` has no parameter or mapping rule, so planning
+  MULTI-INSTANCE one is de-converted, edited and re-converted (`process-sub-process`). `validate-process-graph` has no parameter or mapping rule, so planning
   catches none of this. A caller reporting a mapping that resolves to nothing: see the
   stranded-mapping-row case in `process-modeling-details`. CONDITIONAL flows belong on this list even
   though you CAN build one (`process-branch-conditions` owns the detail): removing the last conditional
@@ -198,8 +198,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   as high-risk: prefer additive edits, do not remove or rewire those elements, and tell the user what
   you left alone.
 - Every modify re-draws the WHOLE diagram; where that would REPLACE an arrangement the server REFUSES
-  the edit and asks rather than flattening it. Read `process-diagram-layout` (that refusal and its two
-  answers) before editing a process whose diagram matters.
+  the edit and asks rather than flattening it. Read `process-diagram-layout` before editing a process whose diagram matters.
 - You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not
   a build in progress (`process-version-writes`): a modify overwrites the ONE schema you named (a process
   can be a family of them), and the overwrite is irreversible either way. TRUE: you would overwrite the

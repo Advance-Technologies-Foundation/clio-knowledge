@@ -13,7 +13,7 @@ directions of that conversion are the platform's; you write the C# spelling and 
 renders the friendly form.
 
 CONFIRM IT WITHOUT THE DESIGNER. No tool returns a designer link, so do not offer one — an invented URL is
-worse than none. The check you can actually run is `describe-business-process`: a stored formula reads back
+worse than none. The check you can actually run is `describe-business-process mode=full`: a stored formula reads back
 on the parameter as `source: "Script"` with your expression in `value` (NOT in an `expression` field — the
 describe contract has no such field on a parameter). `source: "ConstValue"` there means the formula was
 never stored as one and a constant went in instead. For a flow, the read-back is `kind: "conditional"` with

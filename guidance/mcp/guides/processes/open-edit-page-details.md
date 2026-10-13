@@ -3,8 +3,7 @@ clio MCP process-open-edit-page-details guide — the Open edit page element's e
 A details article of the process guide set, reached through `process-open-edit-page`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of `useBackgroundMode` on the Open edit page element, the measured
 evidence behind its Log activity default, why its record type follows the page, the designer's value-source
-menu for its fields, the `showPage` value written at create, and reading an existing element back with
-`describe-business-process`. Split out of `process-open-edit-page`, which keeps the `openEditPage` block, every
+menu for its fields, the `showPage` value written at create, and reading an existing element back. Split out of `process-open-edit-page`, which keeps the `openEditPage` block, every
 field rule and refusal, the destructive-change guards and the ROUTING rule for choosing this element; read that
 first.
 
@@ -46,7 +45,7 @@ leave the required Column empty, and `describe` reports that faithfully as `enab
 a switched-on list that produces no results. Such a block cannot be fed straight back (the write path requires
 the column), so supply a column or `enabled: false` when re-applying.
 
-`describe-business-process` reads the configuration back as the element's `openEditPage` block, round-trippable
+`describe-business-process mode=full` reads the configuration back as the element's `openEditPage` block, round-trippable
 into a build/modify block with ONE asymmetry — the read reports pre-filled values AND a record when the schema
 carries both (the write path refuses that pair), so drop the one that does not belong to the reported `editMode`
 before re-applying, and feed `pageTypeUId` back as `recordType`. A `performer` of `null` in the read-back means

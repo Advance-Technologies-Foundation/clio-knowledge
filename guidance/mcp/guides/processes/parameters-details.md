@@ -94,7 +94,7 @@ date/time/lookup default-value rule; read that first.
     code rename can leave the row EMPTY while the caller's stored mapping is intact. An empty row means
     "the carry-over did not match", not that your data is gone. Do not re-map on the strength of one, and
     DO NOT SAVE the caller from that card - re-deriving drops the unmatched parameter's mapping row in
-    memory, and saving persists that. Close it and read `describe-business-process`, which reports every
+    memory, and saving persists that. Close it and read `describe-business-process mode=full`, which reports every
     parameter of a sub-process element with its `source` and `value`. (Observed once, 2026-09-17, and only
     when the caption was renamed alongside the code. Nothing in the client reads the caption on this path,
     so the condition is unexplained - assume EITHER rename can do it until it is re-measured.)

@@ -15,13 +15,18 @@ To place a section in a workplace, grant roles, or move an app out of `My applic
 `place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio <CLIO-TBD> and later).
 Arguments: `environment-name`, `section-code`, `workplace-name`, `package-name`, `roles`; optional
 `mode` `existing`|`new`|`none`, `client-type` (`web` default), `remove-from-my-applications` (default
-true), `position`. It resolves client type, section and roles, binds every row with `Type` and
-`LoaderId`, never duplicates or deletes, and is safe to re-run. A move with no roles and
+true), `position`. It resolves client type, section and roles, binds each row it owns (a
+workplace with `Type` and `LoaderId`), never duplicates or deletes, and is safe to re-run. A move with no roles and
 `remove-from-my-applications=true` is refused (the section would become invisible). Relay `warnings`
 (a section code, workplace or role name shared by several rows is resolved by a rule or refused: say
 which row it took), report `section-workplaces` and give the user `next-step` (log out and in).
-A product workplace (`Sales`, `Service`, ...) as the target is NOT verified: surface that to the user
-and prefer one your own package owns (`workplaces-details`).
+A workplace another package ships (a product one: `Sales`, `Service`, ...) is used but never bound
+into yours: the tool warns that installing your package needs that one, refuses a `position` change,
+and leaves that package's existing grants and placements to it. It still binds into your package the
+grant of every role you pass that no other package ships (a new one, or an existing live-only one),
+and then ships it to every environment installing your package: for such a workplace pass a role only after the user explicitly agrees to ship its grant everywhere; otherwise
+omit it and grant live-only (unbound) by hand (`workplaces-details`, manual placement). Such a target
+is NOT verified: surface that to the user and prefer a workplace your own package owns.
 It takes no `confirm`, and it does not choose for you: ask the questions below FIRST, then pass the
 user's workplace and roles. Do by hand only what it does not do — deletes and removals (Deleting a
 workplace, `workplaces-details`), home pages (`home-page`, and the `My applications` check below), a
@@ -87,7 +92,8 @@ Pick the narrowest role that satisfies the request. If the request scopes the ap
 an existing target workplace's `SysAdminUnitInWorkplace` rows should match it; if they do not,
 surface the mismatch and confirm rather than silently granting access. Before granting on a workplace
 another package binds (`SysPackageSchemaData` filtered by `SysSchema.Name = 'SysWorkplace'`), say so:
-a bound grant is EXPORTED to every environment installing your package.
+a bound grant is EXPORTED to every environment installing your package, so keep it live-only (unbound)
+unless the user explicitly agrees to ship it everywhere, on the tool path too.
 
 ## Client type
 A workplace belongs to one client type (a web workplace never appears in Creatio Mobile, and vice

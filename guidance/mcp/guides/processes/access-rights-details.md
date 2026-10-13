@@ -21,7 +21,7 @@ VERSION BOUNDARIES - there are TWO, and they are different questions:
     installs whatever archive YOUR clio bundles, so a clio old enough to lack the check also installs
     a package old enough to discard the block.
   On a clio or an environment below those boundaries, do not treat the absence of a warning as
-  evidence: read the process back with `describe-business-process` yourself.
+  evidence: read the process back with `describe-business-process mode=full` yourself.
 MUST, owned by `process-access-rights`, which states it in full: that read-back proves only that the
 `accessRights` block LANDED, never that a permission changed, so before you report a REVOKE as applied,
 read the permissions on a record the filter matched with `get-record-rights`.

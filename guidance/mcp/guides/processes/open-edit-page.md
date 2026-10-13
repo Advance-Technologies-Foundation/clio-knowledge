@@ -10,7 +10,7 @@ shape live in `process-modeling`; the element catalog and what is buildable toda
 `process-element-catalog`; naming rules for the caption and code live in
 `process-naming`; the record filter this element shares with the data elements is owned by
 `process-data-source-filters`. Do not infer a rule that lives in one of those from what this article says.
-MOVED to `process-open-edit-page-details`: `useBackgroundMode` on this element, the measured Log activity default, why the record type follows the page, the designer's value-source menu, the `showPage` value written at create, and reading an existing element back with `describe-business-process`. Read it BEFORE you set `useBackgroundMode` here, when a step will not complete although its completion condition is met, or before you feed a read-back block into a write; an ordinary build needs only this article.
+MOVED to `process-open-edit-page-details`: `useBackgroundMode` on this element, the measured Log activity default, why the record type follows the page, the designer's value-source menu, the `showPage` value written at create, and reading an existing element back. Read it BEFORE you set `useBackgroundMode` here, when a step will not complete although its completion condition is met, or before you feed a read-back block into a write; an ordinary build needs only this article.
 MUST NOT, unless the request asks for it: set `useBackgroundMode: true` on this element - an Open edit page step with the flag ON was measured not to resume (the measurement is in `process-open-edit-page-details`).
 
 == The element and its block ==

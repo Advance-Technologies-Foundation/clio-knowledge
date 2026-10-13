@@ -41,7 +41,7 @@ A FOURTH cause produces the same symptom with a different fix: an environment wh
 CrtProcessBuilder predates this element DISCARDS the whole `accessRights` block while deserializing and
 still answers success, leaving the element unconfigured. A clio that carries the accessRights read-back
 check detects this one for you: it reads the process back after the operation and warns when the block
-did not land, or when the read-back could not be obtained at all. Treat either warning as "the
+did not land, or when the read-back failed. Treat either warning as "the
 permissions were NOT changed".
 But be precise about what that proves: `describe-business-process` is a process DEFINITION read. It
 confirms the `accessRights` block LANDED — the case above — and it proves NOTHING about whether any
@@ -235,7 +235,7 @@ showing the element and the object whose filter is being cleared, and still gett
   element, so one sent BEFORE the retarget is cleared by it (see `process-data-elements`).
 - A present-but-blank `object` is refused; omit it to keep the current target.
 
-== Read-back (describe-business-process) ==
+== Read-back (describe-business-process mode=full) ==
 A `selectedEmployees` filter decodes when stored in the modern format; a legacy `FilterEdit`
 value reports the entry without its filter. A stored-but-undecodable collection reports as an EMPTY
 array, but `addUnreadable`/`removeUnreadable` say how many entries could NOT be reported (-1 when the

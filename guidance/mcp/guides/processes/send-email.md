@@ -134,7 +134,7 @@ result contradicts a rule here or a user disputes one.
   parameter (verified: zero specimens of `[Parameter].[EntityColumn]` without an `[Element]`; the designer
   offers column drill only on the Elements tab), so to email a record's column read it with a data element
   FIRST and drill THAT output. An unknown parameter/element/column is REJECTED naming what was missing, so
-  DISCOVER exact names with `describe-business-process` (or define the parameter) first — do not guess; column
+  DISCOVER exact names with `describe-business-process mode=full` (or define the parameter) first — do not guess; column
   names are matched case-sensitively. A whole raw `<img data-value="[#…#]">` token (or a bare `[#…#]` formula)
   written by hand passes through unchanged (the escape hatch). NOTE `{{…}}` is NOT clio macro syntax — that is
   the content designer's editable template fields (`{{#index::Title#}}`, New String/Text/Picture/Color), a
@@ -155,7 +155,7 @@ result contradicts a rule here or a user disputes one.
   The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
   recipient's value and saving DELETES the parameter (`saveRecipients` calls `removeRecipient` on an emptied
   row, which calls `removeParameter`, which removes it from the element).
-  `describe-business-process` reads the configuration back as the element's `email` block: `hasBody` is a
+  `describe-business-process mode=full` reads the configuration back as the element's `email` block: `hasBody` is a
   presence flag, and `body` echoes the HTML with the process-macro tokens DECODED back into the same
   `[[param:…]]` / `[[element:…]]` author form — so on a MODIFY you can read the current body and edit it in
   place.
