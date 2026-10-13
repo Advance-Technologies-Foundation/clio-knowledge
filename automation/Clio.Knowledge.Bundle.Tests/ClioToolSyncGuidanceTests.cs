@@ -85,6 +85,29 @@ public sealed class ClioToolSyncGuidanceTests
             because: "the fallback keeps the move recipe");
     }
 
+    [Test]
+    [Description("A runtime check stays optional, and when an agent makes one it is routed to the verification tools.")]
+    public void RuntimeVerification_ShouldBeOptionalAndRoutedToTheTools()
+    {
+        string coreRules = Collapse(Read("guidance/mcp/guides/core-rules.md"));
+        string modeling = Collapse(Read("guidance/mcp/guides/processes/process-modeling.md"));
+
+        coreRules.Should().Contain("A runtime check is optional and the user's choice",
+            because: "the routing must not turn verification into a duty");
+        foreach (string clause in new[]
+        {
+            "`run-process` with `wait`", "`watch` (reports the records the run created as `created`)",
+            "`cleanup` (deletes only records you created)", "`trigger-smoke` for a record-triggered (signal) process",
+            "`odata-delete` with `dry-run`, `ids` or `cascade`"
+        })
+        {
+            coreRules.Should().Contain(clause,
+                because: "without the tools named, agents hand-roll create/sleep/read/delete loops of 8-20 calls");
+        }
+        modeling.Should().Contain("A runtime check is optional (the user's choice); use `run-process` or `trigger-smoke` (`core-rules`).",
+            because: "the build recipe's verify step is where an agent decides how to check its process");
+    }
+
     private static string Read(string relativePath) =>
         ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath);
 

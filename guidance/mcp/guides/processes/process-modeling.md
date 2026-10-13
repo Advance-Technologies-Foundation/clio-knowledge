@@ -120,7 +120,8 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
    same JSON.
 5. Verify with `describe-business-process mode=full` (element types, user-task names, parameter sources +
    direction - an output you can map FROM has `isOutput:true`, not `isResult` - and the signal
-   trigger), never with a raw `execute-esq`/`odata-read` of the process record.
+   trigger), never with a raw `execute-esq`/`odata-read` of the process record. A runtime check is
+   optional (the user's choice); use `run-process` or `trigger-smoke` (`core-rules`).
 6. Change it later with `modify-business-process`, same shapes as a build. Ops: addElement /
    removeElement / addFlow / removeFlow / addParameter / addMapping / setParameter / removeParameter /
    setFilter / clearFilter / setSignal (a signalStart's trigger + tracked columns, in place) / setFlow /
@@ -147,7 +148,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (r
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
   compiled (a `scriptTask`; then pass `process-name`), and do NOT read a raw system record
   (`odata-read`/`execute-esq`) to decide readiness - read status back with `describe-business-process`.
-  (No `NeedXxx` column is a compile instruction: `process-modeling-details`.) WITHIN A PROCESS exactly two
+  WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
   without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task
