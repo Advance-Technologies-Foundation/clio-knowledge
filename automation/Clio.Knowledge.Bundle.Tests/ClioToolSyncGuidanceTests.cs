@@ -146,6 +146,8 @@ public sealed class ClioToolSyncGuidanceTests
 
         coreRules.Should().Contain("A runtime check is optional and the user's choice; before you make one, read `core-rules-details` (Runtime check)",
             because: "core-rules is read on every operation, so it carries only the pointer");
+        coreRules.Should().Contain("On automatic, check a Freedom UI form page with `page-smoke` (clio 8.1.0.141 and later; read `core-rules-details`, Runtime check) instead of opening a browser or writing a Playwright script.",
+            because: "the browser-verification rule is where an agent decides to open a browser, so it names the one-call check there");
         coreRules.Should().NotContain("trigger-smoke",
             because: "the tool detail lives in core-rules-details, out of the article every operation reads");
         details.Should().Contain("A runtime check is optional and the user's choice.",
@@ -157,7 +159,11 @@ public sealed class ClioToolSyncGuidanceTests
             "`trigger-smoke` for a record-triggered (signal) process",
             "`entity`, `values` (the trigger record's columns), `watch` (1-5 entities, required), optionally `process`",
             "A created record with no such lookup stays (it is listed in `cleanup.skipped`)",
-            "`odata-delete` with `dry-run`, `ids` or `cascade`"
+            "`odata-delete` with `dry-run`, `ids` or `cascade`",
+            "`page-smoke` to look at a Freedom UI form page instead of writing a Playwright script",
+            "`page` (the form page schema name), optionally `record-id`",
+            "It is read-only unless you pass `click` (a button caption or element name)",
+            "treat it as a write and confirm the target environment with the user first"
         })
         {
             details.Should().Contain(clause,

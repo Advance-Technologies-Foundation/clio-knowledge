@@ -32,6 +32,14 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
   trigger and the records that point at it through a lookup. A created record with no such lookup stays (it is
   listed in `cleanup.skipped`), so the environment is not necessarily clean afterwards. It writes and deletes
   live records: confirm the target environment with the user first, as for any destructive tool.
+- `page-smoke` to look at a Freedom UI form page instead of writing a Playwright script or driving a browser:
+  `page` (the form page schema name), optionally `record-id` (edit mode; without it the page opens in add mode)
+  and `timeout`. It opens the page headless with the environment's stored session and returns the visible
+  `buttons`, `fields` and `consoleErrors`. `success=false` means the page did not open; console errors alone do
+  not fail it, so read them. It is read-only unless you pass `click` (a button caption or element name), which
+  presses that button like a user and can create or change records or start a process: treat it as a write and
+  confirm the target environment with the user first. With `click`, `watch` (1-5 entities) lists the records
+  that appeared in `click.created`; nothing is deleted. It needs a Chromium-based browser where clio runs.
 - `odata-delete` with `dry-run`, `ids` or `cascade`, whose refusal carries an `explanation` - act on it
   instead of retrying.
 
