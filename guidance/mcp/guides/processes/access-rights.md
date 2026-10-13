@@ -11,7 +11,8 @@ points here; `process-data-elements` owns the record `filter` shape this element
 `record-rights` owns persisted grants (the `Sys<Entity>Right` storage and the direct
 `get-record-rights` / `set-record-rights` path). Choose between them by WHEN the change happens: use
 `record-rights` for an ad-hoc grant or revoke you make now, and this element only when the change must
-happen inside a running process.
+happen inside a running process. The two surfaces spell levels DIFFERENTLY: `record-rights` exposes
+`granted`/`delegated`, this block takes `permit`/`delegate`/`restrict` — never copy a level across.
 Moved to `process-access-rights-details`: the two VERSION BOUNDARIES (CrtProcessBuilder `1.6.0.2`), when
 the read-back check runs on a `clearFilter` batch, describe's full field shape, the PROVENANCE and row
 mechanics of `restrict`, and the reasoning behind rules here. Read it when the environment's
@@ -25,8 +26,7 @@ does NOTHING — no error, no log an agent can read back — at least in these c
   1. the record `filter` is PRESENT but carries no conditions (the runtime exits "filters empty");
   2. `add` and `remove` are BOTH empty (there is no permission to apply);
   3. the target object does not use record permissions (`AdministratedByRecords` off).
-Cases 1 and 3 are refused at build time — for both, the refusal and the runtime no-op are the same fact
-seen from two sides: the build rejects the configuration precisely BECAUSE the runtime would exit on it.
+Cases 1 and 3 are refused at build time, because the runtime would exit on them.
 Only case 2 builds green, saves, publishes and runs — and a designer-built element can still arrive in
 case 1, since the refusal guards what this API writes, not what already exists. So a clean build is NOT
 evidence that the element will do anything.
@@ -132,8 +132,7 @@ remove edit+delete from everyone, then grant them back to the approver in `add`.
 It is NOT interchangeable with a `role` entry on a remove: a role entry there produces a process
 that reports success and does not lock the record.
 
-Refused on `add`: it carries no access level, and "grant to everyone" is not a shape the platform models
-this way — name the role you mean.
+Refused on `add` (it carries no access level): name the role you mean.
 
 == Which records: the element's own filter ==
 `accessRights` says WHO and WHAT; the element's separate `filter` block says WHICH records — it is a

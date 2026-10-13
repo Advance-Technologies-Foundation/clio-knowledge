@@ -90,8 +90,8 @@ Why the branch article exists. Split out of `process-formulas` because that arti
 left: the two halves are read at different times - the vocabulary while authoring any formula, this while
 planning a BRANCH.
 
-A column of a read record in a condition (`[#Element.Parameter.Column#]`). That is not a corner: of the 487
-element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
+A column of a read record in a condition (`[#Element.Parameter.Column#]`). Column tests are not a corner case:
+of the 487 element-output conditions in the shipped corpus, 242 are column tests and 245 are not.
 
 Why `removeFlow` and `setFlowCondition` refuse a carried-over `kind` or `condition`. Deliberate, not
 tidiness: where two flows join the same pair, honouring the edit while ignoring a `kind` acts on a flow the
@@ -104,9 +104,8 @@ and you would dismiss a genuine R7 finding elsewhere in the graph as already han
 A fallback catches an unmatched VALUE, not a missing one — the evidence. Measured on a stand: four runs of
 one three-way gateway routed 50, 500 and 5000 correctly and routed the no-value run to `< 100`.
 
-Rare case — a deciding gateway's OWN default. Re-kinding the gateway's OWN default to `sequence` is a
-no-op — it stays the default, silently, because clearing the marker would leave the gateway with no
-fallback at all.
+A deciding gateway's OWN default — why re-kinding it to `sequence` is a silent no-op (the core states the
+trap). It stays the default because clearing the marker would leave the gateway with no fallback at all.
 
 Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
 `B` stand for a REFERENCE (a meta-path token, a `[#Name#]` the server expands, a system variable, a system

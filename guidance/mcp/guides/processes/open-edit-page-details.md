@@ -85,9 +85,9 @@ after such a change. That clearing matters beyond tidiness:
 the runtime applies stored pre-filled values in EITHER mode, so a leftover set would be live configuration
 nobody asked for.
 
-Completion and `setFilter` / `clearFilter`. That these two move the completion mode themselves is the part
-which is the surprise worth planning for: they change what the step DOES through an operation that names
-only its conditions. On an EMPTY group the mode stays off (an empty group matches everything, so calling it
+Completion and `setFilter` / `clearFilter`. On this element `setFilter` and `clearFilter` move the completion
+mode themselves, and that is the surprise worth planning for: they change what the step DOES through an
+operation that names only its conditions. On an EMPTY group the mode stays off (an empty group matches everything, so calling it
 conditions is the contradiction the pairing rule prevents). They move together because a bare `setFilter`
 reaches this element without passing through the `openEditPage` block that owns the pairing rule.
 

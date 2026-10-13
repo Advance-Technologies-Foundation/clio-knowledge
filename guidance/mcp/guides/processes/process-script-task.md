@@ -34,7 +34,7 @@ A body or the methods returned by `describe-business-process`, a compiler messag
 
 Inspect before authoring
 - On a NEW process the parameter names are the ones your own descriptor declares; for an existing one, read them from the environment:
-- Call `get-process-signature process-name=<code-or-caption> environment-name=<env>` first. Copy `processCode` and each parameter `name` returned by the environment; never derive a code from a display caption or copy the sample names below. If a caption is ambiguous, choose one of the returned candidate codes and call the tool again with that exact code.
+- Call `get-process-signature process-name=<code-or-caption> environment-name=<env>` first. Copy `processCode` and each parameter `name` returned by the environment; never derive a code from a display caption or copy the sample names below. If a caption is refused as ambiguous (several DISTINCT processes, or no active version), choose one of the returned candidate codes and call the tool again with that exact code. That rule forbids INVENTING a code, not using a caption: on a versioned process the caption is the better identity, because it resolves to the ACTIVE version while a code names one member (`process-versions` owns which identity means what).
 - Match each C# generic type to the parameter's declared CLR type. A Lookup parameter is a `Guid`, not its display text.
 
 Read and write process parameters
@@ -91,4 +91,4 @@ Do not require the `SerializeObject(object, Formatting)` overload merely for pre
 Evidence and applicability
 - `AggregationTypeStrict` namespace ownership is verified in Creatio core source and in Creatio 10.0.0.858 assemblies; the same split is also documented by `esq-filters-backend` for later 10.x builds.
 Verification
-Compile the process on the target environment, run it with known parameter values - a new version by its own code before it is activated, on the clio the version order above names, and otherwise only once it is active - and verify the expected output parameter or persisted side effect. A value returned by a run is not proof on its own: a ScriptTask that throws after its `Set` still leaves that value behind, so also check that the process instance completed rather than ended in error.
+Compile the process on the target environment - a compile on another Creatio version is supporting evidence only - run it with known parameter values - a new version by its own code before it is activated, on the clio the version order above names, and otherwise only once it is active - and verify the expected output parameter or persisted side effect. A value returned by a run is not proof on its own: a ScriptTask that throws after its `Set` still leaves that value behind, so also check that the process instance completed rather than ended in error.

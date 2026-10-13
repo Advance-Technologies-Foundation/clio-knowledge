@@ -15,8 +15,8 @@ that first. Nothing here relaxes a rule stated there.
 save handler. The signal start is the platform-native, declarative trigger.
 
 == A column of a Read data record as a source — how it resolves ==
-The server resolves it on the read object, type-checks it against the target
-and writes the platform's three-segment meta path, so there are no UIds to find.
+The server resolves a column source (`sourceElement` + `sourceColumn`) on the read object, type-checks it
+against the target and writes the platform's three-segment meta path, so there are no UIds to find.
 
 == A column of a Read data record as a source — evidence ==
 - Verified at run time on Creatio 10.1.37 (.NET Framework, MSSQL), CrtProcessBuilder 1.6.6.27, 2026-09-25: one
@@ -24,12 +24,12 @@ and writes the platform's three-segment meta path, so there are no UIds to find.
   `[#ReadContact.ResultEntity.DoNotUseCall#] == false` -> Perform task with `OwnerId` <- `sourceColumn: "Owner"`.
   A contact with `DoNotUseCall = false` ran the call branch and its Activity got the contact's owner (not the
   process starter); one with `true` ran the fallback.
-- The UId form on the MODIFY path (`process-data-elements` states its spelling and checks):
-  In a raw `expression` mapping onto a process parameter, and in a Formula body, that UId token (in its
-  prefix-less form) was measured to deliver a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
+- The UId form of a column reference, which the MODIFY path uses (`process-data-elements` states its spelling
+  and checks), was measured in a raw `expression` mapping onto a process parameter and in a Formula body: that
+  UId token (in its prefix-less form) delivered a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
   (Creatio 10.1.37, .NET Framework, MSSQL; CrtProcessBuilder 1.6.6.22; 2026-09-24).
-- The modify-path condition by name, described and run with a matching and a non-matching record:
-  Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24; 2026-09-21.
+- A modify-path condition written by name was described and run with a matching and a non-matching record,
+  for `Contact.DoNotUseCall` true/false, on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24; 2026-09-21.
 
 == A column of a Read data record as a source — read-back ==
 `describe-business-process` reports such a value's `sourceElement` / `sourceElementParameter` /
@@ -37,7 +37,6 @@ and writes the platform's three-segment meta path, so there are no UIds to find.
 (same spelling, a fitting type, a loaded column).
 
 == Modify data element (changeData) — read-back of a value the write path would refuse ==
-(When `describe-business-process` reads a `changeData` block back:
-A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
-check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
-comes back as its raw `[#…#]` in `expression`).
+When `describe-business-process` reads a `changeData` block back, a stored value the write path would refuse —
+a non-text or empty constant, or a binding that fails the type check — reads back as its COLUMN ALONE rather
+than as something you cannot write back, and any other formula comes back as its raw `[#…#]` in `expression`.

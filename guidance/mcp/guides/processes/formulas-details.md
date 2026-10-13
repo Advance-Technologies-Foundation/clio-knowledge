@@ -75,10 +75,10 @@ A bare `Price` is refused naming it, while `[Price]` gives `Formula value error:
 The line-break check. A bare carriage return with no line feed is NOT refused: the platform checks for `\n`
 only, and CR is whitespace to the interpreter, so such a formula parses and stores on one line.
 
-A blank `condition`. This check is clio's
-own, because the gate would ACCEPT it.
+A blank `condition`. clio refuses a blank condition itself, because the platform's gate would ACCEPT it.
 
-Keeping expressions flat (the rule and its consequence stay in `process-formulas`). Measured on one stand (core 10.0.731.0) on 2026-09-01. No
+Keeping expressions flat (the rule and its consequence stay in `process-formulas`). The worker-process crash
+that a deeply nested expression causes was measured on one stand (core 10.0.731.0) on 2026-09-01. No
 CrtProcessBuilder version enters into it - the parser is the platform's - so treat it as one measurement,
 not a platform constant, and as a defect only the platform can close.
 

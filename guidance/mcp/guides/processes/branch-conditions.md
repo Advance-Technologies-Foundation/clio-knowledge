@@ -181,7 +181,9 @@ the process, namely dropping the LAST conditional flow off an element that still
 gateway's outgoing flows must each say how they are chosen, and the designer cannot draw a plain flow out
 of one, so `kind: "sequence"` there is normalised to `default` and a notice says so. It is REFUSED only
 when the gateway already has a default: that flow has nothing left to become, and you must give it a
-condition or re-kind the existing default first. Remove-and-add is guarded by nothing and loses the position as well: do it and the
+condition or re-kind the existing default first — to `conditional`: re-kinding the gateway's OWN default to
+`sequence` is a TRAP that silently does nothing (it stays the default, and the next `setFlow` is refused
+again). Remove-and-add is guarded by nothing and loses the position as well: do it and the
 exclusive branch becomes a parallel one, with `describe` reporting `kind: "sequence"` on both flows — which
 reads exactly like "condition cleared, as asked".
 

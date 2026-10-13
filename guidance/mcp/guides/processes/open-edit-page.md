@@ -58,7 +58,8 @@ What it DOES decide is whether the step's activity is logged with the scheduling
 priority the block carries — and whether the element writes its "Connected to" links at run time: with the gate
 off `describe` reports `writesConnectionsAtRuntime: false` and `setConnections` is refused. So the trade is
 narrow and DECIDABLE without judgement: leave the gate on only when the request asks for an activity, or when you
-are also writing this element's connections in the same build — otherwise turn it off. Either way, say in one line what you did, rather than
+are also writing this element's connections in the same build — otherwise turn it off. Do not keep it on because
+"a user task usually needs its connections": shipped elements mostly leave it off. Either way, say in one line what you did, rather than
 letting the user find the answer on the card.
 PICKING THE PAGE is the part to get right, because it decides everything else: the target OBJECT and — for a
 typed object — the RECORD TYPE are DERIVED from the page, never supplied. Only a page REGISTERED ON A SECTION
