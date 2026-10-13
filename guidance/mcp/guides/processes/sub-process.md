@@ -51,7 +51,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
         the same. Captions are display text; nothing binds by them. Before CrtProcessBuilder 1.6.6.20 a callee
         saved through this toolset may still hand its callers the captions from before that save, and saving
         it again through this toolset only moves that lag. So if a caller still shows a caption the called
-        process no longer has after a re-sync, run `install-process-builder` - the install restarts the
+        process no longer has after a re-sync, ask the user to approve `install-process-builder` (`core-rules`) - the install restarts the
         application, which drops the stale cache - then re-sync. Only when the package cannot be updated, ask
         the USER to open the called process in the process designer and save it (no change needed), then
         re-sync; that cure lasts only until the next save of the callee through an older toolset.

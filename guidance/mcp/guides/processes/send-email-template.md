@@ -67,7 +67,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
   `templateEntity` (re-appliable as a `processParameter`/`sourceElement`/`expression`); in template mode
   `hasBody` is false and `body` is omitted even when a stale body is stored. clio WARNS after a build or modify when
   a sent `template` does not read back — a CrtProcessBuilder that predates template mode discarded it while
-  answering success: `install-process-builder` and re-apply. RUN-VERIFIED on dev-local in BOTH send modes (manual on 10.1.503 with CrtProcessDesigner 7.8.0, 2026-09-09,
+  answering success: `install-process-builder` once the user approves it (`core-rules`), and re-apply. RUN-VERIFIED on dev-local in BOTH send modes (manual on 10.1.503 with CrtProcessDesigner 7.8.0, 2026-09-09,
   read off the email activity; auto on 10.2.75 with CrtProcessBuilder 1.6.2.x, 2026-09-10, delivered through
   the Exchange Listener endpoint to an SMTP sink): macros
   resolve against the `templateEntity` record, the `subject` override wins, a template without `EmailTemplateLang`

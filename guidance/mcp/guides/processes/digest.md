@@ -119,22 +119,24 @@ page. Read the articles of the elements you actually use, and only those.
   A CUSTOM user-task schema carries its own compile obligation (`process-element-catalog`). On a
   file-design-mode stand a built process is not runtime-active until it is loaded FS->DB and
   published, so a signal will not fire yet.
+- On a CrtProcessBuilder install/update refusal, STOP and ask the user before
+  `install-process-builder`: it rebuilds the configuration and restarts the site for every user
+  (`core-rules`).
 
 == Descriptor skeleton (owner: `process-modeling`) ==
 { "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "<package-name from get-target-package>",
   "elements": [ { "name": "OnboardingRequestedStart", "type": "startEvent", "caption": "Onboarding requested" },
-                { "name": "NotifyAccountOwner", "type": "performTask", "caption": "Notify the account owner" },
-                { "name": "EndOnboardingHandedOff", "type": "endEvent", "caption": "Onboarding handed off" } ],
+    { "name": "NotifyAccountOwner", "type": "performTask", "caption": "Notify the account owner" },
+    { "name": "EndOnboardingHandedOff", "type": "endEvent", "caption": "Onboarding handed off" } ],
   "flows": [ { "source": "OnboardingRequestedStart", "target": "NotifyAccountOwner" },
-             { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
+    { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
   "parameters": [ { "name": "AccountNameParameter", "type": "Text", "direction": "In", "caption": "Account name" } ],
   "mappings": [ { "elementName": "NotifyAccountOwner", "elementParameter": "<ParamName>",
-                  "processParameter": "AccountNameParameter" } ] }
+    "processParameter": "AccountNameParameter" } ] }
 - `name` is the element handle used by `flows` (`source` / `target`) and `mappings` (`elementName`).
-  Each element's own block (`readData`, `email`, `approval`, `subProcess`, ...), a `filter`, and a
-  mapping source other than a process parameter are owned by that element's article,
-  `process-data-source-filters` and `process-parameters`; a formula by `process-formulas`, a flow
-  condition by `process-branch-conditions`.
+  Owners: element block - its article; `filter` - `process-data-source-filters`; other
+  mapping sources - `process-parameters`; formula - `process-formulas`; flow condition -
+  `process-branch-conditions`.
 
 == Changing an existing process (owners: `process-modeling`, `process-versions`, `process-sub-process-when`) ==
 - Editing or launching ANY existing process starts at `process-versions`; the code you were handed
