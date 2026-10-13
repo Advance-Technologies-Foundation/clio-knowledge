@@ -24,7 +24,8 @@ SILENTLY DEGRADES the allowed-results list the task page / designer result dropd
 the default set. Do NOT try to verify the degradation through the `Activity.AllowedResult` column — that
 column derives from outgoing CONDITIONAL flows, not from the category, and is empty either way on a process
 without them. So the bare-Guid `value` is the only correct route; on a pre-1.3.1.1 package the parameter
-cannot be set correctly — update the package rather than using the expression form.
+cannot be set correctly — update the package (`install-process-builder`, once the user approves it:
+`core-rules`) rather than using the expression form.
 
 This matches what the DESIGNER stores for the real-lookup families this rule is about (a task element's
 ActivityCategory / ActivityPriority): a lookup constant a human picks is

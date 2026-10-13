@@ -119,9 +119,8 @@ page. Read the articles of the elements you actually use, and only those.
   A CUSTOM user-task schema carries its own compile obligation (`process-element-catalog`). On a
   file-design-mode stand a built process is not runtime-active until it is loaded FS->DB and
   published, so a signal will not fire yet.
-- On a CrtProcessBuilder install/update refusal, STOP and ask the user before
-  `install-process-builder`: it rebuilds the configuration and restarts the site for every user
-  (`core-rules`).
+- A process tool refusing because CrtProcessBuilder is missing or older: STOP and ask the user before
+  `install-process-builder`: it builds the configuration and restarts the site for every user.
 
 == Descriptor skeleton (owner: `process-modeling`) ==
 { "name": "UsrAccount_Onboard", "caption": "Account onboarding", "packageName": "<package-name from get-target-package>",

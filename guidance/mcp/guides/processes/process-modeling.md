@@ -70,9 +70,9 @@ one; read that article.
     established - not false, NOT permission. `setConnections` is refused on `false` AND `null`.
   * validate-process-graph - pre-check a planned graph against the connection rules R1-R20
     (`process-activity-connections-details`).
-- These tools need CrtProcessBuilder at the version this clio ships. On a refusal to install or update
-  it, STOP and ask the user before `install-process-builder`: it rebuilds the configuration and restarts
-  the site for every user (`core-rules`).
+- These tools need CrtProcessBuilder at least at the version this clio ships. When one refuses because it
+  is missing or older, STOP and ask the user before `install-process-builder`: it builds the
+  configuration and restarts the site for every user (`core-rules`).
 
 == Descriptor (create-business-process) ==
 {
