@@ -61,7 +61,7 @@ public sealed class ClioToolSyncGuidanceTests
         ("processes/task-category.md", "Evidence: observed on a Creatio 8.x stand through", "evidence"),
         ("processes/tracing.md", "do not re-read the process with", "an instruction NOT to read"),
         ("processes/version-writes.md", "settle it by re-reading the family with", "the summary carries the version standing"),
-        ("processes/versions.md", "queried through the process-library view and then through", "evidence"),
+        ("processes/versions-details.md", "queried through the process-library view and then through", "evidence"),
         ("processes/versions.md", "read `isActiveVersion` from", "the summary carries isActiveVersion"),
         ("processes/versions.md", "treat it as a lead to confirm with", "the summary carries the active version")
     ];
