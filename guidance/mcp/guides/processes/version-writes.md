@@ -70,7 +70,8 @@ handled (two writers on one number are refused after the save); the load is not.
 This section owns what "existing process" means for the version path and `isActiveVersion`. The
 unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when
 another person has since edited, activated or launched it by hand. A family YOU created in this same
-task is a BUILD IN PROGRESS, within the limits below. Fixing, re-saving or launching it follows the
+task is a BUILD IN PROGRESS, within the limits below; if you cannot tell whether the family is yours or
+whether a limit applies, it is existing. Fixing, re-saving or launching it follows the
 build path, `process-digest` plus the element articles, NOT `process-versions` or this article: do not
 ask the two questions below, and `process-modeling`'s `isActiveVersion` rule does not apply. Its other
 modify rules (describe first, `removeFlow`, `removeElement`), `core-rules` and the element articles' own
@@ -85,7 +86,7 @@ confirmations still apply. The limits:
     active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.
     An un-activated draft, or one activated moments ago whose runs touched only records you created,
     stays exempt: a run you started does not make it existing.
-  * Built in an EARLIER task or session, or you cannot tell: existing -- you cannot know who used it since.
+  * Built in an EARLIER task or session: existing -- you cannot know who used it since.
 
 == Ask once, then behave predictably ==
 Two questions, asked ONCE, BEFORE the first edit of a session:

@@ -175,7 +175,7 @@ public sealed class ProcessDigestTests
         ("process-modeling", "On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB and published"),
         ("process-modeling", "\"name\": \"UsrAccount_Onboard\", \"caption\": \"Account onboarding\""),
         ("process-modeling", "it is `name`, not `id`"),
-        ("process-modeling", "Read it BEFORE editing or launching ANY existing process."),
+        ("process-modeling", "Read it BEFORE editing or launching ANY existing process, not one you are building."),
         ("process-modeling", "ALWAYS `describe-business-process` first, and re-describe after the edit"),
         ("process-modeling", "You MUST read `isActiveVersion` from the describe output before ANY modify"),
         ("process-modeling", "offer `modify-business-process-as-new-version`"),
@@ -290,7 +290,7 @@ public sealed class ProcessDigestTests
             @"== What you can build today \(create-business-process\) ==(?<list>.+?)NOT yet buildable").Groups["list"].Value;
         string unsupported = Regex.Match(catalog, @"NOT yet buildable(?<list>.+?)== Building from a data-id")
             .Groups["list"].Value;
-        string typeList = Regex.Match(card, @"Types:(?<list>.+?)== Names").Groups["list"].Value;
+        string typeList = Regex.Match(card, @"Types \(else `process-element-catalog`\):(?<list>.+?)== Names").Groups["list"].Value;
 
         // Act
         string[] types = [.. Regex.Matches(typeList.Replace("(never as a userTask)", string.Empty), @"[a-z][A-Za-z]+")

@@ -46,7 +46,7 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-sub-process-when` - WHEN a request needs more than one process: D1, D2, D4.
   * `process-activity-connections` - the "Connected to" links of the Activity a task creates.
   * `process-versions` - the version model and which member runs. Read it BEFORE editing or launching
-    ANY existing process.
+    ANY existing process, not one you are building.
   * `process-version-writes` - saving a new version, a restore point, rollback.
 Each is sized to be read WHOLE through `get-guidance`. Never infer another article's rule from this
 one; read that article.

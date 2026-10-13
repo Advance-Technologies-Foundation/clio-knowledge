@@ -36,7 +36,7 @@ public sealed class ProcessBuildInProgressTests
     [
         "This section owns what \"existing process\" means for the version path and `isActiveVersion`.",
         "The unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when another person has since edited, activated or launched it by hand.",
-        "A family YOU created in this same task is a BUILD IN PROGRESS, within the limits below.",
+        "A family YOU created in this same task is a BUILD IN PROGRESS, within the limits below; if you cannot tell whether the family is yours or whether a limit applies, it is existing.",
         "Fixing, re-saving or launching it follows the build path, `process-digest` plus the element articles, NOT `process-versions` or this article",
         "do not ask the two questions below",
         "`process-modeling`'s `isActiveVersion` rule does not apply.",
@@ -46,7 +46,7 @@ public sealed class ProcessBuildInProgressTests
         "ACTIVATING it is part of the build only when the request asks for a working or active process; otherwise the request has to say so.",
         "Once it is active AND its trigger can fire on records you did not create, an in-place modify of the active version is no longer exempt: save a new version, or get the `process-modeling` confirmation.",
         "An un-activated draft, or one activated moments ago whose runs touched only records you created, stays exempt: a run you started does not make it existing.",
-        "Built in an EARLIER task or session, or you cannot tell: existing"
+        "Built in an EARLIER task or session: existing"
     ];
 
     [Test]
@@ -73,6 +73,28 @@ public sealed class ProcessBuildInProgressTests
 
     private const string DefinitionClause = "is a BUILD IN PROGRESS";
 
+    /// <summary>
+    /// The card's edit route, clause by clause: the exemption and its key limits (own family, created in this
+    /// task, not live with a trigger on records the agent did not create), the lifted confirmation, the owner
+    /// ONLY for a limit, and the "unsure means existing" default.
+    /// </summary>
+    private static readonly string[] CardPointerClauses =
+    [
+        "a family YOU created in THIS task is NOT existing: fix, re-save, run it here",
+        "no `isActiveVersion` confirmation",
+        "unless active with a trigger that can fire on records you did not create (`process-version-writes`).",
+        "Else or unsure: existing, `process-versions` then `process-modeling`."
+    ];
+
+    /// <summary>The same decision on the routing row that sends an edit to process-versions.</summary>
+    private static readonly string[] RoutingPointerClauses =
+    [
+        "NOT existing: a family YOU created in THIS task.",
+        "Fix, re-save or run it from name=process-digest, with no isActiveVersion confirmation",
+        "unless it is active with a trigger that can fire on records you did not create (then name=process-version-writes).",
+        "Unsure: existing"
+    ];
+
     [Test]
     [Description("Only the owner defines the exemption; the card, routing and process-modeling point at it.")]
     public void TheExemption_ShouldHaveOneOwnerAndPointers()
@@ -89,7 +111,7 @@ public sealed class ProcessBuildInProgressTests
             .Where(article => Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath))
                 .Contains(DefinitionClause, StringComparison.Ordinal))
             .Select(article => article.ItemId)];
-        string cardEditRoute = Regex.Match(card, @"- edit or launch an existing process:.*\z").Value;
+        string cardEditRoute = Regex.Match(card, @"- edit or launch:.*\z").Value;
         string routingRow = Regex.Match(routing,
             @"- which VERSION of a process you are reading.*?(?= - save a change as a NEW version)").Value;
 
@@ -98,17 +120,31 @@ public sealed class ProcessBuildInProgressTests
             because: "anti-vacuity: the single-owner check looks for the owner's own defining words");
         otherDefiners.Should().BeEmpty(
             because: "AGENTS.md gives every rule one owner; a second definition drifts from the first");
-        cardEditRoute.Should().Contain("`process-versions`, then `process-modeling`",
-            because: "a genuinely existing process still starts at the version path");
-        cardEditRoute.Should().Contain("One YOU built in this task is not existing: fix it here (`process-version-writes`).",
-            because: "the card is what every build reads, so its edit route is where an agent decides whether "
-                + "its own fresh process sends it down the version path");
+        foreach (string clause in CardPointerClauses)
+        {
+            cardEditRoute.Should().Contain(clause,
+                because: "the card is what every build reads, so its edit route has to decide the common case - "
+                    + "the agent's own fresh process - with NO further read: the exemption, its limits, that the "
+                    + "isActiveVersion confirmation does not apply, and that 'unsure' means existing");
+        }
+        Regex.Matches(card, Regex.Escape("`process-version-writes`")).Should().ContainSingle(
+            because: "the card sends the agent into the version owner only when a limit applies; a second mention "
+                + "is an invitation to read ~17 KB for the case the card already decides");
+        cardEditRoute.Should().Contain("did not create (`process-version-writes`)",
+            because: "that single mention is attached to the limit, not to the exemption");
         routingRow.Should().Contain("ANY existing process -> name=process-versions first",
             because: "the version path stays the entry for a genuinely existing process");
-        routingRow.Should().Contain(
-            "A process YOU built in this task is not existing: fix it from name=process-digest (owner name=process-version-writes)",
-            because: "routing is read before any article, so the row that sends an edit to process-versions must "
-                + "carry the exemption too");
+        foreach (string clause in RoutingPointerClauses)
+        {
+            routingRow.Should().Contain(clause,
+                because: "routing is read before any article, so the row that sends an edit to process-versions "
+                    + "must decide the agent's own fresh process too, and send it to the owner only for a limit");
+        }
+        Regex.Matches(routingRow, Regex.Escape("name=process-version-writes")).Should().ContainSingle(
+            because: "an unconditional owner pointer is what sent runs into the version articles; the row names "
+                + "the owner once, for the limit");
+        routingRow.Should().Contain("did not create (then name=process-version-writes)",
+            because: "that single mention is attached to the limit, not to the exemption");
         modeling.Should().Contain(
             "You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not a build in progress (`process-version-writes`):",
             because: "the isActiveVersion rule is the line that otherwise overrides the exemption: a fresh build is "
