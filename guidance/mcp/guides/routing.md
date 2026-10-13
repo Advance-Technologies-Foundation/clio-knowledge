@@ -116,14 +116,15 @@ precondition kept next to the instruction it guards — names that guide as the 
     registered -> name=process-activity-connections-details
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
-    process -> name=process-versions
+  - which VERSION of a process you are reading or which one runs, or editing or launching ANY existing
+    process -> name=process-versions first (a handed code is usually the family root, which does not
+    run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
+    re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
+    it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can
+    read or write data you did not create (then name=process-version-writes). Unsure: existing
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
     name=process-version-writes; add name=process-versions for the model it assumes and
     name=process-modeling for the operation reference
-  - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
-    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
-    operation reference
   - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
     name=process-modeling-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery

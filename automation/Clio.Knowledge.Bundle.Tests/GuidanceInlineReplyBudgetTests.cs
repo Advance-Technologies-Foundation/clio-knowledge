@@ -44,7 +44,7 @@ public sealed class GuidanceInlineReplyBudgetTests
     /// The reply size each article of the split must stay within: 19,000 bytes, about 800 under the largest
     /// reply the release gate's Copilot CLI was seen to pass inline.
     /// </summary>
-    private const int InlineReplyBudgetBytes = 19_000;
+    internal const int InlineReplyBudgetBytes = 19_000;
 
     /// <summary>
     /// Everything in a <c>get-guidance</c> reply except the article text: the feedback policy, name, uri,
