@@ -18,7 +18,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   element's own parameters come from the task. The same shape is
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
   Boolean, Date, Date-time, Time, Guid, Lookup, Collection (a record collection, `CompositeObjectList`,
-  whose direction defaults to `Out` unless you set one), and, from clio 8.1.0.142, File and FileCollection (one
+  whose direction defaults to `Out` unless you set one), and, with a File-aware clio, File and FileCollection (one
   file and several, carried by reference: `process-files`) — other types (composite object / entity / binary /
   ...) are not supported yet, and binary never will be: a process parameter carries a file by reference (File). Name a process parameter per N8 in `process-naming`
   (summarised in `process-digest`).
@@ -28,9 +28,9 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   Mirroring a COLLECTION output (a `CompositeObjectList`, e.g. a Read data element's `ResultCompositeObjectList`)
   reproduces the designer's "create parameter from element" artifact in ONE step: the per-column
   `itemProperties` are copied (name, type, tag = the column UId — the DESIGN-TIME shape a consumer binds to;
-  a collection without it is an opaque list nothing can bind to), it is tagged `<element>.<parameter>`, and a mapping from that output into the new parameter is created (from
-  clio 8.1.0.142 each copied item is bound to the source item of its name too), so the parameter is never left
-  unbound. `value` and `referenceSchema` are refused on a collection. So is a
+  a collection without it is an opaque list nothing can bind to), it is tagged `<element>.<parameter>`, and a mapping from that output into the new parameter is created (with
+  a File-aware clio, `process-files`, each copied item is bound to the source item of its name too), so the
+  parameter is never left unbound. `value` and `referenceSchema` are refused on a collection. So is a
   mirror of a collection output that carries NO `itemProperties`: the result would be a bound, tagged,
   unbindable empty shape, indistinguishable from a bare collection — the refusal names the source and the two
   ways forward (shape the source first — a Read data element in `collection` mode with explicit `columns` —
@@ -39,9 +39,9 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   mirror. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
   with no item properties, which the mirror therefore refuses). `describe-business-process` reports a collection parameter's `tag` and
   `itemProperties`; both are absent on a scalar and on a bare collection — feed a described collection back
-  through `typeFromElement` naming its source, never by re-typing the shape. The one exception, from clio
-  8.1.0.142: a PROCESS parameter described as type `FileCollection` is re-sent as that type, which rebuilds its
-  shape (`process-files`). A `tag` rides on items that
+  through `typeFromElement` naming its source, never by re-typing the shape. The one exception, with a
+  File-aware clio: a PROCESS parameter described as type `FileCollection` is re-sent as that type, which rebuilds
+  its shape (`process-files`). A `tag` rides on items that
   are COLUMNS; where they are PARAMETERS of another process (a multi-instance Sub-process element's two
   collections) there is none at all — 0 of 407 in the shipped corpus — so never require it. A collection
   IS consumed now: such an element iterates one, bound onto `InputRecordCollection` by the ordinary
@@ -54,8 +54,8 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   from — the designer's Regenerate. The pair must equal the parameter's own `tag` AND the parameter must still be
   bound to that output: a different source, a binding since moved elsewhere, or a bare (untagged) collection is
   refused, and retargeting is `removeParameter` + `addParameter`. The `tag` and the binding are left untouched
-  (from clio 8.1.0.142 the refreshed items are bound to the source's items), both sides must be collections,
-  and a shapeless source is refused here too. Nothing re-mirrors automatically when the source element's columns change, so re-issue it
+  (with a File-aware clio, `process-files`, the refreshed items are bound to the source's items), both sides must
+  be collections, and a shapeless source is refused here too. Nothing re-mirrors automatically when the source element's columns change, so re-issue it
   after a `setElement` that changed the element's `columns`. Do NOT set a Date / Date-time / Time default
   through setParameter `value` — those defaults are formula macros, not plain constants; use the
   mapping + `expression` path below (addMapping overwrites, so it edits a default exactly as it
@@ -63,7 +63,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   (same version story as the parameters note above).
 - Remove a parameter with `removeParameter` (parameterName; blocked when another parameter's value, an
   element mapping, an execution-context parameter or a CONDITIONAL FLOW'S CONDITION still references it (or,
-  from clio 8.1.0.142, one of its items) —
+  with a File-aware clio, `process-files`, one of its items) —
   sub-processes included. The refusal names each usage site. The scan is a SUPERSET of the designer's: it
   matches a parameter UId case-insensitively where the designer matches case-sensitively, so it can refuse
   a delete the designer would allow. Broader is the safe direction — the failure it prevents is a dangling
@@ -89,7 +89,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   `formula.resultProcessParameter` (it wins over a stored binding). Build and modify WARN on both cases.
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
   add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
-  processParameter (a process parameter by name; from clio 8.1.0.142 `Name.Item` names an item of a collection
+  processParameter (a process parameter by name; with a File-aware clio `Name.Item` names an item of a collection
   parameter, as does `targetProcessParameter` - `process-files`) | value (a constant) | expression (a raw formula).
   Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process mode=full` output an element parameter
   is usable as a mapping source when `isOutput: true` — key on that, NOT on `isResult` or `direction`. Those are

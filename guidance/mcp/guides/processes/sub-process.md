@@ -135,7 +135,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
         the source is `ResultCompositeObjectList` — the output whose data value type matches;
         `ResultEntityCollection` does NOT and is refused by the type check.
         MUST: send THIS mapping as well as the per-item ones below — the collection decides HOW MANY
-        iterations run, the dotted mappings only what each one receives. From clio 8.1.0.142 a per-item
+        iterations run, the dotted mappings only what each one receives. With a File-aware clio a per-item
         mapping from an ITEM of a collection (`ResultCompositeObjectList.<Column>`, a FileCollection's `File`)
         binds `InputRecordCollection` to that collection too, and one from a DIFFERENT collection than the
         bound one is refused (rule P1, `process-files`); any other per-item source still needs this mapping,

@@ -37,12 +37,11 @@ public sealed class CollectionParameterGuidanceTests
     }
 
     [Test]
-    [Description("File and FileCollection are on the type list from the clio release, binary (no longer file) is on the not-supported list, and a described FileCollection is the stated exception to re-submitting a collection only through typeFromElement.")]
+    [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is the stated exception to re-submitting a collection only through typeFromElement.")]
     public void Guide_ShouldListTheFileTypesAndTheFileCollectionException()
     {
         // Arrange
         string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
-        string boundary = FileParameterGuidanceTests.ClioBoundary;
 
         // Act
         string[] supportedTypes = [.. guide.Split("Supported types:", 2)[^1].Split(" — ", 2)[0].Split(", ")];
@@ -52,7 +51,7 @@ public sealed class CollectionParameterGuidanceTests
             because: "the parameter shape at the top of the article is the list an agent reads first");
         supportedTypes.Should().Contain(type => type.Contains("File and FileCollection", StringComparison.Ordinal),
             because: "the two types belong in the supported-types sentence itself, not in a note after it");
-        guide.Should().Contain($"and, from clio {boundary}, File and FileCollection (one file and several, carried by "
+        guide.Should().Contain("and, with a File-aware clio, File and FileCollection (one file and several, carried by "
                 + "reference: `process-files`)",
             because: "the supported-types sentence is where an agent looks for a file type, and it must reach the guide "
                 + "that owns the two types");
@@ -61,12 +60,12 @@ public sealed class CollectionParameterGuidanceTests
             because: "a file is supported now, so the not-supported list names binary, which stays refused for good");
         guide.Should().NotContain("entity / file /",
             because: "the old list told agents a file could not be a process parameter");
-        guide.Should().Contain("never by re-typing the shape. The one exception, from clio "
-                + $"{boundary}: a PROCESS parameter described as type `FileCollection` is re-sent as that type, which "
-                + "rebuilds its shape (`process-files`).",
+        guide.Should().Contain("never by re-typing the shape. The one exception, with a File-aware clio: a PROCESS "
+                + "parameter described as type `FileCollection` is re-sent as that type, which rebuilds its shape "
+                + "(`process-files`).",
             because: "describe reports a process-level collection of the FileCollection shape by that alias, and the "
                 + "mirror refuses a file output, so re-typing is the only way to rebuild it");
-        guide.Should().Contain($"from clio {boundary} `Name.Item` names an item of a collection parameter, as does "
+        guide.Should().Contain("with a File-aware clio `Name.Item` names an item of a collection parameter, as does "
                 + "`targetProcessParameter`",
             because: "the dotted process-parameter path is part of the mapping grammar this article owns");
     }

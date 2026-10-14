@@ -8,20 +8,24 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <summary>
 /// Pins the ENG-95984 guidance: the <c>process-files</c> guide (the File and FileCollection process parameter types
 /// and the two-level collection rules P1, P2, P2-MI, P3, R-M1 and R-M2 that CrtProcessBuilder applies to every
-/// structured mapping) and the version-gated multi-instance passages in <c>process-sub-process</c> and
+/// structured mapping) and the gated multi-instance passages in <c>process-sub-process</c> and
 /// <c>process-sub-process-when</c>. The type list and the FileCollection exception in <c>process-parameters</c> are
 /// pinned beside the other collection rules, in <see cref="CollectionParameterGuidanceTests"/>.
 /// </summary>
 /// <remarks>
-/// <see cref="ClioBoundary"/> is the clio release that ships the behaviour. It was not known when the text was
-/// written, so every article states it as this one literal: correcting it at merge is one edit here and the same
-/// replacement in the articles, and a missed article fails <see cref="EveryVersionGate_ShouldNameTheSameClioRelease"/>.
+/// The behaviour is gated on the tool contract, not on a clio release: the release that ships it was not cut when
+/// the text was written, and a predicted number would tell an agent on an earlier release that does ship it that it
+/// lacks the binder. <c>process-files</c> defines the gate once and names a clio that passes it
+/// <see cref="FileAwareClio"/>; every other article cites that term, which
+/// <see cref="EveryGate_ShouldCiteTheContractGateRatherThanAClioRelease"/> checks.
 /// </remarks>
 [TestFixture]
 public sealed class FileParameterGuidanceTests
 {
-    /// <summary>The clio release from which the server applies the File types and the two-level rules.</summary>
-    internal const string ClioBoundary = "8.1.0.142";
+    /// <summary>
+    /// The term <c>process-files</c> defines for a clio whose FULL create-business-process contract names type File.
+    /// </summary>
+    private const string FileAwareClio = "File-aware clio";
 
     private const string ItemId = "process-files";
 
@@ -148,7 +152,7 @@ public sealed class FileParameterGuidanceTests
         // Act
         (string Clause, string Because)[] rules =
         [
-            ($"From clio {ClioBoundary} every structured mapping (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below",
+            ("With a File-aware clio every structured mapping (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below",
                 "the rules run on structured sources only, and a record column is not a parameter-to-parameter binding"),
             ("A collection TAKES FILES when it is (a) the `Files` input of the Process parameter variant (`ProcessFileProcessingUserTask`), or (b) a process parameter of the FileCollection shape. P2 and R-M2 apply to these targets only.",
                 "P2 and R-M2 are scoped to these two targets; a reader who applies them to any collection expects a pairing that never happens"),
@@ -194,8 +198,8 @@ public sealed class FileParameterGuidanceTests
     }
 
     [Test]
-    [Description("The guide is gated on the clio release and on the tool contract, and names a CrtProcessBuilder version only as inline evidence of a measurement, never as the boundary.")]
-    public void Guide_ShouldGateOnTheClioReleaseAndCiteThePackageOnlyAsEvidence()
+    [Description("The guide is gated on the tool contract, defines the File-aware term the other articles cite, names no clio release as the boundary, and names a CrtProcessBuilder version only as inline evidence of a measurement.")]
+    public void Guide_ShouldGateOnTheToolContractAndCiteThePackageOnlyAsEvidence()
     {
         // Arrange
         string guide = ReadCollapsed(ArticlePath);
@@ -203,10 +207,17 @@ public sealed class FileParameterGuidanceTests
         // Act
         string[] packageVersions = [.. Regex.Matches(guide, @"CrtProcessBuilder \d+\.\d+\.\d+\.\d+")
             .Select(match => guide[Math.Max(0, match.Index - "measured on ".Length)..(match.Index + match.Length)])];
+        string[] clioReleases = [.. Regex.Matches(guide, @"clio \d+\.\d+\.\d+\.\d+").Select(match => match.Value)];
 
         // Assert
-        guide.Should().Contain($"From clio {ClioBoundary}: use only when the FULL create-business-process contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its silence proves nothing.",
-            because: "the boundary is the clio release, and the tool contract is the check an agent can make before it declares a type an older pair refuses");
+        guide.Should().Contain("Use only when the FULL create-business-process contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its silence proves nothing. Such a clio is called File-aware below and in the guides that cite this one.",
+            because: "the tool contract is the check an agent can make before it declares a type an older pair refuses, it holds on whichever release ships the types, and the other articles cite the term it defines");
+        guide.Should().Contain("A File-aware clio refuses such an environment up front; the remedy it names is `install-process-builder`",
+            because: "the agent must know the refusal of an outdated package comes from clio before any write, and what remedies it");
+        guide.Should().Contain("(`mode` is older than the File types, so every File-aware clio takes it)",
+            because: "the read-back the guide teaches needs `mode`, and the agent must know a clio that passes the gate accepts it");
+        clioReleases.Should().BeEmpty(
+            because: "a clio release written before it is cut is a prediction, and on the release that actually ships the types it would tell an agent it lacks them");
         guide.Should().Contain("does NOT apply the rules below either",
             because: "an older package refuses File loudly but stores an outer-only mapping and binds an item alone in silence");
         guide.Should().NotContain("TBD",
@@ -214,7 +225,7 @@ public sealed class FileParameterGuidanceTests
         packageVersions.Should().NotBeEmpty(
             because: "anti-vacuity: the guide cites the measured package version as evidence");
         packageVersions.Should().OnlyContain(text => text.StartsWith("measured on ", StringComparison.OrdinalIgnoreCase),
-            because: "a CrtProcessBuilder version is evidence of what was measured, not the version boundary, which is the clio release");
+            because: "a CrtProcessBuilder version is evidence of what was measured, not the boundary, which is the tool contract");
     }
 
     [Test]
@@ -256,8 +267,8 @@ public sealed class FileParameterGuidanceTests
     }
 
     [Test]
-    [Description("The multi-instance passages state, under the clio release gate, that a per-item value taken from an item of a collection binds InputRecordCollection too, that a different collection is refused, and that sending both mappings stays the advice; the read-back asks for one element.")]
-    public void MultiInstancePassages_ShouldGateTheItemBindingOnTheClioRelease()
+    [Description("The multi-instance passages state, under the File-aware gate, that a per-item value taken from an item of a collection binds InputRecordCollection too, that a different collection is refused, and that sending both mappings stays the advice; the read-back asks for one element.")]
+    public void MultiInstancePassages_ShouldGateTheItemBindingOnTheFileAwareClio()
     {
         // Arrange
         string subProcess = ReadCollapsed(SubProcessPath);
@@ -267,14 +278,14 @@ public sealed class FileParameterGuidanceTests
         string[] subProcessClauses =
         [
             "MUST: send THIS mapping as well as the per-item ones below",
-            $"From clio {ClioBoundary} a per-item mapping from an ITEM of a collection",
+            "With a File-aware clio a per-item mapping from an ITEM of a collection",
             "binds `InputRecordCollection` to that collection too, and one from a DIFFERENT collection than the bound one is refused (rule P1, `process-files`)",
             "any other per-item source still needs this mapping, and an older clio may bind only what you send, so send both.",
             "the build succeeds, `describe-business-process element=<name>` shows `InputRecordCollection` with `source: \"None\"`"
         ];
         string[] subProcessWhenClauses =
         [
-            $"From clio {ClioBoundary} a per-item value taken from an item of a collection binds that collection too (`process-files`)",
+            "With a File-aware clio a per-item value taken from an item of a collection binds that collection too (`process-files`)",
             "any other per-item value still needs the first mapping, and an older clio may need it in every case, so send both."
         ];
 
@@ -282,7 +293,7 @@ public sealed class FileParameterGuidanceTests
         foreach (string clause in subProcessClauses)
         {
             subProcess.Should().Contain(clause,
-                because: "process-sub-process owns the multi-instance mappings, and the item-only behaviour changed at the clio release: one iteration became one per item");
+                because: "process-sub-process owns the multi-instance mappings, and the item-only behaviour changed with the File-aware clio: one iteration became one per item");
         }
         foreach (string clause in subProcessWhenClauses)
         {
@@ -292,22 +303,32 @@ public sealed class FileParameterGuidanceTests
     }
 
     [Test]
-    [Description("Every version gate this change wrote names the same clio release, so correcting the literal at merge cannot leave one article behind.")]
-    public void EveryVersionGate_ShouldNameTheSameClioRelease()
+    [Description("Every article this change gated cites the File-aware clio that process-files defines from the tool contract, and the catalog description states that gate rather than a clio release.")]
+    public void EveryGate_ShouldCiteTheContractGateRatherThanAClioRelease()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
-        string manifest = File.ReadAllText(Path.Combine(repositoryRoot, "bundle-source.json"));
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        string[] citingArticles = [ParametersPath, SubProcessPath, SubProcessWhenPath];
 
         // Act
-        (string Path, int Gates)[] gates = [.. new[] { ArticlePath, ParametersPath, SubProcessPath, SubProcessWhenPath }
-            .Select(path => (path, Regex.Matches(ReadCollapsed(path), $@"clio {Regex.Escape(ClioBoundary)}\b").Count))];
+        (string Path, int Gates)[] gates = [.. new[] { ArticlePath }.Concat(citingArticles)
+            .Select(path => (path, Regex.Matches(ReadCollapsed(path), Regex.Escape(FileAwareClio)).Count))];
+        string[] unresolved = [.. citingArticles.Where(path => !ReadCollapsed(path).Contains("`process-files`", StringComparison.Ordinal))];
+        string description = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ItemId)
+            .GetProperty("description").GetString()!;
 
         // Assert
         gates.Should().OnlyContain(article => article.Gates > 0,
-            because: "each of these articles states a behaviour that starts at the clio release");
-        manifest.Should().Contain($"From clio {ClioBoundary}.",
-            because: "the catalog description of process-files names the release too");
+            because: "each of these articles states a behaviour a clio has only when its contract names type File");
+        unresolved.Should().BeEmpty(
+            because: "the term is defined in process-files, so an article that uses it must name the guide that defines it");
+        description.Should().EndWith("Applies when the FULL create-business-process contract names type File.",
+            because: "the catalog description of process-files states the same gate as the guide");
+        description.Should().NotMatchRegex(@"clio \d+\.\d+\.\d+\.\d+",
+            because: "a release number written before the release is cut is a prediction the catalog must not make");
     }
 
     private static string ReadCollapsed(string relativePath) =>

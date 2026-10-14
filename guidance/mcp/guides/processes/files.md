@@ -4,13 +4,13 @@ Scope
 This guide owns the `File` and `FileCollection` process parameter types and the two-level rules (P1, P2, P2-MI,
 P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through. Parameters and mappings
 in general: `process-parameters`; the Sub-process element: `process-sub-process`; formulas: `process-formulas`.
-From clio 8.1.0.142: use only when the FULL create-business-process contract (`get-tool-contract` with
+Use only when the FULL create-business-process contract (`get-tool-contract` with
 `tool-names: ["create-business-process"]`, `detail: "full"`) names type File in `parameters[]`; the default reply is
-shortened and lists no types, so its silence proves nothing. An environment
-whose CrtProcessBuilder predates this support refuses `type: File` as not supported and saves nothing, but it does
-NOT apply the rules below either: an outer-only mapping is stored as sent and an item mapping binds the item alone,
-and a read-back there reports a file collection as `CompositeObjectList`.
-A clio from 8.1.0.142 refuses such an environment up front; the remedy it names is `install-process-builder`, which
+shortened and lists no types, so its silence proves nothing. Such a clio is called File-aware below and in the guides
+that cite this one. An environment whose CrtProcessBuilder predates this support refuses `type: File` as not
+supported and saves nothing, but it does NOT apply the rules below either: an outer-only mapping is stored as sent
+and an item mapping binds the item alone, and a read-back there reports a file collection as `CompositeObjectList`.
+A File-aware clio refuses such an environment up front; the remedy it names is `install-process-builder`, which
 you run only after the user approves it (`core-rules`).
 Configuring the Process file element itself (which files it reads, where it saves them) is not part of this
 contract; one that is already in the process is mapped like any other element.
@@ -34,7 +34,7 @@ contract; one that is already in the process is mapped like any other element.
 
 == Reading them back ==
 - Read a process back with `describe-business-process mode=full`, or `element=<name>` for one element (`mode`
-  exists from clio 8.1.0.141, so every clio this guide applies to takes it). A `File` reads back as type
+  is older than the File types, so every File-aware clio takes it). A `File` reads back as type
   `FileLocator`. A PROCESS parameter that is a collection with no tag and exactly one FileLocator item reads back as
   type `FileCollection`, with its `itemProperties`. Both types re-submit as written: `FileLocator` is an accepted
   type name, and `FileCollection` rebuilds the same shape. An element's file collection keeps the platform name
@@ -64,7 +64,7 @@ contract; one that is already in the process is mapped like any other element.
 == Binding a collection: both levels ==
 When an element or a sub-process reads a collection input, the run time builds each row from that input's own
 items (platform source): an item left unbound reads empty, and the Process file element fails on it. So a collection is bound at two levels, the collection (which rows) and its item (what
-each row holds), as the process designer does in one gesture. From clio 8.1.0.142 every structured mapping
+each row holds), as the process designer does in one gesture. With a File-aware clio every structured mapping
 (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below,
 through `mappings[]`, `addMapping`, `setConnections` and the approval block; a refused mapping writes no value. A
 dotted name addresses an item on either side: `DocumentsParameter.File` as `processParameter` or

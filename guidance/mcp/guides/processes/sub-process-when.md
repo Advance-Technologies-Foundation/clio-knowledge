@@ -49,7 +49,7 @@ it calls.
   and its steps read the item from there, never from the caller. That takes TWO kinds of mapping, and
   the first is the one that gets forgotten: the collection itself (`InputRecordCollection` from
   `ResultCompositeObjectList`), and each per-item value (a dotted name). Without the first the build
-  succeeds and the loop runs ONCE with empty values. From clio 8.1.0.142 a per-item value taken from an
+  succeeds and the loop runs ONCE with empty values. With a File-aware clio a per-item value taken from an
   item of a collection binds that collection too (`process-files`); any other per-item value still needs
   the first mapping, and an older clio may need it in every case, so send both. Converting the element,
   binding the collection and addressing a per-item value are owned by `process-sub-process` (MULTI-INSTANCE).
