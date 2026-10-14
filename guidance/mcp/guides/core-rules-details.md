@@ -46,8 +46,9 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
   first (clio 8.1.0.141 and later): its question offers a browser already on the machine (a
   headless shell Playwright or Puppeteer cached, an installed Chrome, Edge, Chromium or Brave), a one-time
   download of a pinned chrome-headless-shell from Chrome for Testing into `~/.clio/browsers/`, or no.
-  `CHROME_PATH`, when set, replaces the question and a remembered answer (a warning says so), never an answer
-  the user gives on the call. A reply with `code=browser-consent-required` (or
+  `CHROME_PATH`, when set, replaces the question and a remembered `existing` or `download` answer (a warning
+  says so), but not a remembered `none` (that still answers `browser-declined`), and never an answer the user
+  gives on the call. A reply with `code=browser-consent-required` (or
   `browser-not-found`) and no `success` is a question for the USER, not a failure and not their consent, in
   the same way a CrtProcessBuilder refusal is not approval to install: relay `browserConsent.question` to
   the user verbatim, NEVER answer it for them or pick a browser yourself, then call page-smoke again with the

@@ -169,7 +169,8 @@ public sealed class ClioToolSyncGuidanceTests
             "relay `browserConsent.question` to the user verbatim, NEVER answer it for them or pick a browser yourself",
             "The answer is remembered, so the user is usually asked once; if a later call asks again, relay it again.",
             "`browser-download-failed`: tell the user; call again to retry, or ask the user before choosing another browser - never pick one for them.",
-            "`browser-downloading` means part of the download is kept (`browserDownload` says how much): call again without `browser` to resume it."
+            "`browser-downloading` means part of the download is kept (`browserDownload` says how much): call again without `browser` to resume it.",
+            "`CHROME_PATH`, when set, replaces the question and a remembered `existing` or `download` answer (a warning says so), but not a remembered `none` (that still answers `browser-declined`), and never an answer the user gives on the call."
         })
         {
             details.Should().Contain(clause,
