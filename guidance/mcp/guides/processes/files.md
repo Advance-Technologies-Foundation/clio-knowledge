@@ -5,8 +5,8 @@ This guide owns the `File` and `FileCollection` process parameter types and the 
 P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through. Parameters and mappings
 in general: `process-parameters`; the Sub-process element: `process-sub-process`; formulas: `process-formulas`.
 From clio 8.1.0.142: use only when the FULL create-business-process contract (`get-tool-contract` with
-`detail: "full"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its
-silence proves nothing. An environment
+`tool-names: ["create-business-process"]`, `detail: "full"`) names type File in `parameters[]`; the default reply is
+shortened and lists no types, so its silence proves nothing. An environment
 whose CrtProcessBuilder predates this support refuses `type: File` as not supported and saves nothing, but it does
 NOT apply the rules below either: an outer-only mapping is stored as sent and an item mapping binds the item alone,
 and a read-back there reports a file collection as `CompositeObjectList`.
@@ -107,7 +107,8 @@ targets only.
   items: from another source it leaves them reading the old one, with no notice. There, map the outer level first;
   P1 then refuses an item taken from another collection.
 - An `expression` goes through as given; only its meta-path tokens are checked, and none of the rules above runs on
-  it (the stored text has its GUIDs lower-cased). The formula checks `process-formulas` describes still apply. A misspelled token, a token from another process and a column of a collection item are refused; a token that
+  it (the stored text has its GUIDs lower-cased). Beyond this check, the formula itself still goes through the
+  validation `process-formulas` describes. A misspelled token, a token from another process and a column of a collection item are refused; a token that
   names an item (`Files.File`) is accepted. Prefer a structured source (`process-formulas` owns the formula form).
 
 == Recipes ==

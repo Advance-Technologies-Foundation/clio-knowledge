@@ -205,7 +205,7 @@ public sealed class FileParameterGuidanceTests
             .Select(match => guide[Math.Max(0, match.Index - "measured on ".Length)..(match.Index + match.Length)])];
 
         // Assert
-        guide.Should().Contain($"From clio {ClioBoundary}: use only when the FULL create-business-process contract (`get-tool-contract` with `detail: \"full\"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its silence proves nothing.",
+        guide.Should().Contain($"From clio {ClioBoundary}: use only when the FULL create-business-process contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its silence proves nothing.",
             because: "the boundary is the clio release, and the tool contract is the check an agent can make before it declares a type an older pair refuses");
         guide.Should().Contain("does NOT apply the rules below either",
             because: "an older package refuses File loudly but stores an outer-only mapping and binds an item alone in silence");
