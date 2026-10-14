@@ -343,9 +343,9 @@ FLOW
    A grid whose rows differ in column structure is cut into bands: it becomes ["1fr"], and each multi-column
    band is a synthesized insert `<container>_TabletBand<N>` (no source name) before its children, which take
    it as parentName. Apply in order; never move them back. REPORT it as a FACT ("fields in <container> stack
-   on the phone and sit in <n> columns on a tablet", <n> = length of columnsByBreakpoint.medium); report a
-   banded container (["1fr"]) through its bands ("<fields> sit side by side in <n> columns; the rest are
-   full width"), never as "1 column". Do NOT ask whether to apply it — changing it means hand-editing values.
+   on the phone and sit in <n> columns on a tablet", <n> = length of columnsByBreakpoint.medium). A group
+   listing a band grid is reported through its bands ("<fields> sit side by side in <n> columns"); a 1-column
+   result "takes the full tablet width". Do NOT ask whether to apply it — changing it means hand-editing values.
 5c. Tab body + Area (when guide.tabAreaLayers is present): every tab the CONVERTER creates already carries
    its synthesized inserts in viewConfigDiff — the tab-body grid, then its Area card — because on
    mobile a tab's content lives in an Area card, not directly in the tab body. Each of that tab's
@@ -566,8 +566,8 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   adaptive.
   Supported canvases: phone portrait (`small`) and tablet (`medium` = `large`, from 600 dp, so a phone in
   landscape gets them too). Known tablet limits, to mention at the gate: rows in neighbouring columns do not
-  line up, and a grid that cannot be banded (template grid or child, overlapping cells, a rowSpan across
-  bands, more than 12 columns) keeps one column set for all rows.
+  line up, and a grid that cannot be banded (template grid or child, a child covering another's start column, a
+  rowSpan across bands, >12 start columns) keeps one column set for all rows.
 - TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and is
   no more a proposal than adaptiveLayout is: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
