@@ -20,7 +20,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   Boolean, Date, Date-time, Time, Guid, Lookup, Collection (a record collection, `CompositeObjectList`,
   whose direction defaults to `Out` unless you set one), and, from clio 8.1.0.142, File and FileCollection (one
   file and several, carried by reference: `process-files`) — other types (composite object / entity / binary /
-  ...) are not supported yet, and binary never will be. Name a process parameter per N8 in `process-naming`
+  ...) are not supported yet; binary is refused, because a process parameter carries a file by reference (File). Name a process parameter per N8 in `process-naming`
   (summarised in `process-digest`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of

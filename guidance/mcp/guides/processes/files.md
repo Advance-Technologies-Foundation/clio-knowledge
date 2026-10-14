@@ -2,11 +2,12 @@ clio MCP process-files guide — File and FileCollection process parameters, and
 
 Scope
 This guide owns the `File` and `FileCollection` process parameter types and the two-level rules (P1, P2, P2-MI,
-P3, R-M1, R-M2) every structured mapping onto or from an ITEM of a collection goes through. Parameters and mappings
+P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through. Parameters and mappings
 in general: `process-parameters`; the Sub-process element: `process-sub-process`; formulas: `process-formulas`.
 From clio 8.1.0.142: use only when get-tool-contract for create-business-process mentions type File. An environment
 whose CrtProcessBuilder predates this support refuses `type: File` as not supported and saves nothing, but it does
-NOT apply the rules below either: an outer-only mapping is stored as sent and an item mapping binds the item alone.
+NOT apply the rules below either: an outer-only mapping is stored as sent and an item mapping binds the item alone,
+and a read-back there reports a file collection as `CompositeObjectList`.
 A clio from 8.1.0.142 refuses such an environment up front; the remedy it names is `install-process-builder`, which
 you run only after the user approves it (`core-rules`).
 Configuring the Process file element itself (which files it reads, where it saves them) is not part of this
@@ -33,8 +34,8 @@ contract; one that is already in the process is mapped like any other element.
 - Read a process back with `describe-business-process mode=full`, or `element=<name>` for one element (`mode`
   exists from clio 8.1.0.141, so every clio this guide applies to takes it). A `File` reads back as type
   `FileLocator`. A PROCESS parameter that is a collection with no tag and exactly one FileLocator item reads back as
-  type `FileCollection`, with its `itemProperties`. Both re-submit as they are: `FileLocator` is an accepted type
-  name, and `FileCollection` rebuilds the same shape. An element's file collection keeps the platform name
+  type `FileCollection`, with its `itemProperties`. Both types re-submit as written: `FileLocator` is an accepted
+  type name, and `FileCollection` rebuilds the same shape. An element's file collection keeps the platform name
   `CompositeObjectList`.
 - ITEM NAME: a file collection made in the process designer may name its one item otherwise (`Attachment`). It
   still reads back as `FileCollection`, with its real item name (measured on CrtProcessBuilder 1.6.6.98 on
@@ -58,11 +59,11 @@ contract; one that is already in the process is mapped like any other element.
   mirror copies a whole parameter.
 
 == Binding a collection: both levels ==
-The run time builds each row of a collection from the TARGET's own items: an item left unbound reads empty, and an
-element that reads it fails. So a collection is bound at two levels, the collection (which rows) and its item (what
+When an element or a sub-process reads a collection input, the run time builds each row from that input's own
+items (platform source): an item left unbound reads empty, and the Process file element fails on it. So a collection is bound at two levels, the collection (which rows) and its item (what
 each row holds), as the process designer does in one gesture. From clio 8.1.0.142 every structured mapping
 (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below,
-through `mappings[]`, `addMapping` and every other route that writes a mapping; a refused mapping writes no value. A
+through `mappings[]`, `addMapping`, `setConnections` and the approval block; a refused mapping writes no value. A
 dotted name addresses an item on either side: `DocumentsParameter.File` as `processParameter` or
 `targetProcessParameter`, `ObjectFiles.File` as `sourceElementParameter`, `InputRecordCollection.<CalleeParam>` as
 `elementParameter`.
@@ -92,14 +93,17 @@ targets only.
   this way reads as one row at run time (platform source; not measured on a stand yet).
 - R-M1 — a single File (a process parameter, or a flat File input of an element, a single-instance sub-process's
   included) from an ITEM of a collection is refused ("use a FileCollection, or a multi-instance sub-process"):
-  outside a row the item reads empty. Measured on Creatio 10.1.37 on 2026-10-02: a designer-made mapping of that
-  shape delivered no file while the source held two.
-- Order matters, because the LAST mapping decides. An item mapping followed by an outer mapping onto a collection
-  that takes files: the outer one re-pairs an item bound outside its source (P2), and its notice names the old
-  binding. An outer mapping followed by a single-file mapping onto its item: the collection is cleared (P3). So copy
-  a whole collection with the outer mapping ALONE, and pass one file with the item mapping alone.
+  outside a row the item reads empty. Measured on Creatio 10.1.37 on 2026-10-02: a mapping of that shape, written
+  by an older CrtProcessBuilder that still accepted it, delivered no file while the source held two.
+- Order matters. Onto a collection that takes files, the LAST mapping decides. An item mapping followed by an
+  outer mapping: the outer one re-pairs an item bound outside its source (P2), and its notice names the old binding.
+  An outer mapping followed by a single-file mapping onto its item: the collection is cleared (P3). So copy a whole
+  collection with the outer mapping ALONE, and pass one file with the item mapping alone. Onto any other collection
+  (a multi-instance `InputRecordCollection`, a sub-process input) a later outer mapping is NOT checked against its
+  items: from another source it leaves them reading the old one, with no notice. There, map the outer level first;
+  P1 then refuses an item taken from another collection.
 - An `expression` goes through as given; only its meta-path tokens are checked, and none of the rules above runs on
-  it. A misspelled token, a token from another process and a column of a collection item are refused; a token that
+  it (the stored text has its GUIDs lower-cased). A misspelled token, a token from another process and a column of a collection item are refused; a token that
   names an item (`Files.File`) is accepted. Prefer a structured source (`process-formulas` owns the formula form).
 
 == Recipes ==
@@ -114,10 +118,11 @@ targets only.
 3. One called-process run per file: the callee declares a `File` input; the caller's Sub-process element is
    multi-instance (`process-sub-process`) and maps `InputRecordCollection.ContractFileParameter` from
    `DocumentsParameter.File` (or from `ReadFiles.ObjectFiles.File`). P1 binds `InputRecordCollection` too. Send it
-   alone, or before mapping `InputRecordCollection` itself, which sent first raises a P2-MI notice.
+   alone; if you also map `InputRecordCollection` itself, map it FIRST (it raises a P2-MI notice until the item is
+   mapped), because a later outer mapping is not checked against the item.
 4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM (`<input>.File` from the source's file
-   item); P1 binds the input too. That input does not take files: an outer-only mapping onto it is stored unpaired,
-   and whether the called process then reads the files is not measured yet.
+   item); P1 binds the input too. That input does not take files: an outer-only mapping onto it is stored unpaired;
+   neither form has been run on a stand yet.
 5. Verify with `describe-business-process element=<name>` (or `mode=full`): each level shows its source.
 
 == Other refusals ==
