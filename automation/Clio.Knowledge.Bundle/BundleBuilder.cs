@@ -448,7 +448,13 @@ public sealed class BundleBuilder
         HashSet<string> declaredValues = declared.ToHashSet(StringComparer.Ordinal);
         if (!actualValues.SetEquals(declaredValues))
         {
-            throw new InvalidDataException($"Declared {declaredLabel} must exactly match {actualLabel}.");
+            // Name the values, not just the two lists: with 170+ items a bare "must match" leaves the
+            // author diffing bundle-source.json by hand to find the one id that moved.
+            string missing = string.Join(", ", actualValues.Except(declaredValues).Order(StringComparer.Ordinal));
+            string extra = string.Join(", ", declaredValues.Except(actualValues).Order(StringComparer.Ordinal));
+            throw new InvalidDataException(
+                $"Declared {declaredLabel} must exactly match {actualLabel}. "
+                + $"Missing from {declaredLabel}: [{missing}]. Not among {actualLabel}: [{extra}].");
         }
     }
 

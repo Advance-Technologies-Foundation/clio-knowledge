@@ -1,6 +1,7 @@
 clio MCP process-read-data guide — the Read data element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 == What this article owns ==
 This article owns the Read data element: its `readData` block, all four read modes and what each one
@@ -11,10 +12,16 @@ elements (record triggers, Modify data) stay there, and Add data and Delete data
 articles, `process-add-data` and `process-delete-data`.
 The record `filter` this element carries is owned by `process-data-source-filters` — this article says
 WHETHER it takes one and what it means here, that one says what a filter may contain. The build
-lifecycle and descriptor shape live in `process-modeling`; what is buildable today lives in
-`process-element-catalog`.
+lifecycle, the descriptor shape and what is buildable today are summarised in `process-digest` (owners
+`process-modeling` and `process-element-catalog`).
 
 == Read data element (readData) — first / collection / count / aggregation modes ==
+- A `readData` element left with NO source object (no block, and no `setElement.readData` after it) is NOT
+  refused - finishing it with `setElement` in the same or a later request is supported - but the response
+  carries a Warning naming it (CrtProcessBuilder 1.6.6.90 and later - an older package stays silent, so
+  silence proves nothing), judged at the END of the request. Treat that Warning as a to-do: until it is fixed
+  the element fails on its first run. Settle the missing part WITH the user rather than inventing it, and
+  while it stays unfinished say plainly that the element is incomplete.
 - A `readData` element reads from one object in one of FOUR modes, all buildable (count and aggregation from
   CrtProcessBuilder 1.6.2.6 — not the earlier 1.6.0.9, a pre-merge cut that never shipped — and collection
   from the version this guidance ships with). Configure it with the element's `readData` block:
@@ -84,7 +91,7 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
   output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the output from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output STOPS BEING FILLED
-  (the parameter still exists and is still mappable) — re-read the element with `describe-business-process`
+  (the parameter still exists and is still mappable) — re-read the element with `describe-business-process element=<name>`
   after such a change and re-point anything that consumed it.
 - `describe-business-process` reports only FLAGGED / value-bearing parameters. An omitted one may still
   exist and be mappable (`ResultRowsCount` above) — omission means "not reported", never "does not exist".
@@ -113,8 +120,8 @@ lifecycle and descriptor shape live in `process-modeling`; what is buildable tod
   clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
   `setFilter`) in the same operations array. MUST, before any `setFilter` on a live process: `setFilter`
   REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
-  back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
-  and the read-back shape. `describe-business-process` reads the whole block back
+  back with `describe-business-process mode=full` and send it complete. `process-data-source-filters` owns the op
+  and the read-back shape. `describe-business-process mode=full` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`, and `aggregation` as `{function, column}` in aggregation
   mode), so anything the builder made round-trips into create/modify. Read-back limits on a HUMAN-made
   element: a linked-object column is omitted from

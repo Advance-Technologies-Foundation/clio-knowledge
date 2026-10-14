@@ -1,19 +1,27 @@
 # Conditional flows and branch conditions
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
-Split out of `process-formulas` because that article had no budget headroom left: the two halves are
-read at different times - the vocabulary while authoring any formula, this while planning a BRANCH.
-The formula vocabulary, the reference syntax, what each refusal names and the length bound stay there
-and are NOT restated here; fetch both when you author a condition.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
+The formula vocabulary, the reference syntax, what each refusal names and the length bound stay in
+`process-formulas` and are NOT restated here; fetch both when you author a condition.
+
+`process-branch-conditions-details` carries the evidence and rarer cases behind these rules: the label
+figures and wording, the condition paths' version floor, a gateway that builds with no fallback, the
+NOTICE that reports a parallel split and its three caveats, the diagram's branch order, and the
+corpus-attested condition shapes. It also holds the reasoning and counts moved out of the rules below, a
+gateway's own default re-kinded to `sequence`, and why this article split from `process-formulas`. Read it when a build or a pre-flight answers with a parallel-split
+notice or a package-version refusal, or when you need the evidence behind a rule.
 
 == Conditional flows and branch conditions ==
 
 HOW A CONDITION NAMES A PARAMETER DEPENDS ON WHICH CALL YOU ARE IN, and getting it wrong costs the
-whole call. The RUNTIME only ever resolves a UId meta-path — `[#[Parameter:{uid}]#]`. On
-`modify-business-process` that is what you write, and `describe-business-process` gives you the UIds.
-On `create-business-process` you write the NAME instead — `[#Amount#]`, `[#Element.Parameter#]` — and
-the server expands it, because on create the UId does not exist yet. Both are spelled out below; read
-"REFERENCING A PARAMETER" under FORMULAS for the meta-path form itself.
+whole call. The RUNTIME only ever resolves a UId meta-path —
+`[#[IsOwnerSchema:false].[IsSchema:false].[Parameter:{uid}]#]`. On `create-business-process` you write
+the NAME — `[#Amount#]`, `[#Element.Parameter#]` — and the server expands it, because on create the UId
+does not exist yet. On `modify-business-process` you write the name too when its contract carries the
+gate under **ON THE MODIFY PATH**; otherwise the meta-path, from the UIds `describe-business-process mode=full`
+reports. Both are spelled out below; `process-formulas` ("REFERENCING A PARAMETER") owns the meta-path
+form itself.
 
 A branch is a flow with a CONDITION, and you DECLARE it where you declare the flow:
 
@@ -26,25 +34,16 @@ A branch is a flow with a CONDITION, and you DECLARE it where you declare the fl
 `kind` is `sequence` (the default) | `conditional` | `default`, and a `conditional` flow REQUIRES a
 `condition`. The same fields are on `addFlow`.
 
-**LABEL BOTH ARMS.** `flows[].label` is the text the designer draws ON the connector, and on a branch it
-is not decoration: without it a two-branch decision renders as two identical unlabelled arrows and a
-reader has to open each one's properties to tell them apart. It is what the shipped product does on the
-large majority of its conditional flows and a quarter of its default ones, and almost never on a plain
-sequence flow — so label the arms and leave an ordinary continuation bare. `process-naming` N10 carries
-the measured figures and their population.
-
-Name the OUTCOME, never the condition. `Approved`, `User Not Found`, `no record found`, plain
-`Yes` / `No` — the corpus is business phrases, and repeating the expression is the thing to avoid,
-because it is already one click away on the flow itself. `process-naming` N10 owns the wording rule in
-full. EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
+**LABEL BOTH ARMS** of a branch and leave an ordinary continuation bare (why: `process-branch-conditions-details`).
+Name the OUTCOME, never the condition. `process-naming` N10 owns the wording rule
+(summarised in `process-digest`). EDITING one is destructive and this article owns that: an EMPTY `label` CLEARS a designer's
 caption, so read the three-state contract under **ON THE MODIFY PATH** below before any edit, and
-`describe-business-process` first — it reports each flow's `label`, which is the only way to learn a
+`describe-business-process mode=full` first — it reports each flow's `label`, which is the only way to learn a
 human's label is there to be erased.
 
-**ON THE BUILD PATH, WRITE THE NAME.** This is the one exception to the UId rule above and it exists
-because it has to: on `create-business-process` the UIds do not exist yet — the parameters and elements
-are made by that same call — so `flows[].condition` takes a name and the server expands it once
-everything exists.
+**ON THE BUILD PATH, WRITE THE NAME.** It exists because it has to: on `create-business-process` the UIds do
+not exist yet — the parameters and elements are made by that same call — so `flows[].condition` takes a name
+and the server expands it once everything exists.
 
     { "source": "Check", "target": "Approve", "kind": "conditional",
       "condition": "[#Amount#] > 100", "label": "Approved" }        // a process parameter
@@ -55,27 +54,32 @@ everything exists.
 `[#Element.Parameter.Column#]` for ONE column of the record it returned. A `readData` in `first` mode exposes
 exactly one output and it is a RECORD (`ResultEntity`), so a column test reads
 `[#ReadContact.ResultEntity.DoNotUseCall#] == true`; the column is resolved by its code on the read object,
-and `process-data-elements` owns that source, its refusals and the UId form a MODIFY-path condition needs.
-That is not a corner: of the 487 element-output conditions in the shipped corpus, 242 are column tests and
-245 are not.
+and `process-data-elements` owns that source, its refusals and its UId form.
 
 > Do NOT reach for `[#Read.ResultCount#]`. `ResultCount` is a declared parameter, so the name resolves, the
 > condition stores, and `describe` reads back clean — but `ReadDataUserTask.HandleResult` assigns it only in
 > `function` mode with `FunctionType == Count`, and returns before it in every other mode. On anything clio
 > builds it stays 0, so `> 0` never fires and the fallback always runs. See `process-data-elements`.
 
-`[#SysSettings.Code<Type>#]`, `[#Lookup.Schema.Record#]` and an already-written meta-path are passed
-through untouched. A name that resolves to nothing is refused before anything is saved, naming the flow
-and listing the parameters that do exist — which is the whole reason to write the name rather than
-guess: without it the platform answers `Formula value error: Expression expected (at index 0)`, naming
-neither, and the entire call is aborted.
+`[#SysSettings.Code<Type>#]` and `[#Lookup.Schema.Record#]` are passed through untouched, and so is an
+already-written meta-path - which, under the contract named in the next paragraph, must be spelled exactly
+as the platform writes it (every segment dot-separated, braces included, the
+`[IsOwnerSchema:false].[IsSchema:false].` prefix whole or absent) and name an item of this process, or it is
+refused naming the flow - and, for a misspelling, handing back the correct token. A name that resolves to
+nothing is refused before anything is saved, naming the flow and listing the parameters that do exist —
+which is the whole reason to write the name rather than guess: without it the platform answers `Formula
+value error: Expression expected (at index 0)`, naming neither, and the entire call is aborted.
 
-**ON THE MODIFY PATH, WRITE THE META-PATH.** There is no expansion there and none is needed: the process
-exists, so `describe-business-process` reports the element and parameter UIds (column UIds come from the
-`process-data-elements` recipe). The two-step route — build the flow plain,
-then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a designer-authored
-one. To change an existing flow's kind in either direction, `setFlow` takes `source`, `target`, `kind`,
-(for a conditional one) `condition`, and an optional `label`.
+**ON THE MODIFY PATH, CHECK THE CONTRACT FIRST.** When the `modify-business-process` contract from
+`get-tool-contract` contains the exact phrase `every segment dot-separated`, `addFlow`, `setFlow` and
+`setFlowCondition` expand the same names as here, and the server checks every hand-written meta path - in a
+condition, an `expression` mapping or value and a Formula body, on create as well - as above; an echoed
+designer condition too, so one reading a column its Read data does not load is refused. With any other
+contract there is no expansion on modify: write the meta-path from the UIds `describe-business-process mode=full`
+reports (column UIds come from the `process-data-elements` recipe). The two-step route — build the flow
+plain, then `setFlowCondition` — is what you use on a flow that ALREADY exists, including a
+designer-authored one. To change an existing flow's kind in either direction, `setFlow` takes `source`,
+`target`, `kind`, (for a conditional one) `condition`, and an optional `label`.
 
 The `label` argument has THREE states and the difference is destructive: OMITTING it keeps whatever
 label the flow has, an EMPTY string CLEARS it, and text replaces it. Omitting is what you want on any
@@ -90,19 +94,11 @@ rule and the corpus figures.
 `removeFlow` takes `source` and `target` ONLY, and `setFlowCondition` takes those plus a `condition`.
 Both resolve the flow by the PAIR, so a `kind` (or, on `removeFlow`, a `condition`) carried over from a
 `describe` is REFUSED rather than ignored — and the refusal ABORTS THE WHOLE BATCH, which is atomic.
-Deliberate, not tidiness: where two flows join the same pair, honouring the edit while ignoring a
-`kind` acts on a flow the caller did not name. **MUST strip `kind` and `condition` before a
+**MUST strip `kind` and `condition` before a
 `removeFlow`.** Version-dependent, so do not rely on it as a backstop: the `removeFlow` refusal ships
 from `CrtProcessBuilder` **1.6.0.10** and the `setFlowCondition` one from **1.6.0.11**; below those the
 extra fields are accepted and silently dropped, clio does no client-side check, and stripping them
-yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule in full.
-
-Both need `CrtProcessBuilder` **1.6.0.3** or newer; below it the build path takes a system setting
-only. State the version that SHIPS the behaviour, not the one it first appeared under: the gateway
-line was numbered 1.4.0.58 through 1.4.0.70 while it was being built, and no released archive ever
-carried those numbers - a 1.5.0.0 minor was cut elsewhere and outranks all of them, so a 1.4.x floor
-is satisfied by a server carrying none of this. 1.6.0.3 is the first released archive with the whole
-line in it, and it is what clio's own [RequiresPackage] floor demands.
+yourself is the whole protection. `process-modeling` owns `removeFlow`'s destructive rule.
 
 NO GATEWAY IS NEEDED. The platform synthesizes an exclusive gateway for a conditional flow whose source
 is not one, so a branch straight off an activity is legitimate — 485 of the 1 406 conditional flows in
@@ -139,10 +135,7 @@ saying so. Declaration order does not change the outcome — it did until the fi
 where declaring the conditional arm first (which the precedence advice below tells you to do) aborted
 the whole `create-business-process` call. Off a gateway, write the else branch as `kind: "default"` and
 the notice does not arise. R7 does NOT apply to this shape - not "is satisfied by it":
-`process-activity-connections` owns R1-R20 and states why, and the difference is operational. The
-gateway is synthesized at generation time and never appears as a graph node, so there is no
-exclusive-diverge node for R7 to judge. Read "satisfied" and you would dismiss a genuine R7 finding
-elsewhere in the graph as already handled.
+`process-activity-connections-details` owns R1-R20 and states why, and the difference is operational.
 
 Two consequences worth having before you build:
 
@@ -158,9 +151,7 @@ Two consequences worth having before you build:
   **A fallback catches an unmatched VALUE, not a missing one.** An unset numeric parameter does not
   arrive as "no value" — it arrives as its type's default, and for Integer that is `0`
   (`IntegerDataValueType.DefValue`). So a gateway whose first branch is `[#Amount#] < 100` takes that
-  branch when nothing was passed, and a `default` written to catch the empty case never fires. Measured
-  on a stand: four runs of one three-way gateway routed 50, 500 and 5000 correctly and routed the
-  no-value run to `< 100`. Nothing errors, so the branch is silently unreachable rather than broken.
+  branch when nothing was passed, and a `default` written to catch the empty case never fires. Nothing errors, so the branch is silently unreachable rather than broken.
   Test the empty case explicitly, or make the first condition exclude the default value.
   ONE either way: a conditional branch beside TWO flows that have none is refused, because the platform
   drops one of them and runs the other alongside the branch the condition chose. Refused on BOTH
@@ -169,26 +160,9 @@ Two consequences worth having before you build:
   validation — `process-modeling` is right that the modify path runs none; this refusal is a
   different mechanism that happens to guard the same shape, which is why modify is not the hole
   here that it is for the structural rules.
-- **A diverging gateway with no fallback still BUILDS — the warning does not block it.**
-  `validate-process-graph` reports R7/R9 and `create-business-process` saves the process anyway, so a
-  clean build is NOT evidence that the conditions cover every case. Only a run is. What the warning
-  predicts is exact — on a stand, an unmatched value produced `status: error` and a
-  `SysProcessLog.ErrorDescription` reading "None of the conditions were met after the element ...",
-  word for word what R7 said it would — but the prediction arrives as advice, not as a refusal.
 - **Do not leave a branching element with only plain flows.** The platform synthesizes the exclusive gateway
   only when at least one outgoing flow is conditional; with all of them plain there is no gateway and EVERY
   outgoing flow is taken. That is a parallel split.
-
-  It is no longer a SILENT one at build time. `validate-process-graph` has always reported the shape as
-  an R12 warning, and from **CrtProcessBuilder 1.6.2.10** `create-business-process` and
-  `modify-business-process` raise a matching NOTICE — so a caller who skipped the pre-flight is no longer
-  told less than one who ran it. Both sides WARN rather than refuse, because the shape ships and runs: 74
-  non-gateway sources in the 7.8.0 corpus carry it, 33 of them on ordinary activities. Read the notice as
-  "confirm you meant a fan-out", not as a defect.
-
-  It is raised ONCE per request, over the graph that is actually saved — so a batch that builds the split
-  and then dissolves it (`addFlow` twice, then `setFlow kind:"conditional"`, which is the remedy below)
-  correctly reports nothing.
 
   **How you fix it depends on how many branches there are, and the two answers are not variations of
   one another.** With TWO plain flows, give either of them a condition and the one left plain becomes
@@ -197,26 +171,6 @@ Two consequences worth having before you build:
   an `exclusiveGateway` element: route the flows through it and condition each of ITS outgoing flows,
   leaving one `default`. A deciding gateway is exempt from the stray-branch rule, which is why
   `[conditional, conditional, default]` is legal there and illegal on the activity.
-
-  Three caveats, each a way you would otherwise be told something untrue:
-
-  - **On a stand below 1.6.2.10, you do not get silence — you get a REFUSAL.** No `[RequiresPackage]`
-    floor was raised for this notice, but the floor is not what decides: clio refuses whenever the
-    environment records a package version *older than the one this clio ships*, whatever that version
-    is. So a clio carrying 1.6.2.10 answers `create-business-process`, `modify-business-process`,
-    `describe-business-process` **and `validate-process-graph`** with *"This clio carries
-    CrtProcessBuilder 1.6.2.10, but the target environment has X. Update the package in the target
-    environment and retry."* The pre-flight is gated too, so it is not a fallback. Run
-    `install-process-builder` — that is the whole remedy. The build is silent about the split only when
-    your clio ALSO predates 1.6.2.10, so the two versions converge and nothing is refused — and on that
-    stand `validate-process-graph` still reports the shape as R12, which it always has. An
-    un-upgraded stand is exactly where the pre-flight earns its keep, not a stand where nothing can
-    see the split.
-  - **On modify it reports the sources your request TOUCHED**, not the whole graph. A split already
-    present in a designer-authored process you did not edit stays unreported here — `validate-process-graph`
-    is what reads the whole graph, and a clean modify is therefore not evidence of a clean process.
-  - **The notice covers plain flows only.** A `default` flow beside a plain one off an ordinary element
-    is an implicit split too, by exactly the same mechanism, and neither side reports that one.
 
 That second point is what makes CLEARING a condition the dangerous edit, and it is why the clear-condition
 operation is `setFlow` rather than remove-and-add. `setFlow` re-kinds the flow in place: it keeps the flow's
@@ -227,9 +181,9 @@ the process, namely dropping the LAST conditional flow off an element that still
 gateway's outgoing flows must each say how they are chosen, and the designer cannot draw a plain flow out
 of one, so `kind: "sequence"` there is normalised to `default` and a notice says so. It is REFUSED only
 when the gateway already has a default: that flow has nothing left to become, and you must give it a
-condition or re-kind the existing default first. Re-kinding the gateway's OWN default to `sequence` is a
-no-op — it stays the default, silently, because clearing the marker would leave the gateway with no
-fallback at all. Remove-and-add is guarded by nothing and loses the position as well: do it and the
+condition or re-kind the existing default first — to `conditional`: re-kinding the gateway's OWN default to
+`sequence` is a TRAP that silently does nothing (it stays the default, and the next `setFlow` is refused
+again). Remove-and-add is guarded by nothing and loses the position as well: do it and the
 exclusive branch becomes a parallel one, with `describe` reporting `kind: "sequence"` on both flows — which
 reads exactly like "condition cleared, as asked".
 
@@ -244,14 +198,6 @@ fires above 100 and one that fires above 1000 resolve differently purely by whic
 most specific FIRST, and say which order you chose and why, because nothing but the order records the
 intent.
 
-THE DIAGRAM NOW SHOWS THAT ORDER, which is the one place a human can read it. The layout in
-`process-diagram-layout` draws a split's branches top to bottom in evaluation order, with one deliberate
-exception: the DEFAULT branch keeps the gateway's own row, because it is the path that runs when nothing
-matched and it is what the eye follows across the picture. So the conditional branches read downward in
-the order you declared them, and the default is on the spine rather than at the bottom. Two consequences
-worth knowing before you write: declare the main path first when a gateway has no default, and expect a
-gateway that GAINS a default later to move its existing branches down a row.
-
 One exception, and it decides the DIALECT rather than the order: when a connector's source
 enumerates ACTIVITY RESULTS the branch is chosen by a result SELECTION rather than by a formula, the
 designer offers no formula field there at all, and a condition written onto such a connector is
@@ -264,10 +210,3 @@ evaluated BEFORE any formula branch, whatever order the flows are written in.
 behind it, how to write the dialect with `flows[].results` and `setFlowResults`, how to read it back,
 and exactly when the checkbox editor appears. Read it before branching off an approval, a perform task, a preconfigured page or an open
 edit page with results by column.
-
-Corpus-attested condition shapes, most common first — these are what real processes use. `X`, `A` and
-`B` stand for a REFERENCE TOKEN (`[#[Parameter:{uid}]#]`, a system variable, a system setting), never for a
-parameter's name:
-`X != Guid.Empty`, `X == true`, `X == "text"` / `X.Equals("text")`, `A && B`, numeric comparisons, a bare
-boolean parameter, lookup-record equality, parameter-to-parameter comparison, `!string.IsNullOrEmpty(X)`,
-`A || B`, `.Contains("x")`, `X != null`, `!X`, and date comparisons against `DateTime.MinValue`.

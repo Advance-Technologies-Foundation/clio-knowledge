@@ -1,6 +1,7 @@
 clio MCP process-delete-data guide — the Delete data element
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 
 This article is the authoritative owner of the Creatio **Delete data** element (`deleteData` /
 `DeleteDataUserTask`): its one-field `deleteData` block, the record filter that decides what is destroyed,
@@ -104,7 +105,7 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
     dismiss one as "probably stale from an earlier op": that was the behaviour of an older
     `CrtProcessBuilder`, and against a current one a warning means the element really is unable to run.
   * If you get one anyway, the honest move is the same as always — read the element back with
-    `describe-business-process` and say what you actually see.
+    `describe-business-process element=<name>` and say what you actually see.
 - RULES FOR THE EXCHANGE:
   * A vague reply is not a yes. "ok go on", "whatever you think" -> ask once more, plainly.
   * If the filter CHANGES after the user agreed, confirm again — consent was for the old set, not this one.
@@ -139,6 +140,6 @@ name in backticks is a get-guidance topic to fetch, not a section to scroll to.
   target change (FIRST configuration included) the stored record filter clears unless its root already
   targets the incoming object — issue a `setFilter` in the same operations array when it cleared, or the
   element is left in the deletes-nothing-and-fails state. Same reset rule as `readData` / `changeData`.
-- `describe-business-process` reads the block back as `source` + `sourceSchemaUId`. `source` is null when the
+- `describe-business-process mode=full` reads the block back as `source` + `sourceSchemaUId`. `source` is null when the
   element's target object is set by a formula/mapping instead of a constant — the block is still reported,
   and retargeting such an element needs an explicit `source`.

@@ -1,6 +1,7 @@
 clio MCP process-task-category guide — a task's category and priority are lookup CONSTANTS
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of WHY a task element's ActivityCategory and ActivityPriority
 MUST be written as a bare record Guid in `value`, stored as a ConstValue: what silently degrades when
 the mapping's SOURCE is an `expression` instead, how DisplayValue is serialized into the schema
@@ -23,7 +24,8 @@ SILENTLY DEGRADES the allowed-results list the task page / designer result dropd
 the default set. Do NOT try to verify the degradation through the `Activity.AllowedResult` column — that
 column derives from outgoing CONDITIONAL flows, not from the category, and is empty either way on a process
 without them. So the bare-Guid `value` is the only correct route; on a pre-1.3.1.1 package the parameter
-cannot be set correctly — update the package rather than using the expression form.
+cannot be set correctly — update the package (`install-process-builder`, once the user approves it:
+`core-rules`) rather than using the expression form.
 
 This matches what the DESIGNER stores for the real-lookup families this rule is about (a task element's
 ActivityCategory / ActivityPriority): a lookup constant a human picks is

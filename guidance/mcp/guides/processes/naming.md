@@ -1,12 +1,13 @@
 clio MCP process-naming guide — name a business process, its elements and its parameters
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the N1-N10 rules for the process caption and code, element captions and codes, parameter codes, and sequence-flow labels.
 
 == Naming and codes (N1-N10) ==
 (AUTHORING rules for the names and codes you choose. They are numbered N-, deliberately NOT R-: nothing
 pre-checks them — `validate-process-graph` enforces a subset of the R1–R20 connection rules (which live
-in `process-activity-connections`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
+in `process-activity-connections-details`) and enforces none of these. The reader they are written for is a no-code team opening the result in the Process
 Designer, so a generated process has to read as though a person named it.)
 Field map — each rule below names the descriptor field it governs:
   process title    -> `caption` (top level)
@@ -167,7 +168,7 @@ N10 Sequence-flow labels — `flows[].label`, and on a BRANCH this is not option
     `label` argument, what a relabel must echo back, and the pair-addressing refusals — and
     `process-modeling` owns `removeFlow`. Go there before editing a flow: an EMPTY `label` CLEARS a
     designer's caption.
-    READ BEFORE YOU WRITE. `describe-business-process` reports each flow's `label`, and that field is
+    READ BEFORE YOU WRITE. `describe-business-process mode=full` reports each flow's `label`, and that field is
     the only way to learn a human's label exists: a flow's caption is a `LocalizableString`, so it lives
     in the schema's RESOURCES (`BaseElements.<FlowName>.Caption`) and not in the metadata — a metadata
     diff between two processes says nothing at all about their labels. An archive predating the member

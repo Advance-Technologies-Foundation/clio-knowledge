@@ -12,7 +12,7 @@ What is a business rule
 - Business rules are created via dedicated MCP tools, not by editing page schema bodies or writing JavaScript.
 
 Required MCP contract check
-- Before creating, updating, or deleting business rules (calling `create-entity-business-rules`, `update-entity-business-rules`, `delete-entity-business-rules`, or their page counterparts) call `get-tool-contract` for that tool to get the contract and see examples.
+- Before creating, updating, or deleting business rules (calling `create-entity-business-rules`, `update-entity-business-rules`, `delete-entity-business-rules`, or their page counterparts) call `get-tool-contract` for that tool with `detail: "full"` to get the contract and see examples (a named lookup without it is fitted to one reply, and returns a large contract in its short form, without examples).
 - Before updating or deleting, first call `read-entity-business-rules` / `read-page-business-rules` to obtain exact rule names (and, for update, the block uIds to preserve).
 
 State-changing actions are one-way

@@ -162,6 +162,28 @@ public sealed class BundleBuilderTests
     }
 
     [Test]
+    [Description("Names the ids on each side when the required item IDs and the declared resources disagree, so the author is not left diffing a 170-item manifest by hand to find the one that moved.")]
+    public void Build_ShouldNameTheDifferingIds_WhenRequiredItemIdsDoNotMatchResources()
+    {
+        // Arrange
+        File.WriteAllText(Path.Combine(_directory, "a.md"), "a");
+        string sourcePath = WriteSource("""
+			[
+			  { "itemId": "guide-a", "title": "Example guidance", "description": "Example guidance used to validate bundle behavior.", "topicId": "creatio.guide-a", "role": "guidance", "uri": "docs://knowledge/com.example.knowledge/guide-a", "sourcePath": "a.md", "bundlePath": "resources/a.md", "mediaType": "text/markdown" }
+			]
+			""", itemIdsJson: "[\"guide-renamed\"]");
+        using ECDsa key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+
+        // Act
+        Action act = () => new BundleBuilder().Build(sourcePath, Path.Combine(_directory, "bundle.zip"), key, Publication());
+
+        // Assert
+        act.Should().Throw<InvalidDataException>()
+            .WithMessage("*Missing from required item IDs: [guide-a]*Not among resource item IDs: [guide-renamed]*",
+                because: "the failure must say which id is missing from the requirements and which one no resource declares");
+    }
+
+    [Test]
     [Description("Rejects missing or whitespace-only discovery descriptions before publishing a bundle.")]
     public void Build_ShouldRejectDescription_WhenItIsNotHumanReadable()
     {

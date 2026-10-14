@@ -15,7 +15,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class ReadDataCollectionGuidanceTests
 {
     private const string Article = "guidance/mcp/guides/processes/read-data.md";
-    private const string Catalog = "guidance/mcp/guides/processes/element-catalog.md";
+    // ENG-100156: the catalog entries moved to the details article.
+    private const string Catalog = "guidance/mcp/guides/processes/element-catalog-details.md";
 
     [Test]
     [Description("Collection is taught as a buildable mode with both of its outputs, and the shaped one is named as what a Collection process parameter mirrors.")]

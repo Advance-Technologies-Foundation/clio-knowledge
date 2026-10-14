@@ -1,6 +1,7 @@
 clio MCP process-task-performer guide — who performs a Perform task
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of "Who performs the task?" for a Perform task element: the two
 layers it can be answered on, the element-level `performer` block that is the ONLY way to assign work to
 a TEAM, the OwnerId parameter for one named person, which sources each layer accepts and which it
@@ -32,7 +33,7 @@ create/addElement, or in place via setElement's
   an omitted contact defaults to the process starter.
 * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
   performer to open the page for) and stays untouched for user.
-* describe reads the block back top-level on the element (`performer`: type + the stored formula +
+* describe `mode=full` reads the block back top-level on the element (`performer`: type + the stored formula +
   roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
   than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
   element has its own `email.performer`, which is a different field and is not refused.

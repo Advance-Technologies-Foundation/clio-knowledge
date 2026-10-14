@@ -41,8 +41,8 @@ public sealed class ProcessVersionsGuidanceTests
     private static readonly Regex PlaceholderToken = new("<[A-Z][A-Z0-9-]*TBD>", RegexOptions.Compiled);
 
     [Test]
-    [Description("Pins the measured fold: the code of a version that is not active runs the ACTIVE version, so run-process cannot run a new version before activation - the question the guide used to leave open.")]
-    public void Guide_ShouldStateThatANonActiveCodeRunsTheActiveVersion()
+    [Description("Pins the two measured launch behaviours: a clio whose run-process contract names versionName runs exactly the named version, so a new version can be verified before activation, while an older clio folds a non-active code onto the ACTIVE version.")]
+    public void Guide_ShouldStateWhichVersionALaunchRunsOnEachClio()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
@@ -51,10 +51,18 @@ public sealed class ProcessVersionsGuidanceTests
         string guide = Collapsed(repositoryRoot, GuidePath);
 
         // Assert
-        guide.Should().Contain("`run-process` cannot run a version that is not active",
-            because: "a run of a new version's code before activation executes the previous version, so its result proves nothing");
+        guide.Should().Contain("says it \"runs EXACTLY the version whose code it is given\"",
+            because: "the run-before-activation check is valid only on a clio that runs the named version, and the gate quotes a sentence an older contract does not carry");
+        guide.Should().Contain("a queued answer is NOT evidence that the named version ran",
+            because: "the platform's background queue starts the active version, so a queued launch cannot verify a non-active one");
+        guide.Should().Contain("passes `result-parameters`, which make it synchronous",
+            because: "result-parameters are what keep a verification run off the queue");
+        guide.Should().Contain("(2026-10-12, .NET Framework, CrtProcessBuilder 1.6.6.93; a .NET host not measured)",
+            because: "evidence names the runtime and package it was measured on");
+        guide.Should().Contain("folds every code onto the ACTIVE version",
+            because: "on an older clio a run of a new version's code before activation executes the previous version, so its result proves nothing");
         guide.Should().NotContain("still not established",
-            because: "the fold is measured (ENG-101880), and leaving it open invites the run-before-activation check that cannot work");
+            because: "both behaviours are measured, and leaving either open invites a check whose result proves nothing");
     }
 
     [Test]

@@ -1,10 +1,12 @@
 clio MCP process-parameters guide — process parameters, mappings and formula defaults
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of process parameters, the mappings that bind them, and the date/time/lookup default macros.
+Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element. Also there: the evidence for the binding rule below and a multi-start example that sets one shared parameter per branch.
 
 == Parameters / mapping / formulas ==
-- Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection),
+- Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection/File/FileCollection),
   direction (In/Out/Variable/Internal), caption, description, or referenceSchema = an object name (e.g. City) to make
   it a Lookup to that object }, and an optional value (a constant default; NOT valid for Date / Date-time /
   Time — those defaults are formula macros, see the date macro rule below. A LOOKUP default takes a bare
@@ -15,17 +17,20 @@ This article is the authoritative owner of process parameters, the mappings that
   unsettable). A user-task
   element's own parameters come from the task. The same shape is
   used by modify-business-process `addParameter`. Supported types: Text, Long text, Integer, Float, Money,
-  Boolean, Date, Date-time, Time, Guid, Lookup, and Collection (a record collection, `CompositeObjectList`,
-  whose direction defaults to `Out` unless you set one) — other types (composite object / entity / file / ...) are not
-  supported yet. Name a process parameter per N8 in `process-naming`.
+  Boolean, Date, Date-time, Time, Guid, Lookup, Collection (a record collection, `CompositeObjectList`,
+  whose direction defaults to `Out` unless you set one), and, with a File-aware clio, File and FileCollection (one
+  file and several, carried by reference: `process-files`) — other types (composite object / entity / binary /
+  ...) are not supported yet, and binary never will be: a process parameter carries a file by reference (File). Name a process parameter per N8 in `process-naming`
+  (summarised in `process-digest`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.
   Mirroring a COLLECTION output (a `CompositeObjectList`, e.g. a Read data element's `ResultCompositeObjectList`)
   reproduces the designer's "create parameter from element" artifact in ONE step: the per-column
   `itemProperties` are copied (name, type, tag = the column UId — the DESIGN-TIME shape a consumer binds to;
-  a collection without it is an opaque list nothing can bind to), it is tagged `<element>.<parameter>`, and a mapping from that output into the new parameter is created, so
-  the parameter is never left unbound. `value` and `referenceSchema` are refused on a collection. So is a
+  a collection without it is an opaque list nothing can bind to), it is tagged `<element>.<parameter>`, and a mapping from that output into the new parameter is created (with
+  a File-aware clio, `process-files`, each copied item is bound to the source item of its name too), so the
+  parameter is never left unbound. `value` and `referenceSchema` are refused on a collection. So is a
   mirror of a collection output that carries NO `itemProperties`: the result would be a bound, tagged,
   unbindable empty shape, indistinguishable from a bare collection — the refusal names the source and the two
   ways forward (shape the source first — a Read data element in `collection` mode with explicit `columns` —
@@ -34,7 +39,9 @@ This article is the authoritative owner of process parameters, the mappings that
   mirror. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
   with no item properties, which the mirror therefore refuses). `describe-business-process` reports a collection parameter's `tag` and
   `itemProperties`; both are absent on a scalar and on a bare collection — feed a described collection back
-  through `typeFromElement` naming its source, never by re-typing the shape. A `tag` rides on items that
+  through `typeFromElement` naming its source, never by re-typing the shape. The one exception, with a
+  File-aware clio: a PROCESS parameter described as type `FileCollection` is re-sent as that type, which rebuilds
+  its shape (`process-files`). A `tag` rides on items that
   are COLUMNS; where they are PARAMETERS of another process (a multi-instance Sub-process element's two
   collections) there is none at all — 0 of 407 in the shipped corpus — so never require it. A collection
   IS consumed now: such an element iterates one, bound onto `InputRecordCollection` by the ordinary
@@ -46,15 +53,17 @@ This article is the authoritative owner of process parameters, the mappings that
   `typeFromElementParameter` in `parameterUpdate` refresh its `itemProperties` from the output it was CREATED
   from — the designer's Regenerate. The pair must equal the parameter's own `tag` AND the parameter must still be
   bound to that output: a different source, a binding since moved elsewhere, or a bare (untagged) collection is
-  refused, and retargeting is `removeParameter` + `addParameter`. The `tag` and the binding are left untouched,
-  both sides must be collections, and a shapeless source is refused here too. Nothing re-mirrors automatically when the source element's columns change, so re-issue it
+  refused, and retargeting is `removeParameter` + `addParameter`. The `tag` and the binding are left untouched
+  (with a File-aware clio, `process-files`, the refreshed items are bound to the source's items), both sides must
+  be collections, and a shapeless source is refused here too. Nothing re-mirrors automatically when the source element's columns change, so re-issue it
   after a `setElement` that changed the element's `columns`. Do NOT set a Date / Date-time / Time default
   through setParameter `value` — those defaults are formula macros, not plain constants; use the
   mapping + `expression` path below (addMapping overwrites, so it edits a default exactly as it
   creates one). A Lookup default IS settable through `value` as a bare record Guid
   (same version story as the parameters note above).
 - Remove a parameter with `removeParameter` (parameterName; blocked when another parameter's value, an
-  element mapping, an execution-context parameter or a CONDITIONAL FLOW'S CONDITION still references it —
+  element mapping, an execution-context parameter or a CONDITIONAL FLOW'S CONDITION still references it (or,
+  with a File-aware clio, `process-files`, one of its items) —
   sub-processes included. The refusal names each usage site. The scan is a SUPERSET of the designer's: it
   matches a parameter UId case-insensitively where the designer matches case-sensitively, so it can refuse
   a delete the designer would allow. Broader is the safe direction — the failure it prevents is a dangling
@@ -68,107 +77,21 @@ This article is the authoritative owner of process parameters, the mappings that
   used to be an unnamed serialised error carrying only a parameter UId; from 1.4.0.41 the package rewrites
   that one message into a sentence naming the reference and the remedy.)
   What none of that judges is whether the removal is the one you MEANT, so on an EXISTING customer process the
-  describe-first and confirm-the-removal rules in `process-modeling` still apply.
-- A SUB-PROCESS element's parameters are the CALLED process's contract, copied onto the element and
-  re-derived whenever the platform builds a schema instance. `process-element-catalog` owns the BUILD
-  contract - how the callee is named, which directions keep a value, what `resync` refuses. This guide
-  owns what the call does at RUN TIME and how little of it you can observe:
-  * THE RULE: after any change to a called process's parameters, re-synchronize every caller with
-    `subProcess: {resync: true}`. No per-element exception: a MULTI-INSTANCE element takes the
-    same request - de-converted, re-synchronized, re-converted around the same five. Skip one and its
-    per-item values, bound by NAME, quietly stop arriving. Nothing here lists a process's callers: `execute-esq` over `VwProcessLib`
-    gives you the candidates, then `describe` each and look for a `subProcess.process` naming it.
-  * A `setElement` carrying NO `subProcess` block does not write THE ELEMENT - the rest of the edit is
-    applied as asked, and the element is only reported on, as a re-synchronization OWED. Three shapes DO
-    re-synchronize, and two are easy to send by accident: `{resync: true}`, any block naming the process
-    ALREADY called (`resync: false` does not decline it - that only declines when no process is named),
-    and an EMPTY `subProcess: {}`. A block naming a DIFFERENT process is a retarget: it replaces the whole
-    contract, and `process-element-catalog` owns its refusals.
-  * WHAT A RE-SYNCHRONIZATION COSTS, so you can weigh sending one. Where the callee legitimately DROPPED a
-    parameter and the write LANDS, the platform removes that parameter AND DELETES ITS MAPPING ROW, flags
-    every element that referenced it invalid, and any replacement it creates carries a NEW UId - so
-    re-selecting the process afterwards does not restore the binding. Where the callee cannot be delivered
-    at all, the same removal happens in memory and is then DISCARDED with the refusal: nothing is saved,
-    and the refusal is the protection rather than the damage. A re-sync that was not needed is otherwise
-    safe, with one cost: it clears values that came from the callee's own defaults, keeps the ones the
-    caller wrote, and says so in its notices.
-  * READ ALL THE NOTICES, not one. A re-sync answers with what the platform's diff moved - parameters
-    ADDED, REMOVED, RENAMED, RETYPED, values CLEARED - separately with references left DANGLING (the sites
-    still bound to a parameter the element no longer carries), and separately again if it SKIPPED the
-    element, for a self-reference or a callee it could not read. Two answers look like success and are
-    not. An EMPTY diff is what you get when the load already converged the element: "nothing left to see",
-    not "nothing changed". And a notice saying the dangling scan could not complete does not mean nothing
-    broke. THE ONE POSITIVE SIGNAL: a `resync: true` that RETURNS AT ALL guarantees every parameter the
-    callee currently declares is now present on the element - the write refuses rather than saving a copy
-    that did not land.
-  * WHAT THE DANGLING NOTICE CATCHES, from CrtProcessBuilder 1.6.3.26, is the sites the platform's own
-    pre-save validation does not catch first - a stored blob such as a Modify-data element's column
-    bindings. A reference this package wrote (a formula, or a mapping - it stores both as `Script`) is
-    usually refused by that validation before the re-sync can report it; usually, because that refusal is
-    gated on an application-CONFIGURATION key, `Feature-UseVerificationOfProcessParameterDirection`,
-    default ON and not switchable from the product UI. Where it is off the notice reaches those sites too,
-    and it can name several in one message.
-  * WHY IT MATTERS: values cross by parameter NAME, matched CASE-SENSITIVELY, and direction is ignored on
-    the receiving side - the copy-back writes into whatever element parameter carries the callee's name,
-    `In` and `Variable` alike. A name present on only one side is SKIPPED, on the interpreted path with no
-    exception and no log line. Requiredness is never validated on either side. A COLLECTION-typed
-    parameter crosses like any other; what does not cross is a member of a collection ITEM's structure. So
-    the cases that bite are narrow: a parameter the callee DROPPED, one it renamed while the element
-    stayed BEHIND, and - for that parameter alone - one it ADDED that nobody mapped. A RETYPE still
-    crosses. To USE an output, map FROM it: name the element and the parameter as the SOURCE of a mapping
-    onto a process parameter or another element's input.
-  * AND WHICH PROCESS ACTUALLY RUNS is not the one you synchronized against, if the callee is VERSIONED.
-    Design time uses the stored UId; run time resolves that UId's family and executes its ACTIVE VERSION.
-    A caller re-synchronized against the version you edited can therefore still call a different one, and
-    nothing in a read tells you so - check which version of the callee is active before concluding that a
-    correct re-sync fixed the delivery.
-  * `inSync` IS NOT A DRIFT REPORT. It compares NAMES only, CASE-INSENSITIVELY, in ONE direction: whether
-    every parameter the callee declares is PRESENT on the element. So it catches an ADD, and misses a
-    REMOVE, a caption change, and a CASE-ONLY code rename, which the runtime does bind on. On a
-    MULTI-INSTANCE element it says nothing EITHER way: it reads the ROOT parameters, which there are the
-    five service ones, so it is `false` whenever the callee declares anything and VACUOUSLY TRUE when it
-    declares nothing - an `all` over an empty set. Check `multiInstance` first, then
-    `multiInstanceOptions.calleeInSync`: the same test one level down, in the collections' item
-    properties, where that element's contract lives. `false` there DOES mean a
-    re-synchronization is owed; ask with `subProcess.resync: true`. A `true` means nothing on its own -
-    besides the vacuous case, the read repairs the element on its way to you: materialising a schema
-    instance from metadata, and every fetch of the DESIGN instance, re-synchronizes every sub-process
-    element on it. Never read `true` as "intact".
-  * A parameter on the element that the callee does NOT declare is not necessarily damage. One the CALLER
-    created, with no mapping row, is a legitimate and permanent state: no re-synchronization removes it.
-  * IF YOU NEED `inSync` AS EVIDENCE, use the recipe - save the caller, `describe` it once, change the
-    callee, `describe` again - and know its limits. Step 1 is a WRITE that converges and persists the
-    element, so it erases any drift that had already happened. The caller must not be saved again in
-    between, because a second save re-converges and re-persists it. If those limits do not fit, skip the
-    recipe and just re-synchronize - its notices are computed against the callee as the manager currently
-    holds it, which a save of the CALLEE refreshes.
-  * A RENAME is followed automatically. The element parameter is paired to the callee's through the
-    mapping row's source UId rather than by name, so the element's copy keeps its own UId while its name,
-    caption, data type, direction and five other properties are overwritten from the callee. Whether its
-    VALUE survives needs BOTH a provenance stamp saying the caller wrote it and a direction of `In` or
-    `Variable`; the notice says whether it survived, not which condition failed. What is NOT followed is
-    anything YOU wrote naming the old parameter; that has to be updated by hand.
-  * THE DESIGNER CARD cannot check any of this. Its parameter row has no code column: a type icon, a
-    direction icon, the caption - or the CODE, when a parameter has no caption - and the mapping value.
-    Opening the card re-derives the element's parameters and re-attaches the stored values BY NAME, so a
-    code rename can leave the row EMPTY while the caller's stored mapping is intact. An empty row means
-    "the carry-over did not match", not that your data is gone. Do not re-map on the strength of one, and
-    DO NOT SAVE the caller from that card - re-deriving drops the unmatched parameter's mapping row in
-    memory, and saving persists that. Close it and read `describe-business-process`, which reports every
-    parameter of a sub-process element with its `source` and `value`. (Observed once, 2026-09-17, and only
-    when the caption was renamed alongside the code. Nothing in the client reads the caption on this path,
-    so the condition is unexplained - assume EITHER rename can do it until it is re-measured.)
-  `describe-business-process` reports the element's parameters as the instance it was handed carries them.
-  `direction` and `isRequired` are re-copied from the callee on every synchronization, so they track it;
-  `isResult` is copied only when the element parameter is CREATED and is never refreshed, so a callee that
-  later flips it leaves the element reporting the old value, and no re-sync reports or fixes that.
+  describe-first and confirm-the-removal rules (owner `process-modeling`) still apply.
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).
+  A `targetProcessParameter` mapping is a BINDING, not an assignment: the parameter's ONE value source,
+  evaluated whenever the parameter is read - not once at start, not when a branch runs. A second mapping
+  onto it REPLACES the first (the last listed is saved); a read before the source element ran, or on a
+  run whose start never reaches it, gets the default. To SET a parameter in the flow - e.g. one shared
+  parameter fed by each branch of a multi-start process - give each branch a `formulaTask` with
+  `formula.resultProcessParameter` (it wins over a stored binding). Build and modify WARN on both cases.
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
   add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
-  processParameter (a process parameter by name) | value (a constant) | expression (a raw formula).
-  Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process` output an element parameter
+  processParameter (a process parameter by name; with a File-aware clio `Name.Item` names an item of a collection
+  parameter, as does `targetProcessParameter` - `process-files`) | value (a constant) | expression (a raw formula).
+  Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process mode=full` output an element parameter
   is usable as a mapping source when `isOutput: true` — key on that, NOT on `isResult` or `direction`. Those are
   the stored facts it derives from, and a Read data element's non-`first` outputs carry neither
   (`process-read-data`); the same names sit in its `readData.outputs`.
@@ -233,6 +156,6 @@ This article is the authoritative owner of process parameters, the mappings that
   etc.).
   This applies to MAPPINGS only. It does NOT mean a formula cannot reference a parameter: inside an
   `expression` there is no structured alternative, and the UId meta-path is exactly what you write.
-  `process-formulas` owns that form — built from the `uid`s `describe-business-process` reports; the column
+  `process-formulas` owns that form — built from the `uid`s `describe-business-process mode=full` reports; the column
   form (a third segment) is `process-data-elements`'. An email BODY macro reaches a column with its own
   grammar, `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).

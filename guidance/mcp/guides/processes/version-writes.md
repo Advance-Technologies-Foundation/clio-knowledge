@@ -1,9 +1,11 @@
 clio MCP process-version-writes guide — save a change as a new version, and roll back to another one
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article owns the two WRITE operations on a process version family and what they do and do not
-change. The version MODEL they operate on — what a version is, what the family is, which member runs
-and how to read that standing — is `process-versions`, and this article assumes it. V1-V7 are that
+change, and what counts as an EXISTING process (a build in progress does not). The version MODEL they
+operate on — what a version is, what the family is, which member runs and how to read that standing —
+is `process-versions`, and this article assumes it. V1-V7 are that
 article's numbered facts, cited here by number and stated THERE: fetch it if a citation below is the
 first you have seen of one. A rule that lives in another article is cited by its article NAME and
 never repeated here.
@@ -64,6 +66,30 @@ Framework stand trip IIS rapid-fail and take the app pool down, so the failure i
 and six ambiguous transport errors rather than a call you can retry. The database half of the race is
 handled (two writers on one number are refused after the save); the load is not.
 
+== A process you built in this task is a build in progress ==
+This section owns what "existing process" means for the version path and `isActiveVersion`. The
+unit is the FAMILY (V1, V2): a process is existing when its family was there before this task, or when
+another person has since edited, activated or launched it by hand. A family YOU created in this same
+task is a BUILD IN PROGRESS, within the limits below; if you cannot tell whether the family is yours or
+whether a limit applies, it is existing. Fixing, re-saving or launching it follows the
+build path, `process-digest` plus the element articles, NOT `process-versions` or this article: do not
+ask the two questions below, and `process-modeling`'s `isActiveVersion` rule does not apply. Its other
+modify rules (describe first, `removeFlow`, `removeElement`), `core-rules` and the element articles' own
+confirmations still apply. The limits:
+  * A version you add to a family that existed before this task is NOT a build in progress: the family
+    is existing, so the version articles and the `isActiveVersion` rule apply in full.
+  * The REQUEST asks for versions (save a revision, several revisions, one of them actual): a version
+    task by request, so the version articles apply to those steps in full.
+  * ACTIVATING it is part of the build only when the request asks for a working or active process;
+    otherwise the request has to say so.
+  * Once it is active AND any of its runs, from ANY start type (record signal, timer, message, signal,
+    manual), can read or write data you did not create, an in-place modify of the active version is no
+    longer exempt: save a new version, or get the `process-modeling` confirmation. A start that fires on
+    no record still counts: a timer run of a changed graph updates other people's data on its own. An
+    un-activated draft, or one activated moments ago whose runs can touch only data you created, stays
+    exempt: a run you started does not make it existing.
+  * Built in an EARLIER task or session: existing -- you cannot know who used it since.
+
 == Ask once, then behave predictably ==
 Two questions, asked ONCE, BEFORE the first edit of a session:
   1. Do edits go to the CURRENT version, or to a NEW one?
@@ -74,7 +100,8 @@ who has to re-derive which of those happened has lost the thing versioning was f
 
 The two answers do NOT carry the same authority, and this paragraph decides any sentence that seems
 to say otherwise. Q1 is a ROUTING answer: it picks which tool every later edit uses, and picking a
-tool changes nothing on the environment by itself. Ask Q1 with its consequence -- CURRENT overwrites the
+tool changes nothing on the environment by itself. Switching process tracing as the ONLY change is not an edit and does
+not follow Q1; beside edits it travels in their batch (`process-tracing`). Ask Q1 with its consequence -- CURRENT overwrites the
 running graph and nothing brings the old one back -- because a CURRENT answer is also the explicit yes
 `process-modeling` requires for an in-place edit of the ACTIVE version. It covers THAT process on THAT
 environment for the rest of the session; ask again before an in-place edit of another. The edit request
@@ -178,8 +205,8 @@ another version actual instead.
 
 == Where the other rules live ==
   * consent for a high-impact write, and what an earlier answer does NOT authorise -> `core-rules`
-  * naming a process, its elements and its parameters                              -> `process-naming`
+  * naming a process, its elements and its parameters                              -> `process-digest` (N1-N10), owner `process-naming`
   * the version model, the version fields, and which identity resolves to what     -> `process-versions`
   * the operations array these edits carry                                         -> `process-modeling`
-This article owns only the two write operations and their outcomes. It does not restate the version
-model, the descriptor or the element catalog (`process-element-catalog`).
+This article owns only the two write operations, their outcomes and the build-in-progress exemption. It
+does not restate the version model, the descriptor or the element catalog (`process-element-catalog`).

@@ -1,6 +1,7 @@
 clio MCP process-send-email-template guide — the Send email element's TEMPLATE message
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the Send email element's TEMPLATE message mode: the `template` and
 `templateEntity` contract, the build-time refusals, the object requirement and the choose-or-ask rule, the
 `subject` override, mode switching and the template read-back. `process-send-email` owns the element itself —
@@ -9,9 +10,9 @@ its AUTO-MODE CHECKLIST applies to a template element unchanged (the `template` 
 message mode selects ONLY the message: `mode`, `sender`, `to`/`cc`/`bcc`, `importance`, `ignoreErrors` and
 `performer` behave identically in both modes and are owned there; `useBackgroundMode` is an element-level
 field outside the `email` block. Split out of process-send-email.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` — read it BEFORE you name anything, including when you entered at this
-leaf rather than through `process-modeling`.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Template message (messageSource "template") ==
 - TEMPLATE MODE (CrtProcessBuilder 1.6.2.1 or newer): `template` names an existing template by NAME, by `EmailTemplate` record id, or as the
@@ -20,7 +21,8 @@ leaf rather than through `process-modeling`.
   email template is named '<name>'`), an id no row carries, another type (`is not an email template` — a CHAT
   template is one), and an AMBIGUOUS name (`more than one email template is named '<name>'. Pass the record
   id of the one you mean.`). It is stored TOGETHER with the mode (`BodyTemplateType="0"` + `EmailTemplateId`),
-  never one without the other — the missing-message trap in `process-send-email`'s AUTO-MODE CHECKLIST is why. `template` and `body`/`bodyFormat` in one block
+  never one without the other — the missing-message trap in `process-send-email`'s AUTO-MODE CHECKLIST is why (its mechanism is in
+`process-send-email-details`). `template` and `body`/`bodyFormat` in one block
   are REFUSED (`mutually exclusive`). `messageSource` is optional: omitted, the mode follows the content
   (`template` → template, `body` → custom) or, with neither, stays what the element has; sent, it must agree
   with the content. Macros are resolved by the PLATFORM at send time — process data is NOT injected into the
@@ -65,7 +67,8 @@ leaf rather than through `process-modeling`.
   `templateEntity` (re-appliable as a `processParameter`/`sourceElement`/`expression`); in template mode
   `hasBody` is false and `body` is omitted even when a stale body is stored. clio WARNS after a build or modify when
   a sent `template` does not read back — a CrtProcessBuilder that predates template mode discarded it while
-  answering success: `install-process-builder` and re-apply. RUN-VERIFIED on dev-local in BOTH send modes (manual on 10.1.503 with CrtProcessDesigner 7.8.0, 2026-09-09,
+  answering success: `install-process-builder` once the user approves it
+  (`core-rules`), and re-apply. RUN-VERIFIED on dev-local in BOTH send modes (manual on 10.1.503 with CrtProcessDesigner 7.8.0, 2026-09-09,
   read off the email activity; auto on 10.2.75 with CrtProcessBuilder 1.6.2.x, 2026-09-10, delivered through
   the Exchange Listener endpoint to an SMTP sink): macros
   resolve against the `templateEntity` record, the `subject` override wins, a template without `EmailTemplateLang`

@@ -1,6 +1,7 @@
 # Branching on an activity result
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 Split out of `process-branch-conditions`, which had no budget headroom left and owns the FORMULA
 branch - flow kinds, precedence, the gateway rules and the hazard of clearing a condition. This
 article owns the OTHER predicate dialect and is the authority on when a formula is the wrong one.
@@ -53,7 +54,7 @@ package has no build-path field and refuses the operation as unknown.
 - Two sibling branches off one source may not claim the SAME result. The designer cannot express that
   shape - it removes a taken result from the list before drawing it - and the runtime would take both
   branches, a parallel split wearing the clothes of a decision.
-- `describe-business-process` reads the selection back as `results` plus `resultsActivity`, the element
+- `describe-business-process mode=full` reads the selection back as `results` plus `resultsActivity`, the element
   whose results they are. Both are ABSENT below 1.6.2.23, which is the same bytes as a formula branch:
   an all-absent read is not evidence that nothing in the process branches on a result.
 

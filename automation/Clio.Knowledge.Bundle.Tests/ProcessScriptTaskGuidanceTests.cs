@@ -113,7 +113,7 @@ public sealed class ProcessScriptTaskGuidanceTests
     }
 
     [Test]
-    [Description("Pins the rules the second QA round (ENG-92711) added: no run of a new version before activation, consent for activation, no second compile after a compile that succeeded, the retry before a restart while the runtime reloads, the Latin and keyword name rules, and the multi-line verbatim string. Each came from a stand measurement or a QA finding; losing one sends an agent into a run that proves nothing, a needless compile or restart, or a string that changes its value.")]
+    [Description("Pins the rules the second QA round (ENG-92711) added, as amended when run-process began running the named version: a run of a new version before activation only on a clio that runs the named version, synchronously, consent for activation, no second compile after a compile that succeeded, the retry before a restart while the runtime reloads, the Latin and keyword name rules, and the multi-line verbatim string. Each came from a stand measurement or a QA finding; losing one sends an agent into a run that proves nothing, a needless compile or restart, or a string that changes its value.")]
     public void Guide_ShouldKeepTheQaRoundTwoVersionCompileAndNameRules()
     {
         // Arrange
@@ -131,12 +131,22 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the consent rule lives in process-version-writes, and a bare `version-writes` names no guide");
         guide.Should().Contain("compile SUCCEEDED (no compiler errors)",
             because: "a compile that failed, or one followed by another edit, covers nothing");
-        guide.Should().Contain("a new version only once it is active",
-            because: "the general verification paragraph must not send a new version to run-process before activation");
+        guide.Should().Contain("a new version by its own code before it is activated, on the clio the version order above names",
+            because: "the general verification paragraph must send a new version to run-process before activation only where that run executes it");
         guide.Should().Contain("that warning does not ask for a SECOND compile",
             because: "a version compiled before its activation ran its new C# without another compile, and the activation answer used to read as demanding one");
-        guide.Should().Contain("activate it with `set-active-business-process-version` only when the user decides to; then verify it on a run",
-            because: "activating an uncompiled version breaks every new instance, and a version can only be run once it is active");
+        guide.Should().Contain("compile the new version; verify it on a run of its own code; activate it with `set-active-business-process-version` only when the user decides to",
+            because: "activating an uncompiled version breaks every new instance, and a clio that runs the named version lets the new code be checked before it reaches them");
+        guide.Should().Contain("for `run-process` says it \"runs EXACTLY the version whose code it is given\"",
+            because: "the run-before-activation check is valid only on a clio whose run-process runs the named version, and an older contract also contains `versionName` inside `activeVersionName`, so the gate quotes a sentence only the newer contract carries");
+        guide.Should().Contain("with `run-process` and `result-parameters` (they keep the run synchronous)",
+            because: "a run the platform queues starts the ACTIVE version, so a run without result-parameters can verify the old code");
+        guide.Should().Contain("a `queued-background` answer is NOT evidence that the new version ran",
+            because: "the queue re-resolves to the active version, and that answer must not be read as a verification");
+        guide.Should().Contain("Ask first when the process has side effects",
+            because: "the run of a version not yet activated is a real run in a customer environment");
+        guide.Should().Contain("on that clio the user opens the version in the process designer",
+            because: "on an older clio the designer run is the only way to see a new version run before activation (TC-07)");
         guide.Should().Contain("a Latin letter (a-z, A-Z)",
             because: "the designer and the platform refuse a non-Latin element name, although C# allows one");
         guide.Should().Contain("not a C# keyword",
@@ -152,13 +162,88 @@ public sealed class ProcessScriptTaskGuidanceTests
         guide.Should().Contain("A verbatim string (`@\"...\"`) that spans lines gains tabs",
             because: "the generator indents every line of the body, so such a string changes its value");
         guide.Should().Contain("the code of a version that is not active runs the ACTIVE version",
-            because: "a run of the new version's code before activation executes the previous version, so it proves nothing");
-        guide.Should().NotContain("verify it on a run, and only then activate it",
-            because: "that order cannot be followed: run-process folds a non-active version's code onto the active one");
+            because: "on an older clio a run of the new version's code before activation executes the previous version, so it proves nothing");
+        guide.Should().NotContain("Do NOT run the new version before activating it to check it",
+            because: "the blanket ban was lifted for a clio that runs the named version; the older-clio route is gated, not unconditional");
         coreRules.Should().Contain("run it again about two minutes later (asking first when the process has side effects) and ask before a restart",
             because: "core-rules carries the same exception for a process-name compile, and every operation reads it");
         coreRules.Should().NotContain("run it again a minute later",
             because: "one minute was shorter than the measured reload");
+    }
+
+    [Test]
+    [Description("Pins what to do when the MCP client stops waiting for compile-creatio before it answers (ENG-102333): the compile may still be running, so poll compile-status rather than compiling again, and, when compile-status has no record, read the timed compilation history its not-found answer lists - last-compilation-log, whose verdict carries no time, is the fallback when that field is absent (unreadable history or an older clio). Measured on a stand: a process-name compile ran about five minutes while the client gave up after 60 s. Round 3 (QA): no row since the call can mean the request was lost with a restarted server, so it ends with the user, not with last-compilation-log. core-rules owns the rule and its short form (never call it again, poll the status tool); core-rules-details holds how to tell whether it ran; process-script-task only points to core-rules.")]
+    public void Guides_ShouldSayWhatToDoAfterAClientSideCompileTimeout()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+
+        // Act
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot,
+            "guidance/mcp/guides/processes/process-script-task.md"));
+        string coreRules = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/core-rules.md"));
+        string coreRulesDetails = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/core-rules-details.md"));
+        string longRunningRule = coreRules + "\n" + coreRulesDetails;
+
+        // Assert
+        coreRules.Should().Contain("If YOUR MCP client stops waiting first",
+            because: "core-rules owns the long-running rule every operation reads, and a client-side timeout is the case it did not cover");
+        coreRules.Should().Contain("read `core-rules-details` before calling anything again",
+            because: "the forensics moved to core-rules-details, so the rule every operation reads must still send the agent there before it repeats a compile, restart or launch");
+        coreRules.Should().Contain("do NOT call it again to check; poll compile-status / restart-status",
+            because: "a second compile-creatio is a second runtime reload for every user, or a refusal, never a status");
+        coreRulesDetails.Should().Contain("`not-found` means this MCP server session holds no record, not that nothing ran",
+            because: "a not-found that reads as 'nothing ran' is what sent agents to recompile or guess");
+        coreRulesDetails.Should().Contain("lists the environment's newest compilation-history rows",
+            because: "compile-status's not-found answer carries the environment's own history, which survives a client restarting the MCP server");
+        coreRulesDetails.Should().Contain("only rows that finished after you called compile-creatio can be your compile's: compare their `finished-utc` with the `started-utc` of its in-progress answer, allowing a minute either way",
+            because: "the finish time is what ties a history row to the agent's own compile, the in-progress answer carries the call's time, and other compiles write rows too");
+        coreRulesDetails.Should().Contain("A row that finished clearly before your call is not yours, even one more than seven minutes old",
+            because: "right after a restart the newest row can be over seven minutes old and still predate the call (ENG-102333 QA)");
+        coreRulesDetails.Should().Contain("finished only when its newest row is more than seven minutes old",
+            because: "a compile writes a row per project as each ends, so its first row is not its end");
+        coreRulesDetails.Should().Contain("ask the user before compiling again",
+            because: "an agent whose compile wrote no row needs a way out, and every compile needs the user's confirmation");
+        longRunningRule.Should().NotContain("you may start it again",
+            because: "the guidance must not license a compile the user did not confirm");
+        coreRulesDetails.Should().Contain("ask the user before a restart that rests on them alone",
+            because: "any schema publisher can write a row, so a restart for every user cannot rest on rows alone");
+        coreRulesDetails.Should().Contain("If no row was written since your call, the compile has either not finished its first project yet or never started",
+            because: "a request still on its way when the MCP server restarted is lost with it, so no row is not proof the compile runs (ENG-102333 QA)");
+        coreRulesDetails.Should().Contain("treat it as not run and ask the user before compiling again. Do not read last-compilation-log for it",
+            because: "with no row since the call that undated verdict can only be an earlier compile's, which a QA agent read as its own success");
+        longRunningRule.Should().NotContain("it is still running: poll again",
+            because: "calling a rowless compile running is what let an agent report a compile that never happened");
+        coreRulesDetails.Should().Contain("When the answer has no `compilation-history` field (it carries `compilation-history-error`, or it comes from a clio that predates the field), fall back to last-compilation-log (through clio-run) - unless",
+            because: "last-compilation-log's undated verdict is the fallback for an unreadable history or an older clio, not the first answer");
+        coreRulesDetails.Should().Contain("Note that last-compilation-log reads the latest FINISHED compile and carries no time",
+            because: "last-compilation-log has no timestamp, so read while the compile still runs it reports an earlier compile's verdict");
+        coreRulesDetails.Should().Contain("do not rely on it, or restart on it, before then",
+            because: "a stale success read mid-compile would otherwise lead to the restart core-rules forbids during a compile; after the compile has finished, a restart the workflow needs is still owed, so the rule is about timing, not a ban");
+        coreRulesDetails.Should().Contain("When restart-status answers `requestfailed`, the restart request itself failed and no restart happened: ask the user, then retry once.",
+            because: "the restart request runs inside the deadline race, so a failed request is reported after the answer, and checking that the environment answers would point the wrong way - it answers because it never restarted");
+        coreRules.Should().Contain("for a restart, possibly not yet confirmed",
+            because: "a restart's in-progress answer can come before its request is confirmed");
+        longRunningRule.Should().NotContain("operation accepted",
+            because: "at the deadline the request may not have reached the environment, so the answer is 'started', never 'accepted' (ENG-102333 QA)");
+        coreRulesDetails.Should().Contain("so report its verdict to the user as unconfirmed",
+            because: "a green last-compilation-log cannot show that the agent's own compile ran");
+        coreRulesDetails.Should().Contain("A `status: not-started` whose error says the launch request was never sent means nothing ran",
+            because: "run-process now answers at the shared deadline, and its not-started answer is exact - the request is never sent after it");
+        coreRulesDetails.Should().Contain("Any other `not-started` is the environment refusing the launch: act on the cause its error names instead of calling again",
+            because: "a platform refusal shares the status, and retrying it would loop, or repeat elements that already ran");
+        coreRulesDetails.Should().Contain("tell the user the environment is not answering",
+            because: "retrying a launch that cannot even be prepared needs an end");
+        coreRulesDetails.Should().Contain("`status: still-running` means the request was sent and clio has no verdict - do NOT re-run it",
+            because: "a sent launch request may have started the run, and a second launch duplicates its work");
+        longRunningRule.Should().NotContain("never restart on that answer alone",
+            because: "that wording read as a permanent ban and contradicted the package-compile activation cycle");
+        guide.Should().Contain("If your client reports the call timed out (for example `Request timed out`)",
+            because: "a process-name compile is the long call a ScriptTask author meets, so the article names the case where it happens");
+        guide.Should().Contain("follow the Long-running tools rule in `core-rules`",
+            because: "the rule has one owner; the article points to it instead of restating it");
+        guide.Should().NotContain("last-compilation-log",
+            because: "the fallback and its no-timestamp caveat live in core-rules only, so the two cannot drift apart");
     }
 
     private static string FindRepositoryRoot()

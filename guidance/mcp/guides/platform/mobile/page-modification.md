@@ -103,6 +103,9 @@ DO NOT add: "handlers", "converters", "validators" — these are AMD/web-only co
 DO NOT wrap the body in define(...).
 DO NOT add any AMD marker pairs (SCHEMA_DEPS, SCHEMA_VIEW_CONFIG_DIFF, etc.).
 For append mode, send a fragment containing only the `*Diff` arrays you want to merge; missing keys are skipped.
+The empty arrays above show the shape, not a body to send in replace mode. A generated mobile form page declares
+`PDS` in its own root `modelConfigDiff` merge, and a replace body with `"modelConfigDiff": []` drops it — see
+"A `replace` body must carry the page's own data sources" in `page-modification-overview`.
 
 ─────────────────────────────────────────────────────────────
 OPERATION SHAPE — the component "type" MUST be inside "values"
@@ -140,7 +143,7 @@ BUTTON PLACEMENT below for where a button may go and the full shape it needs.
 processName / processRunType appear in both examples because a crt.RunBusinessProcessRequest button
 that omits them is REJECTED. `recordIdProcessParameterName` appears too because these run
 `ForTheSelectedPage`: that run type passes the current record into a named process parameter, so the
-record binding is REQUIRED (ENG-95822) — `ProcessSchemaParameter1` is a stand-in for the CODE
+record binding is REQUIRED (enforced since clio 8.1.0.117) — `ProcessSchemaParameter1` is a stand-in for the CODE
 get-process-signature echoes; resolve the real one (see the run-process-button guide). Use
 `RegardlessOfThePage` instead when no record is passed. These three are STRUCTURAL and offline, so
 both validate-page and update-page reject a button that omits them. One thing still needs the
@@ -172,7 +175,7 @@ these checks, and sync-pages with validate:false skips them.
 Scope: the differ is shared with the web client, so the same shape defect breaks web pages
 identically — but clio enforces this rule on MOBILE bodies only.
 
-Evidence: verified on a live stand for ENG-95429 — writing the wrong shape to a real mobile page
+Evidence: verified on a live stand in August 2026 — writing the wrong shape to a real mobile page
 and re-reading the server-merged viewConfig returned the element with NO "type", while a
 neighbouring template button kept its own. Platform build not pinned; verify against your target
 platform version.
@@ -187,7 +190,7 @@ child elements. Putting them in its "values" — an array, or a lone object, of 
   Target slot already holds ELEMENTS  -> the differ STRIPS the whole property out of the merge
                                          before copying anything. The save reports success, the
                                          operation stays in the page body, and the children reach
-                                         NOTHING. This is the ENG-95429 report.
+                                         NOTHING. This is the defect this rule exists for.
   Target slot absent or empty         -> the merge applies and you get what you asked for.
 
 "Elements" is the applier's own test, not a guess about shape: it looks at the target slot's FIRST
@@ -245,7 +248,7 @@ whose slots may be empty — is refused too, even though the merge would have ap
 two-step idiom above rather than reaching for sync-pages validate:false: a plain insert into a slot
 that template genuinely lacks is the shape that throws.
 
-Evidence: the STRIP outcome is verified on a live stand for ENG-95429 — a merge on Scaffold
+Evidence: the STRIP outcome is verified on a live stand in August 2026 — a merge on Scaffold
 carrying a crt.Button in values.actions saved successfully, stayed in the page's own body, and
 appeared ZERO times in the server-merged viewConfig, which still held only the template's own
 buttons. Platform build not pinned; verify against your target platform version.
@@ -253,7 +256,7 @@ buttons. Platform build not pinned; verify against your target platform version.
 The rest of this section is READ FROM THE APPLIER, not observed on a stand: that an insert throws
 on a property the element does not carry, that the merge group runs before inserts, and that a
 single-element slot is reachable only by a merge. clio ships the same reading as a validator
-(ENG-95429), so guide and tool agree by construction rather than by independent confirmation.
+(since clio 8.1.0.108), so guide and tool agree by construction rather than by independent confirmation.
 
 ─────────────────────────────────────────────────────────────
 VALIDATORS, CONVERTERS, HANDLERS — mobile constraints
@@ -317,6 +320,14 @@ To add content inside the Scaffold:
              putting child elements in there is blocked, see AUTHORING CHILDREN above
 - Add child: { "operation": "insert", ..., "parentName": "Scaffold", "propertyName": "items" }
 
+"propertyName" is REQUIRED on every "insert" AND "move" that names a "parentName" — the web
+`propertyName` rule in `page-modification-components` applies unchanged. A "move" of a template
+element is no exception: { "operation": "move", "name": "AreaProfileContainer", "parentName":
+"FeedTabContainer", "propertyName": "items", "index": 0 }. Without "propertyName" the Mobile Page
+Designer canvas never loads. The Scaffold collection slots are "items", "actions" and "leading"
+(buttons do not belong in the last two, see BUTTON PLACEMENT below); "floatAction" holds one
+element and is not an insert target (see SINGLE-ELEMENT SLOTS above).
+
 viewConfigDiff INSERTS ADDRESS THE SLOT BY propertyName ONLY — never use "path" in a
 viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is
 the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
@@ -363,7 +374,7 @@ Scope and limits of this rule:
   which get-page cannot show you yet.
 - clio warns — never blocks — on exactly one shape: an insert of crt.Button into Scaffold/"actions".
   "leading" is advice; no validator checks it.
-- Verified for "actions" (ENG-95429, live stand): a button inserted there is absent from the
+- Verified for "actions" (live stand, August 2026): a button inserted there is absent from the
   designer canvas. "leading" is an extrapolation from the same observation — the designer omits
   that entire navigation bar, the template's own buttons included — and was not tested separately.
 - NOT claimed: that either slot fails to render in the Creatio Mobile app. That was never tested.
@@ -424,18 +435,18 @@ NO DATA SOURCE NEEDED — an analytics widget fetches its own data from `config.
 
 ONE SERIES PER CHART — the mobile runtime loads data for the FIRST series only. Its renderer can draw
   several same-type series and the Mobile Designer canvas does, but the later series' collections are never
-  fetched, so on the device they arrive empty (multi-series is ENG-87329, still open). Mixed types collapse
-  further: the client keeps the first series alone. A multi-category ask therefore becomes one chart PER
-  category, or ONE series grouped by the category column — a TOTAL cannot be a grouping value. Neither the
-  canvas nor a saved-body read-back catches this; only the app does.
+  fetched, so on the device they arrive empty (a known Creatio Mobile defect, unfixed in August 2026).
+  Mixed types collapse further: the client keeps the first series alone. A multi-category ask therefore
+  becomes one chart PER category, or ONE series grouped by the category column — a TOTAL cannot be a
+  grouping value. Neither the canvas nor a saved-body read-back catches this; only the app does.
 
 RUNTIME GAPS TO DESIGN AROUND — the mobile analytics runtime trails the web one, and no design-time
   check reveals it. A DATE column under SUM/AVG fails the runtime request outright (server
   `UnsupportedTypeException`) and under MIN/MAX draws an empty chart, so aggregate a number or COUNT the
-  primary column and put the date in the grouping instead (ENG-89575); negative values do not render
-  (ENG-88682); grouping through a related object can disagree with the web result (ENG-89059). Tell the
-  user when their request needs one of these rather than shipping a widget that renders blank on the
-  device.
+  primary column and put the date in the grouping instead; negative values do not render; grouping
+  through a related object can disagree with the web result (known Creatio Mobile defects, August 2026).
+  Tell the user when their request needs one of these rather than shipping a widget that renders blank
+  on the device.
 
 PARENT — insert into a grid container the page already has: `MainContainer` (root grid of every
   mobile template), `ListContainer` (list/section pages), or a tab's `…TabContainer` /
@@ -529,13 +540,15 @@ VERIFY IN THE APP — a mobile widget cannot be verified in a browser. Check the
 
 Evidence: schemas produced by the Mobile Designer on Creatio 8.3.4 / 10.0 for a record page
 (`MobilePageWithTabsFreedomTemplate`) and a section page (`BaseMobileListTemplate`), read back with
-`get-page` (ENG-95577).
+`get-page` in August 2026.
 
 ─────────────────────────────────────────────────────────────
 ADAPTIVE BREAKPOINTS
 ─────────────────────────────────────────────────────────────
-The web→mobile conversion PROPOSES an adaptive layout for containers that group 2+ fields
-(stack on phone, 2 columns on tablet) — present it to the user, who can adjust or decline.
+The web→mobile conversion bakes an adaptive layout into every multi-column grid it converts
+(stack on phone; on tablet weighted columns from the web grid, and a grid whose rows differ in column
+structure becomes a one-column stack in which each multi-column band gets its own synthesized grid) — how it is
+reported is owned by the web-to-mobile-conversion guide.
 Apply this section whenever you want per-screen placement; otherwise rely on the static
 `columns` / `layoutConfig` values.
 
@@ -545,8 +558,12 @@ The mobile designer "Tablet portrait" / "Tablet landscape" preview switcher maps
 Adaptive layout has TWO sides — you must edit both for a real responsive layout:
 
 (1) CONTAINER side — `adaptive` on crt.GridContainer (sibling of `columns`).
-    Defines how many grid columns exist at each breakpoint.
-    Both string ("1fr 1fr") and array (["1fr","1fr"]) forms are accepted by the runtime.
+    Defines how many grid columns exist at each breakpoint, and how wide each one is.
+    Write `columns` as an ARRAY, one entry per column: the runtime reads a single string such as
+    "1fr 1fr" as ONE column. A positive integer "<n>fr" is that column's weight (["2fr","1fr"] is a 2:1
+    split); a bare number is a fixed width, and any other value ("minmax(...)", "1.5fr") gets weight 1.
+    In the designer, editing a breakpoint's column count resets that breakpoint, and toggling "Use
+    adaptive layout" resets the grid, to equal 1fr columns.
 
     {
       "operation": "merge",
@@ -561,7 +578,7 @@ Adaptive layout has TWO sides — you must edit both for a real responsive layou
     }
 
 (2) CHILD side — `layoutConfig.adaptive` on each child component (button, field, label, ...).
-    Defines the explicit grid cell the child occupies at each breakpoint.
+    Defines the column the child takes at each breakpoint and its order (`row`) within that column.
     Per breakpoint keys: `row` (1-based), `column` (1-based), `colSpan`, `rowSpan`.
 
     Without per-breakpoint `layoutConfig.adaptive`, children fall back to the static
@@ -618,12 +635,16 @@ Rules of thumb:
   - Define `adaptive` on the GridContainer AND `layoutConfig.adaptive` on every child
     that needs to move between breakpoints. Skipping either side breaks the layout.
   - Use 1-based `row` and `column` — the runtime reflows children by these per breakpoint
-    (one item per cell). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
+    (items sharing a column stack in `row` order). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
     designer's format, but are NOT honored per-item by the runtime; do not rely on them to
-    span cells. To make an item wider, give the container fewer columns at that breakpoint.
+    span cells. To make an item wider, give the container fewer columns at that breakpoint, a
+    larger "<n>fr" weight to the item's column, or move rows with a different column structure into
+    a nested crt.GridContainer of their own (as the converter's `<container>_TabletBand<N>` does).
+  - Each column is an independent stack ordered by `row`: items that share a `row` in neighbouring
+    columns are NOT aligned to each other on the device, even though the designer preview aligns them.
   - Keep all three breakpoints (`small`, `medium`, `large`) populated even when two
-    share the same cell — the designer always serialises the full set and partial maps
-    may render as empty cells on the missing breakpoint.
+    share the same cell — the designer always serialises the full set and drops the weights of a
+    partial map (the runtime falls back to the next smaller breakpoint).
   - Adaptive child placement is supported inside crt.GridContainer. For crt.FlexContainer,
     reflow happens through the container's own `direction` / `wrap` properties, not
     through child `layoutConfig.adaptive`.
@@ -641,7 +662,7 @@ Default field container pattern:
     "name": "<GroupName>Container",
     "values": {
       "type": "crt.GridContainer",
-      "columns": "1fr",
+      "columns": ["1fr"],
       "color": "primary",
       "borderRadius": "medium",
       "padding": { "top": "medium", "right": "medium", "bottom": "medium", "left": "medium" },
@@ -748,7 +769,7 @@ crt.RunBusinessProcessRequest
   recordIdProcessParameterName alone does NOT select the run type. And the reverse also
   holds: 'ForTheSelectedPage' REQUIRES recordIdProcessParameterName (the process parameter
   CODE that receives the current record) — validate-page and update-page both reject a
-  ForTheSelectedPage button that omits it (ENG-95822); use 'RegardlessOfThePage' when no
+  ForTheSelectedPage button that omits it (since clio 8.1.0.117); use 'RegardlessOfThePage' when no
   record is passed.
   FULL parameter contract is the request catalog (single source of truth): call
   get-request-info request-type=crt.RunBusinessProcessRequest schema-type=mobile and resolve

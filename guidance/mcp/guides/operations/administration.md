@@ -186,9 +186,10 @@ record rights and are not the IP rules displayed on the role's ACCESS RULES tab.
 
 ## Evidence and handoff
 
-The source/runtime investigation for Clio #968 traced AdministrationService, OrgStructureUser,
-RightsService and native role-licensing processes. Local lifecycle verification used Creatio
-10.1.585.0 on .NET 8/PostgreSQL. The external MCP AdministrationToolE2ETests covers account lifecycle,
+The source/runtime investigation behind the administration tools (clio 8.1.0.127) traced
+AdministrationService, OrgStructureUser, RightsService and native role-licensing processes.
+Local lifecycle verification used Creatio 10.1.585.0 on .NET 8/PostgreSQL. The external MCP
+AdministrationToolE2ETests covers account lifecycle,
 manager reuse, inherited functional membership and removal, delegation and IP-rule CRUD. Manual
 fresh-session probes covered password replacement, lockout recovery and IP denial with UseRestrictedIP
 enabled, followed by restored login after rule removal. AdministrationLicenseE2ETests verified

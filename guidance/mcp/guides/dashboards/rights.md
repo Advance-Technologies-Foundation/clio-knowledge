@@ -18,7 +18,7 @@ from the dashboard name with `execute-esq`: select `UId` where `Name = '<SchemaN
   `level` = granted|delegated (grant only, default granted); `revoke` to remove.
 
 The full contract, and the record-level (`SysSchemaAdminUnitRight`) vs operation-level
-(`SysSchemaOperationRight`) distinction, are in `get-guidance name=record-rights`. A dashboard created
+(`SysEntitySchemaOperationRight`) distinction, are in `get-guidance name=record-rights`. A dashboard created
 via `create-page` already has a default `All Employees` read grant.
 
 ## Persist the dashboard's access grants as package data bindings — REQUIRED

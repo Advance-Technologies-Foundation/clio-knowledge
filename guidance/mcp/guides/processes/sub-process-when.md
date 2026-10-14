@@ -1,6 +1,7 @@
 clio MCP process-sub-process-when guide — when a request calls for a Sub-process, and when it does not
 
-Part of the process guide set. `process-modeling` is the entry point and indexes the rest.
+Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
+the card or this article sends you there.
 This article is the authoritative owner of the DECISION to put logic into a separate, called process:
 the one-process default, the three triggers D1, D2 and D4, what an existing process allows, how to
 talk to the user about it, the never-list, and where a helper process lives. HOW to build the element
@@ -48,8 +49,10 @@ it calls.
   and its steps read the item from there, never from the caller. That takes TWO kinds of mapping, and
   the first is the one that gets forgotten: the collection itself (`InputRecordCollection` from
   `ResultCompositeObjectList`), and each per-item value (a dotted name). Without the first the build
-  succeeds and the loop runs ONCE with empty values. Converting the element, binding the collection and
-  addressing a per-item value are owned by `process-sub-process` (MULTI-INSTANCE).
+  succeeds and the loop runs ONCE with empty values. With a File-aware clio a per-item value taken from an
+  item of a collection binds that collection too (`process-files`); any other per-item value still needs
+  the first mapping, and an older clio may need it in every case, so send both. Converting the element,
+  binding the collection and addressing a per-item value are owned by `process-sub-process` (MULTI-INSTANCE).
 - EXECUTION MODE — choose it, do not inherit it. A conversion that names no `executionMode` is
   `Sequential` (`process-sub-process`), and Sequential starts the next item only after the previous
   item's called process has FINISHED. A helper with a human step parks until that person acts, so
@@ -67,7 +70,7 @@ it calls.
   tell the user the helper exists and what it is.
 - ASK: not about the loop. It is the only per-item loop the process designer and this toolset offer,
   so there is no design choice to put to the user; explain it in the result summary in business
-  words. A flow routed back through a gateway (R15, `process-activity-connections`) repeats steps but
+  words. A flow routed back through a gateway (R15, `process-activity-connections-details`) repeats steps but
   hands them no item — do not hand-roll a per-item loop that way. Questions the request leaves open
   elsewhere — who performs the task, for example — are still asked, by the rules of the article that
   owns them.
