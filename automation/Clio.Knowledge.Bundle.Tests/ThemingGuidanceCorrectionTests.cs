@@ -78,6 +78,27 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "the caller needs the concrete transport boundary to diagnose the failing tool");
     }
 
+    [Test]
+    [Description("Keeps a recolour from carrying the old primary's derived secondary into the new theme.")]
+    public void ThemingGuide_ShouldReDeriveDerivedColoursWhenThePrimaryChanges()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+
+        // Act
+        string guide = File.ReadAllText(Path.Combine(repositoryRoot, "guidance/mcp/guides/theming/index.md"));
+        string restyleStep = guide.Split('\n')
+            .Single(line => line.StartsWith("2. Restyle with `update-theme`", StringComparison.Ordinal));
+
+        // Assert
+        guide.Should().Contain("When the primary changes, re-derive the secondary and accent from the new primary",
+            because: "a recolour that keeps the old derived secondary renders the new brand with the old one's palette");
+        guide.Should().Contain("A colour the tool derived is never a user choice",
+            because: "a secondary the agent passed to create-theme is still derived, not a settled user choice");
+        restyleStep.Should().Contain("To change the primary, rebuild the CSS with `build-theme`",
+            because: "swapping only the primary values in the get-theme CSS leaves every dependent token on the old brand");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
