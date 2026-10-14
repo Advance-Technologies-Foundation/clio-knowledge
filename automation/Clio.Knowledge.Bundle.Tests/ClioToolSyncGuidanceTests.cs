@@ -163,6 +163,7 @@ public sealed class ClioToolSyncGuidanceTests
             "`page-smoke` only when the task needs a UI check of a Freedom UI form page",
             "INSTEAD of a hand-written Playwright script or browser steps, not as a routine step after every page change",
             "`page` (the form page schema name), optionally `record-id`",
+            "`success=false` means the page did not open or the click was not made (`click.outcome` says which); with `click.outcome=unknown` the button may have been pressed, so read `click.created` before retrying.",
             "It is read-only unless you pass `click` (a button caption or element name)",
             "treat it as a write and confirm the target environment with the user first"
         })
