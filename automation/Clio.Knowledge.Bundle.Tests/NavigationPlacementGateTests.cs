@@ -73,8 +73,10 @@ public sealed class NavigationPlacementGateTests
             because: "the gate has one owner");
         homePage.Should().Contain("When you cannot ask, `core-rules` (Navigation placement) applies: leave the page unbound",
             because: "a home-page request with no named workplace hits the same gate");
-        homePage.Should().Contain("do not pick one yourself. When you cannot ask, leave the page unbound and say so (step 1)",
-            because: "step 5 repeats the question, so it needs the same branch for an agent that cannot ask");
+        homePage.Should().Contain("do not pick one yourself; when you cannot ask, step 1 applies",
+            because: "step 5 repeats the question, so it points an agent that cannot ask back to the one branch in step 1");
+        homePage.Should().NotContain("When you cannot ask, leave the page unbound and say so (step 1)",
+            because: "the cannot-ask outcome is stated once, in step 1");
     }
 
     private static string Normalize(string text) =>

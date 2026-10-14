@@ -37,6 +37,10 @@ public sealed class GuidanceMigrationTests
         "process-formulas-details",
         "process-parameters-details",
         "process-modeling-details",
+        "process-script-task-details",
+        "process-versions-details",
+        "process-data-elements-details",
+        "process-perform-task-details",
         "app-modeling-details",
         "workplaces-details",
         "existing-app-maintenance-details",
@@ -44,7 +48,8 @@ public sealed class GuidanceMigrationTests
         "portal-service-routing",
         "external-organizations",
         "page-schema-translation",
-        "object-rights"
+        "object-rights",
+        "m365-addin-customization"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
@@ -74,6 +79,34 @@ public sealed class GuidanceMigrationTests
                 || path.StartsWith("references/", StringComparison.Ordinal)
                 || path.StartsWith("catalog/", StringComparison.Ordinal),
             because: "developers must publish canonical guidance, references, or catalog content rather than immutable oracle fixtures");
+    }
+
+    [Test]
+    [Description("Publishes every guidance article at resources/<itemId>.md, so the itemId names its file in the flat resources folder.")]
+    public void BundleSource_ShouldPublishGuidanceAtItsItemIdPath()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+
+        // Act
+        (string ItemId, string BundlePath)[] guidance = [.. source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Where(resource => resource.GetProperty("sourcePath").GetString()!
+                .StartsWith("guidance/", StringComparison.Ordinal))
+            .Select(resource => (resource.GetProperty("itemId").GetString()!,
+                resource.GetProperty("bundlePath").GetString()!))];
+        string[] misnamed = [.. guidance
+            .Where(article => article.BundlePath != $"resources/{article.ItemId}.md")
+            .Select(article => $"{article.ItemId} -> {article.BundlePath}")];
+
+        // Assert
+        guidance.Should().NotBeEmpty(because: "anti-vacuity: the manifest declares guidance articles");
+        misnamed.Should().BeEmpty(
+            because: "resources/ is one flat folder: a path that drops the itemId's prefix (versions-details.md "
+                + "for process-versions-details) hides which item it belongs to and can collide with a later "
+                + "article of another domain");
     }
 
     [Test]

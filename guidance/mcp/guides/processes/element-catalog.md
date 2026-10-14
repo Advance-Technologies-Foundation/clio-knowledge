@@ -135,7 +135,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   four Read data modes DO build, see the catalog entry in `process-element-catalog-details`. A collection IS consumed now: a multi-instance
   Sub-process element iterates one, once per item (see the `callActivity` entry in `process-element-catalog-details`).
   Use the catalog in `process-element-catalog-details` to reason about a solution and to READ existing processes
-  (`describe-business-process`); don't expect to build those types in this increment.
+  (`describe-business-process mode=full`); don't expect to build those types in this increment.
 
 == Building from a data-id ==
 (The `data-id` strings in `process-element-catalog-details` are the vocabulary for `validate-process-graph` and for reasoning about /

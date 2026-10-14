@@ -3,7 +3,7 @@ clio MCP process-parameters guide — process parameters, mappings and formula d
 Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
 the card or this article sends you there.
 This article is the authoritative owner of process parameters, the mappings that bind them, and the date/time/lookup default macros.
-Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element.
+Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element. Also there: the evidence for the binding rule below and a multi-start example that sets one shared parameter per branch.
 
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection),
@@ -74,10 +74,16 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
 - Mappings (`mappings[]`): bind a TARGET parameter to a SOURCE.
   TARGET — `elementName` + `elementParameter` (an element input) OR `targetProcessParameter`
   (a process parameter, e.g. expose an element's OUTPUT as a process output).
+  A `targetProcessParameter` mapping is a BINDING, not an assignment: the parameter's ONE value source,
+  evaluated whenever the parameter is read - not once at start, not when a branch runs. A second mapping
+  onto it REPLACES the first (the last listed is saved); a read before the source element ran, or on a
+  run whose start never reaches it, gets the default. To SET a parameter in the flow - e.g. one shared
+  parameter fed by each branch of a multi-start process - give each branch a `formulaTask` with
+  `formula.resultProcessParameter` (it wins over a stored binding). Build and modify WARN on both cases.
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
   add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
   processParameter (a process parameter by name) | value (a constant) | expression (a raw formula).
-  Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process` output an element parameter
+  Identifying an OUTPUT for `sourceElementParameter`: in `describe-business-process mode=full` output an element parameter
   is usable as a mapping source when `isOutput: true` — key on that, NOT on `isResult` or `direction`. Those are
   the stored facts it derives from, and a Read data element's non-`first` outputs carry neither
   (`process-read-data`); the same names sit in its `readData.outputs`.
@@ -142,6 +148,6 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   etc.).
   This applies to MAPPINGS only. It does NOT mean a formula cannot reference a parameter: inside an
   `expression` there is no structured alternative, and the UId meta-path is exactly what you write.
-  `process-formulas` owns that form — built from the `uid`s `describe-business-process` reports; the column
+  `process-formulas` owns that form — built from the `uid`s `describe-business-process mode=full` reports; the column
   form (a third segment) is `process-data-elements`'. An email BODY macro reaches a column with its own
   grammar, `[[element:<Element>.<OutputParameter>.<Column>]]` (see `process-send-email`).

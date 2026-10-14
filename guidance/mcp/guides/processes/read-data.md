@@ -91,7 +91,7 @@ lifecycle, the descriptor shape and what is buildable today are summarised in `p
   Re-aggregating in place counts as a conversion too, even though the mode does not change: `aggregation`'s
   output follows the COLUMN TYPE, so switching `{sum, Amount}` to `{min, CreatedOn}` moves the output from
   `ResultFloatFunction` to `ResultDateTimeFunction`. A mapping that named the old output STOPS BEING FILLED
-  (the parameter still exists and is still mappable) — re-read the element with `describe-business-process`
+  (the parameter still exists and is still mappable) — re-read the element with `describe-business-process element=<name>`
   after such a change and re-point anything that consumed it.
 - `describe-business-process` reports only FLAGGED / value-bearing parameters. An omitted one may still
   exist and be mappable (`ResultRowsCount` above) — omission means "not reported", never "does not exist".
@@ -120,8 +120,8 @@ lifecycle, the descriptor shape and what is buildable today are summarised in `p
   clears the columns, sort AND record filter bound to the old entity — re-supply them (and issue a
   `setFilter`) in the same operations array. MUST, before any `setFilter` on a live process: `setFilter`
   REPLACES the element's whole filter and there is no add-one-condition op, so read the current filter
-  back with `describe-business-process` and send it complete. `process-data-source-filters` owns the op
-  and the read-back shape. `describe-business-process` reads the whole block back
+  back with `describe-business-process mode=full` and send it complete. `process-data-source-filters` owns the op
+  and the read-back shape. `describe-business-process mode=full` reads the whole block back
   (`source`, `mode`, `columns` as names, `sort`, and `aggregation` as `{function, column}` in aggregation
   mode), so anything the builder made round-trips into create/modify. Read-back limits on a HUMAN-made
   element: a linked-object column is omitted from

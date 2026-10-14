@@ -12,7 +12,7 @@ an older package up front. The write's own result is the proof of a switch - do 
 `describe-business-process` to confirm one. Switching ON took effect only when the result carries the warning
 `Tracing is now ON ...` or `Tracing was already ON ...`, which also names the switch-off date. An older pair accepts
 `isTracing` and drops it in silence, so a success WITHOUT that warning means tracing was NOT switched on: read
-`describe-business-process` then, and tell the user. Switching OFF carries no warning; the success of the batch that
+`describe-business-process mode=full` then, and tell the user. Switching OFF carries no warning; the success of the batch that
 held it is the proof, because an older package refuses the operation it does not know
 (`Operation 'setTracing' is not supported`).
 Switching it needs the `CanManageSolution` right on top of process design (`CanManageProcessDesign`). The product's

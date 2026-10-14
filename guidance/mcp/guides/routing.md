@@ -1,7 +1,9 @@
 clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
-Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+Pick the domain, then the row (get-guidance name=...). From clio 8.1.0.141, `get-guidance name=list` returns the
+catalog, one `name: purpose` line per guide, and an unknown name fails with the closest names (an older
+clio answers any unknown name, `list` included, with the bare `availableGuides` list).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
 `esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
 how a guide points at a rule it does not own. Other backticks are ordinary code (columns, ops,
@@ -127,6 +129,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-modeling for the operation reference
   - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
     name=process-modeling-details
+  - the evidence or reasoning behind a rule, after the article itself: record trigger and Modify data ->
+    name=process-data-elements-details; Perform task -> name=process-perform-task-details; the version
+    model -> name=process-versions-details; ScriptTask -> name=process-script-task-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
   - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
     tracing on or off -> name=process-tracing
@@ -142,6 +147,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
+- Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
@@ -151,7 +157,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
-  - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
+  - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion

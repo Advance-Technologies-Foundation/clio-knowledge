@@ -119,7 +119,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
         written, but the reply still carries the multi-instance notice that the element "was NOT
         re-synchronized as part of this edit and nothing was changed on it". That notice speaks for the
         parameter refresh the edit skipped, not for the flag — do not retry on it; read the flag back with
-        `describe-business-process` (`useBackgroundMode`). On such an element the flag does not do what it
+        `describe-business-process element=<name>` (`useBackgroundMode`). On such an element the flag does not do what it
         does elsewhere: the platform excludes a multi-instance sub-process from the element background
         token, and the flow generator reads the flag to build a different ITERATION flow. It buys no
         concurrency — the continuations are consumed under a per-process lock and serialise anyway: on a
