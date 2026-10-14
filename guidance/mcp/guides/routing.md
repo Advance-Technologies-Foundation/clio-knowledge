@@ -68,6 +68,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
+  - a parameter or mapping that carries FILES (type File or FileCollection, a file collection bound at both
+    levels, one sub-process run per file) -> name=process-files (after name=process-parameters)
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - verify a stored formula or condition, match a formula refusal message to its fix, or a formula refusal
     about the CrtProcessBuilder version -> name=process-formulas-details (after name=process-formulas)
