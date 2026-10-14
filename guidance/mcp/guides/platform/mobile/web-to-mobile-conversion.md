@@ -81,12 +81,10 @@ Creatio or disk. The guide contains:
   - modelConfig / viewModelConfig — the same configs in full-object form, for REFERENCE only.
     viewModelConfig is already FILTERED (attributes used only by dropped components removed).
   - adaptiveLayout — the responsive layout for each MULTI-column grid container (phone collapses to
-    1 column and stacks; tablet/desktop keep the web columns). BOTH sides are already baked into
+    1 column and stacks; tablet columns are derived from the web grid). BOTH sides are already baked into
     values (the container's adaptive columns into its own values, each child's placement into
     viewConfigDiff[].values.layoutConfig.adaptive) — nothing separate to apply. It is a READABLE INDEX
-    of what the conversion did, not a switch: present it at the gate as fact, and if the user wants it
-    different the change is an edit to those `values` before pasting. Null when there is no multi-column
-    grid container.
+    of what the conversion did, not a switch (step 5b). Null when there is no multi-column grid container. Tablet band grids are groups of their own (step 5b).
   - tabAreaLayers — the mobile designer's two-layer body synthesized inside every tab the CONVERTER
     creates: a tab-body grid holding the tab's Area card (the guide gives you both names — take them
     from here, never build them from a name pattern), with ALL of the tab's top-level content
@@ -339,17 +337,15 @@ FLOW
    the page's modelConfigDiff / viewModelConfigDiff (see DATA SECTIONS below). Do NOT rebuild them
    by hand, and NEVER copy the data-source section from a pre-existing / reference body.
 5b. Adaptive layout (when guide.adaptiveLayout is present): for every MULTI-column crt.GridContainer the
-   guide has ALREADY baked both sides into values you pasted in step 4 — the container's per-breakpoint
-   columns (small = 1, medium/large = the web columns) and each child's layoutConfig.adaptive (phone stacks
-   in one column; tablet/desktop keep the web placement). A single-column grid gets no adaptive (the mobile
-   client renders the plain layout). Nothing extra to apply — do NOT emit a separate merge for the
-   container's adaptive (it is already inside the container's inserted values; a separate merge
-   would duplicate the operation). REPORT it to the user in plain language as a FACT of the conversion
-   ("fields in <container> stack on the phone and keep <n> columns on a tablet; tablet is experimental,
-   check it on a device") — do NOT ask whether to
-   apply it. There is no field to decline it with: the values are already in the operations you pasted, so
-   a "no" has no represented outcome. The only change path is hand-editing those values before pasting,
-   and that is the developer's to take, not a question for the gate.
+   guide has ALREADY baked both sides into values you pasted in step 4 — the container's columns per
+   breakpoint (small = 1; medium = large = columnsByBreakpoint.medium) and each child's layoutConfig.adaptive.
+   A single-column grid gets no adaptive. Do NOT emit a separate merge for the container's adaptive.
+   A grid whose rows differ in column structure is cut into bands: it becomes ["1fr"], and each multi-column
+   band is a synthesized insert `<container>_TabletBand<N>` (no source name) before its children, which take
+   it as parentName. Apply in order; never move them back. REPORT it as a FACT ("fields in <container> stack
+   on the phone and sit in <n> columns on a tablet", <n> = length of columnsByBreakpoint.medium). A group
+   listing a band grid is reported through its bands ("<fields> sit side by side in <n> columns"); a 1-column
+   result "takes the full tablet width". Do NOT ask whether to apply it — changing it means hand-editing values.
 5c. Tab body + Area (when guide.tabAreaLayers is present): every tab the CONVERTER creates already carries
    its synthesized inserts in viewConfigDiff — the tab-body grid, then its Area card — because on
    mobile a tab's content lives in an Area card, not directly in the tab body. Each of that tab's
@@ -567,9 +563,11 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   chrome and DOES convert.
 - ADAPTIVE LAYOUT (multi-column crt.GridContainer) is two-sided and both sides are baked into values for
   you; step 5b has the mechanics and the reporting rule. Just paste values verbatim; do not hand-build
-  adaptive. The mobile runtime reflows children by `row` / `column`.
-  Supported canvas: Mobile (`small`) ONLY. `medium`/`large` (tablet/desktop) are baked in but stay
-  EXPERIMENTAL, outside supported scope. Say so at the gate; tell the user to check on a tablet.
+  adaptive.
+  Supported canvases: phone portrait (`small`) and tablet (`medium` = `large`, from 600 dp, so a phone in
+  landscape gets them too). Known tablet limits, to mention at the gate: rows in neighbouring columns do not
+  line up, and a grid that cannot be banded (template grid or child, a child covering another's start column, a
+  rowSpan across bands, >12 start columns) keeps one column set for all rows.
 - TAB BODY + AREA for every tab the CONVERTER creates is baked into viewConfigDiff the same way, and is
   no more a proposal than adaptiveLayout is: the tab body + Area card are the REQUIRED mobile
   structure for a converted tab — report it at the gate, never put it up for the user's approval, and
@@ -587,8 +585,6 @@ HARD MOBILE RULES (see also get-guidance `mobile-page-modification`)
   registry) — paste it verbatim and add only the value binding. validate-page is the backstop and
   rejects an insert that drops a required property (e.g. a field's caption, or a lookup-path
   attribute's type), and update-page blocks the save.
-- Mobile layout is a simplified vertical flow; complex multi-column desktop layout will likely
-  need manual adaptation in the designer.
 
 LIMITATIONS (be transparent)
 This does not guarantee a pixel-perfect or behavior-perfect migration. It guarantees a
