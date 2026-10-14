@@ -168,7 +168,8 @@ public sealed class ClioToolSyncGuidanceTests
             "treat it as a write and confirm the target environment with the user first",
             "relay `browserConsent.question` to the user verbatim, NEVER answer it for them or pick a browser yourself",
             "The answer is remembered, so the user is usually asked once; if a later call asks again, relay it again.",
-            "`browser-download-failed`: tell the user; call again to retry, or ask the user before choosing another browser - never pick one for them."
+            "`browser-download-failed`: tell the user; call again to retry, or ask the user before choosing another browser - never pick one for them.",
+            "`browser-downloading` means part of the download is kept (`browserDownload` says how much): call again without `browser` to resume it."
         })
         {
             details.Should().Contain(clause,
