@@ -252,7 +252,8 @@ public sealed class ProcessGuideResponseSizeTests
     /// is the same JavaScriptEncoder the server uses, so backticks, angle brackets and every non-ASCII
     /// character expand to their six-character escapes here exactly as they do on the wire. Measuring the
     /// raw file instead would understate a dense article by more than a third.
+    /// <para>Internal so a guide with a design target tighter than the budget measures itself the same way.</para>
     /// </summary>
-    private static int ResponseSize(string repositoryRoot, string sourcePath) =>
+    internal static int ResponseSize(string repositoryRoot, string sourcePath) =>
         JsonSerializer.Serialize(ProcessGuideSet.Read(repositoryRoot, sourcePath)).Length + EnvelopeAllowance;
 }
