@@ -174,7 +174,7 @@ public sealed class FileParameterGuidanceTests
                 "P3 resets the parents (owner decision), which a designer user would not expect"),
             ("R-M1 — a single File (a process parameter, or a flat File input of an element, a single-instance sub-process's included) from an ITEM of a collection is refused (\"use a FileCollection, or a multi-instance sub-process\")",
                 "R-M1 also refuses a single-instance sub-process's flat File input, and the refusal names the two alternatives"),
-            ("Order matters. Onto a collection that takes files, the LAST mapping decides.",
+            ("Order matters. Onto a collection that takes files, the LAST accepted mapping decides (an item taken from another collection is refused by P1).",
                 "an item mapping and an outer mapping onto the same file collection undo each other in either order"),
             ("the outer one re-pairs an item bound outside its source (P2), and its notice names the old binding.",
                 "item, then outer: P2 rebinds the item"),
@@ -205,7 +205,7 @@ public sealed class FileParameterGuidanceTests
             .Select(match => guide[Math.Max(0, match.Index - "measured on ".Length)..(match.Index + match.Length)])];
 
         // Assert
-        guide.Should().Contain($"From clio {ClioBoundary}: use only when get-tool-contract for create-business-process mentions type File.",
+        guide.Should().Contain($"From clio {ClioBoundary}: use only when the FULL create-business-process contract (`get-tool-contract` with `detail: \"full\"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its silence proves nothing.",
             because: "the boundary is the clio release, and the tool contract is the check an agent can make before it declares a type an older pair refuses");
         guide.Should().Contain("does NOT apply the rules below either",
             because: "an older package refuses File loudly but stores an outer-only mapping and binds an item alone in silence");

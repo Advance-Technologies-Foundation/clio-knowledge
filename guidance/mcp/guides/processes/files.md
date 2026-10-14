@@ -4,7 +4,9 @@ Scope
 This guide owns the `File` and `FileCollection` process parameter types and the two-level rules (P1, P2, P2-MI,
 P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through. Parameters and mappings
 in general: `process-parameters`; the Sub-process element: `process-sub-process`; formulas: `process-formulas`.
-From clio 8.1.0.142: use only when get-tool-contract for create-business-process mentions type File. An environment
+From clio 8.1.0.142: use only when the FULL create-business-process contract (`get-tool-contract` with
+`detail: "full"`) names type File in `parameters[]`; the default reply is shortened and lists no types, so its
+silence proves nothing. An environment
 whose CrtProcessBuilder predates this support refuses `type: File` as not supported and saves nothing, but it does
 NOT apply the rules below either: an outer-only mapping is stored as sent and an item mapping binds the item alone,
 and a read-back there reports a file collection as `CompositeObjectList`.
@@ -42,9 +44,10 @@ contract; one that is already in the process is mapped like any other element.
   2026-10-14). On THAT process, address the item by that name. A process REBUILT from the description names the
   item `File`, so a re-sent mapping that still names `AttachmentsParameter.Attachment` is refused ("has no item
   'Attachment'", followed by the items it has): rename that segment to `File`.
-- A value that is exactly one reference to another element's output is reported as `sourceElement` +
-  `sourceElementParameter` (dotted for an item: `ObjectFiles.File`) when re-sending those names would change no other
-  level; anything else, a reference to a process parameter included, stays a `value` formula. Re-send a binding by
+- A value that is exactly one reference to another element's output is reported with `sourceElement` +
+  `sourceElementParameter` (dotted for an item: `ObjectFiles.File`) beside the raw `value`, when re-sending those names
+  would change no other level; anything else, a reference to a process parameter included, comes back only as the raw
+  formula in `value`. Re-send a binding by
   name, not as an `expression`, so the rules below run. An element input bound only on its item is listed too.
 
 == Where the files come from ==
@@ -95,7 +98,8 @@ targets only.
   included) from an ITEM of a collection is refused ("use a FileCollection, or a multi-instance sub-process"):
   outside a row the item reads empty. Measured on Creatio 10.1.37 on 2026-10-02: a mapping of that shape, written
   by an older CrtProcessBuilder that still accepted it, delivered no file while the source held two.
-- Order matters. Onto a collection that takes files, the LAST mapping decides. An item mapping followed by an
+- Order matters. Onto a collection that takes files, the LAST accepted mapping decides (an item taken from another
+  collection is refused by P1). An item mapping followed by an
   outer mapping: the outer one re-pairs an item bound outside its source (P2), and its notice names the old binding.
   An outer mapping followed by a single-file mapping onto its item: the collection is cleared (P3). So copy a whole
   collection with the outer mapping ALONE, and pass one file with the item mapping alone. Onto any other collection
@@ -103,27 +107,31 @@ targets only.
   items: from another source it leaves them reading the old one, with no notice. There, map the outer level first;
   P1 then refuses an item taken from another collection.
 - An `expression` goes through as given; only its meta-path tokens are checked, and none of the rules above runs on
-  it (the stored text has its GUIDs lower-cased). A misspelled token, a token from another process and a column of a collection item are refused; a token that
+  it (the stored text has its GUIDs lower-cased). The formula checks `process-formulas` describes still apply. A misspelled token, a token from another process and a column of a collection item are refused; a token that
   names an item (`Files.File`) is accepted. Prefer a structured source (`process-formulas` owns the formula form).
 
 == Recipes ==
-1. Keep the files an element produced: `addParameter {name: "DocumentsParameter", type: "FileCollection"}`, then
-   `addMapping {targetProcessParameter: "DocumentsParameter", sourceElement: "ReadFiles", sourceElementParameter:
-   "ObjectFiles"}`. P2 binds `DocumentsParameter.File` to `ReadFiles.ObjectFiles.File` and says so in a notice.
-2. Hand them to a Process file element of the Process parameter variant: `addMapping {elementName: "CopyFiles",
-   elementParameter: "Files", processParameter: "DocumentsParameter"}`. P2 binds `Files.File` to
-   `DocumentsParameter.File`. Measured on CrtProcessBuilder 1.6.6.98 on 2026-10-14: recipes 1 and 2 on a process
+1. Keep the files an element produced:
+   {"op": "addParameter", "parameter": {"name": "DocumentsParameter", "type": "FileCollection"}}, then
+   {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
+   "sourceElementParameter": "ObjectFiles"}}. P2 binds `DocumentsParameter.File` to `ReadFiles.ObjectFiles.File` and
+   says so in a notice.
+2. Hand them to a Process file element of the Process parameter variant:
+   {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
+   "processParameter": "DocumentsParameter"}}. P2 binds `Files.File` to `DocumentsParameter.File`. Measured on CrtProcessBuilder 1.6.6.98 on 2026-10-14: recipes 1 and 2 on a process
    whose two file elements were configured in the designer; one run copied the three source files to the target
    record, names and bytes equal.
 3. One called-process run per file: the callee declares a `File` input; the caller's Sub-process element is
    multi-instance (`process-sub-process`) and maps `InputRecordCollection.ContractFileParameter` from
-   `DocumentsParameter.File` (or from `ReadFiles.ObjectFiles.File`). P1 binds `InputRecordCollection` too. Send it
-   alone; if you also map `InputRecordCollection` itself, map it FIRST (it raises a P2-MI notice until the item is
-   mapped), because a later outer mapping is not checked against the item.
-4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM (`<input>.File` from the source's file
-   item); P1 binds the input too. That input does not take files: an outer-only mapping onto it is stored unpaired;
+   `DocumentsParameter.File` (or from `ReadFiles.ObjectFiles.File`). P1 binds `InputRecordCollection` too.
+   `process-sub-process` still asks for the `InputRecordCollection` mapping as well: send it FIRST and from the SAME
+   collection (it raises a P2-MI notice until the item is mapped), because a later outer mapping is not checked
+   against the item.
+4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM (`<input>.<its file item>` from the
+   source's file item); P1 binds the input too. That input does not take files: an outer-only mapping onto it is stored unpaired;
    neither form has been run on a stand yet.
-5. Verify with `describe-business-process element=<name>` (or `mode=full`): each level shows its source.
+5. Verify an element input with `describe-business-process element=<name>` and a process parameter (recipe 1) with
+   `mode=full`: each level shows its source.
 
 == Other refusals ==
 - An `addMapping` `value` onto any file or collection target: a file has no constant form, so map it.

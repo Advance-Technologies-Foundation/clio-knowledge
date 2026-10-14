@@ -56,8 +56,8 @@ public sealed class CollectionParameterGuidanceTests
                 + "reference: `process-files`)",
             because: "the supported-types sentence is where an agent looks for a file type, and it must reach the guide "
                 + "that owns the two types");
-        guide.Should().Contain("other types (composite object / entity / binary / ...) are not supported yet; binary "
-                + "is refused, because a process parameter carries a file by reference (File).",
+        guide.Should().Contain("other types (composite object / entity / binary / ...) are not supported yet, and "
+                + "binary never will be: a process parameter carries a file by reference (File).",
             because: "a file is supported now, so the not-supported list names binary, which stays refused for good");
         guide.Should().NotContain("entity / file /",
             because: "the old list told agents a file could not be a process parameter");
