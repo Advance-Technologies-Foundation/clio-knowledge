@@ -53,6 +53,12 @@ Rules for the handlers block
 - To show a user-facing message (confirmation/info/success/error) from a handler, dispatch `crt.ShowDialogRequest` (message/actions under `dialogConfig.data`); this needs `@creatio-devkit/common` in `SCHEMA_DEPS` and the `sdk` alias in `SCHEMA_ARGS` (see `page-schema-handlers`). NEVER use `alert(...)`, `window.alert(...)`, `confirm(...)`, or `prompt(...)`.
 (For non-trivial handler logic — business orchestration, SDK service calls, attribute-change handling — read `page-schema-handlers`.)
 
+Checking a button at runtime
+- A handler's semantic errors show only when the page runs. When the task needs that UI check, use
+  `page-smoke` (clio 8.1.0.141 and later; `core-rules-details`, Runtime check) INSTEAD of a hand-written
+  Playwright script or browser steps; it is not a routine step after every save. Its `click` presses the
+  button and is a write.
+
 Binding a custom remote-module output payload
 For an Angular remote-module component registered as a web component, Angular Elements dispatches an
 `@Output()` / `@CrtOutput()` emission as a `CustomEvent`. Map the emitted value into a named request
