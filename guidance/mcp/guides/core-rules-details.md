@@ -42,7 +42,22 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
   read-only unless you pass `click` (a button caption or element name), which presses that button like a user
   and can create or change records or start a process: treat it as a write and confirm the target environment
   with the user first. With `click`, `watch` (1-5 entities) lists the records that appeared in
-  `click.created`; nothing is deleted. It needs a Chromium-based browser where clio runs.
+  `click.created`; nothing is deleted. It needs a Chromium-based browser where clio runs, and asks the user
+  first (clio 8.1.0.141 and later): its question offers a browser already on the machine (a
+  headless shell Playwright or Puppeteer cached, an installed Chrome, Edge, Chromium or Brave), a one-time
+  download of a pinned chrome-headless-shell from Chrome for Testing into `~/.clio/browsers/`, or no.
+  `CHROME_PATH`, when set, replaces the question and a remembered `existing` or `download` answer (a warning
+  says so), but not a remembered `none` (that still answers `browser-declined`), and never an answer the user
+  gives on the call. A reply with `code=browser-consent-required` (or
+  `browser-not-found`) and no `success` is a question for the USER, not a failure and not their consent, in
+  the same way a CrtProcessBuilder refusal is not approval to install: relay `browserConsent.question` to
+  the user verbatim, NEVER answer it for them or pick a browser yourself, then call page-smoke again with the
+  `browser` (and, for `existing`, the `browser-path`) of the choice THEY picked. The answer is remembered, so
+  the user is usually asked once; if a later call asks again, relay it again. `browser-declined` means the
+  user said no: continue without a UI check. `browser-ready` means the download finished: call again without
+  `browser`. `browser-downloading` means part of the download is kept (`browserDownload` says how much): call
+  again without `browser` to resume it. `browser-download-failed`: tell the user; call again to retry, or ask the user before choosing
+  another browser - never pick one for them.
 - `odata-delete` with `dry-run`, `ids` or `cascade`, whose refusal carries an `explanation` - act on it
   instead of retrying.
 
