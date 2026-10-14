@@ -51,8 +51,10 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
   the same way a CrtProcessBuilder refusal is not approval to install: relay `browserConsent.question` to
   the user verbatim, NEVER answer it for them or pick a browser yourself, then call page-smoke again with the
   `browser` (and, for `existing`, the `browser-path`) of the choice THEY picked. The answer is remembered, so
-  this happens once. `browser-declined` means the user said no: continue without a UI check.
-  `browser-ready` means the download finished: call again without `browser`.
+  the user is usually asked once; if a later call asks again, relay it again. `browser-declined` means the
+  user said no: continue without a UI check. `browser-ready` means the download finished: call again without
+  `browser`. `browser-download-failed`: tell the user; call again to retry, or ask the user before choosing
+  another browser - never pick one for them.
 - `odata-delete` with `dry-run`, `ids` or `cascade`, whose refusal carries an `explanation` - act on it
   instead of retrying.
 

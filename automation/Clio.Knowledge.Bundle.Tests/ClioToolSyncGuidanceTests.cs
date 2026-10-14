@@ -165,7 +165,10 @@ public sealed class ClioToolSyncGuidanceTests
             "`page` (the form page schema name), optionally `record-id`",
             "`success=false` means the page did not open or the click was not made (`click.outcome` says which); with `click.outcome=unknown` the button may have been pressed, so read `click.created` before retrying.",
             "It is read-only unless you pass `click` (a button caption or element name)",
-            "treat it as a write and confirm the target environment with the user first"
+            "treat it as a write and confirm the target environment with the user first",
+            "relay `browserConsent.question` to the user verbatim, NEVER answer it for them or pick a browser yourself",
+            "The answer is remembered, so the user is usually asked once; if a later call asks again, relay it again.",
+            "`browser-download-failed`: tell the user; call again to retry, or ask the user before choosing another browser - never pick one for them."
         })
         {
             details.Should().Contain(clause,
