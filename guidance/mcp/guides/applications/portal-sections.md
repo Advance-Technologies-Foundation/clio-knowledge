@@ -107,7 +107,5 @@ confirmed at the `RightManagementService` layer; whether portal visibility addit
 (it needs a portal-licensed external user to A/B). Treat the external-user round-trip as the acceptance
 test, not the per-step read-backs.
 
-<!-- Version boundary: the object-rights step uses set-object-rights / get-object-rights, which ship in
-clio <SET-OBJECT-RIGHTS-CLIO-VERSION-TBD>. Replace this placeholder with the released clio version
-before merging (merging publishes; an unresolved boundary is refused by the producer contract suite).
-Until then this article stays on a draft PR. -->
+Version boundary: the object-rights step uses `set-object-rights` / `get-object-rights`, which ship in
+clio 8.1.0.138 and later; on an older clio, stop before step 4 and tell the user to update clio.
