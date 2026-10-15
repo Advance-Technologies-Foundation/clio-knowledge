@@ -1,12 +1,14 @@
 clio MCP record-permissions guide
 
 Choose and verify Creatio record permissions before implementing grants or runtime rules.
-This is the decision entry point. `record-rights` owns direct stored-grant tools;
+This is the decision entry point. `default-record-rights` owns the object's record-permissions switch and its
+default rules; `record-rights` owns direct stored-grant tools;
 `record-permission-extensions` owns runtime predicates and their combination contract;
 `process-access-rights` owns the Change access rights process element. Read the selected owner before acting.
 
 | Requirement | Approach | Canonical owner |
 |---|---|---|
+| Records created by role X are available to role Y by default; turn record permissions on/off for an object; apply the rules to existing records | Default record rules of the object | `default-record-rights` |
 | Explicit users/roles may access a particular record; grants survive sessions | Persisted grants | `record-rights` |
 | A process changes those grants when a business event happens | Persisted grants changed by Change access rights | `process-access-rights` |
 | Access follows current user context, relationships or record attributes at query time | Runtime SQL predicates | `record-permission-extensions` |
