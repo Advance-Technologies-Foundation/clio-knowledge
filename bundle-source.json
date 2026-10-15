@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.151",
+  "libraryVersion": "1.15.154",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -856,7 +856,7 @@
     {
       "itemId": "dashboard-and-home-page-layout",
       "title": "Dashboard and home page layout",
-      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages, including the 12-column grid, the metric-band-then-chart-grid skeleton, per-widget-type default sizes, and the plain-white (without-fill) card theme.",
+      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages: per-surface metric tile sizes read from the Main grid rows, the metric block and chart grid, adding a metric to an existing page without appending it, the widget color palette by WCAG contrast (four low-contrast presets banned), mandatory metric icons, and the plain-white (without-fill) card theme on both surfaces.",
       "topicId": "creatio.dashboard-and-home-page-layout",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
