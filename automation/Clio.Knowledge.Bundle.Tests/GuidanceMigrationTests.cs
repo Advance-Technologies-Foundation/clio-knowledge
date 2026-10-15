@@ -50,7 +50,8 @@ public sealed class GuidanceMigrationTests
         "external-organizations",
         "page-schema-translation",
         "object-rights",
-        "m365-addin-customization"
+        "m365-addin-customization",
+        "default-record-rights"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
