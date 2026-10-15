@@ -254,7 +254,7 @@ Page-body templates
     $context: request.$context,
     scopes: [...request.scopes]
   });
-- Rule: in new deployed page-body handler code, use `await sdk.HandlerChainService.instance.process({ type, $context, scopes })` for imperative request dispatch, and always pass `scopes: [...request.scopes]`. This is the documented `@creatio-devkit/common` API and the form used uniformly by Creatio Academy SCHEMA_HANDLERS examples. `page-schema-handlers` (API choice rules) owns why `scopes` is required and when an existing `request.$context.executeRequest(...)` call is kept.
+- Rule: in new deployed page-body handler code, use `await sdk.HandlerChainService.instance.process({ type, $context, scopes })` for imperative request dispatch, and pass `scopes: [...request.scopes]` unless the target request intentionally changes scope. This is the documented `@creatio-devkit/common` API and the form used uniformly by Creatio Academy SCHEMA_HANDLERS examples. `page-schema-handlers` (API choice rules) owns why `scopes` is required and when an existing `request.$context.executeRequest(...)` call is kept.
 
 Anti-patterns
 - Do NOT add `@creatio-devkit/common` when no SDK symbol is used after the edit.
@@ -269,7 +269,7 @@ Anti-patterns
 - Do NOT invent collection helper APIs beyond `createItem(...)`, `registerOnCollectionChangeCallback(...)`, `registerOnItemAttributesChangesCallback(...)`, and their matching unregister methods shown here.
 - Do NOT fire-and-forget SDK promises with `void somePromise`, `.then()` without error handling, or any other pattern that drops failures silently in schema-body code.
 - Do NOT use internal `ɵ*` exports from the package.
-- Do NOT call `sdk.HandlerChainService.instance.process(...)` without `scopes`: it skips the page's own handlers silently (see `page-schema-handlers`, API choice rules). Do NOT write new dispatch code with `request.$context.executeRequest(...)` — it is not declared in the typed `@creatio-devkit/common` surface.
+- Do NOT call `sdk.HandlerChainService.instance.process(...)` without `scopes` by accident: it skips the page's own handlers silently (see `page-schema-handlers`, API choice rules). Do NOT write new dispatch code with `request.$context.executeRequest(...)` — it is not declared in the typed `@creatio-devkit/common` surface.
 - Existing product code may still use `request.$context.attributes[...]` or direct property assignment. Do not prefer those forms in newly generated schema-body code unless the local schema already follows that pattern.
 
 BEFORE SAVE CHECKLIST
