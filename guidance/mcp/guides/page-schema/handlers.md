@@ -477,6 +477,7 @@ Anti-patterns
 - Do NOT use `alert(...)`, `window.alert(...)`, `confirm(...)`, or `prompt(...)` to show a message from a handler; dispatch `crt.ShowDialogRequest` instead (message/actions under `dialogConfig.data`).
 - Do NOT use `request.viewModel`, `request.sender`, `.$get(...)`, `.$set(...)`, or `request.$context.get(...)` in deployed page-body handlers.
 - Do NOT omit `$context` or `scopes` when forwarding a request from one handler into another page-scoped handler chain.
+- Do NOT reload a form page's `PDS` with `crt.LoadDataRequest` `dataSourceName: "PDS"` without an explicit `config.useLastLoadParameters: true`: it can drop the record filter and show another record. Use `refreshDataConfig` `RefreshSpecific` with `targetDataSourceNames: ["PDS"]` — see get-request-info `crt.LoadDataRequest`.
 - Do NOT mutate unrelated request fields; only use documented control flags such as `preventAttributeChangeRequest` when that request type explicitly supports them.
 - Do NOT parallelize multiple `$context.set(...)` calls with `Promise.all(...)` unless order independence is proven.
 
