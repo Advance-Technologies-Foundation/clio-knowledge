@@ -132,6 +132,8 @@ names a different style/theme in the prompt, use that instead.
 `config.color` is REQUIRED (see Title and header): it colors the title. Default to "dark-blue" when
 the user gives none.
 
+MUST NOT use `orange-red`, `orange`, `light-green` or `turquoise` for `config.color` or `series[*].color` (below 3:1 contrast on the white card); the widget color palette is owned by `dashboard-and-home-page-layout`.
+
 ## Placement and preserving existing widgets
 
 - Insert the chart with a UNIQUE view-element `name` via `update-page` in APPEND mode; this

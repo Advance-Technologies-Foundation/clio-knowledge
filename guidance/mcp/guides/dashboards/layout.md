@@ -1,140 +1,174 @@
 clio MCP dashboard and home page layout guide
 
-Use this guide whenever you add, arrange, size, group, or style Freedom UI ANALYTICAL widgets
-(metrics/indicators and charts) on a DASHBOARD or a HOME PAGE — so they look native and balanced,
-matching how Creatio's own product dashboards look. This guide covers ONLY dashboards and home
-pages; desktops are a separate surface with their own guide — read `desktop-page` for those.
+Use this guide whenever you add, arrange, size, group, color, or style Freedom UI ANALYTICAL widgets
+(metrics/indicators and charts) on a DASHBOARD or a HOME PAGE, new or existing, so they look like
+Creatio's own product dashboards. Desktops are a separate surface: read `desktop-page` for those.
 
-This is a LAYOUT / DESIGN-QUALITY guide. It owns WHERE a widget goes, HOW BIG it is, and HOW it is
-styled. It does NOT own the runtime payload of any single widget — for the `crt.IndicatorWidget`
-generation contract (aggregate, static filter, intent -> config translation) read the dedicated
-`indicator-widget` guidance and call `get-component-info`. For the
-`crt.ChartWidget` generation contract (chart type, series, aggregation, grouping, sorting, static
-filter) read the dedicated `chart-widget` guidance and call `get-component-info`. For surrounding
-page structure, fields, containers, and accessibility/contrast defer to the general Freedom UI page
-guidance (`page-modification` and the UI guidelines). Filtering a dashboard's widgets by its page
-data (the hidden `DashboardDS` source) is dashboard-specific — read `dashboard-design`.
+This guide is the single owner of WHERE a widget goes, HOW BIG it is, its card theme, the widget color
+palette, and the metric icon rule on dashboards and home pages; `indicator-widget` and `chart-widget` cite
+it. It does NOT own a widget's runtime payload: for `crt.IndicatorWidget` read `indicator-widget`, for
+`crt.ChartWidget` read `chart-widget`, and call `get-component-info`. For page structure and containers
+read `page-modification`; filtering a dashboard's widgets by its page data (`DashboardDS`) is in
+`dashboard-design`.
+
+Evidence: the sizes, colors, and icons below were read with `get-page` from the 8 stock analytics
+dashboards and 4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15 (platform
+version not read). The reference is the Accounts analytics dashboard (`AccountsAnalyticsDashboard`).
 
 ## Core rules (in priority order)
 
-Get these three right for every widget, in this order. Treat each as a hard rule unless the user
-explicitly overrides it — they are what keep a custom analytics surface looking native. They are
-stated here once as the single source of truth; later sections only add the exact numbers and examples.
+Hard rules unless the user explicitly overrides one.
 
-1. Right PLACE — metric tiles go in a top BAND; charts go in a GRID below. Metrics never go below
-   their charts; charts never sit in the metric band. When a surface covers several subject areas,
-   split it into LABELED sections (separated by a header and spacing, never by card color), each
-   section being its own metric band + chart row.
-2. Right STYLE — PLAIN WHITE card (`theme` "without-fill") is the default for EVERY widget, the same
-   on dashboards and home pages. A colored/emphasis card is a rare, deliberate signal for ONE
-   critical KPI (e.g. an SLA-breach counter the business wants impossible to miss) — at most one or
-   two per screen, on metric tiles only, never on charts, and never for variety or to "brand" a
-   section. Keep the theme-default title color; let metric value/icon colors follow the default
-   semantic (red is reserved for overdue / negative / gap counts). Don't hand-pick decorative colors.
-3. Right SIZE — size by widget TYPE, not by eye (exact column counts per type are in "Widget
-   catalog" below). Metric tiles are 1 row tall and share equal width across the band; charts are
-   ~9 rows tall (`rowSpan`; never below 6). Every row's widget widths must sum to a full 12 columns — less than 12 leaves a
-   visible gap, more than 12 wraps and breaks alignment. Composition (pie/doughnut) breakdowns come
-   in threes.
+1. PLACE: metric tiles form a METRIC BLOCK at the top, either a band across the page or a block of
+   columns with a tall widget beside it. Charts go below or beside the block, never inside it; a metric
+   never goes below the charts. On an existing page follow "Adding to an existing page". A surface that
+   covers several subjects is split into LABELED sections (a header and spacing, never card color), each
+   its own metric block and chart row.
+2. SIZE: read the page grid first; a metric tile takes the size of its SURFACE ("Metric tile size") and is
+   never stretched to fill a row. Charts are sized by type ("Widget catalog").
+3. STYLE: every widget is a plain-white card, takes a color by MEANING from the allowed palette ("Color"),
+   and every metric tile carries an icon ("Icon").
 
-## The 12-column grid
+## Metric tile size
 
-A Creatio analytics surface lays widgets on a responsive 12-column grid. Every widget occupies a
-whole number of columns wide and a whole number of rows tall.
+Before sizing anything, read the `rows` of the page's `Main` `crt.GridContainer` with `get-page` (the
+merged `bundle.json`). Both surfaces have a 12-column grid and an 8px gap, but different row heights:
 
-- WIDTH is what you tune most — a widget's width is a slice of 12.
-- HEIGHT is `layoutConfig.rowSpan` (grid rows). Platform defaults: metric tile 3, gauge 3, chart 9,
-  funnel 15, list/pivot 9. HARD FLOOR: a chart, list, or pivot must have `rowSpan` >= 6 — below that
-  it renders unreadably short. A METRIC TILE is exempt: it holds a number and stays ~3. A GAUGE is NOT —
-  it ships the tile's default of 3 but has a semicircular arc to draw, and at 3 rows the dial renders
-  too small to read. Give a gauge `rowSpan` 6, floor 5. The "rows" elsewhere in this guide are these
-  `rowSpan` values, so "a chart ~3 rows" means the ~9-`rowSpan` default, not literally 3.
-- Each row of widgets must sum to EXACTLY 12 columns.
-
-The only widths you normally need:
-
-| Width | Columns | Fits per row | Use for |
+| Surface | `Main` rows | Metric `colSpan` | Metric `rowSpan` |
 |---|---|---|---|
-| One-sixth | 2 | 6 | metric tiles (6-up band) |
-| One-quarter | 3 | 4 | metric tiles (4-up band) |
-| One-third | 4 | 3 | charts (default), doughnuts in threes |
-| Half | 6 | 2 | bar charts with long labels, lists |
-| Two-thirds | 8 | 1 (+ a 4-col sibling) | a focal chart beside a metric/doughnut column |
-| Full | 12 | 1 | a wide trend/timeline, a wide list |
+| Dashboard (`BaseDashboardTemplate`) | `28px` | 3, or 2 in a dense band | 3 |
+| Home page (`BaseHomePage`) | `64px` | 3, or 2 in a dense band | 2 |
 
-Sizing math: metric tile width = 12 / (tiles in the band). Use 4 or 6 tiles per band -> 3 or 2
-columns each. Avoid 5 per row (doesn't divide 12 evenly) — use 4 or 6, or split into two bands.
-After laying out a row, verify its columns sum to 12 and rebalance (widen a chart, or add/resize
-siblings) if they don't.
+Height in px = `rowSpan` x row height + (`rowSpan` - 1) x gap. The same `rowSpan` 3 is 100px on a
+dashboard and 208px on a home page, so a `rowSpan` copied from one surface to the other renders a
+bloated or squashed tile. For any other `rows` value copy the sibling tiles' size; with none, pick the
+`rowSpan` whose height is closest to the stock 100-136px.
 
-## Canonical layout
+- NEVER derive a tile width from 12 divided by the tile count, and never widen a tile to fill a row: a
+  tile is at most `colSpan` 4. Two tiles are 3 + 3, not 6 + 6.
+- Dense band: 5 or 6 tiles across (more go on a second tile row), or a block two tiles wide in 4
+  columns; use `colSpan` 2 there.
+- The 12-column rule applies to the FILLED AREA, not to each row. When the tiles of a row do not reach 12
+  columns, put a tall widget beside the block, or leave the rest of the row empty.
+- BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total, so both end on
+  the same row.
 
-Every native Creatio analytics surface follows the same top-down shape: a metric band on top, then
-chart rows below, optionally grouped into labeled sections.
+The reference, a metric block with a doughnut beside it (dashboard grid):
+
+| Widget | Type, color, icon | `layoutConfig` |
+|---|---|---|
+| Number of accounts | metric, `steel-blue`, `work-icon` | `{ "column": 1, "row": 1, "colSpan": 3, "rowSpan": 3 }` |
+| Accounts without primary contact | metric, `cadmium-red`, `document-edit-icon` | `{ "column": 4, "row": 1, "colSpan": 3, "rowSpan": 3 }` |
+| Accounts by industry | doughnut | `{ "column": 7, "row": 1, "colSpan": 6, "rowSpan": 12 }` |
+| Accounts by category | bar | `{ "column": 1, "row": 4, "colSpan": 6, "rowSpan": 9 }` |
+| Accounts by type | horizontal bar | `{ "column": 1, "row": 13, "colSpan": 6, "rowSpan": 8 }` |
+| Accounts by employee count | bar | `{ "column": 7, "row": 13, "colSpan": 6, "rowSpan": 8 }` |
+
+The doughnut's `rowSpan` 12 = 3 (tiles) + 9 (bar under them), so it ends on the same row as the bar.
+
+## Color
+
+Applies to every widget: a metric's `config.layout.color`, a chart's `config.color` and its
+`series[*].color`. The number is the WCAG 2 contrast ratio of the preset's swatch color against the
+white card.
+
+- MUST NOT use in any widget (below 3:1, unreadable on white): `orange-red` 2.39, `turquoise` 2.33,
+  `orange` 1.88, `light-green` 1.61.
+- DEFAULT choice (4.5:1 or more): `dark-blue` 13.83, `navy-blue` 7.21, `forest-green` 6.73,
+  `burnt-coral` 6.01, `vivid-purple` 5.79, `steel-blue` 5.78, `blue` 5.77, `violet` 5.30,
+  `cadmium-red` 5.01, `dark-turquoise` 4.50.
+- Allowed (3:1 to 4.5:1): `celestial-blue` 4.05, `coral` 3.65, `red` 3.50, `purple` 3.08, `green` 3.05,
+  `rusty-orange` 3.03, `light-blue` 3.03, `bright-red` 3.02, `dark-green` 3.01.
+
+Color follows MEANING, never variety; the same meaning keeps the same color on one page. As on the
+stock dashboards:
+
+| Meaning | Color | Stock example |
+|---|---|---|
+| Neutral count, amount or time | `steel-blue` | Number of accounts |
+| Negative: overdue, missing data, expiring, inactive | `cadmium-red` | Accounts without primary contact |
+| New, this month, inflow | `dark-turquoise` | New contacts this month |
+| Attention: waiting, reopened | `burnt-coral` | Reopened cases |
+| Good result | `forest-green` | First contact resolution |
+| A separate category | `vivid-purple` or `navy-blue` | Emails, calls |
+
+On a chart, don't recolor bars per value; the reference's series use `blue` and `burnt-coral`.
+
+## Icon
+
+Every metric tile MUST carry an icon (`config.layout.icon.iconName`) chosen by meaning; every metric on
+the stock dashboards has one. Examples:
+
+| Meaning | `iconName` |
+|---|---|
+| Accounts, contacts, orders | `work-icon`, `contact-group-icon`, `trolley-icon` |
+| Amounts | `coins-icon`, `money-icon` |
+| Overdue, inactive, response time | `hourglass-icon` |
+| Duration, resolution time | `clock-icon` |
+| Overdue response, overdue resolution | `message-warning-icon`, `problem-icon` |
+| Waiting, reopened | `bell-icon` |
+| Expiring | `fire-icon` |
+| Missing data, contracts | `document-edit-icon`, `document-icon` |
+| Goal, open opportunities, first contact resolution | `goal-icon` |
+| Calls, emails | `phone-icon`, `mail-icon` |
+| Satisfaction | `like-icon` |
+| Resolved, closed | `checkmark-filled-icon` |
+| New this month, in progress | `diagram-icon`, `level-icon` |
+
+## Card theme
+
+Every widget on a dashboard AND on a home page uses the plain-white card, `theme` "without-fill", like
+the base product: a customization should not stand out. On a home page this OVERRIDES the
+`crt.IndicatorWidget` component documentation, which says `theme` "full-fill" for home pages: follow
+this guide. Use a colored card only when the user explicitly asks for one, and never in a banned color.
+
+## Adding to an existing page
+
+1. Read the page with `get-page`: the `Main` rows and every widget's `layoutConfig`, `theme`, and color.
+2. Copy the SIZE and TEXT settings of the sibling metric tiles (`colSpan`, `rowSpan`,
+   `text.fontSizeMode`, `text.labelPosition`), but never their `theme` or a banned color: the new tile
+   is "without-fill" with a color by meaning from "Color", even when its siblings are full-fill or use a
+   banned color.
+3. Put the tile in a free slot of the metric block: the next free columns of the block's rows.
+4. When the block is full, add a new tile row directly UNDER the block, in the block's columns:
+   - move every widget that starts on or below that row down by the tile's `rowSpan`, in every column,
+     so nothing below overlaps;
+   - extend by the same `rowSpan` a side widget whose rows exactly match the block, or the block and
+     the widgets under it (it starts on the block's first row and ends on the same row as that stack),
+     so the bottoms stay aligned. A side widget that does not match keeps its size.
+5. NEVER append the tile at the bottom of the page or among the charts, and never restyle, resize, or
+   move an existing widget beyond step 4.
+
+Worked example: "Add a metric with the number of closed cases to the Case Intelligence dashboard".
+Before: 8 metric tiles 2x3 fill columns 1-4, rows 1-12 (at rows 1, 4, 7, 10 in columns 1 and 3); a
+doughnut `{ "column": 5, "row": 1, "colSpan": 8, "rowSpan": 12 }` sits beside them; three
+horizontal bars 4x10 start on row 13 (columns 1, 5, 9); a doughnut 4x10 and a bar 8x10 start on row 23.
+The block is full, so:
+
+- the new tile is `{ "column": 1, "row": 13, "colSpan": 2, "rowSpan": 3 }`, "without-fill",
+  `checkmark-filled-icon`, a color by meaning (e.g. `forest-green` for a good result);
+- the doughnut matched rows 1-12, so it becomes `{ "column": 5, "row": 1, "colSpan": 8, "rowSpan": 15 }`;
+- the widgets on row 13 move to row 16 and those on row 23 to row 26;
+- a second new tile takes the free slot `{ "column": 3, "row": 13, "colSpan": 2, "rowSpan": 3 }`.
+
+## New page layout
+
+Every native analytics surface has the same top-down shape: a metric block, then chart rows.
 
 ```
-+--------------------------------------------------------------+
-|  METRIC BAND   [tile][tile][tile][tile]     (4 or 6 tiles)   |  <- 1 row tall
-+--------------------------------------------------------------+
-|  CHART ROW     [ chart 4 ][ chart 4 ][ chart 4 ]            |  <- ~3 rows tall
-|  CHART ROW     [   chart 6   ][   chart 6   ]               |
-|  CHART ROW     [ doughnut 4 ][ doughnut 4 ][ doughnut 4 ]   |
-|  WIDE TREND    [          line / timeline 12          ]     |
-+--------------------------------------------------------------+
+METRIC BAND  [tile 3][tile 3][tile 3][tile 3]          (4 tiles; or 6 tiles at 2 columns)
+CHART ROW    [ chart 4 ][ chart 4 ][ chart 4 ]
+CHART ROW    [   chart 6   ][   chart 6   ]
+WIDE TREND   [          line / timeline 12          ]
 ```
 
-Rules baked into this skeleton:
-
-1. Metrics first, always on top — the eye should hit the headline numbers before the breakdowns.
-2. Charts below, in full-12 rows. Mix widths only so each row still sums to 12.
-3. Doughnuts grouped in threes.
-4. Wide trends last / full width when they have many time points.
-
-Multi-topic surfaces split into labeled sections, each its own mini-skeleton (metric band + chart
-row):
-
-```
-My Calls            <- section header
-  [m][m][m][m]      <- 4 metric tiles (3 cols each)
-  [chart4][chart4][chart4]
-
-My Chats            <- section header
-  [m][m][m]
-  [chart4][chart4][chart4]
-
-My Cases            <- section header
-  [m][m][m][m][m][m]   <- 6 metric tiles (2 cols each)
-  [chart6][chart6]
-```
-
-## Worked patterns (lifted from product dashboards)
-
-Use these as ready templates.
-
-Pattern A — Section stack: per topic, a 4-up (or 6-up) metric band, then a 3-up
-chart row of [bar 4][comparison 4][trend 4]. Repeat for each topic with its own header.
-
-Pattern B — KPI strip + focus rows:
-- Top: 6 metric tiles (2 cols each) across the full width.
-- Then repeated [chart 4][chart 8] rows: a small left chart (status/priority/channel breakdown)
-  beside a wide right chart (trend/activity/dynamics).
-- Bottom: a 3-up row (4+4+4).
-
-Pattern C — Metric column + focal chart:
-- Left: a 2-wide column of metric tiles stacked (each tile 2 cols -> the column is 4 cols wide),
-  e.g. 4 rows of two tiles.
-- Right: a focal doughnut at 8 cols spanning the height of that metric column.
-- Then a 3-up chart row (4+4+4), then [doughnut 4][chart 8].
-
-Pattern D — KPI strip + breakdown grid:
-- Top: 6 metric tiles (2 cols each).
-- Then [bar 6][bar 6] (two half-width bars).
-- Then [doughnut 4][doughnut 4][doughnut 4] (by service / by category / by channel).
-- Then more 6+6 or full-12 trend rows.
+- A chart row's widths sum to 12; mix widths only so they still do. Doughnuts come in threes at 4 columns.
+- Wide trends go last, full width when they have many time points.
+- Patterns from the product: a 6-tile strip then [chart 4][chart 8] rows (a small breakdown beside a wide
+  trend); a metric block in columns 1-4 or 1-6 beside a focal doughnut ("Metric tile size"); a 6-tile
+  strip then [bar 6][bar 6] then three doughnuts (by service, by category, by channel).
 
 ## Concept -> widget map
-
-Pick the widget from what the user wants to show, not from what looks nice:
 
 | The user wants to show... | Widget type |
 |---|---|
@@ -147,79 +181,41 @@ Pick the widget from what the user wants to show, not from what looks nice:
 | A multi-dimension table of aggregates | Pivot table |
 | External content (report, page, embed) | Web page widget |
 
-## Widget catalog — type, when to use, default size
+## Widget catalog: type, when to use, default size
 
-Every widget keeps the PLAIN WHITE (`without-fill`) default (see Core rule 2); only the rare
-emphasized-KPI exception differs. Sizes below are in 12-grid columns; height is ~9 `rowSpan` for
-every chart (floor 6) and ~3 for a metric tile unless noted.
+Height is `layoutConfig.rowSpan`. Platform defaults: gauge 3, chart 9, funnel 15, list/pivot 9. HARD
+FLOOR: a chart, list, or pivot must have `rowSpan` >= 6, below that it renders unreadably short. A
+METRIC TILE is exempt and takes its surface size ("Metric tile size"). A GAUGE is NOT: it ships the
+tile's default of 3, but at 3 rows its semicircular arc is too small to read. Give a gauge `rowSpan` 6,
+floor 5.
 
-Metric (indicator) — a single aggregated value with a caption and a small leading icon; the
-workhorse of the top band.
-- When to use: any headline number to see at a glance — counts, sums, averages, min/max, and
-  "without X" gap counts (e.g. "Accounts without primary contact").
-- Examples: "Total calls — 3", "Average handle time, sec — 160", "Overdue cases (response) — 1".
-- Size: 2 columns (6-up band) or 3 columns (4-up band); height 1 row. Only in the top band, never
-  interleaved with charts.
-- For the runtime payload (aggregate, static filter, parentName placement, theme presets) read the
-  `indicator-widget` guidance.
-
-Bar / Column chart — compares a measure across categories.
-- When to use: ranking or comparing discrete categories; grouped "X vs Y". Vertical (column) for few
-  categories with short labels (e.g. "Accounts by category"); horizontal (bar) for many categories
-  or long labels like people/accounts/services (e.g. "Orders by owner").
-- Size: 4 columns when grouped 3-per-row; 6 columns when labels are long or it's primary.
-- Series use the theme palette (a single blue or magenta series by default); don't recolor bars per
-  value.
-
-Doughnut / Pie chart — composition (shares of a whole that sum to 100%).
-- When to use: part-to-whole with a small number of slices (<= ~6). For many categories use a bar
-  chart instead. Examples: "Cases by service", "Cases by category", "Cases by channel".
-- Size: 4 columns, grouped 3 per row (by service / by category / by channel side by side). A single
-  focal doughnut may take 8 columns beside a metric column.
-- Don't use for time series, for > 6 slices, or for values that don't sum to a meaningful whole.
-
-Line / Spline chart — how a measure moves over time.
-- When to use: trends, dynamics, "by month/week/day"; "X vs Y" when both are time series. Examples:
-  "Call volume trend", "Customer satisfaction score dynamics".
-- Size: 4 columns when grouped with sibling charts; 6-12 columns for a primary timeline with many
-  points (wider = more readable). Trends often sit beside or directly under the metrics they explain.
-
-List widget — a compact live list of records (top N, "my open ...").
-- When to use: when the user must see and act on individual records, not an aggregate (e.g. "My
-  overdue cases", "Latest leads").
-- Size: 6-12 columns (lists need horizontal room); height ~5-10 visible rows. Keep the column set
-  minimal.
-
-Pivot table — a table of aggregates across two dimensions (e.g. cases by priority x channel).
-- When to use: only when a chart can't convey the two-dimensional aggregate clearly.
-- Size: 6-12 columns; height by row count.
-
-Web page widget — embeds external content / a URL.
-- When to use: surfacing an external report or page; avoid when a native widget can show the same
-  data.
-- Size: 6-12 columns, height generous.
-
-## Styling rationale
-
-PLAIN WHITE is the native default because a customization should not visually stand out unless a
-business priority requires it — it keeps a custom analytics surface consistent with the base
-product, the same on dashboards and home pages. The colored-card exception and the title/value color
-rules live in Core rule 2; don't restate them with different limits. When a colored background IS
-used, verify text/contrast against the accessibility/contrast guidance.
+- Metric (indicator): a headline number (count, sum, average, min/max, a "without X" gap count). Size,
+  color, and icon per this guide; payload per `indicator-widget`.
+- Bar / Column: compares a measure across categories, or a grouped "X vs Y". Vertical for few short
+  labels, horizontal for many or long labels (people, accounts, services). 4 columns when 3 per row,
+  6 when labels are long or it is primary.
+- Doughnut / Pie: shares of a whole with <= ~6 slices; more categories -> bar chart. 4 columns, 3 per
+  row; a single focal doughnut may take 8 columns beside a metric column (6 beside the reference's
+  6-column block). Never for time series.
+- Line / Spline: a measure over time (trend, dynamics). 4 columns beside sibling charts; 6-12 for a
+  primary timeline with many points.
+- List widget: individual records the user acts on (e.g. "My overdue cases"). 6-12 columns, ~5-10
+  visible rows, minimal columns.
+- Pivot table: a two-dimension aggregate a chart cannot convey. 6-12 columns, height by row count.
+- Web page widget: external content; avoid when a native widget shows the same data. 6-12 columns.
 
 ## Finish checklist
 
-- Metric tiles are in a top band, equal width, one row tall, 4 or 6 across (never 5).
-- Every chart row sums to exactly 12 columns — no row at 8 or 10 (dead space) or 14 (wrap).
-- Doughnut/pie breakdowns are grouped (ideally 3 per row at 4 cols); no lone doughnut floating at an
-  odd width.
-- No chart sits in the metric band, and no metric tile is dropped among the charts.
-- Every widget uses the plain-white (`without-fill`) card (no stray colored cards for variety or
-  branding).
-- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); metric tiles stay short
-  (~3); each gauge is 6 (floor 5) so its arc is not squashed.
-- Multi-topic surfaces are split into labeled sections, each = metric band + chart row.
-- Titles and value colors use theme defaults (red only for overdue/negative).
+- `Main` rows read; every metric tile has its surface size, is at most 4 columns wide, and is not
+  stretched to fill a row.
+- Metric tiles form one block at the top (or under it on an existing page), never among the charts or
+  appended at the bottom.
+- A widget beside a stack ends on the same row as the stack; every chart row sums to 12 columns.
+- Every widget is "without-fill" (home pages too); no `orange-red`, `orange`, `light-green` or
+  `turquoise` anywhere; colors follow meaning.
+- Every metric tile has an icon chosen by meaning.
+- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); each gauge is 6.
+- Multi-topic surfaces are split into labeled sections.
 
 For a List widget's binding and clone/repair contract, MUST read `list-widget` and fetch
 `get-component-info` for its runtime assembly documentation.

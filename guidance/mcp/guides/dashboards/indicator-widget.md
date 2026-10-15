@@ -48,6 +48,7 @@ be registered this way; `validate-page` flags it as a warning  — see `page-sch
 - On any other page, if the user asks to add a widget but does not clarify where on the page, and
   you know there are other widgets, place it near the existing ones (use the same `parentName` as
   another widget).
+- On a dashboard or home page, tile size, placement, color and icon are owned by `dashboard-and-home-page-layout`: read it before you add or move a tile.
 
 ## Card theme
 The card theme is set by the SURFACE's guide, not here: `dashboard-and-home-page-layout` for dashboards and home
