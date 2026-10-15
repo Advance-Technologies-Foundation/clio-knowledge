@@ -8,13 +8,16 @@ has `process-delete-data`. The `filter` these elements
 carry is owned by `process-data-source-filters`: every element here says WHETHER it takes one and what
 that means for it, and that article says what a filter may contain. The Change access rights element consumes the same
 filter; see `process-access-rights`.
+Moved to `process-data-elements-details`: run-time evidence for a Read data column source, and how
+describe reads back column sources and unwritable values. Read it to weigh that evidence or when a
+described value reads back raw.
 
 == Trigger a process on a record event ("run on save" of a page/record) — READ THIS ==
 - When the goal is "run a process when a record is saved / added / changed / deleted" (e.g. on a page
   like UsrXxx_FormPage), that is a PROCESS trigger, NOT page logic. Make the process START with a
   Signal start element bound to the object. Do NOT add a client-side save handler
   (`crt.SaveRecordRequest` / any page handler) to launch a process on save — that is the wrong tool and
-  a fragile workaround. The signal start is the platform-native, declarative trigger.
+  a fragile workaround.
 - Build it with `create-business-process`. The start element is:
     { "name": "RecordModifiedSignal", "type": "signalStart", "caption": "Record is modified",
       "signal": { "entity": "<EntityName>", "on": "modified" } }
@@ -30,7 +33,7 @@ filter; see `process-access-rights`.
   rejects it for "added"/"deleted", and rejects a name that is not a column on the entity. Use entity COLUMN
   names (e.g. `Amount`), not field captions; omit `changedColumns` (or pass []) to fire on any change — but an
   array that contains ONLY blank entries is rejected, since that reads as a mistake rather than as a request
-  to widen the trigger (blanks mixed with real names are simply ignored). This is
+  to widen the trigger (blanks mixed with real names are ignored). This is
   INDEPENDENT of `filter`: `changedColumns` narrows WHICH columns count as a change, `filter` narrows WHICH
   records qualify — combine them freely.
 - To fire the trigger ONLY for records matching a condition (e.g. only when Name = "Start"), add a
@@ -78,8 +81,7 @@ filter; see `process-access-rights`.
   that reading a record's column needs a newer clio. A clio that advertises it also checks the environment
   and refuses anything below CrtProcessBuilder 1.6.6.40, naming the fix (`install-process-builder`).
 - ONE column of the record a first-record `readData` element read (its `ResultEntity`) is a value source,
-  named by the column's CODE. The server resolves it on the read object, type-checks it against the target
-  and writes the platform's three-segment meta path, so there are no UIds to find. This article owns the
+  named by the column's CODE. This article owns the
   forms and the refusals:
   * a mapping (`mappings[]` at create, `addMapping` on modify) - the element source plus `sourceColumn`:
         { "elementName": "Call", "elementParameter": "OwnerId",
@@ -107,14 +109,6 @@ filter; see `process-access-rights`.
   `sourceColumn`. On create, a column source whose element is declared LATER in `elements[]` is refused for
   the order; the FLOW order and the modify path are not checked, so place the read before its consumers in
   the flow yourself.
-- Verified at run time on Creatio 10.1.37 (.NET Framework, MSSQL), CrtProcessBuilder 1.6.6.27, 2026-09-25: one
-  create call built signalStart (Contact added) -> readData (Id = RecordId) -> exclusiveGateway on
-  `[#ReadContact.ResultEntity.DoNotUseCall#] == false` -> Perform task with `OwnerId` <- `sourceColumn: "Owner"`.
-  A contact with `DoNotUseCall = false` ran the call branch and its Activity got the contact's owner (not the
-  process starter); one with `true` ran the fallback.
-- `describe-business-process` reports such a value's `sourceElement` / `sourceElementParameter` /
-  `sourceColumn` beside the raw `value`, only when those names would re-apply to the identical value
-  (same spelling, a fitting type, a loaded column).
 - On the MODIFY path a condition takes the same name (`[#ReadContact.ResultEntity.DoNotUseCall#] == true`)
   under the contract `process-branch-conditions` names (ON THE MODIFY PATH); with any other contract,
   write the UId form there. A raw `expression` always takes the UId form: the read element's `uid` and
@@ -127,12 +121,9 @@ filter; see `process-access-rights`.
   misspelling, handing the correct token back). Under any other contract the UId form may be stored as
   written with NO load check (a column the read does not load arrives EMPTY): include the column in
   `readData.columns`, or omit the list, yourself.
-  In a raw `expression` mapping onto a process parameter, and in a Formula body, that UId token (in its
-  prefix-less form) was measured to deliver a Text (`Contact.Name`) and a Lookup (`Contact.Account`) column at run time
-  (Creatio 10.1.37, .NET Framework, MSSQL; CrtProcessBuilder 1.6.6.22; 2026-09-24).
+  The UId token also works in an `expression` mapping and a Formula body (`process-data-elements-details`).
   Describe again and require `kind: "conditional"` plus the exact text, then run with a matching and a
   non-matching record: a read-back proves authoring, NOT routing.
-  Verified for `Contact.DoNotUseCall` true/false on Creatio 10.1.585 (.NET 8, PostgreSQL), clio 8.1.0.131, CrtProcessBuilder 1.6.2.24; 2026-09-21.
 - A Send email BODY macro reaches a column with its own grammar, and a recipient reaches one through a
   process parameter; `process-send-email` owns both.
 
@@ -184,14 +175,12 @@ filter; see `process-access-rights`.
   object — `setFilter` never validates its `object` against the element, so a same-object filter set before the
   target survives; issue a `setFilter` in the same operations array when it cleared. Same rule on `readData`.
   MUST: that `setFilter` REPLACES the element's whole filter — read the current one back with
-  `describe-business-process` and send it complete, or the records this element updates silently widen.
-  `process-data-source-filters` owns the op and its read-back. `describe-business-process` reads the block back (`source` is null when the element's target object is set by a formula/mapping instead of a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
+  `describe-business-process mode=full` and send it complete, or the records this element updates silently widen.
+  `process-data-source-filters` owns the op and its read-back. `describe-business-process mode=full` reads the block back (`source` is null when the element's target object is set by a formula/mapping, not a constant — the block is still reported, and retargeting such an element needs an explicit `source`; constants in `value`; a
   `processParameter` / `sourceElement` binding decodes back to its NAME, so the block re-applies in another
   process — a decoded `sourceElement` still obeys the create-time rule that its element appear EARLIER in
   `elements[]`, and describe emits stored order, so a described block may need reordering before it re-creates.
-  A stored value the write path would refuse — a non-text or empty constant, or a binding that fails the type
-  check — reads back as its COLUMN ALONE rather than as something you cannot write back, and any other formula
-  comes back as its raw `[#…#]` in `expression`).
+  How a stored value the write path would refuse reads back: `process-data-elements-details`).
 
 == Delete data element (deleteData) ==
 - Owned by its own article: `process-delete-data`. A `deleteData` element permanently deletes every record

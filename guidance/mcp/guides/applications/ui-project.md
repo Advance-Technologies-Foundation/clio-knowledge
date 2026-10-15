@@ -23,12 +23,14 @@ Required arguments (wire-format names are camelCase)
 
 Optional arguments
 - `empty` (boolean, default `false`) — when `true`, scaffold the `ui-project-Empty` template instead of the default `ui-project` template. Use for a minimal shell when the standard template's sample components are unwanted.
-- `creatioVersion` (string, default empty) — pick a template variant matching a specific Creatio version. Omit to use the template provider's current default.
+- `creatioVersion` (string, default empty) — selects the template. Omitted: the current template (`ui-project` / `ui-project-Empty`). What a given version selects depends on the clio build, and the output tells the two apart:
+  - Output names the template (clio builds after 8.1.0.139 that map the version): `8.3.4` and later (10.x included) also select the current template. Below `8.3.4`: the closest legacy template `ui/8.0.3`, `ui/8.0.8` or `ui/8.0.10` (`8.3` is read as `8.3.0`). A version below `8.0.3` or an unparsable value is rejected before anything is written. The template line also names the `@creatio-devkit/common` range written to `package.json`; read it, do not assume the SDK line matches the requested Creatio version.
+  - Output says only `Done` (clio 8.1.0.139 and earlier): ANY given version is resolved against the legacy templates only, so `10.0.0` produces the `8.0.10` template (Angular 15, `@creatio-devkit/common ^0.808.0`). On those builds omit `creatioVersion` to get the current template, and check `package.json` after the call.
 
 Where the files land
 - `<workspaceDirectory>/projects/<projectName>/` — Angular project sources (with `<%projectName%>`, `<%vendorPrefix%>`, `<%distPath%>` placeholders already substituted in template-text files).
 - `<workspaceDirectory>/packages/<packageName>/` — clio package shell (created if missing).
-- Build output (configured in the template's tsconfig/angular.json) points the Angular `dist` folder at `packages/<packageName>/Files/src/js/<projectName>/` so that `push-workspace` later ships the built remote module along with the package.
+- Build output (`outputPath` in `angular.json`) points the bundle at `packages/<packageName>/Files/src/js/<projectName>/` so that `push-workspace` later ships the built remote module along with the package. The generated `.esproj` (`BuildOutputFolder`) and the current templates' npm `clean` script use the same folder. Exception in clio 8.1.0.139 and earlier: the legacy `8.0.8` / `8.0.10` empty templates write to `dist/<projectName>`, so the build never reaches the package — check `outputPath` before building.
 
 Typical workflow
 1. Confirm or pick the workspace directory. If it does not already exist as a clio workspace, call `create-workspace` first.

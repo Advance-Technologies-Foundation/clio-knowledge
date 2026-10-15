@@ -45,7 +45,8 @@ modify safety rule; read that first. Nothing here relaxes a rule stated there.
   process reacting to two triggers was unbuildable - although the shape is one the platform itself
   ships (`PublishDraftToArticle` carries two start signals). The change - several starts, the simple
   one still only once - needs CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131
-  or later; below either floor the second start is still refused, with the symptoms the core names.
+  or later; below either floor the second start is still refused: "the process has more than one
+  start event" at build, R3 in `validate-process-graph`.
 - File-design mode: on an FSD stand a built process is saved to the file system, so the designer sees
   it, yet it is not runtime-active until it is loaded FS->DB and published.
 - The readiness trap. Inferring "needs a compile" from a raw column NAME is the mistake the compile rule

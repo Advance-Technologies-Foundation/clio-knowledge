@@ -1,7 +1,9 @@
 clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
-Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+Pick the domain, then the row (get-guidance name=...). From clio 8.1.0.141, `get-guidance name=list` returns the
+catalog, one `name: purpose` line per guide, and an unknown name fails with the closest names (an older
+clio answers any unknown name, `list` included, with the bare `availableGuides` list).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
 `esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
 how a guide points at a rule it does not own. Other backticks are ordinary code (columns, ops,
@@ -66,6 +68,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
+  - a parameter or mapping that carries FILES (type File or FileCollection, a file collection bound at both
+    levels, one sub-process run per file) -> name=process-files (after name=process-parameters)
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - verify a stored formula or condition, match a formula refusal message to its fix, or a formula refusal
     about the CrtProcessBuilder version -> name=process-formulas-details (after name=process-formulas)
@@ -127,6 +131,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-modeling for the operation reference
   - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
     name=process-modeling-details
+  - the evidence or reasoning behind a rule, after the article itself: record trigger and Modify data ->
+    name=process-data-elements-details; Perform task -> name=process-perform-task-details; the version
+    model -> name=process-versions-details; ScriptTask -> name=process-script-task-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
   - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
     tracing on or off -> name=process-tracing
@@ -152,7 +159,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
-  - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
+  - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
@@ -165,6 +172,7 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Record-level permission model, stored grants versus runtime/dynamic access rules, or permission-extension interfaces -> name=record-permissions
 - Runtime record-permission implementation, activation and combination modes -> name=record-permission-extensions
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
+- Access rights (default record rules): turn record permissions on/off for an object, set which rights a NEW record gets by who created it ("records created by role X are visible to role Y"), or apply those rules to existing records -> name=default-record-rights
 - Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer; get-object-rights / set-object-rights), including making a portal section's object available to external users -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget

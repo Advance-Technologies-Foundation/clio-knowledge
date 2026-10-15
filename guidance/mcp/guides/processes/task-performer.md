@@ -33,7 +33,7 @@ create/addElement, or in place via setElement's
   an omitted contact defaults to the process starter.
 * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
   performer to open the page for) and stays untouched for user.
-* describe reads the block back top-level on the element (`performer`: type + the stored formula +
+* describe `mode=full` reads the block back top-level on the element (`performer`: type + the stored formula +
   roleDisplay) and it is re-appliable verbatim. This ELEMENT-LEVEL block is REFUSED on any element other
   than performTask — the retired CallUserTask by name (its runtime IGNORES the assignment). A sendEmail
   element has its own `email.performer`, which is a different field and is not refused.
