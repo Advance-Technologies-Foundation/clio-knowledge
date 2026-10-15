@@ -10,9 +10,9 @@ here. Split out of `process-modeling` because that article had no budget headroo
 both of these sections grow with every element the platform gains while the lifecycle around them does not.
 `process-modeling` keeps the lifecycle: the tools, the descriptor, the build recipe and the safety
 rules for editing an existing process.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
@@ -20,7 +20,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
-  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask).
+  `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask,
+  `changeAccessRights`->ChangeAdminRightsUserTask, owned by `process-access-rights`).
   A `readData` element is CONFIGURABLE via its `readData` block — source object, mode (`first` | `collection` |
   `count` | `aggregation`), result columns and
   sort (`first` / `collection` — refused for `count`/`aggregation`; REQUIRED for `collection`), a
@@ -134,7 +135,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
   four Read data modes DO build, see the catalog entry in `process-element-catalog-details`. A collection IS consumed now: a multi-instance
   Sub-process element iterates one, once per item (see the `callActivity` entry in `process-element-catalog-details`).
   Use the catalog in `process-element-catalog-details` to reason about a solution and to READ existing processes
-  (`describe-business-process`); don't expect to build those types in this increment.
+  (`describe-business-process mode=full`); don't expect to build those types in this increment.
 
 == Building from a data-id ==
 (The `data-id` strings in `process-element-catalog-details` are the vocabulary for `validate-process-graph` and for reasoning about /

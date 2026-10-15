@@ -3,9 +3,12 @@ clio MCP process-formulas-details guide — the designer's rendering, read-back,
 A details article of the process guide set, reached through `process-formulas`, which points here; a build starts at `process-digest`.
 This article is the authoritative owner of how the designer renders a stored formula and how a stored
 formula or condition reads back in `describe-business-process`, the verbatim table of formula refusals and
-their fixes, the per-request limit, and what an older CrtProcessBuilder package did with a formula. Split
-out of `process-formulas`, which keeps the formula vocabulary, the parameter reference syntax, the worked
-example, what the gate checks and what each refusal names, and the length bound; read that first.
+their fixes, the per-request limit, what an older CrtProcessBuilder package did with a formula, and the
+EVIDENCE and reasoning behind several `process-formulas` rules: the decimal suffix, the unrecognised macro
+family, the line-break check, the blank condition, and the flat-expression rule. Split out of
+`process-formulas`, which keeps the formula vocabulary, the parameter reference syntax, the worked
+example, what the gate checks and what each refusal names, the length bound, and every rule, refusal and
+prohibition the evidence here supports; read that first.
 
 The designer then displays the worked example of `process-formulas` as `RoundUp([#PriceParameter#])` — it
 resolves the UId back to the name, and it shows the designer's own spelling of the function. Both
@@ -13,7 +16,7 @@ directions of that conversion are the platform's; you write the C# spelling and 
 renders the friendly form.
 
 CONFIRM IT WITHOUT THE DESIGNER. No tool returns a designer link, so do not offer one — an invented URL is
-worse than none. The check you can actually run is `describe-business-process`: a stored formula reads back
+worse than none. The check you can actually run is `describe-business-process mode=full`: a stored formula reads back
 on the parameter as `source: "Script"` with your expression in `value` (NOT in an `expression` field — the
 describe contract has no such field on a parameter). `source: "ConstValue"` there means the formula was
 never stored as one and a constant went in instead. For a flow, the read-back is `kind: "conditional"` with
@@ -29,7 +32,8 @@ ON AN OLDER PACKAGE a bad formula is still refused, in the package's own words, 
 refuses MORE (a 256 KB per-request budget; from 1.4.0.32 an unrecognised macro family on a NEW condition),
 so a refusal from a pre-1.4.0.41 environment is not evidence the formula is bad. clio refuses
 `create-business-process` / `modify-business-process` below its enforced floor, which makes every "on an
-older package" fallback in this guide set history, not a branch: run `install-process-builder`, and never
+older package" fallback in this guide set history, not a branch: run `install-process-builder` once the user approves it
+(`core-rules`), and never
 re-send a call in an older dialect - clio refused it before it left.
 
 WHAT A REFUSAL LOOKS LIKE. Every row is a verbatim measurement, prefixed by `Process validation failed:`
@@ -56,6 +60,33 @@ checks first, naming the flow or field (measured, 1.6.6.77): a misspelling gets 
 reference to that item is written ... Send '[#…#]'`; an unknown process parameter `… which is not a
 parameter of this process`, an unknown element `… which this process does not have`; a column outside
 `readData.columns` gets `is not among the columns the element reads`.
+
+== Formulas — evidence ==
+
+The decimal suffix (`process-formulas` forbids writing `1.2m`). Measured: an
+agent that had read this article still wrote `1.2m`, because the suffix is documented further down only
+as something REFUSALS show you.
+
+An unrecognised macro family. Measured over a mapping onto a plain process parameter,
+`[#UsrUnknownDialect.Something#]`, `[#ColumnValue.Id#]` and `[#SamplingColumnValue.Id#]` are all three
+refused the same way, the last two being real platform families used in a context no converter covers; the rule itself is in `process-formulas`.
+A bare `Price` is refused naming it, while `[Price]` gives `Formula value error: Expression expected (at index 0).` Measured; the two are not interchangeable.
+
+The line-break check. A bare carriage return with no line feed is NOT refused: the platform checks for `\n`
+only, and CR is whitespace to the interpreter, so such a formula parses and stores on one line.
+
+A blank `condition`. clio refuses a blank condition itself, because the platform's gate would ACCEPT it.
+
+Keeping expressions flat (the rule and its consequence stay in `process-formulas`). The worker-process crash
+that a deeply nested expression causes was measured on one stand (core 10.0.731.0) on 2026-09-01. No
+CrtProcessBuilder version enters into it - the parser is the platform's - so treat it as one measurement,
+not a platform constant, and as a defect only the platform can close.
+
+Two things make "keep it flat" harder than it sounds, which is why the rule is written as a habit
+rather than a limit. One is that the depth you write is not the depth the parser sees
+(`process-formulas`). And clio's
+character bound is not a mitigation: it bounds LENGTH, and the dangerous expression is short and dense
+rather than long and flat.
 
 == Conditional flows and branch conditions ==
 

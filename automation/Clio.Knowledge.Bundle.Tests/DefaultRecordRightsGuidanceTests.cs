@@ -17,7 +17,7 @@ public sealed class DefaultRecordRightsGuidanceTests
     private const string GuidePath = "guidance/mcp/guides/operations/default-record-rights.md";
 
     private static readonly Regex VersionBoundary = new(
-        @"Version boundary: set-default-record-rights and apply-default-record-rights require clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){2,3}) or later",
+        @"Version boundary: set-default-record-rights and apply-default-record-rights require (clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){2,3}) or later|a clio release newer than \d+(\.\d+){2,3}[;.])",
         RegexOptions.Compiled);
 
     private static readonly Regex CitedGuide = new(@"get-guidance name=([a-z0-9][a-z0-9.-]*[a-z0-9])",

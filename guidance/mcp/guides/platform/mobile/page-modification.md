@@ -320,6 +320,14 @@ To add content inside the Scaffold:
              putting child elements in there is blocked, see AUTHORING CHILDREN above
 - Add child: { "operation": "insert", ..., "parentName": "Scaffold", "propertyName": "items" }
 
+"propertyName" is REQUIRED on every "insert" AND "move" that names a "parentName" — the web
+`propertyName` rule in `page-modification-components` applies unchanged. A "move" of a template
+element is no exception: { "operation": "move", "name": "AreaProfileContainer", "parentName":
+"FeedTabContainer", "propertyName": "items", "index": 0 }. Without "propertyName" the Mobile Page
+Designer canvas never loads. The Scaffold collection slots are "items", "actions" and "leading"
+(buttons do not belong in the last two, see BUTTON PLACEMENT below); "floatAction" holds one
+element and is not an insert target (see SINGLE-ELEMENT SLOTS above).
+
 viewConfigDiff INSERTS ADDRESS THE SLOT BY propertyName ONLY — never use "path" in a
 viewConfigDiff insert (e.g. NOT "path": ["tools"]; use "propertyName": "tools"). "path" is
 the addressing mechanism for viewModelConfigDiff / modelConfigDiff only; a viewConfigDiff
@@ -537,8 +545,10 @@ Evidence: schemas produced by the Mobile Designer on Creatio 8.3.4 / 10.0 for a 
 ─────────────────────────────────────────────────────────────
 ADAPTIVE BREAKPOINTS
 ─────────────────────────────────────────────────────────────
-The web→mobile conversion PROPOSES an adaptive layout for containers that group 2+ fields
-(stack on phone, 2 columns on tablet) — present it to the user, who can adjust or decline.
+The web→mobile conversion bakes an adaptive layout into every multi-column grid it converts
+(stack on phone; on tablet weighted columns from the web grid, and a grid whose rows differ in column
+structure becomes a one-column stack in which each multi-column band gets its own synthesized grid) — how it is
+reported is owned by the web-to-mobile-conversion guide.
 Apply this section whenever you want per-screen placement; otherwise rely on the static
 `columns` / `layoutConfig` values.
 
@@ -548,8 +558,12 @@ The mobile designer "Tablet portrait" / "Tablet landscape" preview switcher maps
 Adaptive layout has TWO sides — you must edit both for a real responsive layout:
 
 (1) CONTAINER side — `adaptive` on crt.GridContainer (sibling of `columns`).
-    Defines how many grid columns exist at each breakpoint.
-    Both string ("1fr 1fr") and array (["1fr","1fr"]) forms are accepted by the runtime.
+    Defines how many grid columns exist at each breakpoint, and how wide each one is.
+    Write `columns` as an ARRAY, one entry per column: the runtime reads a single string such as
+    "1fr 1fr" as ONE column. A positive integer "<n>fr" is that column's weight (["2fr","1fr"] is a 2:1
+    split); a bare number is a fixed width, and any other value ("minmax(...)", "1.5fr") gets weight 1.
+    In the designer, editing a breakpoint's column count resets that breakpoint, and toggling "Use
+    adaptive layout" resets the grid, to equal 1fr columns.
 
     {
       "operation": "merge",
@@ -564,7 +578,7 @@ Adaptive layout has TWO sides — you must edit both for a real responsive layou
     }
 
 (2) CHILD side — `layoutConfig.adaptive` on each child component (button, field, label, ...).
-    Defines the explicit grid cell the child occupies at each breakpoint.
+    Defines the column the child takes at each breakpoint and its order (`row`) within that column.
     Per breakpoint keys: `row` (1-based), `column` (1-based), `colSpan`, `rowSpan`.
 
     Without per-breakpoint `layoutConfig.adaptive`, children fall back to the static
@@ -621,12 +635,16 @@ Rules of thumb:
   - Define `adaptive` on the GridContainer AND `layoutConfig.adaptive` on every child
     that needs to move between breakpoints. Skipping either side breaks the layout.
   - Use 1-based `row` and `column` — the runtime reflows children by these per breakpoint
-    (one item per cell). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
+    (items sharing a column stack in `row` order). `colSpan` / `rowSpan` are serialized as 1 to match the mobile
     designer's format, but are NOT honored per-item by the runtime; do not rely on them to
-    span cells. To make an item wider, give the container fewer columns at that breakpoint.
+    span cells. To make an item wider, give the container fewer columns at that breakpoint, a
+    larger "<n>fr" weight to the item's column, or move rows with a different column structure into
+    a nested crt.GridContainer of their own (as the converter's `<container>_TabletBand<N>` does).
+  - Each column is an independent stack ordered by `row`: items that share a `row` in neighbouring
+    columns are NOT aligned to each other on the device, even though the designer preview aligns them.
   - Keep all three breakpoints (`small`, `medium`, `large`) populated even when two
-    share the same cell — the designer always serialises the full set and partial maps
-    may render as empty cells on the missing breakpoint.
+    share the same cell — the designer always serialises the full set and drops the weights of a
+    partial map (the runtime falls back to the next smaller breakpoint).
   - Adaptive child placement is supported inside crt.GridContainer. For crt.FlexContainer,
     reflow happens through the container's own `direction` / `wrap` properties, not
     through child `layoutConfig.adaptive`.
@@ -644,7 +662,7 @@ Default field container pattern:
     "name": "<GroupName>Container",
     "values": {
       "type": "crt.GridContainer",
-      "columns": "1fr",
+      "columns": ["1fr"],
       "color": "primary",
       "borderRadius": "medium",
       "padding": { "top": "medium", "right": "medium", "bottom": "medium", "left": "medium" },

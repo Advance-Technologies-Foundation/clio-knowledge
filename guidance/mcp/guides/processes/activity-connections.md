@@ -4,9 +4,9 @@ Part of the process guide set. A build starts at `process-digest`; open `process
 the card or this article sends you there.
 This article is the authoritative owner of the "Connected to" links of the Activity a task creates.
 Moved to `process-activity-connections-details`: the R1-R20 connection rules, the four stored shapes that read back but refuse on re-apply with the rest of what a described `connections[]` entry carries, and why a connection still writes when the registration step is skipped. Read it when you plan or validate a graph or a `validate-process-graph` finding names an R rule, when a connection you read back is refused on re-apply, or when the designer does not show a connection you registered.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Activity connections ("Connected to") ==
 - WHAT: which records the Activity a task creates is attached to — a contact, an account, and whatever else
@@ -49,7 +49,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
   on a clear entry is rejected. Clearing an already-unbound column is a no-op, not an error. It REPORTS
   what it cleared, and you need that: a cleared connection disappears from describe, so afterwards
   "cleared" and "never bound" are indistinguishable from the read-back alone.
-- READ IT BACK with `describe-business-process`: each element carries `connections[]`, every entry giving
+- READ IT BACK with `describe-business-process mode=full`: each element carries `connections[]`, every entry giving
   both the raw macro (`value`) and a decoded source in exactly the shape `setConnections` accepts, so you
   can feed it straight back — with FOUR exceptions that refuse on re-apply (listed in
   `process-activity-connections-details`), none of them values you wrote: they are what a designer, an

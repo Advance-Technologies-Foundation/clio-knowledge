@@ -4,8 +4,8 @@ Owns: the "Use record permissions" switch of an object and its DEFAULT record ru
 set-default-record-rights rules, and the rule that applying them to existing records is the user's decision
 (apply-default-record-rights).
 
-Version boundary: set-default-record-rights and apply-default-record-rights require clio <SET-DEFAULT-RECORD-RIGHTS-CLIO-VERSION-TBD>
-or later; from the same version get-object-rights also reports the record layer. On an older clio none of this
+Version boundary: set-default-record-rights and apply-default-record-rights require a clio release newer than
+8.1.0.140; from the same release get-object-rights also reports the record layer. On an older clio none of this
 exists: use the "Use record permissions" page of the Object permissions designer.
 
 ## Which layer

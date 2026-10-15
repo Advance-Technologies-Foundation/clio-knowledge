@@ -1,13 +1,14 @@
 clio MCP workplaces-details guide — deleting a workplace, removing rows and bindings, product-workplace moves, and the evidence behind the workplace rules
 
 A details article of the workplaces guide, reached through `workplaces`, which points here and is read first.
-This article is the authoritative owner of the ordered procedure for deleting a workplace and the
-recovery when the parent was deleted first; of removing one section placement, a role grant or the
+This article is the authoritative owner of the MANUAL placement recipe (create a workplace, grant a
+role, add or move a section by hand) for when `place-section-in-workplace` is unavailable or fails; of
+the ordered procedure for deleting a workplace and the recovery when the parent was deleted first; of removing one section placement, a role grant or the
 `My applications` bindings; of moving a section into a product-owned workplace; and of the evidence and
 reasoning behind the client-type, binding-column, `Position`, home-page and cache rules. Split out of
 `workplaces`, which keeps the three-table model, every confirmation gate, the placement-and-audience
-questions, the binding column sets and names, the create, grant, add and move recipes, and the rules
-that bite; read that first — every rule it states applies here too.
+questions, the placement tool, the binding column sets and names, and the rules that bite; read that
+first — every rule it states applies here too.
 
 ## Ask where things belong before you write — why
 - A NEW workplace named for the app is the recommendation when scaffolding because it keeps the
@@ -42,6 +43,46 @@ that bite; read that first — every rule it states applies here too.
   with it.
 - Each binding appears as a `Data/<Schema>_<Suffix>/data.json` folder in the package.
 
+## Manual placement — only when `place-section-in-workplace` is unavailable or fails
+Use this on a clio older than the tool, or when the tool fails for a reason its arguments cannot fix;
+the tool does all of it in one idempotent call otherwise. Every write here is the two-step live write
+plus binding of `workplaces` → Ship every change as a data binding, and every rule of `workplaces`
+(confirmation gates, the questions, the rules that bite) applies.
+- Client type: resolve it explicitly (`odata-read` `SysApplicationClientType`, match `Name` `Web` or
+  `Mobile`) and pass it in BOTH writes — the `odata-create` payload AND the binding row. Omitting it
+  on the LIVE row is survivable (WEB is filled in), on the BINDING row it fails silently (see Client
+  type — evidence). `Type` and `LoaderId` are likewise platform-set live and absent from a hand-built
+  binding: ship all three.
+- Get `Type`, `LoaderId` and the client-type GUID by READ-BACK: right after `odata-create`,
+  `odata-read` `SysWorkplace` for the new `Id` selecting `SysApplicationClientTypeId`, `TypeId`,
+  `LoaderId`, and pass them into the binding row as `SysApplicationClientType`, `Type`, `LoaderId`
+  (only FK columns drop the `Id` suffix; `LoaderId` is the real name and keeps it).
+- Create a workplace: `odata-read` `SysWorkplace` for the name FIRST — `Name` is NOT unique and
+  `create-data-binding-db` matches an existing row by `Name` before `Id`, keeping the FIRST match
+  (see Operations — create a workplace below). On a collision pick a distinct name or verify with
+  `read-data-binding-db` that the bound `Id` is yours. Then `odata-create` it (`Name`, `Position`,
+  client type), read it back, and `create-data-binding-db` with the FULL column set. To place it in
+  the switcher, create it then update `Position`. It has NO `SysAdminUnitInWorkplace` rows, so nobody
+  sees it: grant the agreed audience, or the workplace is dead.
+- Grant a role's access: resolve the role `Id` from `SysAdminUnit` by name — names are not unique;
+  if several match, disambiguate before writing — then `odata-create` a `SysAdminUnitInWorkplace` row
+  and bind it. Confirm the role list with the USER and start from the NARROWEST role; never default to
+  a blanket role such as `All employees`. Before you BIND it, check whether another package binds the
+  workplace (`SysPackageSchemaData` filtered by `SysSchema.Name = 'SysWorkplace'`): on a workplace you
+  do not own, keep the grant live-only (unbound) unless the user explicitly agrees to ship it
+  everywhere.
+- Add a section: resolve its `Id` from `SysModule` by code first — codes are NOT unique
+  (`Code = 'Contact'` returns two rows on a stock environment); disambiguate by the `SysModuleId` the
+  existing `SysModuleInWorkplace` rows use (the zero-GUID check does not catch a wrong-but-real
+  `SysModuleId`). Then `odata-create` the `SysModuleInWorkplace` row and bind it.
+- Move a section between workplaces (how an app leaves `My applications`): the TARGET `SysWorkplace`
+  row must already have its OWN `SysWorkplace` binding in the same package — bind it FIRST, or the
+  junction binding fails with "Data is not bound for connected object". Then `odata-update` the row's
+  `SysWorkplaceId` to the target with `confirm=true` and `upsert-data-binding-row-db` the junction
+  binding row (it keeps the `create-app` binding's `Position` — harmless, see above). A move is ONE row
+  changing parents — do not create a row in the target and leave the source row behind. Then grant the
+  audience on the target if it has none, and verify `My applications` no longer lists the section.
+
 ## Operations — create a workplace: what a name collision looks like
 `SysWorkplace`.`Name` is NOT unique — a stand can hold a web and a mobile workplace with the same
 name. `create-data-binding-db` matches an existing row by `Name` before `Id` and keeps the FIRST
@@ -55,8 +96,8 @@ a workplace with no client type (see Client type — evidence).
   so if more than one row matches, disambiguate before writing. Removing visibility changes who can
   see data: confirm it with the USER first (`workplaces` → Confirmation gates, which also covers
   `remove-data-binding-row-db` deleting the live row with no `confirm` gate).
-- Change a role: a remove of the old row plus a grant of the new one (grant per `workplaces` →
-  Operations, including the owning-package check before you bind it).
+- Change a role: a remove of the old row plus a grant of the new one (the tool, or Manual placement
+  below, including the owning-package check before you bind it).
 
 ## Operations — removing one section row
 Resolve the section `Id` from `SysModule` by code first — codes are NOT unique, and the zero-GUID rule

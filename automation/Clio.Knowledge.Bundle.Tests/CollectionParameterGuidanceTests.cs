@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -8,7 +9,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// collection gets a shape, the two refusals that keep a shapeless one from being created, and the re-mirror rule
 /// that the package enforces against the parameter's own tag and its live binding. Each claim below was wrong at
 /// some point in the story's review rounds, and a copy-edit that drops one puts an agent back on the path the
-/// server refuses.
+/// server refuses. ENG-95984 added the File and FileCollection types to the same list, and FileCollection is the one
+/// collection describe reports by an alias rather than by its platform type, so it is the documented exception to
+/// re-submitting a described collection only through its mirror.
 /// </summary>
 [TestFixture]
 public sealed class CollectionParameterGuidanceTests
@@ -22,13 +25,49 @@ public sealed class CollectionParameterGuidanceTests
         string guide = ReadGuide();
 
         guide.Should().Contain("Collection (a record collection, `CompositeObjectList`",
-            because: "an agent picks the type by name, and the platform type it maps to is what describe reports back");
+            because: "an agent picks the type by name, and the platform type it maps to is what describe reports back - "
+                + "for every collection but a process parameter of the FileCollection shape, which describe reports by "
+                + "that alias so the described type rebuilds the shape");
         guide.Should().Contain("whose direction defaults to `Out` unless you set one",
             because: "the Out default belongs to the TYPE, not to the mirror - a bare declared collection gets it too, "
                 + "and an agent that expects the Variable default writes a process parameter it did not mean to expose");
         guide.Should().Contain("the per-column\n  `itemProperties` are copied",
             because: "the shape is the contract a consumer binds to; a caller that thinks the mirror copies only the "
                 + "type ships a collection nothing can read");
+    }
+
+    [Test]
+    [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is the stated exception to re-submitting a collection only through typeFromElement.")]
+    public void Guide_ShouldListTheFileTypesAndTheFileCollectionException()
+    {
+        // Arrange
+        string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+
+        // Act
+        string[] supportedTypes = [.. guide.Split("Supported types:", 2)[^1].Split(" — ", 2)[0].Split(", ")];
+
+        // Assert
+        guide.Should().Contain("Guid/Lookup/Collection/File/FileCollection),",
+            because: "the parameter shape at the top of the article is the list an agent reads first");
+        supportedTypes.Should().Contain(type => type.Contains("File and FileCollection", StringComparison.Ordinal),
+            because: "the two types belong in the supported-types sentence itself, not in a note after it");
+        guide.Should().Contain("and, with a File-aware clio, File and FileCollection (one file and several, carried by "
+                + "reference: `process-files`)",
+            because: "the supported-types sentence is where an agent looks for a file type, and it must reach the guide "
+                + "that owns the two types");
+        guide.Should().Contain("other types (composite object / entity / binary / ...) are not supported yet, and "
+                + "binary never will be: a process parameter carries a file by reference (File).",
+            because: "a file is supported now, so the not-supported list names binary, which stays refused for good");
+        guide.Should().NotContain("entity / file /",
+            because: "the old list told agents a file could not be a process parameter");
+        guide.Should().Contain("never by re-typing the shape. The one exception, with a File-aware clio: a PROCESS "
+                + "parameter described as type `FileCollection` is re-sent as that type, which rebuilds its shape "
+                + "(`process-files`).",
+            because: "describe reports a process-level collection of the FileCollection shape by that alias, and the "
+                + "mirror refuses a file output, so re-typing is the only way to rebuild it");
+        guide.Should().Contain("with a File-aware clio `Name.Item` names an item of a collection parameter, as does "
+                + "`targetProcessParameter`",
+            because: "the dotted process-parameter path is part of the mapping grammar this article owns");
     }
 
     [Test]

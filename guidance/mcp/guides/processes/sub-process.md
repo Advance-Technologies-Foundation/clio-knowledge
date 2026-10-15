@@ -12,9 +12,9 @@ when the called process's own parameters change (their CAPTIONS on a re-sync are
 WHETHER a request calls for this element at all — the one-process default, per-item work, a repeated
 fragment, long phases — and which execution mode a per-item loop needs is owned by
 `process-sub-process-when`: read it before you plan one.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
 
 == Element: Sub-process (callActivity -> subProcess) ==
 - `callActivity` Sub-process — call ANOTHER process (the BPMN call activity) and run it once, passing
@@ -51,9 +51,10 @@ name anything, and `process-naming` itself only for a case the card does not cov
         the same. Captions are display text; nothing binds by them. Before CrtProcessBuilder 1.6.6.20 a callee
         saved through this toolset may still hand its callers the captions from before that save, and saving
         it again through this toolset only moves that lag. So if a caller still shows a caption the called
-        process no longer has after a re-sync, run `install-process-builder` - the install restarts the
-        application, which drops the stale cache - then re-sync. Only when the package cannot be updated, ask
-        the USER to open the called process in the process designer and save it (no change needed), then
+        process no longer has after a re-sync, ask the user to approve `install-process-builder`
+        (`core-rules`) - the install restarts the
+        application, which drops the stale cache - then re-sync. When the package cannot be updated, or the user postpones the
+        install, ask the USER to open the called process in the process designer and save it (no change needed), then
         re-sync; that cure lasts only until the next save of the callee through an older toolset.
       * REFUSALS, each stated as what to do instead: the named process is the one the element lives in, or
         another VERSION of it (self-reference — the runtime resolves the family's active version, so that
@@ -118,7 +119,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
         written, but the reply still carries the multi-instance notice that the element "was NOT
         re-synchronized as part of this edit and nothing was changed on it". That notice speaks for the
         parameter refresh the edit skipped, not for the flag — do not retry on it; read the flag back with
-        `describe-business-process` (`useBackgroundMode`). On such an element the flag does not do what it
+        `describe-business-process element=<name>` (`useBackgroundMode`). On such an element the flag does not do what it
         does elsewhere: the platform excludes a multi-instance sub-process from the element background
         token, and the flow generator reads the flag to build a different ITERATION flow. It buys no
         concurrency — the continuations are consumed under a per-process lock and serialise anyway: on a
@@ -134,10 +135,15 @@ name anything, and `process-naming` itself only for a case the card does not cov
         the source is `ResultCompositeObjectList` — the output whose data value type matches;
         `ResultEntityCollection` does NOT and is refused by the type check.
         MUST: send THIS mapping as well as the per-item ones below — the collection decides HOW MANY
-        iterations run, the dotted mappings only what each one receives. Without it nothing refuses or
-        warns: the build succeeds, describe shows `InputRecordCollection` with `source: "None"`, and at run
-        time the element runs ONE iteration with every per-item value empty (measured, CrtProcessBuilder
-        1.6.6.22: one task with no contact instead of one per contact).
+        iterations run, the dotted mappings only what each one receives. With a File-aware clio a per-item
+        mapping from an ITEM of a collection (`ResultCompositeObjectList.<Column>`, a FileCollection's `File`)
+        binds `InputRecordCollection` to that collection too, and one from a DIFFERENT collection than the
+        bound one is refused (rule P1, `process-files`); any other per-item source still needs this mapping,
+        and an older clio may bind only what you send, so send both. Without the collection bound, nothing
+        refuses or warns: the build succeeds, `describe-business-process element=<name>` shows
+        `InputRecordCollection` with `source: "None"`, and at run time the element runs ONE iteration with
+        every per-item value empty (measured, CrtProcessBuilder 1.6.6.22: one task with no contact instead of
+        one per contact).
       * ADDRESS A PER-ITEM VALUE with a DOTTED name, on both sides:
         `elementParameter: "InputRecordCollection.<CalleeParam>"` and, when the source is a column of
         another element's collection output, `sourceElementParameter: "ResultCompositeObjectList.<Column>"`.

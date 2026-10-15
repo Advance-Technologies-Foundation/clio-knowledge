@@ -1,7 +1,9 @@
 clio MCP routing map
 
 Map the task to the guide(s) you MUST read with get-guidance before planning or mutating.
-Pick the domain, then the row (get-guidance name=...; an unknown name returns availableGuides).
+Pick the domain, then the row (get-guidance name=...). From clio 8.1.0.141, `get-guidance name=list` returns the
+catalog, one `name: purpose` line per guide, and an unknown name fails with the closest names (an older
+clio answers any unknown name, `list` included, with the bare `availableGuides` list).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
 `esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
 how a guide points at a rule it does not own. Other backticks are ordinary code (columns, ops,
@@ -37,11 +39,10 @@ precondition kept next to the instruction it guards — names that guide as the 
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
   article, then the article of each element you use (the rows below)
-  - process-digest is the BUILD CARD: it restates, naming each owner, what every build and edit needs
-    from `process-modeling` (the build-lifecycle owner), `process-element-catalog`, `process-naming` and
-    `process-sub-process-when`. For an ordinary build do NOT open those four - read the card instead and
-    open one only when the card sends you there. After the card, read the ONE matching sub-guide per
-    element:
+  - process-digest is the BUILD CARD: the recipe, the D1/D2/D4 check, N1-N10 and the buildable types
+    in short (owners `process-modeling`, `process-sub-process-when`, `process-naming`,
+    `process-element-catalog`), and a table naming the ONE article per element. For an ordinary build do
+    NOT open those four; after the card read ONLY the articles of the elements you use:
   - which elements exist beyond the card's buildable list, and how a data-id maps to a build type ->
     name=process-element-catalog
     - the element catalog (data-id -> label -> purpose), to read an existing process or reason about an
@@ -54,7 +55,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - where the diagram puts an element, how connectors are routed, what `describe` reports about the
     picture, and the refusal an edit that would RE-DRAW a hand-arranged diagram gets ->
     name=process-diagram-layout
-  - name the process, its elements, or its parameters (the N1-N10 rules, restated in process-digest)
+  - name the process, its elements, or its parameters (the N1-N10 rules, in short on process-digest)
     -> name=process-naming when the card sends you there
   - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
@@ -67,6 +68,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     the relative-date macros, the signal-start restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
+  - a parameter or mapping that carries FILES (type File or FileCollection, a file collection bound at both
+    levels, one sub-process run per file) -> name=process-files (after name=process-parameters)
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - verify a stored formula or condition, match a formula refusal message to its fix, or a formula refusal
     about the CrtProcessBuilder version -> name=process-formulas-details (after name=process-formulas)
@@ -117,16 +120,20 @@ precondition kept next to the instruction it guards — names that guide as the 
     registered -> name=process-activity-connections-details
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading, which one the runtime runs, or launching ANY existing
-    process -> name=process-versions
+  - which VERSION of a process you are reading or which one runs, or editing or launching ANY existing
+    process -> name=process-versions first (a handed code is usually the family root, which does not
+    run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
+    re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
+    it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can
+    read or write data you did not create (then name=process-version-writes). Unsure: existing
   - save a change as a NEW version, take a restore point, make a version actual, or a rollback request ->
     name=process-version-writes; add name=process-versions for the model it assumes and
     name=process-modeling for the operation reference
-  - editing ANY existing process -> name=process-versions first: the code you were handed is usually the
-    family root, and editing it edits a graph the runtime does not run; add name=process-modeling for the
-    operation reference
   - the evidence or version history behind a build-lifecycle rule, or a stranded Sub-process mapping row ->
     name=process-modeling-details
+  - the evidence or reasoning behind a rule, after the article itself: record trigger and Modify data ->
+    name=process-data-elements-details; Perform task -> name=process-perform-task-details; the version
+    model -> name=process-versions-details; ScriptTask -> name=process-script-task-details
   - add a process ScriptTask, or write or repair its C# -> name=process-script-task; add name=esq-filters-backend when the code builds an EntitySchemaQuery
   - a process run failed or returned a wrong value and you need the VALUES its elements saw, or switch process
     tracing on or off -> name=process-tracing
@@ -142,6 +149,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
   - lookup seeding / data bindings -> name=data-bindings
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
+- Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
@@ -151,7 +159,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
-  - manage navigation workplaces (create/update/delete a workplace, grant/remove role visibility, add/remove/move sections) -> name=workplaces
+  - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion

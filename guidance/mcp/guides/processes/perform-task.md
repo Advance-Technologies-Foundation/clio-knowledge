@@ -7,9 +7,11 @@ and what the runtime writes back. Two of its settings are their own subject and 
 WHO performs the task is owned by `process-task-performer`, and HOW a category or priority value must be
 written -- and what silently degrades when it is written as a formula -- is owned by
 `process-task-category`. The ids, the two refusal texts and their remedy are here.
-Naming anything here? Every element, parameter and process code and caption is governed by N1-N10,
-owned by `process-naming` and restated in `process-digest` — read the card's N1-N10 block BEFORE you
-name anything, and `process-naming` itself only for a case the card does not cover.
+Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
+code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
+`process-naming` only to relabel something that already exists or to settle a name collision.
+Moved to `process-perform-task-details`: the reasoning and evidence behind several rules here. Read it
+when asked why a rule holds (approvals, the Call category row) or for its counts.
 
 == Element: Perform task (userTask / performTask -> ActivityUserTask) ==
 - WHAT IT IS: the "Perform task" element. Type alias `performTask` (equivalently `userTask` with
@@ -18,15 +20,13 @@ name anything, and `process-naming` itself only for a case the card does not cov
   inside an automated flow.
 - USE IT FOR: call a client, review a document, follow up, prepare paperwork, a manual check — any step where the
   process must wait for a person to act outside the process.
-- DO NOT USE IT FOR approvals. Creatio has a dedicated Approval element that creates an Approval record (not an
-  Activity), emails approver and author, supports delegation, and branches on the verdict. Perform task has no
-  approved/rejected semantics. Approval IS buildable — `process-approval` owns it; use that element rather
+- DO NOT USE IT FOR approvals. Approval IS buildable — `process-approval` owns it; use that element rather
   than emulating it with a task.
 - DO NOT EMULATE IT with an Add data of `Activity` records (Type = Task). Setting `Owner` or `OwnerRole` on the
   record does not make it one: it gets no binding to this process element and no completion listener, so the
   process runs straight past it, never learns that the task was completed or with which result, and cannot
   branch on that result (`ActivityUserTask`, `UserTaskActivityHandler`, `AddDataUserTask`). A task for each
-  record of a set is decided by D1 (restated in `process-digest`; owner `process-sub-process-when`).
+  record of a set is decided by D1 (owner `process-sub-process-when`, which also says what is NOT D1).
 - A "CALL TASK" IS THIS ELEMENT WITH A CALL CATEGORY, NOT THE CALL ELEMENT. `CallUserTask` (the "Call" entry
   in the list-user-tasks palette) is RETIRED: the product removed it from the designer palette and keeps the
   schema only for backward compatibility with old processes. NEVER build a new element with
@@ -45,11 +45,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
   Due date (= start + Duration), reminder, and any "Connected to" links. It appears in the performer's
   "Business process tasks" tab. The next element runs only after the activity is completed WITH A RESULT.
 - READ-BACK CAVEAT: describe-business-process shows an element parameter only when it is BOUND (or is a result).
-  A fresh Perform task therefore shows only 11 parameters out of the full set it actually carries (37 declared
-  on a stock environment). Absence from describe does NOT mean the parameter does not exist — every parameter
-  in the table below is settable by name with `addMapping`. The element's full set is also not a fixed number:
-  the platform can derive one extra connection parameter per Activity lookup column that exists on YOUR
-  environment, so a custom column adds a parameter.
+  Absence from describe does NOT mean the parameter does not exist — every parameter
+  in the table below is settable by name with `addMapping`.
 - IDENTIFY IT IN describe OUTPUT by `buildType: "usertask"` PLUS `userTaskName: "ActivityUserTask"`. It never
   reads back as `performTask`.
 
@@ -75,10 +72,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
                       03DF85BF-6B19-4DEA-8463-D5D49B80BB28 is ActivityType Task
                       (ConfigurationConstants.Activity.ActivityCategory.CallAsTask) and is the one to use;
                       E52BD583-7825-E011-8165-00155D043204 is ActivityType Call (the constant plainly named
-                      Call) and is the wrong row here. Why: a Perform task ALWAYS creates a Task-typed
-                      Activity, and the designer's own category dropdown filters ActivityCategory by
-                      ActivityType = Task, so the Call-typed row is one it never offers on this element —
-                      resolving "Call" by NAME is a coin flip whose wrong side no human designer can produce.
+                      Call) and is the wrong row here. Why: see `process-perform-task-details`.
                       Verify against the environment before trusting either id.
                       Set it as a bare record Guid in `value`. The route ships from CrtProcessBuilder
                       1.3.1.1, and a CURRENT clio additionally refuses any environment older than the
@@ -92,7 +86,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
                       lets the call through and the old package rejects it with "Value '...' is not valid for
                       parameter 'ActivityCategory' of type Lookup: a Lookup constant is a formula token, not a
                       plain value. Set it via a mapping 'expression' instead...". Either way: update the
-                      package (install-process-builder); do NOT fall back to the expression form (see
+                      package (install-process-builder, once the user approves it:
+                      `core-rules`); do NOT fall back to the expression form (see
                       `process-task-category`).
   ActivityPriority    Lookup -> ActivityPriority. Default = ab96fa02-7fe6-df11-971b-001d60e938c6 (Medium).
                       Same bare-Guid `value` route and same version story as ActivityCategory.
@@ -124,8 +119,7 @@ name anything, and `process-naming` itself only for a case the card does not cov
                       categories do, and a selected result makes the platform stop reading the formula.
                       Write the SELECTION instead — `flows[].results` on the build path,
                       `setFlowResults` on the modify path. A formula here is REFUSED, and the
-                      refusal lists the results the element offers. `process-activity-result-branches` owns the rule. Affects 337 of
-                      the 1 406 conditional flows shipped in 7.8.0. Say two things out loud, or the
+                      refusal lists the results the element offers. `process-activity-result-branches` owns the rule. Say two things out loud, or the
                       owner finds them alone: once a human opens that connector's card the designer marks
                       it invalid and every later save raises "Required fields of some elements are not
                       filled in" naming it (until then the schema saves clean), and a human cannot see or
@@ -178,8 +172,8 @@ name anything, and `process-naming` itself only for a case the card does not cov
    <- ActivityCategory CallAsTask. The two "Call" rows, which one to use and why resolving by NAME is a coin
       flip are stated once near the top of this article; do not restate them here.
 
-3) describe-business-process -> every parameter you bound now appears with its source and value.
-   The ones you did NOT bind stay hidden. That is expected; it is not a failure.
+3) describe-business-process mode=full -> every parameter you bound now appears with its source and value.
+   The ones you did NOT bind stay hidden: expected, not a failure.
 
 Variant — the same task ASSIGNED TO A TEAM ("the sales department calls the client"): drop the OwnerId
 mapping from step 2 and set the element-level performer instead (works inline in step 1's element too;
