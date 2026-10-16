@@ -476,7 +476,7 @@
     {
       "itemId": "app-modeling-details",
       "title": "Application modeling details",
-      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
+      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, redirecting an inherited lookup, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
       "topicId": "creatio.app-modeling-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/app-modeling-details",
