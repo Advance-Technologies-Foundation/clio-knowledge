@@ -31,6 +31,13 @@ first — every rule it states applies here too.
   so do not expect the workplace to render; the verified fact is the empty columns, not the rendering
   failure.
 
+## Portal workplace type — evidence
+NOT isolated: whether portal visibility REQUIRES `Type = Portal`, or whether a `General` workplace
+granted to `All external users` suffices, was not A/B-tested on a live stand (it needs a
+portal-licensed external user). Until it is, prefer a dedicated `Portal`-type workplace for a portal
+section — it is the platform's own categorization and the conservative choice — and treat the
+General-workplace shortcut as unverified. Record which one you used so the result can be checked.
+
 ## Ship every change as a data binding — why the column sets are what they are
 - `remove-data-binding-row-db` deletes the live record as well as unbinding it, so there is no way to
   un-ship a workplace row without deleting the workplace. That is why New apps start in a default

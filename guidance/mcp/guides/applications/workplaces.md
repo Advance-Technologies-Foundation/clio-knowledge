@@ -101,6 +101,27 @@ versa). The tool takes `client-type`; for the mobile flow read `mobile-page-modi
 binding row must carry `SysApplicationClientType`, `Type` and `LoaderId` — install supplies no
 defaults, so without them the workplace arrives empty (`workplaces-details`).
 
+## Portal / external-user workplaces
+A section that PORTAL (self-service / external) users must reach lives in a workplace granted to the
+EXTERNAL audience. The end-to-end portal-section flow (page binding, this placement, object-access
+grant) is owned by `portal-sections`; here are the two workplace specifics it relies on, on top of the
+internal flow above.
+- Audience — grant the workplace to the role **All external users**
+  (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`) through `roles` of `place-section-in-workplace`, as for an
+  internal role. A workplace no external role can see hides the section from portal navigation. Confirm
+  the audience with the user, and do NOT add `All external users` to a workplace that also carries
+  internal-only sections unless exposing those is intended.
+- Type — `SysWorkplace.Type` (the `SysWorkplaceType` lookup) has `Portal`
+  (`111c7ff1-8224-45b0-a24e-fcc983fc0c70`) and `Self-service` (`a77fefc0-227d-4e21-9992-a9a7ee889e21`)
+  in addition to `General` and Limited internal. `place-section-in-workplace` creates a workplace with
+  the platform's default `Type` and has no argument for it, so a PORTAL-type workplace is created BY
+  HAND (`workplaces-details`, manual placement) with `Type` set EXPLICITLY on `odata-create` AND carried
+  in the binding — a hand-built binding does not inherit it (same silent-empty trap as
+  `SysApplicationClientType`). Then place the section and grant the audience with the tool,
+  `mode=existing`.
+  Prefer a dedicated `Portal`-type workplace for a portal section; a `General` one granted to
+  `All external users` is unverified (`workplaces-details`, Portal workplace type — evidence).
+
 ## Ship every change as a data binding
 A write you make BY HAND is TWO steps: the live write (`odata-create` / `odata-update`), then a binding
 in the target package so it transfers — `create-data-binding-db` for the FIRST bind of a row (it
