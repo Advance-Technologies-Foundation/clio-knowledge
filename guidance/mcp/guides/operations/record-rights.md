@@ -2,6 +2,8 @@ clio MCP record-rights guide
 
 For choosing between stored grants and runtime rules, MUST first read `record-permissions`.
 This article owns direct persisted-grant tools; it does not calculate complete effective access.
+The rights a NEW record gets by default, the object's "Use record permissions" switch, and re-applying the
+default rules to existing records are `get-guidance name=default-record-rights`, not these tools.
 For runtime predicates and their interaction with stored grants, read `record-permission-extensions`.
 
 Manage record-level access rights (who may read/edit/delete a specific record, or a dashboard)

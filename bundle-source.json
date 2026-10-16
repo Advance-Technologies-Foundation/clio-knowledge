@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.149",
+  "libraryVersion": "1.15.157",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -155,6 +155,7 @@
       "product-telemetry",
       "record-rights",
       "object-rights",
+      "default-record-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
       "reference.atf-repository-dev.provider-and-context",
@@ -355,6 +356,7 @@
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/object-rights",
+      "docs://knowledge/com.creatio.clio/default-record-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
@@ -476,7 +478,7 @@
     {
       "itemId": "app-modeling-details",
       "title": "Application modeling details",
-      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
+      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, redirecting an inherited lookup, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
       "topicId": "creatio.app-modeling-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/app-modeling-details",
@@ -552,7 +554,7 @@
     {
       "itemId": "portal-sections",
       "title": "Portal sections",
-      "description": "Orchestration guide for registering a Freedom UI section so PORTAL (self-service / external) users can open it: sequences page binding, workplace placement, and object-access grant, all carrying the All external users audience, on the deny-by-default external-user model. The Freedom mechanism (SysEntitySchemaOperationRight), one object-rights grant per approved object, not the Classic SSP tables.",
+      "description": "Orchestration guide for registering a Freedom UI section so PORTAL (self-service / external) users can open it: sequences page binding, workplace placement, object-access grant, and the record-permissions check, all carrying the All external users audience, on the deny-by-default external-user model. The Freedom mechanism (SysEntitySchemaOperationRight), one object-rights grant per approved object, not the Classic SSP tables.",
       "topicId": "creatio.portal-sections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/portal-sections",
@@ -2065,6 +2067,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/operations/record-rights.md",
       "bundlePath": "resources/record-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "default-record-rights",
+      "title": "Default record rights",
+      "description": "Canonical MCP guidance for the RECORD layer of object permissions: the \"Use record permissions\" switch and the object's default record rules (records created by an author role get read/edit/delete levels for a grantee role), read with get-object-rights and changed one rule per call with set-default-record-rights. Owns the switch semantics (ON with no rule = every user sees only their own records; existing records get no rights until applied), the full-list save, and the rule that apply-default-record-rights runs only when the user decides.",
+      "topicId": "creatio.default-record-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/default-record-rights",
+      "sourcePath": "guidance/mcp/guides/operations/default-record-rights.md",
+      "bundlePath": "resources/default-record-rights.md",
       "mediaType": "text/plain"
     },
     {

@@ -51,6 +51,7 @@ public sealed class GuidanceMigrationTests
         "page-schema-translation",
         "object-rights",
         "m365-addin-customization",
+        "default-record-rights",
         "portal-sections"
     ];
 

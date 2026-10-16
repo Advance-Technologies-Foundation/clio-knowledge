@@ -54,6 +54,26 @@ public sealed class PortalSectionsGuidanceTests
         normalized.Should().Contain(rule, because: "the portal grant follows the set-object-rights contract");
     }
 
+    [TestCase("owner: `default-record-rights`", TestName = "PortalSections_ShouldRouteRecordAccessToDefaultRecordRights")]
+    [TestCase("a portal list with a step-4 grant can still be empty",
+        TestName = "PortalSections_ShouldStateThatRecordPermissionsCanHideRecords")]
+    [TestCase("A rule reaches NEW records only", TestName = "PortalSections_ShouldStateThatRulesReachNewRecordsOnly")]
+    [TestCase("`apply-default-record-rights` runs — the user's decision, never yours",
+        TestName = "PortalSections_ShouldLeaveTheApplyToTheUser")]
+    [TestCase("needs a clio newer than 8.1.0.140", TestName = "PortalSections_ShouldNameTheRecordStepVersionBoundary")]
+    [Description("The record step reads the record-permissions switch and rules for the portal audience and leaves rule writes and the apply to default-record-rights and the user.")]
+    public void PortalSections_ShouldCheckRecordAccess(string rule)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), PortalSectionsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().Contain(rule, because: "record permissions decide which records portal users reach after the object grant");
+    }
+
     [Test]
     [Description("No line of the article puts include-connected on a set-object-rights call: set changes one object per call and refuses the argument.")]
     public void PortalSections_ShouldNotPassIncludeConnectedToSetObjectRights()
