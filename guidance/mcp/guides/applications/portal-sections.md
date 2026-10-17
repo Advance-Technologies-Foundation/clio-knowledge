@@ -13,10 +13,16 @@ let internal roles bypass object permissions — see `entity-operation-access`).
 user is the opposite: they reach ONLY what an explicit grant gives them. So a section that "just works"
 for an employee is invisible to a portal user until BOTH its navigation AND its data access are granted
 to the portal audience. Every step below therefore carries the SAME audience — the platform role
-**All external users** (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`) — and a portal section is finished only
-when all of navigation, page binding, object access and — where the object uses record permissions —
-record access name that role. Miss one and the user sees an
-empty section, a blank list, or nothing in the menu, with no error.
+**All external users** (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`). A portal section is finished when its
+navigation, its page binding and its object access each name that role, and its record access is checked.
+Record access names the role only where an object's "Use record permissions" switch is ON and portal
+users must reach records they did not create (step 5); with the switch OFF there is nothing to add. Each
+miss fails with no error, and each has its own symptom:
+- no workplace granted to the role — the section is not in the menu;
+- no portal page binding — a record does not open on the portal page;
+- no object grant — the list and the fields are empty;
+- record permissions ON with no rule for the role — the user sees only the records they created, often
+  an empty list.
 
 ## Freedom, not Classic — do not write the SSP tables
 This flow is the FREEDOM UI portal mechanism. The Classic self-service-portal (SSP) artifacts —
