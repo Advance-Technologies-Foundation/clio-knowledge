@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Pins the guidance for the Process file element (<c>fileProcessing</c>, CrtProcessBuilder 1.6.6.100): its section of
+/// Pins the guidance for the Process file element (<c>fileProcessing</c>, CrtProcessBuilder 1.6.6.102): its section of
 /// <c>process-files</c>, which owns the block, and the buildable row and dedicated-type entry of
 /// <c>process-element-catalog</c>. The File and FileCollection parameter rules of the same guide are pinned by
 /// <see cref="FileParameterGuidanceTests"/>, which also holds the guide's size target.
@@ -25,7 +25,7 @@ public sealed class ProcessFileGuidanceTests
     private const string SectionHeading = "== The Process file element: `fileProcessing` ==";
 
     [Test]
-    [Description("The element section gates the type on the contract and the 1.6.6.100 floor, and says the group sent is the variant, with only the Object attachments group written in this version.")]
+    [Description("The element section gates the type on the contract and the 1.6.6.102 floor, and says the group sent is the variant, with only the Object attachments group written in this version.")]
     public void Section_ShouldGateTheElementAndMakeTheGroupTheVariant()
     {
         // Arrange
@@ -35,7 +35,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Build it only when the FULL contract (as above) names `fileProcessing` (alias `processFile`)",
-            "such a clio refuses a CrtProcessBuilder older than 1.6.6.100 up front",
+            "such a clio refuses a CrtProcessBuilder older than 1.6.6.102 up front",
             "The block carries ONE group, and the group IS the variant",
             "`attachments` (Object attachments) is the only one this version writes (`report` and `files` are refused).",
             "Omit `userTaskName`."
@@ -162,7 +162,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The catalog lists fileProcessing as buildable from 1.6.6.100, refuses only the Object schema on the generic route, keeps the Report and Process-parameter elements out of the generic route, and maps the data-id to the dedicated type among FIVE.")]
+    [Description("The catalog lists fileProcessing as buildable from 1.6.6.102, refuses only the Object schema on the generic route, keeps the Report and Process-parameter elements out of the generic route, and maps the data-id to the dedicated type among FIVE.")]
     public void Catalog_ShouldListTheElementAndItsDedicatedType()
     {
         // Arrange
@@ -171,7 +171,7 @@ public sealed class ProcessFileGuidanceTests
         // Act
         string[] clauses =
         [
-            "- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.100**:",
+            "- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.102**:",
             "this version builds the Object attachments variant (`attachments`) only - `process-files` owns the block.",
             "On the generic `userTask` route only `ObjectFileProcessingUserTask` is refused; the Generated report and Process parameter elements (`ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are not buildable yet; do not build them as a generic `userTask`.",
             "FIVE user tasks have their own dedicated build type",

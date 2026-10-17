@@ -124,7 +124,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 - `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C# the process must be COMPILED for -
   `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
   and the methods.
-- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.100**: reads a record's
+- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.102**: reads a record's
   attachments and saves them to another record's attachments or hands them to the following elements. Its
   `fileProcessing` block carries ONE group, which is the variant, and this version builds the Object attachments
   variant (`attachments`) only - `process-files` owns the block. On the generic `userTask` route only

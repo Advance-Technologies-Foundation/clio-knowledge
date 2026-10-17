@@ -142,7 +142,7 @@ do not re-send it unchanged.
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (alias `processFile`); such a clio refuses a
-CrtProcessBuilder older than 1.6.6.100 up front, as above. The block carries ONE group, and the group IS the
+CrtProcessBuilder older than 1.6.6.102 up front, as above. The block carries ONE group, and the group IS the
 variant: `attachments` (Object attachments) is the only one this version writes (`report` and `files` are refused).
 Omit `userTaskName`.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
