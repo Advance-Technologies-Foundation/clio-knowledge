@@ -65,10 +65,10 @@ assumes the earlier one exists.
 3. Place the section in a workplace the portal audience can see — owner: `workplaces`. The section needs
    a `SysModuleInWorkplace` row in a workplace whose `SysAdminUnitInWorkplace` grants **All external
    users**; a workplace no external role can see hides the section from the menu. `workplaces` owns
-   `SysWorkplace.Type` (the `SysWorkplaceType` lookup has a `Portal` value) and the three-table model —
-   go there for the placement (`place-section-in-workplace` with `All external users` in `roles`) and for
-   the by-hand creation of a `Portal`-type workplace, which the tool does not do. Confirm placement and audience with the user, as
-   that guide requires.
+   `SysWorkplace.Type` and the three-table model — go there for the placement
+   (`place-section-in-workplace` with `All external users` in `roles`). The tool cannot set a `Portal`
+   workplace type yet: use the workplace it creates, and do not build one by hand. Confirm
+   placement and audience with the user, as that guide requires.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`; read it before this step (it
    owns the row priority, the enable flag and the ask-before-write rule). Give `All external users`

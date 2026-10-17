@@ -34,9 +34,9 @@ first — every rule it states applies here too.
 ## Portal workplace type — evidence
 NOT isolated: whether portal visibility REQUIRES `Type = Portal`, or whether a `General` workplace
 granted to `All external users` suffices, was not A/B-tested on a live stand (it needs a
-portal-licensed external user). Until it is, prefer a dedicated `Portal`-type workplace for a portal
-section — it is the platform's own categorization and the conservative choice — and treat the
-General-workplace shortcut as unverified. Record which one you used so the result can be checked.
+portal-licensed external user). `place-section-in-workplace` cannot create a `Portal`-type workplace
+yet, so a portal section placed by the tool sits in a General-type workplace: treat that as
+unverified and record it so the result can be checked.
 
 ## Ship every change as a data binding — why the column sets are what they are
 - `remove-data-binding-row-db` deletes the live record as well as unbinding it, so there is no way to
