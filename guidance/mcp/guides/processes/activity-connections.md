@@ -132,6 +132,32 @@ code and caption; for a build, name from the Names block of `process-digest`, it
      creates the element parameter when the user task declares none.
   Do NOT offer, as a lighter alternative, writing the record's NAME into the activity's title or description.
   That produces no link — no Activities detail, no Timeline, no pre-filled fields — and the ask was a link.
+- AN OBJECT'S "CONNECTIONS" LIST IS A DIFFERENT WRITE. Two stores answer "is this column a connection of
+  object X", and writing the wrong one changes nothing the user asked about:
+  * the `EntityConnection` table — the registry rows step 2 writes. CrtProcessBuilder reads THIS TABLE
+    DIRECTLY: the `registered` flag on a described connection and the "no connection-registry row" refusal
+    both come from it. With the `UseConnectionsComponent` feature off, the server's connection list is the
+    table rows only;
+  * the object's `EntityConnections` add-on — the Object designer "Connections" node, one layer per package,
+    storing only the difference from the parent layers. With `UseConnectionsComponent` on, the server merges
+    it over the table rows, and that merged list is what the Freedom UI `crt.Connections` page component
+    shows. It is written by `update-entity-connections` and read by `get-entity-connections` (both
+    non-resident: `get-tool-contract` first, then `clio-run`; an older clio has neither — report the missing
+    capability rather than writing table rows instead).
+  Choose by what was asked:
+  * the object's Connections list — add, remove or reorder the lookups the Connections node and
+    `crt.Connections` offer -> `get-entity-connections`, change its `connections[].columnName` list, send
+    the FULL ordered list back to `update-entity-connections`. A column left out is REMOVED and `[]` removes
+    every connection; only lookup columns are accepted; never send an entry whose `columnName` is null. Do
+    NOT write an `EntityConnection` row for this: it is not what the Connections node stores, and the add-on
+    of a later package layer can still remove or reorder that column;
+  * an activity a process creates must be "Connected to" a record — the recipe above, step 2 included. An
+    add-on entry does NOT register it: the process builder never reads the add-on, so the connection stays
+    `registered: false`;
+  * `update-entity-connections` refuses because the list it reads does not reflect the add-on (the feature
+    is off, or the server's connections service is missing; `get-entity-connections` then carries a
+    warning) -> tell the user. Turning the feature on is their decision, and a table row is not a
+    substitute for the list they asked to change.
 - SUCCEEDS WITH A WARNING, two cases. A column that exists but has no connection-registry row IS written at
   run time, yet the connection is ignored by the record page's connections detail, Next Steps, email
   auto-relation rules and quick-add, and is normally absent from the designer's "Connected to" as well —

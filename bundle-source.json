@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.156",
+  "libraryVersion": "1.15.157",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1917,7 +1917,7 @@
     {
       "itemId": "process-activity-connections",
       "title": "Activity connections (\"Connected to\")",
-      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, and the upsert-by-column semantics. The R1-R20 connection-rule catalog, the four read-back shapes that refuse on re-apply and the skipped-registration mechanism moved to process-activity-connections-details.",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and which store a connection request needs: an EntityConnection registry row (what the process builder reads) or the object's EntityConnections add-on written by update-entity-connections (the Object designer Connections node, shown by crt.Connections). The R1-R20 connection-rule catalog, the four read-back shapes that refuse on re-apply and the skipped-registration mechanism moved to process-activity-connections-details.",
       "topicId": "creatio.process-activity-connections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
