@@ -1,8 +1,9 @@
-clio MCP process-files guide — File and FileCollection process parameters, and binding a collection at both levels
+clio MCP process-files guide — File and FileCollection parameters, two-level collection binding, the Process file element
 
 Scope
-This guide owns the `File` and `FileCollection` process parameter types and the two-level rules (P1, P2, P2-MI,
-P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through. Parameters and mappings
+This guide owns the `File` and `FileCollection` process parameter types, the two-level rules (P1, P2, P2-MI,
+P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through, and the Process file
+element's `fileProcessing` block (last section). Parameters and mappings
 in general: `process-parameters`; the Sub-process element: `process-sub-process`; formulas: `process-formulas`.
 Use only when the FULL create-business-process contract (`get-tool-contract` with
 `tool-names: ["create-business-process"]`, `detail: "full"`) names type File in `parameters[]`; the default reply is
@@ -12,8 +13,6 @@ supported and saves nothing, but it does NOT apply the rules below either: an ou
 and an item mapping binds the item alone, and a read-back there reports a file collection as `CompositeObjectList`.
 A File-aware clio refuses such an environment up front; the remedy it names is `install-process-builder`, which
 you run only after the user approves it (`core-rules`).
-Configuring the Process file element itself (which files it reads, where it saves them) is not part of this
-contract; one that is already in the process is mapped like any other element.
 
 == The two types ==
 - `File` — ONE file, carried by reference: the platform's FileLocator type. Aliases `file`, `filelocator` and
@@ -140,3 +139,41 @@ targets only.
 - `removeParameter` of a collection while a mapping reads one of its ITEMS (`process-parameters` owns that guard).
 Every refusal here and above names the mapping or parameter and the way forward, and saves nothing: fix the call,
 do not re-send it unchanged.
+
+== The Process file element: `fileProcessing` ==
+Build it only when the FULL contract (as above) names `fileProcessing` (alias `processFile`); such a clio refuses a
+CrtProcessBuilder older than 1.6.6.100 up front, as above. The block carries ONE group, and the group IS the
+variant: `attachments` (Object attachments) is the only one this version writes (`report` and `files` are refused).
+Omit `userTaskName`; `source` is only a check of the group.
+{"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
+"AccountParameter"}}, "saveTo": {"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
+- `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as the
+  designer derives it: an object with its own attachment object is `dedicated`; one without keeps its files in
+  SysFile, and SysFile storage is refused in this version, on either side and by `setFilter`.
+- `attachments.recordId`, WHOSE files: `value` (an existing record's id), `processParameter`, `sourceElement` +
+  `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.
+  An item of a collection is refused here and in `saveTo.recordId`: the element reads its record once per run. It is
+  the record scope of the element's filter; `setFilter` adds conditions and keeps it.
+- `attachments.numberOfRecords`: 1..5000; omitted, it defaults to 50 and does NOT read all.
+- `attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object. Never an array,
+  which arrives as no value (measured on CrtProcessBuilder 1.6.6.54 on 2026-10-02).
+- `action`: `saveToAttachments` copies the files to the `saveTo` record (`object`, `recordId`, optional
+  `linkColumn`); `useInProcess` hands them on. Omitted on create, it follows from `saveTo`. A constant
+  `saveTo.recordId` must be an existing record; a mapped one gets a notice (it may be empty at run time). After
+  saving, `ObjectFiles` points at the SOURCE files; the copies are only in `CreatedObjectFileIds` (measured on
+  CrtProcessBuilder 1.6.6.100 on 2026-10-15), so switching to `useInProcess` is refused while an element reads it.
+- A saving element with neither `recordId` nor a filter condition would copy arbitrary files: refused at the end of
+  the request (`failedOperationIndex: null`). Add either in the same request.
+- `setElement` merges member by member: an omitted member keeps its value; `{}` clears `attachments.recordId` or
+  `attachments.sort`; `saveTo.linkColumn: ""` derives the column again, never clears it. Another `attachments.object`
+  clears the stored filter and sort unless the block sends new ones; another `saveTo` object needs its `recordId`.
+- Read it back with `describe-business-process element=<name>` (or `mode=full`; on clio older than 8.1.0.141, omit
+  `mode`): effective values, and `issues` that still save. `source`, `storage`, `fileObject` and
+  `attachments.linkColumn` are identity checks: resent unchanged they pass, changed they are refused. Remove the
+  describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on every value source.
+- Most shipped uses end in a record's attachments; when a following element needs the files, map the element's
+  output collection (Recipes). Send email attachments and Creatio.ai calls are not buildable through this tool yet.
+- The saved copies: iterate `CreatedObjectFileIds` with a multi-instance sub-process (its callee takes a Guid), or
+  re-find them with Modify data on the target's attachment object, filtered on its link column = the target record
+  and `CreatedOn` `CurrentHour`. Hazards: that also matches files anyone added to the record within the hour, and
+  misses a copy made before the hour turned.

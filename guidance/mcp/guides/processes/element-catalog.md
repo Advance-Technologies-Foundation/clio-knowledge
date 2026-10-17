@@ -124,6 +124,13 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 - `scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**: C# the process must be COMPILED for -
   `process-script-task` owns when to use one, the question to ask BEFORE adding one, the block, the usings
   and the methods.
+- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.100**: reads a record's
+  attachments and saves them to another record's attachments or hands them to the following elements. Its
+  `fileProcessing` block carries ONE group, which is the variant, and this version builds the Object attachments
+  variant (`attachments`) only - `process-files` owns the block. On the generic `userTask` route only
+  `ObjectFileProcessingUserTask` is refused; the Generated report and Process parameter elements
+  (`ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are not buildable yet; do not build them as a
+  generic `userTask`.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,
@@ -142,14 +149,16 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
 `startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
-`readData`/ReadDataUserTask. FOUR user tasks have their own dedicated build type and must NOT be built as
+`readData`/ReadDataUserTask. FIVE user tasks have their own dedicated build type and must NOT be built as
 a generic `userTask`: `preconfiguredPageUserTask` -> `type:"preconfiguredPage"`, see
 `process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, so it could
 only build a page-less element that fails at run time, and it is REFUSED; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
 modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
 `process-send-email`, and `process-send-email-template` for the template mode;
-`openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; and `approvalUserTask` ->
-`type:"approval"`, see `process-approval`.)
+`openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; `approvalUserTask` ->
+`type:"approval"`, see `process-approval`; and `objectFileProcessingUserTask` -> `type:"fileProcessing"` with its
+`attachments` group, see `process-files` — the generic route carries no file source, record or target, and it is
+REFUSED.)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
