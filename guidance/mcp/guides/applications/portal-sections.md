@@ -14,15 +14,14 @@ user is the opposite: they reach ONLY what an explicit grant gives them. So a se
 for an employee is invisible to a portal user until BOTH its navigation AND its data access are granted
 to the portal audience. Every step below therefore carries the SAME audience — the platform role
 **All external users** (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`). A portal section is finished when its
-navigation, its page binding and its object access each name that role, and its record access is checked.
-Record access names the role only where an object's "Use record permissions" switch is ON and portal
-users must reach records they did not create (step 5); with the switch OFF there is nothing to add. Each
-miss fails with no error, and each has its own symptom:
+navigation, its page binding and its object access each name that role, and — on every object whose
+"Use record permissions" switch is ON — a default record rule names it as the AUTHOR, so that employees
+reach what portal users create (step 5). Each miss fails with no error, and each has its own symptom:
 - no workplace granted to the role — the section is not in the menu;
 - no portal page binding — a record does not open on the portal page;
 - no object grant — the list and the fields are empty;
-- record permissions ON with no rule for the role — the user sees only the records they created, often
-  an empty list.
+- record permissions ON with no rule authored by the role — employees do not see the records created on
+  the portal (only holders of "view any data" do), so nobody processes them.
 
 ## Freedom, not Classic — do not write the SSP tables
 This flow is the FREEDOM UI portal mechanism. The Classic self-service-portal (SSP) artifacts —
@@ -95,22 +94,34 @@ assumes the earlier one exists.
       an object that could not be read, or a connected set that could not be enumerated, is not verified
       — re-run the read; do not treat it as done.
 
-5. Check RECORD access on the objects granted in step 4 — owner: `default-record-rights`; read it before
+5. Set RECORD access on the objects granted in step 4 — owner: `default-record-rights`; read it before
    any write here (it owns the switch, the rules, the ask-before-write rule and the apply decision).
-   Operation permissions decide first, then record permissions: an object whose "Use record permissions"
-   switch is ON shows an external user only the records they created plus the records their rights
-   reach, so a portal list with a step-4 grant can still be empty, with no error.
+   With the "Use record permissions" switch ON, a record is reached only by its author, through its
+   record rights, or with "view any data". So the rules decide two directions, and they are separate:
+   - portal → employees: a record a portal user creates is reached by employees only through a rule with
+     AUTHOR `All external users` (or the portal role) and an internal GRANTEE — the OOTB `Account` rule
+     `All external users` → `All employees` is the model. Without it the portal works for the portal
+     user, and the business never sees what came in. This rule is REQUIRED on every object where portal
+     users create records.
+   - employees → portal: whether portal users see records they did not create is a business decision.
+     Seeing only their own records is often the intended behaviour; when they must see more, that is a
+     rule with GRANTEE `All external users`, or record rights per record / at runtime (below).
    1. READ the record part of the same `get-object-rights` read: `Record permissions: ON|OFF` and every
-      default rule. OFF: every external user with read reaches EVERY record — the disclosure of step 4;
-      keep the object OFF only if that is intended. ON: name to the user the rules whose GRANTEE is
-      `All external users` or a portal role; with none, portal users reach only their own records.
-   2. DECIDE with the user which records portal users must reach. Records created by a role (for
-      example employees' records) → a default rule with that AUTHOR and GRANTEE `All external users`
-      (`set-default-record-rights`, preview first, as that guide requires). Turning the switch ON to stop
-      every external user reaching every record is the same tool with `enable-record-permissions`, and
-      changes access for INTERNAL users too — say so. One particular record → `record-rights`.
-      Records filtered by the external user's account or contact need a runtime rule
-      (`record-permissions` is the entry point for choosing).
+      default rule. OFF: every user with read reaches EVERY record — every external user sees every
+      record, the disclosure of step 4; keep the object OFF only if that is intended. ON: name to the
+      user the rules whose AUTHOR or GRANTEE is `All external users` or a portal role.
+   2. DECIDE with the user, in this order:
+      - the INTERNAL role that must work with portal-created records (`All employees`, or a narrower
+        role such as a support line) → a rule with AUTHOR `All external users` and that GRANTEE, with the
+        operations they need (`read`, usually `edit`);
+      - whether portal users see only their own records; if not, a rule with GRANTEE
+        `All external users` and the AUTHOR whose records they must see. One particular record →
+        `record-rights`; records filtered by the external user's account or contact need a runtime rule
+        (`record-permissions` is the entry point for choosing).
+      Write each rule with `set-default-record-rights`, preview first, as that guide requires. Turning the
+      switch ON to stop every external user reaching every record is the same tool with
+      `enable-record-permissions` together with the first rule; it changes access for INTERNAL users too —
+      say so.
    3. A rule reaches NEW records only. Existing records keep their rights until
       `apply-default-record-rights` runs — the user's decision, never yours: tell them the record count
       from the result and ask, per `default-record-rights`.
@@ -131,8 +142,9 @@ in AFTER step 3 (a re-login, not F5). Evidence boundary: the grant mechanism (a
 confirmed at the `RightManagementService` layer; whether portal visibility additionally depends on the workplace's
 `SysWorkplace.Type` being `Portal` versus the audience grant alone was NOT isolated on a live stand
 (it needs a portal-licensed external user to A/B). Treat the external-user round-trip as the acceptance
-test, not the per-step read-backs: on an object with record permissions ON, check it with a record that
-user did NOT create, or own records alone hide a missing rule.
+test, not the per-step read-backs. On an object with record permissions ON, also check the other
+direction: an employee in the rule's grantee role, without "view any data", opens a record the portal
+user created — a system administrator sees it whatever the rules say, so they prove nothing.
 
 Version boundary: the object-rights step uses `set-object-rights` / `get-object-rights`, which ship in
 clio 8.1.0.138 and later; on an older clio, stop before step 4 and tell the user to update clio. The

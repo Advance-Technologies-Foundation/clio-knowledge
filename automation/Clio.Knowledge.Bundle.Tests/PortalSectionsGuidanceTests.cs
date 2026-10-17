@@ -55,13 +55,19 @@ public sealed class PortalSectionsGuidanceTests
     }
 
     [TestCase("owner: `default-record-rights`", TestName = "PortalSections_ShouldRouteRecordAccessToDefaultRecordRights")]
-    [TestCase("a portal list with a step-4 grant can still be empty",
-        TestName = "PortalSections_ShouldStateThatRecordPermissionsCanHideRecords")]
+    [TestCase("AUTHOR `All external users` (or the portal role) and an internal GRANTEE",
+        TestName = "PortalSections_ShouldRequireARuleAuthoredByThePortalAudience")]
+    [TestCase("This rule is REQUIRED on every object where portal users create records",
+        TestName = "PortalSections_ShouldMakeThePortalToEmployeesRuleRequired")]
+    [TestCase("whether portal users see records they did not create is a business decision",
+        TestName = "PortalSections_ShouldLeaveThePortalVisibilityOfOthersRecordsToTheUser")]
+    [TestCase("employees do not see the records created on the portal",
+        TestName = "PortalSections_ShouldNameTheSymptomOfAMissingAuthorRule")]
     [TestCase("A rule reaches NEW records only", TestName = "PortalSections_ShouldStateThatRulesReachNewRecordsOnly")]
     [TestCase("`apply-default-record-rights` runs — the user's decision, never yours",
         TestName = "PortalSections_ShouldLeaveTheApplyToTheUser")]
     [TestCase("needs a clio newer than 8.1.0.140", TestName = "PortalSections_ShouldNameTheRecordStepVersionBoundary")]
-    [Description("The record step reads the record-permissions switch and rules for the portal audience and leaves rule writes and the apply to default-record-rights and the user.")]
+    [Description("The record step requires a rule authored by the portal audience so employees reach portal-created records, leaves what portal users see of others' records to the user, and leaves the apply to the user.")]
     public void PortalSections_ShouldCheckRecordAccess(string rule)
     {
         // Arrange
