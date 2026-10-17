@@ -38,7 +38,7 @@ public sealed class ProcessFileGuidanceTests
             "such a clio refuses a CrtProcessBuilder older than 1.6.6.100 up front",
             "The block carries ONE group, and the group IS the variant",
             "`attachments` (Object attachments) is the only one this version writes (`report` and `files` are refused).",
-            "Omit `userTaskName`; `source` is only a check of the group."
+            "Omit `userTaskName`."
         ];
 
         // Assert
@@ -63,8 +63,8 @@ public sealed class ProcessFileGuidanceTests
             "`attachments.object`: the record object or its attachment object (`AccountFile`).",
             "SysFile storage is refused in this version, on either side and by `setFilter`.",
             "`value` (an existing record's id), `processParameter`, `sourceElement` + `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.",
-            "An item of a collection is refused here and in `saveTo.recordId`: the element reads its record once per run.",
-            "It is the record scope of the element's filter; `setFilter` adds conditions and keeps it.",
+            "A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per run.",
+            "It becomes the filter's record scope; `setFilter` adds conditions and keeps it.",
             "`attachments.numberOfRecords`: 1..5000; omitted, it defaults to 50 and does NOT read all.",
             "`attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object.",
             "Never an array, which arrives as no value (measured on CrtProcessBuilder 1.6.6.54 on 2026-10-02)."
@@ -115,9 +115,9 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "`setElement` merges member by member: an omitted member keeps its value; `{}` clears `attachments.recordId` or `attachments.sort`; `saveTo.linkColumn: \"\"` derives the column again, never clears it.",
-            "Another `attachments.object` clears the stored filter and sort unless the block sends new ones",
-            "Read it back with `describe-business-process element=<name>` (or `mode=full`; on clio older than 8.1.0.141, omit `mode`)",
-            "`source`, `storage`, `fileObject` and `attachments.linkColumn` are identity checks",
+            "Another `attachments.object` clears the stored filter and sort: resend `recordId`, `sort` and setFilter",
+            "Read it back with `describe-business-process element=<name>` or `mode=full` (on clio older than 8.1.0.141, omit `mode` and `element`).",
+            "`source`, `storage`, `fileObject` and `attachments.linkColumn` are identity checks, never settings: drop them (and `saveTo.linkColumn`) when changing the object.",
             "Remove the describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on every value source."
         ];
 
@@ -143,7 +143,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Most shipped uses end in a record's attachments; when a following element needs the files, map the element's output collection",
-            "Send email attachments and Creatio.ai calls are not buildable through this tool yet.",
+            "Send email attachments and Creatio.ai file inputs are not buildable through this tool yet.",
             "iterate `CreatedObjectFileIds` with a multi-instance sub-process",
             "re-find them with Modify data on the target's attachment object, filtered on its link column = the target record and `CreatedOn` `CurrentHour`.",
             "Hazards: that also matches files anyone added to the record within the hour, and misses a copy made before the hour turned."
