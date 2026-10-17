@@ -44,13 +44,19 @@ the USER before granting — a portal grant widens who can read business data.
 Each is owned by another guide; here is what the portal case adds. Do them in this order — a later step
 assumes the earlier one exists.
 
-1. The SECTION and its page must exist. A portal section is an ordinary Freedom section
-   (`SysModule`, Type=0) with a Freedom form page — there is no separate "portal section" object.
-   Create them the normal way (`app-modeling` for the section/app, `page-creation` for a page) if they
-   do not exist yet. Nothing here is portal-specific.
+1. The SECTION and a SEPARATE PORTAL PAGE must exist. A portal section is an ordinary Freedom section
+   (`SysModule`, Type=0) — there is no separate "portal section" object; create it the normal way
+   (`app-modeling`) if it does not exist yet. The page is portal-specific: ALWAYS design a dedicated
+   portal record page (`page-creation`), never reuse the employees' page. External users usually must
+   see a LIMITED part of the record — a few fields, no internal details, notes, history or system
+   fields — and the employees' page shows everything the object holds. When the request does not say
+   what the portal page shows, ASK THE USER before designing it: which fields and details external
+   users see, which of them they may edit, and whether they add records. That scope drives the rest:
+   step 2 binds this page, and step 4 grants only the objects it shows.
 
-2. Bind the page for the portal audience — owner: `related-page-binding`. Give the record page an
-   `All external users` entry so opening a record as a portal user resolves to the Freedom page:
+2. Bind the portal page for the portal audience — owner: `related-page-binding`. Give the section's
+   object an `All external users` entry so opening a record as a portal user resolves to the portal page
+   of step 1:
    `create-related-page-addon` with `--portal-default-page` (and `--portal-add-page` if adding differs).
    The audience is the entry's ROLE — `related-page-binding` owns the rule that the internal base
    default (`All employees`) is NOT a verified portal fallback, so an explicit portal entry is required.

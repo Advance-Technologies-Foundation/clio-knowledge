@@ -54,6 +54,9 @@ public sealed class PortalSectionsGuidanceTests
         normalized.Should().Contain(rule, because: "the portal grant follows the set-object-rights contract");
     }
 
+    [TestCase("ALWAYS design a dedicated portal record page", TestName = "PortalSections_ShouldDesignASeparatePortalPage")]
+    [TestCase("never reuse the employees' page", TestName = "PortalSections_ShouldNotReuseTheEmployeesPage")]
+    [TestCase("ASK THE USER before designing it", TestName = "PortalSections_ShouldAskThePortalPageScope")]
     [TestCase("owner: `default-record-rights`", TestName = "PortalSections_ShouldRouteRecordAccessToDefaultRecordRights")]
     [TestCase("AUTHOR `All external users` (or the portal role) and an internal GRANTEE",
         TestName = "PortalSections_ShouldRequireARuleAuthoredByThePortalAudience")]
