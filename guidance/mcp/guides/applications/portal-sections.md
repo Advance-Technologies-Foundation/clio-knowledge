@@ -134,8 +134,8 @@ assumes the earlier one exists.
 ## Fixed ids
 - `All external users` role (the portal audience, used in steps 2–5):
   `720b771c-e7a7-4f31-9cfb-52cd21c3739f`.
-Other ids (the `Portal` workplace type, `All employees`) are owned by the guides that use them —
-`workplaces` and `related-page-binding` / `object-rights` respectively.
+Other ids (`All employees`) are owned by the guides that use them — `related-page-binding` /
+`object-rights`.
 
 ## Verify — the real proof is an external user
 Reading each step back (the related-page entry, the `SysModuleInWorkplace` row, the object grant)
