@@ -101,6 +101,24 @@ public sealed class PortalSectionsGuidanceTests
     }
 
     [Test]
+    [Description("The '…any data' bypass is cited to object-rights, and object-rights states it.")]
+    public void PortalSections_ShouldCiteTheAnyDataBypassToAnOwnerThatStatesIt()
+    {
+        // Arrange
+        string guide = Normalized(File.ReadAllText(Path.Combine(Root(), PortalSectionsPath)));
+        string owner = Normalized(File.ReadAllText(Path.Combine(Root(), "guidance/mcp/guides/operations/object-rights.md")));
+
+        // Act
+        bool cites = guide.Contains("let internal roles bypass object permissions — see `object-rights`", StringComparison.Ordinal);
+        bool states = owner.Contains("Internal roles holding the \"…any data\" system operations reach records whatever the object rows say",
+            StringComparison.Ordinal);
+
+        // Assert
+        cites.Should().BeTrue(because: "the bypass claim must name the guide that owns it");
+        states.Should().BeTrue(because: "the cited owner must state the bypass rule");
+    }
+
+    [Test]
     [Description("No line of the article puts include-connected on a set-object-rights call: set changes one object per call and refuses the argument.")]
     public void PortalSections_ShouldNotPassIncludeConnectedToSetObjectRights()
     {

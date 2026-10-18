@@ -11,7 +11,7 @@ before the step; its rules are not restated here.
 
 ## The one rule that changes everything: external users are deny-by-default
 An INTERNAL user reaches an object unless something restricts them (the "…any data" system operations
-let internal roles bypass object permissions — see `entity-operation-access`). An EXTERNAL / portal
+let internal roles bypass object permissions — see `object-rights`). An EXTERNAL / portal
 user is the opposite: they reach ONLY what an explicit grant gives them. So a section that "just works"
 for an employee is invisible to a portal user until BOTH its navigation AND its data access are granted
 to the portal audience. Every step below therefore carries the SAME audience — the platform role
