@@ -4,10 +4,10 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Keeps the object-access step of portal-sections on the set-object-rights contract: one call per approved
-/// object, with its operations and the enable flag named, after the developer has seen what the whole external
-/// audience would get. The old step (a fan-out grant, a two-step confirmation code, a default grant of
-/// read/create/edit) calls arguments the tool now refuses before any read or write.
+/// Keeps portal-sections an orchestration card: it routes each step to its owner (object-rights,
+/// default-record-rights) and states only what the portal case adds, plus the preview-and-ask MUST that guards
+/// the destructive set-object-rights write. The owners' mechanics are pinned in the owners' own tests; restating
+/// them here is how the old object step drifted onto arguments the tool now refuses.
 /// </summary>
 [TestFixture]
 public sealed class PortalSectionsGuidanceTests
@@ -37,10 +37,12 @@ public sealed class PortalSectionsGuidanceTests
         TestName = "PortalSections_ShouldStateWhatTheWholeAudienceGets")]
     [TestCase("the object of each detail on the page, and the lookup object of each column shown",
         TestName = "PortalSections_ShouldListEveryObjectThePortalPagesShow")]
-    [TestCase("it does not list lookups the object inherits",
-        TestName = "PortalSections_ShouldStateWhatTheConnectedListingLeavesOut")]
-    [TestCase("with the facts of a preview of the planned call",
+    [TestCase("not only what `--include-connected` reports",
+        TestName = "PortalSections_ShouldNotLimitTheListToTheConnectedListing")]
+    [TestCase("you MUST preview each call and ASK THE USER before any write",
         TestName = "PortalSections_ShouldPreviewBeforeAsking")]
+    [TestCase("owner: `object-rights`. Follow its \"Give a role access to an object and its lookups\" flow",
+        TestName = "PortalSections_ShouldRouteObjectAccessToTheObjectRightsFlow")]
     [Description("The object-access step lists, asks, then grants each approved object in its own set-object-rights call, naming the operations and the enable flag.")]
     public void PortalSections_ShouldFollowTheObjectRightsContract(string rule)
     {
@@ -69,7 +71,8 @@ public sealed class PortalSectionsGuidanceTests
     [TestCase("A rule reaches NEW records only", TestName = "PortalSections_ShouldStateThatRulesReachNewRecordsOnly")]
     [TestCase("`apply-default-record-rights` runs — the user's decision, never yours",
         TestName = "PortalSections_ShouldLeaveTheApplyToTheUser")]
-    [TestCase("needs a clio newer than 8.1.0.140", TestName = "PortalSections_ShouldNameTheRecordStepVersionBoundary")]
+    [TestCase("need the clio releases named in `object-rights` and `default-record-rights`",
+        TestName = "PortalSections_ShouldRouteTheVersionBoundaryToTheOwners")]
     [Description("The record step requires a rule authored by the portal audience so employees reach portal-created records, leaves what portal users see of others' records to the user, and leaves the apply to the user.")]
     public void PortalSections_ShouldCheckRecordAccess(string rule)
     {
@@ -81,6 +84,20 @@ public sealed class PortalSectionsGuidanceTests
 
         // Assert
         normalized.Should().Contain(rule, because: "record permissions decide which records portal users reach after the object grant");
+    }
+
+    [Test]
+    [Description("The object-rights section the object step routes to still exists under the name the step cites.")]
+    public void PortalSections_ShouldRouteToAnExistingObjectRightsSection()
+    {
+        // Arrange
+        string owner = File.ReadAllText(Path.Combine(Root(), "guidance/mcp/guides/operations/object-rights.md"));
+
+        // Act
+        bool hasSection = owner.Contains("## Give a role access to an object and its lookups", StringComparison.Ordinal);
+
+        // Assert
+        hasSection.Should().BeTrue(because: "portal-sections step 4 sends the reader to that flow by name");
     }
 
     [Test]

@@ -1,11 +1,13 @@
 clio MCP portal sections guide
 
+Owns: the order of the portal-section steps and the single audience carried through them; the separate
+portal page and its scope question; which objects and which record rules the portal case needs; the
+external-user acceptance test.
+
 Register a Freedom UI SECTION so PORTAL (self-service / external) users can open it. This is an
 ORCHESTRATION guide: it does not add a new tool, it SEQUENCES five capabilities that already have
-owners, and it owns only what is specific to the portal case — the ordering, the single audience that
-must be carried through every step, and the deny-by-default rule that makes a portal section different
-from an ordinary one. Read `core-rules` first. Each step names the sibling guide that owns its
-mechanics; do not re-derive them here.
+owners. Read `core-rules` first. Each step names the sibling guide that owns its mechanics — read it
+before the step; its rules are not restated here.
 
 ## The one rule that changes everything: external users are deny-by-default
 An INTERNAL user reaches an object unless something restricts them (the "…any data" system operations
@@ -41,8 +43,8 @@ if it does not, the section is correctly configured and still seen by no one. Co
 the USER before granting — a portal grant widens who can read business data.
 
 ## The five steps (in order)
-Each is owned by another guide; here is what the portal case adds. Do them in this order — a later step
-assumes the earlier one exists.
+Each is owned by another guide; read the owner before its step — here is only what the portal case adds.
+Do them in this order — a later step assumes the earlier one exists.
 
 1. The SECTION and a SEPARATE PORTAL PAGE must exist. A portal section is an ordinary Freedom section
    (`SysModule`, Type=0) — there is no separate "portal section" object; create it the normal way
@@ -55,81 +57,46 @@ assumes the earlier one exists.
    step 2 binds this page, and step 4 grants only the objects it shows.
 
 2. Bind the portal page for the portal audience — owner: `related-page-binding`. Give the section's
-   object an `All external users` entry so opening a record as a portal user resolves to the portal page
-   of step 1:
-   `create-related-page-addon` with `--portal-default-page` (and `--portal-add-page` if adding differs).
-   The audience is the entry's ROLE — `related-page-binding` owns the rule that the internal base
-   default (`All employees`) is NOT a verified portal fallback, so an explicit portal entry is required.
-   The `is-ssp-default` flag is NOT how the portal audience is set; do not touch it.
+   object an explicit `All external users` entry that opens the portal page of step 1
+   (`create-related-page-addon` with `--portal-default-page`, and `--portal-add-page` if adding differs);
+   the internal base default does not cover portal users.
 
-3. Place the section in a workplace the portal audience can see — owner: `workplaces`. The section needs
-   a `SysModuleInWorkplace` row in a workplace whose `SysAdminUnitInWorkplace` grants **All external
-   users**; a workplace no external role can see hides the section from the menu. `workplaces` owns
-   `SysWorkplace.Type` and the three-table model — go there for the placement
-   (`place-section-in-workplace` with `All external users` in `roles`). Confirm placement and audience
-   with the user, as that guide requires.
+3. Place the section in a workplace the portal audience can see — owner: `workplaces`
+   (`place-section-in-workplace` with `All external users` in `roles`). A workplace no external role can
+   see hides the section from the menu. Confirm placement and audience with the user, as that guide
+   requires.
 
-4. Grant OBJECT access to the portal audience — owner: `object-rights`; read it before this step (it
-   owns the row priority, the enable flag and the ask-before-write rule). Give `All external users`
-   operation permissions on the section's object AND on every object the portal pages show, or the list
-   and fields are empty even though the section and page exist. Each object is its own grant, and each
-   grant is a disclosure decision, not a mechanical step:
-   1. LIST: build the list from what the portal pages show — the section's object, the object of each
-      detail on the page, and the lookup object of each column shown. `get-object-rights
-      --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --include-connected`
-      reads the object and its OWN lookups with their rows and writes nothing; it does not list lookups
-      the object inherits (for example `Created by` → `Contact`), detail objects or their lookups, so
-      read each of those by name. Security and system lookups (for example `SysAdminUnit`) are never
-      listed; granting one is a separate decision.
-   2. ASK THE USER before any write, per object, with the facts of a preview of the planned call
-      (`preview=true`): the operations, and whether operation permissions turn on (with the rows that
-      then start to decide). Say that EVERY external user gets that access, on EVERY record of the
-      object: a shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
-      reference data that must not become readable to every external user — leave such a lookup out and
-      handle it another way. Which RECORDS they reach is step 5, not this step.
-   3. GRANT each approved object in its own call: `set-object-rights --entity-schema-name <Object>
-      --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f --operations read`, plus
-      `--enable-operation-permissions` when the object is not administered yet — such an object is closed
-      to external users, so their first grant on it always needs the flag. `--operations` is required:
-      `read`, plus `create`/`edit` on the section's object only where external users genuinely author
-      records. The All employees row does not decide for external users, so it does not shadow this grant.
-   4. VERIFY with the same `get-object-rights … --include-connected` read. The tool reports facts, not a
-      verdict: every approved object must show an `All external users` row with at least `read`. An
-      object reported as `not administered by operation permissions` is still CLOSED to external users;
-      an object that could not be read, or a connected set that could not be enumerated, is not verified
-      — re-run the read; do not treat it as done.
+4. Grant OBJECT access to the portal audience — owner: `object-rights`. Follow its "Give a role access to
+   an object and its lookups" flow with grantee `All external users`; it owns the listing, the preview,
+   the grant and the verify. `set-object-rights` writes at once: you MUST preview each call and ASK THE
+   USER before any write, and GRANT each approved object in its own call, for example
+   `set-object-rights --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f
+   --operations read`. What the portal case adds:
+   - the list is what the portal pages show — the section's object, the object of each detail on the
+     page, and the lookup object of each column shown — not only what `--include-connected` reports;
+   - each grant is a disclosure decision: say that EVERY external user gets that access, on EVERY record
+     of the object. A shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
+     reference data — leave such a lookup out and handle it another way;
+   - `read`, plus `create`/`edit` on the section's object only where external users genuinely author
+     records. An object not administered by operation permissions is CLOSED to external users, so their
+     first grant on it carries `--enable-operation-permissions`;
+   - done when every approved object shows an `All external users` row with at least `read` in the
+     read-back. Which RECORDS they reach is step 5.
 
-5. Set RECORD access on the objects granted in step 4 — owner: `default-record-rights`; read it before
-   any write here (it owns the switch, the rules, the ask-before-write rule and the apply decision).
-   With the "Use record permissions" switch ON, a record is reached only by its author, through its
-   record rights, or with "view any data". So the rules decide two directions, and they are separate:
+5. Set RECORD access on the objects of step 4 — owner: `default-record-rights`; it owns the switch, the
+   rules, the preview and the apply. With "Use record permissions" OFF every external user with read
+   reaches EVERY record — keep it OFF only if that is intended. With it ON the rules decide two
+   directions, and they are separate decisions for the user:
    - portal → employees: a record a portal user creates is reached by employees only through a rule with
-     AUTHOR `All external users` (or the portal role) and an internal GRANTEE — the OOTB `Account` rule
-     `All external users` → `All employees` is the model. Without it the portal works for the portal
-     user, and the business never sees what came in. This rule is REQUIRED on every object where portal
-     users create records.
+     AUTHOR `All external users` (or the portal role) and an internal GRANTEE (`All employees`, or a
+     narrower role such as a support line), usually with `read` and `edit`. This rule is REQUIRED on
+     every object where portal users create records — without it the business never sees what came in.
    - employees → portal: whether portal users see records they did not create is a business decision.
      Seeing only their own records is often the intended behaviour; when they must see more, that is a
-     rule with GRANTEE `All external users`, or record rights per record / at runtime (below).
-   1. READ the record part of the same `get-object-rights` read: `Record permissions: ON|OFF` and every
-      default rule. OFF: every user with read reaches EVERY record — every external user sees every
-      record, the disclosure of step 4; keep the object OFF only if that is intended. ON: name to the
-      user the rules whose AUTHOR or GRANTEE is `All external users` or a portal role.
-   2. DECIDE with the user, in this order:
-      - the INTERNAL role that must work with portal-created records (`All employees`, or a narrower
-        role such as a support line) → a rule with AUTHOR `All external users` and that GRANTEE, with the
-        operations they need (`read`, usually `edit`);
-      - whether portal users see only their own records; if not, a rule with GRANTEE
-        `All external users` and the AUTHOR whose records they must see. One particular record →
-        `record-rights`; records filtered by the external user's account or contact need a runtime rule
-        (`record-permissions` is the entry point for choosing).
-      Write each rule with `set-default-record-rights`, preview first, as that guide requires. Turning the
-      switch ON to stop every external user reaching every record is the same tool with
-      `enable-record-permissions` together with the first rule; it changes access for INTERNAL users too —
-      say so.
-   3. A rule reaches NEW records only. Existing records keep their rights until
-      `apply-default-record-rights` runs — the user's decision, never yours: tell them the record count
-      from the result and ask, per `default-record-rights`.
+     rule with GRANTEE `All external users`, `record-rights` for one record, or a runtime rule
+     (`record-permissions` is the entry point for choosing).
+   A rule reaches NEW records only. Existing records keep their rights until
+   `apply-default-record-rights` runs — the user's decision, never yours.
 
 ## Fixed ids
 - `All external users` role (the portal audience, used in steps 2–5):
@@ -151,8 +118,5 @@ test, not the per-step read-backs. On an object with record permissions ON, also
 direction: an employee in the rule's grantee role, without "view any data", opens a record the portal
 user created — a system administrator sees it whatever the rules say, so they prove nothing.
 
-Version boundary: the object-rights step uses `set-object-rights` / `get-object-rights`, which ship in
-clio 8.1.0.138 and later; on an older clio, stop before step 4 and tell the user to update clio. The
-record step needs a clio newer than 8.1.0.140 (`set-default-record-rights`, and the record part of
-`get-object-rights`); on an older clio, use the "Use record permissions" page of the Object permissions
-designer for step 5.
+Version boundary: steps 4 and 5 need the clio releases named in `object-rights` and
+`default-record-rights`; on an older clio, stop before that step and use the fallback that guide names.
