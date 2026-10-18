@@ -113,11 +113,8 @@ internal flow above.
   internal-only sections unless exposing those is intended.
 - Type — `SysWorkplace.Type` (the `SysWorkplaceType` lookup) has `Portal`
   (`111c7ff1-8224-45b0-a24e-fcc983fc0c70`) and `Self-service` (`a77fefc0-227d-4e21-9992-a9a7ee889e21`)
-  in addition to `General` and Limited internal. `place-section-in-workplace` cannot set it yet: it
-  creates a workplace with the platform's default `Type` (General) and has no argument for it. Do NOT
-  create or retype a workplace by hand to get `Portal`. Place the section with the tool, and tell the
-  user that the workplace is General-type and that whether a portal needs a `Portal`-type workplace is
-  unverified (`workplaces-details`, Portal workplace type — evidence).
+  in addition to `General` and Limited internal. Whether a portal section needs a `Portal`-type
+  workplace is unverified (`workplaces-details`, Portal workplace type — evidence).
 
 ## Ship every change as a data binding
 A write you make BY HAND is TWO steps: the live write (`odata-create` / `odata-update`), then a binding
