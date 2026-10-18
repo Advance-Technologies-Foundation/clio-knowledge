@@ -154,4 +154,25 @@ public sealed class PortalSectionsGuidanceTests
         // Assert
         names.Should().BeFalse(because: $"'{retired}' is no longer a set-object-rights argument");
     }
+
+    [TestCase(PortalSectionsPath, "`workplace-type=portal`, clio 8.1.0.142 and later",
+        TestName = "PortalSections_ShouldPassThePortalWorkplaceType")]
+    [TestCase(PortalSectionsPath, "An existing workplace of another type is refused, never retyped",
+        TestName = "PortalSections_ShouldStateThatAnotherTypeIsRefused")]
+    [TestCase("guidance/mcp/guides/applications/workplaces.md", "pass `workplace-type=portal` to `place-section-in-workplace` (clio 8.1.0.142 and later)",
+        TestName = "Workplaces_ShouldNameTheWorkplaceTypeArgumentAndItsVersion")]
+    [TestCase("guidance/mcp/guides/applications/workplaces.md", "the tool never retypes a workplace",
+        TestName = "Workplaces_ShouldStateThatTheToolNeverRetypes")]
+    [Description("The portal placement names the workplace-type argument with its first clio version, and states that an existing workplace of another type is refused, never retyped.")]
+    public void PortalPlacement_ShouldNameTheWorkplaceType(string path, string rule)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), path));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().Contain(rule, because: "a portal section needs a Portal workplace, set by the tool, not by hand");
+    }
 }

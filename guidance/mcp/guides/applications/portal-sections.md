@@ -62,8 +62,9 @@ Do them in this order — a later step assumes the earlier one exists.
    the internal base default does not cover portal users.
 
 3. Place the section in a workplace the portal audience can see — owner: `workplaces`
-   (`place-section-in-workplace` with `All external users` in `roles`). A workplace no external role can
-   see hides the section from the menu. Confirm placement and audience with the user, as that guide
+   (`place-section-in-workplace` with `All external users` in `roles` and `workplace-type=portal`, clio
+   8.1.0.142 and later). A workplace no external role can see hides the section from the menu. An
+   existing workplace of another type is refused, never retyped — pick a Portal workplace or a new name. Confirm placement and audience with the user, as that guide
    requires.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`. Follow its "Give a role access to

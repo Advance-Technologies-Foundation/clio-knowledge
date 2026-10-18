@@ -15,7 +15,7 @@ To place a section in a workplace, grant roles, or move an app out of `My applic
 `place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio 8.1.0.141 and later).
 Arguments: `environment-name`, `section-code`, `workplace-name`, `package-name`, `roles`; optional
 `mode` `existing`|`new`|`none`, `client-type` (`web` default), `remove-from-my-applications` (default
-true), `position`. It resolves client type, section and roles, binds each row it owns (a
+true), `position`, `workplace-type` (clio 8.1.0.142 and later). It resolves client type, section and roles, binds each row it owns (a
 workplace with `Type` and `LoaderId`), never duplicates or deletes, and is safe to re-run. A move with no roles and
 `remove-from-my-applications=true` is refused (the section would become invisible). Relay `warnings`
 (a section code, workplace or role name shared by several rows is resolved by a rule or refused: say
@@ -32,6 +32,16 @@ user's workplace and roles. Do by hand only what it does not do — deletes and 
 workplace, `workplaces-details`), home pages (`home-page`, and the `My applications` check below), a
 rename or other workplace update (Operations), and a tool failure or an older clio
 (`workplaces-details`, manual placement).
+
+## Portal / external-user workplaces
+A workplace has a type (`SysWorkplaceType`): `general` (employees), `portal`, `self-service`. For
+external users (`All external users`, the portal audience) pass `workplace-type=portal` to
+`place-section-in-workplace` (clio 8.1.0.142 and later): a NEW workplace is created with that type,
+and the result's `workplace` block reports `type`. An EXISTING workplace of another type is refused
+before any write and the error names its current type — the tool never retypes a workplace; choose
+a workplace of the right type or a new name. Without the argument the type is neither set nor
+checked. An older clio has no `workplace-type`: say so to the user rather than retyping a workplace
+by hand.
 
 ## The three tables
 - `SysWorkplace` — the workplace: `Name`; `Position` (order in the switcher);
