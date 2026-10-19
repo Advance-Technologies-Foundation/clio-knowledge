@@ -130,7 +130,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   variant (`attachments`) only - `process-files` owns the block. On the generic `userTask` route only
   `ObjectFileProcessingUserTask` is refused; the Generated report and Process parameter elements
   (`ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are not buildable yet; do not build them as a
-  generic `userTask`.
+  generic `userTask` - the server does not refuse that route, and the element it saves is unconfigured.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,

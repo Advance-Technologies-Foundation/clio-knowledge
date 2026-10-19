@@ -34,7 +34,7 @@ public sealed class ProcessFileGuidanceTests
         // Act
         string[] clauses =
         [
-            "Build it only when the FULL contract (as above) names `fileProcessing` (alias `processFile`)",
+            "Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`)",
             "such a clio refuses a CrtProcessBuilder older than 1.6.6.102 up front",
             "The block carries ONE group, and the group IS the variant",
             "`attachments` (Object attachments) is the only one this version writes (`report` and `files` are refused).",
@@ -51,7 +51,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The attachments members: the object and its storage, the record scope and its sources, the 50-file default that does NOT read all, and the one-object sort with the measured array result.")]
+    [Description("The attachments members: the object and its storage, the record scope and its sources, setFilter replacing the other conditions around the scope, the 50-file create default that does NOT read all and a kept count on setElement, and the one-object sort.")]
     public void Section_ShouldStateTheAttachmentsMembers()
     {
         // Arrange
@@ -64,10 +64,9 @@ public sealed class ProcessFileGuidanceTests
             "SysFile storage is refused in this version, on either side and by `setFilter`.",
             "`value` (an existing record's id), `processParameter`, `sourceElement` + `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.",
             "A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per run.",
-            "It becomes the filter's record scope; `setFilter` adds conditions and keeps it.",
-            "`attachments.numberOfRecords`: 1..5000; omitted, it defaults to 50 and does NOT read all.",
-            "`attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object.",
-            "Never an array, which arrives as no value (measured on CrtProcessBuilder 1.6.6.54 on 2026-10-02)."
+            "It becomes the filter's record scope: `setFilter` REPLACES the other conditions and keeps the scope - send them all in one call, never the scope column.",
+            "`attachments.numberOfRecords`: 1..5000; omitted on create, it defaults to 50 and does NOT read all; omitted on `setElement`, the stored count stays.",
+            "`attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object. Never an array."
         ];
 
         // Assert
@@ -116,7 +115,7 @@ public sealed class ProcessFileGuidanceTests
         [
             "`setElement` merges member by member: an omitted member keeps its value; `{}` clears `attachments.recordId` or `attachments.sort`; `saveTo.linkColumn: \"\"` derives the column again, never clears it.",
             "Another `attachments.object` clears the stored filter and sort: resend `recordId`, `sort` and setFilter",
-            "Read it back with `describe-business-process element=<name>` or `mode=full` (on clio older than 8.1.0.141, omit `mode` and `element`).",
+            "Read it back with `describe-business-process element=<name>` or `mode=full`.",
             "`source`, `storage`, `fileObject` and `attachments.linkColumn` are identity checks, never settings: drop them (and `saveTo.linkColumn`) when changing the object.",
             "Remove the describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on every value source."
         ];
@@ -130,7 +129,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The endpoint sentence is the shipped pattern and the retired 'rarely an endpoint' appears nowhere; the consumers this tool cannot build are named as not buildable YET; the Modify data re-find carries its hazards.")]
+    [Description("The endpoint sentence is the shipped pattern and the retired 'rarely an endpoint' appears nowhere; the consumers this tool cannot build are named as not buildable YET; the copies are re-selected with Read data, never Modify data, and the re-find carries its hazards.")]
     public void Section_ShouldStateTheEndpointConsumersAndTheReFind()
     {
         // Arrange
@@ -142,10 +141,10 @@ public sealed class ProcessFileGuidanceTests
         // Act
         string[] clauses =
         [
-            "Most shipped uses end in a record's attachments; when a following element needs the files, map the element's output collection",
+            "Shipped product processes end in a record's attachments (via Generated report); when a following element needs the files, map the element's output collection",
             "Send email attachments and Creatio.ai file inputs are not buildable through this tool yet.",
             "iterate `CreatedObjectFileIds` with a multi-instance sub-process",
-            "re-find them with Modify data on the target's attachment object, filtered on its link column = the target record and `CreatedOn` `CurrentHour`.",
+            "re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column = the target record and `CreatedOn` `CurrentHour`.",
             "Hazards: that also matches files anyone added to the record within the hour, and misses a copy made before the hour turned."
         ];
 
@@ -173,7 +172,7 @@ public sealed class ProcessFileGuidanceTests
         [
             "- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.102**:",
             "this version builds the Object attachments variant (`attachments`) only - `process-files` owns the block.",
-            "On the generic `userTask` route only `ObjectFileProcessingUserTask` is refused; the Generated report and Process parameter elements (`ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are not buildable yet; do not build them as a generic `userTask`.",
+            "On the generic `userTask` route only `ObjectFileProcessingUserTask` is refused; the Generated report and Process parameter elements (`ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are not buildable yet; do not build them as a generic `userTask` - the server does not refuse that route, and the element it saves is unconfigured.",
             "FIVE user tasks have their own dedicated build type",
             "`objectFileProcessingUserTask` -> `type:\"fileProcessing\"` with its `attachments` group, see `process-files`"
         ];

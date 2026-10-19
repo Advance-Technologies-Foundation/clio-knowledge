@@ -141,10 +141,10 @@ Every refusal here and above names the mapping or parameter and the way forward,
 do not re-send it unchanged.
 
 == The Process file element: `fileProcessing` ==
-Build it only when the FULL contract (as above) names `fileProcessing` (alias `processFile`); such a clio refuses a
-CrtProcessBuilder older than 1.6.6.102 up front, as above. The block carries ONE group, and the group IS the
-variant: `attachments` (Object attachments) is the only one this version writes (`report` and `files` are refused).
-Omit `userTaskName`.
+Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
+refuses a CrtProcessBuilder older than 1.6.6.102 up front, as above. The block carries ONE group, and the group IS
+the variant: `attachments` (Object attachments) is the only one this version writes (`report` and `files` are
+refused). Omit `userTaskName`.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
 "AccountParameter"}}, "saveTo": {"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
 - `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as in the
@@ -153,10 +153,11 @@ Omit `userTaskName`.
 - `attachments.recordId`, WHOSE files: `value` (an existing record's id), `processParameter`, `sourceElement` +
   `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.
   A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per
-  run. It becomes the filter's record scope; `setFilter` adds conditions and keeps it.
-- `attachments.numberOfRecords`: 1..5000; omitted, it defaults to 50 and does NOT read all.
-- `attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object. Never an array,
-  which arrives as no value (measured on CrtProcessBuilder 1.6.6.54 on 2026-10-02).
+  run. It becomes the filter's record scope: `setFilter` REPLACES the other conditions and keeps the scope - send
+  them all in one call, never the scope column.
+- `attachments.numberOfRecords`: 1..5000; omitted on create, it defaults to 50 and does NOT read all; omitted on
+  `setElement`, the stored count stays.
+- `attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object. Never an array.
 - `action`: `saveToAttachments` copies the files to the `saveTo` record (`object`, `recordId`, optional
   `linkColumn`); `useInProcess` hands them on. Omitted on create, it follows from `saveTo`. A constant
   `saveTo.recordId` must be an existing record; a mapped one gets a notice (it may be empty at run time). After
@@ -165,17 +166,17 @@ Omit `userTaskName`.
 - A saving element with neither `recordId` nor a filter condition would copy arbitrary files: refused at the end of
   the request (`failedOperationIndex: null`).
 - `setElement` merges member by member: an omitted member keeps its value; `{}` clears `attachments.recordId` or
-  `attachments.sort`; `saveTo.linkColumn: ""` derives the column again, never clears it. Another
-  `attachments.object` clears the stored filter and sort: resend `recordId`, `sort` and setFilter; another `saveTo`
-  object needs its `recordId`.
-- Read it back with `describe-business-process element=<name>` or `mode=full` (on clio older than 8.1.0.141, omit
-  `mode` and `element`). `source`, `storage`, `fileObject` and `attachments.linkColumn` are identity checks, never
-  settings: drop them (and `saveTo.linkColumn`) when changing the object. Remove the describe-only
-  members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on every value source.
-- Most shipped uses end in a record's attachments; when a following element needs the files, map the element's
-  output collection (Recipes). Send email attachments and Creatio.ai file inputs are not buildable through this
-  tool yet.
+  `attachments.sort`; `saveTo.linkColumn: ""` derives the column again, never clears it. Another `attachments.object`
+  clears the stored filter and sort: resend `recordId`, `sort` and setFilter; another `saveTo` object needs its
+  `recordId`.
+- Read it back with `describe-business-process element=<name>` or `mode=full`. `source`, `storage`, `fileObject` and
+  `attachments.linkColumn` are identity checks, never settings: drop them (and `saveTo.linkColumn`) when changing the
+  object. Remove the describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on
+  every value source.
+- Shipped product processes end in a record's attachments (via Generated report); when a following element needs the
+  files, map the element's output collection (Recipes). Send email attachments and Creatio.ai file inputs are not
+  buildable through this tool yet.
 - The saved copies: iterate `CreatedObjectFileIds` with a multi-instance sub-process (its callee takes a Guid), or
-  re-find them with Modify data on the target's attachment object, filtered on its link column = the target record
-  and `CreatedOn` `CurrentHour`. Hazards: that also matches files anyone added to the record within the hour, and
-  misses a copy made before the hour turned.
+  re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column =
+  the target record and `CreatedOn` `CurrentHour`. Hazards: that also matches files anyone added to the record within
+  the hour, and misses a copy made before the hour turned.
