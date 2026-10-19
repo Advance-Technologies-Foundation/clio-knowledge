@@ -142,7 +142,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
     storing only the difference from the parent layers. With `UseConnectionsComponent` on, the server merges
     it over the table rows, and that merged list is what the Freedom UI `crt.Connections` page component
     shows. It is written by `update-entity-connections` and read by `get-entity-connections`, both present
-    from clio <CLIO-TBD> onward (non-resident: `get-tool-contract` first, then `clio-run`; an older clio has
+    from clio 8.1.0.142 onward (non-resident: `get-tool-contract` first, then `clio-run`; an older clio has
     neither — report the missing capability rather than writing table rows instead).
   Choose by what was asked:
   * the object's Connections list — add, remove or reorder the lookups the Connections node and
