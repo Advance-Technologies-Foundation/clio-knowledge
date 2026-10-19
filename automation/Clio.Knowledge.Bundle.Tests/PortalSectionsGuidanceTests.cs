@@ -31,8 +31,14 @@ public sealed class PortalSectionsGuidanceTests
     [TestCase("GRANT each approved object in its own call",
         TestName = "PortalSections_ShouldGrantEachApprovedObjectInItsOwnCall")]
     [TestCase("operations=read preview=true", TestName = "PortalSections_ShouldPreviewTheGrantWithItsOperations")]
-    [TestCase("then, on the user's yes, the same call without `preview`",
-        TestName = "PortalSections_ShouldWriteOnlyAfterTheUsersYes")]
+    [TestCase("The preview MUST carry exactly the arguments of the intended write, and the write is the previewed call minus `preview`, nothing else",
+        TestName = "PortalSections_ShouldWriteExactlyThePreviewedCall")]
+    [TestCase("operations=read enable-operation-permissions preview=true",
+        TestName = "PortalSections_ShouldPreviewTheEnablingGrantWithItsFlag")]
+    [TestCase("If a write is refused, or any argument changes after the user's yes, preview again and ask again",
+        TestName = "PortalSections_ShouldPreviewAgainWhenTheWriteChanges")]
+    [TestCase("grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f operations=read",
+        TestName = "PortalSections_ShouldGrantTheAllExternalUsersRole")]
     [TestCase("needs `enable-operation-permissions`, which turns operation permissions ON for EVERY role",
         TestName = "PortalSections_ShouldStateWhatTheEnableFlagChanges")]
     [TestCase("Before that write you MUST name to the user, from the preview, each stored row of an external role that starts to decide",
@@ -40,7 +46,7 @@ public sealed class PortalSectionsGuidanceTests
     [TestCase("internal users then keep only what the rows give them",
         TestName = "PortalSections_ShouldStateThatAnEnableNarrowsInternalAccess")]
     [TestCase("ASK THE USER before any write", TestName = "PortalSections_ShouldAskBeforeEachWrite")]
-    [TestCase("EVERY external user gets that access, on EVERY record of the object",
+    [TestCase("EVERY external user gets that access, on EVERY record and EVERY column of the object, whatever the portal page shows",
         TestName = "PortalSections_ShouldStateWhatTheWholeAudienceGets")]
     [TestCase("the object of each detail on the page, and the lookup object of each column shown",
         TestName = "PortalSections_ShouldListEveryObjectThePortalPagesShow")]
@@ -78,8 +84,10 @@ public sealed class PortalSectionsGuidanceTests
     [TestCase("A rule reaches NEW records only", TestName = "PortalSections_ShouldStateThatRulesReachNewRecordsOnly")]
     [TestCase("`apply-default-record-rights` runs — the user's decision, never yours",
         TestName = "PortalSections_ShouldLeaveTheApplyToTheUser")]
-    [TestCase("steps 3, 4 and 5 need the clio releases named in `workplaces` (clio 8.1.0.141 and later for `place-section-in-workplace`, a later release for its `workplace-type`), `object-rights` and `default-record-rights`",
-        TestName = "PortalSections_ShouldRouteTheVersionBoundaryToTheOwners")]
+    [TestCase("Keeping it OFF is the user's decision, never yours: ASK THE USER, naming that consequence",
+        TestName = "PortalSections_ShouldLeaveRecordPermissionsOffToTheUser")]
+    [TestCase("the record tools need a clio newer than 8.1.0.140",
+        TestName = "PortalSections_ShouldNameTheRecordStepVersionBoundary")]
     [Description("The record step requires a rule authored by the portal audience so employees reach portal-created records, leaves what portal users see of others' records to the user, and leaves the apply to the user.")]
     public void PortalSections_ShouldCheckRecordAccess(string rule)
     {
@@ -91,6 +99,53 @@ public sealed class PortalSectionsGuidanceTests
 
         // Assert
         normalized.Should().Contain(rule, because: "record permissions decide which records portal users reach after the object grant");
+    }
+
+    [TestCase("The page is a LAYOUT, not an access boundary", TestName = "PortalSections_ShouldNotPresentThePageAsAnAccessBoundary")]
+    [TestCase("Hiding a field from them needs column permissions, which this flow does not set",
+        TestName = "PortalSections_ShouldStateThatColumnsNeedColumnPermissions")]
+    [TestCase("The binding is per OBJECT and audience, not per section",
+        TestName = "PortalSections_ShouldStateThatThePortalBindingIsPerObject")]
+    [TestCase("reuse it, or ASK THE USER before replacing it", TestName = "PortalSections_ShouldNotReplaceAnExistingPortalPageSilently")]
+    [TestCase("must NOT be written for a Freedom portal section", TestName = "PortalSections_ShouldNotWriteTheClassicSspTables")]
+    [TestCase("`place-section-in-workplace` needs clio 8.1.0.141 and later",
+        TestName = "PortalSections_ShouldNameTheWorkplaceStepVersionBoundary")]
+    [TestCase("`set-object-rights` / `get-object-rights` need a clio newer than 8.1.0.137",
+        TestName = "PortalSections_ShouldNameTheObjectStepVersionBoundary")]
+    [Description("The page, binding and placement steps state what the portal case adds: the page is no access boundary, the binding is per object, the Classic SSP tables stay untouched, and each step names its clio version.")]
+    public void PortalSections_ShouldStateThePortalScopeOfEachStep(string rule)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), PortalSectionsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().Contain(rule, because: "the portal case adds this rule to the step its owner describes");
+    }
+
+    [TestCase("guidance/mcp/guides/related-data/page-binding.md", "--portal-default-page",
+        TestName = "PortalSections_OwnerShouldStillNameThePortalDefaultPageFlag")]
+    [TestCase("guidance/mcp/guides/related-data/page-binding.md", "--portal-add-page",
+        TestName = "PortalSections_OwnerShouldStillNameThePortalAddPageFlag")]
+    [TestCase("guidance/mcp/guides/applications/workplaces.md", "`place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio 8.1.0.141 and later)",
+        TestName = "PortalSections_OwnerShouldStillStateTheWorkplaceVersion")]
+    [TestCase("guidance/mcp/guides/operations/object-rights.md", "get-object-rights and set-object-rights require a clio release newer than 8.1.0.137",
+        TestName = "PortalSections_OwnerShouldStillStateTheObjectRightsVersion")]
+    [TestCase("guidance/mcp/guides/operations/default-record-rights.md", "require a clio release newer than 8.1.0.140",
+        TestName = "PortalSections_OwnerShouldStillStateTheRecordRightsVersion")]
+    [Description("Every owner fact portal-sections restates (flags, tool names, versions) is still stated by its owner, so a change there fails the build instead of leaving portal-sections stale.")]
+    public void PortalSections_RestatedOwnerFactShouldStillHoldInItsOwner(string ownerPath, string fact)
+    {
+        // Arrange
+        string owner = File.ReadAllText(Path.Combine(Root(), ownerPath));
+
+        // Act
+        string normalized = Normalized(owner);
+
+        // Assert
+        normalized.Should().Contain(fact, because: "portal-sections restates this fact from its owner");
     }
 
     [Test]
@@ -181,6 +236,8 @@ public sealed class PortalSectionsGuidanceTests
         normalized.Should().MatchRegex(
             @"`workplace-type=portal`, clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) and later",
             because: "a portal section needs a Portal workplace, set by the tool, and an older clio does not know the argument");
+        normalized.Should().Contain("On a clio that has the tool but not `workplace-type`, do what `workplaces` says for that case — do not fall back to manual placement.",
+            because: "a clio with the tool but without the argument still uses the tool, as workplaces says; manual placement would be a regression");
         normalized.Should().NotContain("never retyped",
             because: "the refusal of another workplace type is owned by workplaces; a copy here drifts from its owner");
     }
