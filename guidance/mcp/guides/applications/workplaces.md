@@ -31,8 +31,9 @@ is NOT verified: surface that to the user and prefer a workplace your own packag
 It takes no `confirm`, and it does not choose for you: ask the questions below FIRST, then pass the
 user's workplace and roles. Do by hand only what it does not do — deletes and removals (Deleting a
 workplace, `workplaces-details`), home pages (`home-page`, and the `My applications` check below), a
-rename or other workplace update (Operations), and a tool failure or an older clio
-(`workplaces-details`, manual placement).
+rename or other workplace update (Operations), and a tool failure or a clio without the tool
+(`workplaces-details`, manual placement) — except a missing or rejected `workplace-type` for an
+external-user workplace (Portal / external-user workplaces below).
 
 ## Portal / external-user workplaces
 A workplace has a type (`SysWorkplaceType`): `general` (employees), `portal`, `self-service`. For
@@ -41,8 +42,12 @@ external users (`All external users`, the portal audience) pass `workplace-type=
 with that type, and the result's `workplace` block reports `type`. An EXISTING workplace of another
 type is refused before any write and the error names its current type — the tool never retypes a
 workplace; choose a workplace of the right type or a new name. Without the argument the type is
-neither set nor checked. An older clio has no `workplace-type`: say so to the user rather than
-retyping a workplace by hand.
+neither set nor checked. A clio that has `place-section-in-workplace` but not `workplace-type`
+(8.1.0.141 and later, before <CLIO-WORKPLACE-TYPE-TBD>: `get-tool-contract` does not list it, or
+the call rejects it): for an external-user workplace, stop and ask the user to update clio to
+<CLIO-WORKPLACE-TYPE-TBD> or later — do not place the section without the type. A rejected
+`workplace-type` is not the tool failure that leads to manual placement: never place the section or
+retype a workplace by hand instead.
 
 ## The three tables
 - `SysWorkplace` — the workplace: `Name`; `Position` (order in the switcher);
