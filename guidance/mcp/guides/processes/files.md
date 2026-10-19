@@ -160,9 +160,10 @@ refused). Omit `userTaskName`.
 - `attachments.sort`: ONE object `{column, direction}`, a direct column of the attachment object. Never an array.
 - `action`: `saveToAttachments` copies the files to the `saveTo` record (`object`, `recordId`, optional
   `linkColumn`); `useInProcess` hands them on. Omitted on create, it follows from `saveTo`. A constant
-  `saveTo.recordId` must be an existing record; a mapped one gets a notice (it may be empty at run time). After
-  saving, `ObjectFiles` points at the SOURCE files; the copies are only in `CreatedObjectFileIds` (measured on
-  CrtProcessBuilder 1.6.6.100 on 2026-10-15), so switching to `useInProcess` is refused while an element reads it.
+  `saveTo.recordId` must be an existing record; a mapped one gets a notice. After saving, `ObjectFiles` points at the
+  SOURCE files; the copies are only in `CreatedObjectFileIds` (measured on 1.6.6.100, 2026-10-15), so switching to
+  `useInProcess`, or moving `attachments.object` or `saveTo.object` to another object, is refused while an element
+  reads it.
 - A saving element with neither `recordId` nor a filter condition would copy arbitrary files: refused at the end of
   the request (`failedOperationIndex: null`).
 - `setElement` merges member by member: an omitted member keeps its value; `{}` clears `attachments.recordId` or
@@ -173,10 +174,10 @@ refused). Omit `userTaskName`.
   `attachments.linkColumn` are identity checks, never settings: drop them (and `saveTo.linkColumn`) when changing the
   object. Remove the describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on
   every value source.
-- Shipped product processes end in a record's attachments (via Generated report); when a following element needs the
-  files, map the element's output collection (Recipes). Send email attachments and Creatio.ai file inputs are not
-  buildable through this tool yet.
+- Shipped product processes end in a record's attachments (Generated report); when a following element needs the
+  files, map its output collection (Recipes). Send email attachments and Creatio.ai file inputs are not buildable
+  here yet.
 - The saved copies: iterate `CreatedObjectFileIds` with a multi-instance sub-process (its callee takes a Guid), or
   re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column =
-  the target record and `CreatedOn` `CurrentHour`. Hazards: that also matches files anyone added to the record within
-  the hour, and misses a copy made before the hour turned.
+  the target record and `CreatedOn` `CurrentHour`. Hazards: it also matches others' files from that hour, and misses
+  a copy made before the hour turned.

@@ -89,9 +89,9 @@ public sealed class ProcessFileGuidanceTests
         [
             "`action`: `saveToAttachments` copies the files to the `saveTo` record",
             "`useInProcess` hands them on. Omitted on create, it follows from `saveTo`.",
-            "A constant `saveTo.recordId` must be an existing record; a mapped one gets a notice (it may be empty at run time).",
-            "After saving, `ObjectFiles` points at the SOURCE files; the copies are only in `CreatedObjectFileIds` (measured on CrtProcessBuilder 1.6.6.100 on 2026-10-15)",
-            "switching to `useInProcess` is refused while an element reads it.",
+            "A constant `saveTo.recordId` must be an existing record; a mapped one gets a notice.",
+            "After saving, `ObjectFiles` points at the SOURCE files; the copies are only in `CreatedObjectFileIds` (measured on 1.6.6.100, 2026-10-15)",
+            "switching to `useInProcess`, or moving `attachments.object` or `saveTo.object` to another object, is refused while an element reads it.",
             "A saving element with neither `recordId` nor a filter condition would copy arbitrary files: refused at the end of the request (`failedOperationIndex: null`)."
         ];
 
@@ -141,11 +141,11 @@ public sealed class ProcessFileGuidanceTests
         // Act
         string[] clauses =
         [
-            "Shipped product processes end in a record's attachments (via Generated report); when a following element needs the files, map the element's output collection",
-            "Send email attachments and Creatio.ai file inputs are not buildable through this tool yet.",
+            "Shipped product processes end in a record's attachments (Generated report); when a following element needs the files, map its output collection",
+            "Send email attachments and Creatio.ai file inputs are not buildable here yet.",
             "iterate `CreatedObjectFileIds` with a multi-instance sub-process",
             "re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column = the target record and `CreatedOn` `CurrentHour`.",
-            "Hazards: that also matches files anyone added to the record within the hour, and misses a copy made before the hour turned."
+            "Hazards: it also matches others' files from that hour, and misses a copy made before the hour turned."
         ];
 
         // Assert
