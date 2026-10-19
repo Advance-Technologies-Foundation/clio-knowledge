@@ -63,9 +63,8 @@ Do them in this order — a later step assumes the earlier one exists.
 
 3. Place the section in a workplace the portal audience can see — owner: `workplaces`
    (`place-section-in-workplace` with `All external users` in `roles` and `workplace-type=portal`, clio
-   8.1.0.142 and later). A workplace no external role can see hides the section from the menu. An
-   existing workplace of another type is refused, never retyped — pick a Portal workplace or a new name. Confirm placement and audience with the user, as that guide
-   requires.
+   <CLIO-WORKPLACE-TYPE-TBD> and later). A workplace no external role can see hides the section from the
+   menu. Confirm placement and audience with the user, as that guide requires.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`. Follow its "Give a role access to
    an object and its lookups" flow with grantee `All external users`; it owns the listing, the preview,
@@ -123,5 +122,6 @@ direction: an employee in the rule's grantee role, without "view any data", open
 user created — a system administrator sees it whatever the rules say, so they prove nothing.
 
 Version boundary: steps 3, 4 and 5 need the clio releases named in `workplaces` (clio 8.1.0.141 and later
-for `place-section-in-workplace`), `object-rights` and `default-record-rights`; on an older clio, stop
+for `place-section-in-workplace`, a later release for its `workplace-type`), `object-rights` and
+`default-record-rights`; on an older clio, stop
 before that step and use the fallback that guide names.

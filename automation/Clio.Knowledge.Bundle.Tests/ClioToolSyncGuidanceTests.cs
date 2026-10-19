@@ -134,6 +134,14 @@ public sealed class ClioToolSyncGuidanceTests
             because: "a tool failure or an older clio still needs the manual recipe somewhere");
         details.Should().Contain("- Move a section between workplaces",
             because: "the fallback keeps the move recipe");
+        workplaces.Should().MatchRegex(
+            @"`position`, `workplace-type` \(clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) and later\)",
+            because: "the argument list names workplace-type with the first clio release that has it");
+        workplaces.Should().MatchRegex(
+            @"pass `workplace-type=portal` to `place-section-in-workplace` \(clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) and later\)",
+            because: "external users need a Portal workplace, and an older clio does not know the argument");
+        workplaces.Should().Contain("the tool never retypes a workplace",
+            because: "an existing workplace of another type is refused before any write, never retyped");
     }
 
     [Test]
