@@ -135,7 +135,11 @@ public sealed class PortalSectionsGuidanceTests
         TestName = "PortalSections_OwnerShouldStillStateTheObjectRightsVersion")]
     [TestCase("guidance/mcp/guides/operations/default-record-rights.md", "require a clio release newer than 8.1.0.140",
         TestName = "PortalSections_OwnerShouldStillStateTheRecordRightsVersion")]
-    [Description("Every owner fact portal-sections restates (flags, tool names, versions) is still stated by its owner, so a change there fails the build instead of leaving portal-sections stale.")]
+    [TestCase("guidance/mcp/guides/operations/object-rights.md", "`All external users` = `720b771c-e7a7-4f31-9cfb-52cd21c3739f`",
+        TestName = "PortalSections_ObjectRightsShouldStillStateTheAllExternalUsersId")]
+    [TestCase("guidance/mcp/guides/operations/default-record-rights.md", "`All external users` (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`)",
+        TestName = "PortalSections_DefaultRecordRightsShouldStillStateTheAllExternalUsersId")]
+    [Description("Every owner fact portal-sections restates (the portal page flags, the clio versions, the All external users id) is still stated by its owner, so a change there fails the build instead of leaving portal-sections stale.")]
     public void PortalSections_RestatedOwnerFactShouldStillHoldInItsOwner(string ownerPath, string fact)
     {
         // Arrange
