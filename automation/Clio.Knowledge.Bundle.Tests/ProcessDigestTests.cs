@@ -125,7 +125,7 @@ public sealed class ProcessDigestTests
         ("process-element-catalog", "`formulaTask` (Formula), from CrtProcessBuilder **1.6.3.16**. Below that version the type is refused outright, naming the ones it does build."),
         ("process-element-catalog", "`subProcess` (Sub-process), from CrtProcessBuilder **1.6.3.26**. Below that version the type is refused outright, naming the ones it does build."),
         ("process-element-catalog", "`scriptTask` (Script task), from CrtProcessBuilder **1.6.6.30**"),
-        ("process-element-catalog", "FOUR user tasks have their own dedicated build type and must NOT be built as a generic `userTask`"),
+        ("process-element-catalog", "FIVE user tasks have their own dedicated build type and must NOT be built as a generic `userTask`"),
         ("process-element-catalog", "`flows[]` takes `kind` (`sequence` | `conditional` | `default`) and, on a conditional flow, its `condition`."),
         ("process-element-catalog", "`flows[].label` on the build path"),
         ("process-activity-result-branches", "A conditional flow carries its predicate in ONE OF TWO disjoint slots, and the flow's SOURCE decides which"),
@@ -359,8 +359,8 @@ public sealed class ProcessDigestTests
     }
 
     [Test]
-    [Description("The types the card says never to build as a userTask are exactly the FOUR the catalog gives a dedicated build type.")]
-    public void TheCardsDedicatedTypes_ShouldEqualTheCatalogsFour()
+    [Description("The types the card says never to build as a userTask are exactly the FIVE the catalog gives a dedicated build type.")]
+    public void TheCardsDedicatedTypes_ShouldEqualTheCatalogsFive()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
@@ -371,14 +371,14 @@ public sealed class ProcessDigestTests
         string[] onCard = [.. Regex.Match(card, @";(?<list>[^;]+)\(never as a userTask\)").Groups["list"].Value
             .Split(' ', StringSplitOptions.RemoveEmptyEntries).Order(StringComparer.Ordinal)];
         string[] owned = [.. Regex.Matches(
-                Regex.Match(catalog, @"FOUR user tasks have their own dedicated build type(?<rest>.+?)\)\s*-")
+                Regex.Match(catalog, @"FIVE user tasks have their own dedicated build type(?<rest>.+?)\)\s*-")
                     .Groups["rest"].Value,
                 "`type:\"(?<type>[A-Za-z]+)\"`")
             .Select(match => match.Groups["type"].Value)
             .Order(StringComparer.Ordinal)];
 
         // Assert
-        owned.Should().HaveCount(4, because: "anti-vacuity: the catalog names FOUR dedicated build types");
+        owned.Should().HaveCount(5, because: "anti-vacuity: the catalog names FIVE dedicated build types");
         onCard.Should().Equal(owned,
             because: "a dedicated type built as a generic userTask is refused or builds an element that fails at "
                 + "run time, and the card is the only place an ordinary build reads the list");
