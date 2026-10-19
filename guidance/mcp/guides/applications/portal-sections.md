@@ -69,17 +69,20 @@ Do them in this order — a later step assumes the earlier one exists.
 4. Grant OBJECT access to the portal audience — owner: `object-rights`. Follow its "Give a role access to
    an object and its lookups" flow with grantee `All external users`; it owns the listing, the preview,
    the grant and the verify. `set-object-rights` writes at once: you MUST preview each call and ASK THE
-   USER before any write, and GRANT each approved object in its own call, for example
-   `set-object-rights --entity-schema-name <Object> --grantee 720b771c-e7a7-4f31-9cfb-52cd21c3739f
-   --operations read`. What the portal case adds:
+   USER before any write, and GRANT each approved object in its own call — first
+   `set-object-rights entity-schema-name=<Object> grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f operations=read preview=true`,
+   then, on the user's yes, the same call without `preview`. What the portal case adds:
    - the list is what the portal pages show — the section's object, the object of each detail on the
-     page, and the lookup object of each column shown — not only what `--include-connected` reports;
+     page, and the lookup object of each column shown — not only what `include-connected` reports;
    - each grant is a disclosure decision: say that EVERY external user gets that access, on EVERY record
      of the object. A shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
      reference data — leave such a lookup out and handle it another way;
    - `read`, plus `create`/`edit` on the section's object only where external users genuinely author
      records. An object not administered by operation permissions is CLOSED to external users, so their
-     first grant on it carries `--enable-operation-permissions`;
+     first grant on it needs `enable-operation-permissions`, which turns operation permissions ON for
+     EVERY role, not only the portal audience. Before that write you MUST name to the user, from the
+     preview, each stored row of an external role that starts to decide (it can WIDEN external access)
+     and say that internal users then keep only what the rows give them (`object-rights` owns the rule);
    - done when every approved object shows an `All external users` row with at least `read` in the
      read-back. Which RECORDS they reach is step 5.
 
@@ -118,5 +121,6 @@ test, not the per-step read-backs. On an object with record permissions ON, also
 direction: an employee in the rule's grantee role, without "view any data", opens a record the portal
 user created — a system administrator sees it whatever the rules say, so they prove nothing.
 
-Version boundary: steps 4 and 5 need the clio releases named in `object-rights` and
-`default-record-rights`; on an older clio, stop before that step and use the fallback that guide names.
+Version boundary: steps 3, 4 and 5 need the clio releases named in `workplaces` (clio 8.1.0.141 and later
+for `place-section-in-workplace`), `object-rights` and `default-record-rights`; on an older clio, stop
+before that step and use the fallback that guide names.
