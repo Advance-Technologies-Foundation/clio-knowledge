@@ -34,7 +34,7 @@ Required inputs
 Optional inputs
 - `caption`: human-readable caption. Defaults to `schema-name` when omitted.
 - `description`: free-form description.
-- `entity-schema-name`: existing entity schema the page is bound to; leave blank for template-pure pages (dashboards, desktops, blank pages, custom pages). From the clio release after 8.1.0.141, a WEB page created with it carries a data source bound to the entity, chosen by the template:
+- `entity-schema-name`: existing entity schema the page is bound to; leave blank for template-pure pages (dashboards, desktops, blank pages, custom pages). From clio <CLIO-GH1840-TBD>, a WEB page created with it carries a data source bound to the entity, chosen by the template:
   * a template with no primary data source (tabbed, mini, blank page templates) gets a page-scoped `PDS` that becomes `primaryDataSourceName` — the shape of stock record pages such as `Accounts_FormPage`;
   * a template that names a primary data source gets that one bound;
   * `ListPageV3Template` declares its own `PDS` as a `viewElement` list source; it is bound to the entity and NOT made primary (stock list pages have no primary data source).
