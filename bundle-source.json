@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.158",
+  "libraryVersion": "1.15.162",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2032,8 +2032,8 @@
     },
     {
       "itemId": "process-files",
-      "title": "Process files: File and FileCollection parameters",
-      "description": "Owns the File and FileCollection process parameter types (one file and several files, carried by reference as the FileLocator type; their Variable default; the FileCollection read-back and its item name; the refusals) and the two-level rules every structured mapping onto a collection or an item of one goes through: P1 binds the collections of an item-to-item mapping, a multi-instance InputRecordCollection included; P2 pairs the file item of a collection that takes files; P2-MI notices; P3 clears a bound collection above a file item that takes one file; the R-M1 and R-M2 refusals. Recipes: keep the files an element produced, hand them to a Process file element, run a sub-process once per file. Applies when the FULL create-business-process contract names type File.",
+      "title": "Process files: File and FileCollection parameters, and the Process file element",
+      "description": "Owns the File and FileCollection process parameter types (one file and several files, carried by reference as the FileLocator type; their Variable default; the FileCollection read-back and its item name; the refusals), the two-level rules every structured mapping onto a collection or an item of one goes through (P1, P2, P2-MI, P3, R-M1, R-M2), recipes (keep an element's files, hand them to a Process file element, run a sub-process once per file), and the Process file element's fileProcessing block from CrtProcessBuilder 1.6.6.103: the group is the variant (Object attachments only), the record scope, the 50-file default, the sort, the action, the setElement merge, identity checks and describe-only members, SysFile storage refused, consumers and re-finding the saved copies. Applies when the FULL create-business-process contract names type File.",
       "topicId": "creatio.process-files",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-files",
