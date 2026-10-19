@@ -23,7 +23,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
-  - a record's connections / "Connected to" block on a page -> get-component-info crt.Connections (not a ComboBox each)
+  - a record's connections / "Connected to" block on a page -> name=page-modification-field-contract (CONNECTIONS ARE NOT INSERTED FIELDS) + get-component-info crt.Connections
   - page business rules (create/change/remove; visibility/required/value) -> name=business-rules
   - wire a button/menu action to a platform request (crt.*Request: print, close, cancel, ...) -> get-request-info + name=when-to-use-requests
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
