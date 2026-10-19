@@ -141,14 +141,20 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   * the object's `EntityConnections` add-on — the Object designer "Connections" node, one layer per package,
     storing only the difference from the parent layers. With `UseConnectionsComponent` on, the server merges
     it over the table rows, and that merged list is what the Freedom UI `crt.Connections` page component
-    shows. It is written by `update-entity-connections` and read by `get-entity-connections` (both
-    non-resident: `get-tool-contract` first, then `clio-run`; an older clio has neither — report the missing
-    capability rather than writing table rows instead).
+    shows. It is written by `update-entity-connections` and read by `get-entity-connections`, both present
+    from clio <CLIO-TBD> onward (non-resident: `get-tool-contract` first, then `clio-run`; an older clio has
+    neither — report the missing capability rather than writing table rows instead).
   Choose by what was asked:
   * the object's Connections list — add, remove or reorder the lookups the Connections node and
     `crt.Connections` offer -> `get-entity-connections`, change its `connections[].columnName` list, send
-    the FULL ordered list back to `update-entity-connections`. A column left out is REMOVED and `[]` removes
-    every connection; only lookup columns are accepted; never send an entry whose `columnName` is null. Do
+    the FULL ordered list back to `update-entity-connections`. `package-name` is required by both and names
+    the add-on LAYER they read and write: pass the SAME package to both, a non-foreign one, and one from
+    which every target lookup column is visible — the package that owns the object's replacing schema or
+    the columns you add, chosen as in step 1, not `Custom` by default. A column left out is REMOVED and `[]`
+    removes every connection, EXCEPT entries whose `columnName` is null (columns not visible from that
+    package): never send them back — they are kept as they are. Only lookup columns are accepted; a request
+    to connect a non-lookup column has no write — tell the user a connection must be a lookup. A column
+    removed by another package's layer cannot be brought back from this package (the response warns). Do
     NOT write an `EntityConnection` row for this: it is not what the Connections node stores, and the add-on
     of a later package layer can still remove or reorder that column;
   * an activity a process creates must be "Connected to" a record — the recipe above, step 2 included. An
