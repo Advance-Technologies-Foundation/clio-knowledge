@@ -50,6 +50,12 @@ public sealed class PortalSectionsGuidanceTests
         TestName = "PortalSections_ShouldStateWhatTheWholeAudienceGets")]
     [TestCase("the object of each detail on the page, and the lookup object of each column shown",
         TestName = "PortalSections_ShouldListEveryObjectThePortalPagesShow")]
+    [TestCase("decide step 5 FIRST: before the first write of this step, ask the user the step 5 question for each object",
+        TestName = "PortalSections_ShouldDecideRecordPermissionsBeforeTheObjectGrant")]
+    [TestCase("Never a security or system object: `object-rights` lists them and owns the rule",
+        TestName = "PortalSections_ShouldNeverListASecurityOrSystemObject")]
+    [TestCase("A lookup the user rejects shows EMPTY for external users, with no error: go back to step 1 and take its column off the portal page, or tell the user it stays empty",
+        TestName = "PortalSections_ShouldCloseTheLoopOnARejectedLookup")]
     [TestCase("not only what `include-connected` reports",
         TestName = "PortalSections_ShouldNotLimitTheListToTheConnectedListing")]
     [TestCase("you MUST preview each call and ASK THE USER before any write",
@@ -135,11 +141,19 @@ public sealed class PortalSectionsGuidanceTests
         TestName = "PortalSections_OwnerShouldStillStateTheObjectRightsVersion")]
     [TestCase("guidance/mcp/guides/operations/default-record-rights.md", "require a clio release newer than 8.1.0.140",
         TestName = "PortalSections_OwnerShouldStillStateTheRecordRightsVersion")]
+    [TestCase("guidance/mcp/guides/related-data/page-binding.md", "`create-related-page-addon` binds pages",
+        TestName = "PortalSections_OwnerShouldStillNameCreateRelatedPageAddon")]
+    [TestCase("guidance/mcp/guides/applications/workplaces.md", "Arguments: `environment-name`, `section-code`, `workplace-name`, `package-name`, `roles`",
+        TestName = "PortalSections_OwnerShouldStillNameThePlacementRolesArgument")]
+    [TestCase("guidance/mcp/guides/operations/default-record-rights.md", "set-default-record-rights and apply-default-record-rights require",
+        TestName = "PortalSections_OwnerShouldStillNameTheRecordRightsTools")]
+    [TestCase("guidance/mcp/guides/operations/object-rights.md", "You MUST NOT propose a security or system object",
+        TestName = "PortalSections_OwnerShouldStillExcludeSecurityAndSystemObjects")]
     [TestCase("guidance/mcp/guides/operations/object-rights.md", "`All external users` = `720b771c-e7a7-4f31-9cfb-52cd21c3739f`",
         TestName = "PortalSections_ObjectRightsShouldStillStateTheAllExternalUsersId")]
     [TestCase("guidance/mcp/guides/operations/default-record-rights.md", "`All external users` (`720b771c-e7a7-4f31-9cfb-52cd21c3739f`)",
         TestName = "PortalSections_DefaultRecordRightsShouldStillStateTheAllExternalUsersId")]
-    [Description("Every owner fact portal-sections restates (the portal page flags, the clio versions, the All external users id) is still stated by its owner, so a change there fails the build instead of leaving portal-sections stale.")]
+    [Description("Every owner fact portal-sections restates (the portal page flags and tool names, the clio versions, the All external users id, the security-object rule) is still stated by its owner, so a change there fails the build instead of leaving portal-sections stale.")]
     public void PortalSections_RestatedOwnerFactShouldStillHoldInItsOwner(string ownerPath, string fact)
     {
         // Arrange
@@ -150,6 +164,30 @@ public sealed class PortalSectionsGuidanceTests
 
         // Assert
         normalized.Should().Contain(fact, because: "portal-sections restates this fact from its owner");
+    }
+
+    [TestCase("core-rules")]
+    [TestCase("app-modeling")]
+    [TestCase("page-creation")]
+    [TestCase("related-page-binding")]
+    [TestCase("workplaces")]
+    [TestCase("object-rights")]
+    [TestCase("default-record-rights")]
+    [TestCase("administration")]
+    [TestCase("record-permissions")]
+    [TestCase("record-rights")]
+    [Description("Every guide portal-sections cites by name is a declared itemId, so get-guidance resolves it.")]
+    public void PortalSections_CitedGuideShouldBeDeclared(string itemId)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), PortalSectionsPath));
+
+        // Act
+        HashSet<string> declared = ProcessGuideSet.DeclaredItemIds(Root());
+
+        // Assert
+        guide.Should().Contain($"`{itemId}`", because: "the case list names only guides the article cites");
+        declared.Should().Contain(itemId, because: "a cited guide must resolve through get-guidance");
     }
 
     [Test]

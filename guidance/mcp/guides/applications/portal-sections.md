@@ -87,12 +87,17 @@ Do them in this order — a later step assumes the earlier one exists.
    `set-object-rights entity-schema-name=<Object> grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f operations=read enable-operation-permissions preview=true`.
    If a write is refused, or any argument changes after the user's yes, preview again and ask again.
    What the portal case adds:
+   - decide step 5 FIRST: before the first write of this step, ask the user the step 5 question for each
+     object (record permissions ON or OFF). With them OFF the grant opens every record of the object to
+     every external user at once, and that access stays if the run stops after this step;
    - the list is what the portal pages show — the section's object, the object of each detail on the
-     page, and the lookup object of each column shown — not only what `include-connected` reports;
+     page, and the lookup object of each column shown — not only what `include-connected` reports.
+     Never a security or system object: `object-rights` lists them and owns the rule;
    - each grant is a disclosure decision: say that EVERY external user gets that access, on EVERY record
      and EVERY column of the object, whatever the portal page shows. A shared lookup (`Account`,
-     `Contact`, price lists, catalogs) can carry PII or internal reference data — leave such a lookup out
-     and handle it another way;
+     `Contact`, price lists, catalogs) can carry PII or internal reference data — ASK THE USER about each
+     one. A lookup the user rejects shows EMPTY for external users, with no error: go back to step 1 and
+     take its column off the portal page, or tell the user it stays empty;
    - `read`, plus `create`/`edit` on the section's object only where external users genuinely author
      records. An object not administered by operation permissions is CLOSED to external users, so their
      first grant on it needs `enable-operation-permissions`, which turns operation permissions ON for
