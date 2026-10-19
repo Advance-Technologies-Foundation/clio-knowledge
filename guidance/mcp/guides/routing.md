@@ -71,6 +71,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     value -> name=process-parameters
   - a parameter or mapping that carries FILES (type File or FileCollection, a file collection bound at both
     levels, one sub-process run per file) -> name=process-files (after name=process-parameters)
+  - a Process file element (`fileProcessing`: copy a record's attachments, or hand them to the next
+    elements) -> name=process-files
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - verify a stored formula or condition, match a formula refusal message to its fix, or a formula refusal
     about the CrtProcessBuilder version -> name=process-formulas-details (after name=process-formulas)
