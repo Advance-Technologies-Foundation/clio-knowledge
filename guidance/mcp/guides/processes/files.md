@@ -111,14 +111,14 @@ targets only.
    says so in a notice.
 2. Hand them to a Process parameter element: its `files` group (last section), or onto one built in the designer
    {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
-   "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on
-   CrtProcessBuilder 1.6.6.98 on 2026-10-14 on designer-made elements: one run of recipes 1 and 2 copied the three
-   source files to the target record, names and bytes equal.
+   "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on a
+   stand on designer-made elements: one run of recipes 1 and 2 copied the three source files to the target record,
+   names and bytes equal.
 3. One called-process run per file: the callee declares a File input; the caller's Sub-process element is
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.
    Send the InputRecordCollection mapping `process-sub-process` asks for FIRST and from the SAME collection (a P2-MI
-   notice until the item is mapped): a later outer mapping is not checked against the item.
+   notice until the item is mapped): see Order matters.
 4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM from the source's file item; P1 binds the
    input too. That input does not take files: an outer-only mapping onto it is stored unpaired. Neither form has
    been run on a stand yet.
@@ -133,11 +133,11 @@ Every refusal here and above names the way forward and saves nothing: fix the ca
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
-refuses a CrtProcessBuilder older than 1.6.6.103 up front, as above. The block carries ONE group, and the group IS
-the variant: `attachments` (Object attachments), `report` (Generated report: `process-files-report` owns it) or
-`files` (Process parameter, last section); a package older than 1.6.6.105 writes attachments only and refuses the
-other two by name. Omit `userTaskName`. The generic userTask route naming any of the three Process file tasks is
-refused: build them only here.
+refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106 if it offers report and files), as
+above. The block carries ONE group, and the group IS the variant: `attachments` (Object attachments), `report`
+(Generated report: `process-files-report` owns it) or `files` (Process parameter, last section); a package older than
+1.6.6.105 writes attachments only and refuses the other two by name. Omit `userTaskName`. The generic userTask route
+naming any of the three Process file tasks is refused: build them only here.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
 "AccountParameter"}}, "saveTo": {"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
 - `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as in the
@@ -189,5 +189,6 @@ useInProcess is refused.
   copies nothing, silently.
 - An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.
 - Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids. It has no filter.
-- Describe adds the describe-only `files.bindingLevels` (both, itemOnly, outerOnly or none), with an issue for a
-  stored shape that would not resubmit as stored. Remove it before resubmitting.
+- Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue
+  for a stored shape that would not resubmit as stored or a stored action other than save (it fails at run time).
+  Remove it before resubmitting.

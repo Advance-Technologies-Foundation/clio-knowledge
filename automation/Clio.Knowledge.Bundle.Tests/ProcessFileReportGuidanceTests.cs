@@ -13,8 +13,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// </summary>
 /// <remarks>
 /// TRIM ALARMS: each clause is a rule the package enforces or a fact measured on a stand. The measured lifetime of the
-/// temporary report files carries its date in the clause, and the unmeasured sub-process case says so, so neither can
-/// be trimmed into a stronger claim than the evidence.
+/// temporary report files says it was measured on a stand, and the sub-process and error cases say they are read from
+/// source, so neither can be trimmed into a stronger claim than the evidence.
 /// </remarks>
 [TestFixture]
 public sealed class ProcessFileReportGuidanceTests
@@ -103,7 +103,7 @@ public sealed class ProcessFileReportGuidanceTests
     }
 
     [Test]
-    [Description("The rights sentence says the printable lookup and the record selection apply NO record permissions (UseAdminRights = false), and never that they run with the rights of the user the process runs as.")]
+    [Description("The rights sentence says the printable lookup and the record selection apply NO record permissions (UseAdminRights = false), never that they run with the rights of the user the process runs as, and that only the rights cases and a printable missing on another run-time environment escape the design-time checks.")]
     public void Guide_ShouldStateThatNoRecordPermissionsApply()
     {
         // Arrange
@@ -121,6 +121,10 @@ public sealed class ProcessFileReportGuidanceTests
             because: "the Word generator reads the printable and the merge fields with rights on, so the run can fail or fill blanks even though selection ignores rights");
         guide.Should().Contain("a record whose columns that user cannot read is generated with those fields blank, reporting success.",
             because: "a blank-field report that reports success is the silent half of the rights split");
+        guide.Should().Contain("A printable missing on the environment you build on is refused (above) and reported by describe; no design-time check sees the rights cases, or a printable missing only on another environment the process runs on.",
+            because: "the missing printable is caught where the agent builds; only the rights cases and another run-time environment go unseen");
+        guide.Should().NotContain("No design-time check sees either.",
+            because: "that sentence denied the design-time refusal and the describe issue a missing printable gets");
         guide.Should().NotContainEquivalentOf("rights of the user the process runs as",
             because: "that reading of UseAdminRights = false is the opposite of what the platform does");
         guide.Should().NotContainEquivalentOf("the caller's rights",
@@ -128,7 +132,7 @@ public sealed class ProcessFileReportGuidanceTests
     }
 
     [Test]
-    [Description("The records: report.recordId is the record scope stored as Id = value, setFilter keeps it, the same scope twice is refused, a Word report with no scope and no filter is refused at the end of the request, the record order is unspecified, and a printable swap keeps or clears the filter by object.")]
+    [Description("The records: report.recordId is the record scope stored as Id = value, setFilter keeps it, the same scope twice is refused, a Word report with no scope and no filter is refused at the end of the request, the record order is unspecified, a printable swap keeps or clears the filter by object, and clearFilter keeps the scope and is refused with the printable missing.")]
     public void Guide_ShouldStateTheRecordScopeAndTheSwap()
     {
         // Arrange
@@ -142,7 +146,8 @@ public sealed class ProcessFileReportGuidanceTests
             "A Word report with neither a record scope nor a filter condition would generate one for EVERY record of its object: refused at the end of the request (`failedOperationIndex: null`), whatever the action.",
             "The records are not sorted: their order, and so the order of the files and their `(n)` numbers, is unspecified.",
             "Another printable of the SAME object keeps the filter, the scope and the suffix column, and checks the stored scope again. One of ANOTHER object clears those of the three that are stored, with a notice: a `report.recordId` sent with the change becomes the new scope",
-            "That move is refused while another element reads the element's `CreatedObjectFileIds`."
+            "That move is refused while another element reads the element's `CreatedObjectFileIds`.",
+            "`clearFilter` keeps the scope too. Both are refused while the stored printable is missing on this environment: set `report.printable` first."
         ];
 
         // Assert
@@ -154,7 +159,7 @@ public sealed class ProcessFileReportGuidanceTests
     }
 
     [Test]
-    [Description("The file names: separateReports written true when omitted and an explicit false kept with a notice, the caption read in the runner's culture, the constant suffix stored as a localizable value with its culture not measured, and the text-column suffix with its preconditions.")]
+    [Description("The file names: separateReports written true when omitted on create or with a new printable and kept otherwise, an explicit false kept with a notice and clearing the suffix column, the caption read in the runner's culture, the constant suffix stored as a localizable value with its culture not measured, and the text-column suffix with its preconditions.")]
     public void Guide_ShouldStateTheFileNameRules()
     {
         // Arrange
@@ -163,7 +168,8 @@ public sealed class ProcessFileReportGuidanceTests
         // Act
         string[] clauses =
         [
-            "Omitted, it is written `true`, as the designer forces; an explicit `false` is kept, with a notice",
+            "Omitted, it is written `true` on create or when the printable changes, as the designer forces, and the stored value is kept otherwise; an explicit `false` is kept, with a notice",
+            "`false` also clears a stored `fileNameSuffixColumn`, with a notice.",
             "A file is named after the printable's caption, read in the culture of the user the process runs as",
             "a constant is stored as a localizable value, as the designer stores it (how it reads under another culture is not measured).",
             "`fileNameSuffixColumn`: the code of a TEXT column of the report's object, with separate reports on and without `fileNameSuffix`."
@@ -178,7 +184,7 @@ public sealed class ProcessFileReportGuidanceTests
     }
 
     [Test]
-    [Description("Where the files go: several records into one target raise a notice, use-in-process files are temporary with their measured lifetime and the unmeasured sub-process case stated, the Out-parameter, PDF and designer-feature notices.")]
+    [Description("Where the files go: several records into one target raise a notice, use-in-process files are temporary with their measured lifetime, a sub-process handing them out through an Out or a Variable parameter hands over deleted files, the Out-or-Variable, filter-without-scope, PDF and designer-feature notices.")]
     public void Guide_ShouldStateWhereTheFilesGo()
     {
         // Arrange
@@ -189,10 +195,11 @@ public sealed class ProcessFileReportGuidanceTests
         [
             "A filter that can select several records attaches every report to the ONE `saveTo` record, with a notice",
             "Use in process: the files are temporary and go on as `ReportFiles`",
-            "They live while the process instance runs and are deleted when it completes (measured on 2026-10-19:",
-            "That a sub-process deletes its files when it completes is read from source, not measured",
+            "They live while the process instance runs and are deleted when it completes (measured on a stand:",
+            "Read from source, not measured: a sub-process deletes the files it generated when IT completes, so one that hands `ReportFiles` to its caller through an Out or a Variable parameter (Variable is the default, for a FileCollection too) hands over deleted files: save them inside the sub-process.",
             "an instance ending in an error keeps its temporary files (only completion and cancel delete them).",
-            "A notice warns when they flow into an Out process parameter",
+            "A notice warns when they flow into an Out or a Variable process parameter",
+            "Another warns when the element has a filter but no `report.recordId`: it generates one temporary file per matching record.",
             "a printable that asks for PDF (`ConvertInPDF`) gets it only with a Word-to-PDF converter package installed; otherwise the files are .docx",
             "The group has no `sort`: do not send one."
         ];
@@ -203,10 +210,14 @@ public sealed class ProcessFileReportGuidanceTests
             guide.Should().Contain(clause,
                 because: "a temporary file handed out of the process is gone when the instance completes, and the evidence for that has a known gap");
         }
+        guide.Should().NotContain("measured on 2026-",
+            because: "the lifetime is attributed to a stand measurement without a date");
+        guide.Should().NotContain("flow into an Out process parameter",
+            because: "a Variable parameter, the default direction, hands the files to a caller as well");
     }
 
     [Test]
-    [Description("The Add data pattern: the row the report is generated for is added first and its RecordId feeds report.recordId, with an example whose element codes follow the naming rules.")]
+    [Description("The Add data pattern: the row the report is generated for is added first with the columns the printable prints and its RecordId feeds report.recordId, and the example saves the files where the shipped process does, so copying it yields a filled, kept report.")]
     public void Guide_ShouldTeachAddDataFirst()
     {
         // Arrange
@@ -217,7 +228,10 @@ public sealed class ProcessFileReportGuidanceTests
         [
             "== Add data creates the report's data row first ==",
             "the report takes its id from the Add data output `RecordId`.",
-            "{\"sourceElement\": \"AddDNSGuideReport\", \"sourceElementParameter\": \"RecordId\"}"
+            "{\"sourceElement\": \"AddDNSGuideReport\", \"sourceElementParameter\": \"RecordId\"}",
+            "\"values\": [{\"column\": \"SenderDomain\", \"processParameter\": \"SenderDomainParameter\"}, {\"column\": \"SiteUrl\", \"processParameter\": \"SiteUrlParameter\"}]",
+            "\"saveTo\": {\"object\": \"DNSGuideFile\", \"linkColumn\": \"SenderDomain\", \"recordId\": {\"processParameter\": \"SenderDomainParameter\"}}",
+            "a column left unset prints blank, with no error."
         ];
 
         // Assert

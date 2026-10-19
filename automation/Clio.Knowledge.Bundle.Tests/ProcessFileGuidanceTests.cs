@@ -29,7 +29,7 @@ public sealed class ProcessFileGuidanceTests
     private const string ProcessParameterHeading = "== The Process parameter variant: the `files` group ==";
 
     [Test]
-    [Description("The element section gates the type on the contract and the 1.6.6.103 floor, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
+    [Description("The element section gates the type on the contract, the 1.6.6.103 floor and the 1.6.6.106 floor of a clio offering report and files, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
     public void Section_ShouldGateTheElementAndMakeTheGroupTheVariant()
     {
         // Arrange
@@ -39,7 +39,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`)",
-            "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front",
+            "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106 if it offers report and files), as above.",
             "The block carries ONE group, and the group IS the variant",
             "`attachments` (Object attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last section)",
             "a package older than 1.6.6.105 writes attachments only and refuses the other two by name.",
@@ -169,7 +169,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The catalog lists fileProcessing as buildable from 1.6.6.103 with report and files from 1.6.6.105, refuses the generic route for all three Process file tasks, names the guide of each group, and maps all three data-ids to the one dedicated type.")]
+    [Description("The catalog lists fileProcessing as buildable from 1.6.6.103 with report and files from 1.6.6.106, refuses the generic route for all three Process file tasks, names the guide of each group, and maps all three data-ids to the one dedicated type.")]
     public void Catalog_ShouldListTheElementAndItsDedicatedType()
     {
         // Arrange
@@ -179,7 +179,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.103**:",
-            "`attachments` (Object attachments), and from **1.6.6.105** also `report` (Generated report) and `files` (Process parameter) - `process-files` owns the block, `process-files-report` its `report` group.",
+            "`attachments` (Object attachments), and from **1.6.6.106** also `report` (Generated report) and `files` (Process parameter) - `process-files` owns the block, `process-files-report` its `report` group.",
             "On the generic `userTask` route all three Process file tasks (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that route carries no file source, record or target.",
             "SEVEN user tasks have their own dedicated build type",
             "`objectFileProcessingUserTask`, `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:\"fileProcessing\"` with the matching `attachments`, `report` or `files` group, see `process-files`"
@@ -198,7 +198,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The Process parameter section: saving only, exactly one source and the refused value, both levels for a collection, one file for a single File, an unset single File stops the process, an empty collection copies nothing, an expression goes through as given, the outputs and the describe-only bindingLevels.")]
+    [Description("The Process parameter section: saving only, exactly one source and the refused value, both levels for a collection, one file for a single File, an unset single File stops the process, an empty collection copies nothing, an expression goes through as given, the outputs, and the block-level describe-only bindingLevels with its issues.")]
     public void Section_ShouldStateTheProcessParameterGroup()
     {
         // Arrange
@@ -216,7 +216,7 @@ public sealed class ProcessFileGuidanceTests
             "An empty collection copies nothing, silently.",
             "An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.",
             "Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids.",
-            "Describe adds the describe-only `files.bindingLevels` (both, itemOnly, outerOnly or none)",
+            "Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue for a stored shape that would not resubmit as stored or a stored action other than save (it fails at run time).",
             "Remove it before resubmitting."
         ];
 
@@ -227,6 +227,8 @@ public sealed class ProcessFileGuidanceTests
             section.Should().Contain(clause,
                 because: "the variant only saves, an unset single File fails the run with an error, and an empty collection succeeds while copying nothing");
         }
+        section.Should().NotContain("files.bindingLevels",
+            because: "describe writes bindingLevels on the fileProcessing block, not inside the files group");
     }
 
     [Test]
