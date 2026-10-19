@@ -87,6 +87,6 @@ on transfer) — read `get-guidance name=dashboard-rights`.
   single call.
 - On creation the dashboard is granted read access to `All Employees`, so every employee can see it
   by default.
-- Leave `entity-schema-name` (the create-page page-dependency argument) separate from
+- Do not pass `entity-schema-name` for a dashboard. It is a different input from
   `DashboardsEntitySchemaName` (a dashboard link-back property passed via `optional-properties`);
-  they are different inputs.
+  what `entity-schema-name` does to a page is described in `page-creation`.
