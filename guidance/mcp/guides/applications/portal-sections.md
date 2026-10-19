@@ -88,8 +88,9 @@ Do them in this order — a later step assumes the earlier one exists.
    - the list is what the portal pages show — the section's object, the object of each detail on the
      page, and the lookup object of each column shown — not only what `include-connected` reports;
    - each grant is a disclosure decision: say that EVERY external user gets that access, on EVERY record
-     and EVERY column of the object, whatever the portal page shows. A shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
-     reference data — leave such a lookup out and handle it another way;
+     and EVERY column of the object, whatever the portal page shows. A shared lookup (`Account`,
+     `Contact`, price lists, catalogs) can carry PII or internal reference data — leave such a lookup out
+     and handle it another way;
    - `read`, plus `create`/`edit` on the section's object only where external users genuinely author
      records. An object not administered by operation permissions is CLOSED to external users, so their
      first grant on it needs `enable-operation-permissions`, which turns operation permissions ON for
