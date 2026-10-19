@@ -14,8 +14,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// </summary>
 /// <remarks>
 /// TRIM ALARMS: each clause is a rule the package enforces or a fact measured on a stand, and the tests fail when one is
-/// reworded or dropped. The two measured facts carry their version and date in the clause itself, so the evidence
-/// cannot be trimmed away from the claim.
+/// reworded or dropped. The measured facts carry their version (and the date, where one is given) in the clause
+/// itself, so the evidence cannot be trimmed away from the claim.
 /// </remarks>
 [TestFixture]
 public sealed class ProcessFileGuidanceTests
@@ -29,7 +29,7 @@ public sealed class ProcessFileGuidanceTests
     private const string ProcessParameterHeading = "== The Process parameter variant: the `files` group ==";
 
     [Test]
-    [Description("The element section gates the type on the contract, the 1.6.6.103 floor and the 1.6.6.106 floor of a clio offering report and files, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
+    [Description("The element section gates the type on the contract, the 1.6.6.103 floor and the 1.6.6.106 floor a clio that also offers report and files applies to every group, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
     public void Section_ShouldGateTheElementAndMakeTheGroupTheVariant()
     {
         // Arrange
@@ -39,7 +39,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`)",
-            "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106 if it offers report and files), as above.",
+            "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106, for every group, if it also offers report and files), as above.",
             "The block carries ONE group, and the group IS the variant",
             "`attachments` (Object attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last section)",
             "a package older than 1.6.6.105 writes attachments only and refuses the other two by name.",
@@ -54,6 +54,8 @@ public sealed class ProcessFileGuidanceTests
             section.Should().Contain(clause,
                 because: "a block with no group or two groups is refused, a server older than the floor refuses the type, and the generic route builds no Process file element at all");
         }
+        section.Should().NotContain("(1.6.6.106 if it offers report and files)",
+            because: "the floor is per command, not per group: a clio that also offers report and files refuses an older package for an attachments element too");
     }
 
     [Test]
@@ -198,7 +200,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The Process parameter section: saving only, exactly one source and the refused value, both levels for a collection, one file for a single File, an unset single File stops the process, an empty collection copies nothing, an expression goes through as given, the outputs, and the block-level describe-only bindingLevels with its issues.")]
+    [Description("The Process parameter section: saving only, exactly one source and the refused value, both levels for a collection, one file for a single File, an unset single File stops the process, an empty collection copies nothing, an expression goes through as given, the outputs, and the block-level describe-only bindingLevels with its issues: none means the platform refuses to start the process, a stored useInProcess or an invalid action fails at run time, and a mapped action is decided at run time.")]
     public void Section_ShouldStateTheProcessParameterGroup()
     {
         // Arrange
@@ -216,7 +218,7 @@ public sealed class ProcessFileGuidanceTests
             "An empty collection copies nothing, silently.",
             "An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.",
             "Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids.",
-            "Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue for a stored shape that would not resubmit as stored or a stored action other than save (it fails at run time).",
+            "Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue for a stored shape that would not resubmit as stored (none: nothing bound, the platform refuses to start the process) and for an action other than save: a stored useInProcess or an invalid one fails at run time, a mapped one is decided at run time.",
             "Remove it before resubmitting."
         ];
 
@@ -229,6 +231,8 @@ public sealed class ProcessFileGuidanceTests
         }
         section.Should().NotContain("files.bindingLevels",
             because: "describe writes bindingLevels on the fileProcessing block, not inside the files group");
+        section.Should().NotContain("a stored action other than save (it fails at run time)",
+            because: "a mapped action is decided at run time and does not necessarily fail; only a stored useInProcess or an invalid action does");
     }
 
     [Test]
@@ -248,6 +252,23 @@ public sealed class ProcessFileGuidanceTests
             because: "the single-File arm of the files group rests on this measurement, and the claim must keep its evidence");
         guide.Should().NotContain("not measured on a stand yet).",
             because: "the P3 one-row reading has been measured, so the old caveat would understate the evidence");
+    }
+
+    [Test]
+    [Description("Recipe 2 keeps its evidence: the copy through a designer-made Process parameter element, names and bytes equal, was measured on a stand on CrtProcessBuilder 1.6.6.98.")]
+    public void Recipe2_ShouldCarryTheMeasuredPackageVersion()
+    {
+        // Arrange
+        string guide = Collapse(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ArticlePath));
+
+        // Act
+        bool measured = guide.Contains(
+            "Measured on CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one run of recipes 1 and 2 copied the three source files to the target record, names and bytes equal.",
+            StringComparison.Ordinal);
+
+        // Assert
+        measured.Should().BeTrue(
+            because: "a measurement names the package version it was made on, so a reader can tell whether a later package is covered");
     }
 
     [Test]

@@ -217,7 +217,7 @@ public sealed class ProcessFileReportGuidanceTests
     }
 
     [Test]
-    [Description("The Add data pattern: the row the report is generated for is added first with the columns the printable prints and its RecordId feeds report.recordId, and the example saves the files where the shipped process does, so copying it yields a filled, kept report.")]
+    [Description("The Add data pattern: the row the report is generated for is added first with the columns the printable prints and its RecordId feeds report.recordId; the example declares its process parameters, says how the shipped process links its files instead, and says that a designer save of the element clears the explicit link column, leaving the files linked to no record.")]
     public void Guide_ShouldTeachAddDataFirst()
     {
         // Arrange
@@ -231,7 +231,11 @@ public sealed class ProcessFileReportGuidanceTests
             "{\"sourceElement\": \"AddDNSGuideReport\", \"sourceElementParameter\": \"RecordId\"}",
             "\"values\": [{\"column\": \"SenderDomain\", \"processParameter\": \"SenderDomainParameter\"}, {\"column\": \"SiteUrl\", \"processParameter\": \"SiteUrlParameter\"}]",
             "\"saveTo\": {\"object\": \"DNSGuideFile\", \"linkColumn\": \"SenderDomain\", \"recordId\": {\"processParameter\": \"SenderDomainParameter\"}}",
-            "a column left unset prints blank, with no error."
+            "\"parameters\": [{\"name\": \"SenderDomainParameter\", \"type\": \"Lookup\", \"referenceSchema\": \"SenderDomain\"}, {\"name\": \"SiteUrlParameter\", \"type\": \"Text\"}]",
+            "a column left unset prints blank, with no error.",
+            "The shipped process that generates it saves to DNSGuideFile too, naming the sender domain as the record but no link column, and links the files to it afterwards with a Modify data on the file name.",
+            "`saveTo.recordId` takes a Lookup of SenderDomain, as declared, or a Guid.",
+            "the save is accepted with a notice: opening and saving the element in the process designer clears that column, and the files are then linked to no record."
         ];
 
         // Assert
@@ -240,6 +244,52 @@ public sealed class ProcessFileReportGuidanceTests
             guide.Should().Contain(clause,
                 because: "a report on a record the process creates needs that record first, and RecordId is the only output Add data has");
         }
+        guide.Should().NotContain("where the shipped process that generates it saves it",
+            because: "the shipped process saves to the same object but writes no link column; it links its files with a Modify data afterwards");
+    }
+
+    [Test]
+    [Description("The Add data then report example is one whole create-business-process descriptor: it parses as JSON, and every parameter, element and flow end it names is declared in it.")]
+    public void AddDataExample_ShouldBeACompleteDescriptor()
+    {
+        // Arrange
+        string guide = ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ArticlePath);
+        int start = guide.IndexOf("{\"name\": \"UsrSenderDomain_GenerateDNSGuide\"", StringComparison.Ordinal);
+
+        // Act
+        using JsonDocument descriptor = JsonDocument.Parse(start < 0 ? "{}" : BalancedObject(guide, start));
+        JsonElement root = descriptor.RootElement;
+        string[] parameters = root.TryGetProperty("parameters", out JsonElement declared)
+            ? [.. declared.EnumerateArray().Select(parameter => parameter.GetProperty("name").GetString()!)]
+            : [];
+        string[] elements = root.TryGetProperty("elements", out JsonElement nodes)
+            ? [.. nodes.EnumerateArray().Select(element => element.GetProperty("name").GetString()!)]
+            : [];
+        string[] flowEnds = root.TryGetProperty("flows", out JsonElement flows)
+            ? [.. flows.EnumerateArray().SelectMany(flow => new[] { flow.GetProperty("source").GetString()!, flow.GetProperty("target").GetString()! })]
+            : [];
+        string[] parameterReferences = [.. Regex.Matches(root.GetRawText(), @"""processParameter"":\s*""(\w+)""").Select(match => match.Groups[1].Value)];
+        string[] elementReferences = [.. Regex.Matches(root.GetRawText(), @"""sourceElement"":\s*""(\w+)""").Select(match => match.Groups[1].Value)];
+        string[] types = root.TryGetProperty("elements", out JsonElement typed)
+            ? [.. typed.EnumerateArray().Select(element => element.GetProperty("type").GetString()!)]
+            : [];
+
+        // Assert
+        start.Should().BeGreaterThanOrEqualTo(0, because: "anti-vacuity: the guide carries the whole descriptor");
+        root.TryGetProperty("packageName", out _).Should().BeTrue(
+            because: "create-business-process refuses a descriptor without the package it is created in");
+        types.Should().Equal(["startEvent", "addData", "fileProcessing", "endEvent"],
+            because: "the minimal process is a start, the Add data, the report and an end");
+        parameterReferences.Should().NotBeEmpty(because: "anti-vacuity: the example maps process parameters");
+        parameterReferences.Should().OnlyContain(name => parameters.Contains(name),
+            because: "a mapping from an undeclared process parameter is refused, so the example would not build as written");
+        elementReferences.Should().OnlyContain(name => elements.Contains(name),
+            because: "a source element the descriptor does not declare is refused");
+        flowEnds.Should().NotBeEmpty(because: "anti-vacuity: the example connects its elements");
+        flowEnds.Should().OnlyContain(name => elements.Contains(name),
+            because: "a flow end that names no element is refused");
+        elements.Should().OnlyContain(name => flowEnds.Contains(name),
+            because: "an element no flow reaches is left unconnected");
     }
 
     [Test]
@@ -298,6 +348,41 @@ public sealed class ProcessFileReportGuidanceTests
             because: "the guide was split out to give the report group room; it must not grow back into a spill");
         replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
             because: "a reply over the inline rule is spilled to a file and read back in pieces");
+    }
+
+    private static string BalancedObject(string text, int start)
+    {
+        int depth = 0;
+        bool inString = false;
+        for (int index = start; index < text.Length; index++)
+        {
+            char character = text[index];
+            if (inString)
+            {
+                if (character == '\\')
+                {
+                    index++;
+                }
+                else if (character == '"')
+                {
+                    inString = false;
+                }
+                continue;
+            }
+            if (character == '"')
+            {
+                inString = true;
+            }
+            else if (character == '{')
+            {
+                depth++;
+            }
+            else if (character == '}' && --depth == 0)
+            {
+                return text[start..(index + 1)];
+            }
+        }
+        return text[start..];
     }
 
     private static string ReadCollapsed(string relativePath) =>

@@ -87,17 +87,27 @@ its filter selects, then saves the files to a record's attachments or hands them
 == Add data creates the report's data row first ==
 When the record a printable reports on is made by the process itself, an Add data element inserts the row first,
 with the columns the printable prints, and the report takes its id from the Add data output `RecordId`. For example,
-a DNSGuideReport row, then the "DNS Requirements" printable generated for it and saved to the sender domain's
-DNSGuideFile attachments, where the shipped process that generates it saves it (that process selects by a filter):
-{"name": "AddDNSGuideReport", "type": "addData", "caption": "Add DNS guide report", "addData": {"source":
-"DNSGuideReport", "values": [{"column": "SenderDomain", "processParameter": "SenderDomainParameter"}, {"column":
-"SiteUrl", "processParameter": "SiteUrlParameter"}]}}, then {"name": "GenerateDNSRequirements", "type":
+a DNSGuideReport row, then the "DNS Requirements" printable generated for it and saved to DNSGuideFile, linked to
+the sender domain. The shipped process that generates it saves to DNSGuideFile too, naming the sender domain as the
+record but no link column, and links the files to it afterwards with a Modify data on the file name. As a whole
+create-business-process descriptor (`<package>` from `get-target-package`, `<templateId>` from `list-printables`):
+{"name": "UsrSenderDomain_GenerateDNSGuide", "caption": "Generate DNS guide", "packageName": "<package>",
+"parameters": [{"name": "SenderDomainParameter", "type": "Lookup", "referenceSchema": "SenderDomain"}, {"name":
+"SiteUrlParameter", "type": "Text"}], "elements": [{"name": "DNSGuideRequestedStart", "type": "startEvent", "caption":
+"DNS guide requested"}, {"name": "AddDNSGuideReport", "type": "addData", "caption": "Add DNS guide report", "addData":
+{"source": "DNSGuideReport", "values": [{"column": "SenderDomain", "processParameter": "SenderDomainParameter"},
+{"column": "SiteUrl", "processParameter": "SiteUrlParameter"}]}}, {"name": "GenerateDNSRequirements", "type":
 "fileProcessing", "caption": "Generate DNS requirements", "fileProcessing": {"report": {"printable": "<templateId>",
 "recordId": {"sourceElement": "AddDNSGuideReport", "sourceElementParameter": "RecordId"}}, "saveTo": {"object":
-"DNSGuideFile", "linkColumn": "SenderDomain", "recordId": {"processParameter": "SenderDomainParameter"}}}}.
+"DNSGuideFile", "linkColumn": "SenderDomain", "recordId": {"processParameter": "SenderDomainParameter"}}}}, {"name":
+"EndDNSGuideSaved", "type": "endEvent", "caption": "DNS guide saved"}], "flows": [{"source": "DNSGuideRequestedStart",
+"target": "AddDNSGuideReport"}, {"source": "AddDNSGuideReport", "target": "GenerateDNSRequirements"}, {"source":
+"GenerateDNSRequirements", "target": "EndDNSGuideSaved"}]}
 Assign the other columns it prints the same way (`SPFHostname`, `SPFValue`, `DKIMHostname`, `DKIMValue`,
-`TrackingValue`, `Username`): a column left unset prints blank, with no error. No object pairs with DNSGuideFile by
-name, so `saveTo` names its `linkColumn`, and the save is accepted with a notice.
+`TrackingValue`, `Username`): a column left unset prints blank, with no error. `saveTo.recordId` takes a Lookup of
+SenderDomain, as declared, or a Guid. No object pairs with DNSGuideFile by name, so `saveTo` names its `linkColumn`,
+and the save is accepted with a notice: opening and saving the element in the process designer clears that column,
+and the files are then linked to no record. Change that element through clio, not in the designer.
 
 == Reading it back ==
 `describe-business-process element=<name>` (or `mode=full`) returns the `report` group: `printable` (the stored id),

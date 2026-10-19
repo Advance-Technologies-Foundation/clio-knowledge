@@ -2,15 +2,15 @@ clio MCP process-files guide — File and FileCollection parameters, two-level c
 
 Scope
 This guide owns the `File` and `FileCollection` process parameter types, the two-level rules (P1, P2, P2-MI,
-P3, R-M1, R-M2) every structured mapping onto a collection or onto an item of one goes through, and the Process file
+P3, R-M1, R-M2) every structured mapping onto a collection or an item of one goes through, and the Process file
 element (`fileProcessing`, last sections; its report group: `process-files-report`). Mappings in
 general: `process-parameters`.
 Use only when the FULL create-business-process contract (`get-tool-contract` with
 `tool-names: ["create-business-process"]`, `detail: "full"`) names type File in `parameters[]`; the default reply is
 shortened and lists no types, so its silence proves nothing. Such a clio is called File-aware below and in the guides
 that cite this one. An environment whose CrtProcessBuilder predates this support refuses `type: File` as not
-supported and saves nothing, but it does NOT apply the rules below either: an outer-only mapping is stored as sent
-and an item mapping binds the item alone, and a read-back there reports a file collection as `CompositeObjectList`.
+supported and saves nothing, but it does NOT apply the rules below either: it stores an outer-only mapping as sent,
+binds an item mapping to the item alone and reads a file collection back as `CompositeObjectList`.
 A File-aware clio refuses such an environment up front; the remedy it names is `install-process-builder`, which
 you run only after the user approves it (`core-rules`).
 
@@ -37,15 +37,15 @@ you run only after the user approves it (`core-rules`).
   type `FileCollection`, with its `itemProperties`. Both types re-submit as written: `FileLocator` is an accepted
   type name, and `FileCollection` rebuilds the same shape. An element's file collection keeps the platform name
   `CompositeObjectList`.
-- ITEM NAME: a file collection made in the process designer may name its one item otherwise (`Attachment`). It
+- ITEM NAME: a file collection made in the designer may name its one item otherwise (`Attachment`). It
   still reads back as `FileCollection`, with its real item name (measured on CrtProcessBuilder 1.6.6.98 on
   2026-10-14). On THAT process, address the item by that name. A process REBUILT from the description names the
   item `File`, so a re-sent mapping that still names `AttachmentsParameter.Attachment` is refused ("has no item
   'Attachment'", followed by the items it has): rename that segment to `File`.
-- A value that is exactly one reference to another element's output is reported with sourceElement +
+- A value that is exactly one reference to an element output is reported with sourceElement +
   sourceElementParameter (dotted for an item: ObjectFiles.File) beside the raw value, when re-sending those names
   would change no other level; anything else, a process parameter reference included, comes back only as the raw
-  formula. Re-send a binding by name, not as an expression, so the rules below run.
+  formula. Re-send a binding by name so the rules below run.
 
 == Where the files come from ==
 - The Process file element outputs: Object attachments `ObjectFiles` (item `File`, the files it read), Generated
@@ -56,10 +56,10 @@ you run only after the user approves it (`core-rules`).
   the output, which binds both levels.
 
 == Binding a collection: both levels ==
-When an element or a sub-process reads a collection input, the run time builds each row from that input's own
-items (platform source): an item left unbound reads empty, and the Process file element fails on it. So a collection
-is bound at two levels, the collection (which rows) and its item (what each row holds), as the designer does in one
-gesture. With a File-aware clio every structured mapping
+When an element or a sub-process reads a collection input, the run time builds each row from the items of that
+input (platform source): an unbound item reads empty, and the Process file element fails on it. So a collection
+is bound at two levels, the collection (which rows) and its item (what each row holds), as the designer does at
+once. With a File-aware clio every structured mapping
 (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below,
 through mappings[], addMapping, setConnections and the approval block; a refused mapping writes no value. A dotted
 name addresses an item on either side: DocumentsParameter.File as processParameter or targetProcessParameter,
@@ -68,9 +68,9 @@ A collection TAKES FILES when it is (a) the `Files` input of the Process paramet
 (`ProcessFileProcessingUserTask`), or (b) a process parameter of the FileCollection shape. P2 and R-M2 apply to these
 targets only.
 - P1 — an ITEM from an ITEM (InputRecordCollection.ContractFileParameter from DocumentsParameter.File): the target's
-  collection is bound to the source's collection as well, innermost first, for as many levels as the source has.
+  collection is bound to the source's as well, innermost first, for as many levels as the source has.
   It applies to every collection, a multi-instance `InputRecordCollection` included (`process-sub-process`). A
-  target collection already bound to that source is left as it is; one bound to anything else refuses the mapping:
+  target collection already bound to that source is kept; one bound to anything else refuses the mapping:
   one collection cannot take its rows from two. A source nested deeper than the target is refused: outside its row
   it reads empty.
 - P2 — a COLLECTION onto a collection that takes files: each file item of the target is bound to the source item of
@@ -97,8 +97,8 @@ targets only.
   its notice names the old binding. Outer, then followed by a single-file mapping onto its item: the collection is
   cleared (P3). So copy a whole collection with the outer mapping ALONE, and pass one file with the item mapping
   alone. Onto any other collection (a multi-instance InputRecordCollection, a sub-process input) a later outer
-  mapping is NOT checked against its items: from another source it leaves them reading the old one, silently. There,
-  map the outer level first; P1 then refuses an item taken from another collection.
+  mapping is NOT checked against its items: from another source it silently leaves them reading the old one. There,
+  map the outer level first: P1 then refuses an item from another collection.
 - An `expression` goes through as given; only its meta-path tokens are checked, and none of the rules above runs on
   it (the stored text has its GUIDs lower-cased). A misspelled token, a token from another process and a column of a
   collection item are refused; a token that names an item (`Files.File`) is accepted. Prefer a structured source.
@@ -107,42 +107,43 @@ targets only.
 1. Keep the files an element produced:
    {"op": "addParameter", "parameter": {"name": "DocumentsParameter", "type": "FileCollection"}}, then
    {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
-   "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File and
-   says so in a notice.
+   "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File,
+   with a notice.
 2. Hand them to a Process parameter element: its `files` group (last section), or onto one built in the designer
    {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
-   "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on a
-   stand on designer-made elements: one run of recipes 1 and 2 copied the three source files to the target record,
-   names and bytes equal.
-3. One called-process run per file: the callee declares a File input; the caller's Sub-process element is
+   "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on
+   CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one run of recipes 1 and 2 copied the three
+   source files to the target record, names and bytes equal.
+3. One called-process run per file: the callee declares a File input; the calling Sub-process element is
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.
-   Send the InputRecordCollection mapping `process-sub-process` asks for FIRST and from the SAME collection (a P2-MI
-   notice until the item is mapped): see Order matters.
+   Send the InputRecordCollection mapping that guide asks for FIRST, from the SAME collection (a P2-MI
+   notice until the item is mapped; see Order matters).
 4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM from the source's file item; P1 binds the
    input too. That input does not take files: an outer-only mapping onto it is stored unpaired. Neither form has
-   been run on a stand yet.
-5. Verify an element input with `describe-business-process element=<name>` and a process parameter (recipe 1) with
-   `mode=full`: each level shows its source.
+   been run on a stand.
+5. Verify with `describe-business-process element=<name>` (an element input) or `mode=full` (a process
+   parameter): each level shows its source.
 
 == Other refusals ==
 - An addMapping value onto any file or collection target: a file has no constant form, so map it.
 - setParameter with type FileCollection on a collection of another shape: remove it and add it again.
 - removeParameter of a collection while a mapping reads one of its ITEMS (`process-parameters` owns that guard).
-Every refusal here and above names the way forward and saves nothing: fix the call, do not re-send it unchanged.
+Every refusal here and above names the way forward and saves nothing: fix the call before re-sending.
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
-refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106 if it offers report and files), as
-above. The block carries ONE group, and the group IS the variant: `attachments` (Object attachments), `report`
-(Generated report: `process-files-report` owns it) or `files` (Process parameter, last section); a package older than
-1.6.6.105 writes attachments only and refuses the other two by name. Omit `userTaskName`. The generic userTask route
-naming any of the three Process file tasks is refused: build them only here.
+refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106, for every group, if it also offers report
+and files), as above. The block carries ONE group, and the group IS the variant: `attachments` (Object
+attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last
+section); a package older than 1.6.6.105 writes attachments only and refuses the other two by name. Omit
+`userTaskName`. The generic userTask route naming any of the three Process file tasks is refused: build them only
+here.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
 "AccountParameter"}}, "saveTo": {"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
 - `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as in the
-  designer: an object with its own attachment object is dedicated; one without keeps its files in SysFile, and
-  SysFile storage is refused in this version, on either side and by `setFilter`.
+  designer: dedicated for an object with its own attachment object, otherwise SysFile, and SysFile storage is
+  refused in this version, on either side and by `setFilter`.
 - `attachments.recordId`, WHOSE files: `value` (an existing record's id), `processParameter`, `sourceElement` +
   `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.
   A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per
@@ -190,5 +191,6 @@ useInProcess is refused.
 - An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.
 - Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids. It has no filter.
 - Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue
-  for a stored shape that would not resubmit as stored or a stored action other than save (it fails at run time).
-  Remove it before resubmitting.
+  for a stored shape that would not resubmit as stored (none: nothing bound, the platform refuses to start the
+  process) and for an action other than save: a stored useInProcess or an invalid one fails at run time, a mapped
+  one is decided at run time. Remove it before resubmitting.
