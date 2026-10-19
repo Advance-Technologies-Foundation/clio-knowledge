@@ -34,7 +34,11 @@ Required inputs
 Optional inputs
 - `caption`: human-readable caption. Defaults to `schema-name` when omitted.
 - `description`: free-form description.
-- `entity-schema-name`: existing entity schema. When set, the new page records the entity in its dependencies; leave blank for template-pure pages (dashboards, desktops, blank pages, custom pages).
+- `entity-schema-name`: existing entity schema the page is bound to; leave blank for template-pure pages (dashboards, desktops, blank pages, custom pages). From clio 8.1.0.142, a WEB page created with it carries a data source bound to the entity, chosen by the template:
+  * a template with no primary data source (tabbed, mini, blank page templates) gets a page-scoped `PDS` that becomes `primaryDataSourceName` — the shape of stock record pages such as `Accounts_FormPage`;
+  * a template that names a primary data source gets that one bound;
+  * `ListPageV3Template` declares its own `PDS` as a `viewElement` list source; it is bound to the entity and NOT made primary (stock list pages have no primary data source).
+  A mobile page, or a template clio could not read, gets no data source: the entity is only recorded in the page dependencies and the response `note` says so — bind it with `update-page`. On an older clio the entity only reaches the dependencies on every page, so fields, `crt.Connections`, `crt.Feed` and the template's `#DataSourceEntityName()#` show nothing until you bind it with `update-page` in the shape the template takes above: a page-scoped `PDS` made `primaryDataSourceName` only for a template with no primary data source; the template's own primary for a template that names one; for `ListPageV3Template`, its existing `PDS` bound to the entity and NOT made primary (do not add a second `PDS`).
 
 Validation and failure modes
 - Unknown template: `create-page` rejects the call with a readable error; always call `list-page-templates` first when unsure.
@@ -47,6 +51,7 @@ Validation and failure modes
 create-page response fields
 - `schemaType` — integer schema type from the template used: 9 = Freedom UI web page, 10 = mobile page.
 - `templateName` — name of the template (e.g. `BlankPageTemplate`, `BaseHomePage`).
+- `dataSourceName` / `primaryDataSourceName` (clio 8.1.0.142 and later) — the data source bound to `entity-schema-name`, and the page's primary data source when it is one; absent when nothing was bound.
 
 Designer type mapping
 - `BaseHomePage` (schemaType=9): opens in the **Homepage designer**. Do NOT use the standard Freedom UI page designer URL for this template. A `BaseHomePage` page becomes a workplace's home page only after you bind it — read get-guidance name `home-page`.
