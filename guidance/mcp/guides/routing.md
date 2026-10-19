@@ -160,7 +160,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
-  - make a Freedom UI section reachable by PORTAL / self-service (external) users — the end-to-end flow that sequences page binding, workplace placement, and object-access grant for the All external users audience (deny-by-default) -> name=portal-sections
+  - make a Freedom UI section reachable by PORTAL / self-service (external) users — the end-to-end flow that sequences page binding, workplace placement, object-access grant, and default record rules for the All external users audience (deny-by-default) -> name=portal-sections
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
