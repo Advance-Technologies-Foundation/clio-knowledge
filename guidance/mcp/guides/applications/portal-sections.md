@@ -54,28 +54,41 @@ Do them in this order — a later step assumes the earlier one exists.
    fields — and the employees' page shows everything the object holds. When the request does not say
    what the portal page shows, ASK THE USER before designing it: which fields and details external
    users see, which of them they may edit, and whether they add records. That scope drives the rest:
-   step 2 binds this page, and step 4 grants only the objects it shows.
+   step 2 binds this page, and step 4 grants only the objects it shows. The page is a LAYOUT, not an
+   access boundary: the object grant of step 4 exposes EVERY column of the object to every external
+   user, whatever the page shows. Hiding a field from them needs column permissions, which this flow
+   does not set — say so to the user when the scope leaves fields out for confidentiality.
 
 2. Bind the portal page for the portal audience — owner: `related-page-binding`. Give the section's
    object an explicit `All external users` entry that opens the portal page of step 1
    (`create-related-page-addon` with `--portal-default-page`, and `--portal-add-page` if adding differs);
-   the internal base default does not cover portal users.
+   the internal base default does not cover portal users. The binding is per OBJECT and audience, not
+   per section: every section over the same object opens the same portal page for external users. When
+   the object already has an `All external users` page, reuse it, or ASK THE USER before replacing it —
+   a new binding changes the form every other portal section over that object opens.
 
 3. Place the section in a workplace the portal audience can see — owner: `workplaces`
    (`place-section-in-workplace` with `All external users` in `roles`). A workplace no external role can
    see hides the section from the menu. Confirm placement and audience with the user, as that guide
-   requires.
+   requires. Version boundary: `place-section-in-workplace` needs clio 8.1.0.141 and later; on an older
+   clio, stop here and tell the user to update clio.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`. Follow its "Give a role access to
    an object and its lookups" flow with grantee `All external users`; it owns the listing, the preview,
-   the grant and the verify. `set-object-rights` writes at once: you MUST preview each call and ASK THE
-   USER before any write, and GRANT each approved object in its own call — first
+   the grant and the verify. Version boundary: `set-object-rights` / `get-object-rights` need a clio newer
+   than 8.1.0.137; on an older clio, stop before this step and tell the user to update clio.
+   `set-object-rights` writes at once: you MUST preview each call and ASK THE USER before any write, and
+   GRANT each approved object in its own call. The preview MUST carry exactly the arguments of the
+   intended write, and the write is the previewed call minus `preview`, nothing else — for example
    `set-object-rights entity-schema-name=<Object> grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f operations=read preview=true`,
-   then, on the user's yes, the same call without `preview`. What the portal case adds:
+   or, on an object not administered by operation permissions yet,
+   `set-object-rights entity-schema-name=<Object> grantee=720b771c-e7a7-4f31-9cfb-52cd21c3739f operations=read enable-operation-permissions preview=true`.
+   If a write is refused, or any argument changes after the user's yes, preview again and ask again.
+   What the portal case adds:
    - the list is what the portal pages show — the section's object, the object of each detail on the
      page, and the lookup object of each column shown — not only what `include-connected` reports;
    - each grant is a disclosure decision: say that EVERY external user gets that access, on EVERY record
-     of the object. A shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
+     and EVERY column of the object, whatever the portal page shows. A shared lookup (`Account`, `Contact`, price lists, catalogs) can carry PII or internal
      reference data — leave such a lookup out and handle it another way;
    - `read`, plus `create`/`edit` on the section's object only where external users genuinely author
      records. An object not administered by operation permissions is CLOSED to external users, so their
@@ -87,9 +100,11 @@ Do them in this order — a later step assumes the earlier one exists.
      read-back. Which RECORDS they reach is step 5.
 
 5. Set RECORD access on the objects of step 4 — owner: `default-record-rights`; it owns the switch, the
-   rules, the preview and the apply. With "Use record permissions" OFF every external user with read
-   reaches EVERY record — keep it OFF only if that is intended. With it ON the rules decide two
-   directions, and they are separate decisions for the user:
+   rules, the preview and the apply. Version boundary: the record tools need a clio newer than
+   8.1.0.140; on an older clio, use the "Use record permissions" page of the Object permissions designer.
+   With "Use record permissions" OFF every external user with read reaches EVERY record of the object.
+   Keeping it OFF is the user's decision, never yours: ASK THE USER, naming that consequence. With it ON
+   the rules decide two directions, and they are separate decisions for the user:
    - portal → employees: a record a portal user creates is reached by employees only through a rule with
      AUTHOR `All external users` (or the portal role) and an internal GRANTEE (`All employees`, or a
      narrower role such as a support line), usually with `read` and `edit`. This rule is REQUIRED on
@@ -120,7 +135,3 @@ confirmed at the `RightManagementService` layer; whether portal visibility addit
 test, not the per-step read-backs. On an object with record permissions ON, also check the other
 direction: an employee in the rule's grantee role, without "view any data", opens a record the portal
 user created — a system administrator sees it whatever the rules say, so they prove nothing.
-
-Version boundary: steps 3, 4 and 5 need the clio releases named in `workplaces` (clio 8.1.0.141 and later
-for `place-section-in-workplace`), `object-rights` and `default-record-rights`; on an older clio, stop
-before that step and use the fallback that guide names.
