@@ -29,7 +29,7 @@ public sealed class ProcessFileGuidanceTests
     private const string ProcessParameterHeading = "== The Process parameter variant: the `files` group ==";
 
     [Test]
-    [Description("The element section gates the type on the contract, the 1.6.6.103 floor and the 1.6.6.106 floor a clio that also offers report and files applies to every group, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
+    [Description("The element section gates the type on the contract, the 1.6.6.103 floor and the 1.6.6.107 floor a clio that also offers report and files applies to every group, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
     public void Section_ShouldGateTheElementAndMakeTheGroupTheVariant()
     {
         // Arrange
@@ -39,7 +39,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`)",
-            "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.106, for every group, if it also offers report and files), as above.",
+            "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.107, for every group, if it also offers report and files), as above.",
             "The block carries ONE group, and the group IS the variant",
             "`attachments` (Object attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last section)",
             "a package older than 1.6.6.105 writes attachments only and refuses the other two by name.",
@@ -171,7 +171,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The catalog lists fileProcessing as buildable from 1.6.6.103 with report and files from 1.6.6.106, refuses the generic route for all three Process file tasks, names the guide of each group, and maps all three data-ids to the one dedicated type.")]
+    [Description("The catalog lists fileProcessing as buildable from 1.6.6.103 with report and files from 1.6.6.107, refuses the generic route for all three Process file tasks, names the guide of each group, and maps all three data-ids to the one dedicated type.")]
     public void Catalog_ShouldListTheElementAndItsDedicatedType()
     {
         // Arrange
@@ -181,7 +181,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.103**:",
-            "`attachments` (Object attachments), and from **1.6.6.106** also `report` (Generated report) and `files` (Process parameter) - `process-files` owns the block, `process-files-report` its `report` group.",
+            "`attachments` (Object attachments), and from **1.6.6.107** also `report` (Generated report) and `files` (Process parameter) - `process-files` owns the block, `process-files-report` its `report` group.",
             "On the generic `userTask` route all three Process file tasks (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that route carries no file source, record or target.",
             "SEVEN user tasks have their own dedicated build type",
             "`objectFileProcessingUserTask`, `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:\"fileProcessing\"` with the matching `attachments`, `report` or `files` group, see `process-files`"

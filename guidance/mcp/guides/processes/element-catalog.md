@@ -127,7 +127,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 - `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.103**: reads a record's
   attachments, generates a report or takes the files the process holds, and saves them to a record's attachments or
   hands them to the following elements. Its `fileProcessing` block carries ONE group, which is the variant:
-  `attachments` (Object attachments), and from **1.6.6.106** also `report` (Generated report) and `files` (Process
+  `attachments` (Object attachments), and from **1.6.6.107** also `report` (Generated report) and `files` (Process
   parameter) - `process-files` owns the block, `process-files-report` its `report` group. On the generic `userTask`
   route all three Process file tasks (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`,
   `ProcessFileProcessingUserTask`) are REFUSED: that route carries no file source, record or target.

@@ -63,7 +63,8 @@ its filter selects, then saves the files to a record's attachments or hands them
   reads under another culture is not measured). `{}` clears it; sending one clears a stored `fileNameSuffixColumn`.
 - `fileNameSuffixColumn`: the code of a TEXT column of the report's object, with separate reports on and without
   `fileNameSuffix`. Only the text types the designer offers are accepted (localizable text too); a hashed, secure or
-  color column is refused, because the run time writes its value into every file name. `""` clears it.
+  color column is refused: the designer does not offer them, and the run time reads the column with no rights checks
+  and writes its value into every file name. `""` clears it.
 
 == Where the files go ==
 - Save: `saveTo` as in `process-files`. A filter that can select several records attaches every report to the ONE
