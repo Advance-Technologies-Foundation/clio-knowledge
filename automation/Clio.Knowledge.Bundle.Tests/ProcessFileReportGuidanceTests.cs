@@ -172,7 +172,8 @@ public sealed class ProcessFileReportGuidanceTests
             "`false` also clears a stored `fileNameSuffixColumn`, with a notice.",
             "A file is named after the printable's caption, read in the culture of the user the process runs as",
             "a constant is stored as a localizable value, as the designer stores it (how it reads under another culture is not measured).",
-            "`fileNameSuffixColumn`: the code of a TEXT column of the report's object, with separate reports on and without `fileNameSuffix`."
+            "`fileNameSuffixColumn`: the code of a TEXT column of the report's object, with separate reports on and without `fileNameSuffix`.",
+            "Only the text types the designer offers are accepted (localizable text too); a hashed, secure or color column is refused, because the run time writes its value into every file name."
         ];
 
         // Assert
