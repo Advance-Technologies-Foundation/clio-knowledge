@@ -263,4 +263,24 @@ public sealed class PortalSectionsGuidanceTests
         // Assert
         names.Should().BeFalse(because: $"'{retired}' is no longer a set-object-rights argument");
     }
+
+    [Test]
+    [Description("The portal placement passes the Portal workplace type with its first clio version - a gated placeholder until the clio release that ships it is tagged - and routes the type rules to workplaces instead of restating them.")]
+    public void PortalSections_ShouldPassThePortalWorkplaceType()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), PortalSectionsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().MatchRegex(
+            @"`workplace-type=portal`, clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) and later",
+            because: "a portal section needs a Portal workplace, set by the tool, and an older clio does not know the argument");
+        normalized.Should().Contain("On a clio that has the tool but not `workplace-type`, do what `workplaces` says for that case — do not fall back to manual placement.",
+            because: "a clio with the tool but without the argument still uses the tool, as workplaces says; manual placement would be a regression");
+        normalized.Should().NotContain("never retyped",
+            because: "the refusal of another workplace type is owned by workplaces; a copy here drifts from its owner");
+    }
 }
