@@ -128,9 +128,10 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   attachments, generates a report or takes the files the process holds, and saves them to a record's attachments or
   hands them to the following elements. Its `fileProcessing` block carries ONE group, which is the variant:
   `attachments` (Object attachments), and from **1.6.6.109** also `report` (Generated report) and `files` (Process
-  parameter) - `process-files` owns the block, `process-files-report` its `report` group. On the generic `userTask`
-  route all three Process file tasks (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`,
-  `ProcessFileProcessingUserTask`) are REFUSED: that route carries no file source, record or target.
+  parameter) - `process-files` owns the block, `process-files-report` its `report` group and
+  `process-files-parameter` its `files` group. On the generic `userTask` route all three Process file tasks
+  (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that
+  route carries no file source, record or target.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,

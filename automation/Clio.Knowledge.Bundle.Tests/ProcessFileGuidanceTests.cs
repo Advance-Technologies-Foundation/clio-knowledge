@@ -7,9 +7,10 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <summary>
 /// Pins the guidance for the Process file element (<c>fileProcessing</c>, CrtProcessBuilder 1.6.6.103, with the
 /// <c>report</c> and <c>files</c> groups from 1.6.6.109, the first released cut that carries them): its sections of <c>process-files</c>, which owns the block
-/// (the Object attachments and Process parameter groups), and the buildable row and dedicated-type entry of
+/// (and the Object attachments group), and the buildable row and dedicated-type entry of
 /// <c>process-element-catalog</c>. The Generated report group lives in <c>process-files-report</c>, pinned by
-/// <see cref="ProcessFileReportGuidanceTests"/>. The File and FileCollection parameter rules of the same guide are pinned by
+/// <see cref="ProcessFileReportGuidanceTests"/>, and the Process parameter group in <c>process-files-parameter</c>,
+/// pinned by <see cref="ProcessFileParameterGuidanceTests"/>. The File and FileCollection parameter rules of the same guide are pinned by
 /// <see cref="FileParameterGuidanceTests"/>, which also holds the guide's size target.
 /// </summary>
 /// <remarks>
@@ -26,8 +27,6 @@ public sealed class ProcessFileGuidanceTests
 
     private const string SectionHeading = "== The Process file element: `fileProcessing` ==";
 
-    private const string ProcessParameterHeading = "== The Process parameter variant: the `files` group ==";
-
     [Test]
     [Description("The element section gates the type on the contract, the 1.6.6.103 floor and the 1.6.6.109 floor a clio that also offers report and files applies to every group, says the group sent is the variant among the three groups, that an older package refuses report and files, and that the generic userTask route is refused for all three Process file tasks.")]
     public void Section_ShouldGateTheElementAndMakeTheGroupTheVariant()
@@ -41,7 +40,7 @@ public sealed class ProcessFileGuidanceTests
             "Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`)",
             "such a clio refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.109, for every group, if it also offers report and files), as above.",
             "The block carries ONE group, and the group IS the variant",
-            "`attachments` (Object attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last section)",
+            "`attachments` (Object attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter: `process-files-parameter` owns it)",
             "1.6.6.103 and 1.6.6.104 write attachments only and refuse the other two by name.",
             "Omit `userTaskName`.",
             "The generic userTask route naming any of the three Process file tasks is refused: build them only here."
@@ -69,7 +68,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "`attachments.object`: the record object or its attachment object (`AccountFile`).",
-            "Storage is derived as in the designer: dedicated for an object with its own attachment object, otherwise SysFile; a CrtProcessBuilder of 1.6.6.109 or older refuses SysFile.",
+            "A CrtProcessBuilder of 1.6.6.109 or older refuses SysFile: the remedy, run only after the user approves it (`core-rules`), is `install-process-builder` from a clio that bundles a newer CrtProcessBuilder.",
             "`value` (an existing record's id), `processParameter`, `sourceElement` + `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.",
             "A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per run.",
             "It becomes the filter's record scope: `setFilter` REPLACES the other conditions and keeps the scope - send them all in one call, never the scope column.",
@@ -85,6 +84,32 @@ public sealed class ProcessFileGuidanceTests
         }
         section.Should().NotContain("SysFile storage is refused",
             because: "the bundled package writes SysFile storage, so the earlier refusal would steer an agent away from a buildable element");
+    }
+
+    [Test]
+    [Description("SysFile storage: derived by name (an attachment object named after the object, FileLead for Lead), an unpaired attachment object named directly while its record object derives SysFile with a notice, SysFile columns for sort and setFilter on a SysFile source, the refused RecordId equality, the rows the run time reads, and the Freedom UI attachment list as the measured check of a run.")]
+    public void Section_ShouldStateHowSysFileStorageIsDerivedAndRead()
+    {
+        // Arrange
+        string section = ReadSection();
+
+        // Act
+        string[] clauses =
+        [
+            "Storage is derived as in the designer, by name: dedicated when an attachment object named after the object exists (`<X>File`; Lead's is `FileLead`), otherwise SysFile.",
+            "Name an attachment object no object pairs with by name (`DNSGuideFile`) directly, as `attachments.object`, or as `saveTo.object` with `saveTo.linkColumn`: naming the record object instead derives SysFile, with a notice naming the attachment object whose files the element then does not read or save to (when one of its own lookup columns references the record).",
+            "On a SysFile source, `attachments.sort` and setFilter conditions name SysFile columns (`Name`): a column of the record object (Account address's `GPSE`, which the designer's column list offers) is refused as \"not found on entity 'SysFile'\".",
+            "setFilter also refuses a single `RecordId` equality there: send the record as `attachments.recordId`.",
+            "The run time reads only the SysFile rows whose `RecordSchemaName` is the record object and whose type is File: a file stored without `RecordSchemaName` (for example by a page component whose storage leaves the record schema empty) is never read, and the element completes and copies nothing.",
+            "Verify a run in the record's Freedom UI attachment list: SysFile copies the element saved show there (measured on a stand on 2026-10-20)."
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            section.Should().Contain(clause,
+                because: "the record object of an unpaired attachment object silently reads SysFile, a record-object column is refused on a SysFile source, and a file stored without its record schema is never copied while the run reports success");
+        }
     }
 
     [Test]
@@ -183,7 +208,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "- `fileProcessing` (Process file, alias `processFile`), from CrtProcessBuilder **1.6.6.103**:",
-            "`attachments` (Object attachments), and from **1.6.6.109** also `report` (Generated report) and `files` (Process parameter) - `process-files` owns the block, `process-files-report` its `report` group.",
+            "`attachments` (Object attachments), and from **1.6.6.109** also `report` (Generated report) and `files` (Process parameter) - `process-files` owns the block, `process-files-report` its `report` group and `process-files-parameter` its `files` group.",
             "On the generic `userTask` route all three Process file tasks (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that route carries no file source, record or target.",
             "SEVEN user tasks have their own dedicated build type",
             "`objectFileProcessingUserTask`, `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:\"fileProcessing\"` with the matching `attachments`, `report` or `files` group, see `process-files`"
@@ -199,42 +224,6 @@ public sealed class ProcessFileGuidanceTests
             because: "the Generated report and Process parameter elements build through their groups now");
         catalog.Should().NotContain("the server does not refuse that route",
             because: "the generic route is refused for every Process file task now");
-    }
-
-    [Test]
-    [Description("The Process parameter section: saving only, exactly one source and the refused value, both levels for a collection, one file for a single File, an unset single File stops the process, an empty collection copies nothing, an expression goes through as given, the outputs, and the block-level describe-only bindingLevels with its issues: none means the platform refuses to start the process, a stored useInProcess or an invalid action fails at run time, and a mapped action is decided at run time.")]
-    public void Section_ShouldStateTheProcessParameterGroup()
-    {
-        // Arrange
-        string section = ReadSection(ProcessParameterHeading);
-
-        // Act
-        string[] clauses =
-        [
-            "It copies files the process holds to a record's attachments, and only that: saveTo is required on create and useInProcess is refused.",
-            "`files` takes exactly ONE of processParameter, sourceElement + sourceElementParameter, or expression. A value is refused (a file has no constant form)",
-            "a source with no file item or with several, a parameter of the element itself, and any mapping FROM its Files.",
-            "A collection (a FileCollection, or an element's ObjectFiles or ReportFiles) binds BOTH levels, Files and Files.File: one copy per row.",
-            "A single File binds Files.File only (P3) and copies that one file.",
-            "A single File must be set before the element runs: an unset one stops the process with an error.",
-            "An empty collection copies nothing, silently.",
-            "An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.",
-            "Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids.",
-            "Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue for a stored shape that would not resubmit as stored (none: nothing bound, the platform refuses to start the process) and for an action other than save: a stored useInProcess or an invalid one fails at run time, a mapped one is decided at run time.",
-            "Remove it before resubmitting."
-        ];
-
-        // Assert
-        section.Should().NotBeEmpty(because: "anti-vacuity: process-files carries the Process parameter section");
-        foreach (string clause in clauses)
-        {
-            section.Should().Contain(clause,
-                because: "the variant only saves, an unset single File fails the run with an error, and an empty collection succeeds while copying nothing");
-        }
-        section.Should().NotContain("files.bindingLevels",
-            because: "describe writes bindingLevels on the fileProcessing block, not inside the files group");
-        section.Should().NotContain("a stored action other than save (it fails at run time)",
-            because: "a mapped action is decided at run time and does not necessarily fail; only a stored useInProcess or an invalid action does");
     }
 
     [Test]

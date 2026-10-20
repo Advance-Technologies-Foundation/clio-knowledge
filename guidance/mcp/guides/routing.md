@@ -75,6 +75,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     the next elements) -> name=process-files
     - a GENERATED REPORT (its `report` group: the printable, the records, the file names, temporary files) ->
       name=process-files-report (after name=process-files)
+    - copy the files the PROCESS holds to a record's attachments (its `files` group: the one source, both levels,
+      a single File) -> name=process-files-parameter (after name=process-files)
   - compute a value with a FORMULA (an `expression` mapping source) -> name=process-formulas
   - verify a stored formula or condition, match a formula refusal message to its fix, or a formula refusal
     about the CrtProcessBuilder version -> name=process-formulas-details (after name=process-formulas)
