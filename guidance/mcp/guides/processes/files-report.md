@@ -72,7 +72,7 @@ its filter selects, then saves the files to a record's attachments or hands them
   `saveTo` record, with a notice: set `report.recordId` to generate one. After a save, `ReportFiles` points at the
   saved attachments.
 - Use in process: the files are temporary and go on as `ReportFiles`; map that collection to a Process parameter
-  element (`files`) or to a FileCollection (`process-files`). They live while the process instance runs and are
+  element (`files`: `process-files-parameter`) or to a FileCollection (`process-files`). They live while the process instance runs and are
   deleted when it completes (measured on a stand: one temporary file while the process waited in a Perform task,
   none after it completed, and the copy a Process parameter element saved from it stayed). Read from source, not
   measured: a sub-process deletes the files it generated when IT completes, so one that hands `ReportFiles` to its

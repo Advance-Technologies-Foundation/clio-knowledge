@@ -146,18 +146,16 @@ them only here.
 - `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as in the
   designer, by name: dedicated when an attachment object named after the object exists (`<X>File`; Lead's is
   `FileLead`), otherwise SysFile. Name an attachment object no object pairs with by name (`DNSGuideFile`) directly,
-  as `attachments.object`, or as `saveTo.object` with `saveTo.linkColumn`: naming the record object instead derives
-  SysFile, with a notice naming the attachment object whose files the element then does not read or save to (when
-  one of its own lookup columns references the record). A CrtProcessBuilder of 1.6.6.109 or older refuses SysFile:
+  as `attachments.object` (no `recordId` then: select its files with setFilter), or as `saveTo.object` with
+  `saveTo.linkColumn`: naming the record object keeps that object's own storage, with a notice naming the attachment
+  object the element then does not read or save to (when one of its own lookup columns references the record). A CrtProcessBuilder of 1.6.6.109 or older refuses SysFile:
   the remedy, run only after the user approves it (`core-rules`), is `install-process-builder` from a clio that
   bundles a newer CrtProcessBuilder.
 - On a SysFile source, `attachments.sort` and setFilter conditions name SysFile columns (`Name`): a column of the
-  record object (Account address's `GPSE`, which the designer's column list offers) is refused as "not found on
-  entity 'SysFile'". setFilter also refuses a single `RecordId` equality there: send the record as
-  `attachments.recordId`.
+  record object (Account address's `GPSE`, which the designer's column list offers) is refused, naming SysFile.
+  Send the record as `attachments.recordId`, never as a `RecordId` equality in setFilter (refused there).
 - The run time reads only the SysFile rows whose `RecordSchemaName` is the record object and whose type is File: a
-  file stored without `RecordSchemaName` (for example by a page component whose storage leaves the record schema
-  empty) is never read, and the element completes and copies nothing. Verify a run in the record's Freedom UI
+  file stored without `RecordSchemaName` is never read, and the element completes and copies nothing. Verify a run in the record's Freedom UI
   attachment list: SysFile copies the element saved show there (measured on a stand on 2026-10-20).
 - `attachments.recordId`, WHOSE files: `value` (an existing record's id), `processParameter`, `sourceElement` +
   `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.

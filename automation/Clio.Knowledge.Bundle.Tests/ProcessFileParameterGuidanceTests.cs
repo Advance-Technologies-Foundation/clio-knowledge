@@ -130,7 +130,7 @@ public sealed class ProcessFileParameterGuidanceTests
         bool ownsTheGroup = guide.Contains("This guide owns the `files` group of the Process file element (`fileProcessing`)",
             StringComparison.Ordinal);
         bool readsTheEntryFirst = guide.Contains(
-            "`process-files` owns the rest of the element (the contract gate, the three groups, `action`, `saveTo`, the setElement merge, the describe-only members, the consumers), the File and FileCollection parameters and the two-level rules (P1-P3) this group applies: read it first.",
+            "`process-files` owns the rest of the element (the contract gate, the `attachments` group, `action`, `saveTo`, the setElement merge, the describe-only members other than `bindingLevels`, the consumers), the File and FileCollection parameters and the two-level rules (P1-P3) this group applies: read it first.",
             StringComparison.Ordinal);
 
         // Assert

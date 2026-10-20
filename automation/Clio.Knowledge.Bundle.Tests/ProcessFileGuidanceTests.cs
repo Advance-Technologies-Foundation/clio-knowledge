@@ -97,10 +97,10 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Storage is derived as in the designer, by name: dedicated when an attachment object named after the object exists (`<X>File`; Lead's is `FileLead`), otherwise SysFile.",
-            "Name an attachment object no object pairs with by name (`DNSGuideFile`) directly, as `attachments.object`, or as `saveTo.object` with `saveTo.linkColumn`: naming the record object instead derives SysFile, with a notice naming the attachment object whose files the element then does not read or save to (when one of its own lookup columns references the record).",
-            "On a SysFile source, `attachments.sort` and setFilter conditions name SysFile columns (`Name`): a column of the record object (Account address's `GPSE`, which the designer's column list offers) is refused as \"not found on entity 'SysFile'\".",
-            "setFilter also refuses a single `RecordId` equality there: send the record as `attachments.recordId`.",
-            "The run time reads only the SysFile rows whose `RecordSchemaName` is the record object and whose type is File: a file stored without `RecordSchemaName` (for example by a page component whose storage leaves the record schema empty) is never read, and the element completes and copies nothing.",
+            "Name an attachment object no object pairs with by name (`DNSGuideFile`) directly, as `attachments.object` (no `recordId` then: select its files with setFilter), or as `saveTo.object` with `saveTo.linkColumn`: naming the record object keeps that object's own storage, with a notice naming the attachment object the element then does not read or save to (when one of its own lookup columns references the record).",
+            "On a SysFile source, `attachments.sort` and setFilter conditions name SysFile columns (`Name`): a column of the record object (Account address's `GPSE`, which the designer's column list offers) is refused, naming SysFile.",
+            "Send the record as `attachments.recordId`, never as a `RecordId` equality in setFilter (refused there).",
+            "The run time reads only the SysFile rows whose `RecordSchemaName` is the record object and whose type is File: a file stored without `RecordSchemaName` is never read, and the element completes and copies nothing.",
             "Verify a run in the record's Freedom UI attachment list: SysFile copies the element saved show there (measured on a stand on 2026-10-20)."
         ];
 
@@ -108,7 +108,7 @@ public sealed class ProcessFileGuidanceTests
         foreach (string clause in clauses)
         {
             section.Should().Contain(clause,
-                because: "the record object of an unpaired attachment object silently reads SysFile, a record-object column is refused on a SysFile source, and a file stored without its record schema is never copied while the run reports success");
+                because: "the record object of an unpaired attachment object silently reads its own storage instead, a record-object column is refused on a SysFile source, and a file stored without its record schema is never copied while the run reports success");
         }
     }
 

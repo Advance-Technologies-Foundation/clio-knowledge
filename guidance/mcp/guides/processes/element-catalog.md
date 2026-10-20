@@ -159,7 +159,7 @@ modes (mode/sender/recipients/subject/body OR template + templateEntity/options/
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; `approvalUserTask` ->
 `type:"approval"`, see `process-approval`; and the three Process file tasks, `objectFileProcessingUserTask`,
 `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:"fileProcessing"` with the matching
-`attachments`, `report` or `files` group, see `process-files` — the generic route carries no file source, record or
+`attachments`, `report` or `files` group, see `process-files` (`files`: `process-files-parameter`) — the generic route carries no file source, record or
 target, and it is REFUSED.)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
