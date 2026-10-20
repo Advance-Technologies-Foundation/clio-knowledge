@@ -15,8 +15,9 @@ To place a section in a workplace, grant roles, or move an app out of `My applic
 `place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio 8.1.0.141 and later).
 Arguments: `environment-name`, `section-code`, `workplace-name`, `package-name`, `roles`; optional
 `mode` `existing`|`new`|`none`, `client-type` (`web` default), `remove-from-my-applications` (default
-true), `position`. It resolves client type, section and roles, binds each row it owns (a
-workplace with `Type` and `LoaderId`), never duplicates or deletes, and is safe to re-run. A move with no roles and
+true), `position`, `workplace-type` (clio 8.1.0.143 and later). It resolves client
+type, section and roles, binds each row it owns (a workplace with `Type` and `LoaderId`), never
+duplicates or deletes, and is safe to re-run. A move with no roles and
 `remove-from-my-applications=true` is refused (the section would become invisible). Relay `warnings`
 (a section code, workplace or role name shared by several rows is resolved by a rule or refused: say
 which row it took), report `section-workplaces` and give the user `next-step` (log out and in).
@@ -30,8 +31,23 @@ is NOT verified: surface that to the user and prefer a workplace your own packag
 It takes no `confirm`, and it does not choose for you: ask the questions below FIRST, then pass the
 user's workplace and roles. Do by hand only what it does not do — deletes and removals (Deleting a
 workplace, `workplaces-details`), home pages (`home-page`, and the `My applications` check below), a
-rename or other workplace update (Operations), and a tool failure or an older clio
-(`workplaces-details`, manual placement).
+rename or other workplace update (Operations), and a tool failure or a clio without the tool
+(`workplaces-details`, manual placement) — except a missing or rejected `workplace-type` for an
+external-user workplace (Portal / external-user workplaces below).
+
+## Portal / external-user workplaces
+A workplace has a type (`SysWorkplaceType`): `general` (employees), `portal`, `self-service`. For
+external users (`All external users`, the portal audience) pass `workplace-type=portal` to
+`place-section-in-workplace` (clio 8.1.0.143 and later): a NEW workplace is created
+with that type, and the result's `workplace` block reports `type`. An EXISTING workplace of another
+type is refused before any write and the error names its current type — the tool never retypes a
+workplace; choose a workplace of the right type or a new name. Without the argument a NEW workplace
+gets the platform default type (`general`) and an existing one is not checked. A clio that has `place-section-in-workplace` but not `workplace-type`
+(8.1.0.141 and later, before 8.1.0.143: `get-tool-contract` does not list it, or
+the call rejects it): for an external-user workplace, stop and ask the user to update clio to
+8.1.0.143 or later — do not place the section without the type. A rejected
+`workplace-type` is not the tool failure that leads to manual placement: never place the section or
+retype a workplace by hand instead.
 
 ## The three tables
 - `SysWorkplace` — the workplace: `Name`; `Position` (order in the switcher);
