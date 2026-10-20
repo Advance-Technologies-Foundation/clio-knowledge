@@ -1,8 +1,7 @@
 clio MCP process-files guide — File and FileCollection parameters, two-level collection binding, the Process file element
 
 Scope
-This guide owns the `File` and `FileCollection` process parameter types, the two-level rules (P1, P2, P2-MI,
-P3, R-M1, R-M2) every structured mapping onto a collection or an item of one goes through, and the Process file
+This guide owns the `File` and `FileCollection` process parameter types, the two-level rules (P1-P3, P2-MI, R-M1-R-M3) every structured mapping onto a collection or an item of one goes through, and the Process file
 element (`fileProcessing`, last sections; its report group: `process-files-report`). Mappings in
 general: `process-parameters`.
 Use only when the FULL create-business-process contract (`get-tool-contract` with
@@ -69,9 +68,9 @@ A collection TAKES FILES when it is (a) the `Files` input of the Process paramet
 targets only.
 - P1 — an ITEM from an ITEM (InputRecordCollection.ContractFileParameter from DocumentsParameter.File): the target's
   collection is bound to the source's as well, innermost first, for as many levels as the source has.
-  It applies to every collection, a multi-instance `InputRecordCollection` included (`process-sub-process`). A
-  target collection already bound to that source is kept; one bound to anything else refuses the mapping:
-  one collection cannot take its rows from two. A source nested deeper than the target is refused: outside its row
+  Every collection, a multi-instance `InputRecordCollection` included (`process-sub-process`). A
+  target collection already bound to that source is kept; one bound elsewhere is refused:
+  a collection cannot take rows from two. A source nested deeper than the target is refused: outside its row
   it reads empty.
 - P2 — a COLLECTION onto a collection that takes files: each file item of the target is bound to the source item of
   the same name (case-insensitive) or, when each side has exactly one file item, to that one (`Files.File` from
@@ -83,15 +82,17 @@ targets only.
 - P2-MI — a mapping that binds a multi-instance `InputRecordCollection` (as its target, or through P1) while one of
   its file items, a File parameter of the called process, stays unbound is accepted with a notice: that parameter
   "will be empty on every iteration" unless you map `InputRecordCollection.<F>`. Iterating over records without
-  files is legitimate; the notice only names the gap.
+  files is legitimate.
 - P3 — a SINGLE file (not an item) onto a file item of a single-instance owner (any element but a multi-instance
   sub-process, or the process itself: `DocumentsParameter.File`) clears every bound collection above that item, one
   notice per level: the collection now carries that one file instead of one row per source row, and reads as one
   row at run time (measured on 2026-10-19 with the Process parameter element: one copy).
 - R-M1 — a single File (a process parameter, or a flat File input of an element, a single-instance sub-process's
   included) from an ITEM of a collection is refused ("use a FileCollection, or a multi-instance sub-process"):
-  outside a row the item reads empty. Measured on Creatio 10.1.37 on 2026-10-02: written by an older
-  CrtProcessBuilder that accepted it, that shape delivered no file while the source held two.
+  outside a row the item reads empty. Measured: written by an older package that accepted it, it delivered no
+  file from two.
+- R-M3 — a collection that is an ITEM of another collection is refused as a collection's source: it reads empty
+  outside a row.
 - Order matters. Onto a collection that takes files, the LAST accepted mapping decides (an item taken from another
   collection is refused by P1). Item then outer: the outer one re-pairs an item bound outside its source (P2), and
   its notice names the old binding. Outer, then followed by a single-file mapping onto its item: the collection is
@@ -133,7 +134,7 @@ Every refusal here and above names the way forward and saves nothing: fix the ca
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
-refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.108, for every group, if it also offers report
+refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.109, for every group, if it also offers report
 and files), as above. The block carries ONE group, and the group IS the variant: `attachments` (Object
 attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last
 section); 1.6.6.103 and 1.6.6.104 write attachments only and refuse the other two by name. Omit
