@@ -3,8 +3,9 @@ clio MCP process-files-report guide — the Process file element's Generated rep
 Scope
 This guide owns the `report` group of the Process file element (`fileProcessing`): the printable, the records a
 report is generated for, the file names, where the files go, its notices and its read-back. `process-files` owns the
-rest of the element (the contract gate, the three groups, `action`, `saveTo`, the setElement merge, the describe-only
-members, the consumers) and the File and FileCollection parameters: read it first. Filter conditions beyond the
+rest of the element (the contract gate, the `attachments` group, `action`, `saveTo`, the setElement merge, the
+describe-only members other than `bindingLevels` (`process-files-parameter`), the consumers) and the File and
+FileCollection parameters: read it first. Filter conditions beyond the
 record scope: `process-data-source-filters`. Add data: `process-add-data`.
 
 == What it does ==

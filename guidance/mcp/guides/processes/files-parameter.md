@@ -4,8 +4,8 @@ Scope
 This guide owns the `files` group of the Process file element (`fileProcessing`): copying the files the process
 holds to a record's attachments, its one source, the levels it binds, its outputs and its read-back. `process-files`
 owns the rest of the element (the contract gate, the `attachments` group, `action`, `saveTo`, the setElement merge,
-the describe-only members other than `bindingLevels`, the consumers), the File and FileCollection parameters and the two-level rules (P1-P3) this
-group applies: read it first. The report group: `process-files-report`.
+the describe-only members other than `bindingLevels`, the consumers), the File and FileCollection parameters and
+the two-level rules (P1-P3, R-M1-R-M3) this group applies: read it first. The report group: `process-files-report`.
 
 == The Process parameter variant: the `files` group ==
 It copies files the process holds to a record's attachments, and only that: saveTo is required on create and
