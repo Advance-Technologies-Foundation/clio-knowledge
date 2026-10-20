@@ -26,11 +26,12 @@ public sealed class ProcessFileReportGuidanceTests
     private const string ParentPath = "guidance/mcp/guides/processes/files.md";
 
     /// <summary>
-    /// The same design target <see cref="FileParameterGuidanceTests"/> holds <c>process-files</c> to, in the response
-    /// characters of <see cref="ProcessGuideResponseSizeTests"/>: it keeps the reply under the 19,000-byte inline rule
-    /// with room for the report notices a later cut adds.
+    /// This guide's own design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The
+    /// guide is about 15,000 characters, so 16,000 leaves room for one more notice or clause and fails a larger
+    /// addition, which should then be reviewed or split rather than absorbed. The 19,000-byte inline rule is
+    /// asserted separately.
     /// </summary>
-    private const int DesignTargetResponseCharacters = 21_000;
+    private const int DesignTargetResponseCharacters = 16_000;
 
     [Test]
     [Description("process-files-report is registered banner-less and ungated with no legacy route, as process-files is: published at its itemId path, required by the library, routed after process-files, and pointed to by process-files.")]

@@ -38,7 +38,8 @@ its filter selects, then saves the files to a record's attachments or hands them
 
 == Which records: `report.recordId` and the filter ==
 - `report.recordId` is the record scope: it is stored as `Id = value` on the report's object and takes the value
-  sources of `attachments.recordId` (`process-files`). `{}` clears it.
+  sources of `attachments.recordId` (`process-files`), except the `[#SysVariable.CurrentUserContact#]` expression: the
+  scope column `Id` is no lookup, so it is refused; pass the Contact record from the process. `{}` clears it.
 - `setFilter` writes the other conditions on that object and keeps the scope; another `filter.object` is refused,
   and so is an `Id` equality condition beside `report.recordId` (the same scope set twice). `clearFilter` keeps the
   scope too. Both are refused while the stored printable is missing on this environment: set `report.printable` first.

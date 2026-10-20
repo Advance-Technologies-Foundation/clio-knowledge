@@ -133,10 +133,10 @@ Every refusal here and above names the way forward and saves nothing: fix the ca
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
-refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.107, for every group, if it also offers report
+refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.108, for every group, if it also offers report
 and files), as above. The block carries ONE group, and the group IS the variant: `attachments` (Object
 attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last
-section); a package older than 1.6.6.105 writes attachments only and refuses the other two by name. Omit
+section); 1.6.6.103 and 1.6.6.104 write attachments only and refuse the other two by name. Omit
 `userTaskName`. The generic userTask route naming any of the three Process file tasks is refused: build them only
 here.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
