@@ -69,7 +69,7 @@ Do them in this order — a later step assumes the earlier one exists.
 
 3. Place the section in a workplace the portal audience can see — owner: `workplaces`
    (`place-section-in-workplace` with `All external users` in `roles` and `workplace-type=portal`, clio
-   <CLIO-WORKPLACE-TYPE-TBD> and later). A workplace no external role can see hides the section from the
+   8.1.0.143 and later). A workplace no external role can see hides the section from the
    menu. Confirm placement and audience with the user, as that guide requires. Version boundary:
    `place-section-in-workplace` needs clio 8.1.0.141 and later; on an older clio, stop here and tell the
    user to update clio. On a clio that has the tool but not `workplace-type`, do what `workplaces` says

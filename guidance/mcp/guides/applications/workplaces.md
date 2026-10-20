@@ -15,7 +15,7 @@ To place a section in a workplace, grant roles, or move an app out of `My applic
 `place-section-in-workplace` through `clio-run` (after `get-tool-contract`; clio 8.1.0.141 and later).
 Arguments: `environment-name`, `section-code`, `workplace-name`, `package-name`, `roles`; optional
 `mode` `existing`|`new`|`none`, `client-type` (`web` default), `remove-from-my-applications` (default
-true), `position`, `workplace-type` (clio <CLIO-WORKPLACE-TYPE-TBD> and later). It resolves client
+true), `position`, `workplace-type` (clio 8.1.0.143 and later). It resolves client
 type, section and roles, binds each row it owns (a workplace with `Type` and `LoaderId`), never
 duplicates or deletes, and is safe to re-run. A move with no roles and
 `remove-from-my-applications=true` is refused (the section would become invisible). Relay `warnings`
@@ -38,14 +38,14 @@ external-user workplace (Portal / external-user workplaces below).
 ## Portal / external-user workplaces
 A workplace has a type (`SysWorkplaceType`): `general` (employees), `portal`, `self-service`. For
 external users (`All external users`, the portal audience) pass `workplace-type=portal` to
-`place-section-in-workplace` (clio <CLIO-WORKPLACE-TYPE-TBD> and later): a NEW workplace is created
+`place-section-in-workplace` (clio 8.1.0.143 and later): a NEW workplace is created
 with that type, and the result's `workplace` block reports `type`. An EXISTING workplace of another
 type is refused before any write and the error names its current type — the tool never retypes a
-workplace; choose a workplace of the right type or a new name. Without the argument the type is
-neither set nor checked. A clio that has `place-section-in-workplace` but not `workplace-type`
-(8.1.0.141 and later, before <CLIO-WORKPLACE-TYPE-TBD>: `get-tool-contract` does not list it, or
+workplace; choose a workplace of the right type or a new name. Without the argument a NEW workplace
+gets the platform default type (`general`) and an existing one is not checked. A clio that has `place-section-in-workplace` but not `workplace-type`
+(8.1.0.141 and later, before 8.1.0.143: `get-tool-contract` does not list it, or
 the call rejects it): for an external-user workplace, stop and ask the user to update clio to
-<CLIO-WORKPLACE-TYPE-TBD> or later — do not place the section without the type. A rejected
+8.1.0.143 or later — do not place the section without the type. A rejected
 `workplace-type` is not the tool failure that leads to manual placement: never place the section or
 retype a workplace by hand instead.
 
