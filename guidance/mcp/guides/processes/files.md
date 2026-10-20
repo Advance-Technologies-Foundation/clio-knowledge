@@ -143,8 +143,8 @@ here.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
 "AccountParameter"}}, "saveTo": {"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
 - `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as in the
-  designer: dedicated for an object with its own attachment object, otherwise SysFile, and SysFile storage is
-  refused in this version, on either side and by `setFilter`.
+  designer: dedicated for an object with its own attachment object, otherwise SysFile; a CrtProcessBuilder of 1.6.6.109
+  or older refuses SysFile.
 - `attachments.recordId`, WHOSE files: `value` (an existing record's id), `processParameter`, `sourceElement` +
   `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.
   A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per

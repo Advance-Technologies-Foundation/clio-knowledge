@@ -69,7 +69,7 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "`attachments.object`: the record object or its attachment object (`AccountFile`).",
-            "SysFile storage is refused in this version, on either side and by `setFilter`.",
+            "Storage is derived as in the designer: dedicated for an object with its own attachment object, otherwise SysFile; a CrtProcessBuilder of 1.6.6.109 or older refuses SysFile.",
             "`value` (an existing record's id), `processParameter`, `sourceElement` + `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.",
             "A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per run.",
             "It becomes the filter's record scope: `setFilter` REPLACES the other conditions and keeps the scope - send them all in one call, never the scope column.",
@@ -83,6 +83,8 @@ public sealed class ProcessFileGuidanceTests
             section.Should().Contain(clause,
                 because: "unlike readData an omitted count is not every file, and a sort sent as an array is lost without a refusal that names it");
         }
+        section.Should().NotContain("SysFile storage is refused",
+            because: "the bundled package writes SysFile storage, so the earlier refusal would steer an agent away from a buildable element");
     }
 
     [Test]
