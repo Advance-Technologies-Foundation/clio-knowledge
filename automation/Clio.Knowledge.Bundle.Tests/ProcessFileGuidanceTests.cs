@@ -6,7 +6,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
 /// Pins the guidance for the Process file element (<c>fileProcessing</c>, CrtProcessBuilder 1.6.6.103, with the
-/// <c>report</c> and <c>files</c> groups from 1.6.6.105): its sections of <c>process-files</c>, which owns the block
+/// <c>report</c> and <c>files</c> groups from 1.6.6.108, the first released cut that carries them): its sections of <c>process-files</c>, which owns the block
 /// (the Object attachments and Process parameter groups), and the buildable row and dedicated-type entry of
 /// <c>process-element-catalog</c>. The Generated report group lives in <c>process-files-report</c>, pinned by
 /// <see cref="ProcessFileReportGuidanceTests"/>. The File and FileCollection parameter rules of the same guide are pinned by
