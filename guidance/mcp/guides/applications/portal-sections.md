@@ -68,10 +68,12 @@ Do them in this order — a later step assumes the earlier one exists.
    a new binding changes the form every other portal section over that object opens.
 
 3. Place the section in a workplace the portal audience can see — owner: `workplaces`
-   (`place-section-in-workplace` with `All external users` in `roles`). A workplace no external role can
-   see hides the section from the menu. Confirm placement and audience with the user, as that guide
-   requires. Version boundary: `place-section-in-workplace` needs clio 8.1.0.141 and later; on an older
-   clio, stop here and tell the user to update clio.
+   (`place-section-in-workplace` with `All external users` in `roles` and `workplace-type=portal`, clio
+   8.1.0.143 and later). A workplace no external role can see hides the section from the
+   menu. Confirm placement and audience with the user, as that guide requires. Version boundary:
+   `place-section-in-workplace` needs clio 8.1.0.141 and later; on an older clio, stop here and tell the
+   user to update clio. On a clio that has the tool but not `workplace-type`, do what `workplaces` says
+   for that case — do not fall back to manual placement.
 
 4. Grant OBJECT access to the portal audience — owner: `object-rights`. Follow its "Give a role access to
    an object and its lookups" flow with grantee `All external users`; it owns the listing, the preview,
