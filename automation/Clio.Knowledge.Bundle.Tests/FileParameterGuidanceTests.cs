@@ -164,7 +164,7 @@ public sealed class FileParameterGuidanceTests
                 "P1 refuses rather than rebinds a parent, because rebinding would change what every other item reads"),
             ("A source nested deeper than the target is refused: outside its row it reads empty.",
                 "the second P1 refusal"),
-            ("R-M3 — a collection that is an ITEM of another collection is refused as a collection's source: it reads empty outside a row.",
+            ("R-M3 — a collection that is an ITEM of another collection is refused as a ROOT collection's source (an item target is P1's): it reads empty outside a row.",
                 "a nested collection source gives the target no rows, so the mapping is refused rather than saved green"),
             ("P2 — a COLLECTION onto a collection that takes files: each file item of the target is bound to the source item of the same name (case-insensitive) or, when each side has exactly one file item, to that one (`Files.File` from `ObjectFiles.ObjectFile`).",
                 "the pairing policy is what makes an outer-only mapping deliver files"),

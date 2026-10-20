@@ -77,12 +77,12 @@ targets only.
   `ObjectFiles.ObjectFile`). A notice names every item it binds or rebinds. An item it cannot pair is reported ("at
   run time it will be empty"), and cleared first when it was bound elsewhere. An item already bound into the new
   source is kept. Only file items are paired.
-- R-M2 — a collection with NO file item onto a collection that takes files is refused ("has no File item"): map an
-  element's file output or a FileCollection instead.
+- R-M2 — a collection with NO file item onto a collection that takes files is refused ("has no File item"): map a
+  file output or a FileCollection instead.
 - P2-MI — a mapping that binds a multi-instance `InputRecordCollection` (as its target, or through P1) while one of
   its file items, a File parameter of the called process, stays unbound is accepted with a notice: that parameter
-  "will be empty on every iteration" unless you map `InputRecordCollection.<F>`. Iterating over records without
-  files is legitimate.
+  "will be empty on every iteration" unless you map `InputRecordCollection.<F>`. Records without files are
+  legitimate.
 - P3 — a SINGLE file (not an item) onto a file item of a single-instance owner (any element but a multi-instance
   sub-process, or the process itself: `DocumentsParameter.File`) clears every bound collection above that item, one
   notice per level: the collection now carries that one file instead of one row per source row, and reads as one
@@ -91,8 +91,8 @@ targets only.
   included) from an ITEM of a collection is refused ("use a FileCollection, or a multi-instance sub-process"):
   outside a row the item reads empty. Measured: written by an older package that accepted it, it delivered no
   file from two.
-- R-M3 — a collection that is an ITEM of another collection is refused as a collection's source: it reads empty
-  outside a row.
+- R-M3 — a collection that is an ITEM of another collection is refused as a ROOT collection's source (an item
+  target is P1's): it reads empty outside a row.
 - Order matters. Onto a collection that takes files, the LAST accepted mapping decides (an item taken from another
   collection is refused by P1). Item then outer: the outer one re-pairs an item bound outside its source (P2), and
   its notice names the old binding. Outer, then followed by a single-file mapping onto its item: the collection is
