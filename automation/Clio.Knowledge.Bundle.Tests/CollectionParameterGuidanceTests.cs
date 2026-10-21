@@ -10,8 +10,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// that the package enforces against the parameter's own tag and its live binding. Each claim below was wrong at
 /// some point in the story's review rounds, and a copy-edit that drops one puts an agent back on the path the
 /// server refuses. ENG-95984 added the File and FileCollection types to the same list, and FileCollection is the one
-/// collection describe reports by an alias rather than by its platform type, so it is the documented exception to
-/// re-submitting a described collection only through its mirror.
+/// collection describe reports by an alias rather than by its platform type. The declared item shape then gave a
+/// collection a second way to get a shape - its own `itemProperties` - so a described collection is replayed by how it
+/// was made: a mirrored one through its mirror, a declared one as described, a FileCollection by its alias.
 /// </summary>
 [TestFixture]
 public sealed class CollectionParameterGuidanceTests
@@ -37,7 +38,7 @@ public sealed class CollectionParameterGuidanceTests
     }
 
     [Test]
-    [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is the stated exception to re-submitting a collection only through typeFromElement.")]
+    [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is re-sent by its alias.")]
     public void Guide_ShouldListTheFileTypesAndTheFileCollectionException()
     {
         // Arrange
@@ -60,14 +61,46 @@ public sealed class CollectionParameterGuidanceTests
             because: "a file is supported now, so the not-supported list names binary, which stays refused for good");
         guide.Should().NotContain("entity / file /",
             because: "the old list told agents a file could not be a process parameter");
-        guide.Should().Contain("never by re-typing the shape. The one exception, with a File-aware clio: a PROCESS "
-                + "parameter described as type `FileCollection` is re-sent as that type, which rebuilds its shape "
-                + "(`process-files`).",
+        guide.Should().Contain("With a File-aware clio, a PROCESS parameter described as type `FileCollection` is "
+                + "re-sent as that type, which rebuilds its shape (`process-files`).",
             because: "describe reports a process-level collection of the FileCollection shape by that alias, and the "
-                + "mirror refuses a file output, so re-typing is the only way to rebuild it");
+                + "mirror refuses a file output, so re-sending the alias is how it is rebuilt");
         guide.Should().Contain("with a File-aware clio `Name.Item` names an item of a collection parameter, as does "
                 + "`targetProcessParameter`",
             because: "the dotted process-parameter path is part of the mapping grammar this article owns");
+    }
+
+    [Test]
+    [Description("The declared item shape is taught where the bare Collection is: gated on the create contract's own wording, with its member list, the Variable item default, the two-level limit, the refusals and FileCollection as the one-File form; and a described collection is replayed by how it was made - a mirrored one through typeFromElement, a declared one as described.")]
+    public void Guide_ShouldTeachTheDeclaredItemShapeAndHowToReplayIt()
+    {
+        // Arrange
+        string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+
+        // Act
+        // (nothing to act on - the guide text is the contract)
+
+        // Assert
+        guide.Should().Contain("with a clio whose get-tool-contract for create-business-process says \"declare the "
+                + "columns of a Collection\"",
+            because: "an older clio carries no floor for the member, and an older server drops it silently, so the "
+                + "gate is the contract wording clio ships with the floor");
+        guide.Should().Contain("`itemProperties: [{name, type, direction?, caption?, referenceSchema?, "
+                + "itemProperties?}]` creates exactly those items, in order, each Variable unless set, with no tag.",
+            because: "the member list and the item default are the write shape");
+        guide.Should().Contain("an item of a top-level collection may be a Collection whose items are not collections. "
+                + "Binary and anything deeper are refused, naming the item",
+            because: "the depth limit and the refusals are where an agent stops");
+        guide.Should().Contain("`setParameter` does not reshape (remove + add)",
+            because: "a reshape sent as an update is refused, and the route that works is named");
+        guide.Should().Contain("`FileCollection` is this form with one item `File: File`.",
+            because: "the alias and the general form store the same metadata");
+        guide.Should().Contain("feed a MIRRORED collection (tagged items) back through `typeFromElement` naming its "
+                + "source; re-send a DECLARED one (untagged items) as described, `type` + `itemProperties`",
+            because: "a declared collection has no source to mirror, so the old 'only through typeFromElement' rule "
+                + "would leave it unrebuildable");
+        guide.Should().NotContain("never by re-typing the shape",
+            because: "re-sending a declared shape is now the supported way back");
     }
 
     [Test]
