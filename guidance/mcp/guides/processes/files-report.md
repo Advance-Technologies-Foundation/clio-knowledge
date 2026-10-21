@@ -3,8 +3,9 @@ clio MCP process-files-report guide — the Process file element's Generated rep
 Scope
 This guide owns the `report` group of the Process file element (`fileProcessing`): the printable, the records a
 report is generated for, the file names, where the files go, its notices and its read-back. `process-files` owns the
-rest of the element (the contract gate, the three groups, `action`, `saveTo`, the setElement merge, the describe-only
-members, the consumers) and the File and FileCollection parameters: read it first. Filter conditions beyond the
+rest of the element (the contract gate, the `attachments` group, `action`, `saveTo`, the setElement merge, the
+describe-only members other than `bindingLevels` (`process-files-parameter`), the consumers) and the File and
+FileCollection parameters: read it first. Filter conditions beyond the
 record scope: `process-data-source-filters`. Add data: `process-add-data`.
 
 == What it does ==
@@ -72,7 +73,7 @@ its filter selects, then saves the files to a record's attachments or hands them
   `saveTo` record, with a notice: set `report.recordId` to generate one. After a save, `ReportFiles` points at the
   saved attachments.
 - Use in process: the files are temporary and go on as `ReportFiles`; map that collection to a Process parameter
-  element (`files`) or to a FileCollection (`process-files`). They live while the process instance runs and are
+  element (`files`: `process-files-parameter`) or to a FileCollection (`process-files`). They live while the process instance runs and are
   deleted when it completes (measured on a stand: one temporary file while the process waited in a Perform task,
   none after it completed, and the copy a Process parameter element saved from it stayed). Read from source, not
   measured: a sub-process deletes the files it generated when IT completes, so one that hands `ReportFiles` to its

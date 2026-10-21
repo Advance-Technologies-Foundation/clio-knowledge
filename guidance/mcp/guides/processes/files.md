@@ -2,8 +2,8 @@ clio MCP process-files guide — File and FileCollection parameters, two-level c
 
 Scope
 This guide owns the `File` and `FileCollection` process parameter types, the two-level rules (P1-P3, P2-MI, R-M1-R-M3) every structured mapping onto a collection or an item of one goes through, and the Process file
-element (`fileProcessing`, last sections; its report group: `process-files-report`). Mappings in
-general: `process-parameters`.
+element (`fileProcessing`, last section; its report group: `process-files-report`, its `files` group:
+`process-files-parameter`). Mappings in general: `process-parameters`.
 Use only when the FULL create-business-process contract (`get-tool-contract` with
 `tool-names: ["create-business-process"]`, `detail: "full"`) names type File in `parameters[]`; the default reply is
 shortened and lists no types, so its silence proves nothing. Such a clio is called File-aware below and in the guides
@@ -110,7 +110,8 @@ targets only.
    {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
    "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File,
    with a notice.
-2. Hand them to a Process parameter element: its `files` group (last section), or onto one built in the designer
+2. Hand them to a Process parameter element: its `files` group (`process-files-parameter`), or onto one built in
+   the designer
    {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
    "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on
    CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one run of recipes 1 and 2 copied the three
@@ -136,15 +137,28 @@ Every refusal here and above names the way forward and saves nothing: fix the ca
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
 refuses a CrtProcessBuilder older than 1.6.6.103 up front (1.6.6.109, for every group, if it also offers report
 and files), as above. The block carries ONE group, and the group IS the variant: `attachments` (Object
-attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter, last
-section); 1.6.6.103 and 1.6.6.104 write attachments only and refuse the other two by name. Omit
-`userTaskName`. The generic userTask route naming any of the three Process file tasks is refused: build them only
-here.
+attachments), `report` (Generated report: `process-files-report` owns it) or `files` (Process parameter:
+`process-files-parameter` owns it); 1.6.6.103 and 1.6.6.104 write attachments only and refuse the other two by
+name. Omit `userTaskName`. The generic userTask route naming any of the three Process file tasks is refused: build
+them only here.
 {"type": "fileProcessing", "fileProcessing": {"attachments": {"object": "Account", "recordId": {"processParameter":
 "AccountParameter"}}, "saveTo": {"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
 - `attachments.object`: the record object or its attachment object (`AccountFile`). Storage is derived as in the
-  designer: dedicated for an object with its own attachment object, otherwise SysFile, and SysFile storage is
-  refused in this version, on either side and by `setFilter`.
+  designer, by name: dedicated when an attachment object named after the object exists (`<X>File`; Lead's is
+  `FileLead`), otherwise SysFile. Name an attachment object no object pairs with by name (`DNSGuideFile`) directly,
+  as `attachments.object` (no `recordId` then: select its files with setFilter), or as `saveTo.object` with
+  `saveTo.linkColumn`: naming the record object keeps that object's own storage, with a notice naming the attachment
+  object the element then does not read or save to (when one of its own lookup columns references the record). The
+  same rule derives `saveTo.object`; a SysFile target links by `RecordId`, so omit `saveTo.linkColumn`.
+  A CrtProcessBuilder of 1.6.6.109 or older refuses SysFile, and the clio that bundles it cannot lift that: tell the
+  user SysFile storage needs a newer clio (one that bundles a newer package refuses the old one up front, as above).
+- On a SysFile source, `attachments.sort` and setFilter conditions name SysFile columns (`Name`): a column of the
+  record object (Account address's `GPSE`, which the designer's sort list offers) is refused, naming SysFile.
+  Send the record as `attachments.recordId`, never as a `RecordId` equality in setFilter (refused as a scope).
+- The run time reads only the SysFile rows whose `RecordSchemaName` is the record object and whose type is File: a
+  file stored without `RecordSchemaName` is never read, and the element completes and copies nothing. Verify a run in
+  the record's Freedom UI attachment list: SysFile copies the element saved show there (measured on 1.6.6.110,
+  2026-10-20).
 - `attachments.recordId`, WHOSE files: `value` (an existing record's id), `processParameter`, `sourceElement` +
   `sourceElementParameter` (+ `sourceColumn`), or the `expression` `[#SysVariable.CurrentUserContact#]` for Contact.
   A structured source naming an item is refused here and in `saveTo.recordId`: the element reads its record once per
@@ -176,22 +190,3 @@ here.
   re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column =
   the target record and `CreatedOn` `CurrentHour`. Hazards: it also matches others' files from that hour, and misses
   a copy made before the hour turned.
-
-== The Process parameter variant: the `files` group ==
-It copies files the process holds to a record's attachments, and only that: saveTo is required on create and
-useInProcess is refused.
-{"type": "fileProcessing", "fileProcessing": {"files": {"processParameter": "DocumentsParameter"}, "saveTo":
-{"object": "Contact", "recordId": {"processParameter": "ContactParameter"}}}}
-- `files` takes exactly ONE of processParameter, sourceElement + sourceElementParameter, or expression. A value is
-  refused (a file has no constant form), and so are a source with no file item or with several, a parameter of the
-  element itself, and any mapping FROM its Files.
-- A collection (a FileCollection, or an element's ObjectFiles or ReportFiles) binds BOTH levels, Files and
-  Files.File: one copy per row. A single File binds Files.File only (P3) and copies that one file. A single File
-  must be set before the element runs: an unset one stops the process with an error. An empty collection
-  copies nothing, silently.
-- An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.
-- Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids. It has no filter.
-- Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue
-  for a stored shape that would not resubmit as stored (none: nothing bound, the platform refuses to start the
-  process) and for an action other than save: a stored useInProcess or an invalid one fails at run time, a mapped
-  one is decided at run time. Remove it before resubmitting.

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.168",
+  "libraryVersion": "1.15.169",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -153,6 +153,7 @@
       "process-tracing",
       "process-files",
       "process-files-report",
+      "process-files-parameter",
       "product-telemetry",
       "record-rights",
       "object-rights",
@@ -355,6 +356,7 @@
       "docs://knowledge/com.creatio.clio/process-tracing",
       "docs://knowledge/com.creatio.clio/process-files",
       "docs://knowledge/com.creatio.clio/process-files-report",
+      "docs://knowledge/com.creatio.clio/process-files-parameter",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/object-rights",
@@ -2035,7 +2037,7 @@
     {
       "itemId": "process-files",
       "title": "Process files: File and FileCollection parameters, and the Process file element",
-      "description": "Owns the File and FileCollection process parameter types (carried by reference as FileLocator; their Variable default; the read-back and its item name; the refusals), the two-level rules every structured mapping onto a collection or an item of one goes through (P1, P2, P2-MI, P3, R-M1, R-M2), recipes (keep an element's files, hand them on, run a sub-process once per file), and the Process file element's fileProcessing block: the group is the variant (attachments, report, files), the generic userTask route refused for all three tasks, the Object attachments group (record scope, 50-file default, sort, action, setElement merge, identity checks and describe-only members, SysFile refused, consumers, re-finding the copies) and the Process parameter group (one source, both levels for a collection, one file for a single File, saving only). The report group: process-files-report. Applies when the FULL create-business-process contract names type File.",
+      "description": "Owns the File and FileCollection process parameter types (carried by reference as FileLocator; their Variable default; the read-back and its item name; the refusals), the two-level rules every structured mapping onto a collection or an item of one goes through (P1, P2, P2-MI, P3, R-M1, R-M2), recipes (keep an element's files, hand them on, run a sub-process once per file), and the Process file element's fileProcessing block: the group is the variant (attachments, report, files), the generic userTask route refused for all three tasks, and the Object attachments group (record scope, 50-file default, sort, action, setElement merge, identity checks and describe-only members, storage derived by name, SysFile sort and filter columns, the files SysFile reads, consumers, re-finding the copies). The report group: process-files-report; the Process parameter group: process-files-parameter. Applies when the FULL create-business-process contract names type File.",
       "topicId": "creatio.process-files",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-files",
@@ -2052,6 +2054,17 @@
       "uri": "docs://knowledge/com.creatio.clio/process-files-report",
       "sourcePath": "guidance/mcp/guides/processes/files-report.md",
       "bundlePath": "resources/process-files-report.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-files-parameter",
+      "title": "Process files: the Process parameter variant of the Process file element",
+      "description": "Owns the files group of the Process file element (fileProcessing): copying the files the process holds to a record's attachments and only that (saveTo required on create, useInProcess refused), its one source (processParameter, sourceElement + sourceElementParameter or expression; a value, a source with no file item or several, a parameter of the element itself and a mapping from its Files refused), both levels bound for a collection and one file for a single File, an unset single File stopping the process, an empty collection copying nothing, an expression going through as given, the ObjectFiles and CreatedObjectFileIds outputs, and the describe-only bindingLevels with its issues. Read after process-files.",
+      "topicId": "creatio.process-files-parameter",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-files-parameter",
+      "sourcePath": "guidance/mcp/guides/processes/files-parameter.md",
+      "bundlePath": "resources/process-files-parameter.md",
       "mediaType": "text/plain"
     },
     {

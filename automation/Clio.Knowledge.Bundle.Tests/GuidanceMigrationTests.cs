@@ -41,6 +41,7 @@ public sealed class GuidanceMigrationTests
         "process-versions-details",
         "process-files",
         "process-files-report",
+        "process-files-parameter",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",
