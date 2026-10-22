@@ -4,16 +4,16 @@ Use this guide whenever you add, arrange, size, group, color, or style Freedom U
 (metrics/indicators and charts) on a DASHBOARD or a HOME PAGE, new or existing, so they look like
 Creatio's own product dashboards. Desktops are a separate surface: read `desktop-page` for those.
 
-This guide is the single owner of WHERE a widget goes, HOW BIG it is, its card theme, the widget color
-palette, and the metric icon rule on dashboards and home pages; `indicator-widget` and `chart-widget` cite
-it. It does NOT own a widget's runtime payload: for `crt.IndicatorWidget` read `indicator-widget`, for
+This guide is the single owner of WHERE a widget goes, HOW BIG it is (a metric's text size too), its card
+theme, the widget color palette, and the metric icon and value-only text rules on dashboards and home
+pages; `indicator-widget` and `chart-widget` cite it. It does NOT own a widget's runtime payload: for `crt.IndicatorWidget` read `indicator-widget`, for
 `crt.ChartWidget` read `chart-widget`, and call `get-component-info`. For page structure and containers
 read `page-modification`; filtering a dashboard's widgets by its page data (`DashboardDS`) is in
 `dashboard-design`.
 
 Evidence: the sizes, colors, and icons below were read with `get-page` from the 8 stock analytics
-dashboards and 4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15 (platform
-version not read). The reference is the Accounts analytics dashboard (`AccountsAnalyticsDashboard`).
+dashboards and 4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15, their 76
+metric tiles' text settings on 2026-10-22 (platform version not read). The reference is the Accounts analytics dashboard (`AccountsAnalyticsDashboard`).
 
 ## Core rules (in priority order)
 
@@ -24,10 +24,10 @@ Hard rules unless the user explicitly overrides one.
    never goes below the charts. On an existing page follow "Adding to an existing page". A surface that
    covers several subjects is split into LABELED sections (a header and spacing, never card color), each
    its own metric block and chart row.
-2. SIZE: read the page grid first; a metric tile takes the size of its SURFACE ("Metric tile size") and is
-   never stretched to fill a row. Charts are sized by type ("Widget catalog").
+2. SIZE: read the page grid first; a metric tile takes the size and text size of its SURFACE ("Metric
+   tile size") and is never stretched to fill a row. Charts are sized by type ("Widget catalog").
 3. STYLE: every widget is a plain-white card, takes a color by MEANING from the allowed palette ("Color"),
-   and every metric tile carries an icon ("Icon").
+   and every metric tile carries an icon ("Icon") and shows its value alone, its name being the title.
 
 ## Metric tile size
 
@@ -52,6 +52,16 @@ bloated or squashed tile. For any other `rows` value copy the sibling tiles' siz
   columns, put a tall widget beside the block, or leave the rest of the row empty.
 - BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total, so both end on
   the same row.
+
+Metric text (`config.text` of the tile):
+
+- TEXT SIZE: `text.fontSizeMode` "medium" (the designer's size M) on a dashboard, "large" (size L) on a
+  home page. On an existing page copy the sibling tiles' text settings instead ("Adding to an existing
+  page").
+- VALUE ONLY: `text.template` is exactly `{0}`, the value alone; a `#ResourceString(...)#` template
+  registers the text `{0}`. The metric's name is `config.title`: never repeat it as a caption inside
+  the tile, as in "Open critical requests: {0}". Text beside `{0}` belongs only to a comparison metric
+  (e.g. "10 %"). All 76 stock metric tiles use `{0}`.
 
 The reference, a metric block with a doughnut beside it (dashboard grid):
 
@@ -126,9 +136,10 @@ this guide. Use a colored card only when the user explicitly asks for one, and n
 
 1. Read the page with `get-page`: the `Main` rows and every widget's `layoutConfig`, `theme`, and color.
 2. Copy the SIZE and TEXT settings of the sibling metric tiles (`colSpan`, `rowSpan`,
-   `text.fontSizeMode`, `text.labelPosition`), but never their `theme` or a banned color: the new tile
-   is "without-fill" with a color by meaning from "Color", even when its siblings are full-fill or use a
-   banned color.
+   `text.fontSizeMode`, `text.labelPosition`), or take them from "Metric tile size" when the page has
+   no metric yet, but never their `theme` or a banned color: the new tile is "without-fill" with a
+   color by meaning from "Color", even when its siblings are full-fill or use a banned color. Its
+   `text.template` is `{0}` even when a sibling repeats its name as a caption.
 3. Put the tile in a free slot of the metric block: the next free columns of the block's rows.
 4. When the block is full, add a new tile row directly UNDER the block, in the block's columns:
    - move every widget that starts on or below that row down by the tile's `rowSpan`, in every column,
@@ -146,7 +157,8 @@ horizontal bars 4x10 start on row 13 (columns 1, 5, 9); a doughnut 4x10 and a ba
 The block is full, so:
 
 - the new tile is `{ "column": 1, "row": 13, "colSpan": 2, "rowSpan": 3 }`, "without-fill",
-  `checkmark-filled-icon`, a color by meaning (e.g. `forest-green` for a good result);
+  `checkmark-filled-icon`, a color by meaning (e.g. `forest-green` for a good result),
+  `text.fontSizeMode` "medium" like its siblings and `text.template` `{0}`;
 - the doughnut matched rows 1-12, so it becomes `{ "column": 5, "row": 1, "colSpan": 8, "rowSpan": 15 }`;
 - the widgets on row 13 move to row 16 and those on row 23 to row 26;
 - a second new tile takes the free slot `{ "column": 3, "row": 13, "colSpan": 2, "rowSpan": 3 }`.
@@ -213,7 +225,8 @@ floor 5.
 - A widget beside a stack ends on the same row as the stack; every chart row sums to 12 columns.
 - Every widget is "without-fill" (home pages too); no `orange-red`, `orange`, `light-green` or
   `turquoise` anywhere; colors follow meaning.
-- Every metric tile has an icon chosen by meaning.
+- Every metric tile has an icon chosen by meaning, its surface's `text.fontSizeMode` (on an existing
+  page its siblings') and `text.template` `{0}`, its name only in `config.title`.
 - Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); each gauge is 6.
 - Multi-topic surfaces are split into labeled sections.
 
