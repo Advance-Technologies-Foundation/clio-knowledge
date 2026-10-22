@@ -14,7 +14,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// no stock metric is wider than 4 columns; every stock dashboard metric has an icon; four widget color
 /// presets fall below a 3:1 WCAG contrast ratio on the white card; and all 76 stock metric tiles show the value
 /// alone (<c>text.template</c> <c>{0}</c>, the name only in <c>config.title</c>), with <c>text.fontSizeMode</c>
-/// "medium" on every dashboard (the engineer chose "large" for home pages). The guide owns those rules,
+/// "medium" on every dashboard (the engineer chose "large" for home pages); their titles name the measure in
+/// 2-4 words, about 22 characters at the median, and none appends a filter after a comma (the engineer set the
+/// 25- and 30-character bounds). The guide owns those rules,
 /// <c>indicator-widget</c> and <c>chart-widget</c> only cite it, so each guide is pinned for its own part.
 /// </remarks>
 [TestFixture]
@@ -99,6 +101,30 @@ public sealed class DashboardLayoutGuidanceTests
             "Its `text.template` is `{0}` even when a sibling repeats its name as a caption",
             "`text.template` `{0}`, its name only in `config.title`"
         ], because: "the existing-page steps and the finish checklist must not let a copied or invented caption through");
+    }
+
+    [Test]
+    [Description("The layout guide keeps a metric title a short one-line name of the measure, with a filter folded into the words, on new and existing pages.")]
+    public void LayoutGuide_ShouldKeepTheMetricTitleShortOnOneLine()
+    {
+        // Arrange
+        string guide = Read(LayoutPath);
+
+        // Act
+        string flattened = Flatten(guide);
+
+        // Assert
+        flattened.Should().ContainAll(
+        [
+            "TITLE: `config.title` is a short noun phrase naming the measure, 2-4 words on ONE line: aim at 25 characters or fewer, never more than 30.",
+            "After the name only a unit after a comma (\"Average resolution time, hours\") or a qualifier in parentheses (\"Overdue cases (response)\").",
+            "Never append a filter as a comma list, as in \"Closed requests, Satisfaction 1\": fold it into the words (\"Requests rated 1\", \"Low-rated requests\")."
+        ], because: "the stock titles name the measure in 2-4 words and none appends a filter; a filter list is what made the agent's title unclear");
+        flattened.Should().ContainAll(
+        [
+            "Its title follows TITLE (\"Metric tile size\") even when a sibling's title is longer",
+            "Every metric title is a 2-4 word noun phrase on one line (25 characters or fewer, never more than 30) with no filter appended after a comma"
+        ], because: "the existing-page steps and the finish checklist must not let a long or filter-listing title through");
     }
 
     [Test]
