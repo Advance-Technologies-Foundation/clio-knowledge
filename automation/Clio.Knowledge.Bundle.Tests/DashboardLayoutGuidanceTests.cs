@@ -11,8 +11,10 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// The rules come from the stock product pages, read with <c>get-page</c> on a Sales/Service Enterprise
 /// environment on 2026-10-15: the <c>Main</c> grid has 28px rows on a dashboard and 64px rows on a home page,
 /// so one metric <c>rowSpan</c> for both surfaces renders a 100px tile on one and a 208px tile on the other;
-/// no stock metric is wider than 4 columns; every stock dashboard metric has an icon; and four widget color
-/// presets fall below a 3:1 WCAG contrast ratio on the white card. The guide owns those rules,
+/// no stock metric is wider than 4 columns; every stock dashboard metric has an icon; four widget color
+/// presets fall below a 3:1 WCAG contrast ratio on the white card; and all 76 stock metric tiles show the value
+/// alone (<c>text.template</c> <c>{0}</c>, the name only in <c>config.title</c>), with <c>text.fontSizeMode</c>
+/// "medium" on every dashboard (the engineer chose "large" for home pages). The guide owns those rules,
 /// <c>indicator-widget</c> and <c>chart-widget</c> only cite it, so each guide is pinned for its own part.
 /// </remarks>
 [TestFixture]
@@ -51,6 +53,52 @@ public sealed class DashboardLayoutGuidanceTests
         guide.Should().NotContainAny(
             ["metric tile 3, gauge 3", "~3 for a metric tile", "Metric tiles are 1 row tall", "metric tiles stay short"],
             because: "a single metric rowSpan for both surfaces is the defect this guide replaced");
+    }
+
+    [Test]
+    [Description("The layout guide sets the metric text size per surface and keeps the siblings' text settings on an existing page.")]
+    public void LayoutGuide_ShouldSetTheMetricTextSizePerSurface()
+    {
+        // Arrange
+        string guide = Read(LayoutPath);
+
+        // Act
+        string flattened = Flatten(guide);
+
+        // Assert
+        flattened.Should().Contain(
+            "TEXT SIZE: `text.fontSizeMode` \"medium\" (the designer's size M) on a dashboard, \"large\" (size L) on a home page.",
+            because: "every stock dashboard metric uses medium, and a home-page metric is large");
+        flattened.Should().ContainAll(
+        [
+            "On an existing page copy the sibling tiles' text settings instead",
+            "Copy the SIZE and TEXT settings of the sibling metric tiles (`colSpan`, `rowSpan`, `text.fontSizeMode`, `text.labelPosition`)",
+            "`text.fontSizeMode` \"medium\" like its siblings"
+        ], because: "a new tile on an existing page matches the tiles already there rather than the surface default");
+    }
+
+    [Test]
+    [Description("The layout guide keeps a metric's text template to the value alone, with the name only in the title, on new and existing pages.")]
+    public void LayoutGuide_ShouldShowTheMetricValueAloneInTheTile()
+    {
+        // Arrange
+        string guide = Read(LayoutPath);
+
+        // Act
+        string flattened = Flatten(guide);
+
+        // Assert
+        flattened.Should().ContainAll(
+        [
+            "VALUE ONLY: `text.template` is exactly `{0}`, the value alone",
+            "The metric's name is `config.title`: never repeat it as a caption inside the tile",
+            "Text beside `{0}` belongs only to a comparison metric"
+        ], because: "all 76 stock metric tiles show the value alone; a caption repeating the title is what the designer flagged");
+        flattened.Should().ContainAll(
+        [
+            "Its `text.template` is `{0}` even when a sibling repeats its name as a caption",
+            "`text.template` `{0}`, its name only in `config.title`"
+        ], because: "the existing-page steps and the finish checklist must not let a copied or invented caption through");
     }
 
     [Test]
