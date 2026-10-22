@@ -225,11 +225,11 @@ WIDE TREND   [          line / timeline 12          ]
 
 ## Widget catalog: type, when to use, default size
 
-Height is `layoutConfig.rowSpan`; the widths below are for dashboards. Platform defaults: gauge 3, chart 9, funnel 15, list/pivot 9. HARD
-FLOOR: a chart, list, or pivot must have `rowSpan` >= 6, below that it renders unreadably short. A
-METRIC TILE is exempt and takes its surface size ("Metric tile size"). A GAUGE is NOT: it ships the
-tile's default of 3, but at 3 rows its semicircular arc is too small to read. Give a gauge `rowSpan` 6,
-floor 5.
+Height is `layoutConfig.rowSpan`; the widths below are for dashboards. Platform defaults: gauge 3,
+chart 9, funnel 15, list/pivot 9. HARD FLOOR: a chart, list, or pivot must have `rowSpan` >= 6, below
+that it renders unreadably short. A METRIC TILE is exempt and takes its surface size ("Metric tile
+size"). A GAUGE is NOT: it ships the tile's default of 3, but at 3 rows its semicircular arc is too
+small to read. Give a gauge `rowSpan` 6, floor 5.
 
 - Metric (indicator): a headline number (count, sum, average, min/max, a "without X" gap count). Size,
   color, and icon per this guide; payload per `indicator-widget`.
