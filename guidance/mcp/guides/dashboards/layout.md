@@ -6,14 +6,15 @@ Creatio's own product dashboards. Desktops are a separate surface: read `desktop
 
 This guide is the single owner of WHERE a widget goes, HOW BIG it is (a metric's text size too), its card
 theme, the widget color palette, and the metric icon and value-only text rules on dashboards and home
-pages; `indicator-widget` and `chart-widget` cite it. It does NOT own a widget's runtime payload: for `crt.IndicatorWidget` read `indicator-widget`, for
-`crt.ChartWidget` read `chart-widget`, and call `get-component-info`. For page structure and containers
-read `page-modification`; filtering a dashboard's widgets by its page data (`DashboardDS`) is in
-`dashboard-design`.
+pages; `indicator-widget` and `chart-widget` cite it. It does NOT own the rest of a widget's runtime
+payload: for `crt.IndicatorWidget` read `indicator-widget`, for `crt.ChartWidget` read `chart-widget`,
+and call `get-component-info`. For page structure and containers read `page-modification`; filtering a
+dashboard's widgets by its page data (`DashboardDS`) is in `dashboard-design`.
 
 Evidence: the sizes, colors, and icons below were read with `get-page` from the 8 stock analytics
 dashboards and 4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15, their 76
-metric tiles' text settings on 2026-10-22 (platform version not read). The reference is the Accounts analytics dashboard (`AccountsAnalyticsDashboard`).
+metric tiles' text settings on 2026-10-22 (platform version not read). The reference is the Accounts
+analytics dashboard (`AccountsAnalyticsDashboard`).
 
 ## Core rules (in priority order)
 
