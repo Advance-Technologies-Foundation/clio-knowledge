@@ -7,7 +7,7 @@ namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
 /// Pins the ENG-95984 guidance: the <c>process-files</c> guide (the File and FileCollection process parameter types
-/// and the two-level collection rules P1, P2, P2-MI, P3, R-M1 and R-M2 that CrtProcessBuilder applies to every
+/// and the two-level collection rules P1, P2, P2-MI, P3, R-M1, R-M2 and R-M3 that CrtProcessBuilder applies to every
 /// structured mapping) and the gated multi-instance passages in <c>process-sub-process</c> and
 /// <c>process-sub-process-when</c>. The type list and the FileCollection exception in <c>process-parameters</c> are
 /// pinned beside the other collection rules, in <see cref="CollectionParameterGuidanceTests"/>.
@@ -143,7 +143,7 @@ public sealed class FileParameterGuidanceTests
     }
 
     [Test]
-    [Description("The guide states every two-level rule the package applies to a structured mapping (P1, P2, P2-MI, P3, R-M1, R-M2), the targets that take files, that an expression bypasses them, and the two consequences the implementation made necessary: the last mapping decides, and R-M1 also covers a single-instance sub-process's File input.")]
+    [Description("The guide states every two-level rule the package applies to a structured mapping (P1, P2, P2-MI, P3, R-M1, R-M2, R-M3), the targets that take files, that an expression bypasses them, and the two consequences the implementation made necessary: the last mapping decides, and R-M1 also covers a single-instance sub-process's File input.")]
     public void Guide_ShouldStateEveryBindingRule()
     {
         // Arrange
@@ -158,12 +158,14 @@ public sealed class FileParameterGuidanceTests
                 "P2 and R-M2 are scoped to these two targets; a reader who applies them to any collection expects a pairing that never happens"),
             ("P1 — an ITEM from an ITEM",
                 "P1 is the rule that turns an item-only mapping into a two-level binding"),
-            ("It applies to every collection, a multi-instance `InputRecordCollection` included",
+            ("Every collection, a multi-instance `InputRecordCollection` included",
                 "P1 is type-agnostic, which is what changes the multi-instance passages"),
-            ("one bound to anything else refuses the mapping",
+            ("one bound elsewhere is refused: a collection cannot take rows from two.",
                 "P1 refuses rather than rebinds a parent, because rebinding would change what every other item reads"),
             ("A source nested deeper than the target is refused: outside its row it reads empty.",
                 "the second P1 refusal"),
+            ("R-M3 — a collection that is an ITEM of another collection is refused as a ROOT collection's source (an item target is P1's): it reads empty outside a row.",
+                "a nested collection source gives the target no rows, so the mapping is refused rather than saved green"),
             ("P2 — a COLLECTION onto a collection that takes files: each file item of the target is bound to the source item of the same name (case-insensitive) or, when each side has exactly one file item, to that one (`Files.File` from `ObjectFiles.ObjectFile`).",
                 "the pairing policy is what makes an outer-only mapping deliver files"),
             ("An item it cannot pair is reported (\"at run time it will be empty\"), and cleared first when it was bound elsewhere.",

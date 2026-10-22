@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.154",
+  "libraryVersion": "1.15.171",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -39,6 +39,7 @@
       "m365-addin-customization",
       "workplaces",
       "workplaces-details",
+      "portal-sections",
       "atf-repository-dev",
       "atf-repository-model-management",
       "atf-repository-tests",
@@ -151,6 +152,8 @@
       "process-script-task-details",
       "process-tracing",
       "process-files",
+      "process-files-report",
+      "process-files-parameter",
       "product-telemetry",
       "record-rights",
       "object-rights",
@@ -239,6 +242,7 @@
       "docs://knowledge/com.creatio.clio/m365-addin-customization",
       "docs://knowledge/com.creatio.clio/workplaces",
       "docs://knowledge/com.creatio.clio/workplaces-details",
+      "docs://knowledge/com.creatio.clio/portal-sections",
       "docs://knowledge/com.creatio.clio/atf-repository-dev",
       "docs://knowledge/com.creatio.clio/atf-repository-model-management",
       "docs://knowledge/com.creatio.clio/atf-repository-tests",
@@ -351,6 +355,8 @@
       "docs://knowledge/com.creatio.clio/process-script-task-details",
       "docs://knowledge/com.creatio.clio/process-tracing",
       "docs://knowledge/com.creatio.clio/process-files",
+      "docs://knowledge/com.creatio.clio/process-files-report",
+      "docs://knowledge/com.creatio.clio/process-files-parameter",
       "docs://knowledge/com.creatio.clio/product-telemetry",
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/object-rights",
@@ -476,7 +482,7 @@
     {
       "itemId": "app-modeling-details",
       "title": "Application modeling details",
-      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
+      "description": "Owns the failure handling, rare schema edits and evidence behind app-modeling: what each create-app-section error-class (transport, creatio-timeout, contention, server-error) means, and why sections in one app are created one at a time; the sync-schemas retry and resume behavior; the primary-display column, relabeling an inherited column, redirecting an inherited lookup, and Color columns; the Git-first capture rule's export-schema and tool-contract clauses; and the evidence, timings and provenance behind the app-modeling rules (generated page defaults, section-list placeholder timings, the Date/Time alias, the push-workspace hazard). Split out of app-modeling.",
       "topicId": "creatio.app-modeling-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/app-modeling-details",
@@ -547,6 +553,17 @@
       "uri": "docs://knowledge/com.creatio.clio/workplaces-details",
       "sourcePath": "guidance/mcp/guides/applications/workplaces-details.md",
       "bundlePath": "resources/workplaces-details.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "portal-sections",
+      "title": "Portal sections",
+      "description": "Orchestration guide for registering a Freedom UI section so PORTAL (self-service / external) users can open it: sequences page binding, workplace placement, object-access grant, and the record-permissions check, all carrying the All external users audience, on the deny-by-default external-user model. The Freedom mechanism (SysEntitySchemaOperationRight), one object-rights grant per approved object, not the Classic SSP tables.",
+      "topicId": "creatio.portal-sections",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/portal-sections",
+      "sourcePath": "guidance/mcp/guides/applications/portal-sections.md",
+      "bundlePath": "resources/portal-sections.md",
       "mediaType": "text/plain"
     },
     {
@@ -1917,7 +1934,7 @@
     {
       "itemId": "process-activity-connections",
       "title": "Activity connections (\"Connected to\")",
-      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, and the upsert-by-column semantics. The R1-R20 connection-rule catalog, the four read-back shapes that refuse on re-apply and the skipped-registration mechanism moved to process-activity-connections-details.",
+      "description": "Owns the \"Connected to\" links of the Activity a Creatio process task creates: setConnections and clearConnections, the per-environment column set, the bare recordId route that needs no schema UId, the three current-user macros that are the only ones authorable here, the upsert-by-column semantics, and which store a connection request needs: an EntityConnection registry row (what the process builder reads) or the object's EntityConnections add-on written by update-entity-connections (the Object designer Connections node, shown by crt.Connections). The R1-R20 connection-rule catalog, the four read-back shapes that refuse on re-apply and the skipped-registration mechanism moved to process-activity-connections-details.",
       "topicId": "creatio.process-activity-connections",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-activity-connections",
@@ -2019,13 +2036,35 @@
     },
     {
       "itemId": "process-files",
-      "title": "Process files: File and FileCollection parameters",
-      "description": "Owns the File and FileCollection process parameter types (one file and several files, carried by reference as the FileLocator type; their Variable default; the FileCollection read-back and its item name; the refusals) and the two-level rules every structured mapping onto a collection or an item of one goes through: P1 binds the collections of an item-to-item mapping, a multi-instance InputRecordCollection included; P2 pairs the file item of a collection that takes files; P2-MI notices; P3 clears a bound collection above a file item that takes one file; the R-M1 and R-M2 refusals. Recipes: keep the files an element produced, hand them to a Process file element, run a sub-process once per file. Applies when the FULL create-business-process contract names type File.",
+      "title": "Process files: File and FileCollection parameters, and the Process file element",
+      "description": "Owns the File and FileCollection process parameter types (carried by reference as FileLocator; their Variable default; the read-back and its item name; the refusals), the two-level rules every structured mapping onto a collection or an item of one goes through (P1, P2, P2-MI, P3, R-M1, R-M2), recipes (keep an element's files, hand them on, run a sub-process once per file), and the Process file element's fileProcessing block: the group is the variant (attachments, report, files), the generic userTask route refused for all three tasks, and the Object attachments group (record scope, 50-file default, sort, action, setElement merge, identity checks and describe-only members, storage derived by name, SysFile sort and filter columns, the files SysFile reads, consumers, re-finding the copies). The report group: process-files-report; the Process parameter group: process-files-parameter. Applies when the FULL create-business-process contract names type File.",
       "topicId": "creatio.process-files",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-files",
       "sourcePath": "guidance/mcp/guides/processes/files.md",
       "bundlePath": "resources/process-files.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-files-report",
+      "title": "Process files: the Generated report variant of the Process file element",
+      "description": "Owns the report group of the Process file element (fileProcessing): report.printable (a list-printables templateId, a macro or a caption; MS Word printables of an object only; FastReport and DevExpress refused; an unknown printable refused with the Report setup hint), the rights the printable lookup and record selection apply (none), report.recordId as the record scope and the filter around it, the Word report refused with no scope and no filter, the printable swap, separateReports and the file names, saving or handing on ReportFiles and the lifetime of those temporary files, the PDF and feature notices, the Add data then report pattern, and the read-back. Read after process-files.",
+      "topicId": "creatio.process-files-report",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-files-report",
+      "sourcePath": "guidance/mcp/guides/processes/files-report.md",
+      "bundlePath": "resources/process-files-report.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-files-parameter",
+      "title": "Process files: the Process parameter variant of the Process file element",
+      "description": "Owns the files group of the Process file element (fileProcessing): copying the files the process holds to a record's attachments and only that (saveTo required on create, useInProcess refused), its one source (processParameter, sourceElement + sourceElementParameter or expression; a value, a source with no file item or several, a parameter of the element itself and a mapping from its Files refused), both levels bound for a collection and one file for a single File, an unset single File stopping the process, an empty collection copying nothing, an expression going through as given, the ObjectFiles and CreatedObjectFileIds outputs, and the describe-only bindingLevels with its issues. Read after process-files.",
+      "topicId": "creatio.process-files-parameter",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-files-parameter",
+      "sourcePath": "guidance/mcp/guides/processes/files-parameter.md",
+      "bundlePath": "resources/process-files-parameter.md",
       "mediaType": "text/plain"
     },
     {

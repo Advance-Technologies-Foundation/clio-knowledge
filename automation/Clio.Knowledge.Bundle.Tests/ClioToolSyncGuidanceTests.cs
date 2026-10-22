@@ -134,6 +134,23 @@ public sealed class ClioToolSyncGuidanceTests
             because: "a tool failure or an older clio still needs the manual recipe somewhere");
         details.Should().Contain("- Move a section between workplaces",
             because: "the fallback keeps the move recipe");
+        workplaces.Should().MatchRegex(
+            @"`position`, `workplace-type` \(clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) and later\)",
+            because: "the argument list names workplace-type with the first clio release that has it");
+        workplaces.Should().MatchRegex(
+            @"pass `workplace-type=portal` to `place-section-in-workplace` \(clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) and later\)",
+            because: "external users need a Portal workplace, and an older clio does not know the argument");
+        workplaces.Should().Contain("the tool never retypes a workplace",
+            because: "an existing workplace of another type is refused before any write, never retyped");
+        workplaces.Should().Contain("Without the argument a NEW workplace gets the platform default type (`general`) and an existing one is not checked.",
+            because: "the clio 8.1.0.143 contract creates a General workplace when workplace-type is omitted, so a portal placement without it is wrong");
+        workplaces.Should().MatchRegex(
+            @"for an external-user workplace, stop and ask the user to update clio to (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later — do not place the section without the type\.",
+            because: "a clio with the tool but without workplace-type stops instead of creating a General workplace for the portal audience");
+        workplaces.Should().Contain("A rejected `workplace-type` is not the tool failure that leads to manual placement: never place the section or retype a workplace by hand instead.",
+            because: "portal-sections defers this case to workplaces and forbids the manual fallback, so the owner must say the same");
+        workplaces.Should().Contain("except a missing or rejected `workplace-type` for an external-user workplace",
+            because: "the general manual-placement route must not catch the missing-argument case");
     }
 
     [Test]

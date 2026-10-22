@@ -40,6 +40,8 @@ public sealed class GuidanceMigrationTests
         "process-script-task-details",
         "process-versions-details",
         "process-files",
+        "process-files-report",
+        "process-files-parameter",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",
@@ -51,7 +53,8 @@ public sealed class GuidanceMigrationTests
         "page-schema-translation",
         "object-rights",
         "m365-addin-customization",
-        "default-record-rights"
+        "default-record-rights",
+        "portal-sections"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

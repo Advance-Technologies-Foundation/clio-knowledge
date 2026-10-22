@@ -121,7 +121,11 @@ public sealed class ProcessGuideCrossReferenceTests
         // parameter row reported it as unattributed when the article names the owner right below. Slack
         // is 120 characters on this phrase (the window less the 76-character gap and the 24-character
         // owner token — the earlier note said 144 by forgetting the token); the tightest other row is 87.
-        ("element-level `performer`", "process-task-performer")
+        ("element-level `performer`", "process-task-performer"),
+        // The Process parameter group moved out of process-files into its own article, and the row is
+        // added WITH the split. Keyed on the group name, which files.md, the element catalog and routing all
+        // write next to the owner name; a new mention that drops the name turns this red.
+        ("`files` group", "process-files-parameter")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of

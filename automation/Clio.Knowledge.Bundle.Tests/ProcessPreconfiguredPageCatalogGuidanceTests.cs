@@ -17,8 +17,8 @@ public sealed class ProcessPreconfiguredPageCatalogGuidanceTests
         string catalog = ProcessGuideSet.Read(repositoryRoot, "guidance/mcp/guides/processes/element-catalog.md");
 
         // Assert
-        catalog.Should().Contain("FOUR user tasks have their own dedicated build type",
-            because: "the count is read before the list, and it must match the four entries that follow");
+        catalog.Should().Contain("SEVEN user tasks have their own dedicated build type",
+            because: "the count is read before the list, and it must match the seven user tasks that follow (the three Process file tasks share one build type)");
         catalog.Should().Contain("`preconfiguredPageUserTask` -> `type:\"preconfiguredPage\"`",
             because: "the dedicated-build-type list is where an agent mapping a task name to a build type looks");
     }
