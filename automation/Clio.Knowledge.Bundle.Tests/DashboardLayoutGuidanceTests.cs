@@ -11,7 +11,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// The rules come from the stock product pages, read with <c>get-page</c> on a Sales/Service Enterprise
 /// environment on 2026-10-15: the <c>Main</c> grid has 28px rows on a dashboard and 64px rows on a home page,
 /// so one metric <c>rowSpan</c> for both surfaces renders a 100px tile on one and a 208px tile on the other;
-/// no stock metric is wider than 4 columns; every stock dashboard metric has an icon; four widget color
+/// no stock dashboard metric is wider than 4 columns, while on a home page the engineer chose metric and chart
+/// rows that fill all 12 columns (two tiles 6 + 6, not 3 + 3 with an empty right half, from runtime screenshots
+/// on 2026-10-22); every stock dashboard metric has an icon; four widget color
 /// presets fall below a 3:1 WCAG contrast ratio on the white card; and all 76 stock metric tiles show the value
 /// alone (<c>text.template</c> <c>{0}</c>, the name only in <c>config.title</c>), with <c>text.fontSizeMode</c>
 /// "medium" on every dashboard (the engineer chose "large" for home pages); their titles name the measure in
@@ -50,7 +52,7 @@ public sealed class DashboardLayoutGuidanceTests
             because: "the row height decides how tall a rowSpan renders, and it differs per surface");
         lines.Should().Contain("| Dashboard (`BaseDashboardTemplate`) | `28px` | 3, or 2 in a dense band | 3 |",
             because: "a dashboard metric is 3 rows of 28px, about 100px tall, as on the stock dashboards");
-        lines.Should().Contain("| Home page (`BaseHomePage`) | `64px` | 3, or 2 in a dense band | 2 |",
+        lines.Should().Contain("| Home page (`BaseHomePage`) | `64px` | 12 split evenly per row (\"Home page widths\") | 2 |",
             because: "a home-page metric is 2 rows of 64px; rowSpan 3 there renders the bloated 208px tile");
         guide.Should().NotContainAny(
             ["metric tile 3, gauge 3", "~3 for a metric tile", "Metric tiles are 1 row tall", "metric tiles stay short"],
@@ -128,8 +130,8 @@ public sealed class DashboardLayoutGuidanceTests
     }
 
     [Test]
-    [Description("The layout guide never stretches a metric tile to fill a row and keeps a widget beside a stack bottom-aligned.")]
-    public void LayoutGuide_ShouldNotStretchMetricTiles()
+    [Description("The layout guide never stretches a metric tile to fill a row on a dashboard and keeps a widget beside a stack bottom-aligned.")]
+    public void LayoutGuide_ShouldNotStretchMetricTilesOnADashboard()
     {
         // Arrange
         string guide = Read(LayoutPath);
@@ -140,11 +142,14 @@ public sealed class DashboardLayoutGuidanceTests
         // Assert
         flattened.Should().ContainAll(
         [
-            "NEVER derive a tile width from 12 divided by the tile count",
-            "a tile is at most `colSpan` 4",
-            "The 12-column rule applies to the FILLED AREA, not to each row",
+            "DASHBOARD WIDTH: NEVER derive a tile width from 12 divided by the tile count",
+            "a dashboard tile is at most `colSpan` 4. Two tiles are 3 + 3, not 6 + 6.",
+            "On a dashboard the 12-column rule applies to the FILLED AREA, not to each row",
             "BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total"
-        ], because: "no stock metric is wider than 4 columns; two tiles stretched to 6 + 6 look nothing like the product");
+        ], because: "no stock dashboard metric is wider than 4 columns; two tiles stretched to 6 + 6 look nothing like the product");
+        flattened.Should().NotContainAny(
+            ["a tile is at most `colSpan` 4", "The 12-column rule applies to the FILLED AREA"],
+            because: "the dashboard width rules must not read as universal: a home page fills its rows");
         flattened.Should().ContainAll(
         [
             "| Number of accounts | metric, `steel-blue`, `work-icon` | `{ \"column\": 1, \"row\": 1, \"colSpan\": 3, \"rowSpan\": 3 }` |",
@@ -153,6 +158,47 @@ public sealed class DashboardLayoutGuidanceTests
         guide.Should().NotContainAny(
             ["metric tile width = 12 /", "12 / (tiles in the band)", "Every row's widget widths must sum to a full 12"],
             because: "deriving a tile width from the tile count is what stretched the tiles");
+    }
+
+    [Test]
+    [Description("The layout guide fills every metric row and chart row of a home page across 12 columns, keeps heights, and re-splits such a row on an existing home page.")]
+    public void LayoutGuide_ShouldFillTheRowsOfAHomePage()
+    {
+        // Arrange
+        string guide = Read(LayoutPath);
+
+        // Act
+        string flattened = Flatten(guide);
+
+        // Assert
+        flattened.Should().ContainAll(
+        [
+            "## Home page widths",
+            "METRIC ROW: with nothing beside it, a home-page metric row fills all 12 columns with equal tiles: "
+                + "2 -> 6 + 6, 3 -> 4 + 4 + 4, 4 -> 3 + 3 + 3 + 3, 5 -> 4 + 4 + 4 then 6 + 6, 6 -> 2 each.",
+            "7 or more: rows of at most 6 tiles, as even as possible, each row 2, 3, 4 or 6 tiles so it fills 12 (7 -> 4 + 3, 8 -> 4 + 4).",
+            "A single metric stays `colSpan` 3-4, never stretched to 12, or sits beside a chart.",
+            "The metric `rowSpan` stays 2."
+        ], because: "the engineer chose 6 + 6 over 3 + 3 with an empty right half for a home page's metric row");
+        flattened.Should().ContainAll(
+        [
+            "CHARTS: one chart takes 12 columns.",
+            "Ordinary charts (bar, line/spline, area) go at most 2 per row (6 + 6); an odd last one stretches to 12, "
+                + "preferably the one with the most data points (a trend or timeline).",
+            "Compact charts (doughnut/pie, a bar with few short bars) may go 3 per row (4 + 4 + 4), the remainder split evenly "
+                + "(6 + 6 or 12); 4 compact charts are 6 + 6, 6 + 6.",
+            "Never 4 or more charts in a row.",
+            "Charts in one row share the same `rowSpan`.",
+            "A mixed row such as doughnut 4 + wide chart 8 is fine.",
+            "Chart heights and floors do not change"
+        ], because: "a home page's chart rows fill the width the same way, without changing chart heights");
+        flattened.Should().ContainAll(
+        [
+            "Dashboards keep the widths above.",
+            "on a home page metric and chart rows fill 12 columns (\"Home page widths\")",
+            "re-split that row per \"Home page widths\"",
+            "on a home page every metric row and chart row fills 12 columns per \"Home page widths\""
+        ], because: "the core rule, the existing-page steps and the finish checklist must apply the home-page widths and only there");
     }
 
     [Test]
