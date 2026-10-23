@@ -81,12 +81,11 @@ public sealed class CollectionParameterGuidanceTests
         // (nothing to act on - the guide text is the contract)
 
         // Assert
-        guide.Should().Contain("with a clio whose FULL create-business-process contract (`get-tool-contract`, "
-                + "`detail: \"full\"`; the default reply is shortened and its silence proves nothing) says \"declare the "
-                + "columns of a Collection\"",
+        guide.Should().Contain("with a clio whose create-business-process contract (`get-tool-contract`) shows "
+                + "`itemProperties?` in its `parameter {...}` shape or says \"declare the columns of a Collection\"",
             because: "an older clio carries no floor for the member and an older server drops it silently, so the gate "
-                + "is the contract wording clio ships with the floor - and the default, shortened contract drops that "
-                + "sentence, so only the full one can answer");
+                + "is what clio ships with the floor - the call shape the default, shortened reply keeps, or the "
+                + "sentence the full reply carries - and a default read must be able to answer it without a 44 KB full read");
         guide.Should().Contain("`itemProperties: [{name, type, direction?, caption?, referenceSchema?, "
                 + "itemProperties?}]` creates exactly those items, in order, each Variable unless set, with no tag.",
             because: "the member list and the item default are the write shape");
@@ -145,6 +144,30 @@ public sealed class CollectionParameterGuidanceTests
             because: "an agent refused on a retarget needs the path that works, or it retries the same call");
         guide.Should().Contain("The `tag` and the binding are left untouched",
             because: "the package stopped re-stamping the tag once the gate admitted only the parameter's own source");
+    }
+
+    [Test]
+    [Description("A script that fills a declared collection is shown the pattern that compiles - build a CompositeObjectList of CompositeObject rows keyed by the item names and Set it once - and why adding to the read-back interface does not; the ScriptTask core points there.")]
+    public void ScriptTaskGuides_ShouldShowHowToWriteACollectionParameter()
+    {
+        // Arrange
+        string root = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string details = Regex.Replace(ProcessGuideSet.Read(root, "guidance/mcp/guides/processes/process-script-task-details.md"), @"\s+", " ");
+        string core = ProcessGuideSet.Read(root, "guidance/mcp/guides/processes/process-script-task.md");
+
+        // Assert
+        details.Should().Contain("var rows = new CompositeObjectList<CompositeObject>();",
+            because: "the concrete list type is the one that has Add, and an agent that guesses writes the interface");
+        details.Should().Contain("Set<ICompositeObjectList<ICompositeObject>>(\"OverdueTasks\", rows);",
+            because: "the list is assigned once, through the interface type the parameter carries");
+        details.Should().Contain("Key each row by the collection's item names (its `itemProperties`)",
+            because: "a row is read back by the target's item names, so another key is an empty column");
+        details.Should().Contain("has no `Add`, so adding to `Get<...>(\"OverdueTasks\")` does not compile (CS1061)",
+            because: "this exact mistake cost a compile cycle in the stand run");
+        core.Should().Contain("(to write one: `process-script-task-details`)",
+            because: "the core is at its reply budget, so it points at the details article instead of repeating it");
     }
 
     private static string ReadGuide() =>

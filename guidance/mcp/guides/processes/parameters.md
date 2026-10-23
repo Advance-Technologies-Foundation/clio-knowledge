@@ -36,9 +36,9 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   ways forward (shape the source first — a Read data element in `collection` mode with explicit `columns` —
   or declare the shape yourself, `Collection` + `itemProperties`, below). The same refusal covers an output whose items carry no column UId in their `tag` — only a shape the platform stamped can be reproduced. A bare
   `type: "Collection"` IS accepted (the designer's own type-menu entry) but carries NO shape. Where no output can
-  be mirrored (a sub-process input, a list of records a script fills), declare the shape, with a clio whose FULL
-  create-business-process contract (`get-tool-contract`, `detail: "full"`; the default reply is shortened and its
-  silence proves nothing) says "declare the columns of a Collection": `itemProperties:
+  be mirrored (a sub-process input, a list of records a script fills), declare the shape, with a clio whose
+  create-business-process contract (`get-tool-contract`) shows `itemProperties?` in its `parameter {...}` shape or
+  says "declare the columns of a Collection": `itemProperties:
   [{name, type, direction?, caption?, referenceSchema?, itemProperties?}]` creates exactly those items, in order,
   each Variable unless set, with no tag. An item takes a process parameter's types (Lookup via `referenceSchema`,
   File); an item of a top-level collection may be a Collection whose items are not collections. Binary, a type
