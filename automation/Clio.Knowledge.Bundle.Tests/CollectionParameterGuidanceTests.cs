@@ -39,7 +39,7 @@ public sealed class CollectionParameterGuidanceTests
 
     [Test]
     [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is re-sent by its alias.")]
-    public void Guide_ShouldListTheFileTypesAndTheFileCollectionException()
+    public void Guide_ShouldListTheFileTypesAndReplayAFileCollectionByItsAlias()
     {
         // Arrange
         string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
@@ -71,7 +71,7 @@ public sealed class CollectionParameterGuidanceTests
     }
 
     [Test]
-    [Description("The declared item shape is taught where the bare Collection is: gated on the create contract's own wording, with its member list, the Variable item default, the two-level limit, the refusals and FileCollection as the one-File form; and a described collection is replayed by how it was made - a mirrored one through typeFromElement, a declared one as described.")]
+    [Description("The declared item shape is taught where the bare Collection is: gated on the create contract's call shape or wording, with its member list, the Variable item default, the two-level limit, the refusals and FileCollection as the one-File form; and a described collection is replayed by how it was made - a mirrored one through typeFromElement, a declared one as described.")]
     public void Guide_ShouldTeachTheDeclaredItemShapeAndHowToReplayIt()
     {
         // Arrange
@@ -86,20 +86,20 @@ public sealed class CollectionParameterGuidanceTests
             because: "an older clio carries no floor for the member and an older server drops it silently, so the gate "
                 + "is what clio ships with the floor - the call shape the default, shortened reply keeps, or the "
                 + "sentence the full reply carries - and a default read must be able to answer it without a 44 KB full read");
-        guide.Should().Contain("`itemProperties: [{name, type, direction?, caption?, referenceSchema?, "
+        guide.Should().Contain("`itemProperties: [{name, type, direction?, caption?, description?, referenceSchema?, "
                 + "itemProperties?}]` creates exactly those items, in order, each Variable unless set, with no tag.",
             because: "the member list and the item default are the write shape");
         guide.Should().Contain("an item of a top-level collection may be a Collection whose items are not collections. "
-                + "Binary, a type outside the list (a described MaxSizeText or MediumText item: re-declare it as Text or "
-                + "Long text) and anything deeper are refused, naming the item",
+                + "Binary, a type outside the list (a described MaxSizeText or MediumText item: re-declare it as Long "
+                + "text) and anything deeper are refused, naming the item",
             because: "the depth limit and the refusals are where an agent stops");
         guide.Should().Contain("`setParameter` does not reshape (remove + add)",
             because: "a reshape sent as an update is refused, and the route that works is named");
         guide.Should().Contain("`FileCollection` is this form with one item `File: File`.",
             because: "the alias and the general form store the same metadata");
         guide.Should().Contain("feed a collection back by its OWN `tag`: a tagged (MIRRORED) one through "
-                + "`typeFromElement` naming its source; re-send an untagged (DECLARED) one as described, `type` + "
-                + "`itemProperties`",
+                + "`typeFromElement` naming its source, without its `itemProperties`; re-send an untagged (DECLARED) one "
+                + "as described, `type` + `itemProperties`",
             because: "a declared collection has no source to mirror, so the old 'only through typeFromElement' rule "
                 + "would leave it unrebuildable; and the parameter's own tag decides, since designer items carry tags too");
         guide.Should().Contain("a bound one's `value` is its binding: drop it and replay the binding as a mapping",

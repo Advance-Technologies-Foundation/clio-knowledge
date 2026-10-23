@@ -39,15 +39,15 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   be mirrored (a sub-process input, a list of records a script fills), declare the shape, with a clio whose
   create-business-process contract (`get-tool-contract`) shows `itemProperties?` in its `parameter {...}` shape or
   says "declare the columns of a Collection": `itemProperties:
-  [{name, type, direction?, caption?, referenceSchema?, itemProperties?}]` creates exactly those items, in order,
+  [{name, type, direction?, caption?, description?, referenceSchema?, itemProperties?}]` creates exactly those items, in order,
   each Variable unless set, with no tag. An item takes a process parameter's types (Lookup via `referenceSchema`,
   File); an item of a top-level collection may be a Collection whose items are not collections. Binary, a type
-  outside the list (a described MaxSizeText or MediumText item: re-declare it as Text or Long text) and anything
+  outside the list (a described MaxSizeText or MediumText item: re-declare it as Long text) and anything
   deeper are refused, naming the item; so is `itemProperties` beside `typeFromElement`, and
   `setParameter` does not reshape (remove + add). `FileCollection` is this form with one item `File: File`. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
   with no item properties, which the mirror therefore refuses). `describe-business-process` reports a collection parameter's `tag` and
   `itemProperties`; both are absent on a scalar and on a bare collection — feed a collection back by its OWN
-  `tag`: a tagged (MIRRORED) one through `typeFromElement` naming its source; re-send an untagged (DECLARED) one as
+  `tag`: a tagged (MIRRORED) one through `typeFromElement` naming its source, without its `itemProperties`; re-send an untagged (DECLARED) one as
   described, `type` + `itemProperties`, with the clio above (describe-only members are ignored; a bound one's
   `value` is its binding: drop it and replay the binding as a mapping). With a File-aware clio, a
   PROCESS parameter described as type `FileCollection` is re-sent as that type, which rebuilds its shape
