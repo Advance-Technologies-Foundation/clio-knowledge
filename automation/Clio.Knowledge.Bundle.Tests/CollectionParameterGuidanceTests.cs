@@ -81,24 +81,33 @@ public sealed class CollectionParameterGuidanceTests
         // (nothing to act on - the guide text is the contract)
 
         // Assert
-        guide.Should().Contain("with a clio whose get-tool-contract for create-business-process says \"declare the "
+        guide.Should().Contain("with a clio whose FULL create-business-process contract (`get-tool-contract`, "
+                + "`detail: \"full\"`; the default reply is shortened and its silence proves nothing) says \"declare the "
                 + "columns of a Collection\"",
-            because: "an older clio carries no floor for the member, and an older server drops it silently, so the "
-                + "gate is the contract wording clio ships with the floor");
+            because: "an older clio carries no floor for the member and an older server drops it silently, so the gate "
+                + "is the contract wording clio ships with the floor - and the default, shortened contract drops that "
+                + "sentence, so only the full one can answer");
         guide.Should().Contain("`itemProperties: [{name, type, direction?, caption?, referenceSchema?, "
                 + "itemProperties?}]` creates exactly those items, in order, each Variable unless set, with no tag.",
             because: "the member list and the item default are the write shape");
         guide.Should().Contain("an item of a top-level collection may be a Collection whose items are not collections. "
-                + "Binary and anything deeper are refused, naming the item",
+                + "Binary, a type outside the list (a described MaxSizeText or MediumText item: re-declare it as Text or "
+                + "Long text) and anything deeper are refused, naming the item",
             because: "the depth limit and the refusals are where an agent stops");
         guide.Should().Contain("`setParameter` does not reshape (remove + add)",
             because: "a reshape sent as an update is refused, and the route that works is named");
         guide.Should().Contain("`FileCollection` is this form with one item `File: File`.",
             because: "the alias and the general form store the same metadata");
-        guide.Should().Contain("feed a MIRRORED collection (tagged items) back through `typeFromElement` naming its "
-                + "source; re-send a DECLARED one (untagged items) as described, `type` + `itemProperties`",
+        guide.Should().Contain("feed a collection back by its OWN `tag`: a tagged (MIRRORED) one through "
+                + "`typeFromElement` naming its source; re-send an untagged (DECLARED) one as described, `type` + "
+                + "`itemProperties`",
             because: "a declared collection has no source to mirror, so the old 'only through typeFromElement' rule "
-                + "would leave it unrebuildable");
+                + "would leave it unrebuildable; and the parameter's own tag decides, since designer items carry tags too");
+        guide.Should().Contain("a bound one's `value` is its binding: drop it and replay the binding as a mapping",
+            because: "the write side refuses a constant on a collection, so a bound collection re-sent with its value "
+                + "would be refused");
+        guide.Should().Contain("or declare the shape yourself, `Collection` + `itemProperties`, below)",
+            because: "the mirror refusal now points at itemProperties, and the guide paraphrases that refusal");
         guide.Should().NotContain("never by re-typing the shape",
             because: "re-sending a declared shape is now the supported way back");
     }
