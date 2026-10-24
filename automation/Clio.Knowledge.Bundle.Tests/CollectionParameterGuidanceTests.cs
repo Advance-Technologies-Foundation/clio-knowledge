@@ -10,8 +10,9 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// that the package enforces against the parameter's own tag and its live binding. Each claim below was wrong at
 /// some point in the story's review rounds, and a copy-edit that drops one puts an agent back on the path the
 /// server refuses. ENG-95984 added the File and FileCollection types to the same list, and FileCollection is the one
-/// collection describe reports by an alias rather than by its platform type, so it is the documented exception to
-/// re-submitting a described collection only through its mirror.
+/// collection describe reports by an alias rather than by its platform type. The declared item shape then gave a
+/// collection a second way to get a shape - its own `itemProperties` - so a described collection is replayed by how it
+/// was made: a mirrored one through its mirror, a declared one as described, a FileCollection by its alias.
 /// </summary>
 [TestFixture]
 public sealed class CollectionParameterGuidanceTests
@@ -37,8 +38,8 @@ public sealed class CollectionParameterGuidanceTests
     }
 
     [Test]
-    [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is the stated exception to re-submitting a collection only through typeFromElement.")]
-    public void Guide_ShouldListTheFileTypesAndTheFileCollectionException()
+    [Description("File and FileCollection are on the type list for a File-aware clio, binary (no longer file) is on the not-supported list, and a described FileCollection is re-sent by its alias.")]
+    public void Guide_ShouldListTheFileTypesAndReplayAFileCollectionByItsAlias()
     {
         // Arrange
         string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
@@ -60,14 +61,54 @@ public sealed class CollectionParameterGuidanceTests
             because: "a file is supported now, so the not-supported list names binary, which stays refused for good");
         guide.Should().NotContain("entity / file /",
             because: "the old list told agents a file could not be a process parameter");
-        guide.Should().Contain("never by re-typing the shape. The one exception, with a File-aware clio: a PROCESS "
-                + "parameter described as type `FileCollection` is re-sent as that type, which rebuilds its shape "
-                + "(`process-files`).",
+        guide.Should().Contain("With a File-aware clio, a PROCESS parameter described as type `FileCollection` is "
+                + "re-sent as that type, which rebuilds its shape (`process-files`).",
             because: "describe reports a process-level collection of the FileCollection shape by that alias, and the "
-                + "mirror refuses a file output, so re-typing is the only way to rebuild it");
+                + "mirror refuses a file output, so re-sending the alias is how it is rebuilt");
         guide.Should().Contain("with a File-aware clio `Name.Item` names an item of a collection parameter, as does "
                 + "`targetProcessParameter`",
             because: "the dotted process-parameter path is part of the mapping grammar this article owns");
+    }
+
+    [Test]
+    [Description("The declared item shape is taught where the bare Collection is: gated on the create contract's call shape or wording, with its member list, the Variable item default, the two-level limit, the refusals and FileCollection as the one-File form; and a described collection is replayed by how it was made - a mirrored one through typeFromElement, a declared one as described.")]
+    public void Guide_ShouldTeachTheDeclaredItemShapeAndHowToReplayIt()
+    {
+        // Arrange
+        string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+
+        // Act
+        // (nothing to act on - the guide text is the contract)
+
+        // Assert
+        guide.Should().Contain("with a clio whose create-business-process contract (`get-tool-contract`) shows "
+                + "`itemProperties?` in its `parameter {...}` shape or says \"declare the columns of a Collection\"",
+            because: "an older clio carries no floor for the member and an older server drops it silently, so the gate "
+                + "is what clio ships with the floor - the call shape the default, shortened reply keeps, or the "
+                + "sentence the full reply carries - and a default read must be able to answer it without a 44 KB full read");
+        guide.Should().Contain("`itemProperties: [{name, type, direction?, caption?, description?, referenceSchema?, "
+                + "itemProperties?}]` creates exactly those items, in order, each Variable unless set, with no tag.",
+            because: "the member list and the item default are the write shape");
+        guide.Should().Contain("an item of a top-level collection may be a Collection whose items are not collections. "
+                + "Binary, a type outside the list (a described MaxSizeText or MediumText item: re-declare it as Long "
+                + "text) and anything deeper are refused, naming the item",
+            because: "the depth limit and the refusals are where an agent stops");
+        guide.Should().Contain("`setParameter` does not reshape (remove + add)",
+            because: "a reshape sent as an update is refused, and the route that works is named");
+        guide.Should().Contain("`FileCollection` is this form with one item `File: File`.",
+            because: "the alias and the general form store the same metadata");
+        guide.Should().Contain("feed a collection back by its OWN `tag`: a tagged (MIRRORED) one through "
+                + "`typeFromElement` naming its source, without its `itemProperties`; re-send an untagged (DECLARED) one "
+                + "as described, `type` + `itemProperties`",
+            because: "a declared collection has no source to mirror, so the old 'only through typeFromElement' rule "
+                + "would leave it unrebuildable; and the parameter's own tag decides, since designer items carry tags too");
+        guide.Should().Contain("a bound one's `value` is its binding: drop it and replay the binding as a mapping",
+            because: "the write side refuses a constant on a collection, so a bound collection re-sent with its value "
+                + "would be refused");
+        guide.Should().Contain("or declare the shape yourself, `Collection` + `itemProperties`, below)",
+            because: "the mirror refusal now points at itemProperties, and the guide paraphrases that refusal");
+        guide.Should().NotContain("never by re-typing the shape",
+            because: "re-sending a declared shape is now the supported way back");
     }
 
     [Test]
@@ -103,6 +144,30 @@ public sealed class CollectionParameterGuidanceTests
             because: "an agent refused on a retarget needs the path that works, or it retries the same call");
         guide.Should().Contain("The `tag` and the binding are left untouched",
             because: "the package stopped re-stamping the tag once the gate admitted only the parameter's own source");
+    }
+
+    [Test]
+    [Description("A script that fills a declared collection is shown the pattern that compiles - build a CompositeObjectList of CompositeObject rows keyed by the item names and Set it once - and why adding to the read-back interface does not; the ScriptTask core points there.")]
+    public void ScriptTaskGuides_ShouldShowHowToWriteACollectionParameter()
+    {
+        // Arrange
+        string root = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string details = Regex.Replace(ProcessGuideSet.Read(root, "guidance/mcp/guides/processes/process-script-task-details.md"), @"\s+", " ");
+        string core = ProcessGuideSet.Read(root, "guidance/mcp/guides/processes/process-script-task.md");
+
+        // Assert
+        details.Should().Contain("var rows = new CompositeObjectList<CompositeObject>();",
+            because: "the concrete list type is the one that has Add, and an agent that guesses writes the interface");
+        details.Should().Contain("Set<ICompositeObjectList<ICompositeObject>>(\"OverdueTasks\", rows);",
+            because: "the list is assigned once, through the interface type the parameter carries");
+        details.Should().Contain("Key each row by the collection's item names (its `itemProperties`)",
+            because: "a row is read back by the target's item names, so another key is an empty column");
+        details.Should().Contain("has no `Add`, so adding to `Get<...>(\"OverdueTasks\")` does not compile (CS1061)",
+            because: "this exact mistake cost a compile cycle in the stand run");
+        core.Should().Contain("(to write one: `process-script-task-details`)",
+            because: "the core is at its reply budget, so it points at the details article instead of repeating it");
     }
 
     private static string ReadGuide() =>

@@ -48,7 +48,7 @@ Set<string>("UsrResult", summary);
 Set<bool>("UsrSucceeded", true);
 ```
 
-An unknown code is not a safe fallback: use the exact code from the process signature, in its exact CASE - the run-time lookup is case-sensitive, so `Get<int>("amount")` does not find `Amount`. `"ElementName.ParameterName"` reads another element's parameter, for example `Get<ICompositeObjectList<ICompositeObject>>("ReadOrders.ResultCompositeObjectList")`. Never write a parameter as a bare field: that is the compiled-variant style and does not compile in a ScriptTask clio builds. Set output parameters before the ScriptTask completes so later elements can consume them.
+An unknown code is not a safe fallback: use the exact code from the process signature, in its exact CASE - the run-time lookup is case-sensitive, so `Get<int>("amount")` does not find `Amount`. `"ElementName.ParameterName"` reads another element's parameter, for example `Get<ICompositeObjectList<ICompositeObject>>("ReadOrders.ResultCompositeObjectList")` (to write one: `process-script-task-details`). Never write a parameter as a bare field: that is the compiled-variant style and does not compile in a ScriptTask clio builds. Set output parameters before the ScriptTask completes so later elements can consume them.
 
 Treat every process parameter as untrusted input even when its code and CLR type match the signature. Validate expected formats and ranges, and re-check record access or business authorization before using an identifier for reads, writes, or external calls. A process running with elevated context must not turn a caller-supplied record id into an authorization bypass.
 

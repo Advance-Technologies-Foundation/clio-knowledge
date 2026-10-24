@@ -38,9 +38,10 @@ you run only after the user approves it (`core-rules`).
   `CompositeObjectList`.
 - ITEM NAME: a file collection made in the designer may name its one item otherwise (`Attachment`). It
   still reads back as `FileCollection`, with its real item name (measured on CrtProcessBuilder 1.6.6.98 on
-  2026-10-14). On THAT process, address the item by that name. A process REBUILT from the description names the
-  item `File`, so a re-sent mapping that still names `AttachmentsParameter.Attachment` is refused ("has no item
-  'Attachment'", followed by the items it has): rename that segment to `File`.
+  2026-10-14). On THAT process, address the item by that name. A REBUILD re-sent with its `itemProperties` keeps
+  that item. Rebuilt from the type alone, it names the item `File`,
+  and a mapping naming `AttachmentsParameter.Attachment` is refused ("has no item 'Attachment'", followed by the
+  items it has): rename it to `File`.
 - A value that is exactly one reference to an element output is reported with sourceElement +
   sourceElementParameter (dotted for an item: ObjectFiles.File) beside the raw value, when re-sending those names
   would change no other level; anything else, a process parameter reference included, comes back only as the raw

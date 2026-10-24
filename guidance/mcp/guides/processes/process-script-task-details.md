@@ -35,6 +35,7 @@ The runtime's reload can trail the compile's answer: a run a few seconds after a
 
 == Read and write process parameters — detail ==
 `UserConnection` is a property of the generated class and needs no `Get`.
+- To WRITE a collection parameter (a list of records), build the list and assign it once: `var rows = new CompositeObjectList<CompositeObject>(); var row = new CompositeObject(); row["Task"] = taskId; rows.Add(row); Set<ICompositeObjectList<ICompositeObject>>("OverdueTasks", rows);`. Key each row by the collection's item names (its `itemProperties`). The interface type the getter returns, `ICompositeObjectList<ICompositeObject>`, has no `Add`, so adding to `Get<...>("OverdueTasks")` does not compile (CS1061). Measured on CrtProcessBuilder 1.6.6.117 (2026-10-23): this pattern compiled, and the run returned the rows.
 
 == Namespaces — detail ==
 Besides breaking a name collision, an alias can shorten a long prefix (`TSConfiguration` = `Terrasoft.Configuration`); a fully qualified name needs no using at all and is always an alternative.
