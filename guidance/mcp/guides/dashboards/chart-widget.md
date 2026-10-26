@@ -132,7 +132,7 @@ names a different style/theme in the prompt, use that instead.
 `config.color` is REQUIRED (see Title and header): it colors the title. Default to "dark-blue" when
 the user gives none.
 
-MUST NOT use `orange-red`, `orange`, `light-green` or `turquoise` for `config.color` or `series[*].color` (below 3:1 contrast on the white card); the widget color palette is owned by `dashboard-and-home-page-layout`.
+MUST NOT use `orange-red`, `orange`, `light-green` or `turquoise` for `config.color` or `series[*].color` (below 3:1 contrast on the white card); the widget color palette is owned by `widget-color-and-icon` (get-guidance name=widget-color-and-icon).
 
 ## Placement and preserving existing widgets
 
@@ -142,8 +142,9 @@ MUST NOT use `orange-red`, `orange`, `light-green` or `turquoise` for `config.co
 - SIZE FLOOR — never ship a tiny chart. In a `crt.GridContainer` set `layoutConfig.rowSpan` >= 6
   (platform default 9; funnels 15). In a `crt.FlexContainer` the parent uses `FlexLayoutConfig` —
   set `layoutConfig.height` >= 350 (px) so the flex child doesn't collapse. The same floor applies
-  to list/pivot widgets. Metric TILES are exempt (they stay ~3 rows). A GAUGE is NOT exempt: it draws
-  an arc, not a number, and needs its own height — see `dashboard-and-home-page-layout`.
+  to list/pivot widgets. Metric TILES are exempt (their size is owned by
+  `dashboard-and-home-page-layout`). A GAUGE is NOT exempt: it draws an arc, not a number, and needs its
+  own height — see `dashboard-and-home-page-layout`.
   EXCEPTION — on a DESKTOP page (`CentralAreaDesktopTemplate`) the desktop sizing rule replaces
   this floor: every widget (charts included) may be as short as 3 rows, targeting <= 10 rows total.
   See `desktop-page`.
