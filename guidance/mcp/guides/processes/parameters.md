@@ -8,7 +8,8 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection/File/FileCollection),
   direction (In/Out/Variable/Internal), caption, description, or referenceSchema = an object name (e.g. City) to make
-  it a Lookup to that object }, and an optional value (a constant default; NOT valid for Date / Date-time /
+  it a Lookup to that object - `type: Lookup` without it is refused (older packages saved a lookup to no object);
+  a bare record id is a Guid }, and an optional value (a constant default; NOT valid for Date / Date-time /
   Time — those defaults are formula macros, see the date macro rule below. A LOOKUP default takes a bare
   record Guid in `value` — stored as the ConstValue the runtime reads. The route ships from
   CrtProcessBuilder 1.3.1.1, and a current clio additionally refuses any environment older than the version
@@ -40,7 +41,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   create-business-process contract (`get-tool-contract`) shows `itemProperties?` in its `parameter {...}` shape or
   says "declare the columns of a Collection": `itemProperties:
   [{name, type, direction?, caption?, description?, referenceSchema?, itemProperties?}]` creates exactly those items, in order,
-  each Variable unless set, with no tag. An item takes a process parameter's types (Lookup via `referenceSchema`,
+  each Variable unless set, with no tag. An item takes a process parameter's types (Lookup only with `referenceSchema`,
   File); an item of a top-level collection may be a Collection whose items are not collections. Binary, a type
   outside the list (a described MaxSizeText or MediumText item: re-declare it as Long text) and anything
   deeper are refused, naming the item; so is `itemProperties` beside `typeFromElement`, and

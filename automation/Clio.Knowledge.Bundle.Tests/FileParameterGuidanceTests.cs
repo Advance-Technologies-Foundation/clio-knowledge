@@ -308,7 +308,7 @@ public sealed class FileParameterGuidanceTests
     }
 
     [Test]
-    [Description("Every article this change gated cites the File-aware clio that process-files defines from the tool contract, and the catalog description states that gate rather than a clio release.")]
+    [Description("Every article this change gated cites the File-aware clio that process-files defines from the tool contract, and the catalog description states that gate rather than a clio release and lists every two-level rule.")]
     public void EveryGate_ShouldCiteTheContractGateRatherThanAClioRelease()
     {
         // Arrange
@@ -334,6 +334,8 @@ public sealed class FileParameterGuidanceTests
             because: "the catalog description of process-files states the same gate as the guide");
         description.Should().NotMatchRegex(@"clio \d+\.\d+\.\d+\.\d+",
             because: "a release number written before the release is cut is a prediction the catalog must not make");
+        description.Should().Contain("(P1, P2, P2-MI, P3, R-M1, R-M2, R-M3)",
+            because: "the catalog lists every two-level rule the guide states, R-M3 included");
     }
 
     private static string ReadCollapsed(string relativePath) =>

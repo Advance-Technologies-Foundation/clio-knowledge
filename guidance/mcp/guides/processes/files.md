@@ -120,8 +120,8 @@ targets only.
 3. One called-process run per file: the callee declares a File input; the calling Sub-process element is
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.
-   Send the InputRecordCollection mapping that guide asks for FIRST, from the SAME collection, the item
-   mapping in the same request (see Order matters).
+   Send the InputRecordCollection mapping that guide asks for FIRST, from the SAME collection, and the item
+   mapping in that request (P2-MI; see Order matters).
 4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM from the source's file item; P1 binds the
    input too. That input does not take files: an outer-only mapping onto it is stored unpaired. Neither form has
    been run on a stand.
