@@ -173,10 +173,12 @@ public sealed class FileParameterGuidanceTests
                 "an unpairable item is a notice, not a refusal (owner decision), and the agent must act on it"),
             ("R-M2 — a collection with NO file item onto a collection that takes files is refused (\"has no File item\")",
                 "the refusal keeps a saved-green process from failing in the element at run time"),
-            ("P2-MI — a mapping that binds a multi-instance `InputRecordCollection` (as its target, or through P1)",
+            ("P2-MI — a multi-instance `InputRecordCollection` a request binds (as its target, or through P1)",
                 "iterating over records without files is legitimate, so it is a notice"),
             ("\"will be empty on every iteration\" unless you map `InputRecordCollection.<F>`",
                 "the notice text is how the agent recognises the gap"),
+            ("still unbound when the request ends gets a notice",
+                "the notice is judged on the request's final state, so an item mapped later in the same request is not reported"),
             ("P3 — a SINGLE file (not an item) onto a file item of a single-instance owner (any element but a multi-instance sub-process, or the process itself: `DocumentsParameter.File`) clears every bound collection above that item, one notice per level",
                 "P3 resets the parents (owner decision), which a designer user would not expect"),
             ("R-M1 — a single File (a process parameter, or a flat File input of an element, a single-instance sub-process's included) from an ITEM of a collection is refused (\"use a FileCollection, or a multi-instance sub-process\")",
@@ -306,7 +308,7 @@ public sealed class FileParameterGuidanceTests
     }
 
     [Test]
-    [Description("Every article this change gated cites the File-aware clio that process-files defines from the tool contract, and the catalog description states that gate rather than a clio release.")]
+    [Description("Every article this change gated cites the File-aware clio that process-files defines from the tool contract, and the catalog description states that gate rather than a clio release and lists every two-level rule.")]
     public void EveryGate_ShouldCiteTheContractGateRatherThanAClioRelease()
     {
         // Arrange
@@ -332,6 +334,8 @@ public sealed class FileParameterGuidanceTests
             because: "the catalog description of process-files states the same gate as the guide");
         description.Should().NotMatchRegex(@"clio \d+\.\d+\.\d+\.\d+",
             because: "a release number written before the release is cut is a prediction the catalog must not make");
+        description.Should().Contain("(P1, P2, P2-MI, P3, R-M1, R-M2, R-M3)",
+            because: "the catalog lists every two-level rule the guide states, R-M3 included");
     }
 
     private static string ReadCollapsed(string relativePath) =>

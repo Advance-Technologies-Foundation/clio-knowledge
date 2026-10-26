@@ -22,6 +22,6 @@ useInProcess is refused.
 - An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.
 - Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids. It has no filter.
 - Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue
-  for a stored shape that would not resubmit as stored (none: nothing bound, the platform refuses to start the
-  process) and for an action other than save: a stored useInProcess or an invalid one fails at run time, a mapped
-  one is decided at run time. Remove it before resubmitting.
+  for a stored shape that fails at run time or would not resubmit as stored (none: nothing bound, the platform
+  refuses to start the process) and for an action other than save: a stored useInProcess or an invalid one fails
+  at run time, a mapped one is decided at run time. Remove it before resubmitting.
