@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.170",
+  "libraryVersion": "1.15.171",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2037,7 +2037,7 @@
     {
       "itemId": "process-files",
       "title": "Process files: File and FileCollection parameters, and the Process file element",
-      "description": "Owns the File and FileCollection process parameter types (carried by reference as FileLocator; their Variable default; the read-back and its item name; the refusals), the two-level rules every structured mapping onto a collection or an item of one goes through (P1, P2, P2-MI, P3, R-M1, R-M2), recipes (keep an element's files, hand them on, run a sub-process once per file), and the Process file element's fileProcessing block: the group is the variant (attachments, report, files), the generic userTask route refused for all three tasks, and the Object attachments group (record scope, 50-file default, sort, action, setElement merge, identity checks and describe-only members, storage derived by name, SysFile sort and filter columns, the files SysFile reads, consumers, re-finding the copies). The report group: process-files-report; the Process parameter group: process-files-parameter. Applies when the FULL create-business-process contract names type File.",
+      "description": "Owns the File and FileCollection process parameter types (carried by reference as FileLocator; their Variable default; the read-back and its item name; the refusals), the two-level rules every structured mapping onto a collection or an item of one goes through (P1, P2, P2-MI, P3, R-M1, R-M2, R-M3), recipes (keep an element's files, hand them on, run a sub-process once per file), and the Process file element's fileProcessing block: the group is the variant (attachments, report, files), the generic userTask route refused for all three tasks, and the Object attachments group (record scope, 50-file default, sort, action, setElement merge, identity checks and describe-only members, storage derived by name, SysFile sort and filter columns, the files SysFile reads, consumers, re-finding the copies). The report group: process-files-report; the Process parameter group: process-files-parameter. Applies when the FULL create-business-process contract names type File.",
       "topicId": "creatio.process-files",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-files",
