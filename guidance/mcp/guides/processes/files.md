@@ -80,10 +80,10 @@ targets only.
   source is kept. Only file items are paired.
 - R-M2 — a collection with NO file item onto a collection that takes files is refused ("has no File item"): map a
   file output or a FileCollection instead.
-- P2-MI — a multi-instance `InputRecordCollection` a request binds (as its target, or through P1) with a file
-  item, a File parameter of the called process, still unbound when the request ends gets a notice: that parameter
-  "will be empty on every iteration" unless you map `InputRecordCollection.<F>`. Records without files are
-  legitimate.
+- P2-MI — a multi-instance `InputRecordCollection` a request binds (as its target, or through P1) with a callee
+  File item still unbound when the request ends gets a notice (measured on CrtProcessBuilder 1.6.6.123; older
+  packages: at the mapping): that parameter "will be empty on every iteration" unless you map
+  `InputRecordCollection.<F>`. Rows without files are legal.
 - P3 — a SINGLE file (not an item) onto a file item of a single-instance owner (any element but a multi-instance
   sub-process, or the process itself: `DocumentsParameter.File`) clears every bound collection above that item, one
   notice per level: the collection now carries that one file instead of one row per source row, and reads as one
@@ -121,7 +121,7 @@ targets only.
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.
    Send the InputRecordCollection mapping that guide asks for FIRST, from the SAME collection, and the item
-   mapping in that request (P2-MI; see Order matters).
+   mapping in that request.
 4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM from the source's file item; P1 binds the
    input too. That input does not take files: an outer-only mapping onto it is stored unpaired. Neither form has
    been run on a stand.
