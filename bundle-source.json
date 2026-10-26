@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.170",
+  "libraryVersion": "1.15.172",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -65,6 +65,7 @@
       "creatio-freedom-iframe-section",
       "custom-mcp-tools",
       "dashboard-and-home-page-layout",
+      "widget-color-and-icon",
       "dashboard-creation",
       "dashboard-design",
       "dashboard-rights",
@@ -268,6 +269,7 @@
       "docs://knowledge/com.creatio.clio/creatio-freedom-iframe-section",
       "docs://knowledge/com.creatio.clio/custom-mcp-tools",
       "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
+      "docs://knowledge/com.creatio.clio/widget-color-and-icon",
       "docs://knowledge/com.creatio.clio/dashboard-creation",
       "docs://knowledge/com.creatio.clio/dashboard-design",
       "docs://knowledge/com.creatio.clio/dashboard-rights",
@@ -873,7 +875,7 @@
     {
       "itemId": "dashboard-and-home-page-layout",
       "title": "Dashboard and home page layout",
-      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages, including the 12-column grid, the metric-band-then-chart-grid skeleton, per-widget-type default sizes, and the plain-white (without-fill) card theme.",
+      "description": "Guides layout, sizing, grouping, and styling of analytical widgets on dashboards and home pages: per-surface metric tile and text sizes read from the Main grid rows, a value-only metric text template under a short one-line title, the metric block and chart grid (dashboard tiles never stretched, new home-page metric and chart rows filling 12 columns), adding a metric to an existing page without appending it or resizing existing tiles, and the plain-white (without-fill) card theme on both surfaces. Widget colors and metric icons are in widget-color-and-icon.",
       "topicId": "creatio.dashboard-and-home-page-layout",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboard-and-home-page-layout",
@@ -882,6 +884,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/dashboards/layout.md",
       "bundlePath": "resources/dashboard-and-home-page-layout.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "widget-color-and-icon",
+      "title": "Widget color and icon",
+      "description": "Owns the color palette of analytical widgets and the metric icon rule on dashboards and home pages: the widget color presets by WCAG contrast on the white card (four low-contrast presets banned, the 4.5:1 group the default, the 3:1 to 4.5:1 group allowed), color by meaning, and a mandatory metric icon chosen by meaning. Split out of dashboard-and-home-page-layout.",
+      "topicId": "creatio.widget-color-and-icon",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/widget-color-and-icon",
+      "sourcePath": "guidance/mcp/guides/dashboards/widget-color-and-icon.md",
+      "bundlePath": "resources/widget-color-and-icon.md",
       "mediaType": "text/plain"
     },
     {
@@ -929,7 +942,7 @@
     {
       "itemId": "dashboards",
       "title": "Dashboards",
-      "description": "The clio MCP dashboards router: a names-only index that routes dashboard work to dashboard-creation (create the page), dashboard-and-home-page-layout (widget layout/sizing/styling), dashboard-design (the DashboardDS filter-by-page-data binding), and indicator-widget / chart-widget (per-widget payload).",
+      "description": "The clio MCP dashboards router: a names-only index that routes dashboard work to dashboard-creation (create the page), dashboard-and-home-page-layout (widget layout/sizing/styling), widget-color-and-icon (widget colors and metric icons), dashboard-design (the DashboardDS filter-by-page-data binding), and indicator-widget / chart-widget (per-widget payload).",
       "topicId": "creatio.dashboards",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/dashboards",
