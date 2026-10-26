@@ -130,8 +130,9 @@ public sealed class FileParameterGuidanceTests
             "Both types re-submit as written",
             "An element's file collection keeps the platform name `CompositeObjectList`.",
             "It still reads back as `FileCollection`, with its real item name (measured on CrtProcessBuilder 1.6.6.98 on 2026-10-14).",
-            "A process REBUILT from the description names the item `File`",
-            "(\"has no item 'Attachment'\", followed by the items it has): rename that segment to `File`."
+            "A REBUILD re-sent with its `itemProperties` keeps that item.",
+            "Rebuilt from the type alone, it names the item `File`",
+            "(\"has no item 'Attachment'\", followed by the items it has): rename it to `File`."
         ];
 
         // Assert

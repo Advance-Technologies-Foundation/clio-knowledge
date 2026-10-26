@@ -34,14 +34,24 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   mirror of a collection output that carries NO `itemProperties`: the result would be a bound, tagged,
   unbindable empty shape, indistinguishable from a bare collection — the refusal names the source and the two
   ways forward (shape the source first — a Read data element in `collection` mode with explicit `columns` —
-  or declare a bare `Collection` on purpose). The same refusal covers an output whose items carry no column UId in their `tag` — only a shape the platform stamped can be reproduced. A bare
-  `type: "Collection"` IS accepted (the designer's own type-menu entry) but carries NO shape — prefer the
-  mirror. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
+  or declare the shape yourself, `Collection` + `itemProperties`, below). The same refusal covers an output whose items carry no column UId in their `tag` — only a shape the platform stamped can be reproduced. A bare
+  `type: "Collection"` IS accepted (the designer's own type-menu entry) but carries NO shape. Where no output can
+  be mirrored (a sub-process input, a list of records a script fills), declare the shape, with a clio whose
+  create-business-process contract (`get-tool-contract`) shows `itemProperties?` in its `parameter {...}` shape or
+  says "declare the columns of a Collection": `itemProperties:
+  [{name, type, direction?, caption?, description?, referenceSchema?, itemProperties?}]` creates exactly those items, in order,
+  each Variable unless set, with no tag. An item takes a process parameter's types (Lookup via `referenceSchema`,
+  File); an item of a top-level collection may be a Collection whose items are not collections. Binary, a type
+  outside the list (a described MaxSizeText or MediumText item: re-declare it as Long text) and anything
+  deeper are refused, naming the item; so is `itemProperties` beside `typeFromElement`, and
+  `setParameter` does not reshape (remove + add). `FileCollection` is this form with one item `File: File`. Mirror the shape-bearing `ResultCompositeObjectList`, not `ResultEntityCollection` (the raw list
   with no item properties, which the mirror therefore refuses). `describe-business-process` reports a collection parameter's `tag` and
-  `itemProperties`; both are absent on a scalar and on a bare collection — feed a described collection back
-  through `typeFromElement` naming its source, never by re-typing the shape. The one exception, with a
-  File-aware clio: a PROCESS parameter described as type `FileCollection` is re-sent as that type, which rebuilds
-  its shape (`process-files`). A `tag` rides on items that
+  `itemProperties`; both are absent on a scalar and on a bare collection — feed a collection back by its OWN
+  `tag`: a tagged (MIRRORED) one through `typeFromElement` naming its source, without its `itemProperties`; re-send an untagged (DECLARED) one as
+  described, `type` + `itemProperties`, with the clio above (describe-only members are ignored; a bound one's
+  `value` is its binding: drop it and replay the binding as a mapping). With a File-aware clio, a
+  PROCESS parameter described as type `FileCollection` is re-sent as that type, which rebuilds its shape
+  (`process-files`). A `tag` rides on items that
   are COLUMNS; where they are PARAMETERS of another process (a multi-instance Sub-process element's two
   collections) there is none at all — 0 of 407 in the shipped corpus — so never require it. A collection
   IS consumed now: such an element iterates one, bound onto `InputRecordCollection` by the ordinary
