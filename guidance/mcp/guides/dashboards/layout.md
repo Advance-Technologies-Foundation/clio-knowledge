@@ -5,16 +5,18 @@ Use this guide whenever you add, arrange, size, group, color, or style Freedom U
 Creatio's own product dashboards. Desktops are a separate surface: read `desktop-page` for those.
 
 This guide is the single owner of WHERE a widget goes, HOW BIG it is (a metric's text size too), its card
-theme, the widget color palette, and the metric icon, title and value-only text rules on dashboards and
-home pages; `indicator-widget` and `chart-widget` cite it. It does NOT own the rest of a widget's runtime
-payload: for `crt.IndicatorWidget` read `indicator-widget`, for `crt.ChartWidget` read `chart-widget`,
-and call `get-component-info`. For page structure and containers read `page-modification`; filtering a
+theme, and the metric title and value-only text rules on dashboards and home pages; `indicator-widget`
+and `chart-widget` cite it. The widget color palette and the metric icon rule are owned by
+`widget-color-and-icon`: MUST read get-guidance name=widget-color-and-icon before you choose a widget
+color or a metric icon. This guide does NOT own the rest of a widget's runtime payload: for
+`crt.IndicatorWidget` read `indicator-widget`, for `crt.ChartWidget` read `chart-widget`, and call
+`get-component-info`. For page structure and containers read `page-modification`; filtering a
 dashboard's widgets by its page data (`DashboardDS`) is in `dashboard-design`.
 
-Evidence: the sizes, colors, and icons below were read with `get-page` from the 8 stock analytics
-dashboards and 4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15, their 76
-metric tiles' text settings and titles on 2026-10-22 (platform version not read). The home-page widths
-were chosen from runtime screenshots on 2026-10-22. The reference is the Accounts analytics dashboard
+Evidence: the sizes below were read with `get-page` from the 8 stock analytics dashboards and 4 stock
+home pages of a Sales/Service Enterprise environment on 2026-10-15, their 76 metric tiles' text settings
+and titles on 2026-10-22 (platform version not read). The home-page widths were chosen from runtime
+screenshots on 2026-10-22. The reference is the Accounts analytics dashboard
 (`AccountsAnalyticsDashboard`).
 
 ## Core rules (in priority order)
@@ -27,11 +29,13 @@ Hard rules unless the user explicitly overrides one.
    covers several subjects is split into LABELED sections (a header and spacing, never card color), each
    its own metric block and chart row.
 2. SIZE: read the page grid first; a metric tile takes the size and text size of its SURFACE ("Metric
-   tile size"). On a dashboard a tile is never stretched to fill a row; on a home page metric and chart
-   rows fill 12 columns ("Home page widths"). Charts are sized by type ("Widget catalog").
-3. STYLE: every widget is a plain-white card, takes a color by MEANING from the allowed palette
-   ("Color"), and every metric tile carries an icon ("Icon") and shows its value alone under a short
-   one-line title.
+   tile size"). On a dashboard a tile is never stretched to fill a row. On a home page a metric row
+   with nothing beside it and every chart row fill 12 columns per "Home page widths", except a single
+   metric (`colSpan` 3-4) and a metric block beside a chart (`colSpan` 3, or 2 dense). Charts are sized
+   by type ("Widget catalog").
+3. STYLE: every widget is a plain-white card ("Card theme") and takes a color by MEANING; every metric
+   tile carries an icon chosen by meaning (both per `widget-color-and-icon`) and shows its value alone
+   under a short one-line title.
 
 ## Metric tile size
 
@@ -41,7 +45,7 @@ merged `bundle.json`). Both surfaces have a 12-column grid and an 8px gap, but d
 | Surface | `Main` rows | Metric `colSpan` | Metric `rowSpan` |
 |---|---|---|---|
 | Dashboard (`BaseDashboardTemplate`) | `28px` | 3, or 2 in a dense band | 3 |
-| Home page (`BaseHomePage`) | `64px` | 12 split evenly per row ("Home page widths") | 2 |
+| Home page (`BaseHomePage`) | `64px` | a row fills 12 per "Home page widths"; a single metric 3-4; beside a chart 3, or 2 dense | 2 |
 
 Height in px = `rowSpan` x row height + (`rowSpan` - 1) x gap. The same `rowSpan` 3 is 100px on a
 dashboard and 208px on a home page, so a `rowSpan` copied from one surface to the other renders a
@@ -49,9 +53,9 @@ bloated or squashed tile. For any other `rows` value copy the sibling tiles' siz
 `rowSpan` whose height is closest to the stock 100-136px.
 
 - DASHBOARD WIDTH: NEVER derive a tile width from 12 divided by the tile count, and never widen a tile
-  to fill a row: a dashboard tile is at most `colSpan` 4. Two tiles are 3 + 3, not 6 + 6.
-- Dense band (dashboard, or a home-page block beside a chart): 5 or 6 tiles across (more go on a second
-  tile row), or a block two tiles wide in 4 columns; use `colSpan` 2 there.
+  to fill a row: a dashboard tile is at most `colSpan` 4. On a dashboard two tiles are 3 + 3, not 6 + 6.
+- Dense band, `colSpan` 2: on a dashboard 5 or 6 tiles across (more go on a second tile row) or a block
+  two tiles wide in 4 columns; on a home page only that 2-wide block beside a chart.
 - On a dashboard the 12-column rule applies to the FILLED AREA, not to each row. When the tiles of a row
   do not reach 12 columns, put a tall widget beside the block, or leave the rest of the row empty.
 - BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total, so both end on
@@ -88,7 +92,8 @@ The doughnut's `rowSpan` 12 = 3 (tiles) + 9 (bar under them), so it ends on the 
 
 ## Home page widths
 
-A home page fills its width. Dashboards keep the widths above.
+A home page fills its width. Dashboards keep the widths above. These widths lay out new rows; on an
+existing page never resize the widgets already there: follow "Adding to an existing page".
 
 - METRIC ROW: with nothing beside it, a home-page metric row fills all 12 columns with equal tiles:
   2 -> 6 + 6, 3 -> 4 + 4 + 4, 4 -> 3 + 3 + 3 + 3, 5 -> 4 + 4 + 4 then 6 + 6, 6 -> 2 each. 7 or more:
@@ -103,55 +108,6 @@ A home page fills its width. Dashboards keep the widths above.
   row. Charts in one row share the same `rowSpan`. A mixed row such as doughnut 4 + wide chart 8 is fine.
   Chart heights and floors do not change ("Widget catalog").
 
-## Color
-
-Applies to every widget: a metric's `config.layout.color`, a chart's `config.color` and its
-`series[*].color`. The number is the WCAG 2 contrast ratio of the preset's swatch color against the
-white card.
-
-- MUST NOT use in any widget (below 3:1, unreadable on white): `orange-red` 2.39, `turquoise` 2.33,
-  `orange` 1.88, `light-green` 1.61.
-- DEFAULT choice (4.5:1 or more): `dark-blue` 13.83, `navy-blue` 7.21, `forest-green` 6.73,
-  `burnt-coral` 6.01, `vivid-purple` 5.79, `steel-blue` 5.78, `blue` 5.77, `violet` 5.30,
-  `cadmium-red` 5.01, `dark-turquoise` 4.50.
-- Allowed (3:1 to 4.5:1): `celestial-blue` 4.05, `coral` 3.65, `red` 3.50, `purple` 3.08, `green` 3.05,
-  `rusty-orange` 3.03, `light-blue` 3.03, `bright-red` 3.02, `dark-green` 3.01.
-
-Color follows MEANING, never variety; the same meaning keeps the same color on one page. As on the
-stock dashboards:
-
-| Meaning | Color | Stock example |
-|---|---|---|
-| Neutral count, amount or time | `steel-blue` | Number of accounts |
-| Negative: overdue, missing data, expiring, inactive | `cadmium-red` | Accounts without primary contact |
-| New, this month, inflow | `dark-turquoise` | New contacts this month |
-| Attention: waiting, reopened | `burnt-coral` | Reopened cases |
-| Good result | `forest-green` | First contact resolution |
-| A separate category | `vivid-purple` or `navy-blue` | Emails, calls |
-
-On a chart, don't recolor bars per value; the reference's series use `blue` and `burnt-coral`.
-
-## Icon
-
-Every metric tile MUST carry an icon (`config.layout.icon.iconName`) chosen by meaning; every metric on
-the stock dashboards has one. Examples:
-
-| Meaning | `iconName` |
-|---|---|
-| Accounts, contacts, orders | `work-icon`, `contact-group-icon`, `trolley-icon` |
-| Amounts | `coins-icon`, `money-icon` |
-| Overdue, inactive, response time | `hourglass-icon` |
-| Duration, resolution time | `clock-icon` |
-| Overdue response, overdue resolution | `message-warning-icon`, `problem-icon` |
-| Waiting, reopened | `bell-icon` |
-| Expiring | `fire-icon` |
-| Missing data, contracts | `document-edit-icon`, `document-icon` |
-| Goal, open opportunities, first contact resolution | `goal-icon` |
-| Calls, emails | `phone-icon`, `mail-icon` |
-| Satisfaction | `like-icon` |
-| Resolved, closed | `checkmark-filled-icon` |
-| New this month, in progress | `diagram-icon`, `level-icon` |
-
 ## Card theme
 
 Every widget on a dashboard AND on a home page uses the plain-white card, `theme` "without-fill", like
@@ -161,14 +117,16 @@ this guide. Use a colored card only when the user explicitly asks for one, and n
 
 ## Adding to an existing page
 
+The same steps hold on a dashboard and on a home page. Never resize an existing sibling tile to make
+room, even on a home page whose metric row fills 12 columns.
+
 1. Read the page with `get-page`: the `Main` rows and every widget's `layoutConfig`, `theme`, and color.
 2. Copy the SIZE and TEXT settings of the sibling metric tiles (`colSpan`, `rowSpan`,
    `text.fontSizeMode`, `text.labelPosition`), or take them from "Metric tile size" when the page has
    no metric yet, but never their `theme` or a banned color: the new tile is "without-fill" with a
-   color by meaning from "Color", even when its siblings are full-fill or use a banned color. Its
-   `text.template` is `{0}` even when a sibling repeats its name as a caption. Its title follows TITLE
-   ("Metric tile size") even when a sibling's title is longer. On a home page whose metric row fills 12
-   columns with equal tiles and nothing beside it, re-split that row per "Home page widths" instead.
+   color by meaning per `widget-color-and-icon`, even when its siblings are full-fill or use a banned
+   color. Its `text.template` is `{0}` even when a sibling repeats its name as a caption. Its title
+   follows TITLE ("Metric tile size") even when a sibling's title is longer.
 3. Put the tile in a free slot of the metric block: the next free columns of the block's rows.
 4. When the block is full, add a new tile row directly UNDER the block, in the block's columns:
    - move every widget that starts on or below that row down by the tile's `rowSpan`, in every column,
@@ -177,7 +135,7 @@ this guide. Use a colored card only when the user explicitly asks for one, and n
      the widgets under it (it starts on the block's first row and ends on the same row as that stack),
      so the bottoms stay aligned. A side widget that does not match keeps its size.
 5. NEVER append the tile at the bottom of the page or among the charts, and never restyle, resize, or
-   move an existing widget beyond step 4 and the home-page re-split of step 2.
+   move an existing widget beyond step 4.
 
 Worked example: "Add a metric with the number of closed cases to the Case Intelligence dashboard".
 Before: 8 metric tiles 2x3 fill columns 1-4, rows 1-12 (at rows 1, 4, 7, 10 in columns 1 and 3); a
@@ -231,8 +189,8 @@ that it renders unreadably short. A METRIC TILE is exempt and takes its surface 
 size"). A GAUGE is NOT: it ships the tile's default of 3, but at 3 rows its semicircular arc is too
 small to read. Give a gauge `rowSpan` 6, floor 5.
 
-- Metric (indicator): a headline number (count, sum, average, min/max, a "without X" gap count). Size,
-  color, and icon per this guide; payload per `indicator-widget`.
+- Metric (indicator): a headline number (count, sum, average, min/max, a "without X" gap count). Size per
+  this guide, color and icon per `widget-color-and-icon`, payload per `indicator-widget`.
 - Bar / Column: compares a measure across categories, or a grouped "X vs Y". Vertical for few short
   labels, horizontal for many or long labels (people, accounts, services). 4 columns when 3 per row,
   6 when labels are long or it is primary.
@@ -249,15 +207,16 @@ small to read. Give a gauge `rowSpan` 6, floor 5.
 ## Finish checklist
 
 - `Main` rows read; every metric tile has its surface size. On a dashboard it is at most 4 columns wide
-  and not stretched to fill a row; on a home page every metric row and chart row fills 12 columns per
-  "Home page widths".
+  and not stretched to fill a row. On a home page a new metric row with nothing beside it and every new
+  chart row fill 12 columns per "Home page widths", except a single metric (3-4 columns) and a block
+  beside a chart (3, or 2 dense); existing tiles keep their size.
 - Metric tiles form one block at the top (or under it on an existing page), never among the charts or
   appended at the bottom.
 - A widget beside a stack ends on the same row as the stack; every chart row sums to 12 columns.
-- Every widget is "without-fill" (home pages too); no `orange-red`, `orange`, `light-green` or
-  `turquoise` anywhere; colors follow meaning.
-- Every metric tile has an icon chosen by meaning, its surface's `text.fontSizeMode` (on an existing
-  page its siblings') and `text.template` `{0}`, its name only in `config.title`.
+- Every widget is "without-fill" (home pages too); its color and every metric icon pass the checklist
+  of `widget-color-and-icon`.
+- Every metric tile has its surface's `text.fontSizeMode` (on an existing page its siblings') and
+  `text.template` `{0}`, its name only in `config.title`.
 - Every metric title is a 2-4 word noun phrase on one line (25 characters or fewer, never more than 30)
   with no filter appended after a comma.
 - Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); each gauge is 6.
