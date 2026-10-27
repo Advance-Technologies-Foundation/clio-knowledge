@@ -109,7 +109,18 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatARevokeKeepsTheRow")]
     [TestCase("the grant changes nothing for internal users",
         TestName = "ObjectRights_ShouldStateThatTheAllEmployeesRowShadowsAnInternalGrant")]
-    [TestCase("The tool never reorders rows", TestName = "ObjectRights_ShouldStateThatTheToolNeverReordersRows")]
+    [TestCase("A grant never reorders rows", TestName = "ObjectRights_ShouldStateThatAGrantNeverReordersRows")]
+    [TestCase("grantee plus exactly ONE of position, above, remove-row — a call of its own",
+        TestName = "ObjectRights_ShouldStateThatAMoveOrRemovalIsACallOfItsOwn")]
+    [TestCase("you MUST NOT remove a row when the developer asked to take operations away",
+        TestName = "ObjectRights_ShouldForbidRemovingARowForARevoke")]
+    [TestCase("a narrowing for them is a revoke of EXTERNAL access",
+        TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
+    [TestCase("Moving or removing a row (position, above, remove-row) requires a clio release newer than 8.1.0.144",
+        TestName = "ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove")]
+    [TestCase("Prefer it whenever the goal is \"decide before role Y\" — do not compute a position for that",
+        TestName = "ObjectRights_ShouldPreferAboveOverAComputedPosition")]
+    [TestCase("There is no below", TestName = "ObjectRights_ShouldStateThatThereIsNoBelow")]
     [TestCase("ONE object per call", TestName = "ObjectRights_ShouldStateOneObjectPerCall")]
     [TestCase("nothing is granted by default", TestName = "ObjectRights_ShouldStateThatOperationsAreRequired")]
     [TestCase("a grant or revoke without it (or with a value that names no operation) is refused before any read or write",
