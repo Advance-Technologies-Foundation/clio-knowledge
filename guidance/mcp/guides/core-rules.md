@@ -27,3 +27,4 @@ validation, or the Destructive flag), but you must still honor them proactively.
 
 - General Creatio record operations use DataService first (ESQ reads and native entity writes). Resolve available contracts first: use execute-dataservice-batch for explicit-record writes when installed. On older clients without a suitable write contract, existing OData write recipes remain a supported fallback; report that capability limitation. Prefer a dedicated native lifecycle tool when one owns side effects. OData is a justified fallback only when the required operation has no suitable DataService/native path; state the reason. Read `sequences` for Sales Engagement lifecycle operations and `esq` for query construction.
 - OData foreign-key rejection on a write: read `core-rules-details` before changing data or lookup IDs.
+- A binary (file or image `Data`) column in an OData write, or a file to attach to a record: read `core-rules-details` before writing.

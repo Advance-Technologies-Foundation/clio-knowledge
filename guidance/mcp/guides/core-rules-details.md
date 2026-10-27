@@ -63,3 +63,22 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
 
 ## OData foreign-key rejection
 - For an OData foreign-key rejection, check `get-tool-contract` for the write tool: clients whose contract describes a validated foreign-key hint can name the constraint and any table or column present in the server response. A missing referenced record can mean an incorrect lookup ID; it does not prove an OData mapping defect, and the rejected write can originate in an entity event handler. `on table '<T>'` names the written table; only `referenced table '<T>'` names the target. If the hint says the column or target is unknown, do not infer it from the constraint name. Inspect lookup metadata with `get-entity-schema-properties`, verify supplied IDs against the declared lookup schemas using the normal record-read workflow, and ask an administrator to resolve the physical constraint if still ambiguous. Do not guess or swap lookup IDs. For a delete-side `still referenced` hint, inspect the referencing rows and intended relationship before changing data. Continue to honor `record-created`, `diagnostic.side-effect` and `retry-guidance`; the hint does not establish whether the original write committed. Without this advertised hint, use the same metadata/readback checks and request the constraint details from an administrator when necessary.
+
+## OData binary columns and record files
+- `odata-create` cannot write a binary column: a file or image `Data` column, declared `Edm.Stream` in
+  `$metadata` (for example `SysImage.Data`, `KnowledgeBaseFile.Data`). Creatio rejects such a row before it
+  writes anything. Verified by readback on Creatio 10.2.760 (.NET 8) in October 2026: the answer was
+  `The input was not valid.`, and no record was created. On clio <CLIO-UPLOAD-FILE-TBD> and later the row
+  comes back with `record-created=false`, `diagnostic.side-effect=none`, and an error that names the binary
+  column. Earlier clio versions report the side effect as unknown for the same rejection.
+- Do not re-send the row with the binary value in another encoding. Create the row without the binary
+  column.
+- To attach a file to a record, call `upload-file` (clio <CLIO-UPLOAD-FILE-TBD> and later). Give the file
+  entity (`ContactFile`, `AccountFile`, `KnowledgeBaseFile`), its lookup column to the parent record (`Contact`
+  for `ContactFile`), and the parent record id. The tool reads the stored bytes back before it reports
+  success. When it fails after the file was sent, it returns `file-id`: read that record with `odata-read`
+  before you upload the file again. For an image in `SysImage`, call `upload-image`.
+- The environment's file security policy can reject a file whose extension does not match its content. Tell
+  the user; do not rename the file to pass the check.
+- On a clio version without `upload-file`, tell the user that this clio cannot attach a file to a record,
+  and ask them to update clio. Do not call the platform file API directly with a browser session.
