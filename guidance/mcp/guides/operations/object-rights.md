@@ -113,9 +113,8 @@ Grant:
 - Every INTERNAL user is in All employees. So when an "All employees" row sits above the grantee's row,
   the grant changes nothing for internal users — the highest matching row at or above All employees
   decides for them. A grant never reorders rows: a grant that must take effect for internal users needs
-  the grantee's row moved ABOVE the All employees row — a separate call with
-  above=a29a3ba5-4b0d-de11-9a51-005056c00008 (Move and remove). You MUST tell the developer so before the
-  write.
+  the grantee's row moved ABOVE the All employees row — a separate call with above=<the All employees id>;
+  see "Move and remove". You MUST tell the developer so before the write.
 - External users are not in All employees, so a grant to All external users (or another external role)
   is not shadowed by the All employees row.
 - A role that has a row gets the named operations added to it; the row keeps its position.
@@ -149,7 +148,7 @@ Revoke:
   never removes the row; removing it is its own call, remove-row (Move and remove), and it can WIDEN access.
 - A revoke on an object that is NOT administered is REFUSED: company employees reach it whatever its rows
   say. To limit access, first turn operation permissions on with a grant to All employees
-  (grantee=a29a3ba5-4b0d-de11-9a51-005056c00008, operations=read,create,edit,delete,
+  (grantee=<the All employees id>, operations=read,create,edit,delete,
   enable-operation-permissions — name all four: where the object has stored rows but no All employees
   row, the new row gets only the operations named, see Grant), then revoke from that row what employees must not have. A role that must
   keep MORE than employees needs its row above the All employees row — move it with above (Move and remove).
