@@ -10,13 +10,14 @@ hand-written ESQ into the rights tables:
 - get-object-rights — read the rows of an object's operation permissions. Read-only.
 - set-object-rights — grant or revoke operations for ONE role on ONE object, move or remove that role's
   row, or turn the object's operation permissions on or off. DESTRUCTIVE: it writes in one call, with no
-  publish step. For the permissions to apply correctly, a user should log in to the site again.
+  publish step. The change can reach a user who is already logged in at once, but that is not guaranteed:
+  for the permissions to apply reliably, the user should log in to the site again.
 
 Version boundary: get-object-rights and set-object-rights require a clio release newer than 8.1.0.137;
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
 permissions designer instead. Moving or removing a row (position, above, remove-row) requires a clio
-release newer than 8.1.0.144; on an older clio the tool refuses those arguments as unknown, so move or
-remove the row in the Object permissions designer.
+release newer than 8.1.0.144. A clio without them refuses those arguments as unknown: then move or remove
+the row in the Object permissions designer.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`. The
 "Use record permissions" switch and the object's DEFAULT record rules (which rights a new record gets) are
@@ -62,7 +63,9 @@ object is meant: ask before reading or writing, because the same word can be ano
 
 Evidence: the priority rule is Creatio Academy's (a user in several roles gets the permissions of the
 highest role in the list). It was reproduced per row as a non-admin internal user on a Creatio 8.3.4 stand
-(2026-09-29), with the switch rules as the designer states them, and a denied read returning zero rows.
+(2026-09-29), with the switch rules as the designer states them, a denied read returning zero rows, and the
+change reaching that user's DataService session at once. That a user already working in the application
+can keep the old permissions until they log in again is operator experience, not a probe.
 
 ## get-object-rights
 Args: entity-schema-name (required), grantee (optional), include-connected (optional).
@@ -86,7 +89,8 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
   or a connected set that cannot be enumerated, is reported with a warning — that object is NOT verified.
 
 ## set-object-rights
-Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke;
+Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke; grantee + exactly
+one of position, above, remove-row for a move or a removal (see Move and remove);
 enable-operation-permissions; disable-operation-permissions; preview.
 - ONE object per call. It never touches the object's lookups: each lookup is its own call.
 - operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
@@ -155,6 +159,9 @@ Revoke:
 - A revoke that would leave the object with no row that grants any operation is REFUSED. A revoke never
   turns operation permissions off; to turn them off instead, make the disable call (The switch alone).
 - A revoke from a role that has no row, or of operations the row does not hold, changes nothing.
+- A narrowing (a revoke, a move or a removal that takes operations away) reaches a user who is already
+  logged in reliably only after they log in again. Say so to the developer before the write when the
+  access must end now.
 
 Move and remove (grantee plus exactly ONE of position, above, remove-row — a call of its own):
 - The same ask-first rule as any write: call it with preview=true, show the developer the rows before and
@@ -169,12 +176,13 @@ Move and remove (grantee plus exactly ONE of position, above, remove-row — a c
 - remove-row=true deletes the grantee's row. Its members are then decided by the next matching row — for
   an internal role usually All employees — which can WIDEN their access. "Clear every operation" (revoke,
   the row stays as a DENY) and "remove the row" are different operations: you MUST NOT remove a row when
-  the developer asked to take operations away.
+  the developer asked to take operations away. The preview and the result name that next matching row
+  and the operations it gives; show them to the developer before the write.
 - The preview and the result list every role whose operations change, for a member who is in no other
   role with a row: an internal role is decided by the higher of its own row and All employees, an external
   role by the higher of its own row and All external users. A member of several listed roles, or of a
-  parent role, can be decided by another row. External roles are named as such; a narrowing for them is a
-  revoke of EXTERNAL access, and removing the All external users row takes the object away from portal
+  parent role, can be decided by another row. External roles are named as such; any operation they lose is
+  a revoke of EXTERNAL access, and removing the All external users row takes the object away from portal
   users. Removing the All employees row cuts off every internal user with no other row. You MUST name each
   of these to the developer before the write.
 - Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row
@@ -182,6 +190,8 @@ Move and remove (grantee plus exactly ONE of position, above, remove-row — a c
   any of these arguments together with operations, revoke or a switch flag.
 - While operation permissions are OFF a move or a removal changes the stored order only: nobody's access
   changes until they are turned on.
+- A move or a removal that NARROWS a role's access reaches a user who is already logged in reliably only
+  after they log in again (as for a revoke). Say so to the developer before the write.
 - After the save the object is read back; ANY row that differs from the plan fails the call, because the
   save replaced the whole row list.
 
@@ -241,7 +251,7 @@ Results:
 ## Verify the effect
 - Re-read with get-object-rights. It shows the stored rows, not what a given user can do.
 - To prove what a user can do, test AS that user (a non-admin, not a holder of the "…any data" system
-  operations). A DataService read that is denied returns success with ZERO rows, not an error — "the query
+  operations), logged in again after the write: a session opened before it can still show the old access. A DataService read that is denied returns success with ZERO rows, not an error — "the query
   succeeded" does not prove read access. A denied create fails with a security error.
 
 Use cases (all one general capability):
