@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.172",
+  "libraryVersion": "1.15.175",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -820,7 +820,7 @@
     {
       "itemId": "core-rules-details",
       "title": "Core rules details",
-      "description": "Owns the rarely needed detail behind core-rules: the CLI compile-package --wait exit codes; precompiled-package delivery; how to tell whether a compile, restart or process launch ran after a not-found, requestfailed, not-started or still-running answer (compilation-history rows, last-compilation-log fallback, SysProcessLog); and the OData foreign-key rejection checks. Split out of core-rules.",
+      "description": "Owns the rarely needed detail behind core-rules: the CLI compile-package --wait exit codes; precompiled-package delivery; how to tell whether a compile, restart or process launch ran after a not-found, requestfailed, not-started or still-running answer (compilation-history rows, last-compilation-log fallback, SysProcessLog); the OData foreign-key rejection checks; and why odata-create cannot write a binary (file or image) column and how upload-file / upload-image attach a file to a record. Split out of core-rules.",
       "topicId": "creatio.core-rules-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/core-rules-details",

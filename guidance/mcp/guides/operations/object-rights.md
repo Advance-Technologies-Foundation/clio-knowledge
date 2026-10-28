@@ -182,14 +182,14 @@ Move and remove (grantee plus exactly ONE of position, above, remove-row — a c
   role with a row: an internal role is decided by the higher of its own row and All employees, an external
   role by the higher of its own row and All external users. A member of several listed roles, or of a
   parent role, can be decided by another row. External roles are named as such; any operation they lose is
-  a revoke of EXTERNAL access, and removing the All external users row takes the object away from portal
-  users. Removing the All employees row cuts off every internal user with no other row. You MUST name each
-  of these to the developer before the write.
+  a revoke of EXTERNAL access. Removing the All external users row takes the object away from every portal
+  user who matches no other row that grants it, and removing the All employees row cuts off every internal
+  user with no other row. You MUST name each of these to the developer before the write.
 - Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row
   or several; a removal that would leave an administered object with no row that grants any operation;
   any of these arguments together with operations, revoke or a switch flag.
-- While operation permissions are OFF a move or a removal changes the stored order only: nobody's access
-  changes until they are turned on.
+- While operation permissions are OFF a move or a removal changes the stored rows only (a removed row stays
+  removed): nobody's access changes until they are turned on.
 - A move or a removal that NARROWS a role's access reaches a user who is already logged in reliably only
   after they log in again (as for a revoke). Say so to the developer before the write.
 - After the save the object is read back; ANY row that differs from the plan fails the call, because the

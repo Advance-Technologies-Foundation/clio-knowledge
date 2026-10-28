@@ -123,8 +123,13 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("which can WIDEN their access", TestName = "ObjectRights_ShouldStateThatARemovalCanWidenAccess")]
     [TestCase("The preview and the result name that next matching row and the operations it gives",
         TestName = "ObjectRights_ShouldStateThatARemovalNamesTheDecidingRow")]
-    [TestCase("Removing the All employees row cuts off every internal user with no other row",
+    [TestCase("removing the All employees row cuts off every internal user with no other row",
         TestName = "ObjectRights_ShouldStateThatRemovingAllEmployeesCutsOffInternalUsers")]
+    [TestCase("Removing the All external users row takes the object away from every portal user who matches no other row that grants it",
+        TestName = "ObjectRights_ShouldQualifyWhichPortalUsersLoseAccessOnRemoval")]
+    [TestCase("External roles are named as such", TestName = "ObjectRights_ShouldStateThatExternalRolesAreNamed")]
+    [TestCase("a move or a removal changes the stored rows only (a removed row stays removed)",
+        TestName = "ObjectRights_ShouldStateThatARemovalWhileOffIsStillSaved")]
     [TestCase("Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row or several; a removal that would leave an administered object with no row that grants any operation; any of these arguments together with operations, revoke or a switch flag",
         TestName = "ObjectRights_ShouldListTheMoveAndRemoveRefusals")]
     [TestCase("renumbered 0..n-1", TestName = "ObjectRights_ShouldStateThatRowsAreRenumbered")]
