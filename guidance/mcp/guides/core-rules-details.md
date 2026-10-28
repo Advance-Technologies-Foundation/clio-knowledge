@@ -71,12 +71,12 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
   `$metadata` (for example `SysImage.Data`, `KnowledgeBaseFile.Data`). Creatio rejects such a row before it
   writes anything. Verified by readback on Creatio 10.2.760 (.NET 8) in October 2026: the answer was
   `The input was not valid.`, and no record was created. On .NET Framework builds the same rejection answers
-  `The request is invalid.`. On clio <CLIO-UPLOAD-FILE-TBD> and later the row
+  `The request is invalid.`. On clio 8.1.0.145 and later the row
   comes back with `record-created=false`, `diagnostic.side-effect=none` (or `not-attempted` when clio refused
   the row locally without sending it), and an error that names the binary column. Earlier clio versions report the side effect as unknown for the same rejection.
 - Do not re-send the row with the binary value in another encoding. Create the row without the binary
   column.
-- To attach a file to a record, call `upload-file` (clio <CLIO-UPLOAD-FILE-TBD> and later). Give the file
+- To attach a file to a record, call `upload-file` (clio 8.1.0.145 and later). Give the file
   entity (`ContactFile`, `AccountFile`, `KnowledgeBaseFile`), its lookup column to the parent record (`Contact`
   for `ContactFile`), and the parent record id. The tool reads the stored bytes back before it reports
   success. When it fails after the file was sent, it returns `file-id`: read that record using the normal
