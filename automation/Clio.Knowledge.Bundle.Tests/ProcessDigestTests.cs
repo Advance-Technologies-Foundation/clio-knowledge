@@ -197,7 +197,7 @@ public sealed class ProcessDigestTests
         ("process-modeling", "Add the bridging `addFlow` in the same operations array"),
         ("process-modeling", "`removeFlow` takes `source` and `target` ONLY — MUST strip `kind` and `condition` first"),
         ("process-modeling", "the refusal ABORTS THE WHOLE atomic BATCH"),
-        ("process-modeling", "Every modify re-draws the WHOLE diagram"),
+        ("process-modeling", "`setFlow` re-draw the WHOLE diagram"),
         ("process-modeling", "prefer additive edits, do not remove or rewire"),
         ("process-modeling", "a target retarget clears the record filter"),
         ("process-modeling", "a supplied `add`/`remove` REPLACES that whole collection")

@@ -198,8 +198,8 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   `kind: "sequence"` on both, reading exactly like "condition cleared, as asked". Treat such a process
   as high-risk: prefer additive edits, do not remove or rewire those elements, and tell the user what
   you left alone.
-- Every modify re-draws the WHOLE diagram; where that would REPLACE an arrangement the server REFUSES
-  the edit and asks rather than flattening it. Read `process-diagram-layout` before editing a process whose diagram matters.
+- Only add/remove element/flow and `setFlow` re-draw the WHOLE diagram (1.6.6.125+); if that
+  REPLACES an arrangement the server REFUSES and asks. Read `process-diagram-layout` before editing a process whose diagram matters.
 - You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not
   a build in progress (`process-version-writes`): a modify overwrites the ONE schema you named (a process
   can be a family of them), and the overwrite is irreversible either way. TRUE: you would overwrite the

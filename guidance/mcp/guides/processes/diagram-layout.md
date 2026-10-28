@@ -13,8 +13,8 @@ than the graph — "why does that arrow cross the block", "why is that branch be
 "the customer rearranged this process and now an edit is refused".
 
 == You do not set the layout, but you DO decide it ==
-Do NOT set positions or connector geometry: no argument on any tool carries them, and every save
-re-derives the whole picture. That is not the same as having no influence. The flow ORDER you declare
+Do NOT set positions or connector geometry: no argument on any tool carries them, and every save with a
+structural operation re-derives the whole picture. That is not the same as having no influence. The flow ORDER you declare
 is exactly what decides the arrangement, so the rules below are the ones to author against.
 
 == Where elements go ==
@@ -59,9 +59,10 @@ All three are read-only. `position` is always reported; `size` and `geometry` ar
 straight connector.
 
 == What an edit does to a diagram somebody arranged ==
-Every modify re-applies the automatic layout to the WHOLE diagram AND re-routes every connector: a
-hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed arrows are
-redrawn with it (process data intact, manual layout lost).
+The STRUCTURAL operations are `addElement`, `removeElement`, `addFlow`, `removeFlow` and `setFlow`. A
+modify whose batch holds one re-applies the automatic layout to the WHOLE diagram AND re-routes every
+connector: a hand-arranged multi-lane or branched diagram is redrawn as generated rows, and hand-routed
+arrows are redrawn with it (process data intact, manual layout lost).
 
 That is not a side effect to work around — stored connector geometry is absolute canvas coordinates, so
 anything the engine did not recompute would stay frozen where no shape stands any more. From
@@ -69,11 +70,18 @@ CrtProcessBuilder 1.6.5.14 a caption the designer recorded a position for is rel
 returns to the middle of what it names; an OLDER server leaves it pinned, which strands a branch label
 at the coordinates the arrow used to pass through.
 
+From CrtProcessBuilder 1.6.6.125 every OTHER operation re-draws nothing: a batch made only of them, or
+an empty one, keeps every position, connector and caption as stored and is never refused over layout.
+That covers parameters, mappings, filters, signals, `setElement`, connections, usings, methods, tracing,
+`setFlowCondition` and `setFlowResults` (`process-activity-result-branches` owns the latter). The server
+decides by the operation kinds, not by the diagram. An OLDER server re-draws on every edit, an empty one
+included.
+
 The same version also SAYS when it replaces a connector path somebody stored, as a warning on the
 successful edit: "N connectors had paths stored for them that are not the ones the builder draws". Read
 it back to the user rather than dropping it — the layout gate cannot raise this one, because routing an
 arrow by hand moves no element and the diagram still reads as one the builder drew. It fires on the
-first edit of a process whose arrows the designer routed, and goes quiet afterwards, once the stored
+first structural edit of a process whose arrows the designer routed, and goes quiet afterwards, once the stored
 paths are the builder's own.
 
 == The refusal, and the two questions behind it ==
@@ -87,10 +95,13 @@ reports what it re-drew afterwards - because refusing one would leave it with no
 and the layout rules changed with this version, so most stored diagrams meet the condition.
 
 Two cases reach the refusal: the diagram is not the one the builder lays out, so somebody arranged it
-by hand (or an older version drew it) and applying anything replaces that arrangement; or the edit
+by hand (or an older version drew it) and a structural edit replaces that arrangement; or the edit
 changes which elements sit above which, so the branches swap places — which is what making a branch the
 DEFAULT one does. Shifting elements and inserting one between others are ordinary and never ask.
-Nothing is written when it refuses, so there is no half-applied edit to undo.
+Nothing is written when it refuses, so there is no half-applied edit to undo. A batch that mixes
+structural and other operations is refused whole; from 1.6.6.125 the other operations alone go through
+in place, so offer that as a third answer when the user only wanted them - and send nothing until they
+choose.
 
 The refusal is not a yes/no on re-drawing — that question has no good answer, since no loses the edit
 and yes loses the picture. It opens a TWO-question sequence, and BOTH answers are the user's:
@@ -98,7 +109,9 @@ and yes loses the picture. It opens a TWO-question sequence, and BOTH answers ar
      edit as a NEW VERSION. On yes, send the SAME operations to
      `modify-business-process-as-new-version`. That tool never refuses over layout — it reports how the
      new version's diagram differs and creates it anyway — because refusing the remedy the other path
-     recommends would leave you with nowhere to go. Their process and its diagram are untouched.
+     recommends would leave you with nowhere to go. Their process and its diagram are untouched. Say
+     both costs before asking: the version is PERMANENT (it cannot be deleted), and its own diagram is
+     re-drawn, so the arrangement survives on the source only.
   2. The version is created NOT actual, so nothing runs differently yet, and its response says so on
      every success. Ask the user to open it, look at the diagram, and say whether to make it actual;
      only then call `set-active-business-process-version`. NEVER chain the two — a version is created
