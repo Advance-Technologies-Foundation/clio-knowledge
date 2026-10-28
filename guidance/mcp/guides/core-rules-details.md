@@ -72,15 +72,15 @@ create/sleep/read/delete loop (clio 8.1.0.141 and later; `get-tool-contract` fir
   writes anything. Verified by readback on Creatio 10.2.760 (.NET 8) in October 2026: the answer was
   `The input was not valid.`, and no record was created. On .NET Framework builds the same rejection answers
   `The request is invalid.`. On clio <CLIO-UPLOAD-FILE-TBD> and later the row
-  comes back with `record-created=false`, `diagnostic.side-effect=none`, and an error that names the binary
-  column. Earlier clio versions report the side effect as unknown for the same rejection.
+  comes back with `record-created=false`, `diagnostic.side-effect=none` (or `not-attempted` when clio refused
+  the row locally without sending it), and an error that names the binary column. Earlier clio versions report the side effect as unknown for the same rejection.
 - Do not re-send the row with the binary value in another encoding. Create the row without the binary
   column.
 - To attach a file to a record, call `upload-file` (clio <CLIO-UPLOAD-FILE-TBD> and later). Give the file
   entity (`ContactFile`, `AccountFile`, `KnowledgeBaseFile`), its lookup column to the parent record (`Contact`
   for `ContactFile`), and the parent record id. The tool reads the stored bytes back before it reports
-  success. When it fails after the file was sent, it returns `file-id`: read that record with `odata-read`
-  before you upload the file again. For an image in `SysImage`, call `upload-image` (clio 8.1.0.91 and later).
+  success. When it fails after the file was sent, it returns `file-id`: read that record using the normal
+  record-read workflow before you upload the file again. For an image in `SysImage`, call `upload-image` (clio 8.1.0.91 and later).
 - The environment's file security policy can reject a file whose extension does not match its content. Tell
   the user; do not rename the file to pass the check.
 - When clio cannot attach the file, tell the user why and stop. This includes a clio version without
