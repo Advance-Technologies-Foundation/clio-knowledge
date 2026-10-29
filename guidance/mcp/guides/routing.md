@@ -111,7 +111,8 @@ precondition kept next to the instruction it guards — names that guide as the 
   - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
     against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - FILES a Send email element attaches (`email.attachments`): a Process file element's output, a FileCollection or a
-    File, the order rule, replacing the list on modify, an email that arrives without its files ->
+    File, the order rule, replacing the list on modify, which files an existing email sends (its rows vs the
+    designer), an email that arrives without its files ->
     name=process-send-email-attachments (after name=process-send-email)
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval

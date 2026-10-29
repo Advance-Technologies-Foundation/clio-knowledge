@@ -299,12 +299,12 @@ public sealed class SendEmailAttachmentsGuidanceTests
         }
         guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) run-time sources.",
             because: "the run-time statements are source traces, and the guide must name the sources it traced");
-        guide.Should().Contain("Manual mode delivery has not been measured.",
-            because: "only auto-mode delivery was measured, and the guide must say so (AGENTS.md: no unverified claim presented as verified)");
+        guide.Should().Contain("manual mode's prepared email activity carried every file, original names; its sending was not measured.",
+            because: "manual mode was measured up to the email activity it prepares, not its sending, and the guide must say so (AGENTS.md: no unverified claim presented as verified)");
     }
 
     [Test]
-    [Description("The read-back: the write shape plus slot, bindingLevels and issues, an omitted member when there are no rows, the describe-only members dropped before sending back, and the foreign-schema row left out.")]
+    [Description("The read-back: the write shape plus slot, bindingLevels and issues, an omitted member when there are no rows, the describe-only members dropped before sending back, the foreign-schema row left out, and the entries listed in the designer's row order, not by slot number.")]
     public void Guide_ShouldStateTheReadBack()
     {
         // Arrange
@@ -313,11 +313,12 @@ public sealed class SendEmailAttachmentsGuidanceTests
         // Act
         string[] clauses =
         [
-            "returns `email.attachments` by row number, each entry in the write shape plus the describe-only `slot` (`Attachments<N>`), `bindingLevels` (`both` | `outerOnly` | `itemOnly` | `none`) and `issues`",
+            "returns `email.attachments`, each entry in the write shape plus the describe-only `slot` (`Attachments<N>`), `bindingLevels` (`both` | `outerOnly` | `itemOnly` | `none`) and `issues`",
             "An element with no rows OMITS `attachments`.",
             "clio ignores `slot`, `bindingLevels` and `issues` with a warning, so drop them.",
             "An entry with an issue may be refused when sent back: the issue says what to send instead.",
-            "A row created in another process schema is listed with an issue"
+            "A row created in another process schema is listed with an issue",
+            "Order (CrtProcessBuilder 1.6.6.128+): the designer's row order, the order the email attaches them; a new row goes last, so `slot` numbers can have gaps and need not ascend."
         ];
 
         // Assert
@@ -326,6 +327,10 @@ public sealed class SendEmailAttachmentsGuidanceTests
             guide.Should().Contain(clause,
                 because: "describe is the modify recipe's input, so its shape has to be stated as the agent will see it");
         }
+        guide.Should().NotContain("by slot number",
+            because: "describe lists the rows in the order the email attaches them, which a re-added row breaks away from the slot numbers");
+        guide.Should().NotContain("by row number",
+            because: "describe lists the rows in the order the email attaches them, which a re-added row breaks away from the slot numbers");
         guide.Should().NotContain("\"attachments\": []",
             because: "describe omits the member when there are no rows; an empty array is the write that removes every row");
     }
