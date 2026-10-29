@@ -108,6 +108,6 @@ out.
 Evidence: the build-time rules are pinned by CrtProcessBuilder 1.6.6.127 unit tests, which also compare its rows with
 rows the designer saved on a stand on 2026-10-29. The run-time behaviour is read from the CrtProcessDesigner 7.8.0
 and core (Terrasoft.Core, Terrasoft.File) run-time sources. Measured on a stand on 2026-10-29: auto mode with a
-custom and with a template message delivered every attached file (three rows from Object attachments and Generated
-report sources, checked in the recipient mailbox); with `CreateActivity` on, the email activity carried them.
+custom and with a template message delivered every attached file (two rows, from Object attachments and Generated
+report sources: three files, checked in the recipient mailbox); with `CreateActivity` on, the email activity carried them.
 Manual mode delivery has not been measured.
