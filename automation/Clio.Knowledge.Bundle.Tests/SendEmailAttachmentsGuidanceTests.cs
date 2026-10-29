@@ -41,8 +41,8 @@ public sealed class SendEmailAttachmentsGuidanceTests
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The
-    /// guide is about 11,000 characters, so 12,500 leaves room for a clause or two and fails a larger addition,
-    /// which should then be reviewed rather than absorbed. The 19,000-byte inline rule is asserted separately.
+    /// guide is about 12,400 characters since its fact-check corrections, so 12,500 leaves almost no room: a new clause
+    /// pays for itself with a trim, and a larger addition should be reviewed, or split, rather than absorbed. The 19,000-byte inline rule is asserted separately.
     /// </summary>
     private const int DesignTargetResponseCharacters = 12_500;
 
@@ -167,10 +167,11 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "a source that holds no files (neither a file nor a collection of files, or a collection with no File item)",
             "a collection with several File items (name the one to attach, `<collection>.<item>`)",
             "a Process file element's `Files` input (the files it is GIVEN",
-            "more than 1000 entries.",
+            "More than 1000 entries is refused before any entry is checked, naming the count.",
             "A refused entry writes none of the list.",
             "A Send email made multi-instance in the designer refuses `email.attachments` whole, `[]` included",
-            "a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one is refused, and so is any mapping, formula or attachment that READS one (it only receives files)."
+            "a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one is refused, and so is a mapping (structured source or `expression`) or an `email.attachments` entry that READS one (a row only receives files).",
+            "multi-instance moves the element's parameters into record collection items, and the run time reads only its top-level rows."
         ];
 
         // Assert
@@ -196,7 +197,8 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "On the FLOW the source must run before the email.",
             "the answer warns that it \"does not lie on a path before\" the email: fix the flows.",
             "The warning is a hint, not a proof - a source on a gateway branch the run does not take still reaches the email and is not warned about.",
-            "An email whose source has not run goes out WITHOUT those files and WITHOUT an error."
+            "For an `expression` entry, every element its formula references must be declared earlier too.",
+            "A collection source that has not run sends no files and no error; a single File (or `expression`) source that has not run is empty, so the element fails."
         ];
 
         // Assert
@@ -219,12 +221,16 @@ public sealed class SendEmailAttachmentsGuidanceTests
         string[] clauses =
         [
             "`setElement` with `elementUpdate.email.attachments` replaces the element's attachments.",
-            "every row the list does not name is REMOVED.",
+            "A row is kept as it is only when its stored binding is exactly what the entry would write",
+            "A designer row in a shape this tool does not write (a collection level only, levels reading different sources, a stale collection level) is replaced by a new row for the same source.",
+            "every row of this process the list does not name is REMOVED.",
             "`attachments` omitted: the rows are untouched. `[]`: every row is removed.",
             "Recipients differ: they MATCH-OR-APPEND (`process-send-email`).",
             "`describe-business-process element=<email>` IMMEDIATELY before, take its `email.attachments`, add or drop the entry, send the whole list.",
             "Modify has no concurrency check, so a list from an older read deletes the rows added since",
             "the entry, in the write shape, that restores it (\"To restore it, add { ... } to the list.\")",
+            "None for a row the same request gives back in the same write shape, or one an earlier list of it created;",
+            "On modify clio also reports the removed rows from its own before/after read-back",
             "A row something still reads is not removed: the request is refused, naming the readers."
         ];
 
@@ -291,8 +297,10 @@ public sealed class SendEmailAttachmentsGuidanceTests
             guide.Should().Contain(clause,
                 because: "these are what only the run shows, or a refusal that fires on a save that touched no attachment");
         }
-        guide.Should().Contain("has not been measured through this tool",
-            because: "the run-time statements are source traces, and the guide must say so (AGENTS.md: no unverified claim presented as verified)");
+        guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) run-time sources.",
+            because: "the run-time statements are source traces, and the guide must name the sources it traced");
+        guide.Should().Contain("Manual mode delivery has not been measured.",
+            because: "only auto-mode delivery was measured, and the guide must say so (AGENTS.md: no unverified claim presented as verified)");
     }
 
     [Test]
@@ -320,6 +328,43 @@ public sealed class SendEmailAttachmentsGuidanceTests
         }
         guide.Should().NotContain("\"attachments\": []",
             because: "describe omits the member when there are no rows; an empty array is the write that removes every row");
+    }
+
+    [Test]
+    [Description("The corrected claims hold in the guide and its manifest description: an unrun single File fails the element while an unrun collection sends nothing silently, no check of a Formula body reading a row is promised, the duplicate notice is per source, and the Object attachments remedy is not quoted as the shared refusal wording.")]
+    public void Guide_ShouldCarryTheCorrectedClaims()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string guide = ReadCollapsed(ArticlePath);
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+
+        // Act
+        string description = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ItemId)
+            .GetProperty("description").GetString()!;
+
+        // Assert
+        using (new AssertionScope())
+        {
+            description.Should().Contain("an unrun collection source sends no files and no error, an unrun single File fails the element",
+                because: "the description is what a client shows before the guide is read, and an unrun single File is empty, which fails the element");
+            description.Should().NotContain("an unrun source sends no files and no error",
+                because: "the unqualified claim is wrong for a single File source");
+            guide.Should().NotContain("An email whose source has not run goes out WITHOUT those files",
+                because: "an unrun single File or expression source fails the element instead of sending without files");
+            guide.Should().NotContain("any mapping, formula or attachment that READS",
+                because: "no check refuses a Formula element body that reads a row, so the guide must not promise one");
+            guide.Should().Contain("two entries naming the same source (a collection and its item path count as the same)",
+                because: "the duplicate notice compares the sources named, not the files they reach");
+            guide.Should().Contain("the same files reached by two different routes are not detected",
+                because: "an agent must not read the absence of the notice as proof no file is attached twice");
+            guide.Should().Contain("(\"has no record scope and no filter condition ... sends them outside Creatio\")",
+                because: "only this part of the refusal is shared by the Object attachments and Generated report wording");
+            guide.Should().NotContain("sends them outside Creatio ... Scope it first",
+                because: "'Scope it first' ends only the Object attachments refusal");
+        }
     }
 
     [Test]
