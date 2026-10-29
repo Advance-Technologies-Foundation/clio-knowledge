@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.174",
+  "libraryVersion": "1.15.176",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -138,6 +138,7 @@
       "process-send-email",
       "process-send-email-details",
       "process-send-email-template",
+      "process-send-email-attachments",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -341,6 +342,7 @@
       "docs://knowledge/com.creatio.clio/process-send-email",
       "docs://knowledge/com.creatio.clio/process-send-email-details",
       "docs://knowledge/com.creatio.clio/process-send-email-template",
+      "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -1500,7 +1502,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Build-lifecycle owner for Creatio business processes: tools, create-business-process descriptor, recipe and modify safety rules. A build starts at process-digest; routes to: process-element-catalog, process-element-catalog-details, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole; rare cases: process-modeling-details.",
+      "description": "Build-lifecycle owner for Creatio business processes: tools, descriptor, recipe, modify safety. A build starts at process-digest; routes to: process-element-catalog, process-element-catalog-details, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-send-email-attachments, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to be read whole; rare cases: process-modeling-details.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1842,7 +1844,7 @@
     {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template. Its evidence and rare cases moved to process-send-email-details.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template; the files the email sends (email.attachments, a sent list replaces them) by process-send-email-attachments. Its evidence and rare cases moved to process-send-email-details.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",
@@ -1876,6 +1878,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/processes/send-email-template.md",
       "bundlePath": "resources/process-send-email-template.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-send-email-attachments",
+      "title": "Send email attachments",
+      "description": "Owns email.attachments of the Creatio Send email element (CrtProcessBuilder 1.6.6.127 or newer): one entry per attachment row naming exactly one source (processParameter, sourceElement + sourceElementParameter, or expression; value refused) - a Process file element's ObjectFiles or ReportFiles, another element's file output, a process FileCollection or a single File; the refusals, a multi-instance Send email and raw mappings onto or from a row among them; the order rule (declared earlier on create, on a path before the email, an unrun source sends no files and no error); a sent list REPLACES the rows on modify (describe immediately before, [] removes all, the removal notice restores); the notices; the refusal of an unscoped Object attachments or Generated report source an email sends; the read-back (slot, bindingLevels, issues); both send modes; the UseProcessEmailAttachments troubleshooting line. Read after process-send-email.",
+      "topicId": "creatio.process-send-email-attachments",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-send-email-attachments",
+      "sourcePath": "guidance/mcp/guides/processes/send-email-attachments.md",
+      "bundlePath": "resources/process-send-email-attachments.md",
       "mediaType": "text/plain"
     },
     {

@@ -42,6 +42,7 @@ public sealed class GuidanceMigrationTests
         "process-files",
         "process-files-report",
         "process-files-parameter",
+        "process-send-email-attachments",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",

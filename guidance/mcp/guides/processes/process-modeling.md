@@ -34,7 +34,7 @@ modify safety); every other topic has its own owner -- read the one your task ne
     a TEAM) or OwnerId for one person.
   * `process-task-category` - how a category or priority must be mapped, and what degrades silently
     when it is not (not needed to BUILD one: `process-perform-task` carries the ids and refusals).
-    Read it when a field shows a raw Guid or a results dropdown offers the wrong set.
+    Read it when a field shows a raw Guid or a results dropdown is wrong.
   * `process-open-edit-page` - the Open edit page element, and when to choose it.
   * `process-access-rights` - the Change access rights element and its silent no-ops.
   * `process-send-email` - the Send email element: mode, sender, recipients, subject, custom HTML
@@ -144,8 +144,8 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
      access to whoever it names, with nothing reported at run time; show the user the target object, the
      record `filter` and every grantee with its operations and level, and get an explicit yes first
      (`process-access-rights`);
-   * a sendEmail `email` block - a partial update; to/cc/bcc recipients MATCH-OR-APPEND (a new address
-     is added, an identical one is a no-op, none can be removed).
+   * a sendEmail `email` block - a partial update; recipients MATCH-OR-APPEND (none removable), a sent
+     `email.attachments` list REPLACES (`process-send-email-attachments`).
 - On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB
   and published.
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
