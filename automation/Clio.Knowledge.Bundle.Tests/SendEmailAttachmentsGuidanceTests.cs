@@ -210,7 +210,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
     }
 
     [Test]
-    [Description("A sent list replaces the rows, an omitted list keeps them, [] removes all, the describe-before-send recipe and the missing concurrency check, the removal notice and the reader guard; recipients keep their append rule.")]
+    [Description("A sent list replaces the rows, an omitted list keeps them, [] removes all, the describe-before-send recipe and the missing concurrency check, the removal notice and the reader guard, the formula-row rebuild instruction, and that a list cannot reorder rows (position ignored, kept rows in place, new rows last; [] then the list for another order); recipients keep their append rule.")]
     public void Guide_ShouldStateTheReplaceRuleAndTheRecipe()
     {
         // Arrange
@@ -231,7 +231,10 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "the entry, in the write shape, that restores it (\"To restore it, add { ... } to the list.\")",
             "None for a row the same request gives back in the same write shape, or one an earlier list of it created;",
             "On modify clio also reports the removed rows from its own before/after read-back",
-            "A row something still reads is not removed: the request is refused, naming the readers."
+            "A row something still reads is not removed: the request is refused, naming the readers.",
+            "A list cannot REORDER rows: position is ignored, a kept row stays put, a new row goes last; a reordered list changes nothing, without a notice.",
+            "For another order send `[]`, then the list in that order (new rows; refused while something reads a row).",
+            "a row with a formula on its collection level: rebuild it in the designer to restore it;"
         ];
 
         // Assert
@@ -299,6 +302,8 @@ public sealed class SendEmailAttachmentsGuidanceTests
         }
         guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) run-time sources.",
             because: "the run-time statements are source traces, and the guide must name the sources it traced");
+        guide.Should().Contain("Measured on a stand on 2026-10-29: auto mode, custom and template message, delivered every file",
+            because: "the measured run-time sentence follows one about source traces, so it names where and when it was measured instead of pointing back with 'there'");
         guide.Should().Contain("manual mode's prepared email activity carried every file, original names; its sending was not measured.",
             because: "manual mode was measured up to the email activity it prepares, not its sending, and the guide must say so (AGENTS.md: no unverified claim presented as verified)");
     }
@@ -318,7 +323,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "clio ignores `slot`, `bindingLevels` and `issues` with a warning, so drop them.",
             "An entry with an issue may be refused when sent back: the issue says what to send instead.",
             "A row created in another process schema is listed with an issue",
-            "Order (CrtProcessBuilder 1.6.6.128+): the designer's row order, the order the email attaches them; a new row goes last, so `slot` numbers can have gaps and need not ascend."
+            "Order (CrtProcessBuilder 1.6.6.128+): the designer's row order, the order the email attaches them; `slot` numbers can have gaps and need not ascend."
         ];
 
         // Assert

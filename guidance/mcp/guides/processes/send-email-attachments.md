@@ -1,14 +1,13 @@
 clio MCP process-send-email-attachments guide - the files a Send email element sends (`email.attachments`)
 
 Scope
-This guide owns `email.attachments` of the Send email element (`sendEmail`): entries, refusals, order and replace
-rules, notices, read-back, missing files. `process-send-email` owns the rest
-of the `email` block; `process-files` owns the File and FileCollection types and the Process file element whose
-output an email usually sends. Two words clash: `email.attachments` are the files an email SENDS;
+This guide owns `email.attachments` of the Send email element (`sendEmail`). `process-send-email` owns the rest
+of the `email` block; `process-files` owns the File and FileCollection types and the Process file element. Two
+words clash: `email.attachments` are the files an email SENDS;
 `fileProcessing.attachments` is the Object attachments group of a Process file element, which READS a record's files.
 Needs CrtProcessBuilder 1.6.6.127 or later on the environment. Use it only when the FULL create-business-process
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `attachments`
-in the `email` block. Whatever the versions, read the element back: an `email` block without the `attachments` you
+in the `email` block. Always read the element back: an `email` block without the `attachments` you
 sent means the list did not land, so never report those files as attached.
 
 == The entry ==
@@ -22,7 +21,7 @@ sent means the list did not land, so never report those files as attached.
 - Sources that hold files: a Process file element's output - `ObjectFiles` (Object attachments, Process parameter)
   or `ReportFiles` (Generated report); another element's FileCollection or File output; a process FileCollection
   (for files a calling process passes in); a single File. Each row sends every file its collection holds, so one
-  entry per source, however many files it carries.
+  entry per source.
 - REFUSED, naming the entry by its zero-based position (`email.attachments[1]`): no source or more than one; `value`;
   an element or parameter that does not exist; a source that holds no files (neither a file nor a collection of
   files, or a collection with no File item); a collection with several File items (name the one to attach,
@@ -55,24 +54,26 @@ sent means the list did not land, so never report those files as attached.
   same source. Every other entry gets a new row; every row of this process the list does not name is REMOVED.
   `attachments` omitted: the rows are untouched. `[]`: every row is removed. Recipients differ: they
   MATCH-OR-APPEND (`process-send-email`).
+- A list cannot REORDER rows: position is ignored, a kept row stays put, a new row goes last; a reordered list
+  changes nothing, without a notice. For another order send `[]`, then the list in that order (new rows; refused
+  while something reads a row).
 - To add or drop one: `describe-business-process element=<email>` IMMEDIATELY before, take its
   `email.attachments`, add or drop the entry, send the whole list. Modify has no concurrency check, so a list from an
   older read deletes the rows added since, in the designer too.
 - A removed row gets a notice naming what it read and the entry, in the write shape, that restores it ("To
   restore it, add { ... } to the list."). None for a row the same request gives back in the same write shape, or
-  one an earlier list of it created; a row with a formula on its collection level is rebuilt in the
-  designer; a row that read nothing, as attaching nothing. On modify clio also reports the removed rows
+  one an earlier list of it created; a row with a formula on its collection level: rebuild it in the designer to
+  restore it; a row that read nothing is named as attaching nothing. On modify clio also reports the removed rows
   from its own before/after read-back (a warning; Info when you sent `[]`). A row something still reads is not
   removed: the request is refused, naming the readers.
 
 == Notices (warnings: the process saves) ==
 Judged at the end of the request for every entry of the last list sent; each starts `Send email '<element>': `.
 Tell the user each: the build cannot settle it.
-- a single File: if it is empty when the email runs, the element fails;
+- a single File: empty when the email runs, it fails the element;
 - an `expression`: not checked; it must yield one file, and none fails the element;
 - two entries naming the same source (a collection and its item path count as the same): each file is attached
   twice; the same files reached by two different routes are not detected;
-- a source not on a path before the email (above);
 - the files a Sub-process or a custom user task returns: this tool cannot see which records that code reads them
   from, so make sure it reads only the records it should.
 
@@ -87,15 +88,15 @@ process whose email already sends an unscoped source is refused on its next save
 scoped or the attachment removed. A filter that selects something passes, even one by file name only.
 
 == Read back ==
-`describe-business-process element=<email>` (or `mode=full`) returns `email.attachments`, each entry in
-the write shape plus the describe-only `slot` (`Attachments<N>`), `bindingLevels` (`both` | `outerOnly` | `itemOnly`
-| `none`) and `issues` (a row that fails or surprises at run time, an entry whose re-send would be refused, a source
-that makes the next save refuse, a multi-instance element). An element with no rows OMITS `attachments`. Send the
-entries back unchanged; clio ignores `slot`, `bindingLevels` and `issues` with a warning, so drop them. An entry
-with an issue may be refused when sent back: the issue says what to send instead. A row created in another process
-schema is listed with an issue - this process never sends it and a list never touches it: leave it out.
-- Order (CrtProcessBuilder 1.6.6.128+): the designer's row order, the order the email attaches them; a new row goes
-  last, so `slot` numbers can have gaps and need not ascend.
+Describe (`element=<email>` or `mode=full`) returns `email.attachments`, each entry in the write shape plus the
+describe-only `slot` (`Attachments<N>`), `bindingLevels` (`both` | `outerOnly` | `itemOnly` | `none`) and `issues`
+(a row that fails or surprises at run time, an entry whose re-send would be refused, a source that makes the next
+save refuse, a multi-instance element). An element with no rows OMITS `attachments`. clio ignores `slot`,
+`bindingLevels` and `issues` with a warning, so drop them. An entry with an issue may be refused when sent back: the
+issue says what to send instead. A row created in another process schema is listed with an issue - this process
+never sends it and a list never touches it: leave it out.
+- Order (CrtProcessBuilder 1.6.6.128+): the designer's row order, the order the email attaches them; `slot` numbers
+  can have gaps and need not ascend.
 
 == At run time ==
 - The rows work alike in auto and manual mode and with a custom or a template message: auto mode attaches the files
@@ -109,6 +110,6 @@ schema is listed with an issue - this process never sends it and a list never to
 
 Evidence: the build-time rules are pinned by CrtProcessBuilder 1.6.6.128 unit tests, compared with rows the
 designer saved on a stand on 2026-10-29. The run-time behaviour is read from the CrtProcessDesigner 7.8.0 and core
-(Terrasoft.Core, Terrasoft.File) run-time sources. Measured there: auto mode, custom and template message, delivered
-every file (seen in the mailbox), and with `CreateActivity` on the email activity carried them; manual mode's
-prepared email activity carried every file, original names; its sending was not measured.
+(Terrasoft.Core, Terrasoft.File) run-time sources. Measured on a stand on 2026-10-29: auto mode, custom and
+template message, delivered every file (in the mailbox), and with `CreateActivity` on the email activity carried
+them; manual mode's prepared email activity carried every file, original names; its sending was not measured.
