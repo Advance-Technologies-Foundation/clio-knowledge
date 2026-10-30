@@ -55,6 +55,9 @@ result contradicts a rule here or a user disputes one.
   `Terrasoft.Mail.Sender.EmailException: Sender is not specified` — UNLESS the `SkipSenderValidation` feature
   flag is on, where the identical setup completes. So configure a `sender` for `auto`, but do NOT report a
   missing one as a save-time error.
+  In `mode:"manual"` `sender` is optional, as in the designer: without one the prepared email activity has an
+  empty From and the performer picks a mailbox before Send. Set `sender` in manual mode too when the email must
+  leave from a fixed mailbox.
   AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four (in
   template mode the `template` stands in for `body`). That is an AUTHORING rule, not a tool contract —
   neither the build nor the platform save enforces any of them (the designer itself saves an auto element
