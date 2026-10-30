@@ -125,7 +125,7 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatARemovalNamesTheDecidingRow")]
     [TestCase("removing the All employees row cuts off every internal user with no other row",
         TestName = "ObjectRights_ShouldStateThatRemovingAllEmployeesCutsOffInternalUsers")]
-    [TestCase("Removing the All external users row takes the object away from every portal user who matches no other row that grants it",
+    [TestCase("Removing the All external users row takes the object away from every portal user for whom that row was the deciding row and no other row grants it",
         TestName = "ObjectRights_ShouldQualifyWhichPortalUsersLoseAccessOnRemoval")]
     [TestCase("External roles are named as such", TestName = "ObjectRights_ShouldStateThatExternalRolesAreNamed")]
     [TestCase("a move or a removal changes the stored rows only (a removed row stays removed)",
@@ -133,6 +133,10 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row or several; a removal that would leave an administered object with no row that grants any operation; any of these arguments together with operations, revoke or a switch flag",
         TestName = "ObjectRights_ShouldListTheMoveAndRemoveRefusals")]
     [TestCase("renumbered 0..n-1", TestName = "ObjectRights_ShouldStateThatRowsAreRenumbered")]
+    [TestCase("The other rows keep their relative order",
+        TestName = "ObjectRights_ShouldStateThatOtherRowsKeepTheirRelativeOrder")]
+    [TestCase("The preview and the result list every role whose operations change",
+        TestName = "ObjectRights_ShouldStateThatEveryRoleWhoseAccessChangesIsListed")]
     [TestCase("ANY row that differs from the plan fails the call",
         TestName = "ObjectRights_ShouldStateThatAWholeListSaveFailsOnAnyDifference")]
     [TestCase("The change applies at once, also to a user who is already logged in (Evidence below)",
@@ -143,7 +147,7 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldCiteTheOpenPageProbe")]
     [TestCase("if it still shows the old access, log in again before you conclude anything",
         TestName = "ObjectRights_ShouldVerifyAgainAfterAReLoginWhenTheOldAccessShows")]
-    [TestCase("Moving or removing a row (position, above, remove-row) requires a clio release newer than 8.1.0.144",
+    [TestCase("Moving or removing a row (position, above, remove-row) requires clio <OBJECT-RIGHTS-LAYOUT-TBD> or later",
         TestName = "ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove")]
     [TestCase("Prefer it whenever the goal is \"decide before role Y\" — do not compute a position for that",
         TestName = "ObjectRights_ShouldPreferAboveOverAComputedPosition")]

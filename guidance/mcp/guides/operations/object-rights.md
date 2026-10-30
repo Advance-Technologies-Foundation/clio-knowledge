@@ -15,8 +15,8 @@ hand-written ESQ into the rights tables:
 
 Version boundary: get-object-rights and set-object-rights require a clio release newer than 8.1.0.137;
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
-permissions designer instead. Moving or removing a row (position, above, remove-row) requires a clio
-release newer than 8.1.0.144. A clio without them refuses those arguments as unknown: then move or remove
+permissions designer instead. Moving or removing a row (position, above, remove-row) requires clio
+<OBJECT-RIGHTS-LAYOUT-TBD> or later. A clio without them refuses those arguments as unknown: then move or remove
 the row in the Object permissions designer.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`. The
@@ -183,7 +183,7 @@ Move and remove (grantee plus exactly ONE of position, above, remove-row — a c
   role by the higher of its own row and All external users. A member of several listed roles, or of a
   parent role, can be decided by another row. External roles are named as such; any operation they lose is
   a revoke of EXTERNAL access. Removing the All external users row takes the object away from every portal
-  user who matches no other row that grants it, and removing the All employees row cuts off every internal
+  user for whom that row was the deciding row and no other row grants it, and removing the All employees row cuts off every internal
   user with no other row. You MUST name each of these to the developer before the write.
 - Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row
   or several; a removal that would leave an administered object with no row that grants any operation;
