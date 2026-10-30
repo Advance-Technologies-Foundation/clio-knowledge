@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.174",
+  "libraryVersion": "1.15.175",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -3128,7 +3128,7 @@
     {
       "itemId": "page-schema-translation",
       "title": "Page translation",
-      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
+      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, choosing the text (platform terms read from the environment in the target culture, the page's inherited strings as the glossary, other labels by meaning, ambiguous labels reported), which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
       "topicId": "creatio.page-schema-translation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-translation",

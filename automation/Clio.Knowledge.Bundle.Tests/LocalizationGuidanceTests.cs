@@ -197,6 +197,40 @@ public sealed class LocalizationGuidanceTests
                 because: "activation requirements must include the page-translation guide URI");
     }
 
+    [Test]
+    [Description("Pins how the page-translation guide chooses the text: context first, platform terms from the environment, other labels by meaning.")]
+    public void PageTranslationGuide_ShouldChooseTextByContext()
+    {
+        // Arrange
+        string repositoryRoot = FindRepositoryRoot();
+        string guidesRoot = Path.Combine(repositoryRoot, "guidance", "mcp", "guides");
+        string translation = File.ReadAllText(Path.Combine(guidesRoot, "page-schema", "translation.md"));
+        string maintenance = File.ReadAllText(Path.Combine(guidesRoot, "applications",
+            "existing-app-maintenance.md"));
+
+        // Assert
+        translation.Should().Contain("Choose every value as \"Choosing the text\" below says",
+            because: "the step that writes values must send the agent to the rules for choosing them");
+        translation.Should().Contain("Choosing the text (step 3, and every column title in step 5):",
+            because: "the guide must say how to choose the text, not only how to store it");
+        translation.Should().Contain("`reference-schema-name` from `get-entity-schema-properties`",
+            because: "a label is translated only after its column type and reference object are known");
+        translation.Should().Contain("`execute-esq` on `SysLocalizableValue`, which answers while the culture is inactive",
+            because: "get-entity-schema-properties returns one culture only, and the platform term must come from the environment");
+        translation.Should().Contain("`Columns.<ColumnName>.Caption`",
+            because: "column titles live under their own key in the same table");
+        translation.Should().Contain("The page's inherited strings are the glossary",
+            because: "inherited keys already carry the platform's own translation and tone");
+        translation.Should().Contain("a Boolean \"Taken into account\"",
+            because: "the contrast example keeps the object's title out of ordinary phrases");
+        translation.Should().Contain("write no value for that label",
+            because: "an ambiguous label is reported to the user, not guessed");
+        translation.Should().Contain("The summary names the source of every platform term",
+            because: "the user must see which terms were read from the environment and which were chosen");
+        maintenance.Should().Contain("Its text: `page-schema-translation` (Choosing the text).",
+            because: "column titles follow the same rules, which have one owner");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
