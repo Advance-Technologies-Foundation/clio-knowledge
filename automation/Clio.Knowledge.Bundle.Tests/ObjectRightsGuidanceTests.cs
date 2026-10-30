@@ -109,7 +109,49 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatARevokeKeepsTheRow")]
     [TestCase("the grant changes nothing for internal users",
         TestName = "ObjectRights_ShouldStateThatTheAllEmployeesRowShadowsAnInternalGrant")]
-    [TestCase("The tool never reorders rows", TestName = "ObjectRights_ShouldStateThatTheToolNeverReordersRows")]
+    [TestCase("A grant never reorders rows", TestName = "ObjectRights_ShouldStateThatAGrantNeverReordersRows")]
+    [TestCase("grantee plus exactly ONE of position, above, remove-row — a call of its own",
+        TestName = "ObjectRights_ShouldStateThatAMoveOrRemovalIsACallOfItsOwn")]
+    [TestCase("you MUST NOT remove a row when the developer asked to take operations away",
+        TestName = "ObjectRights_ShouldForbidRemovingARowForARevoke")]
+    [TestCase("any operation they lose is a revoke of EXTERNAL access",
+        TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
+    [TestCase("grantee + exactly one of position, above, remove-row for a move or a removal",
+        TestName = "ObjectRights_ShouldListTheLayoutArgumentsInTheArgsLine")]
+    [TestCase("A clio without them refuses those arguments as unknown: then move or remove the row in the Object permissions designer",
+        TestName = "ObjectRights_ShouldFallBackToTheDesignerOnAClioWithoutTheLayoutArguments")]
+    [TestCase("which can WIDEN their access", TestName = "ObjectRights_ShouldStateThatARemovalCanWidenAccess")]
+    [TestCase("The preview and the result name that next matching row and the operations it gives",
+        TestName = "ObjectRights_ShouldStateThatARemovalNamesTheDecidingRow")]
+    [TestCase("removing the All employees row cuts off every internal user with no other row",
+        TestName = "ObjectRights_ShouldStateThatRemovingAllEmployeesCutsOffInternalUsers")]
+    [TestCase("Removing the All external users row takes the object away from every portal user for whom that row was the deciding row and no other row grants it",
+        TestName = "ObjectRights_ShouldQualifyWhichPortalUsersLoseAccessOnRemoval")]
+    [TestCase("External roles are named as such", TestName = "ObjectRights_ShouldStateThatExternalRolesAreNamed")]
+    [TestCase("a move or a removal changes the stored rows only (a removed row stays removed)",
+        TestName = "ObjectRights_ShouldStateThatARemovalWhileOffIsStillSaved")]
+    [TestCase("Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row or several; a removal that would leave an administered object with no row that grants any operation; any of these arguments together with operations, revoke or a switch flag",
+        TestName = "ObjectRights_ShouldListTheMoveAndRemoveRefusals")]
+    [TestCase("renumbered 0..n-1", TestName = "ObjectRights_ShouldStateThatRowsAreRenumbered")]
+    [TestCase("The other rows keep their relative order",
+        TestName = "ObjectRights_ShouldStateThatOtherRowsKeepTheirRelativeOrder")]
+    [TestCase("The preview and the result list every role whose operations change",
+        TestName = "ObjectRights_ShouldStateThatEveryRoleWhoseAccessChangesIsListed")]
+    [TestCase("ANY row that differs from the plan fails the call",
+        TestName = "ObjectRights_ShouldStateThatAWholeListSaveFailsOnAnyDifference")]
+    [TestCase("The change applies at once, also to a user who is already logged in (Evidence below)",
+        TestName = "ObjectRights_ShouldStateThatAChangeAppliesAtOnce")]
+    [TestCase("if that user still sees the old access, logging in to the site again is the reliable way to apply it",
+        TestName = "ObjectRights_ShouldOfferReLoginAsTheReliableFallback")]
+    [TestCase("a Freedom UI list page already open as a non-admin user followed a row move in both directions without a reload",
+        TestName = "ObjectRights_ShouldCiteTheOpenPageProbe")]
+    [TestCase("if it still shows the old access, log in again before you conclude anything",
+        TestName = "ObjectRights_ShouldVerifyAgainAfterAReLoginWhenTheOldAccessShows")]
+    [TestCase("Moving or removing a row (position, above, remove-row) requires clio <OBJECT-RIGHTS-LAYOUT-TBD> or later",
+        TestName = "ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove")]
+    [TestCase("Prefer it whenever the goal is \"decide before role Y\" — do not compute a position for that",
+        TestName = "ObjectRights_ShouldPreferAboveOverAComputedPosition")]
+    [TestCase("There is no below", TestName = "ObjectRights_ShouldStateThatThereIsNoBelow")]
     [TestCase("ONE object per call", TestName = "ObjectRights_ShouldStateOneObjectPerCall")]
     [TestCase("nothing is granted by default", TestName = "ObjectRights_ShouldStateThatOperationsAreRequired")]
     [TestCase("a grant or revoke without it (or with a value that names no operation) is refused before any read or write",
@@ -238,6 +280,21 @@ public sealed class ObjectRightsGuidanceTests
 
         // Assert
         naming.Should().BeEmpty(because: $"'{retired}' is no longer a set-object-rights argument");
+    }
+
+    [Test]
+    [Description("object-rights does not promise that a change reaches a logged-in user at once: that holds for the user's next server request, but a user already working in the application can keep the old permissions until they log in again, so the unconditional claim sends an agent to verify in a stale session.")]
+    public void ObjectRights_ShouldNotPromiseThatAChangeReachesLoggedInUsersImmediately()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().NotContain("reaches users who are already logged in immediately",
+            because: "a re-login is the reliable way for a change to reach a logged-in user");
     }
 
     [Test]
