@@ -5,7 +5,8 @@ the card or this article sends you there.
 This article is the authoritative owner of the Send email element: the `email` block, its send modes, sender
 and recipients, the auto-mode checklist, and the CUSTOM message (the HTML `body` and its process macros). The
 TEMPLATE message — `template`, `templateEntity`, their refusals, the subject override, mode switching and the
-template read-back — is owned by `process-send-email-template`.
+template read-back — is owned by `process-send-email-template`. The files the email SENDS, `email.attachments`, are
+owned by `process-send-email-attachments`.
 Evidence and rare cases moved to `process-send-email-details` (the tests, stand runs and source reads behind
 these rules, why a no-mode element runs as a template, the designer-removal exceptions); read it only when a
 result contradicts a rule here or a user disputes one.
@@ -32,6 +33,8 @@ result contradicts a rule here or a user disputes one.
      "to"/"cc"/"bcc": [ one of {"value": "a@b.com"} | {"processParameter": "<Name>"} |
        {"expression": "[#…#]", "referenceSchema": "Contact"} , … ],
      "importance": "none"|"normal"|"high"|"low", "ignoreErrors": true|false,
+     "attachments"?: [ one source per entry: {"processParameter": …} | {"sourceElement": …,
+       "sourceElementParameter": …} | {"expression": …} ] (owner `process-send-email-attachments`),
      "performer": { "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's
        contact>", "role"?: "<SysAdminUnit role name or record id>", "showPage"?: true|false } } }`.
   TEMPLATE MODE is owned by `process-send-email-template` — the `template`/`templateEntity` contract, the
@@ -52,6 +55,9 @@ result contradicts a rule here or a user disputes one.
   `Terrasoft.Mail.Sender.EmailException: Sender is not specified` — UNLESS the `SkipSenderValidation` feature
   flag is on, where the identical setup completes. So configure a `sender` for `auto`, but do NOT report a
   missing one as a save-time error.
+  In `mode:"manual"` `sender` is optional, as in the designer: without one the prepared email activity has an
+  empty From and the performer picks a mailbox before Send. Set `sender` in manual mode too when the email must
+  leave from a fixed mailbox.
   AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four (in
   template mode the `template` stands in for `body`). That is an AUTHORING rule, not a tool contract —
   neither the build nor the platform save enforces any of them (the designer itself saves an auto element
@@ -151,7 +157,8 @@ result contradicts a rule here or a user disputes one.
   (`elementUpdate.email` — an in-place partial update). Recipients are MATCH-OR-APPEND: an entry whose
   resolved source and value already match an existing line under the same prefix is a NO-OP (re-application
   is idempotent now — older builds appended a duplicate), a genuinely new address APPENDS, and there is NO
-  removal path THROUGH THIS TOOL — a wrong recipient cannot be replaced or removed through `modify`.
+  removal path THROUGH THIS TOOL — a wrong recipient cannot be replaced or removed through `modify`. Not so
+  `email.attachments`: a sent list REPLACES the element's attachments (`process-send-email-attachments`).
   The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
   recipient's value and saving DELETES the parameter (`saveRecipients` calls `removeRecipient` on an emptied
   row, which calls `removeParameter`, which removes it from the element).

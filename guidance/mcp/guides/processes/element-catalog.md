@@ -39,9 +39,10 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   selection`), plus a record `filter` over the SELECTION object.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
-  body OR an existing email template (with the record its macros resolve against), options and the
-  manual-mode performer. `process-send-email` owns the element and the CUSTOM message;
-  `process-send-email-template` owns the TEMPLATE message and its limits.
+  body OR an existing email template (with the record its macros resolve against), options, the
+  manual-mode performer and, from CrtProcessBuilder **1.6.6.127**, the files it sends. `process-send-email` owns the
+  element and the CUSTOM message; `process-send-email-template` owns the TEMPLATE message and its limits;
+  `process-send-email-attachments` owns `email.attachments`.
 - Open edit page: `openEditPage` (the Open edit page element / OpenEditPageUserTask) is BUILDABLE and fully
   configurable through its `openEditPage` block — page, editing mode, pre-filled values, the record to open,
   performer, Log activity, result column and completion condition. `process-open-edit-page` owns the
