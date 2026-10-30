@@ -10,8 +10,8 @@ hand-written ESQ into the rights tables:
 - get-object-rights — read the rows of an object's operation permissions. Read-only.
 - set-object-rights — grant or revoke operations for ONE role on ONE object, move or remove that role's
   row, or turn the object's operation permissions on or off. DESTRUCTIVE: it writes in one call, with no
-  publish step. The change can reach a user who is already logged in at once, but that is not guaranteed:
-  for the permissions to apply reliably, the user should log in to the site again.
+  publish step. The change applies at once, also to a user who is already logged in (Evidence below); if
+  that user still sees the old access, logging in to the site again is the reliable way to apply it.
 
 Version boundary: get-object-rights and set-object-rights require a clio release newer than 8.1.0.137;
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
@@ -64,8 +64,11 @@ object is meant: ask before reading or writing, because the same word can be ano
 Evidence: the priority rule is Creatio Academy's (a user in several roles gets the permissions of the
 highest role in the list). It was reproduced per row as a non-admin internal user on a Creatio 8.3.4 stand
 (2026-09-29), with the switch rules as the designer states them, a denied read returning zero rows, and the
-change reaching that user's DataService session at once. That a user already working in the application
-can keep the old permissions until they log in again is operator experience, not a probe.
+change reaching that user's DataService session at once. On Creatio 10.2.471 (.NET Framework, MSSQL,
+2026-10-30) a Freedom UI list page already open as a non-admin user followed a row move in both directions
+without a reload: create and delete became available after a widening and were blocked again after a
+narrowing. Logging in again is the fallback when a user still sees the old access, not a step every
+change needs.
 
 ## get-object-rights
 Args: entity-schema-name (required), grantee (optional), include-connected (optional).
@@ -159,9 +162,6 @@ Revoke:
 - A revoke that would leave the object with no row that grants any operation is REFUSED. A revoke never
   turns operation permissions off; to turn them off instead, make the disable call (The switch alone).
 - A revoke from a role that has no row, or of operations the row does not hold, changes nothing.
-- A narrowing (a revoke, a move or a removal that takes operations away) reaches a user who is already
-  logged in reliably only after they log in again. Say so to the developer before the write when the
-  access must end now.
 
 Move and remove (grantee plus exactly ONE of position, above, remove-row — a call of its own):
 - The same ask-first rule as any write: call it with preview=true, show the developer the rows before and
@@ -190,8 +190,6 @@ Move and remove (grantee plus exactly ONE of position, above, remove-row — a c
   any of these arguments together with operations, revoke or a switch flag.
 - While operation permissions are OFF a move or a removal changes the stored rows only (a removed row stays
   removed): nobody's access changes until they are turned on.
-- A move or a removal that NARROWS a role's access reaches a user who is already logged in reliably only
-  after they log in again (as for a revoke). Say so to the developer before the write.
 - After the save the object is read back; ANY row that differs from the plan fails the call, because the
   save replaced the whole row list.
 
@@ -251,8 +249,9 @@ Results:
 ## Verify the effect
 - Re-read with get-object-rights. It shows the stored rows, not what a given user can do.
 - To prove what a user can do, test AS that user (a non-admin, not a holder of the "…any data" system
-  operations), logged in again after the write: a session opened before it can still show the old access. A DataService read that is denied returns success with ZERO rows, not an error — "the query
-  succeeded" does not prove read access. A denied create fails with a security error.
+  operations). An open session normally shows the new access at once; if it still shows the old access,
+  log in again before you conclude anything. A DataService read that is denied returns success with ZERO rows, not an error — "the
+  query succeeded" does not prove read access. A denied create fails with a security error.
 
 Use cases (all one general capability):
 - Grant or revoke any role's object access — the general audit-and-fix use.

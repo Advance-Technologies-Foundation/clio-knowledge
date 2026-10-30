@@ -135,12 +135,14 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("renumbered 0..n-1", TestName = "ObjectRights_ShouldStateThatRowsAreRenumbered")]
     [TestCase("ANY row that differs from the plan fails the call",
         TestName = "ObjectRights_ShouldStateThatAWholeListSaveFailsOnAnyDifference")]
-    [TestCase("for the permissions to apply reliably, the user should log in to the site again",
-        TestName = "ObjectRights_ShouldStateThatReLoginIsTheReliableWayToApplyAChange")]
-    [TestCase("A narrowing (a revoke, a move or a removal that takes operations away) reaches a user who is already logged in reliably only after they log in again",
-        TestName = "ObjectRights_ShouldWarnThatANarrowingNeedsAReLogin")]
-    [TestCase("logged in again after the write: a session opened before it can still show the old access",
-        TestName = "ObjectRights_ShouldVerifyInASessionOpenedAfterTheWrite")]
+    [TestCase("The change applies at once, also to a user who is already logged in (Evidence below)",
+        TestName = "ObjectRights_ShouldStateThatAChangeAppliesAtOnce")]
+    [TestCase("if that user still sees the old access, logging in to the site again is the reliable way to apply it",
+        TestName = "ObjectRights_ShouldOfferReLoginAsTheReliableFallback")]
+    [TestCase("a Freedom UI list page already open as a non-admin user followed a row move in both directions without a reload",
+        TestName = "ObjectRights_ShouldCiteTheOpenPageProbe")]
+    [TestCase("if it still shows the old access, log in again before you conclude anything",
+        TestName = "ObjectRights_ShouldVerifyAgainAfterAReLoginWhenTheOldAccessShows")]
     [TestCase("Moving or removing a row (position, above, remove-row) requires a clio release newer than 8.1.0.144",
         TestName = "ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove")]
     [TestCase("Prefer it whenever the goal is \"decide before role Y\" — do not compute a position for that",
