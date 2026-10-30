@@ -2,7 +2,7 @@ clio MCP process-send-email-attachments guide - the files a Send email element s
 
 Scope
 This guide owns `email.attachments` of the Send email element (`sendEmail`). `process-send-email` owns the rest
-of the `email` block; `process-files` owns the File and FileCollection types and the Process file element. Two
+of the `email` block; `process-files`, the File types and the Process file element. Two
 words clash: `email.attachments` are the files an email SENDS;
 `fileProcessing.attachments` is the Object attachments group of a Process file element, which READS a record's files.
 Needs CrtProcessBuilder 1.6.6.127 or later on the environment. Use it only when the FULL create-business-process
@@ -12,16 +12,16 @@ sent means the list did not land, so never report those files as attached.
 
 == The entry ==
 `"email": { ..., "attachments": [
-   { "sourceElement": "ReadContactFiles", "sourceElementParameter": "ObjectFiles" },
+   { "sourceElement": "ReadFiles", "sourceElementParameter": "ObjectFiles" },
    { "processParameter": "DocumentsParameter" } ] }`
-- One entry is one designer attachment row and names exactly ONE source: `processParameter`, `sourceElement` +
+- An entry is one attachment row and names exactly ONE source: `processParameter`, `sourceElement` +
   `sourceElementParameter` (both halves), or `expression` (a formula written onto the row's file as given). `value`
   is refused: a file has no constant form. A dotted path names an item (`ObjectFiles.File`).
 - Sources that hold files: a Process file element's output - `ObjectFiles` (Object attachments, Process parameter)
-  or `ReportFiles` (Generated report); another element's FileCollection or File output; a process FileCollection
-  (files a caller passes in); a single File. Each row sends every file its collection holds, so one
+  or `ReportFiles` (Generated report); another element's FileCollection or File output; a process FileCollection;
+  a single File. Each row sends every file its collection holds, so one
   entry per source.
-- REFUSED, naming the entry by its zero-based position (`email.attachments[1]`): no source or more than one; `value`;
+- REFUSED, naming the entry by its zero-based position (`email.attachments[1]`): no source or more than one;
   a missing element or parameter; a source that holds no files (neither a file nor a collection of
   files, or a collection with no File item); a collection with several File items (name the one to attach,
   `<collection>.<item>`); a collection nested inside another; the element's own parameter; a Process file element's
@@ -32,14 +32,14 @@ sent means the list did not land, so never report those files as attached.
 - The rows are the element's `Attachments<N>` parameters, each with one `Attachments<N>FileLocator` item. Write
   them only through `email.attachments`: a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one
   is refused, and so is a mapping (structured source or `expression`), an `email.attachments` entry or
-  (CrtProcessBuilder 1.6.6.130+) a Formula element body that READS one (a row only receives files).
+  (CrtProcessBuilder 1.6.6.129+) a Formula element body that READS one (a row only receives files).
 
-== Order: the source runs before the email ==
+== Source order ==
 - `create-business-process`: declare the source element EARLIER in `elements[]` than the Send email, or the entry is
   refused with the forward-reference sentence. For an `expression` entry, every element its formula references must
   be declared earlier too. `modify-business-process`: the source must exist when the operation runs - add it in an
   earlier operation of the batch or an earlier request.
-- On the FLOW the source must run before the email. When the source cannot reach the email along sequence flows, the
+- On the FLOW the source must run before the email. If it cannot reach the email along sequence flows, the
   answer warns that it "does not lie on a path before" the email: fix the flows. The warning is
   a hint, not a proof - a source on a gateway branch the run does not take still reaches the email and is not
   warned about. A collection source that has not run sends no files and no error; a single File (or `expression`)
@@ -69,14 +69,15 @@ sent means the list did not land, so never report those files as attached.
 == Notices (warnings: the process saves) ==
 Judged when the request ends, on every entry of the last list sent; each starts `Send email '<element>': `.
 Tell the user each: the build cannot settle it.
-- a single File, or an `expression` (not checked; it must yield one file): empty, it fails the element;
+- a single File, or an `expression` (not checked; it must yield one file);
 - two entries naming the same source (a collection and its item path count as the same): each file is attached
   twice; the same files reached by two different routes are not detected;
-- the files a Sub-process or a custom user task returns: this tool cannot see which records that code reads them from,
-  so make sure it reads only the records it should.
-Also noticed (CrtProcessBuilder 1.6.6.130+): an entry reading an In/Variable parameter (a caller picks the files),
-and an unscoped Process file source mapped into a Sub-process In/Variable parameter (the callee may email its files:
-scope it).
+- the files a Sub-process or a custom user task returns: this tool cannot see which records that code reads them from:
+  make sure it reads only the records it should;
+- (CrtProcessBuilder 1.6.6.130+) the files of a process parameter that is In, or Variable that no mapping or Formula
+  result writes: a caller picks them and must pass only scoped ones.
+On EVERY save (1.6.6.130+), a designer-built process too, a Sub-process gets a notice when the files of an unscoped
+Process file source reach its In/Variable file input: the called process may send them out, so scope it.
 
 == An unscoped record source is refused ==
 The email reads its files with rights disabled and sends them outside Creatio. So a Process file element whose files
@@ -91,7 +92,7 @@ scoped or the attachment removed. A filter that selects something passes, even o
 == Read back ==
 Describe (`element=<email>` or `mode=full`) returns `email.attachments`, each entry in the write shape plus the
 describe-only `slot` (`Attachments<N>`), `bindingLevels` (`both` | `outerOnly` | `itemOnly` | `none`) and `issues`
-(a row that fails or surprises at run time, an entry a re-send would refuse, a source the next save refuses, a
+(a row that fails or surprises at run time, an entry a re-send refuses, a source the next save refuses, a
 multi-instance element). An element with no rows OMITS `attachments`. clio ignores `slot`,
 `bindingLevels` and `issues` with a warning, so drop them. An entry with an issue may be refused when sent back: the
 issue says what to send instead. A row created in another process schema is listed with an issue; this process never

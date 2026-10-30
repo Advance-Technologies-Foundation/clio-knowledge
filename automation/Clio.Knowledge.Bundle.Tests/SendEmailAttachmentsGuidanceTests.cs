@@ -170,7 +170,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "More than 1000 entries is refused before any entry is checked, naming the count.",
             "A refused entry writes none of the list.",
             "A Send email made multi-instance in the designer refuses `email.attachments` whole, `[]` included",
-            "a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one is refused, and so is a mapping (structured source or `expression`), an `email.attachments` entry or (CrtProcessBuilder 1.6.6.130+) a Formula element body that READS one (a row only receives files).",
+            "a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one is refused, and so is a mapping (structured source or `expression`), an `email.attachments` entry or (CrtProcessBuilder 1.6.6.129+) a Formula element body that READS one (a row only receives files).",
             "multi-instance moves the element's parameters into record collection items, and the run time reads only its top-level rows."
         ];
 
@@ -274,7 +274,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
     }
 
     [Test]
-    [Description("Run-time facts: every mode and message source, manual mode's email activity, an empty file failing the element, system rights and the outside-Creatio destination behind the unscoped-source refusal judged on every save, the two Sub-process hand-off notices, and the package whose unit tests the evidence cites.")]
+    [Description("Run-time facts: every mode and message source, manual mode's email activity, an empty file failing the element, system rights and the outside-Creatio destination behind the unscoped-source refusal judged on every save, the caller-picked parameter notice (In, or a Variable nothing in this process writes), the Sub-process input notice raised on every save, and the package whose unit tests the evidence cites.")]
     public void Guide_ShouldStateTheRunTimeFactsAndTheScopeRefusal()
     {
         // Arrange
@@ -300,8 +300,14 @@ public sealed class SendEmailAttachmentsGuidanceTests
             guide.Should().Contain(clause,
                 because: "these are what only the run shows, or a refusal that fires on a save that touched no attachment");
         }
-        guide.Should().Contain("Also noticed (CrtProcessBuilder 1.6.6.130+): an entry reading an In/Variable parameter (a caller picks the files), and an unscoped Process file source mapped into a Sub-process In/Variable parameter (the callee may email its files: scope it).",
-            because: "files crossing a Sub-process boundary are judged in neither schema, so both sides get a notice instead of a refusal, and the agent must pass each on");
+        guide.Should().Contain("(CrtProcessBuilder 1.6.6.130+) the files of a process parameter that is In, or Variable that no mapping or Formula result writes: a caller picks them and must pass only scoped ones.",
+            because: "files a calling process picks are judged in neither schema, so the entry gets a notice; a Variable parameter this process fills itself is judged where its files come from and gets none");
+        guide.Should().Contain("On EVERY save (1.6.6.130+), a designer-built process too, a Sub-process gets a notice when the files of an unscoped Process file source reach its In/Variable file input: the called process may send them out, so scope it.",
+            because: "the hand-off to a called process is judged over the final schema on every request, whether or not the request wrote the mapping, directly or through a hand-off");
+        guide.Should().NotContain("an entry reading an In/Variable parameter",
+            because: "a Variable parameter that a mapping or a Formula result of this process writes gets no caller notice");
+        guide.Should().NotContain("source mapped into a Sub-process",
+            because: "the Sub-process notice follows hand-offs and is raised on every save, not only for a direct mapping the request writes");
         guide.Should().Contain("the build-time rules are pinned by CrtProcessBuilder 1.6.6.130 unit tests",
             because: "the evidence names the package whose tests pin the rules, the Formula body refusal and the hand-off notices included");
         guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) run-time sources.",
@@ -345,7 +351,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
     }
 
     [Test]
-    [Description("The corrected claims hold in the guide and its manifest description: an unrun single File fails the element while an unrun collection sends nothing silently, the refused readers of a row are named one by one with the Formula element body among them and its later package floor, the duplicate notice is per source, and the Object attachments remedy is not quoted as the shared refusal wording.")]
+    [Description("The corrected claims hold in the guide and its manifest description: an unrun single File fails the element while an unrun collection sends nothing silently, the refused readers of a row are named one by one with the Formula element body among them and its own package floor (1.6.6.129), the duplicate notice is per source, and the Object attachments remedy is not quoted as the shared refusal wording.")]
     public void Guide_ShouldCarryTheCorrectedClaims()
     {
         // Arrange
@@ -370,8 +376,10 @@ public sealed class SendEmailAttachmentsGuidanceTests
                 because: "an unrun single File or expression source fails the element instead of sending without files");
             guide.Should().NotContain("any mapping, formula or attachment that READS",
                 because: "the package refuses a closed list of readers, so a blanket 'any' would promise a check of readers it never inspects");
-            guide.Should().Contain("an `email.attachments` entry or (CrtProcessBuilder 1.6.6.130+) a Formula element body that READS one",
-                because: "CrtProcessBuilder 1.6.6.130 refuses a Formula element body that reads a row, naming the formula element, and an older package writes that body as sent");
+            guide.Should().Contain("an `email.attachments` entry or (CrtProcessBuilder 1.6.6.129+) a Formula element body that READS one",
+                because: "CrtProcessBuilder 1.6.6.129 is the first package that refuses a Formula element body reading a row, naming the formula element; 1.6.6.128 and older write that body as sent");
+            guide.Should().NotContain("(CrtProcessBuilder 1.6.6.130+) a Formula element body",
+                because: "the body refusal shipped in 1.6.6.129, so a later floor would tell an agent on 1.6.6.129 that the body is written");
             guide.Should().Contain("two entries naming the same source (a collection and its item path count as the same)",
                 because: "the duplicate notice compares the sources named, not the files they reach");
             guide.Should().Contain("the same files reached by two different routes are not detected",
