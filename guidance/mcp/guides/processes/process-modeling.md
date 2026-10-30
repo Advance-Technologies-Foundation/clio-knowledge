@@ -32,9 +32,9 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-perform-task` - the Perform task element and its parameter table.
   * `process-task-performer` - who performs a task: the element-level performer block (the only route to
     a TEAM) or OwnerId for one person.
-  * `process-task-category` - how a category or priority must be mapped, and what degrades silently
-    when it is not (not needed to BUILD one: `process-perform-task` carries the ids and refusals).
-    Read it when a field shows a raw Guid or a results dropdown is wrong.
+  * `process-task-category` - how to map a category or priority, and what degrades silently when it
+    is not (not needed to BUILD one: `process-perform-task` has the ids and refusals).
+    Read it when a field shows a raw Guid or a results dropdown offers the wrong set.
   * `process-open-edit-page` - the Open edit page element, and when to choose it.
   * `process-access-rights` - the Change access rights element and its silent no-ops.
   * `process-send-email` - the Send email element: mode, sender, recipients, subject, custom HTML

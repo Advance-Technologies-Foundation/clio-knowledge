@@ -15,8 +15,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 /// <see cref="ProcessFileGuidanceTests"/>.
 /// </summary>
 /// <remarks>
-/// TRIM ALARMS: every clause below is a rule CrtProcessBuilder 1.6.6.127 enforces or a run-time fact an agent
-/// cannot see from a green build. A reword that keeps the rule updates the clause here; a trim that drops it is
+/// TRIM ALARMS: every clause below is a rule CrtProcessBuilder enforces - from 1.6.6.127, or from the later package the
+/// clause itself names - or a run-time fact an agent cannot see from a green build. A reword that keeps the rule updates the clause here; a trim that drops it is
 /// the failure these tests exist for.
 /// </remarks>
 [TestFixture]
@@ -170,7 +170,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "More than 1000 entries is refused before any entry is checked, naming the count.",
             "A refused entry writes none of the list.",
             "A Send email made multi-instance in the designer refuses `email.attachments` whole, `[]` included",
-            "a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one is refused, and so is a mapping (structured source or `expression`) or an `email.attachments` entry that READS one (a row only receives files).",
+            "a mapping (`mappings[]`, `addMapping`) or a Formula element result onto one is refused, and so is a mapping (structured source or `expression`), an `email.attachments` entry or (CrtProcessBuilder 1.6.6.130+) a Formula element body that READS one (a row only receives files).",
             "multi-instance moves the element's parameters into record collection items, and the run time reads only its top-level rows."
         ];
 
@@ -274,7 +274,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
     }
 
     [Test]
-    [Description("Run-time facts: every mode and message source, manual mode's email activity, an empty file failing the element, system rights and the outside-Creatio destination behind the unscoped-source refusal judged on every save.")]
+    [Description("Run-time facts: every mode and message source, manual mode's email activity, an empty file failing the element, system rights and the outside-Creatio destination behind the unscoped-source refusal judged on every save, the two Sub-process hand-off notices, and the package whose unit tests the evidence cites.")]
     public void Guide_ShouldStateTheRunTimeFactsAndTheScopeRefusal()
     {
         // Arrange
@@ -300,6 +300,10 @@ public sealed class SendEmailAttachmentsGuidanceTests
             guide.Should().Contain(clause,
                 because: "these are what only the run shows, or a refusal that fires on a save that touched no attachment");
         }
+        guide.Should().Contain("Also noticed (CrtProcessBuilder 1.6.6.130+): an entry reading an In/Variable parameter (a caller picks the files), and an unscoped Process file source mapped into a Sub-process In/Variable parameter (the callee may email its files: scope it).",
+            because: "files crossing a Sub-process boundary are judged in neither schema, so both sides get a notice instead of a refusal, and the agent must pass each on");
+        guide.Should().Contain("the build-time rules are pinned by CrtProcessBuilder 1.6.6.130 unit tests",
+            because: "the evidence names the package whose tests pin the rules, the Formula body refusal and the hand-off notices included");
         guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) run-time sources.",
             because: "the run-time statements are source traces, and the guide must name the sources it traced");
         guide.Should().Contain("Measured on a stand on 2026-10-29: auto mode, custom and template message, delivered every file",
@@ -341,7 +345,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
     }
 
     [Test]
-    [Description("The corrected claims hold in the guide and its manifest description: an unrun single File fails the element while an unrun collection sends nothing silently, no check of a Formula body reading a row is promised, the duplicate notice is per source, and the Object attachments remedy is not quoted as the shared refusal wording.")]
+    [Description("The corrected claims hold in the guide and its manifest description: an unrun single File fails the element while an unrun collection sends nothing silently, the refused readers of a row are named one by one with the Formula element body among them and its later package floor, the duplicate notice is per source, and the Object attachments remedy is not quoted as the shared refusal wording.")]
     public void Guide_ShouldCarryTheCorrectedClaims()
     {
         // Arrange
@@ -365,7 +369,9 @@ public sealed class SendEmailAttachmentsGuidanceTests
             guide.Should().NotContain("An email whose source has not run goes out WITHOUT those files",
                 because: "an unrun single File or expression source fails the element instead of sending without files");
             guide.Should().NotContain("any mapping, formula or attachment that READS",
-                because: "no check refuses a Formula element body that reads a row, so the guide must not promise one");
+                because: "the package refuses a closed list of readers, so a blanket 'any' would promise a check of readers it never inspects");
+            guide.Should().Contain("an `email.attachments` entry or (CrtProcessBuilder 1.6.6.130+) a Formula element body that READS one",
+                because: "CrtProcessBuilder 1.6.6.130 refuses a Formula element body that reads a row, naming the formula element, and an older package writes that body as sent");
             guide.Should().Contain("two entries naming the same source (a collection and its item path count as the same)",
                 because: "the duplicate notice compares the sources named, not the files they reach");
             guide.Should().Contain("the same files reached by two different routes are not detected",
