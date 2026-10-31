@@ -15,6 +15,11 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 `process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
+- Every key is case-sensitive. The server REFUSES a build or modify request carrying a key its contract does
+  not declare (`lable`, `Label`) and saves nothing; the message gives each key's path and the key meant. Of the
+  fields copied from describe, read-only ones are ignored and named in a warning; one a write takes elsewhere
+  (an element's filter, flat approval fields) is refused with where to write it. A CrtProcessBuilder that
+  predates this check drops an unknown key in silence; there, read the result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
