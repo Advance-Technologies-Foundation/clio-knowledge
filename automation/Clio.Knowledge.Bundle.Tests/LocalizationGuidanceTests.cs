@@ -207,18 +207,50 @@ public sealed class LocalizationGuidanceTests
         string translation = File.ReadAllText(Path.Combine(guidesRoot, "page-schema", "translation.md"));
         string maintenance = File.ReadAllText(Path.Combine(guidesRoot, "applications",
             "existing-app-maintenance.md"));
+        int start = translation.IndexOf("{\"command\":\"execute-esq\"", StringComparison.Ordinal);
+        int end = translation.IndexOf('\n', start);
+
+        // Act
+        using JsonDocument call = JsonDocument.Parse(translation[start..end]);
+        JsonElement args = call.RootElement.GetProperty("args");
+        JsonElement query = args.GetProperty("query");
+        Dictionary<string, string?> filters = query.GetProperty("filters").GetProperty("items").EnumerateObject()
+            .ToDictionary(
+                filter => filter.Value.GetProperty("leftExpression").GetProperty("columnPath").GetString()!,
+                filter => filter.Value.GetProperty("rightExpression").GetProperty("parameter")
+                    .GetProperty("value").GetString());
 
         // Assert
+        start.Should().BeGreaterThan(0, because: "the article must carry the call, not describe it");
+        args.TryGetProperty("rootSchemaName", out _).Should().BeFalse(
+            because: "execute-esq refuses a top-level rootSchemaName; it belongs inside 'query'");
+        query.GetProperty("rootSchemaName").GetString().Should().Be("SysLocalizableValue",
+            because: "schema and column titles of every culture are stored there");
+        filters.Should().BeEquivalentTo(new Dictionary<string, string?>
+        {
+            ["SysSchema.Name"] = "<SchemaName>",
+            ["SysSchema.ManagerName"] = "EntitySchemaManager",
+            ["SysCulture.Name"] = "<culture>",
+            ["Key"] = "<Key>",
+        }, because: "the recipe is generic and must not mix in a client schema of the same name");
+        translation.Should().Contain("read the column's own title on the object that owns the column, never the title of the object it references",
+            because: "a platform column such as Account.Owner is a Lookup to Contact, and its title is not Contact's");
+        translation.Should().Contain("A Lookup label that names a role instead",
+            because: "role labels on a Lookup are ordinary language, not the reference object's title");
+        translation.Should().Contain("different values go to the user with their package names",
+            because: "the agent cannot tell which package wins from the rows alone");
+        translation.Should().Contain("No row, or a value equal to the `en-US` title, means no title in that culture",
+            because: "a culture present in a read does not prove a translation");
         translation.Should().Contain("Choose every value as \"Choosing the text\" below says",
             because: "the step that writes values must send the agent to the rules for choosing them");
         translation.Should().Contain("Choosing the text (step 3, and every column title in step 5):",
             because: "the guide must say how to choose the text, not only how to store it");
         translation.Should().Contain("`reference-schema-name` from `get-entity-schema-properties`",
             because: "a label is translated only after its column type and reference object are known");
-        translation.Should().Contain("`execute-esq` on `SysLocalizableValue`, which answers while the culture is inactive",
+        translation.Should().Contain("`execute-esq` call through `clio-run`, which answers while the culture is inactive",
             because: "get-entity-schema-properties returns one culture only, and the platform term must come from the environment");
-        translation.Should().Contain("`Columns.<ColumnName>.Caption`",
-            because: "column titles live under their own key in the same table");
+        translation.Should().Contain("`Columns.<ColumnName>.Caption` for a column title (`<SchemaName>` is the object that owns the column)",
+            because: "column titles live under their own key, on the object that owns the column");
         translation.Should().Contain("The page's inherited strings are the glossary",
             because: "inherited keys already carry the platform's own translation and tone");
         translation.Should().Contain("a Boolean \"Taken into account\"",
