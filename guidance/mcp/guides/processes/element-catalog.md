@@ -21,8 +21,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   element into `setElement`: clio refuses its element-level fields before sending. In a described BLOCK, a
   key describe reports there is ignored, whoever typed it: a success can carry "Read-only fields copied from
   describe were ignored", and no key it names was saved. In `setElement`, a filter, signal or connections with
-  a value is refused with its operation (setFilter, setSignal, setConnections); flat approval fields are
-  refused everywhere, with the nested key to use. An older package drops an unknown key in silence: read the
+  a value is refused with its operation (setFilter, setSignal, setConnections). Bound element `parameters` and
+  a parameter's sourceElement / sourceElementParameter / sourceColumn are refused: write them as mappings.
+  Flat approval fields are refused everywhere, with the nested key to use. An older package drops an unknown key in silence: read the
   result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
