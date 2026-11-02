@@ -1127,7 +1127,7 @@
     {
       "itemId": "existing-app-maintenance-details",
       "title": "Existing application maintenance details",
-      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; how update-app-section preserves section-title languages and the translations evidence boundary; and the full schema-reuse example. Split out of existing-app-maintenance.",
+      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; and the full schema-reuse example. Split out of existing-app-maintenance.",
       "topicId": "creatio.existing-app-maintenance-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance-details",
@@ -3141,7 +3141,7 @@
     {
       "itemId": "page-schema-translation",
       "title": "Page translation",
-      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, choosing the text (platform terms read from the environment in the target culture, the page's inherited strings as the glossary, other labels by meaning, ambiguous labels reported), which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
+      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, choosing the text (platform terms read from the environment in the target culture, the page's inherited strings as the glossary, other labels by meaning, ambiguous labels reported), object, column and section titles in another culture (title-localizations, update-app-section caption-culture) and when to ask first, and the full compile a newly activated culture needs.",
       "topicId": "creatio.page-schema-translation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-translation",
