@@ -85,11 +85,11 @@ one; read that article.
     { "name": "EndOnboardingHandedOff", "type": "endEvent", "caption": "Onboarding handed off" }
   ],
   "flows": [ { "source": "OnboardingRequestedStart", "target": "NotifyAccountOwner" },
-             { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
+    { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
   "parameters": [ { "name": "AccountNameParameter", "type": "Text", "direction": "In",
-                    "caption": "Account name" } ],
+    "caption": "Account name" } ],
   "mappings": [ { "elementName": "NotifyAccountOwner", "elementParameter": "<ParamName>",
-                  "processParameter": "AccountNameParameter" } ]
+    "processParameter": "AccountNameParameter" } ]
 }
 - `packageName` must accept edits: the package the user named, else the application's (`package-name`
   from `get-app-info` / `create-app`), else the environment's current one, resolved with ONE
@@ -98,8 +98,8 @@ one; read that article.
   On `success: false` relay its error and ask; never substitute a package.
 - `name` is the local element handle used by flows (`source`/`target`) and mappings (`elementName`);
   it is `name`, not `id`. A `userTask` element auto-carries the task's parameters; map values into them
-  with `mappings`. For a record trigger use `signalStart` (see `process-data-elements`).
-- EVERY code and caption in these guides' examples is N1-N10 compliant on purpose (see `process-naming`):
+  with `mappings`. For a record trigger use `signalStart` (`process-data-elements`).
+- EVERY code and caption in these guides' examples is N1-N10 compliant on purpose (`process-naming`):
   copy their SHAPE, not just their fields - never a generated `Start1` / `task1` / `End1`.
 
 == Build recipe (intent -> running process) ==
@@ -145,7 +145,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
      record `filter` and every grantee with its operations and level, and get an explicit yes first
      (`process-access-rights`);
    * a sendEmail `email` block - a partial update; recipients MATCH-OR-APPEND (none removable), a sent
-     `email.attachments` list REPLACES (`process-send-email-attachments`).
+     `email.attachments` list REPLACES (`process-send-email-attachments`; only when the FULL contract names it).
 - On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB
   and published.
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until

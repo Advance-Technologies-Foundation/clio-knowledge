@@ -203,4 +203,25 @@ public sealed class SendEmailGuidanceTests
 		}
 	}
 
+	[Test]
+	[Description("Manual mode keeps the sender optional, says what an omitted one produces (an empty From the performer fills before sending), cites its evidence inline, and still tells the agent to set a sender when the email must leave from a fixed mailbox.")]
+	public void Guide_ShouldKeepTheManualModeSenderOptional_WithItsEvidence()
+	{
+		// Arrange
+		string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+
+		// Act
+		const string rule = "In `mode:\"manual\"` `sender` is optional, as in the designer: without one the prepared email activity has an empty From and the performer picks a mailbox before Send";
+		const string evidence = "(CrtProcessDesigner 7.8.0 source: manual mode copies the element's sender to the activity as is; observed on a test stand, 2026-10-30)";
+		const string fixedMailbox = "Set `sender` in manual mode too when the email must leave from a fixed mailbox.";
+
+		// Assert
+		guide.Should().Contain(rule,
+			because: "the designer validates Sender only in auto mode, so an agent must not refuse or invent a sender for a manual email the user left without one");
+		guide.Should().Contain(evidence,
+			because: "a behavioral claim names its evidence: the designer source that copies the sender as is, and the stand run that saw the empty From");
+		guide.Should().Contain(fixedMailbox,
+			because: "optional is not irrelevant: a manual email that must leave from one mailbox still needs the sender set");
+	}
+
 }

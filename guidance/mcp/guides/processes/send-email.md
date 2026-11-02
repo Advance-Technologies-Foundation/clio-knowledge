@@ -34,7 +34,8 @@ result contradicts a rule here or a user disputes one.
        {"expression": "[#…#]", "referenceSchema": "Contact"} , … ],
      "importance": "none"|"normal"|"high"|"low", "ignoreErrors": true|false,
      "attachments"?: [ one source per entry: {"processParameter": …} | {"sourceElement": …,
-       "sourceElementParameter": …} | {"expression": …} ] (owner `process-send-email-attachments`),
+       "sourceElementParameter": …} | {"expression": …} ] (only when the FULL contract names `attachments`;
+       owner `process-send-email-attachments`),
      "performer": { "type": "user"|"manager"|"role", "contact"?: "<formula; defaults to the current user's
        contact>", "role"?: "<SysAdminUnit role name or record id>", "showPage"?: true|false } } }`.
   TEMPLATE MODE is owned by `process-send-email-template` — the `template`/`templateEntity` contract, the
@@ -56,8 +57,9 @@ result contradicts a rule here or a user disputes one.
   flag is on, where the identical setup completes. So configure a `sender` for `auto`, but do NOT report a
   missing one as a save-time error.
   In `mode:"manual"` `sender` is optional, as in the designer: without one the prepared email activity has an
-  empty From and the performer picks a mailbox before Send. Set `sender` in manual mode too when the email must
-  leave from a fixed mailbox.
+  empty From and the performer picks a mailbox before Send (CrtProcessDesigner 7.8.0 source: manual mode copies the
+  element's sender to the activity as is; observed on a test stand, 2026-10-30). Set `sender` in manual mode too
+  when the email must leave from a fixed mailbox.
   AUTO-MODE CHECKLIST: treat `sender`, `to`, `subject` and `body` as MANDATORY and always send all four (in
   template mode the `template` stands in for `body`). That is an AUTHORING rule, not a tool contract —
   neither the build nor the platform save enforces any of them (the designer itself saves an auto element
