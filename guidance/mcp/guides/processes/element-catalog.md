@@ -15,16 +15,19 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 `process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
-- Every key is case-sensitive. From CrtProcessBuilder 1.6.6.133 create, modify and modify-as-new-version
-  REFUSE a request carrying a key its contract does not declare (`lable`, `Label`) and save nothing; the
-  message names the key's path and the key meant, or the keys valid there. Do not paste a whole described
-  element into `setElement`: clio refuses its element-level fields before sending. In a described BLOCK, a
-  key describe reports there is ignored, whoever typed it: a success can carry "Read-only fields copied from
-  describe were ignored", and no key it names was saved. In `setElement`, a filter, signal or connections with
-  a value is refused with its operation (setFilter, setSignal, setConnections). Bound element `parameters` and
-  a parameter's sourceElement / sourceElementParameter / sourceColumn are refused: write them as mappings.
-  Flat approval fields are refused everywhere, with the nested key to use. An older package drops an unknown key in silence: read the
-  result back with describe.
+- Every key is case-sensitive. From CrtProcessBuilder 1.6.6.134 `create-business-process`,
+  `modify-business-process` and `modify-business-process-as-new-version` REFUSE a request carrying a key its
+  contract does not declare (`lable`, `Label`) and save nothing; the message names the key's path and the key
+  meant, or the keys valid there. Do not paste a whole described element into `setElement`: clio refuses its
+  element-level fields before sending. A described readData / addData / changeData / deleteData block may be
+  re-applied: a key describe reports there is ignored, whoever typed it - a success can carry "Read-only fields
+  copied from describe were ignored", and no key it names was saved. Other blocks (email, subProcess,
+  openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
+  filter, signal or connections with setFilter / setSignal / setConnections, not in `setElement`. A bound
+  input in element `parameters`, and a parameter's sourceElement / sourceElementParameter / sourceColumn, are
+  refused: write them as mappings (for an item property, target the dotted `Parameter.Item` path). Flat
+  approval fields are refused everywhere, with the nested key to use. An older package drops an unknown key
+  in silence: read the result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
