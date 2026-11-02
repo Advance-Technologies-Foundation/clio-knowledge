@@ -165,7 +165,7 @@ public sealed class ProcessFileGuidanceTests
     }
 
     [Test]
-    [Description("The endpoint sentence is the shipped pattern and the retired 'rarely an endpoint' appears nowhere; the consumers this tool cannot build are named as not buildable YET; the copies are re-selected with Read data, never Modify data, and the re-find carries its hazards.")]
+    [Description("The endpoint sentence is the shipped pattern and the retired 'rarely an endpoint' appears nowhere; the Send email consumer routes to its own article while the Creatio.ai consumer stays not buildable YET; the copies are re-selected with Read data, never Modify data, and the re-find carries its hazards.")]
     public void Section_ShouldStateTheEndpointConsumersAndTheReFind()
     {
         // Arrange
@@ -178,7 +178,8 @@ public sealed class ProcessFileGuidanceTests
         string[] clauses =
         [
             "Shipped product processes end in a record's attachments (Generated report); when a following element needs the files, map its output collection",
-            "Send email attachments and Creatio.ai file inputs are not buildable here yet.",
+            "Send email attachments: `process-send-email-attachments`.",
+            "Creatio.ai file inputs are not buildable here yet.",
             "iterate `CreatedObjectFileIds` with a multi-instance sub-process",
             "re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column = the target record and `CreatedOn` `CurrentHour`.",
             "Hazards: it also matches others' files from that hour, and misses a copy made before the hour turned."
@@ -194,6 +195,8 @@ public sealed class ProcessFileGuidanceTests
             because: "the shipped corpus contradicts it: most uses end in a record's attachments");
         section.Should().NotContain("Creatio cannot",
             because: "the platform can; only this tool cannot build it yet");
+        section.Should().NotContain("Send email attachments and Creatio.ai file inputs are not buildable",
+            because: "Send email attachments build through email.attachments now; the retired sentence would make an agent refuse them");
         section.Should().NotContain("(`report` and `files` are refused)",
             because: "the retired sentence told agents the two variants could not be built, which this cut changed");
     }
