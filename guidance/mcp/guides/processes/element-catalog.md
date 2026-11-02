@@ -15,7 +15,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 `process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
-- Every key is case-sensitive. From CrtProcessBuilder 1.6.6.134 `create-business-process`,
+- Every key is case-sensitive. From CrtProcessBuilder 1.6.6.135 `create-business-process`,
   `modify-business-process` and `modify-business-process-as-new-version` REFUSE a request carrying a key its
   contract does not declare (`lable`, `Label`) and save nothing; the message names the key's path and the key
   meant, or the keys valid there. Do not paste a whole described element into `setElement`: clio refuses its
