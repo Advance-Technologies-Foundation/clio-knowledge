@@ -139,16 +139,18 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatEveryRoleWhoseAccessChangesIsListed")]
     [TestCase("ANY row that differs from the plan fails the call",
         TestName = "ObjectRights_ShouldStateThatAWholeListSaveFailsOnAnyDifference")]
-    [TestCase("The change applies at once, also to a user who is already logged in (Evidence below)",
-        TestName = "ObjectRights_ShouldStateThatAChangeAppliesAtOnce")]
-    [TestCase("if that user still sees the old access, logging in to the site again is the reliable way to apply it",
+    [TestCase("On Creatio 8.3.4 and later the change applies at once, also to a user who is already logged in (probed on 8.3.4 and 10.2.471, Evidence below)",
+        TestName = "ObjectRights_ShouldBoundTheImmediateEffectToTheProbes")]
+    [TestCase("before you report a narrowing as effective, check it in a session opened after the write",
+        TestName = "ObjectRights_ShouldCheckANarrowingInAFreshSession")]
+    [TestCase("A narrowing is proven only in a session opened after the write",
+        TestName = "ObjectRights_ShouldVerifyANarrowingInAFreshSession")]
+    [TestCase("If that user still sees the old access, logging in to the site again is the reliable way to apply it",
         TestName = "ObjectRights_ShouldOfferReLoginAsTheReliableFallback")]
     [TestCase("a Freedom UI list page already open as a non-admin user followed a row move in both directions without a reload",
         TestName = "ObjectRights_ShouldCiteTheOpenPageProbe")]
     [TestCase("if it still shows the old access, log in again before you conclude anything",
         TestName = "ObjectRights_ShouldVerifyAgainAfterAReLoginWhenTheOldAccessShows")]
-    [TestCase("Moving or removing a row (position, above, remove-row) requires clio <OBJECT-RIGHTS-LAYOUT-TBD> or later",
-        TestName = "ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove")]
     [TestCase("Prefer it whenever the goal is \"decide before role Y\" — do not compute a position for that",
         TestName = "ObjectRights_ShouldPreferAboveOverAComputedPosition")]
     [TestCase("There is no below", TestName = "ObjectRights_ShouldStateThatThereIsNoBelow")]
@@ -282,9 +284,11 @@ public sealed class ObjectRightsGuidanceTests
         naming.Should().BeEmpty(because: $"'{retired}' is no longer a set-object-rights argument");
     }
 
-    [Test]
-    [Description("object-rights does not promise that a change reaches a logged-in user at once: that holds for the user's next server request, but a user already working in the application can keep the old permissions until they log in again, so the unconditional claim sends an agent to verify in a stale session.")]
-    public void ObjectRights_ShouldNotPromiseThatAChangeReachesLoggedInUsersImmediately()
+    [TestCase("reaches users who are already logged in immediately")]
+    [TestCase("reliably only after they log in again")]
+    [TestCase("logged in again after the write")]
+    [Description("object-rights keeps the probed rule for a logged-in user: a change applied at once in the probes, logging in again is the fallback for a user who still sees the old access, and only a narrowing is checked in a fresh session. It neither promises the effect unconditionally nor makes a re-login a required step after every change.")]
+    public void ObjectRights_ShouldNotMisstateWhenAChangeReachesALoggedInUser(string retired)
     {
         // Arrange
         string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
@@ -293,8 +297,42 @@ public sealed class ObjectRightsGuidanceTests
         string normalized = Normalized(guide);
 
         // Assert
-        normalized.Should().NotContain("reaches users who are already logged in immediately",
-            because: "a re-login is the reliable way for a change to reach a logged-in user");
+        normalized.Should().NotContain(retired,
+            because: "an unconditional promise hides a session that still has the old access, and a mandatory re-login after every change contradicts the probes");
+    }
+
+    [Test]
+    [Description("The move/remove boundary names the first clio release with position, above and remove-row — a gated placeholder until that release is tagged — so replacing the placeholder with the released version touches only the article.")]
+    public void ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().MatchRegex(
+            @"Moving or removing a row \(position, above, remove-row\) requires clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later",
+            because: "an older clio refuses these arguments as unknown, so an agent must know the release that has them");
+    }
+
+    [TestCase("removing a role's row is done in the designer")]
+    [TestCase("the designer sets the order")]
+    [TestCase("moved ABOVE the All employees row in the Object permissions designer")]
+    [TestCase("first (the designer)")]
+    [Description("The designer-only wording for moving and removing a row stays retired: the layout call does both, and the designer remains only the fallback for a clio without the arguments.")]
+    public void ObjectRights_ShouldNotSendMovesAndRemovalsToTheDesigner(string retired)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().NotContain(retired,
+            because: "set-object-rights now moves and removes a row; sending the agent to the designer would bring back the manual step");
     }
 
     [Test]

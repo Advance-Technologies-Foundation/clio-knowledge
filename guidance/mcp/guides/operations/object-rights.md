@@ -10,8 +10,10 @@ hand-written ESQ into the rights tables:
 - get-object-rights — read the rows of an object's operation permissions. Read-only.
 - set-object-rights — grant or revoke operations for ONE role on ONE object, move or remove that role's
   row, or turn the object's operation permissions on or off. DESTRUCTIVE: it writes in one call, with no
-  publish step. The change applies at once, also to a user who is already logged in (Evidence below); if
-  that user still sees the old access, logging in to the site again is the reliable way to apply it.
+  publish step. On Creatio 8.3.4 and later the change applies at once, also to a user who is already logged
+  in (probed on 8.3.4 and 10.2.471, Evidence below). If that user still sees the old
+  access, logging in to the site again is the reliable way to apply it, and before you report a narrowing
+  as effective, check it in a session opened after the write.
 
 Version boundary: get-object-rights and set-object-rights require a clio release newer than 8.1.0.137;
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
@@ -250,8 +252,9 @@ Results:
 - Re-read with get-object-rights. It shows the stored rows, not what a given user can do.
 - To prove what a user can do, test AS that user (a non-admin, not a holder of the "…any data" system
   operations). An open session normally shows the new access at once; if it still shows the old access,
-  log in again before you conclude anything. A DataService read that is denied returns success with ZERO rows, not an error — "the
-  query succeeded" does not prove read access. A denied create fails with a security error.
+  log in again before you conclude anything. A narrowing is proven only in a session opened after the
+  write. A DataService read that is denied returns success with ZERO rows, not an error — "the query
+  succeeded" does not prove read access. A denied create fails with a security error.
 
 Use cases (all one general capability):
 - Grant or revoke any role's object access — the general audit-and-fix use.
