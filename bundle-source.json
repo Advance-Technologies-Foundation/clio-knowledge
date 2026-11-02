@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.176",
+  "libraryVersion": "1.15.177",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -668,7 +668,7 @@
     {
       "itemId": "branding",
       "title": "Branding",
-      "description": "Guides Creatio environment branding: product logos, the shell background image, and the browser-tab favicon, including the license check and the settings each asset is written to.",
+      "description": "Guides Creatio environment branding: product logos, the browser-tab favicon, and the background of a theme or the whole site, including the license check and the settings each asset is written to.",
       "topicId": "creatio.branding",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/branding",
