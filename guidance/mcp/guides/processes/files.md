@@ -132,7 +132,7 @@ targets only.
 - An addMapping value onto any file or collection target: a file has no constant form, so map it.
 - setParameter with type FileCollection on a collection of another shape: remove it and add it again.
 - removeParameter of a collection while a mapping reads one of its ITEMS (`process-parameters` owns that guard).
-Every refusal here and above names the way forward and saves nothing: fix the call before re-sending.
+Every refusal here and above saves nothing and names the fix.
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
@@ -185,8 +185,8 @@ them only here.
   object. Remove the describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on
   every value source.
 - Shipped product processes end in a record's attachments (Generated report); when a following element needs the
-  files, map its output collection (Recipes). Send email attachments and Creatio.ai file inputs are not buildable
-  here yet.
+  files, map its output collection (Recipes). Send email attachments: `process-send-email-attachments`. Creatio.ai
+  file inputs are not buildable here yet.
 - The saved copies: iterate `CreatedObjectFileIds` with a multi-instance sub-process (its callee takes a Guid), or
   re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column =
   the target record and `CreatedOn` `CurrentHour`. Hazards: it also matches others' files from that hour, and misses
