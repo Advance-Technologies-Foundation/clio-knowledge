@@ -125,7 +125,11 @@ public sealed class ProcessGuideCrossReferenceTests
         // The Process parameter group moved out of process-files into its own article, and the row is
         // added WITH the split. Keyed on the group name, which files.md, the element catalog and routing all
         // write next to the owner name; a new mention that drops the name turns this red.
-        ("`files` group", "process-files-parameter")
+        ("`files` group", "process-files-parameter"),
+        // The Send email attachments article is added WITH this row. Keyed on the block member itself, which the
+        // Send email article, the element catalog and process-modeling all write next to the owner name; a new
+        // mention that drops the name turns this red.
+        ("`email.attachments`", "process-send-email-attachments")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
