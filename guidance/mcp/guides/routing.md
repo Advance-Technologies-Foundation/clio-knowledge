@@ -178,7 +178,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
-- Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
+- Branding & theming: product logos / browser-tab favicon / background of a theme or the whole site (set, change, remove) -> name=branding
   - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
   - external users, external organizations, PortalAccount and organization membership -> name=external-organizations

@@ -10,6 +10,10 @@ public sealed class ThemeBackgroundGuidanceTests
 {
     private const string BrandingPath = "guidance/mcp/guides/theming/branding.md";
 
+    private const string ThemingPath = "guidance/mcp/guides/theming/index.md";
+
+    private const string RoutingPath = "guidance/mcp/guides/routing.md";
+
     [Test]
     [Description("The branding guide owns one precedence table: the accessibility color, then the theme background behind the DisableThemeBackground switch, then the site background, then the bundled image.")]
     public void Branding_ShouldOwnThePrecedenceTable()
@@ -155,6 +159,52 @@ public sealed class ThemeBackgroundGuidanceTests
                 guide.Should().Contain(clause,
                     because: "the clio version-floor hint names the site background, which every account without a theme background sees, and a hidden background has causes no write can fix");
             }
+        }
+    }
+
+    [Test]
+    [Description("The theming guide and routing point to branding for the background and state none of its rules: no background tool, setting, feature or version floor.")]
+    public void ThemingAndRouting_ShouldPointToBrandingWithoutTheBackgroundRules()
+    {
+        string theming = ReadCollapsed(ThemingPath);
+        string routing = ReadCollapsed(RoutingPath);
+
+        string[] pointers =
+        [
+            "To add a background to the theme, see `get-guidance name=branding` → \"Background\".",
+            "the stored background is kept — `get-guidance name=branding` → \"Background\"",
+            "`cssFilePath`, and `background` (`get-guidance name=branding` → \"Background\")",
+            "cssContentLength, background?, error? }` (`background`: `get-guidance name=branding` → \"Background\")",
+            "for a theme with an image background see `get-guidance name=branding` → \"Background: package\""
+        ];
+        string[] brandingOnly =
+        [
+            "set-background-image",
+            "set-background-color",
+            "remove-background",
+            "UsePanelIconBackground",
+            "DisableThemeBackground",
+            "UseAccessibleDesktopColor",
+            "CrtBackgroundConfig",
+            "10.2.96"
+        ];
+
+        using (new AssertionScope())
+        {
+            foreach (string pointer in pointers)
+            {
+                theming.Should().Contain(pointer,
+                    because: "an agent reading only the theming guide must learn where the background is owned");
+            }
+            foreach (string token in brandingOnly)
+            {
+                theming.Should().NotContain(token,
+                    because: "the branding guide owns every background rule; a copy in theming would drift");
+                routing.Should().NotContain(token,
+                    because: "routing names the owner, not its tools or settings");
+            }
+            routing.Should().Contain("background of a theme or the whole site (set, change, remove) -> name=branding",
+                because: "a request to give a theme a background must route to the guide that owns it");
         }
     }
 
