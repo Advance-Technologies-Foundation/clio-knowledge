@@ -15,11 +15,15 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 `process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
-- Every key is case-sensitive. The server REFUSES a build or modify request carrying a key its contract does
-  not declare (`lable`, `Label`) and saves nothing; the message gives each key's path and the key meant. In a
-  block copied from describe, read-only fields are ignored and named in a warning; one a write takes elsewhere
-  (an element's filter, flat approval fields) is refused with where to write it. A CrtProcessBuilder that
-  predates this check drops an unknown key in silence; there, read the result back with describe.
+- Every key is case-sensitive. From CrtProcessBuilder 1.6.6.132 create, modify and modify-as-new-version
+  REFUSE a request carrying a key its contract does not declare (`lable`, `Label`) and save nothing; the
+  message names the key's path and the key meant, or the keys valid there. Do not paste a whole described
+  element into `setElement`: clio refuses its element-level fields before sending. In a described BLOCK, a
+  key describe reports there is ignored, whoever typed it: a success can carry "Read-only fields copied from
+  describe were ignored", and no key it names was saved. In `setElement`, a filter, signal or connections with
+  a value is refused with its operation (setFilter, setSignal, setConnections); flat approval fields are
+  refused everywhere, with the nested key to use. An older package drops an unknown key in silence: read the
+  result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
