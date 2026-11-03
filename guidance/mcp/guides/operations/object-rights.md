@@ -185,8 +185,9 @@ Move and remove (grantee plus exactly ONE of position, above, remove-row — a c
   role by the higher of its own row and All external users. A member of several listed roles, or of a
   parent role, can be decided by another row. External roles are named as such; any operation they lose is
   a revoke of EXTERNAL access. Removing the All external users row takes the object away from every portal
-  user for whom that row was the deciding row and no other row grants it, and removing the All employees row cuts off every internal
-  user with no other row. You MUST name each of these to the developer before the write.
+  user for whom that row was the deciding row and no other row grants it, and removing the All employees
+  row cuts off every internal user with no other row, except for the operations a "…any data" system
+  operation still gives them. You MUST name each of these to the developer before the write.
 - Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row
   or several; a removal that would leave an administered object with no row that grants any operation;
   any of these arguments together with operations, revoke or a switch flag.

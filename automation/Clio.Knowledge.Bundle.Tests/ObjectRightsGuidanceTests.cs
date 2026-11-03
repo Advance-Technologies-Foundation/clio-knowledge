@@ -123,7 +123,7 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("which can WIDEN their access", TestName = "ObjectRights_ShouldStateThatARemovalCanWidenAccess")]
     [TestCase("The preview and the result name that next matching row and the operations it gives",
         TestName = "ObjectRights_ShouldStateThatARemovalNamesTheDecidingRow")]
-    [TestCase("removing the All employees row cuts off every internal user with no other row",
+    [TestCase("removing the All employees row cuts off every internal user with no other row, except for the operations a \"…any data\" system operation still gives them",
         TestName = "ObjectRights_ShouldStateThatRemovingAllEmployeesCutsOffInternalUsers")]
     [TestCase("Removing the All external users row takes the object away from every portal user for whom that row was the deciding row and no other row grants it",
         TestName = "ObjectRights_ShouldQualifyWhichPortalUsersLoseAccessOnRemoval")]
