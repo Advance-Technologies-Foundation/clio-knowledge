@@ -38,30 +38,12 @@ Read the result before retrying. A refused image returns `success: false` naming
 The `CrtAppToolbarLogoUnderlayColor` system setting (text) paints a backing color under the top-panel logo — write it with `update-sys-setting` only when the user explicitly asks; it stays on this environment and does not travel with the package.
 
 Background
-There are two levels: a theme background (an image or a color) and the site background (an image). An account sees the first of these that applies:
-1. Accessibility color — its personal `UseAccessibleDesktopColor` system setting is on.
-2. Theme background — its theme has a color or an image that loads, and the `DisableThemeBackground` feature is off.
-3. Site background (the `CrtBackgroundConfig` system setting).
-4. Bundled default image.
-
-In a branding run, give the new theme its background; set the site background only when the user asks for the whole site.
-Theme backgrounds need Creatio 10.2.96 or later and a clio whose `get-tool-contract` for `set-background-color` and `remove-background` returns both. When the tools are missing (clio can be updated) or a tool answers `version-too-old`, tell the user; set the site background instead only if the user agrees, even when the error suggests it.
-
-Background: tools
-Only the three tools below change a theme background; `theme` is the `id` from `create-theme` or `list-themes`. Arguments and errors: `get-tool-contract`.
-- `set-background-image` — exactly one of `file` (uploaded) or `image-id` (from `upload-image`); with `theme` it sets the theme background, without it the site background. With `file` the upload runs before `theme` is checked, so a wrong id leaves the image uploaded.
-- `set-background-color` — `color` (`#RGB`, `#RRGGBB` or `#RRGGBBAA`) and `theme`.
+A theme background is an image or a color; the site background is an image for every account whose theme has none. In a branding run, give the new theme its background; set the site background only when the user asks for the whole site. Three tools — arguments and errors in `get-tool-contract`, `theme` is the `id` from `create-theme` or `list-themes`:
+- `set-background-image` — `file`, or the `image-id` of an `upload-image` result; with `theme` it sets that theme's background, without it the site background. With `file`, a wrong `theme` still leaves the image uploaded.
+- `set-background-color` — `color` and `theme`.
 - `remove-background` — `theme`; safe to repeat.
-`get-theme` and `list-themes` return the theme background as `{ "mode": "Image", "imageId": "<id>" }` or `{ "mode": "Color", "color": "<hex>" }` in `background`, absent if the theme has none.
-
-Background: panel icon
-The panel icon background (the `UsePanelIconBackground` feature) can cover the background. `set-background-image` and `set-background-color` turn it off environment-wide, on every theme; pass `keep-icon-background` = true only when the user asks to keep it. A failed turn-off is a warning, not a failure.
-
-Background: package
-- `set-background-image` binds a theme background's image under the theme's own folders, apart from the site background's bindings.
-- It also binds the panel icon off-state, but only when the All-Users state row reads off; otherwise its warning means the install target keeps the panel icon background on, which can hide the background there.
-- `set-background-color` and `remove-background` bind nothing; a color travels inside the theme.
-- `remove-background` and `delete-theme` leave the image bindings, so the package still ships the image; tell the user.
-
-Background: not showing
-Tell the user which item above wins for their account, or that the panel icon background covers it, or that the theme's image was deleted (`get-theme` still reports its `imageId`; set a new one). Never change `UseAccessibleDesktopColor` or `DisableThemeBackground` to make a background show.
+Only these change a theme background. `get-theme` and `list-themes` return it as `background` (`mode` `Image` with `imageId`, or `Color` with `color`), absent when the theme has none.
+Theme backgrounds need Creatio 10.2.96 or later and a clio whose `get-tool-contract` returns `set-background-color` and `remove-background`. When this clio lacks them (it can be updated) or a tool answers `version-too-old`, tell the user; set the site background instead only if the user agrees, even when the error suggests it.
+The set tools also turn off the panel icon background (the `UsePanelIconBackground` feature), which can cover the background, for the whole environment; pass `keep-icon-background` = true only when the user asks to keep it. A failed turn-off is a warning, not a failure.
+Package: a theme's image is bound under the theme's own folders, apart from the site background's; a color travels inside the theme and binds nothing. The panel icon off-state is bound only when the All-Users state row reads off — otherwise the warning means the install target keeps the panel icon background on, and it can hide the background there. `remove-background` and `delete-theme` leave the image bindings, so the package still ships the image; tell the user.
+An account sees the first that applies: its personal `UseAccessibleDesktopColor` system setting; its theme's color, or its image if it loads, unless the `DisableThemeBackground` feature is on; the site background (the `CrtBackgroundConfig` system setting); the bundled default image. When the user does not see the expected background, tell them which one wins, or that the panel icon background covers it, or that the theme's image was deleted (`get-theme` still reports its `imageId`; set a new one). Never change `UseAccessibleDesktopColor` or `DisableThemeBackground` to make a background show.

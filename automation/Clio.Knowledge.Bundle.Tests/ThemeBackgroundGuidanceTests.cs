@@ -15,91 +15,72 @@ public sealed class ThemeBackgroundGuidanceTests
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
 
     [Test]
-    [Description("Branding owns one precedence list: accessibility color, theme background, site background, bundled image.")]
-    public void Branding_ShouldOwnThePrecedenceList()
+    [Description("Branding keeps every background rule in one Background block, like Logos & favicon.")]
+    public void Branding_ShouldKeepTheBackgroundInOneBlock()
     {
-        string guide = ReadCollapsed(BrandingPath);
+        string raw = File.ReadAllText(Path.Combine(ProcessGuideSet.FindRepositoryRoot(), BrandingPath.Replace('/', Path.DirectorySeparatorChar)));
 
-        string[] items =
-        [
-            "1. Accessibility color — its personal `UseAccessibleDesktopColor` system setting is on.",
-            "2. Theme background — its theme has a color or an image that loads, and the `DisableThemeBackground` feature is off.",
-            "3. Site background (the `CrtBackgroundConfig` system setting).",
-            "4. Bundled default image."
-        ];
-        int[] positions = [.. items.Select(item => guide.IndexOf(item, StringComparison.Ordinal))];
-
-        using (new AssertionScope())
-        {
-            guide.Should().Contain("There are two levels: a theme background (an image or a color) and the site background (an image).",
-                because: "the site level takes no color");
-            positions.Should().NotContain(-1, because: "the creatio-ui AppBackgroundService resolves the background in these four steps");
-            positions.Should().BeInAscendingOrder(because: "the first item that applies is what the account sees");
-        }
+        Regex.Matches(raw, @"^Background\b", RegexOptions.Multiline).Count.Should().Be(1,
+            because: "the background is one section of the branding guide, not a set of sub-sections");
     }
 
     [Test]
-    [Description("A branding run sets the new theme's background, and the theme level is gated once on the Creatio floor and the tool contract.")]
+    [Description("The levels, the branding-run default and the precedence are stated once.")]
+    public void Branding_ShouldStateTheLevelsAndThePrecedence()
+    {
+        ShouldContainAll(
+            "the creatio-ui AppBackgroundService resolves the background in these steps, and a generated background belongs to the new theme",
+            "A theme background is an image or a color; the site background is an image for every account whose theme has none.",
+            "In a branding run, give the new theme its background; set the site background only when the user asks for the whole site.",
+            "An account sees the first that applies: its personal `UseAccessibleDesktopColor` system setting; its theme's color, or its image if it loads, unless the `DisableThemeBackground` feature is on; the site background (the `CrtBackgroundConfig` system setting); the bundled default image.");
+    }
+
+    [Test]
+    [Description("The theme level is gated once on the Creatio floor and the tool contract, and the site fallback needs the user's consent.")]
     public void Branding_ShouldGateTheThemeLevelOnTheFloorAndTheContract()
     {
         string guide = ReadCollapsed(BrandingPath);
 
         using (new AssertionScope())
         {
-            guide.Should().Contain("In a branding run, give the new theme its background; set the site background only when the user asks for the whole site.",
-                because: "a generated background belongs to the theme being built, not to every account on the site");
             guide.Should().Contain(
-                "Theme backgrounds need Creatio 10.2.96 or later and a clio whose `get-tool-contract` for `set-background-color` and `remove-background` returns both. When the tools are missing (clio can be updated) or a tool answers `version-too-old`, tell the user; set the site background instead only if the user agrees, even when the error suggests it.",
+                "Theme backgrounds need Creatio 10.2.96 or later and a clio whose `get-tool-contract` returns `set-background-color` and `remove-background`. When this clio lacks them (it can be updated) or a tool answers `version-too-old`, tell the user; set the site background instead only if the user agrees, even when the error suggests it.",
                 because: "a ThemeService before 10.2.96 refuses the write, and the clio hint names the site background");
             Regex.Matches(guide, @"10\.2\.96").Count.Should().Be(1, because: "the floor has one owner sentence");
         }
     }
 
     [Test]
-    [Description("The tools section states each operation and the limits a green call does not show.")]
+    [Description("The three tools, their levels and the read shape are stated with the limits a green call does not show.")]
     public void Branding_ShouldStateTheToolsAndTheirLimits()
     {
         ShouldContainAll(
-            BrandingPath,
-            "these are the clio contract's theme-level operations and their limits",
-            "Only the three tools below change a theme background; `theme` is the `id` from `create-theme` or `list-themes`.",
-            "`set-background-image` — exactly one of `file` (uploaded) or `image-id` (from `upload-image`); with `theme` it sets the theme background, without it the site background. With `file` the upload runs before `theme` is checked, so a wrong id leaves the image uploaded.",
-            "`set-background-color` — `color` (`#RGB`, `#RRGGBB` or `#RRGGBBAA`) and `theme`.",
+            "these are the clio contract's background operations and their limits",
+            "`set-background-image` — `file`, or the `image-id` of an `upload-image` result; with `theme` it sets that theme's background, without it the site background. With `file`, a wrong `theme` still leaves the image uploaded.",
+            "`set-background-color` — `color` and `theme`.",
             "`remove-background` — `theme`; safe to repeat.",
-            "`get-theme` and `list-themes` return the theme background as `{ \"mode\": \"Image\", \"imageId\": \"<id>\" }` or `{ \"mode\": \"Color\", \"color\": \"<hex>\" }` in `background`, absent if the theme has none.");
+            "Only these change a theme background. `get-theme` and `list-themes` return it as `background` (`mode` `Image` with `imageId`, or `Color` with `color`), absent when the theme has none.");
     }
 
     [Test]
-    [Description("The panel icon turn-off is environment-wide, and only set-background-image binds its off-state.")]
-    public void Branding_ShouldKeepThePanelIconRuleForBothLevels()
+    [Description("The panel icon turn-off is environment-wide, its off-state is bound only when verified, and removal keeps the image bindings.")]
+    public void Branding_ShouldStateThePanelIconAndThePackage()
     {
         ShouldContainAll(
-            BrandingPath,
-            "both tools turn the feature off, but only the image tool ships the off-state",
-            "The panel icon background (the `UsePanelIconBackground` feature) can cover the background. `set-background-image` and `set-background-color` turn it off environment-wide, on every theme;",
-            "It also binds the panel icon off-state, but only when the All-Users state row reads off;");
-    }
-
-    [Test]
-    [Description("A theme image is bound under the theme's folders; a color binds nothing; removal keeps the image bindings.")]
-    public void Branding_ShouldStateThePackageOfAThemeBackground()
-    {
-        ShouldContainAll(
-            BrandingPath,
-            "the install target needs the image row, and clio does not drop it on removal",
-            "`set-background-image` binds a theme background's image under the theme's own folders, apart from the site background's bindings.",
-            "`set-background-color` and `remove-background` bind nothing; a color travels inside the theme.",
+            "the panel icon is environment-wide, and the install target needs the image row that removal does not drop",
+            "The set tools also turn off the panel icon background (the `UsePanelIconBackground` feature), which can cover the background, for the whole environment;",
+            "Package: a theme's image is bound under the theme's own folders, apart from the site background's; a color travels inside the theme and binds nothing.",
+            "The panel icon off-state is bound only when the All-Users state row reads off",
             "`remove-background` and `delete-theme` leave the image bindings, so the package still ships the image; tell the user.");
     }
 
     [Test]
-    [Description("A hidden background is explained from the list and two extra causes, without changing the accessibility setting or the kill switch.")]
+    [Description("A hidden background is explained without changing the accessibility setting or the kill switch.")]
     public void Branding_ShouldExplainAHiddenBackground()
     {
         ShouldContainAll(
-            BrandingPath,
             "a hidden background has causes no background write fixes",
-            "Tell the user which item above wins for their account, or that the panel icon background covers it, or that the theme's image was deleted (`get-theme` still reports its `imageId`; set a new one).",
+            "tell them which one wins, or that the panel icon background covers it, or that the theme's image was deleted (`get-theme` still reports its `imageId`; set a new one).",
             "Never change `UseAccessibleDesktopColor` or `DisableThemeBackground` to make a background show.");
     }
 
@@ -114,7 +95,7 @@ public sealed class ThemeBackgroundGuidanceTests
         [
             "`get-guidance name=branding` covers the product logos, the favicon, and backgrounds",
             "To add a background to the theme, see `get-guidance name=branding` → \"Background\".",
-            "for a theme with an image background see `get-guidance name=branding` → \"Background: package\""
+            "for a theme with an image background see `get-guidance name=branding` → \"Background\""
         ];
         string[] brandingOnly =
         [
@@ -144,9 +125,9 @@ public sealed class ThemeBackgroundGuidanceTests
         }
     }
 
-    private static void ShouldContainAll(string relativePath, string because, params string[] clauses)
+    private static void ShouldContainAll(string because, params string[] clauses)
     {
-        string guide = ReadCollapsed(relativePath);
+        string guide = ReadCollapsed(BrandingPath);
 
         using (new AssertionScope())
         {
