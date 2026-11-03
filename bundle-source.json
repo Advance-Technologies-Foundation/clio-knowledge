@@ -668,7 +668,7 @@
     {
       "itemId": "branding",
       "title": "Branding",
-      "description": "Guides Creatio environment branding: product logos, the browser-tab favicon, and the background of a theme or the whole site, including the license check and the settings each asset is written to.",
+      "description": "Guides Creatio environment branding: product logos, the browser-tab favicon, and the theme or site background, including the license check and the settings each asset is written to.",
       "topicId": "creatio.branding",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/branding",
