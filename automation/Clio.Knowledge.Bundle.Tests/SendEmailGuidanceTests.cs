@@ -236,8 +236,8 @@ public sealed class SendEmailGuidanceTests
 		const string noAddress = "It does skip the send when `to` resolves to no address at run time - nothing is sent then, cc/bcc included (measured with no recipient at all)";
 		const string replace = "To REPLACE a wrong recipient, `addMapping` onto its parameter (`Recipient<N>` / `CopyRecipient<N>` / `BlindCopyRecipient<N>`, named by describe) with the new source: it changes in place.";
 		const string keepsType = "The parameter keeps its type, and the run reads a Lookup recipient as its contact's (or account's) email, any other as literal addresses (CrtProcessDesigner 7.8.0 source), so map a source of the same kind";
-		const string fixedContact = "For a fixed contact map `expression: \"[#Lookup.<Contact UId>.<id>#]\"`, not a bare id `value`: a designer save retypes a constant id to text, and the run then takes the id as an address (measured 2026-11-04).";
-		const string performer = "`performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, the `[#Lookup.<object>.<record>#]` describe returns (kept as written), or (1.6.6.138+) `[#ParameterName#]` / `[#Element.Output#]`";
+		const string fixedContact = "A contact id kept as a constant is retyped to text by the next designer save, and the run then takes the id as an address (measured 2026-11-04). So for a fixed contact map `expression: \"[#Lookup.<Contact UId>.<id>#]\"`; from 1.6.6.139 a bare id mapped onto a contact recipient is stored in that form";
+		const string performer = "`performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, the `[#Lookup.<object>.<record>#]` describe returns (kept as written), or (1.6.6.139+) `[#ParameterName#]` / `[#Element.Output#]`";
 		const string declaredEarlier = "on create an element it names must be declared earlier in `elements[]`. Each must yield a Contact id.";
 
 		// Assert

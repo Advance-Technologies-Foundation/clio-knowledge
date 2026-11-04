@@ -42,7 +42,7 @@ sent means the list did not land, so never report those files as attached.
   answer warns that it "does not lie on a path before" the email: fix the flows. The warning is
   a hint, not a proof - a source on a gateway branch the run does not take still reaches the email and is not
   warned about. A collection source that has not run sends no files and no error; a single File (or `expression`)
-  source that has not run is empty, so the element fails. Describe (1.6.6.138+) gives the row the same issue; both
+  source that has not run is empty, so the element fails. Describe (1.6.6.139+) gives the row the same issue; both
   judge only element sources on top-level flows: silence proves nothing.
 
 == Modify: a sent list REPLACES ==
@@ -69,7 +69,7 @@ sent means the list did not land, so never report those files as attached.
 Judged at request end, on every entry of the last list sent. Tell the user each: the build cannot settle it.
 - a single File, or an `expression` (not checked; it must yield one file);
 - two entries reading the same files: the same source (a collection and its item path count as one) or
-  (1.6.6.138+) a source and a parameter whose own value reads it, with no other writer seen (two such
+  (1.6.6.139+) a source and a parameter whose own value reads it, with no other writer seen (two such
   parameters too): each file is attached twice; other routes (a Script task or Sub-process filling a
   parameter) are not detected;
 - the files a Sub-process or a custom user task returns: this tool cannot see which records that code reads them from:
@@ -111,7 +111,7 @@ sends it, no list touches it: omit it.
   email goes out, or the manual email activity is created, without the files or an error. No
   build or save checks that feature.
 
-Evidence: the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 and 1.6.6.138 unit tests, compared with
+Evidence: the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 and 1.6.6.139 unit tests, compared with
 designer-saved stand rows (2026-10-29). The run-time behaviour is read from the CrtProcessDesigner 7.8.0 and core
 (Terrasoft.Core, Terrasoft.File) sources. Measured on a stand on 2026-10-29: auto mode, custom and
 template message, delivered every file, and the CreateActivity email activity carried them; manual
