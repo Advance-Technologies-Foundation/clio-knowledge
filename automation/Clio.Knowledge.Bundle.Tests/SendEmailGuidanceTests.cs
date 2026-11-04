@@ -224,4 +224,27 @@ public sealed class SendEmailGuidanceTests
 			because: "optional is not irrelevant: a manual email that must leave from one mailbox still needs the sender set");
 	}
 
+	[Test]
+	[Description("The guide says what ignoreErrors does not prevent (a run with no usable sender fails), names the addMapping route that replaces a recipient in place, and lists the performer contact forms the package expands by name.")]
+	public void Guide_ShouldStateIgnoreErrorsLimits_RecipientReplacement_AndPerformerContactForms()
+	{
+		// Arrange
+		string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+
+		// Act
+		const string ignoreErrors = "`ignoreErrors:true` does NOT prevent that failure: with no usable sender (none set, or one naming no mailbox) the run still fails (measured 2026-11-04).";
+		const string replace = "To REPLACE a wrong recipient, `addMapping` onto its parameter (`Recipient<N>` / `CopyRecipient<N>` / `BlindCopyRecipient<N>`, named by describe) with the new source: it changes in place.";
+		const string performer = "`performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, or (1.6.6.138+) `[#ParameterName#]` / `[#Element.Output#]`";
+
+		// Assert
+		guide.Should().Contain(ignoreErrors,
+			because: "agents told users that ignoreErrors keeps the process alive, and a stand run with no usable sender failed with it on");
+		guide.Should().NotContain("a wrong recipient cannot be replaced or removed through `modify`",
+			because: "addMapping onto an existing recipient replaces it in place, measured on a stand");
+		guide.Should().Contain(replace,
+			because: "the email block only appends recipients, so the replacement route must be named where the append rule is stated");
+		guide.Should().Contain(performer,
+			because: "a process-parameter performer written by name was refused by the platform before the package expanded it");
+	}
+
 }

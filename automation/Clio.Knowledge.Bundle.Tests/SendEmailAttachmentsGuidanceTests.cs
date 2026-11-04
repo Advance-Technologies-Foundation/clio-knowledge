@@ -260,7 +260,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "Modify has no concurrency check, so a list from an older read deletes the rows added since",
             "the entry, in the write shape, that restores it (\"To restore it, add { ... } to the list.\")",
             "None for a row the same request gives back in the same write shape, or one an earlier list of it created;",
-            "On modify clio also reports the removed rows from its own before/after read-back",
+            "Each is a warning, `[]` included.",
             "A row something still reads is not removed: the request is refused, naming the readers.",
             "A list cannot REORDER rows: position is ignored, a kept row stays put, a new row goes last; a reordered list changes nothing, without a notice.",
             "For another order send `[]`, then the list in that order (new rows; refused while something reads a row).",
@@ -427,10 +427,12 @@ public sealed class SendEmailAttachmentsGuidanceTests
                 because: "the package refuses a closed list of readers, so a blanket 'any' would promise a check of readers it never inspects");
             guide.Should().Contain("an `email.attachments` entry or (1.6.6.131+) a Formula element body that READS one",
                 because: "1.6.6.131 is the first RELEASED package that refuses a Formula element body reading a row; 1.6.6.127 writes that body as sent");
-            guide.Should().Contain("two entries naming the same source (a collection and its item path count as the same)",
-                because: "the duplicate notice compares the sources named, not the files they reach");
-            guide.Should().Contain("the same files reached by two different routes are not detected",
+            guide.Should().Contain("the same source (a collection and its item path count as one) or (1.6.6.138+) a source and a parameter only it fills",
+                because: "the duplicate notice compares the sources named, plus one route: a process parameter whose only writer is that source");
+            guide.Should().Contain("other routes are not detected",
                 because: "an agent must not read the absence of the notice as proof no file is attached twice");
+            guide.Should().NotContain("Info when you sent `[]`",
+                because: "the package reports every removed row as a warning, and clio drops its own line for a removal the reply reports");
             guide.Should().Contain("(\"has no record scope and no filter condition ... sends them outside Creatio\")",
                 because: "only this part of the refusal is shared by the Object attachments and Generated report wording");
             guide.Should().NotContain("sends them outside Creatio ... Scope it first",

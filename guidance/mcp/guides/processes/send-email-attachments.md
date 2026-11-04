@@ -42,7 +42,7 @@ sent means the list did not land, so never report those files as attached.
   answer warns that it "does not lie on a path before" the email: fix the flows. The warning is
   a hint, not a proof - a source on a gateway branch the run does not take still reaches the email and is not
   warned about. A collection source that has not run sends no files and no error; a single File (or `expression`)
-  source that has not run is empty, so the element fails.
+  source that has not run is empty, so the element fails. Describe (1.6.6.138+) shows it in the row's `issues`.
 
 == Modify: a sent list REPLACES ==
 - `setElement` with `elementUpdate.email.attachments` replaces the element's attachments. Name it in `elementName`,
@@ -61,16 +61,15 @@ sent means the list did not land, so never report those files as attached.
 - A removed row's notice names what it read and the entry, in the write shape, that restores it ("To
   restore it, add { ... } to the list."). None for a row the same request gives back in the same write shape, or
   one an earlier list of it created; a row with a formula on its collection level: rebuild it in the designer to
-  restore it; one that read nothing, as attaching nothing. On modify clio also reports the removed rows
-  from its own before/after read-back (a warning; Info when you sent `[]`). A row something still reads is not
-  removed: the request is refused, naming the readers.
+  restore it; one that read nothing, as attaching nothing. Each is a warning, `[]` included. A row something still
+  reads is not removed: the request is refused, naming the readers.
 
 == Notices (warnings: the process saves) ==
 Judged when the request ends, on every entry of the last list sent; each starts `Send email '<element>': `.
 Tell the user each: the build cannot settle it.
 - a single File, or an `expression` (not checked; it must yield one file);
-- two entries naming the same source (a collection and its item path count as the same): each file is attached
-  twice; the same files reached by two different routes are not detected;
+- two entries reading the same files: the same source (a collection and its item path count as one) or
+  (1.6.6.138+) a source and a parameter only it fills: each file is attached twice; other routes are not detected;
 - the files a Sub-process or a custom user task returns: this tool cannot see which records that code reads them from:
   make sure it reads only what it should;
 - (1.6.6.131+) the files of a process parameter that is In, or Variable that no mapping or Formula
@@ -113,5 +112,5 @@ sends it, no list touches it: leave it out.
 Evidence: the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 unit tests, compared with rows the
 designer saved on a stand on 2026-10-29. The run-time behaviour is read from the CrtProcessDesigner 7.8.0 and core
 (Terrasoft.Core, Terrasoft.File) sources. Measured on a stand on 2026-10-29: auto mode, custom and
-template message, delivered every file (in the mailbox), and the CreateActivity email activity carried them; manual
+template message, delivered every file, and the CreateActivity email activity carried them; manual
 mode's prepared email activity carried every file, original names; its sending was not measured.
