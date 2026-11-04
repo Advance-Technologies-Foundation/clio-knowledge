@@ -241,6 +241,8 @@ public sealed class SendEmailGuidanceTests
 		const string declaredEarlier = "on create an element it names must be declared earlier in `elements[]`. Each must yield a Contact id.";
 
 		// Assert
+		guide.Should().Contain("It does not cover building the message: an empty single-File attachment fails the run with it on (measured 2026-11-04).",
+			because: "two isolated agents guessed that ignoreErrors hides an empty single-File attachment, and a stand run failed with it on");
 		guide.Should().Contain(ignoreErrors,
 			because: "agents told users that ignoreErrors keeps the process alive, and a stand run with no usable sender failed with it on");
 		guide.Should().Contain(noAddress,

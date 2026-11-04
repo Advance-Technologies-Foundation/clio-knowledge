@@ -58,7 +58,8 @@ result contradicts a rule here or a user disputes one.
   missing one as a save-time error. `ignoreErrors:true` does NOT prevent that failure: with no usable sender (none
   set, or one naming no mailbox) the run still fails (measured 2026-11-04). It does skip the send when `to` resolves
   to no address at run time - nothing is sent then, cc/bcc included (measured with no recipient at all) - and, per the
-  CrtProcessDesigner 7.8.0 source, a send failure through a configured mailbox. Never tell the user it keeps the
+  CrtProcessDesigner 7.8.0 source, a send failure through a configured mailbox. It does not cover building the
+  message: an empty single-File attachment fails the run with it on (measured 2026-11-04). Never tell the user it keeps the
   process running whatever happens.
   In `mode:"manual"` `sender` is optional, as in the designer: without one the prepared email activity has an
   empty From and the performer picks a mailbox before Send (CrtProcessDesigner 7.8.0 source: manual mode copies the
@@ -174,7 +175,7 @@ result contradicts a rule here or a user disputes one.
   so map a source of the same kind (describe's `type`, `referenceSchema`). A contact id kept as a constant is retyped
   to text by the next designer save, and the run then takes the id as an address (measured 2026-11-04). So for a
   fixed contact map `expression: "[#Lookup.<Contact UId>.<id>#]"`; from 1.6.6.139 a bare id mapped onto a contact
-  recipient is stored in that form, a record id onto a text recipient or as an `email.to` `value` is refused, and a
+  recipient is stored in that form, a record id onto a text recipient or as an `email.to` `value` is refused (one the line already holds is left as it is), and a
   constant id a recipient already holds gets a warning. There is NO removal path THROUGH THIS
   TOOL. Not so `email.attachments`: a sent list REPLACES the element's attachments (`process-send-email-attachments`).
   The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
