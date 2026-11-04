@@ -18,7 +18,7 @@ hand-written ESQ into the rights tables:
 Version boundary: get-object-rights and set-object-rights require a clio release newer than 8.1.0.137;
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
 permissions designer instead. Moving or removing a row (position, above, remove-row) requires clio
-<OBJECT-RIGHTS-LAYOUT-TBD> or later. A clio without them refuses those arguments as unknown: then move or remove
+8.1.0.147 or later. A clio without them refuses those arguments as unknown: then move or remove
 the row in the Object permissions designer.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`. The
