@@ -23,6 +23,24 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   file and several, carried by reference: `process-files`) — other types (composite object / entity / binary /
   ...) are not supported yet, and binary never will be: a process parameter carries a file by reference (File). Name a process parameter per N8 in `process-naming`
   (summarised in `process-digest`).
+- CHOOSE THE DIRECTION BY WHO USES THE VALUE, and set it on every parameter you declare. The direction is the
+  process signature: a Sub-process element that calls the process maps its `In` and `Variable` parameters and reads
+  its `Out` and `Variable` ones, and a Creatio AI skill built on the process exposes every parameter but an
+  `Internal` one. `Internal` is offered to neither. `run-process` does not check direction - it accepts a value for
+  an `Internal` parameter too - so a run that succeeds says nothing about the signature.
+  * `Internal` — the value only passes between elements of THIS process: a record Id copied from a read to a later
+    element, a counter, a flag, the one shared parameter each branch of a multi-start process assigns
+    (`process-parameters-details`). This is the right choice for every helper parameter.
+  * `In` — a caller passes it in (the record the button was pressed on, a sub-process input).
+  * `Out` — the process returns it to its caller.
+  * `Variable` — a caller passes it in AND reads it back. Use it only when both are true.
+  Omitting `direction` does NOT pick Internal: the default is `Variable` for every type but a generic `Collection`
+  (`Out`) — the designer's own plain Add — so a helper declared without a direction lands in the signature. From
+  CrtProcessBuilder 1.6.6.137 a build or modify that leaves a parameter `Variable` while an element of
+  the process fills it (an element output mapped onto it, or a Formula element's result) answers with a warning
+  naming the parameter; that warning means "make it Internal unless a caller passes or reads it". Change it with
+  `setParameter` and `parameterUpdate.direction` — the UId and every reference survive. A multi-instance conversion of
+  a Sub-process element drops the callee's `Internal` parameters (`process-sub-process`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.
