@@ -225,7 +225,7 @@ public sealed class SendEmailGuidanceTests
 	}
 
 	[Test]
-	[Description("The guide says what ignoreErrors does not prevent (a run with no usable sender fails), names the addMapping route that replaces a recipient in place, and lists the performer contact forms the package expands by name.")]
+	[Description("The guide says what ignoreErrors does and does not prevent (a run with no usable sender fails; a 'to' that resolves to no address skips the whole send), names the addMapping route that replaces a recipient in place with the type rule and the fixed-contact expression form, and lists the performer contact forms with the declaration-order rule.")]
 	public void Guide_ShouldStateIgnoreErrorsLimits_RecipientReplacement_AndPerformerContactForms()
 	{
 		// Arrange
@@ -233,18 +233,32 @@ public sealed class SendEmailGuidanceTests
 
 		// Act
 		const string ignoreErrors = "`ignoreErrors:true` does NOT prevent that failure: with no usable sender (none set, or one naming no mailbox) the run still fails (measured 2026-11-04).";
+		const string noAddress = "It does skip the send when `to` resolves to no address at run time - nothing is sent then, cc/bcc included (measured with no recipient at all)";
 		const string replace = "To REPLACE a wrong recipient, `addMapping` onto its parameter (`Recipient<N>` / `CopyRecipient<N>` / `BlindCopyRecipient<N>`, named by describe) with the new source: it changes in place.";
-		const string performer = "`performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, or (1.6.6.138+) `[#ParameterName#]` / `[#Element.Output#]`";
+		const string keepsType = "The parameter keeps its type, and the run reads a Lookup recipient as its contact's (or account's) email, any other as literal addresses (CrtProcessDesigner 7.8.0 source), so map a source of the same kind";
+		const string fixedContact = "For a fixed contact map `expression: \"[#Lookup.<Contact UId>.<id>#]\"`, not a bare id `value`: a designer save retypes a constant id to text, and the run then takes the id as an address (measured 2026-11-04).";
+		const string performer = "`performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, the `[#Lookup.<object>.<record>#]` describe returns (kept as written), or (1.6.6.138+) `[#ParameterName#]` / `[#Element.Output#]`";
+		const string declaredEarlier = "on create an element it names must be declared earlier in `elements[]`. Each must yield a Contact id.";
 
 		// Assert
 		guide.Should().Contain(ignoreErrors,
 			because: "agents told users that ignoreErrors keeps the process alive, and a stand run with no usable sender failed with it on");
+		guide.Should().Contain(noAddress,
+			because: "the run returns before sending when the To line resolves to no address, so cc and bcc are not sent either; only the no-recipient case was measured");
+		guide.Should().NotContain("It does skip an empty recipient list",
+			because: "the skip turns on the To line resolving to no address at run time, not on an empty recipient list");
 		guide.Should().NotContain("a wrong recipient cannot be replaced or removed through `modify`",
 			because: "addMapping onto an existing recipient replaces it in place, measured on a stand");
 		guide.Should().Contain(replace,
 			because: "the email block only appends recipients, so the replacement route must be named where the append rule is stated");
+		guide.Should().Contain(keepsType,
+			because: "the replacement keeps the parameter's type, and the run resolves only a Lookup recipient to a contact's email");
+		guide.Should().Contain(fixedContact,
+			because: "a stand run after a designer save sent the bare contact id as a literal address, while the Lookup expression survived the save and resolved");
 		guide.Should().Contain(performer,
-			because: "a process-parameter performer written by name was refused by the platform before the package expanded it");
+			because: "a process-parameter performer written by name was refused by the platform before the package expanded it, and the Lookup form describe returns is re-sent as written");
+		guide.Should().Contain(declaredEarlier,
+			because: "on create the package refuses a performer contact that reads an element declared later, which would otherwise run with an empty performer");
 	}
 
 }

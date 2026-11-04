@@ -31,6 +31,11 @@ create/addElement, or in place via setElement's
 * type "user" with `contact` is the single-person form: pass a bare Contact record Guid (checked to exist,
   and stored as the encoding the designer produces) or a formula like [#SysVariable.CurrentUserContact#];
   an omitted contact defaults to the process starter.
+* `contact` for user or manager (the same rules serve Send email manual mode, Pre-configured page and Open edit
+  page): from CrtProcessBuilder 1.6.6.138 a formula's [#ParameterName#] / [#Element.Output#] (.Column too) is
+  expanded by name like a flow condition, and on create an element it names must be declared earlier in
+  `elements[]`; every form must yield a Contact id, and the platform's refusal of any other text lists the
+  accepted forms.
 * `showPage` omitted defaults to false for manager/role (designer parity — a role activity has no single
   performer to open the page for) and stays untouched for user.
 * describe `mode=full` reads the block back top-level on the element (`performer`: type + the stored formula +
