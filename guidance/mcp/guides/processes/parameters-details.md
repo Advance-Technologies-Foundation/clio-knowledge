@@ -132,6 +132,8 @@ date/time/lookup default-value rule; read that first.
     "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeftParameter" } }
 ]
 ```
+  Declare the shared parameter as a helper - no caller passes or reads it:
+  `"parameters": [ { "name": "DaysLeftParameter", "type": "Integer", "direction": "Internal", "caption": "Days left" } ]`.
   Flow each read into its own Formula and both Formulas into the shared next step; `mappings[]` carries
   no `targetProcessParameter` entry for `DaysLeftParameter`. One mapping per branch instead is the shape the build
   warns about, and it reads the default on every run but one branch's.
