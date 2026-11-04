@@ -229,7 +229,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "The warning is a hint, not a proof - a source on a gateway branch the run does not take still reaches the email and is not warned about.",
             "For an `expression` entry, every element its formula references must be declared earlier too.",
             "A collection source that has not run sends no files and no error; a single File (or `expression`) source that has not run is empty, so the element fails.",
-            "Describe (1.6.6.139+) gives the row the same issue; both judge only element sources on top-level flows: silence proves nothing."
+            "Describe (1.6.6.140+) gives the row the same issue; both judge only element sources on top-level flows: silence proves nothing."
         ];
 
         // Assert
@@ -315,6 +315,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
         string[] clauses =
         [
             "The rows work alike in auto and manual mode, custom or template message",
+            "auto mode attaches them to the message (and, with CreateActivity on, its email activity);",
             "manual mode copies them onto the email activity it creates.",
             "A row with no file fails the element: an empty single File, or an `expression` that yields none.",
             "The email reads its files with rights disabled and sends them outside Creatio.",
@@ -339,8 +340,8 @@ public sealed class SendEmailAttachmentsGuidanceTests
             because: "a Variable parameter that a mapping or a Formula result of this process writes gets no caller notice");
         guide.Should().NotContain("source mapped into a Sub-process",
             because: "the Sub-process notice follows hand-offs and is raised on every save, not only for a direct mapping the request writes");
-        guide.Should().Contain("the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 and 1.6.6.139 unit tests",
-            because: "the evidence names the released packages whose tests pin the rules: 1.6.6.131 the Formula body refusal and the hand-off notices, 1.6.6.139 the describe reachability issue and the routed duplicate notice; 1.6.6.130 was re-stamped on changing sources and never shipped, so it identifies nothing");
+        guide.Should().Contain("the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 and 1.6.6.140 unit tests",
+            because: "the evidence names the released packages whose tests pin the rules: 1.6.6.131 the Formula body refusal and the hand-off notices, 1.6.6.140 the describe reachability issue and the routed duplicate notice; 1.6.6.130 was re-stamped on changing sources and never shipped, so it identifies nothing");
         guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) sources.",
             because: "the run-time statements are source traces, and the guide must name the sources it traced");
         guide.Should().Contain("Measured on a stand on 2026-10-29: auto mode, custom and template message, delivered every file",
@@ -428,7 +429,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
                 because: "the package refuses a closed list of readers, so a blanket 'any' would promise a check of readers it never inspects");
             guide.Should().Contain("an `email.attachments` entry or (1.6.6.131+) a Formula element body that READS one",
                 because: "1.6.6.131 is the first RELEASED package that refuses a Formula element body reading a row; 1.6.6.127 writes that body as sent");
-            guide.Should().Contain("the same source (a collection and its item path count as one) or (1.6.6.139+) a source and a parameter whose own value reads it, with no other writer seen (two such parameters too)",
+            guide.Should().Contain("the same source (a collection and its item path count as one) or (1.6.6.140+) a source and a parameter whose own value reads it, with no other writer seen (two such parameters too)",
                 because: "the duplicate notice compares the sources named, plus one route: a non-In process parameter whose own value reads that output and that no Formula element writes");
             guide.Should().NotContain("a source and a parameter only it fills",
                 because: "the package cannot see a Script task or Sub-process writing the parameter, so 'only it fills' promised a check it does not make");

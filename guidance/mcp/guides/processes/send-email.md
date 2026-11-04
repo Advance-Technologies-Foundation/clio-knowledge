@@ -56,11 +56,12 @@ result contradicts a rule here or a user disputes one.
   `Terrasoft.Mail.Sender.EmailException: Sender is not specified` — UNLESS the `SkipSenderValidation` feature
   flag is on, where the identical setup completes. So configure a `sender` for `auto`, but do NOT report a
   missing one as a save-time error. `ignoreErrors:true` does NOT prevent that failure: with no usable sender (none
-  set, or one naming no mailbox) the run still fails (measured 2026-11-04). It does skip the send when `to` resolves
-  to no address at run time - nothing is sent then, cc/bcc included (measured with no recipient at all) - and, per the
-  CrtProcessDesigner 7.8.0 source, a send failure through a configured mailbox. It does not cover building the
-  message: an empty single-File attachment fails the run with it on (measured 2026-11-04). Never tell the user it keeps the
-  process running whatever happens.
+  set, or one naming no mailbox) the run still fails (measured 2026-11-04). Only the legacy SMTP branch (feature
+  `OldEmailIntegration` or `OldEmailSend` on) honours it with no sender set (CrtProcessDesigner 7.8.0 source). It
+  does skip the send when `to` resolves to no address at run time - nothing is sent then, cc/bcc included (measured
+  with no recipient at all) - and, per the CrtProcessDesigner 7.8.0 source, a send failure through a configured
+  mailbox. It does not cover building the message: an empty single-File attachment fails the run with it on
+  (measured 2026-11-04). Never tell the user it keeps the process running whatever happens.
   In `mode:"manual"` `sender` is optional, as in the designer: without one the prepared email activity has an
   empty From and the performer picks a mailbox before Send (CrtProcessDesigner 7.8.0 source: manual mode copies the
   element's sender to the activity as is; observed on a test stand, 2026-10-30). Set `sender` in manual mode too
@@ -108,11 +109,8 @@ result contradicts a rule here or a user disputes one.
   depends on the mailbox's server configuration, which this tool does not set up — say so when you create
   one.
   `mode:"manual"` creates an email activity for the `performer` (manual-only; `type:"role"` requires `role`).
-  `performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, the `[#Lookup.<object>.<record>#]`
-  describe returns (kept as written), or (1.6.6.139+) `[#ParameterName#]` / `[#Element.Output#]` (`.Column` too),
-  expanded by name like a flow condition; on create an element it names must be declared earlier in `elements[]`.
-  Each must yield a Contact id. Any other text is left to the platform's check, whose refusal (1.6.6.139+) lists the
-  accepted forms.
+  `performer.contact` takes the forms `process-task-performer` owns for a Perform task's `contact`: read them there
+  before writing one other than a contact id.
   A `processParameter` recipient mirrors that parameter's type — a Contact-lookup parameter is resolved to
   the contact's email at send time; an entity-COLUMN recipient has no structured field - route the column
   through a process parameter: map it in with `sourceColumn` (`process-data-elements`), then name that
@@ -170,14 +168,21 @@ result contradicts a rule here or a user disputes one.
   resolved source and value already match an existing line under the same prefix is a NO-OP (re-application
   is idempotent now — older builds appended a duplicate), and a genuinely new address APPENDS. To REPLACE a wrong
   recipient, `addMapping` onto its parameter (`Recipient<N>` / `CopyRecipient<N>` / `BlindCopyRecipient<N>`, named
-  by describe) with the new source: it changes in place. The parameter keeps its type, and the run reads a Lookup
-  recipient as its contact's (or account's) email, any other as literal addresses (CrtProcessDesigner 7.8.0 source),
-  so map a source of the same kind (describe's `type`, `referenceSchema`). A contact id kept as a constant is retyped
-  to text by the next designer save, and the run then takes the id as an address (measured 2026-11-04). So for a
-  fixed contact map `expression: "[#Lookup.<Contact UId>.<id>#]"`; from 1.6.6.139 a bare id mapped onto a contact
-  recipient is stored in that form, a record id onto a text recipient or as an `email.to` `value` is refused (one the line already holds is left as it is), and a
-  constant id a recipient already holds gets a warning. There is NO removal path THROUGH THIS
-  TOOL. Not so `email.attachments`: a sent list REPLACES the element's attachments (`process-send-email-attachments`).
+  by describe) with the new source: it changes in place. The run reads a Lookup recipient as its contact's (or
+  account's) email and any other type as literal address text (CrtProcessDesigner 7.8.0 source). A plain mapping
+  keeps the parameter's type, so map a source of the same kind (describe's `type`, `referenceSchema`). A contact id
+  kept as a constant is retyped to text by the next designer save, and the run then takes the id as an address
+  (measured 2026-11-04). So for a fixed contact map `expression: "[#Lookup.<Contact UId>.<id>#]"` or, onto a
+  recipient that references Contact, the bare id: from 1.6.6.140 either repairs a designer-retyped recipient.
+  From 1.6.6.140, on to, cc and bcc alike, exactly one `[#Lookup.<object>.<record>#]` macro (mapped with
+  `addMapping`, or sent as an `email.to`/`cc`/`bcc` `expression`, no `referenceSchema` needed) or a bare record id
+  mapped onto a recipient that references an object ends as a Lookup recipient of that object, the record checked
+  to exist; one the line already holds that way is left as it is. REFUSED, naming the route to use: a record id as
+  an `email.to`/`cc`/`bcc` `value` (unless the line holds it) or mapped onto a recipient with no reference object.
+  Refused too: a macro of another object than the recipient's reference or `referenceSchema`. A recipient holding
+  a constant id, or a record formula while not Lookup, gets an end-of-request warning naming the repair (only for
+  elements the request touched). There is NO removal path THROUGH THIS TOOL. Not so `email.attachments`: a sent
+  list REPLACES the element's attachments (`process-send-email-attachments`).
   The DESIGNER can remove one, so route a removal request there and never say Creatio cannot do it: clearing a
   recipient's value and saving DELETES the parameter (`saveRecipients` calls `removeRecipient` on an emptied
   row, which calls `removeParameter`, which removes it from the element).

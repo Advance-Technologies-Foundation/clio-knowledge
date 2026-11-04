@@ -21,6 +21,12 @@ public sealed class SendEmailGuidanceTests
     /// <summary>ENG-100156 moved the evidence behind the Send email rules into this article.</summary>
     private const string DetailsArticle = "guidance/mcp/guides/processes/send-email-details.md";
 
+    /// <summary>The owner of the performer contact forms the Send email manual mode shares.</summary>
+    private const string PerformerArticle = "guidance/mcp/guides/processes/task-performer.md";
+
+    /// <summary>The owner of the 2048-character bound and of where it applies again after names expand.</summary>
+    private const string FormulasArticle = "guidance/mcp/guides/processes/formulas.md";
+
     [Test]
     [Description("Auto mode teaches all four mandatory fields and the missing-body trap that build and describe both miss.")]
     public void Guide_ShouldKeepAutoModeChecklistAndMissingBodyTrap()
@@ -225,42 +231,90 @@ public sealed class SendEmailGuidanceTests
 	}
 
 	[Test]
-	[Description("The guide says what ignoreErrors does and does not prevent (a run with no usable sender fails; a 'to' that resolves to no address skips the whole send), names the addMapping route that replaces a recipient in place with the type rule and the fixed-contact expression form, and lists the performer contact forms with the declaration-order rule.")]
-	public void Guide_ShouldStateIgnoreErrorsLimits_RecipientReplacement_AndPerformerContactForms()
+	[Description("The guide says what ignoreErrors does and does not prevent (a run with no usable sender fails; a 'to' that resolves to no address skips the whole send; a send failure through a configured mailbox is covered), names the addMapping route that replaces a recipient in place, says a plain mapping keeps the type while a record macro or id types the recipient Lookup, and gives the fixed-contact forms that repair a designer-retyped recipient.")]
+	public void Guide_ShouldStateIgnoreErrorsLimits_AndRecipientReplacement()
 	{
 		// Arrange
 		string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
 
 		// Act
 		const string ignoreErrors = "`ignoreErrors:true` does NOT prevent that failure: with no usable sender (none set, or one naming no mailbox) the run still fails (measured 2026-11-04).";
+		const string legacyBranch = "Only the legacy SMTP branch (feature `OldEmailIntegration` or `OldEmailSend` on) honours it with no sender set (CrtProcessDesigner 7.8.0 source).";
 		const string noAddress = "It does skip the send when `to` resolves to no address at run time - nothing is sent then, cc/bcc included (measured with no recipient at all)";
+		const string mailboxFailure = "a send failure through a configured mailbox.";
 		const string replace = "To REPLACE a wrong recipient, `addMapping` onto its parameter (`Recipient<N>` / `CopyRecipient<N>` / `BlindCopyRecipient<N>`, named by describe) with the new source: it changes in place.";
-		const string keepsType = "The parameter keeps its type, and the run reads a Lookup recipient as its contact's (or account's) email, any other as literal addresses (CrtProcessDesigner 7.8.0 source), so map a source of the same kind";
-		const string fixedContact = "A contact id kept as a constant is retyped to text by the next designer save, and the run then takes the id as an address (measured 2026-11-04). So for a fixed contact map `expression: \"[#Lookup.<Contact UId>.<id>#]\"`; from 1.6.6.139 a bare id mapped onto a contact recipient is stored in that form";
-		const string performer = "`performer.contact` takes a contact id, `[#SysVariable.CurrentUserContact#]`, the `[#Lookup.<object>.<record>#]` describe returns (kept as written), or (1.6.6.139+) `[#ParameterName#]` / `[#Element.Output#]`";
-		const string declaredEarlier = "on create an element it names must be declared earlier in `elements[]`. Each must yield a Contact id.";
+		const string runReads = "The run reads a Lookup recipient as its contact's (or account's) email and any other type as literal address text (CrtProcessDesigner 7.8.0 source).";
+		const string keepsType = "A plain mapping keeps the parameter's type, so map a source of the same kind (describe's `type`, `referenceSchema`).";
+		const string fixedContact = "A contact id kept as a constant is retyped to text by the next designer save, and the run then takes the id as an address (measured 2026-11-04). So for a fixed contact map `expression: \"[#Lookup.<Contact UId>.<id>#]\"` or, onto a recipient that references Contact, the bare id: from 1.6.6.140 either repairs a designer-retyped recipient.";
+		const string recordTypesLookup = "From 1.6.6.140, on to, cc and bcc alike, exactly one `[#Lookup.<object>.<record>#]` macro (mapped with `addMapping`, or sent as an `email.to`/`cc`/`bcc` `expression`, no `referenceSchema` needed) or a bare record id mapped onto a recipient that references an object ends as a Lookup recipient of that object, the record checked to exist; one the line already holds that way is left as it is.";
+		const string refusals = "REFUSED, naming the route to use: a record id as an `email.to`/`cc`/`bcc` `value` (unless the line holds it) or mapped onto a recipient with no reference object. Refused too: a macro of another object than the recipient's reference or `referenceSchema`.";
+		const string warning = "A recipient holding a constant id, or a record formula while not Lookup, gets an end-of-request warning naming the repair (only for elements the request touched).";
+		const string noRemoval = "There is NO removal path THROUGH THIS TOOL.";
 
 		// Assert
 		guide.Should().Contain("It does not cover building the message: an empty single-File attachment fails the run with it on (measured 2026-11-04).",
 			because: "two isolated agents guessed that ignoreErrors hides an empty single-File attachment, and a stand run failed with it on");
 		guide.Should().Contain(ignoreErrors,
 			because: "agents told users that ignoreErrors keeps the process alive, and a stand run with no usable sender failed with it on");
+		guide.Should().Contain(legacyBranch,
+			because: "the measured failure is the current email integration's; the designer source's legacy SMTP branch swallows the no-sender failure when ignoreErrors is on");
 		guide.Should().Contain(noAddress,
 			because: "the run returns before sending when the To line resolves to no address, so cc and bcc are not sent either; only the no-recipient case was measured");
+		guide.Should().Contain(mailboxFailure,
+			because: "the designer source swallows a send failure through a configured mailbox when ignoreErrors is on, the one send-time case it does cover");
 		guide.Should().NotContain("It does skip an empty recipient list",
 			because: "the skip turns on the To line resolving to no address at run time, not on an empty recipient list");
 		guide.Should().NotContain("a wrong recipient cannot be replaced or removed through `modify`",
 			because: "addMapping onto an existing recipient replaces it in place, measured on a stand");
 		guide.Should().Contain(replace,
 			because: "the email block only appends recipients, so the replacement route must be named where the append rule is stated");
+		guide.Should().Contain(runReads,
+			because: "the run resolves only a Lookup recipient to a record's email; a stand run mailed a text recipient's contact id as a literal address");
 		guide.Should().Contain(keepsType,
-			because: "the replacement keeps the parameter's type, and the run resolves only a Lookup recipient to a contact's email");
+			because: "a plain mapping onto a recipient keeps its type, so a source of another kind is read the wrong way at run time");
+		guide.Should().NotContain("The parameter keeps its type",
+			because: "from 1.6.6.140 a record macro or a bare id mapped onto a recipient types it Lookup, so a blanket keeps-its-type rule is wrong");
 		guide.Should().Contain(fixedContact,
-			because: "a stand run after a designer save sent the bare contact id as a literal address, while the Lookup expression survived the save and resolved");
-		guide.Should().Contain(performer,
+			because: "a stand run after a designer save sent the bare contact id as a literal address, while the Lookup expression survived the save and resolved; from 1.6.6.140 either form retypes the recipient Lookup");
+		guide.Should().Contain(recordTypesLookup,
+			because: "the package types a recipient Lookup to the record's object on both routes and checks the record, and leaves a recipient it already holds that way untouched");
+		guide.Should().Contain(refusals,
+			because: "a record id stored as text is mailed as the id itself, and a macro of another object is looked up in the wrong one, so the package refuses both");
+		guide.Should().Contain(warning,
+			because: "the end-of-request check reports a recipient that will mail a record id as literal text, and only for elements the request reached");
+		guide.Should().Contain(noRemoval,
+			because: "only the designer removes a recipient; an agent must route a removal request there instead of inventing a tool path");
+	}
+
+	[Test]
+	[Description("The performer contact forms have ONE owner, process-task-performer: it states the forms, the by-name expansion, the declaration-order rule, the Contact-id requirement and the platform's refusal; the Send email article points there instead of restating them, and the formula article bounds an expanded contact again.")]
+	public void PerformerContactForms_ShouldBeOwnedByTaskPerformer()
+	{
+		// Arrange
+		string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+		string owner = Regex.Replace(ProcessGuideSet.Read(repositoryRoot, PerformerArticle), @"\s+", " ");
+		string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+		string formulas = Regex.Replace(ProcessGuideSet.Read(repositoryRoot, FormulasArticle), @"\s+", " ");
+
+		// Act
+		const string forms = "`contact` for user or manager (this article owns these forms; the same rules serve Send email manual mode's `email.performer`, Pre-configured page and Open edit page) takes a contact id, [#SysVariable.CurrentUserContact#], the [#Lookup.<object>.<record>#] describe returns (kept as written), or (CrtProcessBuilder 1.6.6.140+) [#ParameterName#] / [#Element.Output#] (.Column too), expanded by name like a flow condition;";
+		const string declaredEarlier = "on create an element it names must be declared earlier in `elements[]`. Each must yield a Contact id.";
+		const string platformCheck = "Any other text is left to the platform's check, whose refusal (1.6.6.140+) lists the accepted forms.";
+		const string pointer = "`performer.contact` takes the forms `process-task-performer` owns for a Perform task's `contact`";
+
+		// Assert
+		owner.Should().Contain(forms,
 			because: "a process-parameter performer written by name was refused by the platform before the package expanded it, and the Lookup form describe returns is re-sent as written");
-		guide.Should().Contain(declaredEarlier,
+		owner.Should().Contain(declaredEarlier,
 			because: "on create the package refuses a performer contact that reads an element declared later, which would otherwise run with an empty performer");
+		owner.Should().Contain(platformCheck,
+			because: "the package leaves any other text to the platform's pre-save gate, which appends the accepted forms to its refusal");
+		guide.Should().Contain(pointer,
+			because: "the Send email article routes the shared contact forms to their owner rather than restating them");
+		guide.Should().NotContain("expanded by name like a flow condition",
+			because: "one rule has one owner (AGENTS.md); a second copy in the Send email article drifts from process-task-performer");
+		formulas.Should().Contain("in a condition, a Formula body or (1.6.6.140+) a performer contact, again after names expand.",
+			because: "the package bounds an expanded performer contact again, as it bounds a condition and a Formula body, so a short by-name contact can still be refused for length");
 	}
 
 }
