@@ -317,7 +317,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "The rows work alike in auto and manual mode, custom or template message",
             "auto mode attaches them to the message (and, with CreateActivity on, its email activity);",
             "manual mode copies them onto the email activity it creates.",
-            "A row with no file fails the element: an empty single File, or an `expression` that yields none.",
+            "A row with no file fails the element, `ignoreErrors` or not: an empty single File, or an `expression` that yields none.",
             "The email reads its files with rights disabled and sends them outside Creatio.",
             "an Object attachments element by `attachments.recordId` or a filter condition, a Generated report by `report.recordId` or a filter condition.",
             "Otherwise the request is refused at its END",

@@ -66,7 +66,7 @@ sent means the list did not land, so never report those files as attached.
   the request is refused, naming the readers.
 
 == Notices (warnings: the process saves) ==
-Judged at request end, on every entry of the last list sent. Tell the user each: the build cannot settle it.
+Judged at request end, on every entry of the last list sent. Tell the user each.
 - a single File, or an `expression` (not checked; it must yield one file);
 - two entries reading the same files: the same source (a collection and its item path count as one) or
   (1.6.6.140+) a source and a parameter whose own value reads it, with no other writer seen (two such
@@ -105,7 +105,7 @@ sends it, no list touches it: omit it.
 == At run time ==
 - The rows work alike in auto and manual mode, custom or template message: auto mode attaches them to the
   message (and, with CreateActivity on, its email activity); manual mode copies them onto the email activity it creates.
-- A row with no file fails the element: an empty single File, or an `expression` that yields none.
+- A row with no file fails the element, `ignoreErrors` or not: an empty single File, or an `expression` that yields none.
 - An email that arrives WITHOUT its files: check that the source ran before the email, that its record scope or
   filter selected files, and feature `UseProcessEmailAttachments` for the user who runs the process - with it off, the
   email goes out, or the manual email activity is created, without the files or an error. No
