@@ -21,7 +21,8 @@ public sealed class ThemeBackgroundGuidanceTests
         ShouldContainAll(ThemingPath,
             "the theme methods are the only writers of a theme background",
             "Only `create-theme` and `update-theme` write it; `build-theme` does not.",
-            "pass at most one of `background-image-file` (a local image, uploaded in the same call), `background-image-id` (an image from `upload-image`) or `background-color` (`#RGB`, `#RRGGBB` or `#RRGGBBAA`) to `create-theme`, in brand mode as well, or to `update-theme`.",
+            "pass at most one of `background-image-id` or `background-color` (`#RGB`, `#RRGGBB` or `#RRGGBBAA`) to `create-theme`, in brand mode as well, or to `update-theme`.",
+            "For an image, upload the file first with `upload-image` and pass the id it returns; an id with no uploaded image is refused before any write.",
             "`update-theme` also takes `remove-background`, which clears it so the theme's accounts see the site background again.",
             "With a background argument, `update-theme` needs only the `id`: the `caption`, `css-class-name` and `css-content` you leave out keep their stored values, so a background change never needs the theme CSS.",
             "To give the theme its own background, pass it in this same call — see \"Theme background\".",
@@ -38,7 +39,7 @@ public sealed class ThemeBackgroundGuidanceTests
         using (new AssertionScope())
         {
             theming.Should().Contain(
-                "a theme background needs Creatio 10.2.96 or later — `themeBackgroundSupported` in `check-theming-access` tells you up front, and the write tools check it again before any write. A clio whose `create-theme` contract has no `background-color` cannot write one either (it can be updated). In both cases tell the user; set the site background instead only if the user agrees, even when the error suggests it.",
+                "a theme background needs Creatio 10.2.96 or later — the write tools check it before any write and refuse below it. A clio whose `create-theme` contract has no `background-color` cannot write one either (it can be updated). In both cases tell the user; set the site background instead only if the user agrees, even when the error suggests it.",
                 because: "an older ThemeService drops the background, and the clio hint names the site background");
             Regex.Matches(theming, @"10\.2\.96").Count.Should().Be(1, because: "the floor has one owner sentence");
             branding.Should().NotContain("10.2.96", because: "the theming guide owns the floor");
@@ -46,17 +47,17 @@ public sealed class ThemeBackgroundGuidanceTests
     }
 
     [Test]
-    [Description("The panel icon turn-off is announced before the write, its result is read, and the theme package does not carry it.")]
+    [Description("The panel icon turn-off is announced before the write, and the theme package does not carry it.")]
     public void Theming_ShouldStateThePanelIconAndThePackage()
     {
         ShouldContainAll(ThemingPath,
             "the panel icon change is environment-wide and a theme package does not carry it",
-            "That is an environment-wide change: when `check-theming-access` reports `panelIconBackground` other than `off`, tell the user before the write.",
-            "The result reports `panelIconBackground` as `turned-off`, `already-off` or `kept`; a failed turn-off is a warning, not a failure.",
+            "That is an environment-wide change: tell the user before the write.",
+            "A failed turn-off is a warning, not a failure.",
             "The panel icon state is not bound, so where the package is installed the panel icon background can still cover the theme background.",
-            "A binding problem after a successful write is a warning — the theme exists, so do not create it again; relay the warnings.",
-            "`remove-background` and `delete-theme` leave the image bindings, so the package still ships the image; tell the user.",
-            "when the theme write fails, nothing follows it — no panel icon change and no bindings. A file uploaded before it stays uploaded, and the error names its image id — retry with that `background-image-id` instead of uploading the file again.",
+            "A binding problem after a successful write is a warning — the theme exists, so do not create it again; relay the warnings (`create-theme` returns them in `warnings`, `update-theme` in its log).",
+            "`remove-background` and `delete-theme` leave the image binding, so the package still ships the image; tell the user.",
+            "when the theme write fails, nothing follows it — no panel icon change and no binding.",
             "`get-theme` and `list-themes` return it as `background` (`mode` `Image` with `imageId`, or `Color` with `color`), absent when the theme has none.");
     }
 
@@ -84,11 +85,9 @@ public sealed class ThemeBackgroundGuidanceTests
 
         string[] themingOnly =
         [
-            "background-image-file",
             "background-image-id",
             "background-color",
-            "remove-background",
-            "themeBackgroundSupported"
+            "remove-background"
         ];
         string[] brandingOnly =
         [
