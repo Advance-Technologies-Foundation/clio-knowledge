@@ -20,12 +20,10 @@ public sealed class ThemeBackgroundGuidanceTests
     {
         ShouldContainAll(ThemingPath,
             "the theme methods are the only writers of a theme background",
-            "Only `create-theme` and `update-theme` write it; `build-theme` does not.",
-            "pass at most one of `background-image-id` or `background-color` (`#RGB`, `#RRGGBB` or `#RRGGBBAA`) to `create-theme`, in brand mode as well, or to `update-theme`.",
-            "For an image, upload the file first with `upload-image` and pass the id it returns; an id with no uploaded image is refused before any write.",
-            "`update-theme` also takes `remove-background`, which clears it so the theme's accounts see the site background again.",
-            "With a background argument, `update-theme` needs only the `id`: the `caption`, `css-class-name` and `css-content` you leave out keep their stored values, so a background change never needs the theme CSS.",
-            "To give the theme its own background, pass it in this same call — see \"Theme background\".",
+            "Only `create-theme` and `update-theme` write it.",
+            "pass at most one of `background-image-id` (upload the file with `upload-image` first) or `background-color` to `create-theme` (brand mode too) or `update-theme`; `remove-background` on `update-theme` clears it.",
+            "With a background argument `update-theme` needs only the `id` — the omitted `caption`, `css-class-name` and `css-content` keep their values, so never send the CSS for a background change.",
+            "Pass a theme background in this same call — see \"Theme background\".",
             "a full overwrite of caption + css-class-name + css-content, unless the call only changes the background");
     }
 
@@ -39,7 +37,7 @@ public sealed class ThemeBackgroundGuidanceTests
         using (new AssertionScope())
         {
             theming.Should().Contain(
-                "a theme background needs Creatio 10.2.96 or later — the write tools check it before any write and refuse below it. A clio whose `create-theme` contract has no `background-color` cannot write one either (it can be updated). In both cases tell the user; set the site background instead only if the user agrees, even when the error suggests it.",
+                "Version: Creatio 10.2.96 or later; the write tools refuse an older environment before writing. A clio whose `create-theme` contract has no `background-color` cannot set one. Either way tell the user, and set the site background instead only if the user agrees.",
                 because: "an older ThemeService drops the background, and the clio hint names the site background");
             Regex.Matches(theming, @"10\.2\.96").Count.Should().Be(1, because: "the floor has one owner sentence");
             branding.Should().NotContain("10.2.96", because: "the theming guide owns the floor");
@@ -52,13 +50,14 @@ public sealed class ThemeBackgroundGuidanceTests
     {
         ShouldContainAll(ThemingPath,
             "the panel icon change is environment-wide and a theme package does not carry it",
-            "That is an environment-wide change: tell the user before the write.",
-            "A failed turn-off is a warning, not a failure.",
-            "The panel icon state is not bound, so where the package is installed the panel icon background can still cover the theme background.",
-            "A binding problem after a successful write is a warning — the theme exists, so do not create it again; relay the warnings (`create-theme` returns them in `warnings`, `update-theme` in its log).",
-            "`remove-background` and `delete-theme` leave the image binding, so the package still ships the image; tell the user.",
-            "when the theme write fails, nothing follows it — no panel icon change and no binding.",
-            "`get-theme` and `list-themes` return it as `background` (`mode` `Image` with `imageId`, or `Color` with `color`), absent when the theme has none.");
+            "an environment-wide change, so tell the user before the write.",
+            "A failed turn-off is a warning.",
+            "a failed write changes nothing else.",
+            "The panel icon state is not bound, so on another environment it can still cover the background.",
+            "A binding problem is a warning — the theme exists, do not create it again; relay the warnings (`create-theme` returns them in `warnings`, `update-theme` in its log).",
+            "`remove-background` and `delete-theme` keep the image binding, so the package still ships the image — tell the user.",
+            "`cssClassName`, `cssFilePath`, and `background`",
+            "cssContentLength, background?, error? }");
     }
 
     [Test]
@@ -67,11 +66,11 @@ public sealed class ThemeBackgroundGuidanceTests
     {
         ShouldContainAll(BrandingPath,
             "the branding guide is where a run picks the level and diagnoses a hidden background",
-            "A theme's own background, an image or a color, is seen by the accounts on that theme; the site background, an image, by every account whose theme has none.",
+            "A background has two levels: a theme's own background (an image or a color) is seen by that theme's accounts, the site background (an image) by every account whose theme has none.",
             "In a branding run, give the new theme its background; set the site background only when the user asks for the whole site.",
-            "A theme's background is written with the theme itself — see `get-guidance name=theming` → \"Theme background\".",
-            "The site background cannot be a color or be removed: to change it, set another image.",
-            "An account sees the first that applies: its personal `UseAccessibleDesktopColor` system setting; its theme's color, or its image if it loads, unless the `DisableThemeBackground` feature is on; the site background (the `CrtBackgroundConfig` system setting); the bundled default image.",
+            "A theme background is written with the theme — see `get-guidance name=theming` → \"Theme background\".",
+            "The site background cannot be a color or be removed, only replaced with another image.",
+            "An account sees the first that applies: its `UseAccessibleDesktopColor` system setting; its theme's color, or its image if it loads, unless the `DisableThemeBackground` feature is on; the site background (`CrtBackgroundConfig`); the bundled default image.",
             "Never change `UseAccessibleDesktopColor` or `DisableThemeBackground` to make a background show.");
     }
 
