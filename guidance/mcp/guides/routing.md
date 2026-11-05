@@ -104,7 +104,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-access-rights; add name=process-access-rights-details only when the environment's
     CrtProcessBuilder (or the one your clio bundles) may predate 1.6.0.2, or to decide what a MISSING
     read-back warning proves
-  - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros ->
+  - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros, `ignoreErrors`
+    and what a failed send does to the run ->
     name=process-send-email
     - the evidence behind a Send email rule, or a result that contradicts one (a no-mode element running as a
       template, the designer-removal exceptions) -> name=process-send-email-details

@@ -41,7 +41,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The
-    /// guide is about 12,400 characters since its fact-check corrections, so 12,500 leaves almost no room: a new clause
+    /// guide is about 12,500 characters since its fact-check corrections, so 12,500 leaves almost no room: a new clause
     /// pays for itself with a trim, and a larger addition should be reviewed, or split, rather than absorbed. The 19,000-byte inline rule is asserted separately.
     /// </summary>
     private const int DesignTargetResponseCharacters = 12_500;
@@ -213,7 +213,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
     }
 
     [Test]
-    [Description("Both order rules: declaration order on create and existence on modify, and the flow rule with its warning, its limit and the silent run-time consequence.")]
+    [Description("Both order rules: declaration order on create and existence on modify, and the flow rule with its warning, its limit, the silent run-time consequence and the describe issue that judges only element sources on top-level flows.")]
     public void Guide_ShouldStateBothOrderRules()
     {
         // Arrange
@@ -228,7 +228,8 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "the answer warns that it \"does not lie on a path before\" the email: fix the flows.",
             "The warning is a hint, not a proof - a source on a gateway branch the run does not take still reaches the email and is not warned about.",
             "For an `expression` entry, every element its formula references must be declared earlier too.",
-            "A collection source that has not run sends no files and no error; a single File (or `expression`) source that has not run is empty, so the element fails."
+            "A collection source that has not run sends no files and no error; a single File (or `expression`) source that has not run is empty, so the element fails.",
+            "Describe (1.6.6.140+) gives the row the same issue; both judge only element sources on top-level flows: silence proves nothing."
         ];
 
         // Assert
@@ -260,7 +261,7 @@ public sealed class SendEmailAttachmentsGuidanceTests
             "Modify has no concurrency check, so a list from an older read deletes the rows added since",
             "the entry, in the write shape, that restores it (\"To restore it, add { ... } to the list.\")",
             "None for a row the same request gives back in the same write shape, or one an earlier list of it created;",
-            "On modify clio also reports the removed rows from its own before/after read-back",
+            "Each is a warning, `[]` included.",
             "A row something still reads is not removed: the request is refused, naming the readers.",
             "A list cannot REORDER rows: position is ignored, a kept row stays put, a new row goes last; a reordered list changes nothing, without a notice.",
             "For another order send `[]`, then the list in that order (new rows; refused while something reads a row).",
@@ -314,8 +315,9 @@ public sealed class SendEmailAttachmentsGuidanceTests
         string[] clauses =
         [
             "The rows work alike in auto and manual mode, custom or template message",
+            "auto mode attaches them to the message (and, with CreateActivity on, its email activity);",
             "manual mode copies them onto the email activity it creates.",
-            "A row with no file fails the element: an empty single File, or an `expression` that yields none.",
+            "A row with no file fails the element, `ignoreErrors` or not: an empty single File, or an `expression` that yields none.",
             "The email reads its files with rights disabled and sends them outside Creatio.",
             "an Object attachments element by `attachments.recordId` or a filter condition, a Generated report by `report.recordId` or a filter condition.",
             "Otherwise the request is refused at its END",
@@ -338,8 +340,8 @@ public sealed class SendEmailAttachmentsGuidanceTests
             because: "a Variable parameter that a mapping or a Formula result of this process writes gets no caller notice");
         guide.Should().NotContain("source mapped into a Sub-process",
             because: "the Sub-process notice follows hand-offs and is raised on every save, not only for a direct mapping the request writes");
-        guide.Should().Contain("the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 unit tests",
-            because: "the evidence names the released package whose tests pin the rules, the Formula body refusal and the hand-off notices included; 1.6.6.130 was re-stamped on changing sources and never shipped, so it identifies nothing");
+        guide.Should().Contain("the build-time rules are pinned by CrtProcessBuilder 1.6.6.131 and 1.6.6.140 unit tests",
+            because: "the evidence names the released packages whose tests pin the rules: 1.6.6.131 the Formula body refusal and the hand-off notices, 1.6.6.140 the describe reachability issue and the routed duplicate notice; 1.6.6.130 was re-stamped on changing sources and never shipped, so it identifies nothing");
         guide.Should().Contain("is read from the CrtProcessDesigner 7.8.0 and core (Terrasoft.Core, Terrasoft.File) sources.",
             because: "the run-time statements are source traces, and the guide must name the sources it traced");
         guide.Should().Contain("Measured on a stand on 2026-10-29: auto mode, custom and template message, delivered every file",
@@ -427,10 +429,14 @@ public sealed class SendEmailAttachmentsGuidanceTests
                 because: "the package refuses a closed list of readers, so a blanket 'any' would promise a check of readers it never inspects");
             guide.Should().Contain("an `email.attachments` entry or (1.6.6.131+) a Formula element body that READS one",
                 because: "1.6.6.131 is the first RELEASED package that refuses a Formula element body reading a row; 1.6.6.127 writes that body as sent");
-            guide.Should().Contain("two entries naming the same source (a collection and its item path count as the same)",
-                because: "the duplicate notice compares the sources named, not the files they reach");
-            guide.Should().Contain("the same files reached by two different routes are not detected",
-                because: "an agent must not read the absence of the notice as proof no file is attached twice");
+            guide.Should().Contain("the same source (a collection and its item path count as one) or (1.6.6.140+) a source and a parameter whose own value reads it, with no other writer seen (two such parameters too)",
+                because: "the duplicate notice compares the sources named, plus one route: a non-In process parameter whose own value reads that output and that no Formula element writes");
+            guide.Should().NotContain("a source and a parameter only it fills",
+                because: "the package cannot see a Script task or Sub-process writing the parameter, so 'only it fills' promised a check it does not make");
+            guide.Should().Contain("other routes (a Script task or Sub-process filling a parameter) are not detected",
+                because: "an agent must not read the absence of the notice as proof no file is attached twice, and the package does not read what a Script task or a called process writes");
+            guide.Should().NotContain("Info when you sent `[]`",
+                because: "the package reports every removed row as a warning, and clio drops its own line for a removal the reply reports");
             guide.Should().Contain("(\"has no record scope and no filter condition ... sends them outside Creatio\")",
                 because: "only this part of the refusal is shared by the Object attachments and Generated report wording");
             guide.Should().NotContain("sends them outside Creatio ... Scope it first",
