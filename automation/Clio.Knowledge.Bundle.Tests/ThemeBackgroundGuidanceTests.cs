@@ -15,7 +15,7 @@ public sealed class ThemeBackgroundGuidanceTests
     [TestCase(Theming, "(`get-guidance name=branding` → \"Background\" owns the site background and which one an account sees)")]
     [TestCase(Theming, "Only `create-theme` and `update-theme` write it, and only the no-code flow keeps it: the `theme.json` that `build-theme` writes has no background, so the next `push-workspace` drops one set on a workspace theme — tell the user.")]
     [TestCase(Theming, "on a call that sets a background it can mean the background floor instead — see \"Theme background\".")]
-    [TestCase(Theming, "pass at most one of `background-image-id` (upload the file with `upload-image` first) or `background-color` (#RGB, #RRGGBB or #RRGGBBAA) to `create-theme` (brand mode too) or `update-theme`; `remove-background` on `update-theme` clears it.")]
+    [TestCase(Theming, "pass at most one of `background-image-id` (upload the file with `upload-image` first) or `background-color` (#RGB, #RRGGBB or #RRGGBBAA; convert another form with `advise-theme-palette operation=triage`) to `create-theme` (brand mode too) or `update-theme`; `remove-background` on `update-theme` clears it.")]
     [TestCase(Theming, "With a background argument `update-theme` needs only the `id` — the omitted `caption`, `css-class-name` and `css-content` keep their values, so never send the CSS for a background change.")]
     [TestCase(Theming, "Pass a theme background in this same call — see \"Theme background\".")]
     [TestCase(Theming, "a full overwrite of caption + css-class-name + css-content, unless the call only changes the background")]
