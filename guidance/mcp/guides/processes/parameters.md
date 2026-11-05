@@ -95,9 +95,8 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   A `targetProcessParameter` mapping is a BINDING, not an assignment: the parameter's ONE value source,
   evaluated whenever the parameter is read - not once at start, not when a branch runs. A second mapping
   onto it REPLACES the first (the last listed is saved); a read before the source element ran, or on a
-  run whose start never reaches it, gets the default. To SET a parameter in the flow - e.g. one shared
-  parameter fed by each branch of a multi-start process - give each branch a `formulaTask` with
-  `formula.resultProcessParameter` (it wins over a stored binding). Build and modify WARN on both cases.
+  run whose start never reaches it, gets the default. Several starts sharing one chain: `process-multi-start`.
+  Build and modify WARN on both cases.
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
   add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
   processParameter (a process parameter by name; with a File-aware clio `Name.Item` names an item of a collection

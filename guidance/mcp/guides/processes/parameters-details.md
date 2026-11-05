@@ -115,7 +115,8 @@ date/time/lookup default-value rule; read that first.
     because the surviving binding points at the other branch's read, which never ran. The same process
     with a Formula per branch produced the record's name;
   * a Formula writing a parameter that still carries a binding wins over it.
-- The shape to build when several starts feed one parameter - each branch assigns it after its own read:
+- Several starts sharing one chain merge their record Ids instead (`process-multi-start`). A Formula per
+  branch still assigns correctly - the shape below - but adds an element per start for what one parameter does:
 ```
 "elements": [
   { "name": "RequestAddedSignal", "caption": "Request added", "type": "signalStart", "signal": { "entity": "UsrRequest", "on": "added" } },
@@ -132,6 +133,5 @@ date/time/lookup default-value rule; read that first.
     "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeftParameter" } }
 ]
 ```
-  Flow each read into its own Formula and both Formulas into the shared next step; `mappings[]` carries
-  no `targetProcessParameter` entry for `DaysLeftParameter`. One mapping per branch instead is the shape the build
-  warns about, and it reads the default on every run but one branch's.
+  One mapping per branch instead is the shape the build warns about, and it reads the default on every run
+  but one branch's.
