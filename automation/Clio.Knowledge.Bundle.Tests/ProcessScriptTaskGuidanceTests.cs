@@ -155,6 +155,12 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the reload trailed the compile's answer by about two minutes, and a restart reloads the runtime for every user");
         guide.Should().Contain("Ask the user before that second run when the process has side effects",
             because: "the second run repeats what the elements before the script did");
+        guide.Should().Contain("On a .NET host the code runs only after a restart, and the two-minute retry does not apply",
+            because: "a .NET host keeps the assembly it loaded at startup, so a process-name compile alone leaves the process unable to run");
+        guide.Should().Contain("before it a run proves nothing, and a signal start of a never-loaded process is left Running",
+            because: "a signal start before the restart fails only in the server log, so the process log is not evidence");
+        guide.Should().NotContain("On a .NET host, restart as `core-rules` requires after any compile",
+            because: "the bare pointer did not say the compile answer now names the restart or why a Running instance proves nothing");
         guide.Should().NotContain("if the run still shows the old code, restart;",
             because: "that sent an agent to a restart a short wait would have made unnecessary");
         guide.Should().Contain("CrtProcessBuilder 1.6.6.61 and later name such a string on the save",
