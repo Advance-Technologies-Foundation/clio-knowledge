@@ -89,7 +89,7 @@ public sealed class ProcessDigestTests
     /// update the row if the rule moved, never delete it to go green: the table's size is pinned exactly
     /// (<see cref="HandedBackRuleCount"/>), so a deleted row fails too.
     /// </summary>
-    private const int HandedBackRuleCount = 107;
+    private const int HandedBackRuleCount = 108;
 
     private static readonly (string Owner, string Clause)[] RulesHandedBackToTheirOwners =
     [
@@ -170,6 +170,7 @@ public sealed class ProcessDigestTests
         ("process-modeling", "ONE START PER TRIGGER the process must react to"),
         ("process-modeling", "the SIMPLE (manual) start only once"),
         ("process-modeling", "CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later"),
+        ("process-modeling-details", "needs CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; below either floor the second start is still refused"),
         ("process-modeling", "(recommended) `validate-process-graph(graph)` -> fix every error-severity finding."),
         ("process-modeling", "RETIRED schemas (`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`) as equal peers with no marker"),
         ("process-modeling", "always key on the schema NAME, never on a caption"),
