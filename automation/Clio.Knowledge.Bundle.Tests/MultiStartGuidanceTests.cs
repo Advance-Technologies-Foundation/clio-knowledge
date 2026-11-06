@@ -65,7 +65,11 @@ public sealed class MultiStartGuidanceTests
             because: "the stored order is the process's, not the list's");
         guide.Should().Contain("`removeElement` of a listed start is refused",
             because: "removing a source is the change that would otherwise lose the merge");
+        guide.Should().Contain("the multi-start example in `process-parameters-details`",
+            because: "a clio without mergeFrom still has a working shape, and the gate must point at it rather than "
+                + "stop the build (review of clio-knowledge#314)");
         guide.Should().NotContain("formulaTask",
-            because: "the merge replaces the Formula-per-start recipe; naming it here would offer two ways");
+            because: "the Formula-per-start recipe lives in process-parameters-details; restating it here would "
+                + "offer two ways where mergeFrom is available");
     }
 }
