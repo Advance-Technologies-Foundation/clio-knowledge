@@ -1640,7 +1640,7 @@
     {
       "itemId": "process-parameters",
       "title": "Process parameters and mappings",
-      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source (a binding evaluated on read, one per parameter, not a flow-time assignment), the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. The SUB-PROCESS element's parameters at RUN TIME (the caller re-sync rule, the re-sync notices, values crossing by NAME, inSync, the designer card) moved to process-parameters-details. Formulas themselves are owned by process-formulas.",
+      "description": "Owns Creatio process-level parameters (supported types, direction, typeFromElement, setParameter and removeParameter), the mapping vocabulary that binds a target parameter to exactly one source (a binding evaluated on read, one per parameter, not a flow-time assignment; a formulaTask per branch SETS one in the flow), the target-driven type-compatibility matrix the server enforces, how to identify a mappable output, and the Date/Date-time/Time default-value macros, which must be a formula rather than a constant because those types have no literal form. The SUB-PROCESS element's parameters at RUN TIME (the caller re-sync rule, the re-sync notices, values crossing by NAME, inSync, the designer card) moved to process-parameters-details. Formulas themselves are owned by process-formulas.",
       "topicId": "creatio.process-parameters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters",
@@ -2038,7 +2038,7 @@
     {
       "itemId": "process-multi-start",
       "title": "Process multi-start",
-      "description": "Owns several signal starts on one object that run the same steps: why a chain shared by starts that each fill only their own RecordId changes nothing on all but one, the mergeFrom process parameter that takes the record Id of whichever start fired (same object, Guid or Lookup, always Internal, stable order), modify and describe round trips, the refusals that keep a merge from being lost, and the naive-join and start-not-in-the-list warnings. Applies when the FULL create-business-process contract names mergeFrom.",
+      "description": "Owns several signal starts on one object that run the same steps: why a chain shared by starts that each fill only their own RecordId changes nothing on all but one, the mergeFrom process parameter that takes the record Id of whichever start fired (same object, Guid or Lookup, always Internal, stable order), modify and describe round trips, the refusals that keep a merge from being lost, and the naive-join and start-not-in-the-list warnings. Signal starts on one object only: anything else sets the parameter per branch (process-parameters). Needs CrtProcessBuilder 1.6.6.141 or later and a FULL create-business-process contract that names mergeFrom.",
       "topicId": "creatio.process-multi-start",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-multi-start",
