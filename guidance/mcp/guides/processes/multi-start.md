@@ -3,7 +3,7 @@ clio MCP process multi-start guide
 Scope
 Use this guide when a process reacts to SEVERAL record events (for example a record added AND a column of it changed) and every one of them must run the SAME steps. The graph itself belongs to `process-modeling`; parameters in general to `process-parameters`.
 
-Gate: use `mergeFrom` only when the FULL `create-business-process` contract (`get-tool-contract` with `detail=full`) names `mergeFrom`. Otherwise this clio does not carry it: tell the user that clio needs an update, and do not build the shared chain without it.
+Gate: use `mergeFrom` only when the FULL `create-business-process` contract (`get-tool-contract` with `detail=full`) names `mergeFrom`. Otherwise this clio does not carry it: give each start's branch a Formula that sets the shared parameter (the multi-start example in `process-parameters-details`), and tell the user that a clio update replaces those Formulas with `mergeFrom`.
 
 Why a shared chain needs a merge
 A `signalStart` fires on ONE event, so each event needs its own start, and each start fills only its OWN `RecordId`. An element after both starts that reads one start's `RecordId` gets an empty Id when the other start fired: the run completes with no error and changes nothing. Measured in November 2026 on .NET Framework and .NET 8 stands: the second trigger ran, completed, and updated no record.
