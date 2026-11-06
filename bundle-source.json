@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.180",
+  "libraryVersion": "1.15.181",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -211,6 +211,7 @@
       "sys-setting",
       "sys-setting-tests",
       "sys-settings",
+      "theme-background",
       "theming",
       "ui-project",
       "virtual-entities",
@@ -415,6 +416,7 @@
       "docs://knowledge/com.creatio.clio/sys-setting",
       "docs://knowledge/com.creatio.clio/sys-setting-tests",
       "docs://knowledge/com.creatio.clio/sys-settings",
+      "docs://knowledge/com.creatio.clio/theme-background",
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
@@ -668,7 +670,7 @@
     {
       "itemId": "branding",
       "title": "Branding",
-      "description": "Guides Creatio environment branding: product logos, the shell background image, and the browser-tab favicon, including the license check and the settings each asset is written to.",
+      "description": "Guides Creatio environment branding: product logos, the browser-tab favicon, and the site background image, including the license check and the settings each asset is written to.",
       "topicId": "creatio.branding",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/branding",
@@ -2873,9 +2875,20 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "theme-background",
+      "title": "Theme background",
+      "description": "Owns a custom theme's own background: reading it, setting, changing and removing an image or color with create-theme and update-theme, the Creatio version floor and what to do below it, the panel icon side effect and its confirmation, and the package binding of the image. Split out of theming.",
+      "topicId": "creatio.theme-background",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/theme-background",
+      "sourcePath": "guidance/mcp/guides/theming/theme-background.md",
+      "bundlePath": "resources/theme-background.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "theming",
       "title": "Custom themes",
-      "description": "Guides creation, reading, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes.",
+      "description": "Guides creation, reading, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes; a theme's own background is in theme-background.",
       "topicId": "creatio.theming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/theming",
