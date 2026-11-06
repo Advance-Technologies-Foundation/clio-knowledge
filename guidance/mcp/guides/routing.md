@@ -60,6 +60,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     -> name=process-naming when the card sends you there
   - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
+  - SEVERAL record starts that run the same steps (one shared chain, one record Id) ->
+    name=process-multi-start
   - READ records from inside a process (one record, a collection, a count or an aggregate) ->
     name=process-read-data
   - add data (create records from a process, one or one per filtered selection) -> name=process-add-data

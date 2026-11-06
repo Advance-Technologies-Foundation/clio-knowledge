@@ -38,6 +38,7 @@ public sealed class GuidanceMigrationTests
         "process-parameters-details",
         "process-modeling-details",
         "process-script-task-details",
+        "process-multi-start",
         "process-versions-details",
         "process-files",
         "process-files-report",
