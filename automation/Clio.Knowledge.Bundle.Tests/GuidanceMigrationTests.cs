@@ -55,7 +55,8 @@ public sealed class GuidanceMigrationTests
         "object-rights",
         "m365-addin-customization",
         "default-record-rights",
-        "portal-sections"
+        "portal-sections",
+        "web-service-registration"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
