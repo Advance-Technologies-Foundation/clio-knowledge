@@ -96,7 +96,7 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
 ## set-object-rights
 Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke; grantee + exactly
 one of position, above, remove-row for a move or a removal (see Move and remove);
-enable-operation-permissions; disable-operation-permissions; preview.
+enable-operation-permissions; disable-operation-permissions; package; preview.
 - ONE object per call. It never touches the object's lookups: each lookup is its own call.
 - operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
   grant and revoke — nothing is granted by default, and a grant or revoke without it (or with a value
@@ -226,6 +226,35 @@ Results:
   reporting a failure.
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. It does NOT change column or record permissions.
+
+Package binding (the rows ship with the app):
+- After every successful call — a re-run that changes no row included — the object's stored rows are
+  bound to a package: the binding SysEntitySchemaOperationRight_<object code> holds exactly the rows
+  stored for the object, in priority order. Without it the rights stay on this site only, and the app
+  installs elsewhere with the objects' default permissions.
+- package=<name> names that package. Without it the package of the object's schema is used. You MUST
+  pass package when the object belongs to a package that is not open for editing (a product object,
+  a locked app) or when the developer keeps rights in a package of their own: a missing or locked
+  package is refused before any write, and the refusal names a package to use. The preview names the
+  package and the binding it would write.
+- Rows already bound by hand in another package or under another name are reported, and no second
+  binding is written: keep that binding in step yourself, or remove it and re-run the call to bind the
+  rows in the named package.
+- The "Use operation permissions" switch is part of the object's schema, not of the binding. The result
+  says whether the schema is in the binding's package; when it is not, the package holding the schema
+  must be installed too, or the rows arrive under whatever switch the target has. While the switch is OFF
+  the bound rows decide nothing.
+- A row names its role by SysAdminUnit id, so on another site it applies only where that role exists with
+  the same id. All employees and All external users do; a role created on this site does not unless it is
+  shipped too. The result names every other role — tell the developer to ship those roles.
+- remove-row deletes the row here and takes it out of the binding, so a clean install does not get it.
+  Package install adds and updates rows but never deletes them: a site that already installed the
+  package keeps the removed row. Say so when the developer removes a row from an app that is already
+  installed elsewhere.
+- If the rights are saved but the binding fails, the call fails and says so; run the same call again —
+  it changes no row and binds them.
+- In file system development mode the binding reaches the database only: run pkg-to-file-system before
+  committing the package.
 
 ## Give a role access to an object and its lookups
 1. Read: get-object-rights entity-schema-name=<Object> include-connected=true (and grantee=<role id> to
