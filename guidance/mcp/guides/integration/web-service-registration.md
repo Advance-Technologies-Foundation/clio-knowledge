@@ -33,7 +33,12 @@ Credential rule (MUST)
   tool refuses a constant there and never echoes the refused value.
 - Every referenced system setting MUST exist before the call; a reference to a missing setting is refused,
   because at run time the platform drops it silently and the request goes out without the header. Create the
-  setting first (`get-guidance name=sys-settings`), leave its value empty, and let the user fill it.
+  setting first with `create-sys-setting` and no value, `value-type-name` SecureText for a key, token or
+  password, and let the user fill it (`get-guidance name=sys-settings`).
+- An API key the built-in authentication types do not cover (a key header, a key query parameter, a Bearer
+  token) is an ordinary request parameter with `default-sys-setting`. The value cannot be composed: for
+  `Authorization: Bearer <token>` the setting holds the whole `Bearer <token>` text. A request that must be
+  signed per call (HMAC and similar) cannot be described this way; tell the user.
 - `describe-web-service` never returns credential values or secret-like constant defaults
   (`default-masked: true`, `constant-credentials-masked: true`). Do not try to read them another way.
 
@@ -66,11 +71,13 @@ After registering — tell the user (the tool also returns these as notices)
 Testing
 - `test-web-service-method` sends ONE real request, as Studio's Send test request does, and returns the
   HTTP status and the response body (cut at 20,000 characters). Request and response headers are never
-  returned.
+  returned. Values the request carried from system settings or in `Authorization` are replaced with
+  `[masked]` in the body and the error (`sent-secrets-masked: true`), because an API may echo them. Values
+  shorter than four characters and path parameters are not masked.
 - The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
   changes data on their side.
-- A GET returning 401 or 403 usually means the system-setting values are still empty; say so instead of
-  changing the service.
+- A GET returning 401 or 403 usually means the system-setting values are still empty: an empty setting
+  sends no header or parameter at all, without any error. Say so instead of changing the service.
 
 Changing a registered service
 - Read it first with `describe-web-service`. Add `usages: true` to list the processes that call it; the scan
@@ -94,5 +101,6 @@ Rights and limits
 - Evidence: the tools reuse the platform contracts the Studio web service designer calls
   (`ServiceSchemaRequest`, `ServiceDataContract`, `CheckUniqueSchemaName`, `CallServiceSchemaService`).
   Measured on Creatio 10.2 (.NET Framework, MSSQL) in November 2026: register, describe, modify, the
-  credential refusal and the usage guard against a process that calls a stock service; the usage scan read
+  credential refusal, a SecureText key sent as a header, its masking in an echoed response, and the usage
+  guard against a process that calls a stock service; the usage scan read
   about 1,300 process schemas in about 15 seconds. Other versions are unknown.
