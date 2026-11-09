@@ -171,8 +171,10 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "core-rules carries the same exception for a process-name compile, and every operation reads it");
         coreRules.Should().Contain("On a .NET host that compile does not reload anything: the process runs the compiled code only after the restart, and a run before it proves nothing",
             because: "a .NET host keeps the configuration assembly it loaded at startup until the application restarts");
-        coreRules.Should().Contain("a clio newer than 8.1.0.147 warns that the process \"does NOT run the compiled code yet\"",
-            because: "only a clio released after 8.1.0.147 gives that warning, so the boundary sits next to the instruction it gates");
+        coreRules.Should().Contain("a clio that knows this says so in the compile answer - the process \"does NOT run the compiled code yet\"",
+            because: "the boundary is the capability, not a release number nobody can know before the clio change ships");
+        coreRules.Should().Contain("its silence does not mean the code runs",
+            because: "an older clio gives no warning, and an agent must not read its absence as no restart needed");
         coreRules.Should().Contain("Ask the user before that restart even when they agreed to the compile",
             because: "a restart reloads the application for every user, and the consent to the compile does not cover it");
         coreRules.Should().NotContain("run it again a minute later",
