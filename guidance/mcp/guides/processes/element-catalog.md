@@ -146,12 +146,14 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   `process-files-parameter` its `files` group. On the generic `userTask` route all three Process file tasks
   (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that
   route carries no file source, record or target.
+- `webService` (Call web service), from CrtProcessBuilder **<CRTPROCESSBUILDER-WEBSERVICE-TBD>**: calls a web service
+  REGISTERED in Studio > Web services (REST or SOAP); its `webService` block names the service and method, and the
+  element's parameters are generated from the method - `process-web-service` owns the block. On the generic
+  `userTask` route `WebServiceUserTask`, a legacy SOAP task, is REFUSED.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,
   intermediate events,
-    `webService` (also marked READ-ONLY in the
-    catalog in `process-element-catalog-details`, where silence used to read as "buildable"),
   and reading one COLUMN out of a read COLLECTION's items (a first-record read's column IS a source,
   `sourceColumn` - see `process-data-elements`) — all
   four Read data modes DO build, see the catalog entry in `process-element-catalog-details`. A collection IS consumed now: a multi-instance

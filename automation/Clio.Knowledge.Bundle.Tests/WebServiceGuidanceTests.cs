@@ -1,0 +1,402 @@
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using FluentAssertions;
+using FluentAssertions.Execution;
+using NUnit.Framework;
+
+namespace Clio.Knowledge.Bundle.Tests;
+
+/// <summary>
+/// Pins the <c>process-web-service</c> guide: the <c>webService</c> block of the Call web service element. It is
+/// registered as <c>process-send-email-attachments</c> is - banner-less, ungated, no legacy route - and reached from
+/// the element catalog, its details and routing. Routing also has to tell it apart from the configuration web
+/// service guides, because "call a web service" otherwise lands on the C# backend articles.
+/// </summary>
+/// <remarks>
+/// TRIM ALARMS: every clause below is a rule CrtProcessBuilder enforces from <see cref="Floor"/>, a refusal or notice
+/// an agent has to recognise, or a run-time fact an agent cannot see from a green build. A reword that keeps the rule
+/// updates the clause here; a trim that drops it is the failure these tests exist for.
+/// </remarks>
+[TestFixture]
+public sealed class WebServiceGuidanceTests
+{
+    /// <summary>
+    /// The first CrtProcessBuilder that builds, retargets and describes the element. Not cut yet: the placeholder is the
+    /// shape the pull-request gate in <c>validate-pull-request.yml</c> refuses, so this suite stays green while the
+    /// article is drafted and the merge is blocked until the released version replaces it here, in the article, in
+    /// the two catalog articles and in the manifest description.
+    /// </summary>
+    internal const string Floor = "<CRTPROCESSBUILDER-WEBSERVICE-TBD>";
+
+    private const string ItemId = "process-web-service";
+
+    private const string ArticlePath = "guidance/mcp/guides/processes/web-service.md";
+
+    private const string CatalogPath = "guidance/mcp/guides/processes/element-catalog.md";
+
+    private const string CatalogDetailsPath = "guidance/mcp/guides/processes/element-catalog-details.md";
+
+    private const string ModelingPath = "guidance/mcp/guides/processes/process-modeling.md";
+
+    private const string RoutingPath = "guidance/mcp/guides/routing.md";
+
+    /// <summary>A released version or the gate-shaped placeholder: the only two shapes a floor may take.</summary>
+    private static readonly Regex FloorShape = new(@"^(?:<[A-Z][A-Z0-9-]*TBD>|\d+(?:\.\d+){3})$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
+    /// is about 19,900 characters, so a new clause pays for itself with a trim, and a larger addition is reviewed, or
+    /// split, rather than absorbed. The 19,000-byte inline rule is asserted separately.
+    /// </summary>
+    private const int DesignTargetResponseCharacters = 20_500;
+
+    [Test]
+    [Description("The guide owns the block, states the FULL-contract gate and the floor, and the stored-name rule; it is registered banner-less, ungated and without a legacy route, required by the library, and the element catalog, its details and routing send the reader to it.")]
+    public void Guide_ShouldOwnTheBlock_AndTheEntryArticlesShouldRouteToIt()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        JsonElement requirements = source.RootElement.GetProperty("requirements");
+
+        // Act
+        JsonElement resource = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ItemId);
+        string[] requiredItems = [.. requirements.GetProperty("itemIds").EnumerateArray().Select(item => item.GetString()!)];
+        string[] requiredUris = [.. requirements.GetProperty("resourceUris").EnumerateArray().Select(uri => uri.GetString()!)];
+        string raw = ProcessGuideSet.Read(repositoryRoot, ArticlePath);
+        string guide = Collapse(raw);
+        string catalog = ReadCollapsed(CatalogPath);
+        string details = ReadCollapsed(CatalogDetailsPath);
+        string routing = ReadCollapsed(RoutingPath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            FloorShape.IsMatch(Floor).Should().BeTrue(
+                because: "a floor is a released version or the placeholder the merge gate refuses, nothing else");
+            resource.GetProperty("sourcePath").GetString().Should().Be(ArticlePath,
+                because: "the manifest must point at the article this fixture pins");
+            resource.GetProperty("bundlePath").GetString().Should().Be($"resources/{ItemId}.md",
+                because: "the flat resources folder names each article by its itemId");
+            resource.GetProperty("topicId").GetString().Should().Be($"creatio.{ItemId}",
+                because: "the topic is the stable cross-library identity of the guide");
+            resource.GetProperty("role").GetString().Should().Be("guidance",
+                because: "get-guidance serves only guidance resources");
+            resource.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
+                because: "the block ships enabled; a gated guide would be hidden while the tool accepts the block");
+            resource.TryGetProperty("legacyUris", out _).Should().BeFalse(
+                because: "the guide was born after the v0 migration and has no v0 route to preserve");
+            requiredItems.Should().Contain(ItemId,
+                because: "the library requires every item it publishes for the process tools");
+            requiredUris.Should().Contain($"docs://knowledge/com.creatio.clio/{ItemId}",
+                because: "the requirement lists the canonical route next to the item id");
+            raw.Should().NotContain(ProcessGuideSet.SetBanner,
+                because: "a banner obliges process-modeling to index the guide, and that article has no room left under the inline rule");
+
+            guide.Should().Contain("This guide owns the `webService` block of the Call web service element",
+                because: "the article is the one owner of the block");
+            guide.Should().Contain("`webService {service, method, timeoutSeconds?, ignoreErrors?}`, on `create-business-process`, `addElement` and `setElement`",
+                because: "the contract anchor names every member and every route that takes the block");
+            guide.Should().Contain($"Needs CrtProcessBuilder {Floor} or later on the environment.",
+                because: "an older package refuses the type, so the floor gates every instruction below it");
+            guide.Should().Contain("Use it only when the FULL contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `webService`; the default reply is shortened, so its silence proves nothing.",
+                because: "only the full contract tells a clio that sends the block from one that does not");
+            guide.Should().Contain("request parameter `title` (body, header, query, path or cookie alike) -> input `title_In`; response parameter `status` -> output `status_Out`",
+                because: "the stored names are what every mapping addresses");
+            guide.Should().Contain("addressed dotted: `items_In.name_In`, at any depth",
+                because: "a nested item is addressed by its dotted path");
+            guide.Should().Contain("No aliases: the service's own name `title` is not an element parameter.",
+                because: "a mapping onto the service's name instead of the stored one is refused");
+            guide.Should().Contain("Both are REQUIRED on `create-business-process` and `addElement`; a sole method is not picked for you.",
+                because: "the builder, unlike the designer, never selects a method by itself");
+
+            catalog.Should().Contain($"- `webService` (Call web service), from CrtProcessBuilder **{Floor}**",
+                because: "the catalog owns what builds today and from which package");
+            catalog.Should().Contain("`process-web-service` owns the block.",
+                because: "the catalog names the owner of every block it lists");
+            details.Should().Contain($"BUILDABLE from CrtProcessBuilder **{Floor}** via `type:\"webService\"`",
+                because: "the element entry carries the floor, as every entry that changed from read-only to buildable does");
+            details.Should().Contain("`process-web-service` owns it.",
+                because: "the element entry names the owner of its block");
+            routing.Should().Contain("-> name=process-web-service",
+                because: "an article nothing routes to is never read");
+        }
+    }
+
+    [Test]
+    [Description("The guide states describe's webService member, the stored tree, the resolution flags and issues, the replay recipe, and that no service default is ever shown.")]
+    public void Guide_ShouldStateTheReadBack()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "returns the element's `webService` block: `service` (the name; null when the stored service is not registered), `method`, `timeoutSeconds`",
+            "the describe-only `serviceUId`, `serviceResolved`, `methodResolved`, `parameters` (every stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the `required`, `bound` and `result` flags; no values) and `issues`",
+            "A bound input's value comes back in the element's generic `parameters`.",
+            "No service default is ever shown.",
+            "To resubmit, send the block back unchanged: the describe-only members are ignored with a warning."
+        ];
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "the read-back is how an agent learns the generated names and how it replays a block. Missing: "
+                + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("The guide states how a composite body is mapped, that a formula item needs its list mapped, when to use RequestBody, that it replaces the generated body, and that nothing checks or warns about it.")]
+    public void Guide_ShouldStateTheRequestBodyRules()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on modify, target `elementName` + `elementParameter`.",
+            "the list is bound to that collection too, one request item per source row (rule P1, `process-files`)",
+            "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this.",
+            "it REPLACES the whole body the element would build from its body parameters",
+            "Use it for a method with no body parameter (the shipped `GeminiApiSearch` service builds its JSON body there with a formula), for a body shape mappings cannot express, and for the inner-list workaround",
+            "nothing checks it as JSON, and nothing warns when it and body parameters are both bound"
+        ];
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "the builder neither checks a raw body nor warns about a formula item with an unbound list, so the article is the only place these rules live. Missing: "
+                + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("The guide states that an object-array response is read into a declared Collection of at most two levels, that an item mapping binds its collections, the designer's item-first order, and what is not buildable yet.")]
+    public void Guide_ShouldStateTheResponseRules()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "declare a process `Collection` with `itemProperties` (at most TWO collection levels, `process-parameters`), then map its items from the output's items",
+            "Mapping an item binds the collections above it too (rule P1).",
+            "In the Process Designer the same: map an item first, because the collection picker offers no web-service object array.",
+            "Not buildable yet: mirroring a list output with `typeFromElement` (refused, pointing at the declared Collection), a scalar-array output into a process parameter, a third collection level"
+        ];
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "the declared Collection is the only response route that builds; the others are refused or shapeless. Missing: "
+                + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("The guide states resolution and its refusals, the retarget replace with its guard, the generic-route and multi-instance refusals, SOAP, the drift signals and the designer save that deletes the parameters, with the remedy first.")]
+    public void Guide_ShouldStateResolutionReplaceAndRefusals()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "The service resolves by UId, then by name (exact, else ignoring case), then by caption (ignoring case); the first step that matches decides.",
+            "The CANONICAL spelling is stored",
+            "an unknown service (the refusal lists every registered service as `Name (caption)` and says to register a missing one in Studio > Web services)",
+            "an unknown method (the refusal lists the service's methods)",
+            "The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.",
+            "A SOAP service is built with the same parameter rules as REST, with a notice saying so.",
+            "`service` naming ANOTHER service without `method`: refused with that service's methods, nothing written.",
+            "EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped, `RequestBody` included; `Success`, `Response` and `StatusCode` keep their identity, so their readers stay valid",
+            "the answer lists every dropped input binding WITH its value, in the `addMapping` write shape, so one call re-applies those whose target name the new method still has",
+            "a service change ALWAYS renames the caption to `<service caption> <N>`",
+            "REFUSED, nothing written, while anything - another element, a process parameter, a flow condition, a formula - reads ANY other parameter of the element: an output, a nested item, an input, `RequestBody`.",
+            "Remove or re-point those uses in a SEPARATE, earlier call",
+            "A multi-instance Call web service element (made in the Process Designer) is refused",
+            "`describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in `issues`",
+            "Every `modify-business-process` request warns for EVERY such element of the process, touched or not; a settings-only change does not resolve it.",
+            "A save in the Process Designer of a process whose element no longer resolves DELETES EVERY parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows, and marks the element invalid.",
+            "So FIX FIRST, before any designer save or unrelated modify",
+            "`methodResolved: false` is the signal."
+        ];
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "these are the refusals an agent must recognise and the one loss it must prevent before a designer save. Missing: "
+                + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("The guide states the result outputs, the timeout, ignoreErrors and its feature gate, an HTTP error answer versus no answer, and the inner-list caveat with its remedy.")]
+    public void Guide_ShouldStateTheRunTimeFacts()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`Success` (Boolean, out), `Response` (the response body, Text, out), `StatusCode` (the HTTP status code, Integer, out), `RequestBody` (raw request text, Text, in)",
+            "An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`, whatever `ignoreErrors` is.",
+            "with `ignoreErrors` off the element and the process FAIL; with it on the element completes with `Success` false and `StatusCode` 0.",
+            "While feature `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a failing call still stops the process.",
+            "`timeoutSeconds` covers the whole call, retries included.",
+            "send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
+            "What `RequestBody`, the timeout and the inner-list defect do at run time is read from the Creatio core source and its unit tests, not measured."
+        ];
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "none of these is visible from a green build. Missing: " + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("No process article and no manifest description still claims that webService is read-only or cannot be built.")]
+    public void NoProcessArticleOrManifestDescription_ShouldClaimWebServiceIsUnbuildable()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        string catalog = ReadCollapsed(CatalogPath);
+        string details = ReadCollapsed(CatalogDetailsPath);
+        string modeling = ReadCollapsed(ModelingPath);
+
+        // Act
+        string catalogDescription = Collapse(source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == "process-element-catalog")
+            .GetProperty("description").GetString()!);
+        string notBuildable = Regex.Match(catalog, @"NOT yet buildable(?<list>.+?)== Building from a data-id").Groups["list"].Value;
+        string detailsEntry = Regex.Match(details, @"- `webService` Call web service(?<entry>.+?)- `callActivity`").Groups["entry"].Value;
+        string cannotCreate = Regex.Match(modeling, @"Constructs the builder cannot create \((?<list>[^)]+)\)").Groups["list"].Value;
+
+        // Assert
+        using (new AssertionScope())
+        {
+            notBuildable.Should().NotBeEmpty(because: "anti-vacuity: the catalog lists what does not build");
+            notBuildable.Should().NotContain("webService", because: "the element is buildable from the floor");
+            detailsEntry.Should().NotBeEmpty(because: "anti-vacuity: the details catalog carries the entry");
+            detailsEntry.Should().NotContain("READ-ONLY", because: "the read-only marker would now be a lie");
+            cannotCreate.Should().NotBeEmpty(because: "anti-vacuity: process-modeling lists what the builder cannot create");
+            cannotCreate.Should().NotContain("webService", because: "the builder creates it now");
+            catalogDescription.Should().NotContain("webService remain read-only",
+                because: "a manifest description is what an MCP client shows an agent choosing a guide");
+            catalogDescription.Should().Contain("Call web service (webService, owned by process-web-service)",
+                because: "the description lists what builds today and names the owner");
+        }
+    }
+
+    [Test]
+    [Description("Routing sends a process call of a registered web service to process-web-service and tells it apart from writing a C# configuration web service.")]
+    public void Routing_ShouldSeparateTheProcessElementFromConfigurationServices()
+    {
+        // Arrange
+        string routing = ReadCollapsed(RoutingPath);
+
+        // Act
+        string row = Regex.Match(routing, @"- CALL a REST or SOAP web service .+?name=portal-service-routing\)").Value;
+
+        // Assert
+        using (new AssertionScope())
+        {
+            row.Should().NotBeEmpty(because: "the row routing the Call web service element must exist in one piece");
+            row.Should().Contain("registered in Studio > Web services from a process",
+                because: "the row is about calling a registered service from a process");
+            row.Should().Contain("writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice",
+                because: "\"web service\" otherwise lands on the C# backend guides");
+            row.Should().Contain("name=configuration-webservice-tests",
+                because: "the configuration web service tests guide is the other half of that backend topic");
+        }
+    }
+
+    [Test]
+    [Description("The guide carries no internal task key, spec path, host or test-stand name, its only placeholder is the gate-shaped floor, and no example fills a key-, token- or secret-looking parameter with a constant.")]
+    public void Guide_ShouldCarryNoInternalReferenceOrSecret()
+    {
+        // Arrange
+        string guide = ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ArticlePath);
+
+        // Act
+        bool jiraKey = Regex.IsMatch(guide, @"\b[A-Z][A-Z0-9]+-\d+\b");
+        bool url = Regex.IsMatch(guide, @"https?://|\b\d{1,3}(?:\.\d{1,3}){3}:\d+", RegexOptions.IgnoreCase);
+        bool specPath = Regex.IsMatch(guide, @"spec/|\.cs\b|docs/knowledge|packages/", RegexOptions.IgnoreCase);
+        bool standName = guide.Contains("UsrWsc", StringComparison.Ordinal);
+        string[] placeholders = [.. Regex.Matches(guide, @"<[^<> ]*TBD[^<> ]*>").Select(match => match.Value).Distinct()];
+        string[] constantSecrets = [.. Regex.Matches(guide,
+                @"""elementParameter"":\s*""(?<name>[^""]+)"",\s*""value""")
+            .Select(match => match.Groups["name"].Value)
+            .Where(name => Regex.IsMatch(name, "key|token|secret|password|authorization|signature", RegexOptions.IgnoreCase))];
+
+        // Assert
+        using (new AssertionScope())
+        {
+            jiraKey.Should().BeFalse(because: "published guidance references no internal task");
+            url.Should().BeFalse(because: "the guide names no stand, host or issue link");
+            specPath.Should().BeFalse(because: "the guide names no internal file path of the clio repository or the package");
+            standName.Should().BeFalse(because: "the test services of the development stand are not product names");
+            placeholders.Should().OnlyContain(token => token == Floor,
+                because: "the floor is the only unresolved boundary, and it is written in the shape the merge gate refuses");
+            constantSecrets.Should().BeEmpty(
+                because: "a key or token comes from a system setting or a process parameter; an example with a constant is what an agent copies");
+        }
+    }
+
+    [Test]
+    [Description("The guide tells an agent what to do when the task names no service: find it through the refusal, ask when several fit, stop when none does and say what registration needs, build in two steps, and take keys from a setting or parameter.")]
+    public void Guide_ShouldStateTheTaskWithoutDetails()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "Find the service through the refusal: a build naming a service that does not exist saves nothing and lists every registered service with its caption",
+            "when several fit, ASK the user which; never guess between them.",
+            "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
+            "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
+            "Build in two steps: the element first, then the mappings, from the names the answer and describe report.",
+            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant"
+        ];
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "an agent with no service named either finds one through the refusal or stops; a placeholder process is the failure. Missing: "
+                + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("The guide stays inside its design target and the 19,000-byte inline reply rule.")]
+    public void Guide_ShouldStayInsideItsDesignTarget()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        int responseCharacters = ProcessGuideResponseSizeTests.ResponseSize(repositoryRoot, ArticlePath);
+        int replyBytes = GuidanceInlineReplyBudgetTests.ReplyBytes(ProcessGuideSet.Read(repositoryRoot, ArticlePath));
+        TestContext.WriteLine($"{ItemId}: {responseCharacters:N0} response characters of {DesignTargetResponseCharacters:N0}, "
+            + $"{replyBytes:N0} reply bytes of {GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes:N0}");
+
+        // Assert
+        responseCharacters.Should().BeLessThanOrEqualTo(DesignTargetResponseCharacters,
+            because: "a larger addition should be reviewed, or split, rather than absorbed");
+        replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
+            because: "a reply over the inline rule is spilled to a file and read back in pieces");
+    }
+
+    private static string ReadCollapsed(string relativePath) =>
+        Collapse(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath));
+
+    private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ");
+}
