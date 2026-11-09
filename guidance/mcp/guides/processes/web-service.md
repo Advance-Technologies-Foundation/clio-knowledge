@@ -1,70 +1,69 @@
 clio MCP process-web-service guide - the Call web service element (webService)
 
 Scope
-This guide owns the `webService` block of the Call web service element (`type: "webService"`): the service and
-method, the generated parameters, request and response, retargeting, refusals, notices and the read-back.
+This guide owns the `webService` block of the Call web service element: service and method, generated parameters,
+request, response, retargeting, refusals, notices, read-back.
 `process-parameters` owns mappings and declared Collections; `process-files` owns rule P1 (an item mapping binds its
 collection); `process-formulas` owns the formula vocabulary. A C# web service that Creatio EXPOSES is not this
 element: `configuration-webservice`.
 Needs CrtProcessBuilder <CRTPROCESSBUILDER-WEBSERVICE-TBD> or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`
 and clio is at least <CLIO-WEBSERVICE-TBD>; an older clio refuses the block before sending. The default reply is
-shortened, so its silence proves nothing. Always read the element back: its parameter names come from the service.
+shortened: its silence proves nothing. Always read the element back: its parameter names come from the service.
 
 == Only a registered service ==
-The element calls a web service already REGISTERED in Studio > Web services (REST, or SOAP 1.1 / 1.2). The process
-tools do not register, change or test a service; an unregistered one cannot be called. Nothing the SERVICE stores -
-its base URI, authentication, header or parameter defaults - comes back in any answer (describe, refusals, notices).
-The element's OWN bindings do: describe returns a bound input's value, and a retarget lists the values it dropped.
+The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP 1.1 / 1.2); the process tools
+do not register, change or test one. Nothing the SERVICE stores - its base URI, authentication, header or parameter
+defaults - comes back in any answer. The element's OWN bindings do: describe returns them, a retarget lists those it
+dropped.
 
 == The block ==
 `webService {service, method, timeoutSeconds?, ignoreErrors?}`, on `create-business-process`, `addElement` and
 `setElement` (`elementUpdate.webService`):
-"elements": [{ "name": "CallOrderService", "type": "webService", "caption": "Call order service",
+"elements": [{ "name": "CallOrderService", "type": "webService",
   "webService": { "service": "UsrOrderService", "method": "GetOrders", "timeoutSeconds": 30, "ignoreErrors": true } }]
-- `service`: the service's name (its code), caption or UId. `method`: the method's name. Both are REQUIRED on
+- `service`: its name (code), caption or UId. `method`: the method's name. Both are REQUIRED on
   `create-business-process` and `addElement`; a sole method is not picked for you.
-- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: none. Negative, or more than 2147483, is
-  refused.
-- `ignoreErrors`: `true` lets the process go on after a call that gets no HTTP answer (== Run time ==). Default false.
+- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: none. Negative or over 2147483 is refused.
+- `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==); default false.
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
-- Caption: omit it and the element is captioned `<service caption, or its name> <N>`, as the Process Designer does
-  (`N` the smallest number no other element uses); a `caption` you send is kept. Name the element from the Names
-  block of `process-digest`.
+- Caption: omitted, it is `<service caption, or its name> <N>`, as the Process Designer does (`N` the smallest
+  number no other element uses); a sent `caption` is kept. Name the element from the Names block of `process-digest`.
 - The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.
 
 == Naming the service and method ==
 - The service resolves by UId, then by name (exact, else ignoring case), then by caption (ignoring case); the first
-  step that matches decides. The method resolves within that service by name, exact, else ignoring case.
-- The CANONICAL spelling is stored; a case-only difference is written in the service's spelling, with a notice.
-  Creatio looks a method up exactly at run time.
-- REFUSED, nothing saved: an unknown service (the refusal lists every registered service as `Name (caption)` and
-  says to register a missing one in Studio > Web services); no service registered at all; a registered service that
-  cannot be read (open and save it in Studio > Web services); a name or caption that matches several services (send
-  the exact name or the UId); an unknown method (the refusal lists the service's methods); a method name that matches
-  several methods only when case is ignored; a method with an object parameter that is not an array.
+  step that matches decides. The method: by name within that service, exact, else ignoring case.
+- The CANONICAL spelling is stored (a case-only change, with a notice): Creatio looks a method up exactly at run time.
+- REFUSED, nothing saved: an unknown service (the refusal lists the first 30 services by name as
+  `Name (caption; methods: a, b, ...)`, up to 8 methods then "and N more", the next 70 as `Name (caption)`,
+  counts the rest - one not shown is used by its exact name or UId - and says to register a missing one in Studio >
+  Web services); no service registered; a registered service that cannot be read (open and save it in Studio > Web
+  services); a name or caption matching several services (listed with methods; send the exact name or the UId); an
+  unknown method (the refusal lists the service's methods); a method name matching several only when case is
+  ignored; a method with an object parameter that is not an array.
 - A service in a package the process's package does not depend on is built, with a notice: the Process Designer adds
   that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does
-  not. Add it, or an export of the process's package alone fails at run time.
+  not. Add it, or the package exported alone fails at run time.
 - A SOAP service is built with the same parameter rules as REST, with a notice saying so.
 
 == A task that names no service or method ==
-1. Find the service through the refusal: a build naming a service that does not exist saves nothing and lists every
-   registered service with its caption. Pick the one that fits; when several
-   fit, ASK the user which; never guess between them.
-2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user the service
-   has to be registered in Studio > Web services, and what that needs: the base URL, the method and its parameters,
-   and the authentication. The user enters any credential there, not you.
+1. Find the service and method through ONE refusal: a build naming an unknown service saves nothing and lists the
+   registered services with captions and methods (bounds above). Pick the pair that fits; when several fit, ASK the
+   user which; never guess between them.
+2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
+   it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
+   authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
-4. A key or token parameter is filled from a system setting - an `expression`
-   `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant: a constant
-   is stored in the process, and describe returns it to whoever reads the process. When the service itself defaults
-   the key from a system setting (the shipped `GeminiApiSearch` sends `x-goog-api-key` from `GeminiApiKey`), leave
-   that input unbound: an unbound input is skipped.
+4. A key or token parameter is filled from a system setting - an `expression` `[#SysSettings.<Code>#]`
+   (`process-formulas`) - or from a process parameter, NEVER from a constant: it is stored in the process, and
+   describe returns it to any reader. When the service itself defaults the key from a system setting (the shipped
+   `GeminiApiSearch` sends `x-goog-api-key` from `GeminiApiKey`), leave that input unbound: an unbound input is
+   skipped.
 
 == The parameters the block generates ==
-The method's parameters become the element's own, named as describe returns them and as mappings address them:
+The method's parameters become the element's own, under these names:
 - request parameter `title` (body, header, query, path or cookie alike) -> input `title_In`; response parameter
   `status` -> output `status_Out`;
 - an object array -> a list (`CompositeObjectList`) whose items are named the same way and addressed dotted:
@@ -74,12 +73,12 @@ The method's parameters become the element's own, named as describe returns them
   `StatusCode` (the HTTP status code, Integer, out), `RequestBody` (raw request text, Text, in).
 The create or retarget answer lists the generated names (`*` required); describe's `webService.parameters` is the
 authoritative tree. No aliases: the service's own name `title` is not an element parameter. A mapping onto a name the
-element lacks is refused, listing the element's top-level parameters.
+element lacks is refused, listing its top-level parameters.
 
 == Request values: mappings ==
 Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on
-modify, target `elementName` + `elementParameter`. Mappings of the same create request, or a later operation of the
-same modify batch, can address the generated names.
+modify, target `elementName` + `elementParameter`. Mappings in the same create request, or later in the same
+modify batch, can address the generated names.
 "mappings": [
   { "elementName": "CallOrderService", "elementParameter": "customerId_In", "processParameter": "CustomerIdParameter" },
   { "elementName": "CallOrderService", "elementParameter": "mode_In", "value": "full" },
@@ -99,7 +98,7 @@ same modify batch, can address the generated names.
 
 == Reading the response ==
 - `<name>_Out`, `Success`, `StatusCode` and `Response` are ordinary outputs: map them (`sourceElement` +
-  `sourceElementParameter`) into a process parameter, another element's input, a flow condition or a formula.
+  `sourceElementParameter`) into a process parameter, an element input, a flow condition or a formula.
 - An object-array response: declare a process `Collection` with `itemProperties` (at most TWO collection levels,
   `process-parameters`), then map its items from the output's items: `targetProcessParameter`
   `OrdersParameter.Number` from `sourceElementParameter` `orders_Out.number_Out`. Mapping an item binds the
@@ -110,16 +109,16 @@ same modify batch, can address the generated names.
   shape. Read `Response` in a Script task (`process-script-task`) instead.
 
 == Changing the service or method (modify) ==
-`setElement` with `elementUpdate.webService`, the element named in `elementName`:
+`setElement` with `elementName` and `elementUpdate.webService`:
 - Omitted members keep their stored values. `method` alone: another method of the same service. `service` naming
   ANOTHER service without `method`: refused with that service's methods, nothing written. `timeoutSeconds: 0` clears
   the timeout; `ignoreErrors: false` clears the flag. A block that names nothing is refused.
-- The same service and method (case ignored): a SETTINGS change; only the timeout and the flag change - UNLESS the
+- The same service and method (case ignored): a SETTINGS change of the timeout and the flag only - UNLESS the
   stored method differs in case from the service's: then it is a retarget, guarded as below.
 - Another method or service: a RETARGET:
   * EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped,
     `RequestBody` included; `Success`, `Response` and `StatusCode` keep their identity here, so their readers stay
-    valid (the Process Designer re-creates those three under new ids and leaves their readers dangling);
+    valid (the designer re-creates those three under new ids, leaving their readers dangling);
   * the answer lists every dropped input binding WITH its value, in the `addMapping` write shape, so one call
     re-applies those whose target name the new method still has;
   * a service change ALWAYS renames the caption to `<service caption, or its name> <N>` (`setElement` has no
@@ -127,15 +126,15 @@ same modify batch, can address the generated names.
   * REFUSED, nothing written, while anything - another element, a process parameter, a flow condition, a formula -
     reads ANY other parameter of the element: an output, a nested item, an input, `RequestBody`. A same-named output
     of the new method is a new parameter and does not keep its readers. The refusal names each reader. Remove or
-    re-point those uses in a SEPARATE, earlier call: the check also reads the process as the request found it, so
-    clearing them in the same batch does not help.
+    re-point those uses in a SEPARATE, earlier call: the check reads the process as the request found it, so the
+    same batch does not help.
 - A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and
   describe shows it with an issue.
 
 == When the service changes under a process ==
-Each time Creatio loads a process from the database it re-reads every Call web service element from its service.
-When the service is gone, or no longer has the stored method spelled exactly, that load REMOVES the element's service
-parameters, references to them stop working, and a save of the process keeps them removed.
+Every load of a process from the database re-reads each Call web service element from its service. When the
+service is gone, or no longer has the stored method spelled exactly, that load REMOVES the element's service
+parameters, references to them stop working, and a save keeps them removed.
 - `describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in
   `issues`: the call fails at run time, `ignoreErrors` or not (the lookup runs before the error handling). An issue
   saying the service could not be read or checked means UNKNOWN, not failing.
@@ -144,21 +143,24 @@ parameters, references to them stop working, and a save of the process keeps the
 - In the Process Designer, when the service exists but lacks the stored method, OPENING the element deletes EVERY
   parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows; closing its
   panel marks it invalid, and a designer save keeps that. When the service itself is gone, the load has already
-  removed the service parameters, and the designer leaves `Success`, `Response` and `StatusCode`.
+  removed the service parameters, and the designer leaves those three.
 - So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify: a missing method,
-  retarget with `setElement` (`webService.method`); a missing service, install the package that carries it (a
-  service registered again gets another UId) or retarget to another one (`webService.service` + `webService.method`).
-  A retarget is refused while anything still reads a service parameter of the element: remove those readers in a
-  separate, earlier call. `methodResolved: false` is the signal.
-- `issues` also report nested items that differ from the service (the designer rebuilds them from the service when
-  the element's properties panel is opened), a missing `Success` / `StatusCode` / `Response` (the run stops with an
-  error), an element the designer marked invalid (a required input not set), and the
-  inner-list and duplicate-item shapes below.
+  retarget with `setElement` (`webService.method`); a missing service, install the package that carries it (a service
+  registered again gets another UId) or retarget (`webService.service` + `webService.method`).
+  `methodResolved: false` is the signal. A retarget is refused while anything reads a parameter of the element, a
+  removed one too; a read of a removed one also makes Creatio's pre-save check refuse EVERY modify, an unrelated one
+  too, nothing saved. Its remedy (add the parameter, or correct the reference) fails; the notice after it names the
+  elements and the order: restore the service or method in Studio > Web services and repeat (unless the process was
+  saved in the designer since); else remove or replace every read in an earlier request, then retarget and re-bind
+  the reads in one request.
+- `issues` also report nested items that differ from the service (the designer rebuilds them when the element's panel
+  is opened), a missing `Success` / `StatusCode` / `Response` (the run stops with an error), an element the designer
+  marked invalid (a required input not set), and the inner-list and duplicate-item shapes below.
 
 == Run time ==
 - An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`,
   whatever `ignoreErrors` is: branch on them.
-- A call that gets NO HTTP answer (a refused or unreachable connection, an expired timeout): with `ignoreErrors` off
+- A call with NO HTTP answer (a refused or unreachable connection, an expired timeout): with `ignoreErrors` off
   the element and the process FAIL; with it on the element completes with `Success` false and `Response` holding the
   error text, and `StatusCode` is NOT written.
 - `ignoreErrors` needs Creatio 8.3.2 or later (earlier builds ignore the flag). While feature
@@ -177,8 +179,8 @@ parameters, references to them stop working, and a save of the process keeps the
   different names silently sends one value.
 
 == Notices (warnings: the process saves) ==
-Tell the user each. Besides those named above: a required input with no value (the Process Designer marks such an
-element invalid), and a duplicate item name or tag at any depth.
+Tell the user each. Besides those above: a required input with no value (the designer marks the element invalid),
+and a duplicate item name or tag at any depth.
 
 == Read back ==
 `describe-business-process` (`element=<name>` or `mode=full`) returns the element's `webService` block: `service`
@@ -193,7 +195,7 @@ makes the block a retarget, not a no-op.
 
 Evidence: build-time rules pinned by CrtProcessBuilder <CRTPROCESSBUILDER-WEBSERVICE-TBD> unit tests. Measured on a
 stand on 2026-11-03 (designer-built elements): a 404 completed the element, `ignoreErrors` on or off; a refused
-connection completed it with `ignoreErrors` on and failed the process with it off; the designer deleted every
-parameter of an element whose method no longer resolved; an unrelated modify deleted the service parameters of an
+connection completed it with the flag on and failed the process with it off; the designer deleted every
+parameter of an element with an unresolved method; an unrelated modify deleted the service parameters of an
 element whose stored method differed in case. The run-time rules for `RequestBody`, the timeout, `ignoreErrors`,
 duplicates and the inner list are read from the Creatio core source and the designer client code, not measured.

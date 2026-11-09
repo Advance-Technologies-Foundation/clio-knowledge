@@ -218,7 +218,8 @@ public sealed class WebServiceGuidanceTests
         [
             "The service resolves by UId, then by name (exact, else ignoring case), then by caption (ignoring case); the first step that matches decides.",
             "The CANONICAL spelling is stored",
-            "an unknown service (the refusal lists every registered service as `Name (caption)` and says to register a missing one in Studio > Web services)",
+            "an unknown service (the refusal lists the first 30 services by name as `Name (caption; methods: a, b, ...)`, up to 8 methods then \"and N more\", the next 70 as `Name (caption)`, counts the rest - one not shown is used by its exact name or UId - and says to register a missing one in Studio > Web services)",
+            "a name or caption matching several services (listed with methods; send the exact name or the UId)",
             "an unknown method (the refusal lists the service's methods)",
             "The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.",
             "A SOAP service is built with the same parameter rules as REST, with a notice saying so.",
@@ -232,13 +233,14 @@ public sealed class WebServiceGuidanceTests
             "Remove or re-point those uses in a SEPARATE, earlier call",
             "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
             "UNLESS the stored method differs in case from the service's: then it is a retarget, guarded as below.",
-            "`Success`, `Response` and `StatusCode` keep their identity here, so their readers stay valid (the Process Designer re-creates those three under new ids and leaves their readers dangling)",
+            "`Success`, `Response` and `StatusCode` keep their identity here, so their readers stay valid (the designer re-creates those three under new ids, leaving their readers dangling)",
             "`describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in `issues`: the call fails at run time, `ignoreErrors` or not (the lookup runs before the error handling). An issue saying the service could not be read or checked means UNKNOWN, not failing.",
             "Every `modify-business-process` request warns for EVERY such element of the process, touched or not; a settings-only change does not resolve it.",
             "In the Process Designer, when the service exists but lacks the stored method, OPENING the element deletes EVERY parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows; closing its panel marks it invalid, and a designer save keeps that.",
-            "When the service itself is gone, the load has already removed the service parameters, and the designer leaves `Success`, `Response` and `StatusCode`.",
+            "When the service itself is gone, the load has already removed the service parameters, and the designer leaves those three.",
             "So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify",
-            "A retarget is refused while anything still reads a service parameter of the element: remove those readers in a separate, earlier call.",
+            "A retarget is refused while anything reads a parameter of the element, a removed one too; a read of a removed one also makes Creatio's pre-save check refuse EVERY modify, an unrelated one too, nothing saved.",
+            "Its remedy (add the parameter, or correct the reference) fails; the notice after it names the elements and the order: restore the service or method in Studio > Web services and repeat (unless the process was saved in the designer since); else remove or replace every read in an earlier request, then retarget and re-bind the reads in one request.",
             "`methodResolved: false` is the signal."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -378,7 +380,7 @@ public sealed class WebServiceGuidanceTests
         // Act
         string[] clauses =
         [
-            "Find the service through the refusal: a build naming a service that does not exist saves nothing and lists every registered service with its caption",
+            "Find the service and method through ONE refusal: a build naming an unknown service saves nothing and lists the registered services with captions and methods",
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
