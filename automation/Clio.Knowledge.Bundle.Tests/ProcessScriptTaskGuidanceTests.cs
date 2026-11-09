@@ -155,12 +155,8 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the reload trailed the compile's answer by about two minutes, and a restart reloads the runtime for every user");
         guide.Should().Contain("Ask the user before that second run when the process has side effects",
             because: "the second run repeats what the elements before the script did");
-        guide.Should().Contain("On a .NET host the code runs only after a restart, and the two-minute retry does not apply",
-            because: "a .NET host keeps the assembly it loaded at startup, so a process-name compile alone leaves the process unable to run");
-        guide.Should().Contain("before it a run proves nothing, and a signal start of a never-loaded process is left Running",
-            because: "a signal start before the restart fails only in the server log, so the process log is not evidence");
-        guide.Should().NotContain("On a .NET host, restart as `core-rules` requires after any compile",
-            because: "the bare pointer did not say the compile answer now names the restart or why a Running instance proves nothing");
+        guide.Should().Contain("On a .NET host the two-minute retry does not apply: the code runs only after the restart `core-rules` requires there",
+            because: "a .NET host keeps the assembly it loaded at startup, so no wait makes the new code run, and core-rules owns the restart rule");
         guide.Should().NotContain("if the run still shows the old code, restart;",
             because: "that sent an agent to a restart a short wait would have made unnecessary");
         guide.Should().Contain("CrtProcessBuilder 1.6.6.61 and later name such a string on the save",
@@ -173,6 +169,12 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the blanket ban was lifted for a clio that runs the named version; the older-clio route is gated, not unconditional");
         coreRules.Should().Contain("run it again about two minutes later (asking first when the process has side effects) and ask before a restart",
             because: "core-rules carries the same exception for a process-name compile, and every operation reads it");
+        coreRules.Should().Contain("On a .NET host that compile does not reload anything: the process runs the compiled code only after the restart, and a run before it proves nothing",
+            because: "a .NET host keeps the configuration assembly it loaded at startup until the application restarts");
+        coreRules.Should().Contain("a clio newer than 8.1.0.147 warns that the process \"does NOT run the compiled code yet\"",
+            because: "only a clio released after 8.1.0.147 gives that warning, so the boundary sits next to the instruction it gates");
+        coreRules.Should().Contain("Ask the user before that restart even when they agreed to the compile",
+            because: "a restart reloads the application for every user, and the consent to the compile does not cover it");
         coreRules.Should().NotContain("run it again a minute later",
             because: "one minute was shorter than the measured reload");
     }
