@@ -157,6 +157,8 @@ public sealed class ProcessScriptTaskGuidanceTests
             because: "the second run repeats what the elements before the script did");
         guide.Should().Contain("On a .NET host the two-minute retry does not apply: the code runs only after the restart `core-rules` requires there",
             because: "a .NET host keeps the assembly it loaded at startup, so no wait makes the new code run, and core-rules owns the restart rule");
+        guide.Should().Contain("the compile's answer names that host (with an older clio, ask the user)",
+            because: "the branch depends on the host, so the agent must be told how to tell which one it is on");
         guide.Should().NotContain("if the run still shows the old code, restart;",
             because: "that sent an agent to a restart a short wait would have made unnecessary");
         guide.Should().Contain("CrtProcessBuilder 1.6.6.61 and later name such a string on the save",
