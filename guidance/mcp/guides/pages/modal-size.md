@@ -5,7 +5,7 @@ Owns the size of a Freedom UI modal window: where it lives, how to read and chan
 WHERE THE SIZE LIVES
 - A modal window's size is NOT in the page body. It is `modalSettings.size` in the page's `AppearanceSettings` add-on (`<Page>AppearanceSettings`). The Page Designer writes the same add-on (Page settings -> Appearance -> Modal window size).
 - `layoutConfig.width` of the `Main` container is NOT the window size: it is inherited from `BaseMiniPageTemplate` and changing it leaves the window as it was. Inner container widths and CSS do not change the window size either.
-- A modal page is a page that inherits `BaseMiniPageTemplate`. A form page, a list page or any other page has no modal window size: the tools refuse it.
+- A modal page is a page that inherits `BaseMiniPageTemplate`. A form page, a list page or any other page has no modal window size: the tools refuse it. Tell the user the page is not a modal window and change nothing.
 
 MUST
 - Change a modal window's size ONLY with `set-page-modal-size`. MUST NOT edit `layoutConfig.width` of `Main`, inner container widths, or CSS to make a modal window bigger or smaller — `update-page` reports success and the window does not change.
@@ -35,4 +35,4 @@ PACKAGE
 RESULT
 `set-page-modal-size` returns `previousSize`, `previousSourcePackageName` and `size`: name the old size, the new size and the package to the user.
 
-Evidence: measured on Creatio 10.2 (Sales Enterprise, Marketing, Service Enterprise; MSSQL) — a size written with `set-page-modal-size` is returned by the runtime `AppearanceSettingsService` at once, for a page without its own add-on (created in the app's package) and for a vendor page (`EmailMiniPage`, add-on in `CrtUIv2`).
+Evidence: measured on 2026-11-06 on Creatio 10.2.1027 (Sales Enterprise, Marketing, Service Enterprise; MSSQL) — a size written with `set-page-modal-size` is returned by the runtime `AppearanceSettingsService` at once, for a page without its own add-on (created in the app's package) and for a vendor page (`EmailMiniPage`, add-on in `CrtUIv2`). Runtime only: on that stand the Page Designer's size panel showed its default M after reopening, even for a size the designer itself had saved, so the designer showing the written size as selected is not confirmed.

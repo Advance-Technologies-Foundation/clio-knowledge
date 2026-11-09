@@ -31,6 +31,8 @@ public sealed class PageModalSizeGuidanceTests
             "| `large` | L | 3 |",
             "| `extra-large` | XL | 4 |",
             "`crt.OpenPageRequest`",
+            "Tell the user the page is not a modal window and change nothing",
+            "keeps every other add-on field",
             "call `get-page-modal-size` with the same `package-name` that `set-page-modal-size` will write to",
             "Requires a clio that provides the `get-page-modal-size` and `set-page-modal-size` tools"
         ];
