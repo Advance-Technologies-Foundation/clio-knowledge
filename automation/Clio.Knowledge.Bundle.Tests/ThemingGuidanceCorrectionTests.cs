@@ -115,6 +115,8 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "below 10.2.96 the confirmed theme can still be created without its background");
         guide.Should().Contain("never fall back to `create-theme`",
             because: "a refused update leaves the existing theme as it is, and a create would add a second theme");
+        guide.Should().Contain("for a call with a background argument see \"Theme background\" instead",
+            because: "the Constraints rule for a version below 10.0.0 must not stop a call the background floor refused");
     }
 
     [Test]
