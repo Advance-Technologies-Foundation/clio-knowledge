@@ -1,5 +1,5 @@
 clio MCP existing-app maintenance guide
-Moved to `existing-app-maintenance-details`: column-default round-trip fields, section-creation failure background, why merged column reads return unknowns, section-title language preservation, translations evidence, the full reuse example. Read it when you re-apply, remove or read back a column default, when `create-app-section` keeps failing, or before deleting a section.
+Moved to `existing-app-maintenance-details`: column-default round-trip fields, section-creation failure background, why merged column reads return unknowns, the full reuse example. Read it when you re-apply, remove or read back a column default, when `create-app-section` keeps failing, or before deleting a section.
 
 Canonical flow
 - Prefer `discover -> inspect -> mutate -> verify` for minimal edits to an existing app.

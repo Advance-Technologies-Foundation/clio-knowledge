@@ -276,11 +276,11 @@ public sealed class LocalizationGuidanceTests
             because: "the environment search replaces the walk up the parent chain");
         translation.Should().NotContain("`Maintainer`",
             because: "one majority rule decides between packages; a second rule by maintainer contradicted it");
-        translation.Should().Contain("A result of exactly 500 rows may be cut: narrow the read with the `schema` item before counting",
+        translation.Should().Contain("Count only a complete read: a result of exactly 500 rows may be cut, so narrow the read before counting",
             because: "a share counted on a cut read can clear 70% that the full read does not");
-        translation.Should().Contain("for a `Caption` key keep the `schema` item too, once per found schema",
-            because: "every object has a Caption, so a read by that key alone is cut at 500 rows");
-        translation.Should().Contain("Search each distinct `en-US` text once and reuse the result",
+        translation.Should().Contain("then read those same keys, schema by schema, in the target culture",
+            because: "the target-culture count covers only the keys whose en-US value is the searched text");
+        translation.Should().Contain("Reuse a search for every page and culture of the request",
             because: "the same label on several pages and cultures needs one search, not one per page");
         translation.Should().Contain("(`coverage.sameAsDefault`) proves nothing either way: search its text in the environment",
             because: "a word can legitimately be the same in two languages, so equality is checked, not assumed");
@@ -288,18 +288,24 @@ public sealed class LocalizationGuidanceTests
             because: "the localize-page availability gate covers page keys only; titles have their own tools");
         translation.Should().Contain("read the column's own title on the object that owns the column (`<Key>` `Columns.<ColumnName>.Caption`), never the title of the object it references",
             because: "a platform column such as Account.Owner is a Lookup to Contact, and its title is not Contact's");
-        translation.Should().Contain("set the `manager` item to `ClientUnitSchemaManager` and keep the rows whose `Key` is `LocalizableStrings.<name>.Value`",
+        translation.Should().Contain("A column of an object from another package (a platform object), whatever its label:",
+            because: "the platform-column rule wins over the referenced-object rule for every column of another package's object");
+        translation.Should().Contain("A column of the app's own object whose label is the referenced object's title",
+            because: "only the app's own column takes the referenced object's title");
+        translation.Should().Contain("panel, group and tab titles are `LocalizableStrings.<name>.Value` keys of `ClientUnitSchemaManager` schemas",
             because: "a panel or group title takes the term of the platform's page strings, not an object title");
         translation.Should().Contain("The environment is every package except the app's own package being translated",
             because: "a customer's own customization is a source of terms, not only the platform");
-        translation.Should().Contain("use the value that holds at least 70% of the rows",
+        translation.Should().Contain("use the one that holds at least 70% of the rows",
             because: "a clear majority is used without a question; one stray title must not outweigh the rest");
         translation.Should().Contain("No value reaches 70%: write no value for that label and list it to the user",
             because: "only a split without a clear majority goes to the user");
         translation.Should().NotContain("is ordinary language: translate it by meaning",
             because: "a role label is looked up in the environment before it is translated by meaning");
-        translation.Should().Contain("Drop the values equal to the `en-US` text: they are no title in that culture",
-            because: "a culture present in a read does not prove a translation");
+        translation.Should().Contain("Rows of the app's own package do not count",
+            because: "titles an earlier run wrote must not vote for themselves");
+        translation.Should().Contain("when that value equals the `en-US` text, keep it only if the word is the same in both languages",
+            because: "a culture present in a read does not prove a translation, and the en-US word can be the right one");
         translation.Should().Contain("Choose every value as \"Choosing the text\" below says",
             because: "the step that writes values must send the agent to the rules for choosing them");
         translation.Should().Contain("Choosing the text (step 3, and every column title in step 5):",
@@ -312,8 +318,12 @@ public sealed class LocalizationGuidanceTests
             because: "inherited keys already carry the platform's own translation and tone");
         translation.Should().Contain("a Boolean \"Taken into account\"",
             because: "the contrast example keeps the object's title out of ordinary phrases");
-        translation.Should().Contain("write no value for that label",
+        translation.Should().Contain("Report ambiguity instead of guessing",
             because: "an ambiguous label is reported to the user, not guessed");
+        translation.Should().Contain("Readback: `set-entity-schema-properties` compares the object title in every culture it writes",
+            because: "the moved readback rule must arrive in its new owner");
+        maintenance.Should().NotContain("Readback: `set-entity-schema-properties` compares",
+            because: "the readback rule has one owner, page-schema-translation");
         translation.Should().Contain("The summary names the source of every translated value",
             because: "the user must see which terms were read from the environment and which were chosen");
         translation.Should().Contain("Not page resources — object, column and section titles:",
