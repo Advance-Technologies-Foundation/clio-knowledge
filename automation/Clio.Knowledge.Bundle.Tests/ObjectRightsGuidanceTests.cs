@@ -118,6 +118,8 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
     [TestCase("grantee + exactly one of position, above, remove-row for a move or a removal",
         TestName = "ObjectRights_ShouldListTheLayoutArgumentsInTheArgsLine")]
+    [TestCase("enable-operation-permissions; disable-operation-permissions; package; preview.",
+        TestName = "ObjectRights_ShouldListThePackageArgumentInTheArgsLine")]
     [TestCase("A clio without them refuses those arguments as unknown: then move or remove the row in the Object permissions designer",
         TestName = "ObjectRights_ShouldFallBackToTheDesignerOnAClioWithoutTheLayoutArguments")]
     [TestCase("which can WIDEN their access", TestName = "ObjectRights_ShouldStateThatARemovalCanWidenAccess")]
@@ -209,6 +211,31 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("`All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008`",
         TestName = "ObjectRights_ShouldOwnTheAllEmployeesId")]
     [TestCase("returns success with ZERO rows", TestName = "ObjectRights_ShouldStateThatADeniedReadIsNotAnError")]
+    [TestCase("holds exactly the rows stored for the object, in priority order",
+        TestName = "ObjectRights_ShouldStateWhatTheBindingHolds")]
+    [TestCase("Without it the package of the object's schema is used",
+        TestName = "ObjectRights_ShouldStateTheDefaultBindingPackage")]
+    [TestCase("You MUST pass package when the object belongs to a package that is not open for editing",
+        TestName = "ObjectRights_ShouldRequireThePackageForALockedObject")]
+    [TestCase("a missing or locked package is refused before any write, and the refusal names a package to use",
+        TestName = "ObjectRights_ShouldStateThatALockedPackageIsRefusedFirst")]
+    [TestCase("A preview does NOT fail on a refused package",
+        TestName = "ObjectRights_ShouldStateThatAPreviewShowsARefusedPackage")]
+    [TestCase("no second binding is written", TestName = "ObjectRights_ShouldStateThatNoSecondBindingIsWritten")]
+    [TestCase("While the switch is OFF the bound rows decide nothing",
+        TestName = "ObjectRights_ShouldStateThatBoundRowsNeedTheSwitch")]
+    [TestCase("Package install adds and updates rows but never deletes them",
+        TestName = "ObjectRights_ShouldStateThatInstallNeverDeletesRows")]
+    [TestCase("revoke the role's operations instead of removing its row",
+        TestName = "ObjectRights_ShouldPreferARevokeToWithdrawInstalledAccess")]
+    [TestCase("run the same call again — it changes no row and binds them",
+        TestName = "ObjectRights_ShouldStateHowToRepairAFailedBinding")]
+    [TestCase("After a failed remove-row the same call is refused",
+        TestName = "ObjectRights_ShouldStateHowToRepairTheBindingAfterARemoval")]
+    [TestCase("MUST: that export rewrites the package folders from the database and deletes on-disk items the database lacks",
+        TestName = "ObjectRights_ShouldCarryTheDestructiveExportPrecondition")]
+    [TestCase("not reproduced by an install on a clean site",
+        TestName = "ObjectRights_ShouldStateTheEvidenceOfTheInstallRules")]
     [Description("object-rights keeps each rule of the one-object, explicit-flag contract that an agent must weigh before a write; losing one of them in an edit turns the article back into the old contract.")]
     public void ObjectRights_ShouldStateTheContractRule(string rule)
     {

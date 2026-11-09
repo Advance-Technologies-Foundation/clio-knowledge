@@ -1,7 +1,8 @@
 clio MCP object-rights guide
 
 Owns: the row priority rule of object operation permissions; the set-object-rights rules for a grant, a
-revoke, a move or a removal of a role's row, and turning operation permissions on or off; and the list →
+revoke, a move or a removal of a role's row, and turning operation permissions on or off; the package
+binding set-object-rights writes so the rows ship with the app (the package argument); and the list →
 ask → grant flow for an object and its lookups.
 
 Manage OBJECT operation permissions — who may read/create/edit/delete ANY record of an entity (the
@@ -236,7 +237,8 @@ Package binding (the rows ship with the app):
   pass package when the object belongs to a package that is not open for editing (a product object,
   a locked app) or when the developer keeps rights in a package of their own: a missing or locked
   package is refused before any write, and the refusal names a package to use. The preview names the
-  package and the binding it would write.
+  package and the binding it would write. A preview does NOT fail on a refused package: it answers
+  success and states the refusal in its binding line — read that line before you ask for the yes.
 - Rows already bound by hand in another package or under another name are reported, and no second
   binding is written: keep that binding in step yourself, or remove it and re-run the call to bind the
   rows in the named package.
@@ -250,11 +252,23 @@ Package binding (the rows ship with the app):
 - remove-row deletes the row here and takes it out of the binding, so a clean install does not get it.
   Package install adds and updates rows but never deletes them: a site that already installed the
   package keeps the removed row. Say so when the developer removes a row from an app that is already
-  installed elsewhere.
+  installed elsewhere. To withdraw access on those sites too, revoke the role's operations instead of
+  removing its row: install updates the bound row, and a cleared row denies.
 - If the rights are saved but the binding fails, the call fails and says so; run the same call again —
-  it changes no row and binds them.
-- In file system development mode the binding reaches the database only: run pkg-to-file-system before
-  committing the package.
+  it changes no row and binds them. After a failed remove-row the same call is refused (the role has no
+  row any more): run the switch call that matches the object's current state instead
+  (enable-operation-permissions when it is ON, disable-operation-permissions when it is OFF) — it changes
+  nothing and binds the rows.
+- In file system development mode the binding reaches the database only, and the package folder needs
+  pkg-to-file-system before it is committed. MUST: that export rewrites the package folders from the
+  database and deletes on-disk items the database lacks, so commit or otherwise preserve on-disk work and
+  confirm with the user first, and run it right after the write; the full rule is get-guidance
+  name=data-bindings.
+
+Evidence: the install rules above (rows are upserted by id with every column force-updated, a role
+travels by SysAdminUnit id, a row missing from the binding is never deleted, the switch travels with the
+schema) were read from the Creatio core package-install source, not reproduced by an install on a clean
+site. Treat them as the expected outcome and check the target with get-object-rights after the install.
 
 ## Give a role access to an object and its lookups
 1. Read: get-object-rights entity-schema-name=<Object> include-connected=true (and grantee=<role id> to
