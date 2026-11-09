@@ -20,7 +20,10 @@ Version boundary: get-object-rights and set-object-rights require a clio release
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
 permissions designer instead. Moving or removing a row (position, above, remove-row) requires clio
 8.1.0.147 or later. A clio without them refuses those arguments as unknown: then move or remove
-the row in the Object permissions designer.
+the row in the Object permissions designer. Binding the rows to a package (the package argument and
+every rule under Package binding) requires clio <CLIO-PACKAGE-BINDING-TBD> or later. An older clio refuses package as
+unknown and binds nothing: the rights stay on this site only, so tell the developer they do not ship
+with the app.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`. The
 "Use record permissions" switch and the object's DEFAULT record rules (which rights a new record gets) are
@@ -97,7 +100,7 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
 ## set-object-rights
 Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke; grantee + exactly
 one of position, above, remove-row for a move or a removal (see Move and remove);
-enable-operation-permissions; disable-operation-permissions; package; preview.
+enable-operation-permissions; disable-operation-permissions; package (clio <CLIO-PACKAGE-BINDING-TBD> or later); preview.
 - ONE object per call. It never touches the object's lookups: each lookup is its own call.
 - operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
   grant and revoke — nothing is granted by default, and a grant or revoke without it (or with a value
@@ -228,10 +231,11 @@ Results:
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. It does NOT change column or record permissions.
 
-Package binding (the rows ship with the app):
-- After every successful call — a re-run that changes no row included — the object's stored rows are
-  bound to a package: the binding SysEntitySchemaOperationRight_<object code> holds exactly the rows
-  stored for the object, in priority order. Without it the rights stay on this site only, and the app
+Package binding (the rows ship with the app; clio <CLIO-PACKAGE-BINDING-TBD> or later, see Version boundary):
+- After every successful call that writes (not preview=true) — a re-run that changes no row included —
+  the object's stored rows are bound to a package: the binding SysEntitySchemaOperationRight_<object
+  code> holds exactly the rows stored for the object, in priority order; an object with no stored rows
+  left has that binding removed. Without it the rights stay on this site only, and the app
   installs elsewhere with the objects' default permissions.
 - package=<name> names that package. Without it the package of the object's schema is used. You MUST
   pass package when the object belongs to a package that is not open for editing (a product object,
@@ -239,9 +243,13 @@ Package binding (the rows ship with the app):
   package is refused before any write, and the refusal names a package to use. The preview names the
   package and the binding it would write. A preview does NOT fail on a refused package: it answers
   success and states the refusal in its binding line — read that line before you ask for the yes.
-- Rows already bound by hand in another package or under another name are reported, and no second
-  binding is written: keep that binding in step yourself, or remove it and re-run the call to bind the
-  rows in the named package.
+- The object's own binding SysEntitySchemaOperationRight_<object code> may already be in another
+  editable package (an earlier call bound it there). Without package that package is the target: the
+  binding is updated where it is, and the result names the package. With package naming a different
+  package the call is refused before any write, naming the package that holds the binding: pass that
+  package, or remove that binding first.
+- Rows already bound by hand under another name are reported, and no second binding is written: keep
+  that binding in step yourself, or remove it and re-run the call to bind the rows in the named package.
 - The "Use operation permissions" switch is part of the object's schema, not of the binding. The result
   says whether the schema is in the binding's package; when it is not, the package holding the schema
   must be installed too, or the rows arrive under whatever switch the target has. While the switch is OFF

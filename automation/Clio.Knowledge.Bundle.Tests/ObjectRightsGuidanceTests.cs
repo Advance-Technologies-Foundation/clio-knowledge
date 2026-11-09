@@ -118,7 +118,7 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
     [TestCase("grantee + exactly one of position, above, remove-row for a move or a removal",
         TestName = "ObjectRights_ShouldListTheLayoutArgumentsInTheArgsLine")]
-    [TestCase("enable-operation-permissions; disable-operation-permissions; package; preview.",
+    [TestCase("enable-operation-permissions; disable-operation-permissions; package (clio <CLIO-PACKAGE-BINDING-TBD> or later); preview.",
         TestName = "ObjectRights_ShouldListThePackageArgumentInTheArgsLine")]
     [TestCase("A clio without them refuses those arguments as unknown: then move or remove the row in the Object permissions designer",
         TestName = "ObjectRights_ShouldFallBackToTheDesignerOnAClioWithoutTheLayoutArguments")]
@@ -222,6 +222,10 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("A preview does NOT fail on a refused package",
         TestName = "ObjectRights_ShouldStateThatAPreviewShowsARefusedPackage")]
     [TestCase("no second binding is written", TestName = "ObjectRights_ShouldStateThatNoSecondBindingIsWritten")]
+    [TestCase("With package naming a different package the call is refused before any write, naming the package that holds the binding",
+        TestName = "ObjectRights_ShouldStateThatAnOwnBindingElsewhereRefusesAnotherPackage")]
+    [TestCase("Without package that package is the target: the binding is updated where it is",
+        TestName = "ObjectRights_ShouldStateThatAnOwnBindingElsewhereIsTheDefaultTarget")]
     [TestCase("While the switch is OFF the bound rows decide nothing",
         TestName = "ObjectRights_ShouldStateThatBoundRowsNeedTheSwitch")]
     [TestCase("Package install adds and updates rows but never deletes them",
@@ -326,6 +330,24 @@ public sealed class ObjectRightsGuidanceTests
         // Assert
         normalized.Should().NotContain(retired,
             because: "an unconditional promise hides a session that still has the old access, and a mandatory re-login after every change contradicts the probes");
+    }
+
+    [Test]
+    [Description("The package binding boundary names the first clio release that binds the rows and takes the package argument — a gated placeholder until that release is tagged — and says what an older clio does.")]
+    public void ObjectRights_ShouldStateTheVersionBoundaryOfPackageBinding()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().MatchRegex(
+            @"Binding the rows to a package \(the package argument and every rule under Package binding\) requires clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later",
+            because: "a released clio without the binding refuses package and binds nothing, so an agent must know the release that has it");
+        normalized.Should().Contain("An older clio refuses package as unknown and binds nothing",
+            because: "the agent must tell the developer the rights do not ship on an older clio");
     }
 
     [Test]
