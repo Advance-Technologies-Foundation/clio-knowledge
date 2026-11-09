@@ -28,6 +28,12 @@ public sealed class WebServiceGuidanceTests
     /// </summary>
     internal const string Floor = "<CRTPROCESSBUILDER-WEBSERVICE-TBD>";
 
+    /// <summary>
+    /// The first clio whose pre-send key check declares the block: an older one refuses <c>webService</c> on create,
+    /// <c>addElement</c> and <c>setElement</c> before anything is sent. Not released yet, so the gate-shaped placeholder.
+    /// </summary>
+    internal const string ClioFloor = "<CLIO-WEBSERVICE-TBD>";
+
     private const string ItemId = "process-web-service";
 
     private const string ArticlePath = "guidance/mcp/guides/processes/web-service.md";
@@ -45,10 +51,10 @@ public sealed class WebServiceGuidanceTests
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
-    /// is about 19,900 characters, so a new clause pays for itself with a trim, and a larger addition is reviewed, or
+    /// is about 21,300 characters, so a new clause pays for itself with a trim, and a larger addition is reviewed, or
     /// split, rather than absorbed. The 19,000-byte inline rule is asserted separately.
     /// </summary>
-    private const int DesignTargetResponseCharacters = 20_500;
+    private const int DesignTargetResponseCharacters = 22_000;
 
     [Test]
     [Description("The guide owns the block, states the FULL-contract gate and the floor, and the stored-name rule; it is registered banner-less, ungated and without a legacy route, required by the library, and the element catalog, its details and routing send the reader to it.")]
@@ -74,6 +80,8 @@ public sealed class WebServiceGuidanceTests
         // Assert
         using (new AssertionScope())
         {
+            FloorShape.IsMatch(ClioFloor).Should().BeTrue(
+                because: "a clio floor is a released version or the placeholder the merge gate refuses, nothing else");
             FloorShape.IsMatch(Floor).Should().BeTrue(
                 because: "a floor is a released version or the placeholder the merge gate refuses, nothing else");
             resource.GetProperty("sourcePath").GetString().Should().Be(ArticlePath,
@@ -101,8 +109,8 @@ public sealed class WebServiceGuidanceTests
                 because: "the contract anchor names every member and every route that takes the block");
             guide.Should().Contain($"Needs CrtProcessBuilder {Floor} or later on the environment.",
                 because: "an older package refuses the type, so the floor gates every instruction below it");
-            guide.Should().Contain("Use it only when the FULL contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `webService`; the default reply is shortened, so its silence proves nothing.",
-                because: "only the full contract tells a clio that sends the block from one that does not");
+            guide.Should().Contain($"Use it only when the FULL contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `webService` and clio is at least {ClioFloor}; an older clio refuses the block before sending.",
+                because: "an older clio refuses the block in its pre-send key check, so the package floor alone does not make the block usable");
             guide.Should().Contain("request parameter `title` (body, header, query, path or cookie alike) -> input `title_In`; response parameter `status` -> output `status_Out`",
                 because: "the stored names are what every mapping addresses");
             guide.Should().Contain("addressed dotted: `items_In.name_In`, at any depth",
@@ -139,7 +147,7 @@ public sealed class WebServiceGuidanceTests
             "the describe-only `serviceUId`, `serviceResolved`, `methodResolved`, `parameters` (every stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the `required`, `bound` and `result` flags; no values) and `issues`",
             "A bound input's value comes back in the element's generic `parameters`.",
             "No service default is ever shown.",
-            "To resubmit, send the block back unchanged: the describe-only members are ignored with a warning."
+            "To resubmit, send the block back unchanged - the describe-only members are ignored with a warning - except: a fractional `timeoutSeconds` is refused on write (send whole seconds); `service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's makes the block a retarget, not a no-op."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -161,10 +169,11 @@ public sealed class WebServiceGuidanceTests
         [
             "Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on modify, target `elementName` + `elementParameter`.",
             "the list is bound to that collection too, one request item per source row (rule P1, `process-files`)",
-            "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this.",
-            "it REPLACES the whole body the element would build from its body parameters",
-            "Use it for a method with no body parameter (the shipped `GeminiApiSearch` service builds its JSON body there with a formula), for a body shape mappings cannot express, and for the inner-list workaround",
-            "nothing checks it as JSON, and nothing warns when it and body parameters are both bound"
+            "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list draws the unsourced-inner-list notice.",
+            "when non-null it REPLACES the whole body the element would build from its body parameters; headers, query, path and cookies are still built from theirs.",
+            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
+            "the shipped process `ActionGeminiSearch` builds the JSON body of `GeminiApiSearch.GenerateContent` there with a formula",
+            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -186,7 +195,7 @@ public sealed class WebServiceGuidanceTests
         [
             "declare a process `Collection` with `itemProperties` (at most TWO collection levels, `process-parameters`), then map its items from the output's items",
             "Mapping an item binds the collections above it too (rule P1).",
-            "In the Process Designer the same: map an item first, because the collection picker offers no web-service object array.",
+            "In the Process Designer: map an item first; the designer then binds the collection to the source collection itself.",
             "Not buildable yet: mirroring a list output with `typeFromElement` (refused, pointing at the declared Collection), a scalar-array output into a process parameter, a third collection level"
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -214,16 +223,22 @@ public sealed class WebServiceGuidanceTests
             "The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.",
             "A SOAP service is built with the same parameter rules as REST, with a notice saying so.",
             "`service` naming ANOTHER service without `method`: refused with that service's methods, nothing written.",
-            "EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped, `RequestBody` included; `Success`, `Response` and `StatusCode` keep their identity, so their readers stay valid",
+            "EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped, `RequestBody` included;",
             "the answer lists every dropped input binding WITH its value, in the `addMapping` write shape, so one call re-applies those whose target name the new method still has",
-            "a service change ALWAYS renames the caption to `<service caption> <N>`",
+            "a service change ALWAYS renames the caption to `<service caption, or its name> <N>`",
+            "a registered service that cannot be read (open and save it in Studio > Web services)",
+            "the Process Designer adds that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does not.",
             "REFUSED, nothing written, while anything - another element, a process parameter, a flow condition, a formula - reads ANY other parameter of the element: an output, a nested item, an input, `RequestBody`.",
             "Remove or re-point those uses in a SEPARATE, earlier call",
-            "A multi-instance Call web service element (made in the Process Designer) is refused",
-            "`describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in `issues`",
+            "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
+            "UNLESS the stored method differs in case from the service's: then it is a retarget, guarded as below.",
+            "`Success`, `Response` and `StatusCode` keep their identity here, so their readers stay valid (the Process Designer re-creates those three under new ids and leaves their readers dangling)",
+            "`describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in `issues`: the call fails at run time, `ignoreErrors` or not (the lookup runs before the error handling). An issue saying the service could not be read or checked means UNKNOWN, not failing.",
             "Every `modify-business-process` request warns for EVERY such element of the process, touched or not; a settings-only change does not resolve it.",
-            "A save in the Process Designer of a process whose element no longer resolves DELETES EVERY parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows, and marks the element invalid.",
-            "So FIX FIRST, before any designer save or unrelated modify",
+            "In the Process Designer, when the service exists but lacks the stored method, OPENING the element deletes EVERY parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows; closing its panel marks it invalid, and a designer save keeps that.",
+            "When the service itself is gone, the load has already removed the service parameters, and the designer leaves `Success`, `Response` and `StatusCode`.",
+            "So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify",
+            "A retarget is refused while anything still reads a service parameter of the element: remove those readers in a separate, earlier call.",
             "`methodResolved: false` is the signal."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -245,12 +260,15 @@ public sealed class WebServiceGuidanceTests
         string[] clauses =
         [
             "`Success` (Boolean, out), `Response` (the response body, Text, out), `StatusCode` (the HTTP status code, Integer, out), `RequestBody` (raw request text, Text, in)",
-            "An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`, whatever `ignoreErrors` is.",
-            "with `ignoreErrors` off the element and the process FAIL; with it on the element completes with `Success` false and `StatusCode` 0.",
+            "An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`, whatever `ignoreErrors` is",
+            "with `ignoreErrors` off the element and the process FAIL; with it on the element completes with `Success` false and `Response` holding the error text, and `StatusCode` is NOT written.",
+            "`ignoreErrors` needs Creatio 8.3.2 or later (earlier builds ignore the flag).",
             "While feature `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a failing call still stops the process.",
-            "`timeoutSeconds` covers the whole call, retries included.",
-            "send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
-            "What `RequestBody`, the timeout and the inner-list defect do at run time is read from the Creatio core source and its unit tests, not measured."
+            "It does NOT cover computing the inputs (an empty system setting behind `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.",
+            "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer.",
+            "or later builds with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
+            "While feature `ProcessParameterCollections` is on: a duplicate name among the request items sent, or a duplicate tag among the response items, stops the element, across nesting levels too; a duplicate request tag under different names silently sends one value.",
+            "are read from the Creatio core source and the designer client code, not measured."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -343,8 +361,8 @@ public sealed class WebServiceGuidanceTests
             url.Should().BeFalse(because: "the guide names no stand, host or issue link");
             specPath.Should().BeFalse(because: "the guide names no internal file path of the clio repository or the package");
             standName.Should().BeFalse(because: "the test services of the development stand are not product names");
-            placeholders.Should().OnlyContain(token => token == Floor,
-                because: "the floor is the only unresolved boundary, and it is written in the shape the merge gate refuses");
+            placeholders.Should().OnlyContain(token => token == Floor || token == ClioFloor,
+                because: "the package and clio floors are the only unresolved boundaries, written in the shape the merge gate refuses");
             constantSecrets.Should().BeEmpty(
                 because: "a key or token comes from a system setting or a process parameter; an example with a constant is what an agent copies");
         }
@@ -365,7 +383,8 @@ public sealed class WebServiceGuidanceTests
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
             "Build in two steps: the element first, then the mappings, from the names the answer and describe report.",
-            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant"
+            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant",
+            "When the service itself defaults the key from a system setting (the shipped `GeminiApiSearch` sends `x-goog-api-key` from `GeminiApiKey`), leave that input unbound: an unbound input is skipped."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 

@@ -21,8 +21,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   meant, or the keys valid there. Do not paste a whole described element into `setElement`: clio refuses its
   element-level fields before sending. A described readData / addData / changeData / deleteData block may be
   re-applied: a key describe reports there is ignored, whoever typed it - a success can carry "Read-only fields
-  copied from describe were ignored", and no key it names was saved. Other blocks (email, subProcess,
-  openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
+  copied from describe were ignored", and no key it names was saved. A described `webService` block re-applies too,
+  its describe-only members ignored with a warning, except in the cases `process-web-service` lists. Other blocks
+  (email, subProcess, openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
   filter, signal or connections with setFilter / setSignal / setConnections, not in `setElement`. A bound
   input in element `parameters`, and a parameter's sourceElement / sourceElementParameter / sourceColumn, are
   refused: write them as mappings (for an item property, target the dotted `Parameter.Item` path). Flat
