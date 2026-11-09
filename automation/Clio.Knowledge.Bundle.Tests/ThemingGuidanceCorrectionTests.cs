@@ -99,6 +99,48 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "swapping only the primary values in the get-theme CSS leaves every dependent token on the old brand");
     }
 
+    [Test]
+    [Description("Removes a theme background with a null background argument on update-theme.")]
+    public void ThemingGuide_ShouldRemoveAThemeBackgroundWithNull() =>
+        ReadThemingGuide().Should().Contain("Pass either one as null to `update-theme` to remove it",
+            because: "update-theme has no separate removal argument, so a null image id or color is the only way to remove a background");
+
+    [Test]
+    [Description("Keeps the confirmed theme when the Creatio version refuses its background.")]
+    public void ThemingGuide_ShouldKeepTheThemeWhenTheVersionRefusesItsBackground()
+    {
+        string guide = ReadThemingGuide();
+
+        guide.Should().Contain("After `create-theme`, tell the user and repeat it without the background",
+            because: "below 10.2.96 the confirmed theme can still be created without its background");
+        guide.Should().Contain("never fall back to `create-theme`",
+            because: "a refused update leaves the existing theme as it is, and a create would add a second theme");
+    }
+
+    [Test]
+    [Description("Announces the environment-wide panel icon turn-off before a theme background is written.")]
+    public void ThemingGuide_ShouldAnnounceThePanelIconTurnOffBeforeTheWrite() =>
+        ReadThemingGuide().Should().Contain("That is environment-wide: tell the user before the write",
+            because: "a theme background changes the panel for every account, not only for the theme's accounts");
+
+    [Test]
+    [Description("Binds an existing theme's background image into the theme's own package.")]
+    public void ThemingGuide_ShouldBindAnExistingThemesImageIntoItsOwnPackage() =>
+        ReadThemingGuide().Should().Contain("for an existing theme the Pkg/<package> segment of its `cssFilePath`",
+            because: "an existing theme lives in its own package, not in a branding run's target package");
+
+    [Test]
+    [Description("Keeps the theming article within one get-guidance response.")]
+    public void ThemingGuide_ShouldFitOneGetGuidanceResponse() =>
+        ProcessGuideResponseSizeTests.ResponseSize(FindRepositoryRoot(), ThemingGuidePath)
+            .Should().BeLessThanOrEqualTo(ProcessGuideResponseSizeTests.MaxResponseCharacters,
+                because: "an article that spills out of one response reaches the agent only in part");
+
+    private const string ThemingGuidePath = "guidance/mcp/guides/theming/index.md";
+
+    private static string ReadThemingGuide() =>
+        File.ReadAllText(Path.Combine(FindRepositoryRoot(), ThemingGuidePath));
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
