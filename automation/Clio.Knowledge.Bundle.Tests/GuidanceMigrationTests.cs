@@ -43,6 +43,7 @@ public sealed class GuidanceMigrationTests
         "process-files-report",
         "process-files-parameter",
         "process-send-email-attachments",
+        "process-web-service",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",
@@ -55,7 +56,8 @@ public sealed class GuidanceMigrationTests
         "object-rights",
         "m365-addin-customization",
         "default-record-rights",
-        "portal-sections"
+        "portal-sections",
+        "page-modal-size"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
