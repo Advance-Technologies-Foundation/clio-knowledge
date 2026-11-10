@@ -119,6 +119,11 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-send-email-attachments (after name=process-send-email)
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
+  - CALL a REST or SOAP web service registered in Studio > Web services from a process — the Call web service element
+    (`webService`; build it only when the FULL contract names it): service and method, request values, the response,
+    switching the method -> name=process-web-service;
+    writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
+    name=configuration-webservice-tests; portal routes: name=portal-service-routing)
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:

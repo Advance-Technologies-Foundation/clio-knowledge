@@ -35,7 +35,7 @@ public sealed class PageModalSizeGuidanceTests
             "keeps every other add-on field",
             "call `get-page-modal-size` with the same `package-name` that `set-page-modal-size` will write to",
             "Requires a clio that provides the `get-page-modal-size` and `set-page-modal-size` tools",
-            "name the overriding package (`effectiveSourcePackageName`) to the user instead of retrying with the same `package-name`"
+            "name the overriding package (the `effectiveSourcePackageName` from `get-page-modal-size`, or the package the refusal text names) to the user instead of retrying with the same `package-name`"
         ];
 
         // Assert
