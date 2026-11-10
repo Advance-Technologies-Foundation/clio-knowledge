@@ -1,8 +1,7 @@
 clio MCP process-web-service guide - the Call web service element (webService)
 
 Scope
-This guide owns the `webService` block of the Call web service element: service and method, generated parameters,
-request, response, retargeting, refusals, notices, read-back.
+This guide owns the `webService` block of the Call web service element.
 `process-parameters` owns mappings and declared Collections; `process-files` owns rule P1 (an item mapping binds its
 collection); `process-formulas` owns the formula vocabulary. A C# web service that Creatio EXPOSES is not this
 element: `configuration-webservice`.
@@ -12,9 +11,9 @@ a clio whose contract lacks it refuses the block before sending. The default rep
 proves nothing. Always read the element back: its parameter names come from the service.
 
 == Only a registered service ==
-The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP 1.1 / 1.2); the process tools
+The element calls only a web service REGISTERED in Studio > Web services (REST or SOAP); the process tools
 do not register, change or test one. Nothing the SERVICE stores - its base URI, authentication, header or parameter
-defaults - comes back in any answer. The element's OWN bindings do.
+defaults - comes back in any answer.
 
 == The block ==
 `webService {service, method, timeoutSeconds?, ignoreErrors?}`, on `create-business-process`, `addElement` and
@@ -23,12 +22,13 @@ defaults - comes back in any answer. The element's OWN bindings do.
   "webService": { "service": "UsrOrderService", "method": "GetOrders", "timeoutSeconds": 30, "ignoreErrors": true } }]
 - `service`: its name (code), caption or UId. `method`: the method's name. Both are REQUIRED on
   `create-business-process` and `addElement`; a sole method is not picked for you.
-- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: no overall limit. Negative or over 2147483 is refused.
+- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: no overall limit. Negative or over 2147483 is
+  refused.
 - `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==); default false.
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
-- Caption: omitted, it is `<service caption, or its name> <N>`, as the Process Designer does (`N` the smallest
-  number no other element uses); a sent `caption` is kept. Name the element from the Names block of `process-digest`.
+- Caption: omitted, it is `<service caption, or its name> <N>`, as the designer does (`N` the smallest free
+  number); a sent `caption` is kept. Name the element from the Names block of `process-digest`.
 - The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.
 
 == Naming the service and method ==
@@ -49,8 +49,8 @@ defaults - comes back in any answer. The element's OWN bindings do.
 
 == A task that names no service or method ==
 1. Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves
-   nothing and lists the registered services with captions and methods (bounds above). Pick the pair that fits; when several fit, ASK the
-   user which; never guess between them.
+   nothing and lists the registered services with captions and methods (bounds above). Pick the pair that fits;
+   when several fit, ASK the user which; never guess between them.
 2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
@@ -85,6 +85,7 @@ modify batch, can address the generated names.
 - A composite body: map a list item from an item of another collection (`items_In.name_In` from
   `ReadContacts.ResultCompositeObjectList.Name`) and the list is bound to that collection too, one request item per
   source row (rule P1, `process-files`). Leaves bound only from parameters, constants or formulas send ONE item.
+  A scalar list (`tags_In`) cannot take rows from a list of objects, nor the reverse: the types differ, refused.
 - An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection
   as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list
   draws the unsourced-inner-list notice.
@@ -101,15 +102,15 @@ modify batch, can address the generated names.
 - An object-array response: declare a process `Collection` with `itemProperties` (at most TWO collection levels,
   `process-parameters`), then map its items from the output's items: `targetProcessParameter`
   `OrdersParameter.Number` from `sourceElementParameter` `orders_Out.number_Out`. Mapping an item binds the
-  collections above it too (rule P1). In the Process Designer: map an item first; the designer then binds the
-  collection to the source collection itself.
+  collections above it too (rule P1).
 - Not buildable yet: mirroring a list output with `typeFromElement` (refused, pointing at the declared Collection), a
   scalar-array output into a process parameter, a third collection level, and the designer's "Create from element"
   shape. Read `Response` in a Script task (`process-script-task`) instead.
 
 == Changing the service or method (modify) ==
-`setElement` with `elementName` and `elementUpdate.webService`:
-- Omitted members keep their stored values. `method` alone: another method of the same service. `service` naming
+`setElement` with `elementName` and `elementUpdate.webService`, top-level elements only (a nested one: the designer):
+- Omitted members keep their stored values (a service change resets the timeout, below). `method` alone: another
+  method of the same service, refused while the stored service is not registered. `service` naming
   ANOTHER service without `method`: refused with that service's methods, nothing written. `timeoutSeconds: 0` clears
   the timeout; `ignoreErrors: false` clears the flag. A block that names nothing is refused.
 - The same service and method (case ignored): a SETTINGS change of the timeout and the flag only - UNLESS the
@@ -118,7 +119,7 @@ modify batch, can address the generated names.
   * EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped,
     `RequestBody` included; `Success`, `Response` and `StatusCode` keep their identity here, so their readers stay
     valid (the designer re-creates those three under new ids, leaving their readers dangling);
-  * the answer lists every dropped input binding WITH its value, in the `addMapping` write shape, so one call
+  * the answer lists every dropped input binding WITH its value, as `addMapping` `mapping` objects, so one call
     re-applies those whose target name the new method still has;
   * a service change ALWAYS renames the caption to `<service caption, or its name> <N>` (`setElement` has no
     caption member) and resets the timeout unless the block sends one; a method change keeps both;
@@ -143,19 +144,19 @@ parameters, references to them stop working, and a save keeps them removed.
   parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows; closing its
   panel marks it invalid, and a designer save keeps that. When the service itself is gone, the load has already
   removed the service parameters, and the designer leaves those three.
-- So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify.
-  `methodResolved: false` is the signal. The request's own load has already dropped the service inputs and their
-  bindings, so a retarget lists at most a `RequestBody` binding. To keep them, restore the method in Studio > Web
-  services, or install the package that carries the service (one registered again gets another UId). Else retarget
-  with `setElement` (`webService.method`, or `webService.service` + `webService.method`) and bind the inputs again.
-  A retarget is refused while anything reads a parameter of the element, a removed one too; a read of a removed one
-  also makes Creatio's pre-save check refuse EVERY modify, an unrelated one too, nothing saved. Adding the parameter
-  does not repair it, nor does re-pointing the element; the notice names the elements and the order: restore as
-  above and repeat (unless the process was saved in the designer since); else remove or replace every read in an
+- So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify. `methodResolved: false`
+  is the signal (an unreadable service: unknown, above). The request's own load has already dropped the service inputs
+  and their bindings, so a retarget lists at most a `RequestBody` binding. To keep them, restore the method in
+  Studio > Web services, or install the package that carries the service (one registered again gets another UId).
+  Else retarget with `setElement` (`webService.method`, or `webService.service` + `webService.method`) and bind the
+  inputs again. A retarget is refused while anything reads a parameter of the element, a removed one too; a read of a
+  removed one also makes Creatio's pre-save check refuse EVERY modify, an unrelated one too, nothing saved. Adding the
+  parameter does not repair it, nor does re-pointing the element; the notice names the elements and the order: restore
+  as above and repeat (unless the process was saved in the designer since); else remove or replace every read in an
   earlier request, then retarget and re-bind the reads in one request.
 - `issues` also report nested items that differ from the service (the designer rebuilds them when the element's panel
-  is opened), a missing `Success` / `StatusCode` / `Response` (the run stops with an error), an element the designer
-  marked invalid (a required input not set), and the inner-list and duplicate-item shapes below.
+  is opened), a missing `Success` / `StatusCode` / `Response` (the run stops with an error), an element or parameter
+  marked invalid (e.g. a required input not set), and the inner-list and duplicate-item shapes below.
 
 == Run time ==
 - An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`,
@@ -163,16 +164,17 @@ parameters, references to them stop working, and a save keeps them removed.
 - A call with NO HTTP answer (a refused or unreachable connection, an expired timeout): with `ignoreErrors` off
   the element and the process FAIL; with it on the element completes with `Success` false and `Response` holding the
   error text, and `StatusCode` is NOT written.
-- `ignoreErrors` needs Creatio 8.3.2 or later (earlier builds ignore the flag). While feature
+- While feature
   `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a failing call
   still stops the process. It does NOT cover computing the inputs (an empty system setting behind
   `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.
 - Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it.
   `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond
-  the method's timeout. When it expires, the call fails like a call with no answer.
-- An inner list with no source of its own while its items are bound (`items_In.parts_In`): Creatio builds before the
-  platform fix for arrays inside arrays (10.1.37 among them; fixed in 10.1.540 and 10.2.1), or later builds with
-  feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a
+  the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier
+  attempt had an HTTP error answer: that answer completes the element.
+- An inner list with no source of its own while its items are bound (`items_In.parts_In`): Creatio builds without the
+  platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays`
+  on, send NO value for that inner list. Bind the inner list itself to a
   collection, or build the body in `RequestBody`. The notice comes on every environment: the fix cannot be read.
 - While feature `ProcessParameterCollections` is on: a duplicate name among the request items sent, or a duplicate
   tag among the response items, stops the element, across nesting levels too; a duplicate request tag under
@@ -193,9 +195,9 @@ warning - except: a fractional `timeoutSeconds` is refused on write (send whole 
 method-only block, which is refused; a stored method whose case differs from the service's makes the block a
 retarget, not a no-op.
 
-Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on a
-stand on 2026-11-03 (designer-built elements): a 404 completed the element, `ignoreErrors` on or off; a refused
-connection completed it with the flag on and failed the process with it off; the designer deleted every
-parameter of an element with an unresolved method; an unrelated modify deleted the service parameters of an
-element whose stored method differed in case. Every other run-time rule is read from the Creatio core source and
-the designer client code, not measured.
+Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on Creatio 10.1.37 (.NET
+Framework) on 2026-11-03 (designer-built elements): a 404 completed the element, `ignoreErrors` on or off; a refused
+connection completed it with the flag on and failed the process with it off; the designer deleted every parameter of
+an element with an unresolved method; an unrelated modify deleted the service parameters of an element whose stored
+method differed in case. Every other run-time rule is read from the Creatio core source and the designer client code,
+not measured.

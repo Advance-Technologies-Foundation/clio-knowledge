@@ -67,7 +67,7 @@ System actions (palette group "System actions"):
 - `scriptTask`        Script task  — custom C# (ends with `return true;`; needs a compile), from 1.6.6.30.
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
-- `webService`        Call web service — call a registered service; outputs Success + Http status code.
+- `webService`        Call web service — call a registered service; outputs Success, Response + Http status code.
     BUILDABLE from CrtProcessBuilder **1.6.6.150** via `type:"webService"` with a
     `webService` block (`{service, method, timeoutSeconds?, ignoreErrors?}`), only when the FULL contract names it;
     `process-web-service` owns it.

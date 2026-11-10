@@ -47,6 +47,8 @@ public sealed class WebServiceGuidanceTests
 
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
 
+    private const string VersionsPath = "guidance/mcp/guides/processes/versions.md";
+
     /// <summary>A released four-part package version: the only shape a published floor may take.</summary>
     private static readonly Regex FloorShape = new(@"^\d+(?:\.\d+){3}$", RegexOptions.Compiled);
 
@@ -77,6 +79,7 @@ public sealed class WebServiceGuidanceTests
         string catalog = ReadCollapsed(CatalogPath);
         string details = ReadCollapsed(CatalogDetailsPath);
         string routing = ReadCollapsed(RoutingPath);
+        string versions = ReadCollapsed(VersionsPath);
 
         // Assert
         using (new AssertionScope())
@@ -131,6 +134,8 @@ public sealed class WebServiceGuidanceTests
                 because: "the element entry names the owner of its block");
             routing.Should().Contain("(`webService`; build it only when the FULL contract names it):",
                 because: "routing carries the guide's contract gate, as it does for the other blocks a released clio may not know");
+            versions.Should().Contain("a Call web service element describe reports unresolved -> fix it BEFORE any modify: `process-web-service`",
+                because: "an unrelated modify of a process with a drifted element saves its service parameters away, and the edit path reaches process-versions, not the owner");
             routing.Should().Contain("-> name=process-web-service",
                 because: "an article nothing routes to is never read");
         }
@@ -187,7 +192,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide states that an object-array response is read into a declared Collection of at most two levels, that an item mapping binds its collections, the designer's item-first order, and what is not buildable yet.")]
+    [Description("The guide states that an object-array response is read into a declared Collection of at most two levels, that an item mapping binds its collections, that a scalar list and a list of objects never feed each other, and what is not buildable yet.")]
     public void Guide_ShouldStateTheResponseRules()
     {
         // Arrange
@@ -198,7 +203,7 @@ public sealed class WebServiceGuidanceTests
         [
             "declare a process `Collection` with `itemProperties` (at most TWO collection levels, `process-parameters`), then map its items from the output's items",
             "Mapping an item binds the collections above it too (rule P1).",
-            "In the Process Designer: map an item first; the designer then binds the collection to the source collection itself.",
+            "A scalar list (`tags_In`) cannot take rows from a list of objects, nor the reverse: the types differ, refused.",
             "Not buildable yet: mirroring a list output with `typeFromElement` (refused, pointing at the declared Collection), a scalar-array output into a process parameter, a third collection level"
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -228,7 +233,7 @@ public sealed class WebServiceGuidanceTests
             "A SOAP service is built with the same parameter rules as REST, with a notice saying so.",
             "`service` naming ANOTHER service without `method`: refused with that service's methods, nothing written.",
             "EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped, `RequestBody` included;",
-            "the answer lists every dropped input binding WITH its value, in the `addMapping` write shape, so one call re-applies those whose target name the new method still has",
+            "the answer lists every dropped input binding WITH its value, as `addMapping` `mapping` objects, so one call re-applies those whose target name the new method still has",
             "a service change ALWAYS renames the caption to `<service caption, or its name> <N>`",
             "a registered service that cannot be read (open and save it in Studio > Web services)",
             "the Process Designer adds that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does not.",
@@ -245,7 +250,10 @@ public sealed class WebServiceGuidanceTests
             "A retarget is refused while anything reads a parameter of the element, a removed one too; a read of a removed one also makes Creatio's pre-save check refuse EVERY modify, an unrelated one too, nothing saved.",
             "The request's own load has already dropped the service inputs and their bindings, so a retarget lists at most a `RequestBody` binding. To keep them, restore the method in Studio > Web services, or install the package that carries the service (one registered again gets another UId).",
             "Adding the parameter does not repair it, nor does re-pointing the element; the notice names the elements and the order: restore as above and repeat (unless the process was saved in the designer since); else remove or replace every read in an earlier request, then retarget and re-bind the reads in one request.",
-            "`methodResolved: false` is the signal."
+            "`methodResolved: false` is the signal (an unreadable service: unknown, above).",
+            "`setElement` with `elementName` and `elementUpdate.webService`, top-level elements only (a nested one: the designer):",
+            "Omitted members keep their stored values (a service change resets the timeout, below). `method` alone: another method of the same service, refused while the stored service is not registered.",
+            "an element or parameter marked invalid (e.g. a required input not set)"
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -268,12 +276,12 @@ public sealed class WebServiceGuidanceTests
             "`Success` (Boolean, out), `Response` (the response body, Text, out), `StatusCode` (the HTTP status code, Integer, out), `RequestBody` (raw request text, Text, in)",
             "An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`, whatever `ignoreErrors` is",
             "with `ignoreErrors` off the element and the process FAIL; with it on the element completes with `Success` false and `Response` holding the error text, and `StatusCode` is NOT written.",
-            "`ignoreErrors` needs Creatio 8.3.2 or later (earlier builds ignore the flag).",
             "While feature `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a failing call still stops the process.",
             "It does NOT cover computing the inputs (an empty system setting behind `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.",
-            "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer.",
-            "or later builds with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
+            "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an HTTP error answer: that answer completes the element.",
+            "Creatio builds without the platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
             "While feature `ProcessParameterCollections` is on: a duplicate name among the request items sent, or a duplicate tag among the response items, stops the element, across nesting levels too; a duplicate request tag under different names silently sends one value.",
+            "Measured on Creatio 10.1.37 (.NET Framework) on 2026-11-03 (designer-built elements):",
             "Every other run-time rule is read from the Creatio core source and the designer client code, not measured."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -299,6 +307,7 @@ public sealed class WebServiceGuidanceTests
             .EnumerateArray()
             .Single(item => item.GetProperty("itemId").GetString() == "process-element-catalog")
             .GetProperty("description").GetString()!);
+        string readOnlyInDescription = Regex.Match(catalogDescription, @"while (?<list>[^.]+?) remain read-only").Groups["list"].Value;
         string notBuildable = Regex.Match(catalog, @"NOT yet buildable(?<list>.+?)== Building from a data-id").Groups["list"].Value;
         string detailsEntry = Regex.Match(details, @"- `webService` Call web service(?<entry>.+?)- `callActivity`").Groups["entry"].Value;
         string cannotCreate = Regex.Match(modeling, @"Constructs the builder cannot create \((?<list>[^)]+)\)").Groups["list"].Value;
@@ -312,10 +321,13 @@ public sealed class WebServiceGuidanceTests
             detailsEntry.Should().NotContain("READ-ONLY", because: "the read-only marker would now be a lie");
             cannotCreate.Should().NotBeEmpty(because: "anti-vacuity: process-modeling lists what the builder cannot create");
             cannotCreate.Should().NotContain("webService", because: "the builder creates it now");
-            catalogDescription.Should().NotContain("webService remain read-only",
+            readOnlyInDescription.Should().NotBeEmpty(because: "anti-vacuity: the description lists what remains read-only");
+            readOnlyInDescription.Should().NotContain("webService",
                 because: "a manifest description is what an MCP client shows an agent choosing a guide");
-            catalogDescription.Should().Contain("Call web service (webService, owned by process-web-service)",
-                because: "the description lists what builds today and names the owner");
+            catalogDescription.Should().Contain("Call web service (webService, only when the FULL contract names it; owner process-web-service)",
+                because: "the description lists what builds today, with the guide's contract gate, and names the owner");
+            detailsEntry.Should().Contain("outputs Success, Response + Http status code",
+                because: "Response is one of the three outputs every Call web service element carries");
         }
     }
 
@@ -333,6 +345,8 @@ public sealed class WebServiceGuidanceTests
         using (new AssertionScope())
         {
             row.Should().NotBeEmpty(because: "the row routing the Call web service element must exist in one piece");
+            row.Should().Contain("-> name=process-web-service;",
+                because: "the row that describes the element must route to its guide, not only mention it");
             row.Should().Contain("registered in Studio > Web services from a process",
                 because: "the row is about calling a registered service from a process");
             row.Should().Contain("writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice",
@@ -343,26 +357,37 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide carries no internal task key, spec path, host or test-stand name, it carries no placeholder boundary, and no example fills a key-, token- or secret-looking parameter with a constant.")]
+    [Description("The guide and its manifest description carry no internal task key, spec path, URL, host or test-stand name, no placeholder boundary, and no example fills a key-, token- or secret-looking parameter with a constant, whatever the member order.")]
     public void Guide_ShouldCarryNoInternalReferenceOrSecret()
     {
         // Arrange
-        string guide = ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ArticlePath);
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        string article = ProcessGuideSet.Read(repositoryRoot, ArticlePath);
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        string description = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ItemId)
+            .GetProperty("description").GetString()!;
+        string guide = article + "\n" + description;
 
         // Act
         bool jiraKey = Regex.IsMatch(guide, @"\b[A-Z][A-Z0-9]+-\d+\b");
-        bool url = Regex.IsMatch(guide, @"https?://|\b\d{1,3}(?:\.\d{1,3}){3}:\d+", RegexOptions.IgnoreCase);
-        bool specPath = Regex.IsMatch(guide, @"spec/|\.cs\b|docs/knowledge|packages/", RegexOptions.IgnoreCase);
-        bool standName = guide.Contains("UsrWsc", StringComparison.Ordinal);
+        bool url = Regex.IsMatch(guide,
+            @"https?://|\blocalhost\b|\b\d{1,3}(?:\.\d{1,3}){3}(?::\d+|/)|\b(?:[a-z0-9-]+\.)+(?:com|net|org|io|dev|local|cloud|ru|ua)\b",
+            RegexOptions.IgnoreCase);
+        bool specPath = Regex.IsMatch(guide, @"spec/|\.cs\b|docs/knowledge|packages/|\b[A-Z]:\\", RegexOptions.IgnoreCase);
+        bool standName = Regex.IsMatch(guide, @"UsrWsc|Probe\b|\beng-?\d{4,}", RegexOptions.IgnoreCase);
         string[] placeholders = [.. Regex.Matches(guide, @"<[^<> ]*TBD[^<> ]*>").Select(match => match.Value).Distinct()];
-        string[] constantSecrets = [.. Regex.Matches(guide,
-                @"""elementParameter"":\s*""(?<name>[^""]+)"",\s*""value""")
-            .Select(match => match.Groups["name"].Value)
+        string[] mappingEntries = [.. Regex.Matches(article, @"\{[^{}]*""elementParameter""[^{}]*\}").Select(match => match.Value)];
+        string[] constantSecrets = [.. mappingEntries
+            .Where(entry => Regex.IsMatch(entry, @"""value""\s*:"))
+            .Select(entry => Regex.Match(entry, @"""elementParameter""\s*:\s*""(?<name>[^""]+)""").Groups["name"].Value)
             .Where(name => Regex.IsMatch(name, "key|token|secret|password|authorization|signature", RegexOptions.IgnoreCase))];
 
         // Assert
         using (new AssertionScope())
         {
+            mappingEntries.Should().NotBeEmpty(because: "anti-vacuity: the secret scan reads the article's mapping examples");
             jiraKey.Should().BeFalse(because: "published guidance references no internal task");
             url.Should().BeFalse(because: "the guide names no stand, host or issue link");
             specPath.Should().BeFalse(because: "the guide names no internal file path of the clio repository or the package");
