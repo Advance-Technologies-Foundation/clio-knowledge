@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.185",
+  "libraryVersion": "1.15.193",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -104,6 +104,7 @@
       "page-modification-overview",
       "page-modification-standard-components",
       "page-modification-template-supplied-parts",
+      "page-modal-size",
       "page-schema-converters",
       "page-schema-creatio-devkit-common",
       "page-schema-handlers",
@@ -139,6 +140,7 @@
       "process-send-email-details",
       "process-send-email-template",
       "process-send-email-attachments",
+      "process-web-service",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -308,6 +310,7 @@
       "docs://knowledge/com.creatio.clio/page-modification-overview",
       "docs://knowledge/com.creatio.clio/page-modification-standard-components",
       "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
+      "docs://knowledge/com.creatio.clio/page-modal-size",
       "docs://knowledge/com.creatio.clio/page-schema-converters",
       "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
       "docs://knowledge/com.creatio.clio/page-schema-handlers",
@@ -343,6 +346,7 @@
       "docs://knowledge/com.creatio.clio/process-send-email-details",
       "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-send-email-attachments",
+      "docs://knowledge/com.creatio.clio/process-web-service",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -1430,6 +1434,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "page-modal-size",
+      "title": "Page modal size",
+      "description": "Owns the size of a Freedom UI modal window (a page inheriting BaseMiniPageTemplate): it lives in the page's AppearanceSettings add-on (modalSettings.size), not in the page body, so layoutConfig.width of Main, inner widths and CSS never change it. Read it with get-page-modal-size, change it only with set-page-modal-size (small/medium/large/extra-large = S/M/L/XL), ask the user on a vague request, find the page through the opening button's crt.OpenPageRequest, write to the app's package, and heed the override warning.",
+      "topicId": "creatio.page-modal-size",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modal-size",
+      "sourcePath": "guidance/mcp/guides/pages/modal-size.md",
+      "bundlePath": "resources/page-modal-size.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "page-schema-converters",
       "title": "Page schema converters",
       "description": "Guides creation and editing of Freedom UI converters in raw page schema bodies.",
@@ -1538,7 +1553,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: starts, end, user tasks, Send email (custom and template modes), flows with kind, condition and label, parameters and mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all four Read data modes, the exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess) and Script task (scriptTask) -- while inclusive/event-based gateways, timer/message and intermediate events and webService remain read-only. A read collection IS consumed: a multi-instance Sub-process iterates one (from 1.6.6.14). Also owns how a data-id maps to a build type and the custom user-task compile rule. The data-id -> label -> purpose catalog and its READ-ONLY markers are in process-element-catalog-details.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: starts, end, user tasks, Send email (custom and template modes), flows with kind, condition and label, parameters and mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all four Read data modes, the exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess), Script task (scriptTask), Open edit page, Approval, Pre-configured page, Process file (fileProcessing) and Call web service (webService, only when the FULL contract names it; owner process-web-service) -- while inclusive/event-based gateways and timer/message and intermediate events remain read-only. A read collection IS consumed: a multi-instance Sub-process iterates one (from 1.6.6.14). Also owns how a data-id maps to a build type and the custom user-task compile rule. The data-id -> label -> purpose catalog and its READ-ONLY markers are in process-element-catalog-details.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1889,6 +1904,17 @@
       "uri": "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "sourcePath": "guidance/mcp/guides/processes/send-email-attachments.md",
       "bundlePath": "resources/process-send-email-attachments.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-web-service",
+      "title": "Call web service element",
+      "description": "Owns the webService block of the Creatio Call web service process element (CrtProcessBuilder 1.6.6.150 or newer; only when the FULL create-business-process contract names webService): {service, method, timeoutSeconds?, ignoreErrors?} on create, addElement and setElement, for a REST or SOAP service registered in Studio > Web services; resolution and its refusals; a task that names no service (ask, or stop); the generated parameters (<name>_In, <name>_Out, Success, Response, StatusCode, RequestBody) and request values through mappings; an object-array response into a declared Collection; retarget (parameters replaced, the three result parameters kept, dropped bindings listed with values, refused while anything reads another parameter); drift and the designer save that deletes the parameters; run time (HTTP error vs no answer, ignoreErrors, timeout, the inner-list defect); notices; read-back. Keys never as constants.",
+      "topicId": "creatio.process-web-service",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-web-service",
+      "sourcePath": "guidance/mcp/guides/processes/web-service.md",
+      "bundlePath": "resources/process-web-service.md",
       "mediaType": "text/plain"
     },
     {
