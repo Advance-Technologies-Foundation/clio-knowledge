@@ -178,6 +178,7 @@ public sealed class WebServiceGuidanceTests
         string[] clauses =
         [
             "Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on modify, target `elementName` + `elementParameter`.",
+            "Mappings later in the same request can address the generated names.",
             "the list is bound to that collection too, one request item per source row (rule P1, `process-files`)",
             "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list draws the unsourced-inner-list notice.",
             "when non-null it REPLACES the whole body the element would build from its body parameters; headers, query, path and cookies are still built from theirs.",
@@ -231,7 +232,7 @@ public sealed class WebServiceGuidanceTests
             "The CANONICAL spelling is stored",
             "an unknown service (the refusal lists 30 services with caption and up to 8 methods, 70 more with caption, then a count - one not listed still resolves by exact name or UId; one shown as \"methods not readable\" IS registered, never register it again - and says to register a missing one in Studio > Web services)",
             "a name or caption matching several services (listed with methods; send the exact name or the UId)",
-            "an unknown method (the refusal lists the service's methods with captions)",
+            "an unknown method (the refusal lists the service's methods)",
             "The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.",
             "(REST, or SOAP: built with REST's parameter rules, with a notice)",
             "`timeoutSeconds`: whole seconds, an overall limit; `0`, or absent on create and `addElement`: none (absent on `setElement`: kept).",
@@ -421,9 +422,9 @@ public sealed class WebServiceGuidanceTests
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
-            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters with `typeFromElement`: a `Text` one cannot be retyped later.",
+            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters with `typeFromElement` (below), never a guessed `Text`.",
             "Use an unused process name: a taken one is refused first.",
-            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant",
+            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and describe returns it to any reader.",
             "When the service itself defaults the key from a system setting (the shipped `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];

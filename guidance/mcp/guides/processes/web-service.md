@@ -38,7 +38,7 @@ URI, authentication, header or parameter defaults - comes back in any answer.
   IS registered, never register it again - and says to register a missing one in Studio > Web services); no service
   registered; a registered service that cannot be read (open and save it in Studio > Web services); a name or caption
   matching several services (listed with methods; send the exact name or the UId); an unknown method (the refusal
-  lists the service's methods with captions); a method name matching several only when case is ignored; a method with an object
+  lists the service's methods); a method name matching several only when case is ignored; a method with an object
   parameter that is not an array.
 - A service in a package the process's package does not depend on is built, with a notice: the Process Designer adds
   that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does
@@ -53,10 +53,10 @@ URI, authentication, header or parameter defaults - comes back in any answer.
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
-   Declare their process parameters with `typeFromElement`: a `Text` one cannot be retyped later.
+   Declare their process parameters with `typeFromElement` (below), never a guessed `Text`.
 4. A key or token parameter is filled from a system setting - an `expression` `[#SysSettings.<Code>#]`
-   (`process-formulas`) - or from a process parameter, NEVER from a constant: describe returns a stored one to any
-   reader. When the service itself defaults the key from a system setting (the shipped
+   (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and
+   describe returns it to any reader. When the service itself defaults the key from a system setting (the shipped
    `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped.
 
 == The parameters the block generates ==
@@ -77,7 +77,7 @@ element lacks is refused, listing its top-level parameters.
 
 == Request values: mappings ==
 Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on
-modify, target `elementName` + `elementParameter`. Mappings in the same request can address the generated names.
+modify, target `elementName` + `elementParameter`. Mappings later in the same request can address the generated names.
 "mappings": [
   { "elementName": "CallOrderService", "elementParameter": "customerId_In", "processParameter": "CustomerIdParameter" },
   { "elementName": "CallOrderService", "elementParameter": "mode_In", "value": "full" },
@@ -132,8 +132,9 @@ modify, target `elementName` + `elementParameter`. Mappings in the same request 
   describe shows it with an issue.
 
 == When the service changes under a process ==
-Every load of a process re-reads each Call web service element from its service. When the service is gone, or no longer has the stored method spelled exactly, that load REMOVES the element's service
-parameters, references to them stop working, and a save keeps them removed.
+Every load of a process re-reads each Call web service element from its service. When the service is gone, or no
+longer has the stored method spelled exactly, that load REMOVES the element's service parameters, references to them
+stop working, and a save keeps them removed.
 - `describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in
   `issues`: the call fails at run time, `ignoreErrors` or not. An issue saying the service could not be read or
   checked means UNKNOWN, not failing.
@@ -195,6 +196,6 @@ block a retarget, not a no-op.
 
 Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on Creatio 10.1.37 (.NET
 Framework) on 2026-11-03 (designer-built elements): a 404 and a refused connection, `ignoreErrors` on and off; the
-designer deleting an unresolved method's parameters; an unrelated modify pruning a case-drifted element. Every other
+designer deleting all parameters of an unresolved element; an unrelated modify pruning a case-drifted element. Every other
 run-time rule is read from the Creatio core source and the designer client code,
 not measured.
