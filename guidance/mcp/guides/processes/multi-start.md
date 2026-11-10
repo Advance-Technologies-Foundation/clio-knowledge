@@ -48,6 +48,7 @@ Modify
 - Moving a listed start to another object (`setSignal` with another `entity`) is refused unless every listed start moves with it in the same request, and for a `Lookup` parameter even then (it still references the old object); changing its event is allowed.
 - `describe-business-process` reports the parameter as `mergeFrom`, with no source or value beside it; send it back as reported and nothing changes.
 - A formula hand-edited in the process designer is reported raw, and until it is a merge again neither the refusals above nor the start-not-in-the-list warning guard it. `setParameter` with `mergeFrom` restores the merge only while that formula references nothing but signal starts' `RecordId`s (two or more); with anything else in it, such as a fallback added in the designer, it is refused as "already takes a value (Script)".
+- Two dead ends: a constant stored through `mergeFrom: []` + `value` makes the parameter unmergeable (a later `mergeFrom` is refused as "already takes a value"), and on a hand-edited formula with anything but start Ids in it `mergeFrom: []` changes nothing. The way out of both is a NEW parameter with `mergeFrom`, with the chain's readers pointed at it.
 
 Warnings on a saved build or edit
 - "Element 'X' runs after the starts ... but reads the record Id of ... only": a naive join. Merge the starts as the warning says, and read the parameter instead.
