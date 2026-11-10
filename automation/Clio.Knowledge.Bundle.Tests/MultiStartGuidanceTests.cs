@@ -65,7 +65,7 @@ public sealed class MultiStartGuidanceTests
         guide.Should().Contain("use `mergeFrom` only when the FULL `create-business-process` contract",
             because: "an older clio has no mergeFrom and its typed descriptor drops the member before the server "
                 + "sees it; a server since CrtProcessBuilder 1.6.6.136 refuses an undeclared key instead");
-        guide.Should().Contain("`mergeFrom` needs CrtProcessBuilder 1.6.6.141 or later on the environment",
+        guide.Should().Contain("`mergeFrom` needs CrtProcessBuilder 1.6.6.146 or later on the environment",
             because: "a current clio refuses an older package up front, and the article must say why, as the "
                 + "sibling articles state their package floors");
         guide.Should().Contain("the Formula-per-branch shape in `process-parameters-details`",
@@ -106,7 +106,7 @@ public sealed class MultiStartGuidanceTests
     }
 
     [Test]
-    [Description("The modify rules match what CrtProcessBuilder 1.6.6.141 accepts: a one-entry list is refused, so leaving a two-start merge goes through mergeFrom: [] and re-pointed readers; an unbound parameter reads empty with no warning; sources resolve at once; a Lookup cannot follow its starts to another object; a hand-edited formula is restored only while it is still a pure merge; and the start-not-in-the-list warning also fires for a lone start.")]
+    [Description("The modify rules match what CrtProcessBuilder 1.6.6.146 accepts: a one-entry list is refused, so leaving a two-start merge goes through mergeFrom: [] and re-pointed readers; an unbound parameter reads empty with no warning; sources resolve at once; a Lookup cannot follow its starts to another object; a hand-edited formula is restored only while it is still a pure merge; and the start-not-in-the-list warning also fires for a lone start.")]
     public void Guide_ShouldStateTheModifyRulesTheServerEnforces()
     {
         // Arrange
@@ -131,7 +131,7 @@ public sealed class MultiStartGuidanceTests
         guide.Should().Contain("neither the refusals above nor the start-not-in-the-list warning guard it",
             because: "a formula the server does not recognise as a merge is reported raw and unguarded");
         guide.Should().Contain("also when it is the only start that reaches that element",
-            because: "since 1.6.6.141 the warning fires for a lone unlisted start too");
+            because: "since 1.6.6.146 the warning fires for a lone unlisted start too");
     }
 
     [Test]
