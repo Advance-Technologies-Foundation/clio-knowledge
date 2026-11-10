@@ -21,18 +21,19 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class WebServiceGuidanceTests
 {
     /// <summary>
-    /// The first CrtProcessBuilder that builds, retargets and describes the element. Not cut yet: the placeholder is the
-    /// shape the pull-request gate in <c>validate-pull-request.yml</c> refuses, so this suite stays green while the
-    /// article is drafted and the merge is blocked until the released version replaces it here, in the article, in
-    /// the two catalog articles and in the manifest description.
+    /// The first CrtProcessBuilder that builds, retargets and describes the element. It is stated here, in the
+    /// article, in the two catalog articles and in the manifest description, and moves in all five together.
     /// </summary>
-    internal const string Floor = "<CRTPROCESSBUILDER-WEBSERVICE-TBD>";
+    internal const string Floor = "1.6.6.149";
 
     /// <summary>
-    /// The first clio whose pre-send key check declares the block: an older one refuses <c>webService</c> on create,
-    /// <c>addElement</c> and <c>setElement</c> before anything is sent. Not released yet, so the gate-shaped placeholder.
+    /// The clio side of the gate. It is a capability, not a version: the release that adds <c>webService</c> to the
+    /// pre-send key check also names it in the FULL contract, and no clio release carrying it exists yet, so a number
+    /// would be a guess. An older clio refuses the block on create, <c>addElement</c> and <c>setElement</c> before
+    /// anything is sent.
     /// </summary>
-    internal const string ClioFloor = "<CLIO-WEBSERVICE-TBD>";
+    private const string ClioGate =
+        "Use it only when the FULL contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `webService`; a clio whose contract lacks it refuses the block before sending.";
 
     private const string ItemId = "process-web-service";
 
@@ -46,8 +47,8 @@ public sealed class WebServiceGuidanceTests
 
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
 
-    /// <summary>A released version or the gate-shaped placeholder: the only two shapes a floor may take.</summary>
-    private static readonly Regex FloorShape = new(@"^(?:<[A-Z][A-Z0-9-]*TBD>|\d+(?:\.\d+){3})$", RegexOptions.Compiled);
+    /// <summary>A released four-part package version: the only shape a published floor may take.</summary>
+    private static readonly Regex FloorShape = new(@"^\d+(?:\.\d+){3}$", RegexOptions.Compiled);
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
@@ -80,10 +81,8 @@ public sealed class WebServiceGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            FloorShape.IsMatch(ClioFloor).Should().BeTrue(
-                because: "a clio floor is a released version or the placeholder the merge gate refuses, nothing else");
             FloorShape.IsMatch(Floor).Should().BeTrue(
-                because: "a floor is a released version or the placeholder the merge gate refuses, nothing else");
+                because: "a published floor is a released package version; a placeholder cannot merge");
             resource.GetProperty("sourcePath").GetString().Should().Be(ArticlePath,
                 because: "the manifest must point at the article this fixture pins");
             resource.GetProperty("bundlePath").GetString().Should().Be($"resources/{ItemId}.md",
@@ -109,8 +108,8 @@ public sealed class WebServiceGuidanceTests
                 because: "the contract anchor names every member and every route that takes the block");
             guide.Should().Contain($"Needs CrtProcessBuilder {Floor} or later on the environment.",
                 because: "an older package refuses the type, so the floor gates every instruction below it");
-            guide.Should().Contain($"Use it only when the FULL contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `webService` and clio is at least {ClioFloor}; an older clio refuses the block before sending.",
-                because: "an older clio refuses the block in its pre-send key check, so the package floor alone does not make the block usable");
+            guide.Should().Contain(ClioGate,
+                because: "an older clio refuses the block in its pre-send key check, so the package floor alone does not make the block usable, and only the FULL contract tells the two clio releases apart");
             guide.Should().Contain("request parameter `title` (body, header, query, path or cookie alike) -> input `title_In`; response parameter `status` -> output `status_Out`",
                 because: "the stored names are what every mapping addresses");
             guide.Should().Contain("addressed dotted: `items_In.name_In`, at any depth",
@@ -120,14 +119,16 @@ public sealed class WebServiceGuidanceTests
             guide.Should().Contain("Both are REQUIRED on `create-business-process` and `addElement`; a sole method is not picked for you.",
                 because: "the builder, unlike the designer, never selects a method by itself");
 
-            catalog.Should().Contain($"- `webService` (Call web service), from CrtProcessBuilder **{Floor}**",
-                because: "the catalog owns what builds today and from which package");
+            catalog.Should().Contain($"- `webService` (Call web service), from CrtProcessBuilder **{Floor}** and only when the FULL contract names it:",
+                because: "the catalog owns what builds today and from which package, and an older clio refuses the block, so the row carries the guide's contract gate");
             catalog.Should().Contain("`process-web-service` owns the block.",
                 because: "the catalog names the owner of every block it lists");
             details.Should().Contain($"BUILDABLE from CrtProcessBuilder **{Floor}** via `type:\"webService\"`",
                 because: "the element entry carries the floor, as every entry that changed from read-only to buildable does");
-            details.Should().Contain("`process-web-service` owns it.",
+            details.Should().Contain("(`{service, method, timeoutSeconds?, ignoreErrors?}`), only when the FULL contract names it; `process-web-service` owns it.",
                 because: "the element entry names the owner of its block");
+            routing.Should().Contain("(`webService`; build it only when the FULL contract names it):",
+                because: "routing carries the guide's contract gate, as it does for the other blocks a released clio may not know");
             routing.Should().Contain("-> name=process-web-service",
                 because: "an article nothing routes to is never read");
         }
@@ -339,7 +340,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide carries no internal task key, spec path, host or test-stand name, its only placeholder is the gate-shaped floor, and no example fills a key-, token- or secret-looking parameter with a constant.")]
+    [Description("The guide carries no internal task key, spec path, host or test-stand name, it carries no placeholder boundary, and no example fills a key-, token- or secret-looking parameter with a constant.")]
     public void Guide_ShouldCarryNoInternalReferenceOrSecret()
     {
         // Arrange
@@ -363,8 +364,8 @@ public sealed class WebServiceGuidanceTests
             url.Should().BeFalse(because: "the guide names no stand, host or issue link");
             specPath.Should().BeFalse(because: "the guide names no internal file path of the clio repository or the package");
             standName.Should().BeFalse(because: "the test services of the development stand are not product names");
-            placeholders.Should().OnlyContain(token => token == Floor || token == ClioFloor,
-                because: "the package and clio floors are the only unresolved boundaries, written in the shape the merge gate refuses");
+            placeholders.Should().BeEmpty(
+                because: "a placeholder boundary cannot merge: the release gate refuses it");
             constantSecrets.Should().BeEmpty(
                 because: "a key or token comes from a system setting or a process parameter; an example with a constant is what an agent copies");
         }

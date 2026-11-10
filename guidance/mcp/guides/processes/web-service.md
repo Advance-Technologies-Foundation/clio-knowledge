@@ -6,10 +6,10 @@ request, response, retargeting, refusals, notices, read-back.
 `process-parameters` owns mappings and declared Collections; `process-files` owns rule P1 (an item mapping binds its
 collection); `process-formulas` owns the formula vocabulary. A C# web service that Creatio EXPOSES is not this
 element: `configuration-webservice`.
-Needs CrtProcessBuilder <CRTPROCESSBUILDER-WEBSERVICE-TBD> or later on the environment. Use it only when the FULL
-contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`
-and clio is at least <CLIO-WEBSERVICE-TBD>; an older clio refuses the block before sending. The default reply is
-shortened: its silence proves nothing. Always read the element back: its parameter names come from the service.
+Needs CrtProcessBuilder 1.6.6.149 or later on the environment. Use it only when the FULL
+contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`;
+a clio whose contract lacks it refuses the block before sending. The default reply is shortened: its silence
+proves nothing. Always read the element back: its parameter names come from the service.
 
 == Only a registered service ==
 The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP 1.1 / 1.2); the process tools
@@ -193,7 +193,7 @@ members are ignored with a warning - except: a fractional `timeoutSeconds` is re
 `service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's
 makes the block a retarget, not a no-op.
 
-Evidence: build-time rules pinned by CrtProcessBuilder <CRTPROCESSBUILDER-WEBSERVICE-TBD> unit tests. Measured on a
+Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.149 unit tests. Measured on a
 stand on 2026-11-03 (designer-built elements): a 404 completed the element, `ignoreErrors` on or off; a refused
 connection completed it with the flag on and failed the process with it off; the designer deleted every
 parameter of an element with an unresolved method; an unrelated modify deleted the service parameters of an
