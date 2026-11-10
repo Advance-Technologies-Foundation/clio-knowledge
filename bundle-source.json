@@ -2064,7 +2064,7 @@
     {
       "itemId": "process-multi-start",
       "title": "Process multi-start",
-      "description": "Owns several signal starts on one object that run the same steps: why a chain shared by starts that each fill only their own RecordId changes nothing on all but one, the mergeFrom process parameter that takes the record Id of whichever start fired (same object, Guid or Lookup, always Internal, stable order), modify and describe round trips, the refusals that keep a merge from being lost, and the naive-join and start-not-in-the-list warnings. Signal starts on one object only: anything else sets the parameter per branch (process-parameters). Needs CrtProcessBuilder 1.6.6.141 or later and a FULL create-business-process contract that names mergeFrom.",
+      "description": "Owns several signal starts on one object that run the same steps: why a chain shared by starts that each fill only their own RecordId changes nothing on all but one, the mergeFrom process parameter that takes the record Id of whichever start fired (same object, Guid or Lookup, always Internal, stable order), modify and describe round trips, the refusals that keep a merge from being lost, and the naive-join and start-not-in-the-list warnings. Signal starts on one object only: anything else sets the parameter per branch (process-parameters). Needs CrtProcessBuilder 1.6.6.146 or later and a FULL create-business-process contract that names mergeFrom.",
       "topicId": "creatio.process-multi-start",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-multi-start",
