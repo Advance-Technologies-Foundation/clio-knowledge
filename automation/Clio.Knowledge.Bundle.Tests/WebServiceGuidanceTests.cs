@@ -231,7 +231,7 @@ public sealed class WebServiceGuidanceTests
             "The CANONICAL spelling is stored",
             "an unknown service (the refusal lists 30 services with caption and up to 8 methods, 70 more with caption, then a count - one not listed still resolves by exact name or UId; one shown as \"methods not readable\" IS registered, never register it again - and says to register a missing one in Studio > Web services)",
             "a name or caption matching several services (listed with methods; send the exact name or the UId)",
-            "an unknown method (the refusal lists the service's methods)",
+            "an unknown method (the refusal lists the service's methods with captions)",
             "The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.",
             "(REST, or SOAP: built with REST's parameter rules, with a notice)",
             "`timeoutSeconds`: whole seconds, an overall limit; `0`, or absent on create and `addElement`: none (absent on `setElement`: kept).",
@@ -408,7 +408,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide tells an agent what to do when the task names no service: find it through the refusal, ask when several fit, stop when none does and say what registration needs, build in two steps, and take keys from a setting or parameter.")]
+    [Description("The guide tells an agent what to do when the task names no service: find it through the refusal under an unused process name, ask when several fit, stop when none does and say what registration needs, build in two steps with parameters declared by typeFromElement, and take keys from a setting or parameter.")]
     public void Guide_ShouldStateTheTaskWithoutDetails()
     {
         // Arrange
@@ -421,7 +421,8 @@ public sealed class WebServiceGuidanceTests
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
-            "Build in two steps: the element first, then the mappings, from the names the answer and describe report.",
+            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters with `typeFromElement`: a `Text` one cannot be retyped later.",
+            "Use an unused process name: a taken one is refused first.",
             "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant",
             "When the service itself defaults the key from a system setting (the shipped `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped."
         ];
