@@ -34,7 +34,8 @@ public sealed class PageModalSizeGuidanceTests
             "Tell the user the page is not a modal window and change nothing",
             "keeps every other add-on field",
             "call `get-page-modal-size` with the same `package-name` that `set-page-modal-size` will write to",
-            "Requires a clio that provides the `get-page-modal-size` and `set-page-modal-size` tools"
+            "Requires a clio that provides the `get-page-modal-size` and `set-page-modal-size` tools",
+            "name the overriding package (`effectiveSourcePackageName`) to the user instead of retrying with the same `package-name`"
         ];
 
         // Assert
