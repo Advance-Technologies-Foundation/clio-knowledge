@@ -21,7 +21,7 @@ clio 8.1.0.137 and earlier have neither tool. On such a clio, change object perm
 permissions designer instead. Moving or removing a row (position, above, remove-row) requires clio
 8.1.0.147 or later. A clio without them refuses those arguments as unknown: then move or remove
 the row in the Object permissions designer. Binding the rows to a package (the package argument and
-every rule under Package binding) requires clio <CLIO-PACKAGE-BINDING-TBD> or later. An older clio refuses package as
+every rule under Package binding) requires clio 8.1.0.148 or later. An older clio refuses package as
 unknown and binds nothing: the rights stay on this site only, so tell the developer they do not ship
 with the app.
 
@@ -100,7 +100,7 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
 ## set-object-rights
 Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke; grantee + exactly
 one of position, above, remove-row for a move or a removal (see Move and remove);
-enable-operation-permissions; disable-operation-permissions; package (clio <CLIO-PACKAGE-BINDING-TBD> or later); preview.
+enable-operation-permissions; disable-operation-permissions; package (clio 8.1.0.148 or later); preview.
 - ONE object per call. It never touches the object's lookups: each lookup is its own call.
 - operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
   grant and revoke — nothing is granted by default, and a grant or revoke without it (or with a value
@@ -231,7 +231,7 @@ Results:
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. It does NOT change column or record permissions.
 
-Package binding (the rows ship with the app; clio <CLIO-PACKAGE-BINDING-TBD> or later, see Version boundary):
+Package binding (the rows ship with the app; clio 8.1.0.148 or later, see Version boundary):
 - After every successful call that writes (not preview=true) — a re-run that changes no row included —
   the object's stored rows are bound to a package: the binding SysEntitySchemaOperationRight_<object
   code> holds exactly the rows stored for the object, in priority order; an object with no stored rows
