@@ -24,7 +24,7 @@ public sealed class WebServiceGuidanceTests
     /// The first CrtProcessBuilder that builds, retargets and describes the element. It is stated here, in the
     /// article, in the two catalog articles and in the manifest description, and moves in all five together.
     /// </summary>
-    internal const string Floor = "1.6.6.149";
+    internal const string Floor = "1.6.6.150";
 
     /// <summary>
     /// The clio side of the gate. It is a capability, not a version: the release that adds <c>webService</c> to the
@@ -85,6 +85,8 @@ public sealed class WebServiceGuidanceTests
                 because: "a published floor is a released package version; a placeholder cannot merge");
             resource.GetProperty("sourcePath").GetString().Should().Be(ArticlePath,
                 because: "the manifest must point at the article this fixture pins");
+            resource.GetProperty("description").GetString().Should().Contain($"(CrtProcessBuilder {Floor} or newer)",
+                because: "the manifest description states the same package floor as the article and the catalog");
             resource.GetProperty("bundlePath").GetString().Should().Be($"resources/{ItemId}.md",
                 because: "the flat resources folder names each article by its itemId");
             resource.GetProperty("topicId").GetString().Should().Be($"creatio.{ItemId}",
@@ -147,7 +149,7 @@ public sealed class WebServiceGuidanceTests
             "returns the element's `webService` block: `service` (the name; null when the stored service is not registered), `method`, `timeoutSeconds`",
             "the describe-only `serviceUId`, `serviceResolved`, `methodResolved`, `parameters` (every stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the `required`, `bound` and `result` flags; no values) and `issues`",
             "A bound input's value comes back in the element's generic `parameters`.",
-            "No service default is ever shown.",
+            "Nothing the SERVICE stores - its base URI, authentication, header or parameter defaults - comes back in any answer.",
             "To resubmit, send the block back unchanged - the describe-only members are ignored with a warning - except: a fractional `timeoutSeconds` is refused on write (send whole seconds); `service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's makes the block a retarget, not a no-op."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -241,7 +243,8 @@ public sealed class WebServiceGuidanceTests
             "When the service itself is gone, the load has already removed the service parameters, and the designer leaves those three.",
             "So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify",
             "A retarget is refused while anything reads a parameter of the element, a removed one too; a read of a removed one also makes Creatio's pre-save check refuse EVERY modify, an unrelated one too, nothing saved.",
-            "Its remedy (add the parameter, or correct the reference) fails; the notice after it names the elements and the order: restore the service or method in Studio > Web services and repeat (unless the process was saved in the designer since); else remove or replace every read in an earlier request, then retarget and re-bind the reads in one request.",
+            "The request's own load has already dropped the service inputs and their bindings, so a retarget lists at most a `RequestBody` binding. To keep them, restore the method in Studio > Web services, or install the package that carries the service (one registered again gets another UId).",
+            "Adding the parameter does not repair it, nor does re-pointing the element; the notice names the elements and the order: restore as above and repeat (unless the process was saved in the designer since); else remove or replace every read in an earlier request, then retarget and re-bind the reads in one request.",
             "`methodResolved: false` is the signal."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
@@ -271,7 +274,7 @@ public sealed class WebServiceGuidanceTests
             "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer.",
             "or later builds with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
             "While feature `ProcessParameterCollections` is on: a duplicate name among the request items sent, or a duplicate tag among the response items, stops the element, across nesting levels too; a duplicate request tag under different names silently sends one value.",
-            "are read from the Creatio core source and the designer client code, not measured."
+            "Every other run-time rule is read from the Creatio core source and the designer client code, not measured."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -381,7 +384,7 @@ public sealed class WebServiceGuidanceTests
         // Act
         string[] clauses =
         [
-            "Find the service and method through ONE refusal: a build naming an unknown service saves nothing and lists the registered services with captions and methods",
+            "Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves nothing and lists the registered services with captions and methods",
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",

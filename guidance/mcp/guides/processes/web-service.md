@@ -6,7 +6,7 @@ request, response, retargeting, refusals, notices, read-back.
 `process-parameters` owns mappings and declared Collections; `process-files` owns rule P1 (an item mapping binds its
 collection); `process-formulas` owns the formula vocabulary. A C# web service that Creatio EXPOSES is not this
 element: `configuration-webservice`.
-Needs CrtProcessBuilder 1.6.6.149 or later on the environment. Use it only when the FULL
+Needs CrtProcessBuilder 1.6.6.150 or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`;
 a clio whose contract lacks it refuses the block before sending. The default reply is shortened: its silence
 proves nothing. Always read the element back: its parameter names come from the service.
@@ -14,8 +14,7 @@ proves nothing. Always read the element back: its parameter names come from the 
 == Only a registered service ==
 The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP 1.1 / 1.2); the process tools
 do not register, change or test one. Nothing the SERVICE stores - its base URI, authentication, header or parameter
-defaults - comes back in any answer. The element's OWN bindings do: describe returns them, a retarget lists those it
-dropped.
+defaults - comes back in any answer. The element's OWN bindings do.
 
 == The block ==
 `webService {service, method, timeoutSeconds?, ignoreErrors?}`, on `create-business-process`, `addElement` and
@@ -24,7 +23,7 @@ dropped.
   "webService": { "service": "UsrOrderService", "method": "GetOrders", "timeoutSeconds": 30, "ignoreErrors": true } }]
 - `service`: its name (code), caption or UId. `method`: the method's name. Both are REQUIRED on
   `create-business-process` and `addElement`; a sole method is not picked for you.
-- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: none. Negative or over 2147483 is refused.
+- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: no overall limit. Negative or over 2147483 is refused.
 - `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==); default false.
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
@@ -49,8 +48,8 @@ dropped.
 - A SOAP service is built with the same parameter rules as REST, with a notice saying so.
 
 == A task that names no service or method ==
-1. Find the service and method through ONE refusal: a build naming an unknown service saves nothing and lists the
-   registered services with captions and methods (bounds above). Pick the pair that fits; when several fit, ASK the
+1. Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves
+   nothing and lists the registered services with captions and methods (bounds above). Pick the pair that fits; when several fit, ASK the
    user which; never guess between them.
 2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
@@ -144,15 +143,16 @@ parameters, references to them stop working, and a save keeps them removed.
   parameter of that element, `Success`, `Response` and `StatusCode` included, with their mapping rows; closing its
   panel marks it invalid, and a designer save keeps that. When the service itself is gone, the load has already
   removed the service parameters, and the designer leaves those three.
-- So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify: a missing method,
-  retarget with `setElement` (`webService.method`); a missing service, install the package that carries it (a service
-  registered again gets another UId) or retarget (`webService.service` + `webService.method`).
-  `methodResolved: false` is the signal. A retarget is refused while anything reads a parameter of the element, a
-  removed one too; a read of a removed one also makes Creatio's pre-save check refuse EVERY modify, an unrelated one
-  too, nothing saved. Its remedy (add the parameter, or correct the reference) fails; the notice after it names the
-  elements and the order: restore the service or method in Studio > Web services and repeat (unless the process was
-  saved in the designer since); else remove or replace every read in an earlier request, then retarget and re-bind
-  the reads in one request.
+- So FIX FIRST, before anyone opens the element in the designer or makes an unrelated modify.
+  `methodResolved: false` is the signal. The request's own load has already dropped the service inputs and their
+  bindings, so a retarget lists at most a `RequestBody` binding. To keep them, restore the method in Studio > Web
+  services, or install the package that carries the service (one registered again gets another UId). Else retarget
+  with `setElement` (`webService.method`, or `webService.service` + `webService.method`) and bind the inputs again.
+  A retarget is refused while anything reads a parameter of the element, a removed one too; a read of a removed one
+  also makes Creatio's pre-save check refuse EVERY modify, an unrelated one too, nothing saved. Adding the parameter
+  does not repair it, nor does re-pointing the element; the notice names the elements and the order: restore as
+  above and repeat (unless the process was saved in the designer since); else remove or replace every read in an
+  earlier request, then retarget and re-bind the reads in one request.
 - `issues` also report nested items that differ from the service (the designer rebuilds them when the element's panel
   is opened), a missing `Success` / `StatusCode` / `Response` (the run stops with an error), an element the designer
   marked invalid (a required input not set), and the inner-list and duplicate-item shapes below.
@@ -188,14 +188,14 @@ and a duplicate item name or tag at any depth.
 `ignoreErrors` (absent when false), and the describe-only `serviceUId`, `serviceResolved`, `methodResolved`,
 `parameters` (every stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the
 `required`, `bound` and `result` flags; no values) and `issues`. A bound input's value comes back in the element's
-generic `parameters`. No service default is ever shown. To resubmit, send the block back unchanged - the describe-only
-members are ignored with a warning - except: a fractional `timeoutSeconds` is refused on write (send whole seconds);
-`service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's
-makes the block a retarget, not a no-op.
+generic `parameters`. To resubmit, send the block back unchanged - the describe-only members are ignored with a
+warning - except: a fractional `timeoutSeconds` is refused on write (send whole seconds); `service: null` leaves a
+method-only block, which is refused; a stored method whose case differs from the service's makes the block a
+retarget, not a no-op.
 
-Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.149 unit tests. Measured on a
+Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on a
 stand on 2026-11-03 (designer-built elements): a 404 completed the element, `ignoreErrors` on or off; a refused
 connection completed it with the flag on and failed the process with it off; the designer deleted every
 parameter of an element with an unresolved method; an unrelated modify deleted the service parameters of an
-element whose stored method differed in case. The run-time rules for `RequestBody`, the timeout, `ignoreErrors`,
-duplicates and the inner list are read from the Creatio core source and the designer client code, not measured.
+element whose stored method differed in case. Every other run-time rule is read from the Creatio core source and
+the designer client code, not measured.

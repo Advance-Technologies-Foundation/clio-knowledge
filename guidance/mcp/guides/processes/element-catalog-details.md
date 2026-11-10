@@ -68,7 +68,7 @@ System actions (palette group "System actions"):
   - Compile note: a `scriptTask`, and a `userTask` carrying an after-activity-save script, are the two
     IN-PROCESS elements whose authored C# makes the process itself need a compile before it runs.
 - `webService`        Call web service — call a registered service; outputs Success + Http status code.
-    BUILDABLE from CrtProcessBuilder **1.6.6.149** via `type:"webService"` with a
+    BUILDABLE from CrtProcessBuilder **1.6.6.150** via `type:"webService"` with a
     `webService` block (`{service, method, timeoutSeconds?, ignoreErrors?}`), only when the FULL contract names it;
     `process-web-service` owns it.
 - `callActivity`      Sub-process  — call ANOTHER process (the BPMN call activity) and run it once, passing

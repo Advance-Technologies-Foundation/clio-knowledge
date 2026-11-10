@@ -21,9 +21,8 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   meant, or the keys valid there. Do not paste a whole described element into `setElement`: clio refuses its
   element-level fields before sending. A described readData / addData / changeData / deleteData block may be
   re-applied: a key describe reports there is ignored, whoever typed it - a success can carry "Read-only fields
-  copied from describe were ignored", and no key it names was saved. A described `webService` block re-applies too,
-  its describe-only members ignored with a warning, except in the cases `process-web-service` lists. Other blocks
-  (email, subProcess, openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
+  copied from describe were ignored", and no key it names was saved. Other blocks (email, subProcess,
+  openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
   filter, signal or connections with setFilter / setSignal / setConnections, not in `setElement`. A bound
   input in element `parameters`, and a parameter's sourceElement / sourceElementParameter / sourceColumn, are
   refused: write them as mappings (for an item property, target the dotted `Parameter.Item` path). Flat
@@ -147,10 +146,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   `process-files-parameter` its `files` group. On the generic `userTask` route all three Process file tasks
   (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that
   route carries no file source, record or target.
-- `webService` (Call web service), from CrtProcessBuilder **1.6.6.149** and only when the FULL contract names it:
-  calls a web service REGISTERED in Studio > Web services (REST or SOAP); its `webService` block names the service
-  and method, and the element's parameters are generated from the method - `process-web-service` owns the block. On
-  the generic `userTask` route `WebServiceUserTask`, a legacy SOAP task, is REFUSED.
+- `webService` (Call web service), from CrtProcessBuilder **1.6.6.150** and only when the FULL contract names it:
+  calls a service REGISTERED in Studio > Web services; its `webService` block names the service and
+  method - `process-web-service` owns the block. The generic `userTask` route REFUSES `WebServiceUserTask`.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,
