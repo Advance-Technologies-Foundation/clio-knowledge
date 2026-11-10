@@ -3,17 +3,16 @@ clio MCP process-web-service guide - the Call web service element (webService)
 Scope
 This guide owns the `webService` block of the Call web service element.
 `process-parameters` owns mappings and declared Collections; `process-files` owns rule P1 (an item mapping binds its
-collection); `process-formulas` owns the formula vocabulary. A C# web service that Creatio EXPOSES is not this
-element: `configuration-webservice`.
+collection). A C# web service that Creatio EXPOSES is not this element: `configuration-webservice`.
 Needs CrtProcessBuilder 1.6.6.150 or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`;
 a clio whose contract lacks it refuses the block before sending. The default reply is shortened: its silence
 proves nothing. Always read the element back: its parameter names come from the service.
 
 == Only a registered service ==
-The element calls only a web service REGISTERED in Studio > Web services (REST or SOAP); the process tools
-do not register, change or test one. Nothing the SERVICE stores - its base URI, authentication, header or parameter
-defaults - comes back in any answer.
+The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP: built with REST's parameter
+rules, with a notice); the process tools do not register, change or test one. Nothing the SERVICE stores - its base
+URI, authentication, header or parameter defaults - comes back in any answer.
 
 == The block ==
 `webService {service, method, timeoutSeconds?, ignoreErrors?}`, on `create-business-process`, `addElement` and
@@ -22,13 +21,12 @@ defaults - comes back in any answer.
   "webService": { "service": "UsrOrderService", "method": "GetOrders", "timeoutSeconds": 30, "ignoreErrors": true } }]
 - `service`: its name (code), caption or UId. `method`: the method's name. Both are REQUIRED on
   `create-business-process` and `addElement`; a sole method is not picked for you.
-- `timeoutSeconds`: whole seconds, an overall limit; absent or `0`: no overall limit. Negative or over 2147483 is
-  refused.
-- `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==); default false.
+- `timeoutSeconds`: whole seconds, an overall limit; `0`, or absent on create and `addElement`: none (absent on
+  `setElement`: kept). Negative or over 2147483 is refused.
+- `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==).
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
-- Caption: omitted, it is `<service caption, or its name> <N>`, as the designer does (`N` the smallest free
-  number); a sent `caption` is kept. Name the element from the Names block of `process-digest`.
+- Caption: omitted, it is `<service caption, or its name> <N>`, as the designer does; a sent `caption` is kept.
 - The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.
 
 == Naming the service and method ==
@@ -45,12 +43,12 @@ defaults - comes back in any answer.
 - A service in a package the process's package does not depend on is built, with a notice: the Process Designer adds
   that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does
   not. Add it, or the package exported alone fails at run time.
-- A SOAP service is built with the same parameter rules as REST, with a notice saying so.
 
 == A task that names no service or method ==
 1. Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves
-   nothing and lists the registered services (bounds above). Pick the pair that fits; when several fit, ASK the user
-   which; never guess between them.
+   nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown
+   `method`: that refusal lists them. Pick the pair that fits; when several fit, ASK the user which; never guess
+   between them.
 2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
@@ -99,7 +97,7 @@ modify batch, can address the generated names.
 
 == Reading the response ==
 - `<name>_Out`, `Success`, `StatusCode` and `Response` are ordinary outputs: map them (`sourceElement` +
-  `sourceElementParameter`) into a process parameter, an element input, a flow condition or a formula.
+  `sourceElementParameter`) like any element output.
 - An object-array response: declare a process `Collection` with `itemProperties` (at most TWO collection levels,
   `process-parameters`), then map its items from the output's items: `targetProcessParameter`
   `OrdersParameter.Number` from `sourceElementParameter` `orders_Out.number_Out`. Mapping an item binds the
@@ -123,8 +121,8 @@ modify batch, can address the generated names.
   * the answer lists every dropped input binding WITH its value, as `addMapping` `mapping` objects, so one call
     re-applies those whose target name the new method still has; a binding no mapping can write (a system value or
     setting, a stored mapping) is listed apart, with its stored source: re-bind it in the Process Designer;
-  * a service change ALWAYS renames the caption to `<service caption, or its name> <N>` (`setElement` has no
-    caption member) and resets the timeout unless the block sends one; a method change keeps both;
+  * a service change ALWAYS renames the caption to `<service caption, or its name> <N>` and resets the timeout unless
+    the block sends one; a method change keeps both;
   * REFUSED, nothing written, while anything - another element, a process parameter, a flow condition, a formula -
     reads ANY other parameter of the element: an output, a nested item, an input, `RequestBody`. A same-named output
     of the new method is a new parameter and does not keep its readers. The refusal names each reader. Remove or
@@ -170,12 +168,13 @@ parameters, references to them stop working, and a save keeps them removed.
   `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.
 - Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it.
   `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond
-  the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier
-  attempt had an HTTP error answer: that answer completes the element.
+  the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an
+  HTTP error answer: that answer completes the element. A compiled (not interpretable) process applies neither
+  `timeoutSeconds` nor `ignoreErrors`.
 - An inner list with no source of its own while its items are bound (`items_In.parts_In`): Creatio builds without the
-  platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays`
-  on, send NO value for that inner list. Bind the inner list itself to a
-  collection, or build the body in `RequestBody`. The notice comes on every environment: the fix cannot be read.
+  platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays` on,
+  send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.
+  The notice comes on every environment: the fix cannot be read.
 - While application setting `Feature-ProcessParameterCollections` is on, a name or tag repeated in one top-level
   list's tree: in a request list a repeated name stops the element once two of those items carry a value, a repeated
   tag sends one value; in a response list a repeated tag stops it when the result is stored, a repeated name keeps one
@@ -185,15 +184,15 @@ parameters, references to them stop working, and a save keeps them removed.
 Tell the user each. Besides those above: a required input with no value (the designer marks the element invalid).
 
 == Read back ==
-`describe-business-process` (`element=<name>` or `mode=full`) returns the element's `webService` block: `service`
-(the name; null when the stored service is not registered), `method`, `timeoutSeconds` (may be fractional),
-`ignoreErrors` (absent when false), and the describe-only `serviceUId`, `serviceResolved`, `methodResolved`,
-`parameters` (every stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the
-`required`, `bound` and `result` flags; no values) and `issues`. A bound input's value comes back in the element's
-generic `parameters`. To resubmit, send the block back unchanged - the describe-only members are ignored with a
-warning - except: a fractional `timeoutSeconds` is refused on write (send whole seconds); `service: null` leaves a
-method-only block, which is refused; a stored method whose case differs from the service's makes the block a
-retarget, not a no-op.
+`describe-business-process` (`element=<name>` or `mode=full`) returns the element's `webService` block: `service` (the
+name; null when the stored service is not registered), `method`, `timeoutSeconds` (may be fractional), `ignoreErrors`
+(absent when false), and the describe-only `serviceUId`, `serviceResolved`, `methodResolved`, `parameters` (every
+stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the `required`, `bound`
+and `result` flags; no values) and `issues`. A bound input's value comes back in the element's generic `parameters`.
+To resubmit, send the block back unchanged - the describe-only members are ignored with a warning - except: a
+fractional `timeoutSeconds` is refused on write (leave it out on `setElement` to keep the stored timeout);
+`service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's makes the
+block a retarget, not a no-op.
 
 Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on Creatio 10.1.37 (.NET
 Framework) on 2026-11-03 (designer-built elements): a 404 and a refused connection, `ignoreErrors` on and off; the

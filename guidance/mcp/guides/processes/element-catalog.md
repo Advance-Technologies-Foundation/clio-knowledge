@@ -147,8 +147,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that
   route carries no file source, record or target.
 - `webService` (Call web service), from CrtProcessBuilder **1.6.6.150** and only when the FULL contract names it:
-  calls a service REGISTERED in Studio > Web services; its `webService` block names the service and
-  method - `process-web-service` owns the block. The generic `userTask` route REFUSES `WebServiceUserTask`.
+  calls a service REGISTERED in Studio > Web services; `process-web-service` owns its `webService` block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,
@@ -167,15 +166,15 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. SEVEN user tasks have their own dedicated build type and must NOT be built as
 a generic `userTask`: `preconfiguredPageUserTask` -> `type:"preconfiguredPage"`, see
-`process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, so it could
-only build a page-less element that fails at run time, and it is REFUSED; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
-modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
-`process-send-email`, and `process-send-email-template` for the template mode;
+`process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, and it is
+REFUSED; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
+modes, see `process-send-email`, and `process-send-email-template` for the template mode;
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; `approvalUserTask` ->
 `type:"approval"`, see `process-approval`; and the three Process file tasks, `objectFileProcessingUserTask`,
 `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:"fileProcessing"` with the matching
 `attachments`, `report` or `files` group, see `process-files` (`files`: `process-files-parameter`) — the generic route carries no file source, record or
-target, and it is REFUSED.)
+target, and it is REFUSED. `WebServiceUserTask` ("Call web service" in list-user-tasks) is a legacy SOAP task,
+REFUSED too: build `webService` (`process-web-service`).)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use

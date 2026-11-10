@@ -88,8 +88,8 @@ public sealed class WebServiceGuidanceTests
                 because: "a published floor is a released package version; a placeholder cannot merge");
             resource.GetProperty("sourcePath").GetString().Should().Be(ArticlePath,
                 because: "the manifest must point at the article this fixture pins");
-            resource.GetProperty("description").GetString().Should().Contain($"(CrtProcessBuilder {Floor} or newer)",
-                because: "the manifest description states the same package floor as the article and the catalog");
+            resource.GetProperty("description").GetString().Should().Contain($"(CrtProcessBuilder {Floor} or newer; only when the FULL create-business-process contract names webService)",
+                because: "the manifest description states the same package floor and clio gate as the article and the catalog; a client picking guides by description would otherwise build the block on a clio that refuses it");
             resource.GetProperty("bundlePath").GetString().Should().Be($"resources/{ItemId}.md",
                 because: "the flat resources folder names each article by its itemId");
             resource.GetProperty("topicId").GetString().Should().Be($"creatio.{ItemId}",
@@ -126,8 +126,10 @@ public sealed class WebServiceGuidanceTests
 
             catalog.Should().Contain($"- `webService` (Call web service), from CrtProcessBuilder **{Floor}** and only when the FULL contract names it:",
                 because: "the catalog owns what builds today and from which package, and an older clio refuses the block, so the row carries the guide's contract gate");
-            catalog.Should().Contain("`process-web-service` owns the block.",
+            catalog.Should().Contain("`process-web-service` owns its `webService` block.",
                 because: "the catalog names the owner of every block it lists");
+            catalog.Should().Contain("`WebServiceUserTask` (\"Call web service\" in list-user-tasks) is a legacy SOAP task, REFUSED too: build `webService` (`process-web-service`).",
+                because: "list-user-tasks shows the legacy task under the element's caption, and the data-id paragraph is where a task name is mapped to a build type");
             details.Should().Contain($"BUILDABLE from CrtProcessBuilder **{Floor}** via `type:\"webService\"`",
                 because: "the element entry carries the floor, as every entry that changed from read-only to buildable does");
             details.Should().Contain("(`{service, method, timeoutSeconds?, ignoreErrors?}`), only when the FULL contract names it; `process-web-service` owns it.",
@@ -155,7 +157,7 @@ public sealed class WebServiceGuidanceTests
             "the describe-only `serviceUId`, `serviceResolved`, `methodResolved`, `parameters` (every stored parameter, unbound inputs included, with `tag`, `direction`, `type`, nested `items` and the `required`, `bound` and `result` flags; no values) and `issues`",
             "A bound input's value comes back in the element's generic `parameters`.",
             "Nothing the SERVICE stores - its base URI, authentication, header or parameter defaults - comes back in any answer.",
-            "To resubmit, send the block back unchanged - the describe-only members are ignored with a warning - except: a fractional `timeoutSeconds` is refused on write (send whole seconds); `service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's makes the block a retarget, not a no-op."
+            "To resubmit, send the block back unchanged - the describe-only members are ignored with a warning - except: a fractional `timeoutSeconds` is refused on write (leave it out on `setElement` to keep the stored timeout); `service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's makes the block a retarget, not a no-op."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -231,7 +233,8 @@ public sealed class WebServiceGuidanceTests
             "a name or caption matching several services (listed with methods; send the exact name or the UId)",
             "an unknown method (the refusal lists the service's methods)",
             "The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.",
-            "A SOAP service is built with the same parameter rules as REST, with a notice saying so.",
+            "(REST, or SOAP: built with REST's parameter rules, with a notice)",
+            "`timeoutSeconds`: whole seconds, an overall limit; `0`, or absent on create and `addElement`: none (absent on `setElement`: kept).",
             "EVERY parameter of the element is replaced by the new method's and every input binding on them is dropped, `RequestBody` included;",
             "the answer lists every dropped input binding WITH its value, as `addMapping` `mapping` objects, so one call re-applies those whose target name the new method still has; a binding no mapping can write (a system value or setting, a stored mapping) is listed apart, with its stored source: re-bind it in the Process Designer;",
             "a service change ALWAYS renames the caption to `<service caption, or its name> <N>`",
@@ -282,6 +285,7 @@ public sealed class WebServiceGuidanceTests
             "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an HTTP error answer: that answer completes the element.",
             "Creatio builds without the platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
             "While application setting `Feature-ProcessParameterCollections` is on, a name or tag repeated in one top-level list's tree: in a request list a repeated name stops the element once two of those items carry a value, a repeated tag sends one value; in a response list a repeated tag stops it when the result is stored, a repeated name keeps one value.",
+            "A compiled (not interpretable) process applies neither `timeoutSeconds` nor `ignoreErrors`.",
             "Measured on Creatio 10.1.37 (.NET Framework) on 2026-11-03 (designer-built elements):",
             "Every other run-time rule is read from the Creatio core source and the designer client code, not measured."
         ];
@@ -377,11 +381,14 @@ public sealed class WebServiceGuidanceTests
             @"https?://|\blocalhost\b|\b\d{1,3}(?:\.\d{1,3}){3}(?::\d+|/)|\b(?:[a-z0-9-]+\.)+(?:com|net|org|io|dev|local|cloud|ru|ua)\b",
             RegexOptions.IgnoreCase);
         bool specPath = Regex.IsMatch(guide, @"spec/|\.cs\b|docs/knowledge|packages/|\b[A-Z]:\\", RegexOptions.IgnoreCase);
-        bool standName = Regex.IsMatch(guide, @"UsrWsc|Probe\b|\beng-?\d{4,}", RegexOptions.IgnoreCase);
+        bool standName = Regex.IsMatch(guide, @"UsrWsc|Usr\w*Probe\b|\beng-?\d{4,}", RegexOptions.IgnoreCase);
         string[] placeholders = [.. Regex.Matches(guide, @"<[^<> ]*TBD[^<> ]*>").Select(match => match.Value).Distinct()];
         string[] mappingEntries = [.. Regex.Matches(article, @"\{[^{}]*""elementParameter""[^{}]*\}").Select(match => match.Value)];
+        // A constant reaches a key-named input either as a `value` member or as a string literal inside an `expression`
+        // (an escaped double quote or a single quote in the formula text).
         string[] constantSecrets = [.. mappingEntries
-            .Where(entry => Regex.IsMatch(entry, @"""value""\s*:"))
+            .Where(entry => Regex.IsMatch(entry, @"""value""\s*:")
+                || Regex.IsMatch(entry, @"""expression""\s*:\s*""(?:[^""\\]|\\.)*(?:\\""|')(?:[^""\\]|\\.)*"""))
             .Select(entry => Regex.Match(entry, @"""elementParameter""\s*:\s*""(?<name>[^""]+)""").Groups["name"].Value)
             .Where(name => Regex.IsMatch(name, "key|token|secret|password|authorization|signature", RegexOptions.IgnoreCase))];
 
@@ -410,7 +417,7 @@ public sealed class WebServiceGuidanceTests
         // Act
         string[] clauses =
         [
-            "Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves nothing and lists the registered services (bounds above).",
+            "Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown `method`: that refusal lists them.",
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
