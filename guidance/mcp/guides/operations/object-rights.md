@@ -1,7 +1,8 @@
 clio MCP object-rights guide
 
 Owns: the row priority rule of object operation permissions; the set-object-rights rules for a grant, a
-revoke, a move or a removal of a role's row, and turning operation permissions on or off; and the list →
+revoke, a move or a removal of a role's row, and turning operation permissions on or off; the package
+binding set-object-rights writes so the rows ship with the app (the package argument); and the list →
 ask → grant flow for an object and its lookups.
 
 Manage OBJECT operation permissions — who may read/create/edit/delete ANY record of an entity (the
@@ -19,7 +20,10 @@ Version boundary: get-object-rights and set-object-rights require a clio release
 clio 8.1.0.137 and earlier have neither tool. On such a clio, change object permissions in the Object
 permissions designer instead. Moving or removing a row (position, above, remove-row) requires clio
 8.1.0.147 or later. A clio without them refuses those arguments as unknown: then move or remove
-the row in the Object permissions designer.
+the row in the Object permissions designer. Binding the rows to a package (the package argument and
+every rule under Package binding) requires clio 8.1.0.148 or later. An older clio refuses package as
+unknown and binds nothing: the rights stay on this site only, so tell the developer they do not ship
+with the app.
 
 Access to ONE specific record (or dashboard) is a different layer — `get-guidance name=record-rights`. The
 "Use record permissions" switch and the object's DEFAULT record rules (which rights a new record gets) are
@@ -96,7 +100,7 @@ Args: entity-schema-name (required), grantee (optional), include-connected (opti
 ## set-object-rights
 Args: entity-schema-name (always); grantee + operations for a grant or a revoke; revoke; grantee + exactly
 one of position, above, remove-row for a move or a removal (see Move and remove);
-enable-operation-permissions; disable-operation-permissions; preview.
+enable-operation-permissions; disable-operation-permissions; package (clio 8.1.0.148 or later); preview.
 - ONE object per call. It never touches the object's lookups: each lookup is its own call.
 - operations=read,create,edit,delete names exactly what is granted or revoked. It is REQUIRED on every
   grant and revoke — nothing is granted by default, and a grant or revoke without it (or with a value
@@ -227,6 +231,61 @@ Results:
 - Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
   overwritten. It does NOT change column or record permissions.
 
+Package binding (the rows ship with the app; clio 8.1.0.148 or later, see Version boundary):
+- After every successful call that writes (not preview=true) — a re-run that changes no row included —
+  the object's stored rows are bound to a package: the binding SysEntitySchemaOperationRight_<object
+  code> holds exactly the rows stored for the object, in priority order; an object with no stored rows
+  left has that binding removed. Without it the rights stay on this site only, and the app
+  installs elsewhere with the objects' default permissions.
+- package=<name> names that package. Without it the package of the object's schema is used. When that
+  package is locked (a product object such as Contact or Account, an object of a locked app), the
+  CurrentPackageId package is used instead; no other package is tried, and the call is refused only
+  when the CurrentPackageId package is locked too. That package usually does not hold the object's
+  schema, so the switch ships separately (see below). Pass package when the developer keeps rights in a
+  package of their own. A named package is never replaced: a missing or locked package is refused before
+  any write, and the refusal names a package to use. The preview names the package and the binding it
+  would write.
+- An object the app does not own (a product object, a shared lookup, an object of another app): its
+  binding carries EVERY row stored for that object on this site — other apps' rows, roles created here,
+  this site's All employees row and positions — and install adds them next to the target site's own
+  rows. You MUST say this to the developer before the write, name the package the preview shows, and let
+  the developer choose the package (or keep the default). A preview does NOT fail on a refused package: it answers
+  success and states the refusal in its binding line — read that line before you ask for the yes.
+- The object's own binding SysEntitySchemaOperationRight_<object code> may already be in another
+  editable package (an earlier call bound it there). Without package that package is the target: the
+  binding is updated where it is, and the result names the package. With package naming a different
+  package the call is refused before any write, naming the package that holds the binding: pass that
+  package, or remove that binding first.
+- Rows already bound by hand under another name are reported, and no second binding is written: keep
+  that binding in step yourself, or remove it and re-run the call to bind the rows in the named package.
+- The "Use operation permissions" switch is part of the object's schema, not of the binding. The result
+  says whether the schema is in the binding's package; when it is not, the package holding the schema
+  must be installed too, or the rows arrive under whatever switch the target has. While the switch is OFF
+  the bound rows decide nothing.
+- A row names its role by SysAdminUnit id, so on another site it applies only where that role exists with
+  the same id. All employees and All external users do; a role created on this site does not unless it is
+  shipped too. The result names every other role — tell the developer to ship those roles.
+- remove-row deletes the row here and takes it out of the binding, so a clean install does not get it.
+  Package install adds and updates rows but never deletes them: a site that already installed the
+  package keeps the removed row. Say so when the developer removes a row from an app that is already
+  installed elsewhere. To withdraw access on those sites too, revoke the role's operations instead of
+  removing its row: install updates the bound row, and a cleared row denies.
+- If the rights are saved but the binding fails, the call fails and says so; run the same call again —
+  it changes no row and binds them. After a failed remove-row the same call is refused (the role has no
+  row any more): run the switch call that matches the object's current state instead
+  (enable-operation-permissions when it is ON, disable-operation-permissions when it is OFF) — it changes
+  nothing and binds the rows.
+- In file system development mode the binding reaches the database only, and the package folder needs
+  pkg-to-file-system before it is committed. MUST: that export rewrites the package folders from the
+  database and deletes on-disk items the database lacks, so commit or otherwise preserve on-disk work and
+  confirm with the user first, and run it right after the write; the full rule is get-guidance
+  name=data-bindings.
+
+Evidence: the install rules above (rows are upserted by id with every column force-updated, a role
+travels by SysAdminUnit id, a row missing from the binding is never deleted, the switch travels with the
+schema) were read from the Creatio core package-install source, not reproduced by an install on a clean
+site. Treat them as the expected outcome and check the target with get-object-rights after the install.
+
 ## Give a role access to an object and its lookups
 1. Read: get-object-rights entity-schema-name=<Object> include-connected=true (and grantee=<role id> to
    see that role's row and the rows above it). Add any object the listing does not include — a lookup the
@@ -241,6 +300,8 @@ Results:
      that role, not only on the rows this app uses;
    - turning operation permissions on for a shared lookup makes its rows decide for every role,
      system-wide, wherever that lookup is used.
+   - for a lookup the app does not own, the binding ships every row this site stores for it (see
+     Package binding): say which package receives it.
    Grant only the objects the developer approves. You MUST NOT propose a security or system object (the
    names listed under get-object-rights). Grant one only when the developer named that object first, and
    before asking say what it opens — for example, read on SysAdminUnit lets the grantee read every user
@@ -263,7 +324,9 @@ Use cases (all one general capability):
   they are deny-by-default, so the object and each lookup they must see need an explicit grant. Read on
   a shared lookup (Contact, Account and the like) opens its WHOLE table to every external user; limiting
   them to their own records is record-level access (`get-guidance name=record-permissions`), not this
-  tool.
+  tool. Contact and Account are product objects: where their rows are bound (the package named by
+  package, the package that already holds their binding, or else the CurrentPackageId package) and
+  that the binding carries every row this site stores for them are set out in Package binding.
 - Enable operation permissions on an object from scratch: the first grant with
   enable-operation-permissions.
 - Turn an object's operation permissions off and back on, keeping its rows: the switch alone.
