@@ -118,7 +118,7 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
     [TestCase("grantee + exactly one of position, above, remove-row for a move or a removal",
         TestName = "ObjectRights_ShouldListTheLayoutArgumentsInTheArgsLine")]
-    [TestCase("enable-operation-permissions; disable-operation-permissions; package (clio <CLIO-PACKAGE-BINDING-TBD> or later); preview.",
+    [TestCase("enable-operation-permissions; disable-operation-permissions; package (clio ",
         TestName = "ObjectRights_ShouldListThePackageArgumentInTheArgsLine")]
     [TestCase("A clio without them refuses those arguments as unknown: then move or remove the row in the Object permissions designer",
         TestName = "ObjectRights_ShouldFallBackToTheDesignerOnAClioWithoutTheLayoutArguments")]

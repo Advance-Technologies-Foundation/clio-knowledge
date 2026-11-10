@@ -324,9 +324,9 @@ Use cases (all one general capability):
   they are deny-by-default, so the object and each lookup they must see need an explicit grant. Read on
   a shared lookup (Contact, Account and the like) opens its WHOLE table to every external user; limiting
   them to their own records is record-level access (`get-guidance name=record-permissions`), not this
-  tool. Contact and Account are product objects: their rows are bound to the CurrentPackageId package
-  unless package names another, and the binding carries every row this site stores for them (see
-  Package binding).
+  tool. Contact and Account are product objects: where their rows are bound (the package named by
+  package, the package that already holds their binding, or else the CurrentPackageId package) and
+  that the binding carries every row this site stores for them are set out in Package binding.
 - Enable operation permissions on an object from scratch: the first grant with
   enable-operation-permissions.
 - Turn an object's operation permissions off and back on, keeping its rows: the switch alone.
