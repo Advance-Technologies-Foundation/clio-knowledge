@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.190",
+  "libraryVersion": "1.15.192",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -104,6 +104,7 @@
       "page-modification-overview",
       "page-modification-standard-components",
       "page-modification-template-supplied-parts",
+      "page-modal-size",
       "page-schema-converters",
       "page-schema-creatio-devkit-common",
       "page-schema-handlers",
@@ -309,6 +310,7 @@
       "docs://knowledge/com.creatio.clio/page-modification-overview",
       "docs://knowledge/com.creatio.clio/page-modification-standard-components",
       "docs://knowledge/com.creatio.clio/page-modification-template-supplied-parts",
+      "docs://knowledge/com.creatio.clio/page-modal-size",
       "docs://knowledge/com.creatio.clio/page-schema-converters",
       "docs://knowledge/com.creatio.clio/page-schema-creatio-devkit-common",
       "docs://knowledge/com.creatio.clio/page-schema-handlers",
@@ -1429,6 +1431,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/pages/modification/template-supplied-parts.md",
       "bundlePath": "resources/page-modification-template-supplied-parts.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "page-modal-size",
+      "title": "Page modal size",
+      "description": "Owns the size of a Freedom UI modal window (a page inheriting BaseMiniPageTemplate): it lives in the page's AppearanceSettings add-on (modalSettings.size), not in the page body, so layoutConfig.width of Main, inner widths and CSS never change it. Read it with get-page-modal-size, change it only with set-page-modal-size (small/medium/large/extra-large = S/M/L/XL), ask the user on a vague request, find the page through the opening button's crt.OpenPageRequest, write to the app's package, and heed the override warning.",
+      "topicId": "creatio.page-modal-size",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/page-modal-size",
+      "sourcePath": "guidance/mcp/guides/pages/modal-size.md",
+      "bundlePath": "resources/page-modal-size.md",
       "mediaType": "text/plain"
     },
     {
