@@ -42,7 +42,7 @@ dry-run = false }`; it writes, so it is destructive.
   the object's `entityName`, in the default design package (as `update-page` writes). Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
   the page has a bar already.
-- NO compile and NO restart, on .NET Framework and on .NET 8 (.NET 8: expected, not measured yet): a case is
+- NO compile and NO restart, on .NET Framework and on .NET 8 (measured on both): a case is
   interpreted. `obligations.compileRequired` and `restartRequired` are false; do not run `compile-creatio` or
   `restart` after it. Tell the user to reload (F5) any open page of the object (`reloadOpenPages`).
 
