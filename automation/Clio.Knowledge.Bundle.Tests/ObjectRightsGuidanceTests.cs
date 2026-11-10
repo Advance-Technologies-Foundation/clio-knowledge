@@ -215,8 +215,14 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateWhatTheBindingHolds")]
     [TestCase("Without it the package of the object's schema is used",
         TestName = "ObjectRights_ShouldStateTheDefaultBindingPackage")]
-    [TestCase("You MUST pass package when the object belongs to a package that is not open for editing",
-        TestName = "ObjectRights_ShouldRequireThePackageForALockedObject")]
+    [TestCase("When that package is locked (a product object such as Contact or Account, an object of a locked app), the CurrentPackageId package is used instead; no other package is tried, and the call is refused only when the CurrentPackageId package is locked too",
+        TestName = "ObjectRights_ShouldStateTheCurrentPackageFallbackForALockedObject")]
+    [TestCase("A named package is never replaced",
+        TestName = "ObjectRights_ShouldStateThatANamedPackageIsNeverReplaced")]
+    [TestCase("its binding carries EVERY row stored for that object on this site",
+        TestName = "ObjectRights_ShouldStateThatAProductObjectBindingCarriesEveryRow")]
+    [TestCase("You MUST say this to the developer before the write, name the package the preview shows, and let the developer choose the package",
+        TestName = "ObjectRights_ShouldRequireTellingTheDeveloperAboutAProductObjectBinding")]
     [TestCase("a missing or locked package is refused before any write, and the refusal names a package to use",
         TestName = "ObjectRights_ShouldStateThatALockedPackageIsRefusedFirst")]
     [TestCase("A preview does NOT fail on a refused package",

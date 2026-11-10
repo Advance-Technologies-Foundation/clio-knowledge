@@ -237,11 +237,19 @@ Package binding (the rows ship with the app; clio <CLIO-PACKAGE-BINDING-TBD> or 
   code> holds exactly the rows stored for the object, in priority order; an object with no stored rows
   left has that binding removed. Without it the rights stay on this site only, and the app
   installs elsewhere with the objects' default permissions.
-- package=<name> names that package. Without it the package of the object's schema is used. You MUST
-  pass package when the object belongs to a package that is not open for editing (a product object,
-  a locked app) or when the developer keeps rights in a package of their own: a missing or locked
-  package is refused before any write, and the refusal names a package to use. The preview names the
-  package and the binding it would write. A preview does NOT fail on a refused package: it answers
+- package=<name> names that package. Without it the package of the object's schema is used. When that
+  package is locked (a product object such as Contact or Account, an object of a locked app), the
+  CurrentPackageId package is used instead; no other package is tried, and the call is refused only
+  when the CurrentPackageId package is locked too. That package usually does not hold the object's
+  schema, so the switch ships separately (see below). Pass package when the developer keeps rights in a
+  package of their own. A named package is never replaced: a missing or locked package is refused before
+  any write, and the refusal names a package to use. The preview names the package and the binding it
+  would write.
+- An object the app does not own (a product object, a shared lookup, an object of another app): its
+  binding carries EVERY row stored for that object on this site — other apps' rows, roles created here,
+  this site's All employees row and positions — and install adds them next to the target site's own
+  rows. You MUST say this to the developer before the write, name the package the preview shows, and let
+  the developer choose the package (or keep the default). A preview does NOT fail on a refused package: it answers
   success and states the refusal in its binding line — read that line before you ask for the yes.
 - The object's own binding SysEntitySchemaOperationRight_<object code> may already be in another
   editable package (an earlier call bound it there). Without package that package is the target: the
@@ -292,6 +300,8 @@ site. Treat them as the expected outcome and check the target with get-object-ri
      that role, not only on the rows this app uses;
    - turning operation permissions on for a shared lookup makes its rows decide for every role,
      system-wide, wherever that lookup is used.
+   - for a lookup the app does not own, the binding ships every row this site stores for it (see
+     Package binding): say which package receives it.
    Grant only the objects the developer approves. You MUST NOT propose a security or system object (the
    names listed under get-object-rights). Grant one only when the developer named that object first, and
    before asking say what it opens — for example, read on SysAdminUnit lets the grantee read every user
@@ -314,7 +324,9 @@ Use cases (all one general capability):
   they are deny-by-default, so the object and each lookup they must see need an explicit grant. Read on
   a shared lookup (Contact, Account and the like) opens its WHOLE table to every external user; limiting
   them to their own records is record-level access (`get-guidance name=record-permissions`), not this
-  tool.
+  tool. Contact and Account are product objects: their rows are bound to the CurrentPackageId package
+  unless package names another, and the binding carries every row this site stores for them (see
+  Package binding).
 - Enable operation permissions on an object from scratch: the first grant with
   enable-operation-permissions.
 - Turn an object's operation permissions off and back on, keeping its rows: the switch alone.
