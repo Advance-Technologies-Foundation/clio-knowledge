@@ -63,7 +63,9 @@ dry-run = false }`; it writes, so it is destructive.
   several rows.
 - `record-page-ambiguous` (a typed page set such as Activity: pass `page-schema-name`), `record-page-not-freedom`
   (a Classic page: create a Freedom UI page and its related-page add-on first), `placement-unsupported` (a mini
-  page). All page refusals come BEFORE anything is written.
+  page), `page-entity-mismatch` (the page's primary data source `PDS` is not the object: a page made by
+  `create-page` from a template has none until a field of the object is added). All page refusals come BEFORE
+  anything is written.
 - `created-page-failed`: the case WAS created and kept; `page.retry` carries the exact `update-page` call.
 - `failed-rolled-back` / `failed-leftover`: the build failed after writing; the second lists what to remove by hand.
 - `process-builder-without-build-case`: the environment's CrtProcessBuilder predates this tool;
