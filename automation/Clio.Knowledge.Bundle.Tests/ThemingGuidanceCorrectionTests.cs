@@ -132,6 +132,46 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "an existing theme lives in its own package, not in a branding run's target package");
 
     [Test]
+    [Description("Warns that the panel icon state does not travel with a theme background's package.")]
+    public void ThemingGuide_ShouldWarnThatThePanelIconStateIsNotBound() =>
+        ReadThemingGuide().Should().Contain("The panel icon state is not bound, so elsewhere the icons can cover the background: tell the user.",
+            because: "no clio result says whether that package carries the panel icon state, so the warning names no condition the agent cannot check");
+
+    [Test]
+    [Description("Names the image size cap before a background image is uploaded.")]
+    public void Guides_ShouldNameTheBackgroundImageSizeCap()
+    {
+        ReadThemingGuide().Should().Contain("(upload the file, 10 MB at most, with `upload-image` first)",
+            because: "clio refuses a larger image, and the agent must know that before the user confirms the write");
+        ReadBrandingGuide().Should().Contain("(`file`, 10 MB at most)",
+            because: "set-background-image uploads through the same capped image path");
+    }
+
+    [Test]
+    [Description("Says what a translucent theme color lies over.")]
+    public void ThemingGuide_ShouldSayWhatATranslucentColorShowsThrough() =>
+        ReadThemingGuide().Should().Contain("say only the plain page shows through it",
+            because: "a theme color lies over the plain page, not over the shell background or an earlier image");
+
+    [Test]
+    [Description("Reads a feature with no definition as off.")]
+    public void BrandingGuide_ShouldReadAFeatureWithNoDefinitionAsOff() =>
+        ReadBrandingGuide().Should().Contain("a feature with no `Feature` row is off",
+            because: "with no definition there is no DefaultState to fall back on, and the platform reads the feature as off");
+
+    [Test]
+    [Description("Names the reads that place an account's roles in the role tree.")]
+    public void BrandingGuide_ShouldNameTheReadsForARolesLevel() =>
+        ReadBrandingGuide().Should().Contain("An account's roles are its `SysAdminUnitInRole` rows, and a role's level is the number of `SysAdminUnit.ParentRole` steps from it to a role with none.",
+            because: "the deepest-level rule needs each role's depth, also for roles on different branches");
+
+    [Test]
+    [Description("Keeps the inactive-theme setting out of the changes made to show a background.")]
+    public void BrandingGuide_ShouldNotChangeInactiveThemesToShowABackground() =>
+        ReadBrandingGuide().Should().Contain("`DisableChangeTheme` or `InactiveThemes` to make a background show",
+            because: "InactiveThemes applies to every account on that theme, so it is the administrator's call");
+
+    [Test]
     [Description("Keeps the theming article within one get-guidance response.")]
     public void ThemingGuide_ShouldFitOneGetGuidanceResponse() =>
         ProcessGuideResponseSizeTests.ResponseSize(FindRepositoryRoot(), ThemingGuidePath)
@@ -142,6 +182,9 @@ public sealed class ThemingGuidanceCorrectionTests
 
     private static string ReadThemingGuide() =>
         File.ReadAllText(Path.Combine(FindRepositoryRoot(), ThemingGuidePath));
+
+    private static string ReadBrandingGuide() =>
+        File.ReadAllText(Path.Combine(FindRepositoryRoot(), "guidance/mcp/guides/theming/branding.md"));
 
     private static string FindRepositoryRoot()
     {
