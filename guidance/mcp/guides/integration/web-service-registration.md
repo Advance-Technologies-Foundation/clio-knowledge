@@ -16,18 +16,21 @@ Scope and ownership
   services and stop; do not fall back to raw DataService writes.
 
 Before registering
-1. Call `list-web-services` and reuse a service that already points at the same API. A second service for
+1. Call `list-web-services` and reuse a service whose `base-uri` already points at the same API. A second service for
    the same API is a maintenance burden the user did not ask for.
 2. Ask the user for what you cannot infer: the base URI, the methods the process needs, the authentication
    type, and the package that should own the service. Never guess a credential.
-3. The service code MUST carry the environment's schema-name prefix (`UsrErpOrders`, not `ErpOrders`).
+3. The service code MUST carry the environment's schema-name prefix, the `SchemaNamePrefix` system setting
+   (`get-schema-name-prefix`), for example `UsrErpOrders`, not `ErpOrders`.
    The tool refuses an unprefixed code and a code another service already uses, because the platform save
    would silently overwrite that service. To change an existing service use `modify-web-service`.
 
 Credential rule (MUST)
 - No credential value ever passes through the agent. Basic and Digest authentication take
   `username-sys-setting` and `password-sys-setting` codes only; OAuth 2.0 takes `oauth-app`, the name of an
-  existing OAuth application.
+  existing OAuth application. The tool resolves the name to the application's id, stores that id (the reply
+  shows it as `oauth-app-id`) and refuses a name no application carries. The application itself, with its
+  client id and secret, is created by the user; nothing else is needed on the service side.
 - A header, a cookie, or any parameter whose code looks like a key, token, secret, password, signature or
   session MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
   tool refuses a constant there and never echoes the refused value.
