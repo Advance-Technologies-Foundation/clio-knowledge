@@ -107,6 +107,8 @@ Testing
   body every value and every property name carrying a secret is masked (a number or boolean whole), and the
   other keys and values stay readable; a masked JSON body comes back re-indented.
   Values shorter than four characters and path parameters are not masked.
+- `parameters` maps top-level request parameter codes to values; text, numbers and booleans are accepted.
+  A body field given no value goes out as `null`, not left out (measured), so a strict API may reject it.
 - The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
   changes data on their side.
 - A GET returning 401 or 403 usually means the system-setting values are still empty: an empty setting
@@ -118,14 +120,26 @@ Changing a registered service
 - `modify-web-service` takes `code`, `operations` and optional `acknowledge-usages`. Operations apply in
   order, all or nothing: `addMethod`, `setMethod` (replaces the method of the same code, keeping the UIds of
   parameters it keeps), `removeMethod` (`method-code`), `setBaseUri`, `setRetryCount`, `setAuth`. Only REST
-  services can be changed; a SOAP service stays in Studio.
+  services can be changed; a SOAP service stays in Studio. Each operation names its kind in `op`:
+  `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
+- What `describe-web-service` returns can be sent back as it is: a method (with its parameters) as the
+  `method` of `setMethod`, and the `auth` block as the `auth` of `setAuth`. Read-only fields
+  (`default-masked`, `constant-credentials-masked`) are accepted and ignored, and `oauth-app-id` is taken
+  like `oauth-app`. A kept parameter whose secret constant default describe hid (`default-masked: true`)
+  keeps that default when no default is sent; the agent never needs, and never gets, the value. To remove
+  such a constant send `"default-value": ""`, or replace it with `default-sys-setting`; moving it to a place
+  where it would show (a query parameter, a path that does not look like a credential) is refused.
+- One exception: an `auth` block with `constant-credentials-masked: true` and no setting codes (Basic or
+  Digest credentials typed in Studio as constants) cannot be sent back; `setAuth` needs the
+  `username-sys-setting` and `password-sys-setting` codes instead, and the user fills those settings.
 - USAGE GUARD: `setMethod` and `removeMethod` on a method that a process calls are REFUSED, with the
   processes and elements listed. Those elements would lose their parameters on the next designer load and
   fail at run time, with nothing to warn the user. Show the list to the user; only on their explicit yes,
   repeat the call with `acknowledge-usages` naming exactly those processes. Never fill `acknowledge-usages`
   on your own.
-- `addMethod` never breaks a caller and is not guarded. An existing element sees new parameters only after
-  it is reopened in the designer.
+- `addMethod` never breaks a caller and is not guarded. A parameter added to a method a process already
+  calls appears on that element at its next load, unbound; until it is bound, a body field goes out as
+  `null` (measured), so bind it or tell the user.
 - Codes the service already has stay as they are, with or without the prefix: a service registered before
   the prefix rule, or shipped by Creatio, keeps them. NEVER rename a method or parameter only to add the
   prefix - the rename is exactly the change that breaks its callers. In `setMethod`, send the existing
