@@ -26,7 +26,7 @@ URI, authentication, header or parameter defaults - comes back in any answer.
 - `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==).
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
-- Caption: omitted, it is `<service caption, or its name> <N>`, as the designer does; a sent `caption` is kept.
+- Caption: omitted, it is `<service caption, or its name> <N>`; a sent `caption` is kept.
 - The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.
 
 == Naming the service and method ==
@@ -47,14 +47,15 @@ URI, authentication, header or parameter defaults - comes back in any answer.
 == A task that names no service or method ==
 1. Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves
    nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown
-   `method`: that refusal lists them. Pick the pair that fits; when several fit, ASK the user which; never guess
-   between them.
+   `method`: that refusal lists them. A create probe needs an unused process name: a taken one is refused first.
+   Pick the pair that fits; when several fit, ASK the user which; never guess between them.
 2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
+   Declare their process parameters by the rule below, never with a guessed `type`.
 4. A key or token parameter is filled from a system setting - an `expression` `[#SysSettings.<Code>#]`
-   (`process-formulas`) - or from a process parameter, NEVER from a constant: it is stored in the process, and
+   (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and
    describe returns it to any reader. When the service itself defaults the key from a system setting (the shipped
    `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped.
 
@@ -69,15 +70,14 @@ The method's parameters become the element's own, under these names:
   `StatusCode` (the HTTP status code, Integer, out), `RequestBody` (raw request text, Text, in).
 The create or retarget answer lists the generated names (`*` required); describe's `webService.parameters` is the
 authoritative tree. No aliases: the service's own name `title` is not an element parameter. A mapping onto a name the
-element lacks is refused, listing its top-level parameters.
+element lacks is refused, listing its parameters.
 - A process parameter that feeds an input or takes an output: declare it with `typeFromElement` +
   `typeFromElementParameter` (`process-parameters`), NEVER a guessed `type`: a mapping across type groups is refused.
   A list is refused as a mirror: declare a Collection (== Reading the response ==).
 
 == Request values: mappings ==
 Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on
-modify, target `elementName` + `elementParameter`. Mappings in the same create request, or later in the same
-modify batch, can address the generated names.
+modify, target `elementName` + `elementParameter`. Mappings later in the same request can address the generated names.
 "mappings": [
   { "elementName": "CallOrderService", "elementParameter": "customerId_In", "processParameter": "CustomerIdParameter" },
   { "elementName": "CallOrderService", "elementParameter": "mode_In", "value": "full" },
@@ -96,8 +96,8 @@ modify batch, can address the generated names.
   time ==). Nothing checks it as JSON, and nothing warns when it and body parameters are both bound.
 
 == Reading the response ==
-- `<name>_Out`, `Success`, `StatusCode` and `Response` are ordinary outputs: map them (`sourceElement` +
-  `sourceElementParameter`) like any element output.
+- `<name>_Out`, `Success`, `StatusCode` and `Response` are ordinary outputs (`sourceElement` +
+  `sourceElementParameter`).
 - An object-array response: declare a process `Collection` with `itemProperties` (at most TWO collection levels,
   `process-parameters`), then map its items from the output's items: `targetProcessParameter`
   `OrdersParameter.Number` from `sourceElementParameter` `orders_Out.number_Out`. Mapping an item binds the
@@ -132,9 +132,9 @@ modify batch, can address the generated names.
   describe shows it with an issue.
 
 == When the service changes under a process ==
-Every load of a process from the database re-reads each Call web service element from its service. When the
-service is gone, or no longer has the stored method spelled exactly, that load REMOVES the element's service
-parameters, references to them stop working, and a save keeps them removed.
+Every database load of a process re-reads each Call web service element from its service. When the service is gone,
+or no longer has the stored method spelled exactly, that load REMOVES the element's service parameters, references to
+them stop working, and a save keeps them removed.
 - `describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in
   `issues`: the call fails at run time, `ignoreErrors` or not. An issue saying the service could not be read or
   checked means UNKNOWN, not failing.
@@ -196,6 +196,6 @@ block a retarget, not a no-op.
 
 Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on Creatio 10.1.37 (.NET
 Framework) on 2026-11-03 (designer-built elements): a 404 and a refused connection, `ignoreErrors` on and off; the
-designer deleting the parameters of an element with an unresolved method; an unrelated modify pruning a case-drifted
-element. Every other run-time rule is read from the Creatio core source and the designer client code,
+designer deleting all parameters when the method is gone; an unrelated modify pruning a case-drifted element. Every other
+run-time rule is read from the Creatio core source and the designer client code,
 not measured.
