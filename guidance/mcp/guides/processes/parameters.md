@@ -3,7 +3,7 @@ clio MCP process-parameters guide — process parameters, mappings and formula d
 Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
 the card or this article sends you there.
 This article is the authoritative owner of process parameters, the mappings that bind them, and the date/time/lookup default macros.
-Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element. Also there: the evidence for the binding rule below and a multi-start example that sets one shared parameter per branch.
+Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element. Also there: the evidence for the binding rule below and the Formula-per-branch shape with its wiring - how to SET a parameter on each branch where `mergeFrom` (`process-multi-start`) does not apply, or on a clio without it.
 
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection/File/FileCollection),
@@ -95,9 +95,11 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   A `targetProcessParameter` mapping is a BINDING, not an assignment: the parameter's ONE value source,
   evaluated whenever the parameter is read - not once at start, not when a branch runs. A second mapping
   onto it REPLACES the first (the last listed is saved); a read before the source element ran, or on a
-  run whose start never reaches it, gets the default. To SET a parameter in the flow - e.g. one shared
-  parameter fed by each branch of a multi-start process - give each branch a `formulaTask` with
-  `formula.resultProcessParameter` (it wins over a stored binding). Build and modify WARN on both cases.
+  run whose start never reaches it, gets the default. Build and modify WARN on both cases.
+  Signal starts on ONE object that share a chain merge their record Ids into one parameter with `mergeFrom`
+  (`process-multi-start`). To SET a parameter in the flow anywhere else - signal starts on different objects,
+  a timer or message start, gateway branches after one start - give each branch a `formulaTask` whose
+  `formula.resultProcessParameter` names it (it wins over a stored binding).
   SOURCE — exactly ONE of: `sourceElement` + `sourceElementParameter` (another element's OUTPUT parameter;
   add `sourceColumn` for ONE column of the record it carries - `process-data-elements`) |
   processParameter (a process parameter by name; with a File-aware clio `Name.Item` names an item of a collection
