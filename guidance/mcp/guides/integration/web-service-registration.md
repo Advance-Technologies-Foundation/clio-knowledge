@@ -24,6 +24,11 @@ Before registering
    (`get-schema-name-prefix`), for example `UsrErpOrders`, not `ErpOrders`.
    The tool refuses an unprefixed code and a code another service already uses, because the platform save
    would silently overwrite that service. To change an existing service use `modify-web-service`.
+4. Every method code and every parameter code MUST carry the same prefix: `UsrGetOrders`, `UsrOrderId`,
+   `UsrStatus`, nested items included. Studio validates these codes against `SchemaNamePrefix` whenever it is
+   set, so a method without it opens in Studio > Web services but cannot be saved there, and the only way out
+   is a rename that breaks every process calling the method. The tool refuses unprefixed codes, all of them
+   in one answer. With an empty `SchemaNamePrefix` there is no prefix rule, as in Studio.
 
 Credential rule (MUST)
 - No credential value ever passes through the agent. Basic and Digest authentication take
@@ -31,8 +36,8 @@ Credential rule (MUST)
   existing OAuth application. The tool resolves the name to the application's id, stores that id (the reply
   shows it as `oauth-app-id`) and refuses a name no application carries. The application itself, with its
   client id and secret, is created by the user; nothing else is needed on the service side.
-- A header, a cookie, or any parameter whose code looks like a key, token, secret, password, signature or
-  session MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
+- A header, a cookie, or any parameter whose code or `path` looks like a key, token, secret, password,
+  signature or session MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
   tool refuses a constant there and never echoes the refused value.
 - Every referenced system setting MUST exist before the call; a reference to a missing setting is refused,
   because at run time the platform drops it silently and the request goes out without the header. Create the
@@ -50,15 +55,22 @@ Registering
   (required); `caption`, `retry-count`, `auth` (optional).
 - `base-uri` is an absolute http(s) URI without credentials; the tool adds the trailing slash the designer
   needs, because Studio joins base URI and method URI verbatim.
-- Each method: `code` (what a Call web service element stores), `http-method` (GET, POST, PUT, PATCH,
-  DELETE), `uri` relative to the base, path parameters written as `{code}`; optional `caption`,
-  `timeout-ms` (default 5000), `content-type` (json or xml), `use-auth`, `request-parameters`,
-  `response-parameters`.
-- Each parameter: `code`, `in` (path, query, header, body or cookie for a request; body for a response),
-  `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid, Object), optional `path` (wire name, or
-  a JSONPath such as `$.items` for a response), `array`, `required`, `default-value` or
-  `default-sys-setting`, and `items` for an Object. Every `{placeholder}` needs a path parameter of the same
-  code and the reverse; path parameters are required by default.
+- Each method: `code` (prefixed; what a Call web service element stores), `http-method` (GET, POST, PUT,
+  PATCH, DELETE), `uri` relative to the base, a path parameter written as `{<its path>}`, its wire name;
+  optional `caption`, `timeout-ms` (default 5000), `content-type` (json or xml), `use-auth`,
+  `request-parameters`, `response-parameters`.
+- Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body for a
+  response), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid, Object), `path`, `array`,
+  `required`, `default-value` or `default-sys-setting`, and `items` for an Object.
+- `path` is the name the API sees: the query, header, cookie or body key, the `{placeholder}` of a path
+  parameter, or the JSONPath of a response value (`$.status`; an item inside an Object uses its key relative
+  to the item, `number`). The code carries the prefix and is NOT the wire name, so on an environment with a
+  prefix every new parameter MUST give `path`: without it `UsrPage` would go out as `?UsrPage=` and a
+  response `UsrStatus` would read a key the API never sends, with no error. The tool refuses a new prefixed
+  parameter without `path`. Example: `{"code": "UsrApiKey", "in": "header", "path": "X-Api-Key",
+  "default-sys-setting": "UsrErpApiKey"}`.
+- Every `{placeholder}` in `uri` needs a path parameter whose `path` is that name, and the reverse; path
+  parameters are required by default.
 - An unknown argument is refused with the list of valid fields; fix the name rather than dropping it.
 - The reply returns the saved service as Studio stores it. Its method and parameter codes are the ones a
   process element maps, so keep the reply for the process step.
@@ -96,6 +108,12 @@ Changing a registered service
   on your own.
 - `addMethod` never breaks a caller and is not guarded. An existing element sees new parameters only after
   it is reopened in the designer.
+- Codes the service already has stay as they are, with or without the prefix: a service registered before
+  the prefix rule, or shipped by Creatio, keeps them. NEVER rename a method or parameter only to add the
+  prefix - the rename is exactly the change that breaks its callers. In `setMethod`, send the existing
+  method and kept parameters under their exact current codes (letter case included); only methods and
+  parameters the call adds follow the prefix and `path` rules. A kept parameter sent without `path` keeps its
+  stored wire name.
 
 Rights and limits
 - Every tool except `list-web-services` needs the CanManageSolution operation right; without it the call is
@@ -106,4 +124,6 @@ Rights and limits
   Measured on Creatio 10.2 (.NET Framework, MSSQL) in November 2026: register, describe, modify, the
   credential refusal, a SecureText key sent as a header, its masking in an echoed response, and the usage
   guard against a process that calls a stock service; the usage scan read
-  about 1,300 process schemas in about 15 seconds. Other versions are unknown.
+  about 1,300 process schemas in about 15 seconds. On a .NET Framework stand with prefix `Usr`: a method
+  whose codes lacked the prefix could not be saved in Studio, a prefixed one saved unchanged, and a process
+  built on a registered service called it and received the response (HTTP 200). Other versions are unknown.
