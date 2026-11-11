@@ -104,9 +104,8 @@ Testing
   HTTP status and the response body (cut at 20,000 characters). Request and response headers are never
   returned. Values the request carried from system settings or in `Authorization` are replaced with
   `[masked]` in the body and the error (`sent-secrets-masked: true`), because an API may echo them. In a JSON
-  body every value carrying a secret is masked (a number or boolean whole), and a property name only when the
-  secret is token-like (eight or more characters, or one with a digit or symbol), so a short login such as
-  `user` next to a `user` key keeps the structure; a masked JSON body comes back re-indented.
+  body every value and every property name carrying a secret is masked (a number or boolean whole), and the
+  other keys and values stay readable; a masked JSON body comes back re-indented.
   Values shorter than four characters and path parameters are not masked.
 - The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
   changes data on their side.
