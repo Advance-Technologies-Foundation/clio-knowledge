@@ -133,7 +133,8 @@ Changing a registered service
   authentication). Only REST services can be changed; a SOAP service stays in Studio. Every system setting the
   service references, in any method, must exist for any change to save. Each operation names its kind in `op`:
   `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
-- What `describe-web-service` returns can be sent back as it is: a method (with its parameters) as the
+- What `describe-web-service` returns can be sent back as it is (except a method whose `{placeholder}` differs
+  in letter case from its path parameter; the platform never fills it, so fix the case): a method (with its parameters) as the
   `method` of `setMethod`, and the `auth` block as the `auth` of `setAuth`. Read-only fields
   (`default-masked`, `constant-credentials-masked`) are accepted and ignored, and `oauth-app-id` is taken
   like `oauth-app`. A kept parameter whose secret constant default describe hid (`default-masked: true`)
@@ -151,8 +152,8 @@ Changing a registered service
   with mappings that point at nothing, and they fail at run time with nothing to warn the user. Show the list to
   the user; only on their explicit yes, repeat the call with `acknowledge-usages` listing the `process` codes
   from the refusal (not the captions), exactly those. Never fill `acknowledge-usages` on your own. A process
-  that names the service but whose metadata cannot be read is listed with no element and counts as calling
-  every method.
+  that names the service but whose metadata cannot be read (or that names it outside a Call web service
+  element) is listed with no element and counts as calling every method.
 - `addMethod` never breaks a caller and is not guarded. Adding a parameter to a method a process already calls
   is a `setMethod` and is guarded; after the user agrees, the new parameter appears on that element at its next
   load, unbound, and until it is bound a body field goes out as `null` (measured), so bind it or tell the user.
