@@ -61,10 +61,17 @@ Registering
   `request-parameters`, `response-parameters`.
 - Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body for a
   response), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid, Object), `path`, `array`,
-  `required`, `default-value` or `default-sys-setting`, and `items` for an Object.
-- `path` is the name the API sees: the query, header, cookie or body key, the `{placeholder}` of a path
-  parameter, or the JSONPath of a response value (`$.status`; an item inside an Object uses its key relative
-  to the item, `number`). The code carries the prefix and is NOT the wire name, so on an environment with a
+  `required`, `default-value` or `default-sys-setting`, and `items` for an Object array.
+- Object is ONLY an array (`"type": "Object", "array": true`, its element fields in `items`), for a list of
+  records such as order lines. A single nested object is NOT an Object parameter: describe each of its fields
+  as its own parameter with a dotted `path`, the way Studio's quick setup does - request body
+  `{"code": "UsrCustomerName", "path": "customer.name"}` and `{"code": "UsrCustomerEmail", "path":
+  "customer.email"}` go out as one `{"customer": {"name": ..., "email": ...}}`; a response value reads
+  `$.customer.name`. The tool refuses a single Object: Studio cannot save one and a Call web service element
+  gets a parameter with no fields to bind.
+- `path` is the name the API sees: the query, header, cookie or body key (dotted for a field of a nested
+  object), the `{placeholder}` of a path parameter, or the JSONPath of a response value (`$.status`; a field
+  inside an Object array uses its key relative to the element, `number`). The code carries the prefix and is NOT the wire name, so on an environment with a
   prefix every new parameter MUST give `path`: without it `UsrPage` would go out as `?UsrPage=` and a
   response `UsrStatus` would read a key the API never sends, with no error. The tool refuses a new prefixed
   parameter without `path`. Example: `{"code": "UsrApiKey", "in": "header", "path": "X-Api-Key",
@@ -126,4 +133,6 @@ Rights and limits
   guard against a process that calls a stock service; the usage scan read
   about 1,300 process schemas in about 15 seconds. On a .NET Framework stand with prefix `Usr`: a method
   whose codes lacked the prefix could not be saved in Studio, a prefixed one saved unchanged, and a process
-  built on a registered service called it and received the response (HTTP 200). Other versions are unknown.
+  built on a registered service called it and received the response (HTTP 200). Request body fields with dotted
+  paths went out as one nested object, a dotted response JSONPath filled the element output, and a
+  setting-bound body field was masked in the test-call reply. Other versions are unknown.
