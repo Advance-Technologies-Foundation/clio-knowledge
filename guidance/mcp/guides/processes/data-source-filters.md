@@ -59,7 +59,7 @@ is the one contract all three share, which is why it reads as its own subject.
   "Any of" several values is an `or` group with one condition per value, nested under the AND group when other
   conditions apply. "None of" them is one `notEqual` condition per value in the AND group itself, never an `or`
   group: an `or` of `notEqual` conditions matches every record, and on a `deleteData` element deletes them all.
-  Gate: `values` needs CrtProcessBuilder 1.6.6.156 or later. Use it only when the FULL
+  Gate: `values` needs CrtProcessBuilder 1.6.6.157 or later. Use it only when the FULL
   `create-business-process` contract (`get-tool-contract` with `detail=full`) says several lookup records are
   ONE condition with values; otherwise build "any of" as that `or` group of `equal` conditions, and "none of"
   as `notEqual` conditions in the AND group.
@@ -144,8 +144,8 @@ is the one contract all three share, which is why it reads as its own subject.
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
   A condition over several lookup records, built with `values` or made in the designer, reads back as `values`
   (ids in stored order) with the captions joined in `displayValue` (`Algeria; Andorra`), and re-applies as read,
-  when both sides carry `values`: CrtProcessBuilder 1.6.6.156 or later, and a clio whose contract names it.
-  MUST, on CrtProcessBuilder earlier than 1.6.6.156 or with a clio that predates `values`: describe returns
+  when both sides carry `values`: CrtProcessBuilder 1.6.6.157 or later, and a clio whose contract names it.
+  MUST, on CrtProcessBuilder earlier than 1.6.6.157 or with a clio that predates `values`: describe returns
   such a condition as its FIRST record only, marked
   `<multi-value filter: N values; describe shows only the first>` with `filterDecodedCompletely: false`.
   Re-sent as read it keeps that one record: an `equal` then selects fewer records, a `notEqual` MORE. Do not

@@ -60,7 +60,7 @@ public sealed class FilterValuesGuidanceTests
         string guide = Article();
 
         // Act
-        bool floor = guide.Contains("`values` needs CrtProcessBuilder 1.6.6.156 or later");
+        bool floor = guide.Contains("`values` needs CrtProcessBuilder 1.6.6.157 or later");
         bool contractGate = guide.Contains("Use it only when the FULL\n  `create-business-process` contract");
         bool fallback = guide.Contains("otherwise build \"any of\" as that `or` group of `equal` conditions, and \"none of\"\n"
             + "  as `notEqual` conditions in the AND group");
@@ -77,7 +77,7 @@ public sealed class FilterValuesGuidanceTests
     }
 
     [Test]
-    [Description("ENG-105557: the read-back of a condition over several records is stated both ways - whole as values when CrtProcessBuilder 1.6.6.156 and clio both carry them, and as its FIRST record only, marked, on an older package or with a clio that predates values, where re-sending it narrows an equal and WIDENS a notEqual - so the describe -> setFilter loop never silently drops records.")]
+    [Description("ENG-105557: the read-back of a condition over several records is stated both ways - whole as values when CrtProcessBuilder 1.6.6.157 and clio both carry them, and as its FIRST record only, marked, on an older package or with a clio that predates values, where re-sending it narrows an equal and WIDENS a notEqual - so the describe -> setFilter loop never silently drops records.")]
     public void Guide_ShouldStateTheReadBackOfSeveralRecords()
     {
         // Arrange
@@ -86,7 +86,7 @@ public sealed class FilterValuesGuidanceTests
         // Act
         string[] required = [
             "reads back as `values`",
-            "MUST, on CrtProcessBuilder earlier than 1.6.6.156 or with a clio that predates `values`",
+            "MUST, on CrtProcessBuilder earlier than 1.6.6.157 or with a clio that predates `values`",
             "`<multi-value filter: N values; describe shows only the first>`",
             "an `equal` then selects fewer records, a `notEqual` MORE",
         ];
