@@ -36,10 +36,11 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 == What one call writes ==
 - The case schema in the package: one EMPTY stage per value (`Stage1..N`, caption = the display value, colour
   `#0C8701`), every stage connected to every other (so every stage is clickable on the bar), enabled, the active
-  version. Its link row (`SysDcmSchemaInSettings`), bound to the package, and its settings row (`SysDcmSettings`),
-  bound only when `settings.status` is `created`: a row reused because the object already has one with the same
-  column and no filter column stays in the package that carries it, so relay the note to deploy that package with
-  this one. The case designer needs both rows to open the case; `settings.bindings` names the bindings written.
+  version. Its link row (`SysDcmSchemaInSettings`), bound to the package, and its settings row (`SysDcmSettings`):
+  created and bound, or reused when the object already has one with the same column and no filter column. A reused
+  row no package carries yet is bound to this package; one another package carries stays there, and the note names
+  that package to deploy with this one: relay it. The case designer needs both rows to open the case;
+  `settings.bindings` names the bindings this call wrote.
 - The record page: a `ProgressBarContainer` at index 0 of `MainContainer` holding `crt.EntityStageProgressBar` with
   the object's `entityName`, in the default design package (as `update-page` writes). Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
