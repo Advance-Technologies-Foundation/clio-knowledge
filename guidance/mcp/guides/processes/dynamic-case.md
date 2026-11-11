@@ -8,8 +8,9 @@ asks for "stages", "a status lifecycle", "a progress bar on the record page" or 
 business process: `process-digest`. A case is not the `Case` object.
 
 == Before the call ==
-- The object and the lookup column are PUBLISHED (a column added in this session is published first, or the call is
-  refused `column-not-found`), the lookup has 2 to 20 values the caller can see, and the target package is editable.
+- The object and the lookup column are PUBLISHED: a column saved and not published is refused `column-not-published`
+  (publish the object, then retry), one that does not exist `column-not-found`. The lookup has 2 to 20 values the
+  caller can see, and the target package is editable.
 - The case's package must reach the packages of the object, the column and the lookup, and CrtCoreBase / CrtBase
   (the case settings tables). The tool adds the missing ones itself (`dependencies.added`); with
   `add-package-dependencies: false` it refuses `dependencies-missing` and names them.
