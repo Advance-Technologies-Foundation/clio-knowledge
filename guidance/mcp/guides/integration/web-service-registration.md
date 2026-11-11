@@ -32,9 +32,9 @@ Before registering
 
 Credential rule (MUST)
 - No credential value ever passes through the agent. Basic and Digest authentication take
-  `username-sys-setting` and `password-sys-setting` codes only; OAuth 2.0 takes `oauth-app`, the name of an
-  existing OAuth application. The tool resolves the name to the application's id, stores that id (the reply
-  shows it as `oauth-app-id`) and refuses a name no application carries. The application itself, with its
+  `username-sys-setting` and `password-sys-setting` codes only; OAuth 2.0 takes `oauth-app`, the name or the
+  id of an existing OAuth application. The tool resolves it to the application's id, stores that id (the reply
+  shows it as `oauth-app-id`, which `setAuth` accepts back) and refuses one no application carries. The application itself, with its
   client id and secret, is created by the user; nothing else is needed on the service side.
 - A header, a cookie, or any parameter whose code or `path` looks like a key, token, secret, password,
   signature or session MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
