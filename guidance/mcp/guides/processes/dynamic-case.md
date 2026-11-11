@@ -20,7 +20,8 @@ business process: `process-digest`. A case is not the `Case` object.
 == The call ==
 `create-dynamic-case { environment-name, package-name, entity-schema-name, stage-column-name, stages?,
 order-column?, name?, caption?, add-progress-bar = true, page-schema-name?, add-package-dependencies = true,
-dry-run = false }`; it writes, so it is destructive.
+dry-run = false }`; it writes, so it is destructive. Version boundary: `create-dynamic-case` needs clio <CLIO-TBD>
+or later; on an older clio, stop here and tell the user to update clio - do not build a case by other means.
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
   pass `stages` (every value exactly once, by Id or exact display value) whenever the business order matters.
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
@@ -35,15 +36,16 @@ dry-run = false }`; it writes, so it is destructive.
 == What one call writes ==
 - The case schema in the package: one EMPTY stage per value (`Stage1..N`, caption = the display value, colour
   `#0C8701`), every stage connected to every other (so every stage is clickable on the bar), enabled, the active
-  version. Its settings row (`SysDcmSettings`, reused when the object already has one with the same column and no
-  filter column) and link row (`SysDcmSchemaInSettings`), both bound to the package as `<Table>_<rowId>`; the case
-  designer needs both to open the case.
+  version. Its link row (`SysDcmSchemaInSettings`), bound to the package, and its settings row (`SysDcmSettings`),
+  bound only when `settings.status` is `created`: a row reused because the object already has one with the same
+  column and no filter column stays in the package that carries it, so relay the note to deploy that package with
+  this one. The case designer needs both rows to open the case; `settings.bindings` names the bindings written.
 - The record page: a `ProgressBarContainer` at index 0 of `MainContainer` holding `crt.EntityStageProgressBar` with
   the object's `entityName`, in the default design package (as `update-page` writes). Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
   the page has a bar already.
-- NO compile and NO restart, on .NET Framework and on .NET 8 (measured on both): a case is
-  interpreted. `obligations.compileRequired` and `restartRequired` are false; do not run `compile-creatio` or
+- NO compile and NO restart, on .NET Framework and on .NET 8 (measured 2026-11-11 on Creatio 10.2.1102
+  .NET Framework MSSQL and 10.2.1081 .NET 8 PostgreSQL): a case is interpreted. `obligations.compileRequired` and `restartRequired` are false; do not run `compile-creatio` or
   `restart` after it. Tell the user to reload (F5) any open page of the object (`reloadOpenPages`).
 
 == Tell the user (relay the notes) ==
@@ -58,7 +60,8 @@ dry-run = false }`; it writes, so it is destructive.
 == Refusals that need the user ==
 - `case-exists`: the object already has an enabled case with other stages or another column; the platform starts
   every enabled case, so a second one is never created, and changing a case is not supported. A re-run with the
-  SAME object, column and order answers `already-present` and writes nothing, so a failed call is safe to repeat.
+  SAME object, column and order answers `already-present` and writes nothing to the case (it still adds the bar
+  when the page has none), so a failed call is safe to repeat.
 - `settings-conflict`: the object's case settings use another stage column or a filter column, or there are
   several rows.
 - `record-page-ambiguous` (a typed page set such as Activity: pass `page-schema-name`), `record-page-not-freedom`
@@ -72,12 +75,16 @@ dry-run = false }`; it writes, so it is destructive.
   `install-process-builder`, once the user approves it (`core-rules`), is the remedy.
 
 == Undo (sequential, in this order) ==
-1. `remove-data-binding-row-db` on `SysDcmSchemaInSettings_<id>`.
-2. `remove-data-binding-row-db` on `SysDcmSettings_<id>` ONLY when the call answered `settings.status: created`: a
-   reused row carries other cases' link rows, which deleting it would cascade away.
-3. `delete-schema` on the case.
-4. The record page's replacing schema, if this call created it; otherwise remove the two inserted items with
-   `update-page`.
+Undo ONLY a call whose `case.status` is `created`; after `already-present` this call wrote no case, so never remove
+the case or its link row. Take every name from the result, never compose one from an Id.
+1. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings.bindings`, key
+   `settings.sysDcmSchemaInSettingsId`.
+2. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings.bindings`, key `settings.sysDcmSettingsId`,
+   ONLY when the call answered `settings.status: created`: a reused row carries other cases' link rows, which
+   deleting it would cascade away.
+3. `delete-schema` on `case.schemaName`.
+4. Remove the two inserted items (the container and the `crt.EntityStageProgressBar` in it) with `update-page`,
+   by the exact names in `page.fragment`; never delete the page schema.
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or

@@ -59,7 +59,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
     }
 
     [Test]
-    [Description("The guide carries the rules an agent cannot see from a successful call: pass stages, the order source is reported, no compile or restart, the reused settings row is not removed on undo, and what is not supported yet.")]
+    [Description("The guide carries the rules an agent cannot see from a successful call: the clio version boundary, pass stages, the order source is reported, no compile or restart, undo only what the call created and in order, and what is not supported yet.")]
     public void Article_ShouldKeepTheRulesASuccessfulCallHides()
     {
         // Arrange & Act
@@ -69,12 +69,24 @@ public sealed class ProcessDynamicCaseGuidanceTests
         using (new AssertionScope())
         {
             guide.Should().Contain("create-dynamic-case", because: "the guide owns this tool");
+            guide.Should().MatchRegex(
+                @"Version boundary: `create-dynamic-case` needs clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later; on an older clio, stop here",
+                because: "a published guide reaches every clio, and an older one has no such tool to call");
             guide.Should().Contain("pass `stages`", because: "only the caller knows the business order");
             guide.Should().Contain("orderSource", because: "the order used is always answered and must be relayed");
             guide.Should().Contain("NO compile and NO restart", because: "a case is interpreted; a compile only costs time");
             guide.Should().Contain("ONLY when the call answered `settings.status: created`",
                 because: "deleting a reused settings row cascades away other cases' link rows");
+            guide.Should().Contain("Undo ONLY a call whose `case.status` is `created`",
+                because: "after already-present the case and its link row were never written by this call");
+            guide.Should().MatchRegex(
+                @"1\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry .* 2\. `remove-data-binding-row-db` on the `SysDcmSettings` entry .* 3\. `delete-schema` on `case\.schemaName`\. 4\. Remove the two inserted items",
+                because: "the link row goes before the settings row it references, and the case schema last of the three");
             guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
+            guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");
+            guide.Should().Contain("several cases per object", because: "the platform starts every enabled case");
+            guide.Should().Contain("changing, disabling or deleting an existing case",
+                because: "the tool only creates; the case designer changes a case");
             guide.Should().NotContain("Part of the process guide set",
                 because: "a banner would make process-modeling index the guide, which has no room");
         }
@@ -88,7 +100,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
         string modeling = ReadCollapsed(ModelingPath);
 
         // Assert
-        modeling.Should().NotContain("business objects, DCM,",
-            because: "the sentence sent agents to compile after creating a case");
+        modeling.Should().NotContain("DCM",
+            because: "the compile-obligation list sent agents to compile after creating a case, wherever DCM stands in it");
     }
 }
