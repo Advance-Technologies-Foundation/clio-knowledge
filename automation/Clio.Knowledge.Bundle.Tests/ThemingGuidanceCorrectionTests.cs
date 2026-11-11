@@ -100,10 +100,10 @@ public sealed class ThemingGuidanceCorrectionTests
     }
 
     [Test]
-    [Description("Removes a theme background with a null background argument on update-theme.")]
+    [Description("Removes a theme background with a null in exactly one background argument on update-theme.")]
     public void ThemingGuide_ShouldRemoveAThemeBackgroundWithNull() =>
-        ReadThemingGuide().Should().Contain("Pass either one as null to `update-theme` to remove it",
-            because: "update-theme has no separate removal argument, so a null image id or color is the only way to remove a background");
+        ReadThemingGuide().Should().Contain("To remove it, pass exactly one as null to `update-theme`; a null next to a value, or in both, is ignored",
+            because: "a client that sends null for every unused argument must not remove a background it meant to keep");
 
     [Test]
     [Description("Keeps the confirmed theme when the Creatio version refuses its background.")]
@@ -120,10 +120,10 @@ public sealed class ThemingGuidanceCorrectionTests
     }
 
     [Test]
-    [Description("Announces the environment-wide panel icon turn-off before a theme background is written.")]
+    [Description("Announces the environment-wide gallery entry and panel icon turn-off before a theme background is written.")]
     public void ThemingGuide_ShouldAnnounceThePanelIconTurnOffBeforeTheWrite() =>
-        ReadThemingGuide().Should().Contain("That is environment-wide: tell the user before the write",
-            because: "a theme background changes the panel for every account, not only for the theme's accounts");
+        ReadThemingGuide().Should().Contain("an image joins the shell background gallery, and a background leaves `UsePanelIconBackground` off for All employees. Both are environment-wide: tell the user before the write",
+            because: "a theme image appears in every account's background gallery and the panel changes for every account, not only for the theme's accounts");
 
     [Test]
     [Description("Binds an existing theme's background image into the theme's own package.")]
@@ -132,10 +132,10 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "an existing theme lives in its own package, not in a branding run's target package");
 
     [Test]
-    [Description("Warns that the panel icon state does not travel with a theme background's package.")]
-    public void ThemingGuide_ShouldWarnThatThePanelIconStateIsNotBound() =>
-        ReadThemingGuide().Should().Contain("The panel icon state is not bound, so elsewhere the icons can cover the background: tell the user.",
-            because: "no clio result says whether that package carries the panel icon state, so the warning names no condition the agent cannot check");
+    [Description("Binds the panel icon off state with a theme background and relays the warning that says it was left out.")]
+    public void ThemingGuide_ShouldBindThePanelIconOffStateWithTheBackground() =>
+        ReadThemingGuide().Should().Contain("relay a warning that it was left out: then elsewhere the icons can cover it",
+            because: "the off state travels only when it reads as off here, and the warning is the only signal that the package will not turn it off on the target");
 
     [Test]
     [Description("Names the image size cap before a background image is uploaded.")]
