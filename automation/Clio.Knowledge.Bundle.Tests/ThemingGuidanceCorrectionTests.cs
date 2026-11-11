@@ -132,6 +132,12 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "an existing theme lives in its own package, not in a branding run's target package");
 
     [Test]
+    [Description("Refuses a background for a theme whose package is locked without unlocking it or offering another package.")]
+    public void ThemingGuide_ShouldRefuseABackgroundForALockedThemePackage() =>
+        ReadThemingGuide().Should().Contain("If the theme's package is locked, nothing is written: say so; never unlock it or offer another.",
+            because: "unlocking a package is the user's decision, and a theme cannot move to another package");
+
+    [Test]
     [Description("Binds the panel icon off state with a theme background and relays the warning that says it was left out.")]
     public void ThemingGuide_ShouldBindThePanelIconOffStateWithTheBackground() =>
         ReadThemingGuide().Should().Contain("relay a warning that it was left out: then elsewhere the icons can cover it",
