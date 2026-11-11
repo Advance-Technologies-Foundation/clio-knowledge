@@ -33,8 +33,8 @@ public sealed class StepperActiveStepGuidanceTests
     {
         string guide = Guide();
 
-        guide.Should().Contain("bound to a plain `$Attr` (`\"activeStep\": \"$RentalStep\"`): the bound attribute",
-            because: "a bound stepper keeps its open step in the bound attribute");
+        guide.Should().Contain("bound to a plain `$Attr` (`\"activeStep\": \"$RentalStep\"`) that the page declares in `viewModelConfig.attributes` without a data source: the bound attribute",
+            because: "a bound stepper keeps its open step in the bound attribute, and only a declared attribute lets it change step");
         guide.Should().Contain("unbound: the generated `<StepperName>_ActiveStep`",
             because: "an unbound stepper exposes the generated attribute");
     }
