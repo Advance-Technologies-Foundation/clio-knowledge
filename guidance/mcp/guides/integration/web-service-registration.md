@@ -59,8 +59,8 @@ Registering
   PATCH, DELETE), `uri` relative to the base, a path parameter written as `{<its path>}`, its wire name;
   optional `caption`, `timeout-ms` (default 5000), `content-type` (json or xml), `use-auth`,
   `request-parameters`, `response-parameters`.
-- Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body for a
-  response), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid, Object), `path`, `array`,
+- Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body, header
+  or cookie for a response), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid, Object), `path`, `array`,
   `required`, `default-value` or `default-sys-setting`, and `items` for an Object array.
 - Object is ONLY an array (`"type": "Object", "array": true`, its element fields in `items`), for a list of
   records such as order lines. A single nested object is NOT an Object parameter: describe each of its fields
@@ -76,8 +76,17 @@ Registering
   response `UsrStatus` would read a key the API never sends, with no error. The tool refuses a new prefixed
   parameter without `path`. Example: `{"code": "UsrApiKey", "in": "header", "path": "X-Api-Key",
   "default-sys-setting": "UsrErpApiKey"}`.
+- A response value carried in a header or a cookie is a response parameter with `in: header` or `in: cookie`
+  and the header or cookie name in `path`. The platform matches a response header name EXACTLY as the API
+  sends it, letter case included: `X-Request-Id` reads nothing when the API sends `x-request-id` (measured;
+  many APIs send lowercase). Ask the user or check the API documentation for the exact spelling.
 - Every `{placeholder}` in `uri` needs a path parameter whose `path` is that name, and the reverse; path
   parameters are required by default.
+- Body rules Studio enforces, and the tool refuses the same: a GET method has no body request parameters,
+  and an `xml` method has no body parameters in its request or its response (the platform builds a REST
+  body as JSON only, so such a call fails). An XML API is registered with its path, query, header and cookie
+  parameters only; a process then sends the XML text through the Call web service element's `RequestBody`
+  and reads the raw `Response`.
 - An unknown argument is refused with the list of valid fields; fix the name rather than dropping it.
 - The reply returns the saved service as Studio stores it. Its method and parameter codes are the ones a
   process element maps, so keep the reply for the process step.
@@ -94,8 +103,11 @@ Testing
 - `test-web-service-method` sends ONE real request, as Studio's Send test request does, and returns the
   HTTP status and the response body (cut at 20,000 characters). Request and response headers are never
   returned. Values the request carried from system settings or in `Authorization` are replaced with
-  `[masked]` in the body and the error (`sent-secrets-masked: true`), because an API may echo them. Values
-  shorter than four characters and path parameters are not masked.
+  `[masked]` in the body and the error (`sent-secrets-masked: true`), because an API may echo them. In a JSON
+  body every value carrying a secret is masked (a number or boolean whole), and a property name only when the
+  secret is token-like (eight or more characters, or one with a digit or symbol), so a short login such as
+  `user` next to a `user` key keeps the structure; a masked JSON body comes back re-indented.
+  Values shorter than four characters and path parameters are not masked.
 - The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
   changes data on their side.
 - A GET returning 401 or 403 usually means the system-setting values are still empty: an empty setting
