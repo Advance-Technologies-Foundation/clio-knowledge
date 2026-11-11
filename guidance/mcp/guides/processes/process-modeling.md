@@ -180,7 +180,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - Constructs the builder cannot create (inclusive/event-based gateways, timer/message starts,
-  intermediate events, `webService`; full list in `process-element-catalog`) survive a save untouched
+  intermediate events; full list in `process-element-catalog`) survive a save untouched
   as data - but you CAN still remove or rewire them by name and nothing will warn you. Gateway
   ELEMENTS, DEFAULT flows and the Formula element are buildable and NOT on that list
   (`process-branch-conditions`, `process-element-catalog`).

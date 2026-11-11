@@ -118,6 +118,8 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
     [TestCase("grantee + exactly one of position, above, remove-row for a move or a removal",
         TestName = "ObjectRights_ShouldListTheLayoutArgumentsInTheArgsLine")]
+    [TestCase("enable-operation-permissions; disable-operation-permissions; package (clio ",
+        TestName = "ObjectRights_ShouldListThePackageArgumentInTheArgsLine")]
     [TestCase("A clio without them refuses those arguments as unknown: then move or remove the row in the Object permissions designer",
         TestName = "ObjectRights_ShouldFallBackToTheDesignerOnAClioWithoutTheLayoutArguments")]
     [TestCase("which can WIDEN their access", TestName = "ObjectRights_ShouldStateThatARemovalCanWidenAccess")]
@@ -209,6 +211,41 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("`All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008`",
         TestName = "ObjectRights_ShouldOwnTheAllEmployeesId")]
     [TestCase("returns success with ZERO rows", TestName = "ObjectRights_ShouldStateThatADeniedReadIsNotAnError")]
+    [TestCase("holds exactly the rows stored for the object, in priority order",
+        TestName = "ObjectRights_ShouldStateWhatTheBindingHolds")]
+    [TestCase("Without it the package of the object's schema is used",
+        TestName = "ObjectRights_ShouldStateTheDefaultBindingPackage")]
+    [TestCase("When that package is locked (a product object such as Contact or Account, an object of a locked app), the CurrentPackageId package is used instead; no other package is tried, and the call is refused only when the CurrentPackageId package is locked too",
+        TestName = "ObjectRights_ShouldStateTheCurrentPackageFallbackForALockedObject")]
+    [TestCase("A named package is never replaced",
+        TestName = "ObjectRights_ShouldStateThatANamedPackageIsNeverReplaced")]
+    [TestCase("its binding carries EVERY row stored for that object on this site",
+        TestName = "ObjectRights_ShouldStateThatAProductObjectBindingCarriesEveryRow")]
+    [TestCase("You MUST say this to the developer before the write, name the package the preview shows, and let the developer choose the package",
+        TestName = "ObjectRights_ShouldRequireTellingTheDeveloperAboutAProductObjectBinding")]
+    [TestCase("a missing or locked package is refused before any write, and the refusal names a package to use",
+        TestName = "ObjectRights_ShouldStateThatALockedPackageIsRefusedFirst")]
+    [TestCase("A preview does NOT fail on a refused package",
+        TestName = "ObjectRights_ShouldStateThatAPreviewShowsARefusedPackage")]
+    [TestCase("no second binding is written", TestName = "ObjectRights_ShouldStateThatNoSecondBindingIsWritten")]
+    [TestCase("With package naming a different package the call is refused before any write, naming the package that holds the binding",
+        TestName = "ObjectRights_ShouldStateThatAnOwnBindingElsewhereRefusesAnotherPackage")]
+    [TestCase("Without package that package is the target: the binding is updated where it is",
+        TestName = "ObjectRights_ShouldStateThatAnOwnBindingElsewhereIsTheDefaultTarget")]
+    [TestCase("While the switch is OFF the bound rows decide nothing",
+        TestName = "ObjectRights_ShouldStateThatBoundRowsNeedTheSwitch")]
+    [TestCase("Package install adds and updates rows but never deletes them",
+        TestName = "ObjectRights_ShouldStateThatInstallNeverDeletesRows")]
+    [TestCase("revoke the role's operations instead of removing its row",
+        TestName = "ObjectRights_ShouldPreferARevokeToWithdrawInstalledAccess")]
+    [TestCase("run the same call again — it changes no row and binds them",
+        TestName = "ObjectRights_ShouldStateHowToRepairAFailedBinding")]
+    [TestCase("After a failed remove-row the same call is refused",
+        TestName = "ObjectRights_ShouldStateHowToRepairTheBindingAfterARemoval")]
+    [TestCase("MUST: that export rewrites the package folders from the database and deletes on-disk items the database lacks",
+        TestName = "ObjectRights_ShouldCarryTheDestructiveExportPrecondition")]
+    [TestCase("not reproduced by an install on a clean site",
+        TestName = "ObjectRights_ShouldStateTheEvidenceOfTheInstallRules")]
     [Description("object-rights keeps each rule of the one-object, explicit-flag contract that an agent must weigh before a write; losing one of them in an edit turns the article back into the old contract.")]
     public void ObjectRights_ShouldStateTheContractRule(string rule)
     {
@@ -299,6 +336,24 @@ public sealed class ObjectRightsGuidanceTests
         // Assert
         normalized.Should().NotContain(retired,
             because: "an unconditional promise hides a session that still has the old access, and a mandatory re-login after every change contradicts the probes");
+    }
+
+    [Test]
+    [Description("The package binding boundary names the first clio release that binds the rows and takes the package argument — a gated placeholder until that release is tagged — and says what an older clio does.")]
+    public void ObjectRights_ShouldStateTheVersionBoundaryOfPackageBinding()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().MatchRegex(
+            @"Binding the rows to a package \(the package argument and every rule under Package binding\) requires clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later",
+            because: "a released clio without the binding refuses package and binds nothing, so an agent must know the release that has it");
+        normalized.Should().Contain("An older clio refuses package as unknown and binds nothing",
+            because: "the agent must tell the developer the rights do not ship on an older clio");
     }
 
     [Test]
