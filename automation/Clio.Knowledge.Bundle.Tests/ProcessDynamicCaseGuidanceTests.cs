@@ -41,6 +41,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
             .EnumerateArray()
             .Single(item => item.GetProperty("itemId").GetString() == ItemId);
         string routing = ReadCollapsed(RoutingPath);
+        string[] requiredUris = [.. requirements.GetProperty("resourceUris").EnumerateArray().Select(uri => uri.GetString()!)];
+        string guide = ProcessGuideSet.Read(repositoryRoot, ArticlePath);
 
         // Assert
         using (new AssertionScope())
@@ -53,6 +55,16 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "get-guidance serves only guidance resources");
             requirements.GetProperty("itemIds").EnumerateArray().Select(item => item.GetString())
                 .Should().Contain(ItemId, because: "the library requires every guide it ships");
+            requiredUris.Should().Contain(resource.GetProperty("uri").GetString(),
+                because: "the requirement lists the canonical route next to the item id");
+            resource.GetProperty("topicId").GetString().Should().Be("creatio.process-dynamic-case",
+                because: "the topic is the stable cross-library identity of the guide");
+            resource.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
+                because: "the tool ships ungated; a gated guide would be hidden while the tool answers");
+            guide.Should().NotContain(ProcessGuideSet.SetBanner,
+                because: "a banner obliges process-modeling to index the guide, and that article has no room left");
+            ProcessGuideSet.GoLiveFloor.Should().NotContain(ItemId,
+                because: "the floor holds only banner-carrying articles split out of process-modeling");
             Regex.Matches(routing, $"name={ItemId}\\b").Count.Should().BeGreaterThanOrEqualTo(2,
                 because: "a stage lifecycle and a progress bar on a page both lead an agent here");
         }
@@ -79,8 +91,12 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "deleting a reused settings row cascades away other cases' link rows");
             guide.Should().Contain("Undo ONLY a call whose `case.status` is `created`",
                 because: "after already-present the case and its link row were never written by this call");
+            guide.Should().Contain("MUST have the user's explicit agreement",
+                because: "the undo tools delete live data and ask for no confirmation");
+            guide.Should().Contain("ONLY when `page.status` is `inserted`",
+                because: "after already-present the bar on the page is not this call's to remove");
             guide.Should().MatchRegex(
-                @"1\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry .* 2\. `remove-data-binding-row-db` on the `SysDcmSettings` entry .* 3\. `delete-schema` on `case\.schemaName`\. 4\. Remove the two inserted items",
+                @"1\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry .* 2\. `remove-data-binding-row-db` on the `SysDcmSettings` entry .* 3\. `delete-schema` on `case\.schemaName`\. 4\. ONLY when `page\.status` is `inserted`: remove the two inserted items",
                 because: "the link row goes before the settings row it references, and the case schema last of the three");
             guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
             guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");

@@ -76,15 +76,18 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 
 == Undo (sequential, in this order) ==
 Undo ONLY a call whose `case.status` is `created`; after `already-present` this call wrote no case, so never remove
-the case or its link row. Take every name from the result, never compose one from an Id.
+the case or its link row. Each step deletes live data and none asks for confirmation: it MUST have the user's explicit
+agreement for the named environment and rows first (`core-rules`). Take every name from the result, never compose
+one from an Id.
 1. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings.bindings`, key
    `settings.sysDcmSchemaInSettingsId`.
 2. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings.bindings`, key `settings.sysDcmSettingsId`,
    ONLY when the call answered `settings.status: created`: a reused row carries other cases' link rows, which
    deleting it would cascade away.
 3. `delete-schema` on `case.schemaName`.
-4. Remove the two inserted items (the container and the `crt.EntityStageProgressBar` in it) with `update-page`,
-   by the exact names in `page.fragment`; never delete the page schema.
+4. ONLY when `page.status` is `inserted`: remove the two inserted items (the container and the
+   `crt.EntityStageProgressBar` in it) with `update-page`, by the exact names in `page.fragment`; never delete the
+   page schema. After `already-present` the bar was there before the call.
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or
