@@ -46,6 +46,19 @@ is the one contract all three share, which is why it reads as its own subject.
   bullet after the macro vocabulary), or
   `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
+- SEVERAL VALUES OF ONE COLUMN are ONE condition, never separate `equal` conditions joined by AND: a record
+  holds one value in a column, so such a group matches NO record and the element acts on nothing (a signal
+  start never fires), while the build saves it and only warns. For a LOOKUP column send the records as
+  `values` (each an id or a unique display name) with `equal` (the record is any of them) or `notEqual` (it is
+  none of them). "Status in (To do, In progress)" is
+  `{ "column": "Status", "comparison": "equal", "values": ["To do", "In progress"] }`. The server stores it as
+  the designer stores its multi-select: one condition, run as IN / NOT IN, shown as one row. `values` is a
+  right-hand source of its own and takes lookup columns, records and `equal` / `notEqual` only; a list in
+  `value` is refused. For several values of a column that is not a lookup, or of references, use an `or` group
+  with one condition per value, nested under the AND group when other conditions apply.
+  Gate: `values` needs CrtProcessBuilder 1.6.6.154 or later. Use it only when the FULL
+  `create-business-process` contract (`get-tool-contract` with `detail=full`) says several lookup records are
+  ONE condition with values; otherwise build "any of" as that `or` group of `equal` conditions.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
   `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
@@ -125,6 +138,12 @@ is the one contract all three share, which is why it reads as its own subject.
   (a repeated segment, say), ask the user rather than pick one.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
+  A condition over several lookup records, built with `values` or made in the designer, reads back as `values`
+  (ids in stored order) with the captions joined in `displayValue` (`Algeria; Andorra`), and re-applies as read.
+  MUST, on CrtProcessBuilder earlier than 1.6.6.154: describe returns such a condition as its FIRST record only,
+  marked `<multi-value filter: N values; describe shows only the first>` with `filterDecodedCompletely: false`.
+  Re-sent as read it keeps that one record: an `equal` then selects fewer records, a `notEqual` MORE. Do not
+  re-send it; ask the user, or rebuild it with `values` once the package is updated.
 - LEGACY `isNotNull` (CrtProcessBuilder earlier than 1.6.6.81): those builds stored an is-null condition
   without the platform's own `isNull` flag, which the runtime reads instead of the comparison and which
   defaults to null. Every `isNotNull` they wrote is therefore built as IS NULL (read from platform source,
