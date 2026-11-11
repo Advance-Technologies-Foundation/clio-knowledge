@@ -63,9 +63,10 @@ public sealed class FilterValuesGuidanceTests
         bool floor = guide.Contains("`values` needs CrtProcessBuilder 1.6.6.157 or later");
         bool contractGate = guide.Contains("Use it only when the FULL\n  `create-business-process` contract");
         bool fallback = guide.Contains("otherwise build \"any of\" as that `or` group of `equal` conditions, and \"none of\"\n"
-            + "  as `notEqual` conditions in the AND group");
-        bool noneOfNeverOr = guide.Contains("\"None of\" them is one `notEqual` condition per value in the AND group itself, never an `or`\n"
-            + "  group: an `or` of `notEqual` conditions matches every record");
+            + "  as `notEqual` conditions in an `and` group");
+        bool noneOfNeverOr = guide.Contains("\"None of\" them is one `notEqual` condition per value in an `and` group (the root when it is\n"
+            + "  `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every\n"
+            + "  record");
 
         // Assert
         floor.Should().BeTrue(because: "a current clio refuses an older package up front, and the article must say why");

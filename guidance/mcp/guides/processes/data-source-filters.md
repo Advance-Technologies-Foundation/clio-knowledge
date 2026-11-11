@@ -57,12 +57,13 @@ is the one contract all three share, which is why it reads as its own subject.
   right-hand source of its own and takes lookup columns, records and `equal` / `notEqual` only; a list in
   `value` is refused. For a column that is not a lookup, or for references, the form follows the comparison.
   "Any of" several values is an `or` group with one condition per value, nested under the AND group when other
-  conditions apply. "None of" them is one `notEqual` condition per value in the AND group itself, never an `or`
-  group: an `or` of `notEqual` conditions matches every record, and on a `deleteData` element deletes them all.
+  conditions apply. "None of" them is one `notEqual` condition per value in an `and` group (the root when it is
+  `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every
+  record, and on a `deleteData` element deletes them all.
   Gate: `values` needs CrtProcessBuilder 1.6.6.157 or later. Use it only when the FULL
   `create-business-process` contract (`get-tool-contract` with `detail=full`) says several lookup records are
   ONE condition with values; otherwise build "any of" as that `or` group of `equal` conditions, and "none of"
-  as `notEqual` conditions in the AND group.
+  as `notEqual` conditions in an `and` group.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
   `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
