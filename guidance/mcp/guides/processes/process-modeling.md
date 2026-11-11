@@ -114,8 +114,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
    when it is CHANGED carries TWO signal starts, not two processes and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
    CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
-   the second start (`process-modeling-details`). Branches sharing a parameter each SET it with a
-   `formulaTask`, not a mapping (`process-parameters`).
+   the second start (`process-modeling-details`). Starts sharing a chain: `process-multi-start`.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON
@@ -180,7 +179,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - Constructs the builder cannot create (inclusive/event-based gateways, timer/message starts,
-  intermediate events, `webService`; full list in `process-element-catalog`) survive a save untouched
+  intermediate events; full list in `process-element-catalog`) survive a save untouched
   as data - but you CAN still remove or rewire them by name and nothing will warn you. Gateway
   ELEMENTS, DEFAULT flows and the Formula element are buildable and NOT on that list
   (`process-branch-conditions`, `process-element-catalog`).

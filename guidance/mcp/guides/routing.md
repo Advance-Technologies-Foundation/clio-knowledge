@@ -28,12 +28,13 @@ precondition kept next to the instruction it guards — names that guide as the 
   - wire a button/menu action to a platform request (crt.*Request: print, close, cancel, ...) -> get-request-info + name=when-to-use-requests
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
+  - change the size of a modal window / popup / mini page -> name=page-modal-size (the size is an add-on setting, not the page body)
   - add/update a NAMED or PREDEFINED filter that a list/section page always applies (e.g. an "Active Requests" list) -> name=page-modification-overview + name=esq-filters-frontend
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser", which says when the placeholder is a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
   - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables — for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
-  - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance
+  - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=existing-app-maintenance; lookup values -> name=data-bindings (lookup value translations)
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
@@ -60,6 +61,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     -> name=process-naming when the card sends you there
   - start a process on a record add/modify/delete, or modify data ->
     name=process-data-elements
+  - SEVERAL record starts that run the same steps (one shared chain, one record Id) ->
+    name=process-multi-start
   - READ records from inside a process (one record, a collection, a count or an aggregate) ->
     name=process-read-data
   - add data (create records from a process, one or one per filtered selection) -> name=process-add-data
@@ -118,6 +121,11 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-send-email-attachments (after name=process-send-email)
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
+  - CALL a REST or SOAP web service registered in Studio > Web services from a process — the Call web service element
+    (`webService`; build it only when the FULL contract names it): service and method, request values, the response,
+    switching the method -> name=process-web-service;
+    writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
+    name=configuration-webservice-tests; portal routes: name=portal-service-routing)
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:

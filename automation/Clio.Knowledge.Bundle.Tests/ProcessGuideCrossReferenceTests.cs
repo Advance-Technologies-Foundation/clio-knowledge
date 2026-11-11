@@ -129,7 +129,10 @@ public sealed class ProcessGuideCrossReferenceTests
         // The Send email attachments article is added WITH this row. Keyed on the block member itself, which the
         // Send email article, the element catalog and process-modeling all write next to the owner name; a new
         // mention that drops the name turns this red.
-        ("`email.attachments`", "process-send-email-attachments")
+        ("`email.attachments`", "process-send-email-attachments"),
+        // The Call web service article is added WITH this row. Keyed on the block's name as the element catalog and
+        // its details write it next to the owner name; a new mention that drops the name turns this red.
+        ("`webService` block", "process-web-service")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
