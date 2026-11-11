@@ -53,7 +53,7 @@ URI, authentication, header or parameter defaults - comes back in any answer.
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
-   Declare their process parameters with `typeFromElement` (below), never a guessed `Text`.
+   Declare their process parameters with `typeFromElement` (below), never a guessed `type`.
 4. A key or token parameter is filled from a system setting - an `expression` `[#SysSettings.<Code>#]`
    (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and
    describe returns it to any reader. When the service itself defaults the key from a system setting (the shipped
@@ -132,9 +132,9 @@ modify, target `elementName` + `elementParameter`. Mappings later in the same re
   describe shows it with an issue.
 
 == When the service changes under a process ==
-Every load of a process re-reads each Call web service element from its service. When the service is gone, or no
-longer has the stored method spelled exactly, that load REMOVES the element's service parameters, references to them
-stop working, and a save keeps them removed.
+Every database load of a process re-reads each Call web service element from its service. When the service is gone,
+or no longer has the stored method spelled exactly, that load REMOVES the element's service parameters, references to
+them stop working, and a save keeps them removed.
 - `describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in
   `issues`: the call fails at run time, `ignoreErrors` or not. An issue saying the service could not be read or
   checked means UNKNOWN, not failing.
@@ -196,6 +196,6 @@ block a retarget, not a no-op.
 
 Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on Creatio 10.1.37 (.NET
 Framework) on 2026-11-03 (designer-built elements): a 404 and a refused connection, `ignoreErrors` on and off; the
-designer deleting all parameters of an unresolved element; an unrelated modify pruning a case-drifted element. Every other
+designer deleting all parameters when the method is gone; an unrelated modify pruning a case-drifted element. Every other
 run-time rule is read from the Creatio core source and the designer client code,
 not measured.

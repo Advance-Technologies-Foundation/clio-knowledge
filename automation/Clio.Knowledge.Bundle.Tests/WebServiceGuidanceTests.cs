@@ -168,7 +168,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide states how a composite body is mapped, that a formula item needs its list mapped, when to use RequestBody, that it replaces the generated body, and that nothing checks or warns about it.")]
+    [Description("The guide states how a composite body is mapped, that only a later mapping in the same request can address the generated names, that a formula item needs its list mapped, when to use RequestBody, that it replaces the generated body, and that nothing checks or warns about it.")]
     public void Guide_ShouldStateTheRequestBodyRules()
     {
         // Arrange
@@ -190,7 +190,7 @@ public sealed class WebServiceGuidanceTests
 
         // Assert
         missing.Should().BeEmpty(
-            because: "the builder neither checks a raw body nor warns about a formula item with an unbound list, so the article is the only place these rules live. Missing: "
+            because: "the builder neither checks a raw body nor warns about a formula item with an unbound list, and a mapping before the element that creates its names is refused, so the article is the only place these rules live. Missing: "
                 + string.Join(" | ", missing));
     }
 
@@ -422,7 +422,7 @@ public sealed class WebServiceGuidanceTests
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
-            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters with `typeFromElement` (below), never a guessed `Text`.",
+            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters with `typeFromElement` (below), never a guessed `type`.",
             "Use an unused process name: a taken one is refused first.",
             "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and describe returns it to any reader.",
             "When the service itself defaults the key from a system setting (the shipped `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped."
