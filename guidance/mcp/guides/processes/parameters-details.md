@@ -5,7 +5,7 @@ This article is the authoritative owner of what a SUB-PROCESS element's paramete
 re-synchronize every caller, which `setElement` shapes re-synchronize, what a re-synchronization costs and
 reports, how values cross by name, which version of a versioned callee runs, what `inSync` and describe can and
 cannot show, how a rename is followed, and why the designer card cannot check any of it; and the evidence
-for the process-parameter binding rule `process-parameters` owns, with a multi-start example. Split out of
+for the process-parameter binding rule `process-parameters` owns, with the Formula-per-branch shape. Split out of
 `process-parameters`, which keeps process parameters, the mappings that bind them, type compatibility and the
 date/time/lookup default-value rule; read that first.
 
@@ -104,7 +104,7 @@ date/time/lookup default-value rule; read that first.
   `isResult` is copied only when the element parameter is CREATED and is never refreshed, so a callee that
   later flips it leaves the element reporting the old value, and no re-sync reports or fixes that.
 
-== A process-parameter mapping is a binding — evidence and a multi-start example ==
+== A process-parameter mapping is a binding — evidence and the Formula-per-branch shape ==
 `process-parameters` owns the rule; this is what it rests on and how to build the case it warns about.
 - Measured on a sandbox stand (October 2026) with `run-process` result parameters and `trigger-smoke`:
   * a parameter bound to a Read data column read EMPTY in a Formula placed BEFORE the read and the
@@ -115,7 +115,10 @@ date/time/lookup default-value rule; read that first.
     because the surviving binding points at the other branch's read, which never ran. The same process
     with a Formula per branch produced the record's name;
   * a Formula writing a parameter that still carries a binding wins over it.
-- The shape to build when several starts feed one parameter - each branch assigns it after its own read:
+- Signal starts on ONE object that share a chain merge their record Ids with `mergeFrom` instead
+  (`process-multi-start`). A Formula per branch - the shape below - is what SETS a shared parameter
+  everywhere else (starts on different objects, a timer or message start, gateway branches), and on a clio
+  whose `create-business-process` contract does not name `mergeFrom` it is also the shape for these two starts:
 ```
 "elements": [
   { "name": "RequestAddedSignal", "caption": "Request added", "type": "signalStart", "signal": { "entity": "UsrRequest", "on": "added" } },
@@ -132,6 +135,6 @@ date/time/lookup default-value rule; read that first.
     "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeftParameter" } }
 ]
 ```
-  Flow each read into its own Formula and both Formulas into the shared next step; `mappings[]` carries
-  no `targetProcessParameter` entry for `DaysLeftParameter`. One mapping per branch instead is the shape the build
-  warns about, and it reads the default on every run but one branch's.
+  Flow each start into its own read, each read into its own Formula and both Formulas into the shared next
+  step; `mappings[]` carries no `targetProcessParameter` entry for `DaysLeftParameter`. One mapping per branch
+  instead is the shape the build warns about, and it reads the default on every run but one branch's.
