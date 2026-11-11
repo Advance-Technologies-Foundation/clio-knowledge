@@ -1,6 +1,6 @@
 Part of the process guide set. Owners win; follow pointers.
 0. A request produces ONE process (an asked split is built as asked); split only on D1 (per item of a set, unless one filtered data/rights element does it all), D2 (3+ element fragment at 2+ places), D4 (2+ long human phases): `process-sub-process-when`. Never restructure an existing process without being asked (D1 only, per item).
-1. ONE START PER TRIGGER (add+change: two `signalStart`s; CrtProcessBuilder 1.6.2.24+, clio 8.1.0.131+).
+1. ONE START PER TRIGGER (add+change: two `signalStart`s; shared chain: `process-multi-start`).
 2. `validate-process-graph`; fix all errors.
 3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (retired: `CallUserTask`, `EmailUserTask`, `SendEmailUserTask`).
 4. ONE `get-target-package` (named/app `package`); on `success: false` ask, never guess. `create-business-process`: the descriptor as the JSON object itself, {name,caption,packageName,elements[{name,type,caption,block}],flows[{source,target,kind,condition,label}],parameters,mappings}.
