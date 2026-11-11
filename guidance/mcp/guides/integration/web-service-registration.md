@@ -6,9 +6,9 @@ Scope and ownership
 - This guide owns `register-web-service`, `list-web-services`, `describe-web-service`,
   `modify-web-service` and `test-web-service-method`: their arguments, the credential rule, the usage guard
   and the follow-up steps the user owns.
-- It does NOT own the Call web service process element. The process element catalog
-  (`get-guidance name=process-element-catalog`) owns whether a `webService` element can be built; this guide
-  only produces the service such an element calls.
+- It does NOT own the Call web service process element: `get-guidance name=process-web-service` owns the
+  element, and the process element catalog (`get-guidance name=process-element-catalog`) owns whether it can be
+  built. This guide only produces the service such an element calls.
 - It does NOT cover configuration web services (C# endpoints Creatio exposes); for those read
   `configuration-webservice`.
 - Availability: the five tools exist only in a clio that lists `register-web-service`. If
@@ -36,8 +36,9 @@ Credential rule (MUST)
   id of an existing OAuth application. The tool resolves it to the application's id, stores that id (the reply
   shows it as `oauth-app-id`, which `setAuth` accepts back) and refuses one no application carries. The application itself, with its
   client id and secret, is created by the user; nothing else is needed on the service side.
-- A header, a cookie, or any parameter whose code or `path` looks like a key, token, secret, password,
-  signature or session MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
+- A header, a cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
+  `auth`, `credential`, `signature`, `session` or `cookie` anywhere, in any letter case (so `author` and `keyword`
+  count too), MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
   tool refuses a constant there and never echoes the refused value.
 - Every referenced system setting MUST exist before the call; a reference to a missing setting is refused,
   because at run time the platform drops it silently and the request goes out without the header. Create the
@@ -57,18 +58,22 @@ Registering
   needs, because Studio joins base URI and method URI verbatim.
 - Each method: `code` (prefixed; what a Call web service element stores), `http-method` (GET, POST, PUT,
   PATCH, DELETE), `uri` relative to the base, a path parameter written as `{<its path>}`, its wire name;
-  optional `caption`, `timeout-ms` (default 5000), `content-type` (json or xml), `use-auth`,
+  optional `caption`, `timeout-ms` (default 5000), `content-type` (json or xml, default json), `use-auth`,
   `request-parameters`, `response-parameters`.
+- `use-auth` says whether the method sends the service authentication. Left out, it is true when the service
+  has authentication once the whole call is applied (a `setAuth` in the same `modify-web-service` call counts,
+  whatever its position), false otherwise.
 - Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body, header
-  or cookie for a response), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid, Object), `path`, `array`,
-  `required`, `default-value` or `default-sys-setting`, and `items` for an Object array.
+  or cookie for a response; default body), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid,
+  Object; default Text), `path`, `array`, `required`, `default-value` or `default-sys-setting`, and `items` for an
+  Object array. Give `in` on every parameter of a GET method: one without it is a body parameter and is refused.
 - Object is ONLY an array (`"type": "Object", "array": true`, its element fields in `items`), for a list of
   records such as order lines. A single nested object is NOT an Object parameter: describe each of its fields
   as its own parameter with a dotted `path`, the way Studio's quick setup does - request body
   `{"code": "UsrCustomerName", "path": "customer.name"}` and `{"code": "UsrCustomerEmail", "path":
   "customer.email"}` go out as one `{"customer": {"name": ..., "email": ...}}`; a response value reads
-  `$.customer.name`. The tool refuses a single Object: Studio cannot save one and a Call web service element
-  gets a parameter with no fields to bind.
+  `$.customer.name`. The tool refuses a new single Object: Studio cannot save one and a Call web service element
+  gets a parameter with no fields to bind. One the service already has is kept as it is.
 - `path` is the name the API sees: the query, header, cookie or body key (dotted for a field of a nested
   object), the `{placeholder}` of a path parameter, or the JSONPath of a response value (`$.status`; a field
   inside an Object array uses its key relative to the element, `number`). The code carries the prefix and is NOT the wire name, so on an environment with a
@@ -80,14 +85,15 @@ Registering
   and the header or cookie name in `path`. The platform matches a response header name EXACTLY as the API
   sends it, letter case included: `X-Request-Id` reads nothing when the API sends `x-request-id` (measured;
   many APIs send lowercase). Ask the user or check the API documentation for the exact spelling.
-- Every `{placeholder}` in `uri` needs a path parameter whose `path` is that name, and the reverse; path
-  parameters are required by default.
+- Every `{placeholder}` in `uri` needs a path parameter whose `path` is that name, letter case included (the
+  platform substitutes it case-sensitively), and the reverse; path parameters are required by default.
 - Body rules Studio enforces, and the tool refuses the same: a GET method has no body request parameters,
   and an `xml` method has no body parameters in its request or its response (the platform builds a REST
   body as JSON only, so such a call fails). An XML API is registered with its path, query, header and cookie
   parameters only; a process then sends the XML text through the Call web service element's `RequestBody`
   and reads the raw `Response`.
-- An unknown argument is refused with the list of valid fields; fix the name rather than dropping it.
+- An unknown argument is refused with its name (at the top level also with the list of valid fields); fix the
+  name rather than dropping it.
 - The reply returns the saved service as Studio stores it. Its method and parameter codes are the ones a
   process element maps, so keep the reply for the process step.
 
@@ -102,25 +108,30 @@ After registering — tell the user (the tool also returns these as notices)
 Testing
 - `test-web-service-method` sends ONE real request, as Studio's Send test request does, and returns the
   HTTP status and the response body (cut at 20,000 characters). Request and response headers are never
-  returned. Values the request carried from system settings or in `Authorization` are replaced with
-  `[masked]` in the body and the error (`sent-secrets-masked: true`), because an API may echo them. In a JSON
-  body every value and every property name carrying a secret is masked (a number or boolean whole), and the
-  other keys and values stay readable; a masked JSON body comes back re-indented.
-  Values shorter than four characters and path parameters are not masked.
+  returned. Values the request carried from system settings (path parameters included) or in `Authorization`,
+  and the secret constant defaults describe hides, are replaced with `[masked]` in the body and the error
+  (`sent-secrets-masked: true`), because an API may echo them. In a JSON body every value and every property name
+  carrying a secret is masked (a number or boolean whole), and the other keys and values stay readable; a masked
+  JSON body comes back re-indented. Values shorter than four characters are not masked. When a path
+  parameter filled from a system setting cannot be found in the sent URL, the response is withheld and only
+  the status code comes back.
 - `parameters` maps top-level request parameter codes to values; text, numbers and booleans are accepted.
   A body field given no value goes out as `null`, not left out (measured), so a strict API may reject it.
 - The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
   changes data on their side.
-- A GET returning 401 or 403 usually means the system-setting values are still empty: an empty setting
+- A call returning 401 or 403: first check in `describe-web-service` that the method has `use-auth: true` when
+  the service has authentication. If it does, the system-setting values are usually still empty: an empty setting
   sends no header or parameter at all, without any error. Say so instead of changing the service.
 
 Changing a registered service
 - Read it first with `describe-web-service`. Add `usages: true` to list the processes that call it; the scan
   reads every process schema and takes seconds to minutes on a large environment.
 - `modify-web-service` takes `code`, `operations` and optional `acknowledge-usages`. Operations apply in
-  order, all or nothing: `addMethod`, `setMethod` (replaces the method of the same code, keeping the UIds of
-  parameters it keeps), `removeMethod` (`method-code`), `setBaseUri`, `setRetryCount`, `setAuth`. Only REST
-  services can be changed; a SOAP service stays in Studio. Each operation names its kind in `op`:
+  order, all or nothing: `addMethod` (`method`), `setMethod` (`method`; replaces the method of the same code,
+  keeping the UIds of parameters it keeps), `removeMethod` (`method-code`), `setBaseUri` (`base-uri`),
+  `setRetryCount` (`retry-count`), `setAuth` (`auth`; `type` none, basic, digest or oauth20, and none removes the
+  authentication). Only REST services can be changed; a SOAP service stays in Studio. Every system setting the
+  service references, in any method, must exist for any change to save. Each operation names its kind in `op`:
   `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
 - What `describe-web-service` returns can be sent back as it is: a method (with its parameters) as the
   `method` of `setMethod`, and the `auth` block as the `auth` of `setAuth`. Read-only fields
@@ -129,17 +140,22 @@ Changing a registered service
   keeps that default when no default is sent; the agent never needs, and never gets, the value. To remove
   such a constant send `"default-value": ""`, or replace it with `default-sys-setting`; moving it to a place
   where it would show (a query parameter, a path that does not look like a credential) is refused.
+- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth`; to
+  make an existing method send the new authentication, send it with `setMethod` and `use-auth: true` (the usage
+  guard applies).
 - One exception: an `auth` block with `constant-credentials-masked: true` and no setting codes (Basic or
   Digest credentials typed in Studio as constants) cannot be sent back; `setAuth` needs the
   `username-sys-setting` and `password-sys-setting` codes instead, and the user fills those settings.
 - USAGE GUARD: `setMethod` and `removeMethod` on a method that a process calls are REFUSED, with the
-  processes and elements listed. Those elements would lose their parameters on the next designer load and
-  fail at run time, with nothing to warn the user. Show the list to the user; only on their explicit yes,
-  repeat the call with `acknowledge-usages` naming exactly those processes. Never fill `acknowledge-usages`
-  on your own.
-- `addMethod` never breaks a caller and is not guarded. A parameter added to a method a process already
-  calls appears on that element at its next load, unbound; until it is bound, a body field goes out as
-  `null` (measured), so bind it or tell the user.
+  processes and elements listed. A removed method, or a removed or renamed parameter, leaves those elements
+  with mappings that point at nothing, and they fail at run time with nothing to warn the user. Show the list to
+  the user; only on their explicit yes, repeat the call with `acknowledge-usages` listing the `process` codes
+  from the refusal (not the captions), exactly those. Never fill `acknowledge-usages` on your own. A process
+  that names the service but whose metadata cannot be read is listed with no element and counts as calling
+  every method.
+- `addMethod` never breaks a caller and is not guarded. Adding a parameter to a method a process already calls
+  is a `setMethod` and is guarded; after the user agrees, the new parameter appears on that element at its next
+  load, unbound, and until it is bound a body field goes out as `null` (measured), so bind it or tell the user.
 - Codes the service already has stay as they are, with or without the prefix: a service registered before
   the prefix rule, or shipped by Creatio, keeps them. NEVER rename a method or parameter only to add the
   prefix - the rename is exactly the change that breaks its callers. In `setMethod`, send the existing
