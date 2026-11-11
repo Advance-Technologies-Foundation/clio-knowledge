@@ -168,7 +168,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide states how a composite body is mapped, that a formula item needs its list mapped, when to use RequestBody, that it replaces the generated body, and that nothing checks or warns about it.")]
+    [Description("The guide states how a composite body is mapped, that only a later mapping in the same request can address the generated names, that a formula item needs its list mapped, when to use RequestBody, that it replaces the generated body, and that nothing checks or warns about it.")]
     public void Guide_ShouldStateTheRequestBodyRules()
     {
         // Arrange
@@ -178,6 +178,7 @@ public sealed class WebServiceGuidanceTests
         string[] clauses =
         [
             "Set an input through the ordinary mapping surface (`process-parameters`): `mappings[]` on create, `addMapping` on modify, target `elementName` + `elementParameter`.",
+            "Mappings later in the same request can address the generated names.",
             "the list is bound to that collection too, one request item per source row (rule P1, `process-files`)",
             "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list draws the unsourced-inner-list notice.",
             "when non-null it REPLACES the whole body the element would build from its body parameters; headers, query, path and cookies are still built from theirs.",
@@ -189,7 +190,7 @@ public sealed class WebServiceGuidanceTests
 
         // Assert
         missing.Should().BeEmpty(
-            because: "the builder neither checks a raw body nor warns about a formula item with an unbound list, so the article is the only place these rules live. Missing: "
+            because: "the builder neither checks a raw body nor warns about a formula item with an unbound list, and a mapping before the element that creates its names is refused, so the article is the only place these rules live. Missing: "
                 + string.Join(" | ", missing));
     }
 
@@ -408,7 +409,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The guide tells an agent what to do when the task names no service: find it through the refusal, ask when several fit, stop when none does and say what registration needs, build in two steps, and take keys from a setting or parameter.")]
+    [Description("The guide tells an agent what to do when the task names no service: find it through the refusal under an unused process name, ask when several fit, stop when none does and say what registration needs, build in two steps with parameters declared by typeFromElement, and take keys from a setting or parameter.")]
     public void Guide_ShouldStateTheTaskWithoutDetails()
     {
         // Arrange
@@ -421,8 +422,9 @@ public sealed class WebServiceGuidanceTests
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
-            "Build in two steps: the element first, then the mappings, from the names the answer and describe report.",
-            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant",
+            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters by the rule below, never with a guessed `type`.",
+            "A create probe needs an unused process name: a taken one is refused first.",
+            "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and describe returns it to any reader.",
             "When the service itself defaults the key from a system setting (the shipped `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
