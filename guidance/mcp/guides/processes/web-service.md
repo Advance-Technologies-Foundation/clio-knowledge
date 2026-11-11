@@ -47,13 +47,13 @@ URI, authentication, header or parameter defaults - comes back in any answer.
 == A task that names no service or method ==
 1. Find the service and method through ONE refusal: a build naming an unknown service (and any `method`) saves
    nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown
-   `method`: that refusal lists them. Use an unused process name: a taken one is refused first. Pick the pair that
-   fits; when several fit, ASK the user which; never guess between them.
+   `method`: that refusal lists them. A create probe needs an unused process name: a taken one is refused first.
+   Pick the pair that fits; when several fit, ASK the user which; never guess between them.
 2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
-   Declare their process parameters with `typeFromElement` (below), never a guessed `type`.
+   Declare their process parameters by the rule below, never with a guessed `type`.
 4. A key or token parameter is filled from a system setting - an `expression` `[#SysSettings.<Code>#]`
    (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and
    describe returns it to any reader. When the service itself defaults the key from a system setting (the shipped
@@ -70,7 +70,7 @@ The method's parameters become the element's own, under these names:
   `StatusCode` (the HTTP status code, Integer, out), `RequestBody` (raw request text, Text, in).
 The create or retarget answer lists the generated names (`*` required); describe's `webService.parameters` is the
 authoritative tree. No aliases: the service's own name `title` is not an element parameter. A mapping onto a name the
-element lacks is refused, listing its top-level parameters.
+element lacks is refused, listing its parameters.
 - A process parameter that feeds an input or takes an output: declare it with `typeFromElement` +
   `typeFromElementParameter` (`process-parameters`), NEVER a guessed `type`: a mapping across type groups is refused.
   A list is refused as a mirror: declare a Collection (== Reading the response ==).

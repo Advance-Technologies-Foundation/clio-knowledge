@@ -422,8 +422,8 @@ public sealed class WebServiceGuidanceTests
             "when several fit, ASK the user which; never guess between them.",
             "When none fits, STOP: no process, no placeholder element, no Script task in its place.",
             "what that needs: the base URL, the method and its parameters, and the authentication. The user enters any credential there, not you.",
-            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters with `typeFromElement` (below), never a guessed `type`.",
-            "Use an unused process name: a taken one is refused first.",
+            "Build in two steps: the element first, then the mappings, from the names the answer and describe report. Declare their process parameters by the rule below, never with a guessed `type`.",
+            "A create probe needs an unused process name: a taken one is refused first.",
             "is filled from a system setting - an `expression` `[#SysSettings.<Code>#]` (`process-formulas`) - or from a process parameter, NEVER from a constant: the process stores it, and describe returns it to any reader.",
             "When the service itself defaults the key from a system setting (the shipped `GeminiApiSearch` does), leave that input unbound: an unbound input is skipped."
         ];
