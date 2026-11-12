@@ -184,7 +184,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
-  - register, read, change or test-call a REST web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration
+  - register, read, change or test-call a REST or SOAP web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration; for a SOAP service (SOAP 1.1 / 1.2, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces

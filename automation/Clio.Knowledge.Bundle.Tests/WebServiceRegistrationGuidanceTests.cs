@@ -78,6 +78,39 @@ public sealed class WebServiceRegistrationGuidanceTests
             because: "a process task with no registered service must reach the registration tools, not stop at Studio");
     }
 
+    [Test]
+    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps soap-header parameters on system settings, guards setNamespaces and setType, and routing reaches it.")]
+    public void SoapGuide_ShouldStateItsSafetyRules()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+        string guide = ReadCollapsed(ArticlePath);
+        string routing = ReadCollapsed("guidance/mcp/guides/routing.md");
+
+        // Act
+        string[] clauses =
+        [
+            "take it from the WSDL (the binding operation's `soapAction`) or ask the user; NEVER make one up.",
+            "Pass the whole notice on, risk sentence included",
+            "A soap-header parameter takes no `default-value`",
+            "NEVER a JSONPath",
+            "`removeMethod`, with the processes listed"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent invents a SOAP action, stores a WS-Security secret as a constant, or switches a called service unasked");
+        }
+        guide.Should().NotContain("a SOAP service stays in Studio",
+            because: "SOAP services are registered and changed by the tools now");
+        guide.Should().Contain("get-guidance name=web-service-soap",
+            because: "the owner guide must send a SOAP task to the SOAP article");
+        routing.Should().Contain("for a SOAP service (SOAP 1.1 / 1.2, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap",
+            because: "a SOAP registration task must reach the SOAP article from routing");
+    }
+
     private static string ReadCollapsed(string relativePath) =>
         Regex.Replace(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath), @"\s+", " ");
 }
