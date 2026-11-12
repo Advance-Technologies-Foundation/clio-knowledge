@@ -218,6 +218,7 @@
       "ui-project",
       "virtual-entities",
       "websocket-messaging",
+      "web-service-registration",
       "when-to-use-requests",
       "list-widget",
       "record-permissions",
@@ -425,6 +426,7 @@
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
+      "docs://knowledge/com.creatio.clio/web-service-registration",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
       "docs://knowledge/com.creatio.clio/list-widget",
       "docs://knowledge/com.creatio.clio/record-permissions",
@@ -2951,6 +2953,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "web-service-registration",
+      "title": "REST web service registration",
+      "description": "Owns the clio tools that register, read, change and test-call a REST web service in Creatio Studio > Web services (register-web-service, list-web-services, describe-web-service, modify-web-service, test-web-service-method): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), the real-request warning for test calls, and the usage guard that refuses changing or removing a method a process calls until the user acknowledges the named processes.",
+      "topicId": "creatio.web-service-registration",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-registration",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-registration.md",
+      "bundlePath": "resources/web-service-registration.md",
       "mediaType": "text/plain"
     },
     {

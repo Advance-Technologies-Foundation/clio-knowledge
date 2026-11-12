@@ -123,7 +123,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-approval
   - CALL a REST or SOAP web service registered in Studio > Web services from a process — the Call web service element
     (`webService`; build it only when the FULL contract names it): service and method, request values, the response,
-    switching the method -> name=process-web-service;
+    switching the method -> name=process-web-service; no registered service fits and clio lists
+    `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
@@ -182,6 +183,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
+  - register, read, change or test-call a REST web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
