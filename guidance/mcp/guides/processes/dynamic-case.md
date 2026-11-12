@@ -88,7 +88,7 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
 - `request-failed`: BuildCase could not be called, or answered something that is not its result (an error or a
   login page); read the message and retry once the environment answers.
 - `process-builder-without-build-case`: BuildCase answered 404, so the environment's CrtProcessBuilder has no
-  dynamic-case operation (it needs 1.6.6.160 or later); `install-process-builder`, once the user approves it
+  dynamic-case operation (it needs 1.6.6.165 or later); `install-process-builder`, once the user approves it
   (`core-rules`), is the remedy.
 
 == Partial and unknown outcomes ==
