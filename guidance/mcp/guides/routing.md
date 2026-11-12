@@ -72,7 +72,8 @@ precondition kept next to the instruction it guards — names that guide as the 
   - DELETE records from inside a process -> name=process-delete-data (read it BEFORE planning the step:
     the element is irreversible and the article carries the confirmation you owe the user)
   - restrict WHICH records an element acts on -- the `filter`: comparisons, right-hand value sources,
-    the relative-date macros, the signal-start restriction -> name=process-data-source-filters
+    several values of one column ("status is A or B"), the relative-date macros, the signal-start
+    restriction -> name=process-data-source-filters
   - process parameters, element-parameter mappings, type compatibility, or a date/time/lookup default
     value -> name=process-parameters
   - a parameter or mapping that carries FILES (type File or FileCollection, a file collection bound at both
