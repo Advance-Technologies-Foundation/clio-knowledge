@@ -107,6 +107,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "already-present needs the settings row and the link row too, not only the same stages");
             guide.Should().Contain("AUTO-SAVE mode (`saveOnChange: true`, `askUserToChangeSchema: false`)",
                 because: "a stage click saves the whole record, which the user must be told; the designer's default is manual");
+            guide.Should().Contain("A page stored in the full form (every record page `create-app` makes) takes it too",
+                because: "an agent that read the old refusal would otherwise skip the bar on every create-app page");
+            guide.Should().Contain("Remedy: `add-progress-bar: false`, fix the page as the message says, then re-run the same call",
+                because: "a page refusal is fixed on the page, and the re-run answers already-present for the case");
             guide.Should().Contain("MUST have the user's explicit agreement",
                 because: "the undo tools delete live data and ask for no confirmation");
             guide.Should().Contain("ONLY when `page.status` is `inserted`",

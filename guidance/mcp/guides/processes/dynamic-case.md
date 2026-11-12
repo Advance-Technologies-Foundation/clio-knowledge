@@ -43,7 +43,9 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   that package to deploy with this one: relay it. The case designer needs both rows to open the case;
   `settings.bindings` names the bindings this call wrote.
 - The record page: a `ProgressBarContainer` at index 0 of `MainContainer` holding `crt.EntityStageProgressBar` with
-  the object's `entityName`, in the default design package (as `update-page` writes). Never add `recordId`,
+  the object's `entityName`, in the default design package (as `update-page` writes). A page stored in the full
+  form (every record page `create-app` makes) takes it too: its body is saved by `replace` with only these two items
+  added, pinned to the checksum the plan read. Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
   the page has a bar already. The bar is inserted in AUTO-SAVE mode (`saveOnChange: true`,
   `askUserToChangeSchema: false`): a stage click saves the whole record, with any other unsaved edit on the form,
@@ -82,7 +84,9 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
   `record-page-not-freedom` (a Classic page: create a Freedom UI page and its related-page add-on first),
   `placement-unsupported` (a mini page), `page-entity-mismatch` (the page's primary data source `PDS` is not the
   object: a page made by `create-page` from a template has none until a field of the object is added),
-  `page-append-rejected` (the page refused the bar's append dry run; the message says why).
+  `page-append-rejected` (the dry run of the bar's write failed, or the stored page cannot take it; the message
+  says why). Remedy: `add-progress-bar: false`, fix the page as the message says, then re-run the same call: it
+  answers `already-present` for the case and adds the bar.
 - `dependency-cycle` (the package storage refused the added dependencies) and `dependency-add-failed`: settle
   the package's dependencies with the user, or pass a package that already reaches the object.
 - `request-failed`: BuildCase could not be called, or answered something that is not its result (an error or a
@@ -99,7 +103,8 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
   designer. `planned` means it was not: with the user's agreement run the real call, or remove those dependencies
   (step 5). Never undo from the `unknown` result itself.
 - `created-page-failed`: the case is in place (`case.status` `created` or `already-present`) and kept; the bar is
-  not. `page.retry` carries the exact `update-page` call.
+  not. `page.retry` carries the exact `update-page` call; for a full-form page that is a `replace` of the whole
+  body with its `checksum`, and a conflict means the page changed since: re-run the `create-dynamic-case` call.
 - `failed-rolled-back` / `failed-leftover`: the build failed after writing; the second lists what to remove by
   hand, in order (the case schema with the undo step 1 call, `remote: true` included), and keeps the dependencies
   this call added (`dependencies.status: kept-for-leftovers`): remove them only after the leftovers. Either way the platform's own save may have left a start-event row
