@@ -44,7 +44,8 @@ Credential rule (MUST)
   tool refuses a constant there and never echoes the refused value.
 - Every system setting a call references anew MUST exist before the call; such a reference to a missing
   setting is refused, because at run time the platform drops it silently and the request goes out without the
-  header. A reference the service already had and whose setting was deleted since comes back as a notice. Create the
+  header. A reference the same method (or the authentication) already had, whose setting was deleted since,
+  comes back as a notice. Create the
   setting first with `create-sys-setting` and no value, `value-type-name` SecureText for a key, token or
   password, and let the user fill it (`get-guidance name=sys-settings`).
 - An API key the built-in authentication types do not cover (a key header, a key query parameter, a Bearer
