@@ -26,7 +26,7 @@ URI, authentication, header or parameter defaults - comes back in any answer.
 - `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==).
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
-- Caption: omitted, `<service caption, or its name> <N>`; a sent one is kept.
+- Caption: omitted, it is `<service caption, or its name> <N>`; a sent one is kept.
 - The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.
 
 == Naming the service and method ==
@@ -49,9 +49,9 @@ URI, authentication, header or parameter defaults - comes back in any answer.
    nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown
    `method`: that refusal lists them. A create probe needs an unused process name: a taken one is refused first.
    Pick the pair that fits; when several fit, ASK the user which; never guess between them.
-2. When none fits, STOP: no process, no placeholder element, no Script task in its place. With clio's
-   `register-web-service`, use `web-service-registration` first; else tell the user to register
-   it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
+2. When none fits, STOP: no process, no placeholder element, no Script task in its place. If clio lists
+   `register-web-service`, use `web-service-registration` first. Else tell the user to use
+   Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
    Declare their process parameters by the rule below, never with a guessed `type`.
