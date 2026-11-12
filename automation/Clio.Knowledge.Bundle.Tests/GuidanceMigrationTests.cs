@@ -59,7 +59,8 @@ public sealed class GuidanceMigrationTests
         "default-record-rights",
         "portal-sections",
         "page-modal-size",
-        "process-dynamic-case"
+        "process-dynamic-case",
+        "web-service-registration"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
