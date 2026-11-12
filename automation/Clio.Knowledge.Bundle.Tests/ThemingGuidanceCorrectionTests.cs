@@ -99,6 +99,99 @@ public sealed class ThemingGuidanceCorrectionTests
             because: "swapping only the primary values in the get-theme CSS leaves every dependent token on the old brand");
     }
 
+    [Test]
+    [Description("Removes a theme background with a null in exactly one background argument on update-theme.")]
+    public void ThemingGuide_ShouldRemoveAThemeBackgroundWithNull() =>
+        ReadThemingGuide().Should().Contain("To remove it, pass exactly one as null to `update-theme`; a null next to a value, or in both, is ignored",
+            because: "a client that sends null for every unused argument must not remove a background it meant to keep");
+
+    [Test]
+    [Description("Keeps the confirmed theme when the Creatio version refuses its background.")]
+    public void ThemingGuide_ShouldKeepTheThemeWhenTheVersionRefusesItsBackground()
+    {
+        string guide = ReadThemingGuide();
+
+        guide.Should().Contain("After `create-theme`, tell the user and repeat it without the background",
+            because: "below 10.2.96 the confirmed theme can still be created without its background");
+        guide.Should().Contain("never fall back to `create-theme`",
+            because: "a refused update leaves the existing theme as it is, and a create would add a second theme");
+        guide.Should().Contain("for a call with a background argument see \"Theme background\" instead",
+            because: "the Constraints rule for a version below 10.0.0 must not stop a call the background floor refused");
+    }
+
+    [Test]
+    [Description("Announces the environment-wide gallery entry and panel icon turn-off before a theme background is written.")]
+    public void ThemingGuide_ShouldAnnounceThePanelIconTurnOffBeforeTheWrite() =>
+        ReadThemingGuide().Should().Contain("an image joins the shell background gallery, and a background leaves `UsePanelIconBackground` off for All employees. Both are environment-wide: tell the user before the write",
+            because: "a theme image appears in every account's background gallery and the panel changes for every account, not only for the theme's accounts");
+
+    [Test]
+    [Description("Binds an existing theme's background image into the theme's own package.")]
+    public void ThemingGuide_ShouldBindAnExistingThemesImageIntoItsOwnPackage() =>
+        ReadThemingGuide().Should().Contain("for an existing theme the Pkg/<package> segment of its `cssFilePath`",
+            because: "an existing theme lives in its own package, not in a branding run's target package");
+
+    [Test]
+    [Description("Refuses a background for a theme whose package is locked without unlocking it or offering another package.")]
+    public void ThemingGuide_ShouldRefuseABackgroundForALockedThemePackage() =>
+        ReadThemingGuide().Should().Contain("If the theme's package is locked, nothing is written: say so; never unlock it or offer another.",
+            because: "unlocking a package is the user's decision, and a theme cannot move to another package");
+
+    [Test]
+    [Description("Binds the panel icon off state with a theme background and relays the warning that says it was left out.")]
+    public void ThemingGuide_ShouldBindThePanelIconOffStateWithTheBackground() =>
+        ReadThemingGuide().Should().Contain("relay a warning that it was left out: then elsewhere the icons can cover it",
+            because: "the off state travels only when it reads as off here, and the warning is the only signal that the package will not turn it off on the target");
+
+    [Test]
+    [Description("Names the image size cap before a background image is uploaded.")]
+    public void Guides_ShouldNameTheBackgroundImageSizeCap()
+    {
+        ReadThemingGuide().Should().Contain("(upload the file, 10 MB at most, with `upload-image` first)",
+            because: "clio refuses a larger image, and the agent must know that before the user confirms the write");
+        ReadBrandingGuide().Should().Contain("(`file`, 10 MB at most)",
+            because: "set-background-image uploads through the same capped image path");
+    }
+
+    [Test]
+    [Description("Says what a translucent theme color lies over.")]
+    public void ThemingGuide_ShouldSayWhatATranslucentColorShowsThrough() =>
+        ReadThemingGuide().Should().Contain("say only the plain page shows through it",
+            because: "a theme color lies over the plain page, not over the shell background or an earlier image");
+
+    [Test]
+    [Description("Reads a feature with no definition as off.")]
+    public void BrandingGuide_ShouldReadAFeatureWithNoDefinitionAsOff() =>
+        ReadBrandingGuide().Should().Contain("a feature with no `Feature` row is off",
+            because: "with no definition there is no DefaultState to fall back on, and the platform reads the feature as off");
+
+    [Test]
+    [Description("Names the reads that place an account's roles in the role tree.")]
+    public void BrandingGuide_ShouldNameTheReadsForARolesLevel() =>
+        ReadBrandingGuide().Should().Contain("An account's roles are its `SysAdminUnitInRole` rows, and a role's level is the number of `SysAdminUnit.ParentRole` steps from it to a role with none.",
+            because: "the deepest-level rule needs each role's depth, also for roles on different branches");
+
+    [Test]
+    [Description("Keeps the inactive-theme setting out of the changes made to show a background.")]
+    public void BrandingGuide_ShouldNotChangeInactiveThemesToShowABackground() =>
+        ReadBrandingGuide().Should().Contain("`DisableChangeTheme` or `InactiveThemes` to make a background show",
+            because: "InactiveThemes applies to every account on that theme, so it is the administrator's call");
+
+    [Test]
+    [Description("Keeps the theming article within one get-guidance response.")]
+    public void ThemingGuide_ShouldFitOneGetGuidanceResponse() =>
+        ProcessGuideResponseSizeTests.ResponseSize(FindRepositoryRoot(), ThemingGuidePath)
+            .Should().BeLessThanOrEqualTo(ProcessGuideResponseSizeTests.MaxResponseCharacters,
+                because: "an article that spills out of one response reaches the agent only in part");
+
+    private const string ThemingGuidePath = "guidance/mcp/guides/theming/index.md";
+
+    private static string ReadThemingGuide() =>
+        File.ReadAllText(Path.Combine(FindRepositoryRoot(), ThemingGuidePath));
+
+    private static string ReadBrandingGuide() =>
+        File.ReadAllText(Path.Combine(FindRepositoryRoot(), "guidance/mcp/guides/theming/branding.md"));
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
