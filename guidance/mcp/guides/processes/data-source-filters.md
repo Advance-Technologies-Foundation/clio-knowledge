@@ -37,7 +37,8 @@ is the one contract all three share, which is why it reads as its own subject.
   notContains | startWith | notStartWith | endWith | notEndWith | isNull | isNotNull.
 - The right-hand value of a condition is exactly ONE of: `value` (a constant as a string — the server
   types it by the column; for a Date/DateTime/Time column pass ISO-8601, e.g. `2026-05-01` or
-  `2026-05-01T12:00:00Z`), `processParameter` (a process parameter by name), `elementParameter`
+  `2026-05-01T12:00:00Z`), `values` (several records of one LOOKUP column, see the next bullet),
+  `processParameter` (a process parameter by name), `elementParameter`
   ({ elementName, parameter, column? } — another element's output; the parameter must EXIST on that element —
   a `readData` element exposes only `ResultEntity`, so `{ "elementName": "ReadNewestContact", "parameter": "Id" }`
   is refused; compare against ONE column of the read record with `column`:
@@ -46,6 +47,27 @@ is the one contract all three share, which is why it reads as its own subject.
   bullet after the macro vocabulary), or
   `macro` (a
   relative-date / system macro — the complete set is in the next bullet). isNull/isNotNull take none.
+- SEVERAL VALUES OF ONE COLUMN are ONE condition, never separate `equal` conditions joined by AND: a record
+  holds one value in a column, so such a group matches NO record and the element acts on nothing (a signal
+  start never fires), while the build saves it and only warns. For a LOOKUP column send the records as
+  `values` (each an id or a unique display name) with `equal` (the record is any of them) or `notEqual` (it is
+  none of them). "Status in (To do, In progress)" is
+  `{ "column": "Status", "comparison": "equal", "values": ["To do", "In progress"] }`. The server stores it as
+  the designer stores its multi-select: one condition, run as IN / NOT IN, shown as one row. On a lookup column
+  `notEqual`, with one value or with `values`, also selects records whose column is EMPTY: "none of them"
+  includes records with no value, and a `deleteData` element deletes those too. To leave them out, add an
+  `isNotNull` condition on the same column beside it in an `and` group. Measured on Creatio 10.2.522
+  (.NET Framework, MSSQL) in November 2026, on Contact.Country. `values` is a
+  right-hand source of its own and takes lookup columns, records and `equal` / `notEqual` only; a list in
+  `value` is refused. For a column that is not a lookup, or for references, the form follows the comparison.
+  "Any of" several values is an `or` group with one condition per value, nested under the AND group when other
+  conditions apply. "None of" them is one `notEqual` condition per value in an `and` group (the root when it is
+  `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every
+  record, and on a `deleteData` element deletes them all.
+  Gate: use `values` only when the FULL `create-business-process` contract (`get-tool-contract` with
+  `detail=full`) says "any of several lookup records is ONE condition with values", as clio 8.1.0.150 and
+  later does; that clio refuses an older CrtProcessBuilder up front. Otherwise build "any of" as that `or`
+  group of `equal` conditions, and "none of" as `notEqual` conditions in an `and` group.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
   `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
@@ -73,7 +95,7 @@ is the one contract all three share, which is why it reads as its own subject.
   When the user asks for a `[#…#]`-wrapped or otherwise misspelled filter value, say that a filter does not
   accept that form and which bare token you send instead (or already have) - never report it as the same value.
 - SIGNAL-START RESTRICTION (important): on a `signalStart` filter the right-hand side may ONLY be a constant
-  `value`, a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
+  (`value`, or `values` for several lookup records), a `macro`, or isNull/isNotNull (`datePart` is a LEFT-hand modifier, never a source) — NOT `processParameter` / `elementParameter` /
   `expression`. The signal is evaluated to decide WHICH records start the process, BEFORE any process
   instance exists, so a parameter / element output / meta-path reference has no value yet. The server
   REJECTS a parameter reference on a signal filter (the visual designer likewise hides the "select
@@ -125,6 +147,15 @@ is the one contract all three share, which is why it reads as its own subject.
   (a repeated segment, say), ask the user rather than pick one.
   A lookup value reads back as the raw id in `value` plus its resolved caption in `displayValue` (so
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
+  A condition over several lookup records, built with `values` or made in the designer, reads back as `values`
+  (ids in stored order) with the captions joined in `displayValue` (`Algeria; Andorra`), and re-applies as read,
+  when both sides carry `values`: clio 8.1.0.150 and later, whose contract names it, on the CrtProcessBuilder
+  that clio requires.
+  MUST, whatever the versions: a condition that describe returns marked
+  `<multi-value filter: N values; describe shows only the first>` with `filterDecodedCompletely: false` holds N
+  records but shows only its FIRST (an older clio or CrtProcessBuilder reads it that way). Re-sent as read it
+  keeps that one record: an `equal` then selects fewer records, a `notEqual` MORE. Do not re-send it; ask the
+  user, or rebuild it with `values` once both are updated.
 - LEGACY `isNotNull` (CrtProcessBuilder earlier than 1.6.6.81): those builds stored an is-null condition
   without the platform's own `isNull` flag, which the runtime reads instead of the comparison and which
   defaults to null. Every `isNotNull` they wrote is therefore built as IS NULL (read from platform source,
