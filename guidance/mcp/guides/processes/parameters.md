@@ -41,18 +41,19 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   (a mapping or an expression that reads an element's output, or a Formula element's result), and which is not a
   collection, is saved as `Internal`, and the response carries a warning naming it. That warning is a report, not an
   error: if the process returns the value to a caller, set `Out` (or `Variable` when a caller also passes it in). A
-  direction the request states, `Variable` included, is left as stated and not warned about. A `FileCollection`
-  keeps `Variable` and is not advised otherwise, and a parameter that already existed before the request is never
-  changed: when the request maps an element output onto an existing `Variable` one, or a Formula element it adds or
-  edits writes into it, the response advises `Internal` if only elements of this process use it, `Out` if a caller
-  reads it back, `Variable` only if a caller also passes it in. Only parameters the request reaches that way are
-  judged, so no warning after a modify does not mean the process has no `Variable` helpers. An older
-  CrtProcessBuilder neither switches nor warns, so silence proves nothing: state `Internal` yourself. Measured on
-  Creatio 10.2.522 (.NET Framework, MSSQL) with CrtProcessBuilder 1.6.6.167, 2026-11-12: a Formula-filled and a
-  mapping-filled parameter declared with no direction read back `Internal`, a stated `Variable` and a constant-only
-  one stayed `Variable` with no warning, and a modify that mapped onto an existing `Variable` parameter kept it and
-  advised. Change a direction with `setParameter` and `parameterUpdate.direction` — the UId and every reference
-  survive. A multi-instance conversion of a Sub-process element drops the callee's `Internal` parameters
+  direction the request states is never switched, but a `Variable` stated for a parameter the request creates and an
+  element fills gets the advice below once, in that request. A `FileCollection` keeps `Variable` and is not advised
+  otherwise, and a parameter that already existed before the request is never changed: when the request maps an
+  element output onto an existing `Variable` one, or a Formula element it adds or edits writes into it, the response
+  advises `Internal` if only elements of this process use it, `Out` if a caller reads it back, `Variable` only if a
+  caller also passes it in. Only parameters the request reaches that way are judged, so no warning after a modify
+  does not mean the process has no `Variable` helpers. An older CrtProcessBuilder neither switches nor warns, so
+  silence proves nothing: state `Internal` yourself. Measured on Creatio 10.2.522 (.NET Framework, MSSQL) with
+  CrtProcessBuilder 1.6.6.170, 2026-11-12: a Formula-filled and a mapping-filled parameter declared with no
+  direction read back `Internal`, a stated `Variable` stayed `Variable` with that advice, a constant-only one stayed
+  `Variable` with no warning, and a modify that mapped onto an existing `Variable` parameter kept it and advised.
+  Change a direction with `setParameter` and `parameterUpdate.direction` — the UId and every reference survive. A
+  multi-instance conversion of a Sub-process element drops the callee's `Internal` parameters
   (`process-sub-process`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of

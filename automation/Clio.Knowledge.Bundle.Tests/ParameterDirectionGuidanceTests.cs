@@ -36,8 +36,8 @@ public sealed class ParameterDirectionGuidanceTests
             because: "a version boundary is stated as the clio version that ships the change");
         normalized.Should().Contain("An older CrtProcessBuilder neither switches nor warns, so silence proves nothing",
             because: "silence after a build on an older package must not read as 'no helper is Variable'");
-        normalized.Should().Contain("A direction the request states, `Variable` included, is left as stated and not warned about",
-            because: "a stated direction is the author's choice, and an agent must not expect it to be switched");
+        normalized.Should().Contain("A direction the request states is never switched, but a `Variable` stated for a parameter the request creates and an element fills gets the advice below once",
+            because: "a stated direction is the author's choice and is never switched, yet a helper declared Variable must not land in the signature with no word");
         normalized.Should().Contain("A `FileCollection` keeps `Variable` and is not advised otherwise",
             because: "the FileCollection default is the builder's own choice and gets no advice");
         normalized.Should().Contain("a parameter that already existed before the request is never changed",
