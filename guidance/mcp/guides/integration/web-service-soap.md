@@ -18,7 +18,8 @@ Registering a SOAP service
   reserved and refused; a namespace `uri` with `user:password@` is refused.
 - `base-uri` is the endpoint URL as the WSDL's `soap:address` gives it (`http://www.dneonline.com/calculator.asmx`).
   It is stored as given: no trailing slash is added, and a `{placeholder}` is refused, because a SOAP method has no
-  address of its own.
+  address of its own. A fixed query stays in it (SAP: `?sap-client=100`), since SOAP has no query parameters; a
+  credential-like key with a constant value there is refused.
 - Each method: `code` (prefixed) and `message-element`, the request body's root element with its prefix
   (`tem:Add`), one segment only; without a prefix it goes out in the default namespace. No `uri`: a SOAP method
   is always POST with XML, so `http-method` may only be POST and `content-type` only xml, and both can be left out.
@@ -33,7 +34,7 @@ Registering a SOAP service
   request array's `sequence-element` must be declared in `namespaces`;
   an undeclared one is refused with its name. A prefixed segment must be `prefix:name` with letters, digits,
   `_` and `-` only, each part starting with a letter or `_`: the platform cuts a name at any other character (`tem:Api.Key` would go out as `<tem:Api>`), so the
-  tool refuses it.
+  tool refuses it. An unprefixed name may use any letters (`ДатаНачала`) and goes to the default namespace.
 - Response parameters: `path` is an element path read from the response body, local element names joined by
   `/` (`AddResult` or `AddResponse/AddResult`), NEVER a JSONPath; `$.AddResult` is refused.
 - `soap-header: true` on a top-level body request parameter sends it in the envelope's Header instead of the
@@ -42,9 +43,11 @@ Registering a SOAP service
   "default-sys-setting": "UsrErpWsPassword"}`, with `wsse` declared. A soap-header parameter takes no
   `default-value` (refused like a header constant): give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. The credential-name
-  check also covers `licence`/`license`, `nonce` and `pass` at the end of a word (not `compass`, `bypass`).
+  check also covers `licence`/`license`, `nonce`, `passcode`, `passphrase`, `bearer`, `jwt` and `pass` not
+  followed by a letter (not `compass`, `bypass`, `passport`).
 - `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
-  `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it.
+  `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it. An empty one on a
+  response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`.
 - The tool reports most problems of the definition in one refusal (at most 50); fix them all before
   repeating, and expect a retry to surface a few more.
 
