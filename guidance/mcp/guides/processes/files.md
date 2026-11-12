@@ -16,13 +16,13 @@ you run only after the user approves it (`core-rules`).
 == The two types ==
 - `File` — ONE file, carried by reference: the platform's FileLocator type. Aliases `file`, `filelocator` and
   `file locator`, case-insensitive. The platform's own type NAME "File" is a different, byte-carrying type the flow
-  cannot store, so the alias never reaches it. `Binary` and `Blob` are refused: a process parameter carries a file
+  cannot store. `Binary` and `Blob` are refused: a process parameter carries a file
   by reference, not its bytes.
 - `FileCollection` — SEVERAL files: a record collection (`CompositeObjectList`) with exactly ONE item, `File`
   (FileLocator, Variable, no tag). Aliases `filecollection`, `file collection` and `collection of files`. The alias
   builds the shape.
-- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File defaults to Variable too;
-  declare In or Out only to narrow it. An explicit direction always wins.
+- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File to Variable as well
+  (exception: `process-parameters`). An explicit direction always wins. A helper: `Internal`.
 - Neither takes a `value` (a file has no constant form) nor a `referenceSchema` (it is not a lookup): both are
   refused.
 - Declare them in parameters[] (create) or with addParameter (modify), for example
@@ -57,9 +57,9 @@ you run only after the user approves it (`core-rules`).
 
 == Binding a collection: both levels ==
 When an element or a sub-process reads a collection input, the run time builds each row from the items of that
-input (platform source): an unbound item reads empty, and the Process file element fails on it. So a collection
-is bound at two levels, the collection (which rows) and its item (what each row holds), as the designer does at
-once. With a File-aware clio every structured mapping
+input: an unbound item reads empty, and the Process file element fails on it. So a collection
+is bound at two levels, the collection (which rows) and its item (what each row holds).
+With a File-aware clio every structured mapping
 (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below,
 through mappings[], addMapping, setConnections and the approval block; a refused mapping writes no value. A dotted
 name addresses an item on either side: DocumentsParameter.File as processParameter or targetProcessParameter,
@@ -107,7 +107,8 @@ targets only.
 
 == Recipes ==
 1. Keep the files an element produced:
-   {"op": "addParameter", "parameter": {"name": "DocumentsParameter", "type": "FileCollection"}}, then
+   {"op": "addParameter", "parameter": {"name": "DocumentsParameter", "type": "FileCollection",
+   "direction": "Internal"}}, then
    {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
    "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File,
    with a notice.
