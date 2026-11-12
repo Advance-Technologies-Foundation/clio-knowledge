@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.205",
+  "libraryVersion": "1.15.207",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1643,7 +1643,7 @@
     {
       "itemId": "process-data-source-filters",
       "title": "Process data source filters",
-      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the five right-hand value sources (value, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only a constant, a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
+      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the right-hand value sources (value, values for several lookup records, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only constants (value or values), a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
       "topicId": "creatio.process-data-source-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-source-filters",
