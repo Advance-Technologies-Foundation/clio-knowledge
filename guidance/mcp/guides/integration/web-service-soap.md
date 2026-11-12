@@ -29,8 +29,8 @@ Registering a SOAP service
   method without one carries no action at all.
 - Request parameters: `in` is `body` (default), `header` or `cookie`; there are no path or query parameters.
   A body parameter's `path` is its element path with declared prefixes: `tem:intA`, or nested
-  `tem:Order/tem:Id`. Every prefix used in `message-element` and in every body request parameter `path` (items included) must be
-  declared in `namespaces`;
+  `tem:Order/tem:Id`. Every prefix used in `message-element`, in every body request parameter `path` (items included) and in a
+  request array's `sequence-element` must be declared in `namespaces`;
   an undeclared one is refused with its name. A prefixed segment must be `prefix:name` with letters, digits,
   `_` and `-` only, each part starting with a letter or `_`: the platform cuts a name at any other character (`tem:Api.Key` would go out as `<tem:Api>`), so the
   tool refuses it.
@@ -43,7 +43,8 @@ Registering a SOAP service
   `default-value` (refused like a header constant): give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. The credential-name
   check also covers `licence`/`license`, `nonce` and `pass` at the end of a word (not `compass`, `bypass`).
-- `sequence-element` on an array parameter names the element of each item (`string`; default `item`).
+- `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
+  `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it.
 - The tool reports most problems of the definition in one refusal (at most 50); fix them all before
   repeating, and expect a retry to surface a few more.
 
