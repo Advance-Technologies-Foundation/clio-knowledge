@@ -60,10 +60,10 @@ is the one contract all three share, which is why it reads as its own subject.
   conditions apply. "None of" them is one `notEqual` condition per value in an `and` group (the root when it is
   `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every
   record, and on a `deleteData` element deletes them all.
-  Gate: `values` needs CrtProcessBuilder 1.6.6.157 or later. Use it only when the FULL
-  `create-business-process` contract (`get-tool-contract` with `detail=full`) says several lookup records are
-  ONE condition with values; otherwise build "any of" as that `or` group of `equal` conditions, and "none of"
-  as `notEqual` conditions in an `and` group.
+  Gate: use `values` only when the FULL `create-business-process` contract (`get-tool-contract` with
+  `detail=full`) says several lookup records are ONE condition with values, as clio 8.1.0.150 and later does;
+  that clio refuses an older CrtProcessBuilder up front. Otherwise build "any of" as that `or` group of `equal`
+  conditions, and "none of" as `notEqual` conditions in an `and` group.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
   `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
@@ -145,12 +145,13 @@ is the one contract all three share, which is why it reads as its own subject.
   `UsrStage` shows `Approved`, not a bare GUID); `displayValue` is read-only — omit it on `setFilter`.
   A condition over several lookup records, built with `values` or made in the designer, reads back as `values`
   (ids in stored order) with the captions joined in `displayValue` (`Algeria; Andorra`), and re-applies as read,
-  when both sides carry `values`: CrtProcessBuilder 1.6.6.157 or later, and a clio whose contract names it.
-  MUST, on CrtProcessBuilder earlier than 1.6.6.157 or with a clio that predates `values`: describe returns
-  such a condition as its FIRST record only, marked
-  `<multi-value filter: N values; describe shows only the first>` with `filterDecodedCompletely: false`.
-  Re-sent as read it keeps that one record: an `equal` then selects fewer records, a `notEqual` MORE. Do not
-  re-send it; ask the user, or rebuild it with `values` once both are updated.
+  when both sides carry `values`: clio 8.1.0.150 and later, whose contract names it, on the CrtProcessBuilder
+  that clio requires.
+  MUST, whatever the versions: a condition that describe returns marked
+  `<multi-value filter: N values; describe shows only the first>` with `filterDecodedCompletely: false` holds N
+  records but shows only its FIRST (an older clio or CrtProcessBuilder reads it that way). Re-sent as read it
+  keeps that one record: an `equal` then selects fewer records, a `notEqual` MORE. Do not re-send it; ask the
+  user, or rebuild it with `values` once both are updated.
 - LEGACY `isNotNull` (CrtProcessBuilder earlier than 1.6.6.81): those builds stored an is-null condition
   without the platform's own `isNull` flag, which the runtime reads instead of the comparison and which
   defaults to null. Every `isNotNull` they wrote is therefore built as IS NULL (read from platform source,

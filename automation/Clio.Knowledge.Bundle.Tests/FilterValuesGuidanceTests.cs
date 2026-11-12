@@ -53,32 +53,37 @@ public sealed class FilterValuesGuidanceTests
     }
 
     [Test]
-    [Description("ENG-105557: values is gated on the package floor and on the FULL create-business-process contract, and the gate names both fallbacks - 'any of' as an or group of equal conditions, 'none of' as notEqual conditions in the AND group - so a clio or package that does not carry values never builds a field it cannot send, never falls back to the AND form, and never sends an or group of exclusions, which matches every record.")]
+    [Description("ENG-105557: values is gated on the FULL create-business-process contract and on the clio release that ships it, never on a CrtProcessBuilder number, which a cut from main without values can overtake (1.6.6.158 and 1.6.6.159 did). The gate names both fallbacks: 'any of' as an or group of equal conditions, 'none of' as notEqual conditions in an and group. So a clio or package that does not carry values never builds a field it cannot send, never falls back to the AND form, and never sends an or group of exclusions, which matches every record.")]
     public void Guide_ShouldGateValuesAndNameTheFallback()
     {
         // Arrange
         string guide = Article();
 
         // Act
-        bool floor = guide.Contains("`values` needs CrtProcessBuilder 1.6.6.157 or later");
-        bool contractGate = guide.Contains("Use it only when the FULL\n  `create-business-process` contract");
-        bool fallback = guide.Contains("otherwise build \"any of\" as that `or` group of `equal` conditions, and \"none of\"\n"
-            + "  as `notEqual` conditions in an `and` group");
+        bool contractGate = guide.Contains("Gate: use `values` only when the FULL `create-business-process` contract");
+        bool shippingClio = guide.Contains("as clio 8.1.0.150 and later does;\n"
+            + "  that clio refuses an older CrtProcessBuilder up front");
+        bool packageNumber = guide.Contains("`values` needs CrtProcessBuilder");
+        bool fallback = guide.Contains("Otherwise build \"any of\" as that `or` group of `equal`\n"
+            + "  conditions, and \"none of\" as `notEqual` conditions in an `and` group");
         bool noneOfNeverOr = guide.Contains("\"None of\" them is one `notEqual` condition per value in an `and` group (the root when it is\n"
             + "  `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every\n"
             + "  record");
 
         // Assert
-        floor.Should().BeTrue(because: "a current clio refuses an older package up front, and the article must say why");
         contractGate.Should().BeTrue(
             because: "an older clio does not carry values, and its typed descriptor would drop or refuse the member");
+        shippingClio.Should().BeTrue(
+            because: "a version boundary is the clio release that shipped the change, and its package floor is why the gate needs no package number");
+        packageNumber.Should().BeFalse(
+            because: "a CrtProcessBuilder number can be overtaken by a cut from main that lacks values, as 1.6.6.158 and 1.6.6.159 were");
         fallback.Should().BeTrue(because: "without values the correct form is an or group for any of, never the AND form");
         noneOfNeverOr.Should().BeTrue(
             because: "an or group of exclusions is always true, so a deleteData element built that way deletes every record");
     }
 
     [Test]
-    [Description("ENG-105557: the read-back of a condition over several records is stated both ways - whole as values when CrtProcessBuilder 1.6.6.157 and clio both carry them, and as its FIRST record only, marked, on an older package or with a clio that predates values, where re-sending it narrows an equal and WIDENS a notEqual - so the describe -> setFilter loop never silently drops records.")]
+    [Description("ENG-105557: the read-back of a condition over several records is stated both ways. It reads back whole as values when clio 8.1.0.150 and its CrtProcessBuilder both carry them. The MUST keys on the marker, never on a version, because every package without values returns the FIRST record only (1.6.6.158 and 1.6.6.159 included), and re-sending it narrows an equal and WIDENS a notEqual. So the describe -> setFilter loop never silently drops records.")]
     public void Guide_ShouldStateTheReadBackOfSeveralRecords()
     {
         // Arrange
@@ -87,7 +92,7 @@ public sealed class FilterValuesGuidanceTests
         // Act
         string[] required = [
             "reads back as `values`",
-            "MUST, on CrtProcessBuilder earlier than 1.6.6.157 or with a clio that predates `values`",
+            "MUST, whatever the versions: a condition that describe returns marked",
             "`<multi-value filter: N values; describe shows only the first>`",
             "an `equal` then selects fewer records, a `notEqual` MORE",
         ];
