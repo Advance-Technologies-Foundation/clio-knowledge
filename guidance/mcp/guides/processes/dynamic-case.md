@@ -47,8 +47,12 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
   the page has a bar already.
 - NO compile and NO restart, on .NET Framework and on .NET 8 (measured 2026-11-11 on Creatio 10.2.1102
-  .NET Framework MSSQL and 10.2.1081 .NET 8 PostgreSQL): a case is interpreted. `obligations.compileRequired` and `restartRequired` are false; do not run `compile-creatio` or
-  `restart` after it. Tell the user to reload (F5) any open page of the object (`reloadOpenPages`).
+  .NET Framework MSSQL and 10.2.1081 .NET 8 PostgreSQL): a case is interpreted. `obligations.compileRequired` and
+  `restartRequired` are false; do not run `compile-creatio` or `restart` after it. One exception: with
+  `dependencies.compilationRequired: true` the dependency save asked for a compilation, `obligations` lists
+  `package-dependencies`, and a configuration compile (`compile-creatio` without `package-name`) is due. Tell the
+  user to reload (F5) any open page of the object (`reloadOpenPages`). Before your next `update-page` of a page
+  this call wrote, `get-page` it again.
 
 == Tell the user (relay the notes) ==
 - Existing records get a case on their next change of the stage column; new records start one on insert. A record
@@ -60,36 +64,56 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 - The case opens in the designer at `case.designerUrl`.
 
 == Refusals that need the user ==
+Nothing was written after any of these, unless the item says otherwise.
 - `case-exists`: the object already has an enabled case with other stages or another column; the platform starts
   every enabled case, so a second one is never created, and changing a case is not supported. A re-run with the
   SAME object, column and order answers `already-present` and writes nothing to the case (it still adds the bar
   when the page has none), so a failed call is safe to repeat.
 - `settings-conflict`: the object's case settings use another stage column or a filter column, or there are
-  several rows.
-- `record-page-ambiguous` (a typed page set such as Activity: pass `page-schema-name`), `record-page-not-freedom`
-  (a Classic page: create a Freedom UI page and its related-page add-on first), `placement-unsupported` (a mini
-  page), `page-entity-mismatch` (the page's primary data source `PDS` is not the object: a page made by
-  `create-page` from a template has none until a field of the object is added). All page refusals come BEFORE
-  anything is written.
-- `created-page-failed`: the case WAS created and kept; `page.retry` carries the exact `update-page` call.
-- `failed-rolled-back` / `failed-leftover`: the build failed after writing; the second lists what to remove by hand.
-- `process-builder-without-build-case`: the environment's CrtProcessBuilder predates this tool;
-  `install-process-builder`, once the user approves it (`core-rules`), is the remedy.
+  several rows. When another call created a row at the same moment this call removes its own: retry.
+- Page refusals, all BEFORE anything is written: `record-page-not-found` (no record page could be found: pass
+  `page-schema-name`), `record-page-ambiguous` (a typed page set such as Activity: pass `page-schema-name`),
+  `record-page-not-freedom` (a Classic page: create a Freedom UI page and its related-page add-on first),
+  `placement-unsupported` (a mini page), `page-entity-mismatch` (the page's primary data source `PDS` is not the
+  object: a page made by `create-page` from a template has none until a field of the object is added),
+  `page-append-rejected` (the page refused the bar's append dry run; the message says why).
+- `dependency-cycle` (the package storage refused the added dependencies) and `dependency-add-failed`: settle
+  the package's dependencies with the user, or pass a package that already reaches the object.
+- `request-failed`: BuildCase could not be called, or answered something that is not its result (an error or a
+  login page); read the message and retry once the environment answers.
+- `process-builder-without-build-case`: BuildCase answered 404, so the environment's CrtProcessBuilder has no
+  dynamic-case operation (it needs 1.6.6.160 or later); `install-process-builder`, once the user approves it
+  (`core-rules`), is the remedy.
 
-== Undo (sequential, in this order) ==
-Undo ONLY a call whose `case.status` is `created`; after `already-present` this call wrote no case, so never remove
-the case or its link row. Each step deletes live data and none asks for confirmation: it MUST have the user's explicit
-agreement for the named environment and rows first (`core-rules`). Take every name from the result, never compose
-one from an Id.
-1. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings.bindings`, key
+== Partial and unknown outcomes ==
+- `unknown`: the reply to the writing pass was lost, so the case may or may not exist. Re-run the SAME call before
+  anything else: it answers `already-present` when the case was written. Never undo after `unknown`.
+- `created-page-failed`: the case is in place (`case.status` `created` or `already-present`) and kept; the bar is
+  not. `page.retry` carries the exact `update-page` call.
+- `failed-rolled-back` / `failed-leftover`: the build failed after writing; the second lists what to remove by
+  hand, in order, and keeps the dependencies this call added (`dependencies.status: kept-for-leftovers`): remove
+  them only after the leftovers. Either way the platform's own save may have left a start-event row
+  (`SysEntityPrcStartEvent`); the message says so.
+
+== Undo (sequential, in this order; stop at the first failure) ==
+Steps 1-3 ONLY for a call whose `case.status` is `created`; after `already-present` this call wrote no case, so
+never remove the case or its link row. Steps 4 and 5 follow `page.status` and `dependencies.added` alone. Each
+step deletes live data and none asks for confirmation: it MUST have the user's explicit agreement for the named
+environment and rows first (`core-rules`). Take every name from the result, never compose one from an Id.
+1. `delete-schema { schema-name: case.schemaName, environment-name, remote: true }` (without `remote` it acts
+   on a local workspace). The case goes first, as the server's own rollback does: an enabled case without its
+   settings rows keeps starting and cannot be opened in the designer.
+2. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings.bindings`, key
    `settings.sysDcmSchemaInSettingsId`.
-2. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings.bindings`, key `settings.sysDcmSettingsId`,
+3. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings.bindings`, key `settings.sysDcmSettingsId`,
    ONLY when the call answered `settings.status: created`: a reused row carries other cases' link rows, which
-   deleting it would cascade away.
-3. `delete-schema` on `case.schemaName`.
+   deleting it would cascade away. A reused row this call bound stays bound (no tool removes only the binding):
+   tell the user the package now ships it.
 4. ONLY when `page.status` is `inserted`: remove the two inserted items (the container and the
-   `crt.EntityStageProgressBar` in it) with `update-page`, by the exact names in `page.fragment`; never delete the
-   page schema. After `already-present` the bar was there before the call.
+   `crt.EntityStageProgressBar` in it, by the exact names in `page.fragment`): `get-page`, then `update-page` with
+   `mode: replace` and the body without them (append cannot remove). Never delete the page schema. After
+   `already-present` the bar was there before the call.
+5. `remove-package-dependency` for each of `dependencies.added`, unless something else in the package needs it.
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or

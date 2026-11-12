@@ -89,15 +89,21 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("NO compile and NO restart", because: "a case is interpreted; a compile only costs time");
             guide.Should().Contain("ONLY when the call answered `settings.status: created`",
                 because: "deleting a reused settings row cascades away other cases' link rows");
-            guide.Should().Contain("Undo ONLY a call whose `case.status` is `created`",
+            guide.Should().Contain("Steps 1-3 ONLY for a call whose `case.status` is `created`",
                 because: "after already-present the case and its link row were never written by this call");
+            guide.Should().Contain("Steps 4 and 5 follow `page.status` and `dependencies.added` alone",
+                because: "a call that found the case can still have inserted the bar or added dependencies");
+            guide.Should().Contain("stop at the first failure",
+                because: "a later step assumes the earlier ones took");
+            guide.Should().Contain("Re-run the SAME call before anything else",
+                because: "after a lost reply the case may exist, and a re-run is the read that says so");
             guide.Should().Contain("MUST have the user's explicit agreement",
                 because: "the undo tools delete live data and ask for no confirmation");
             guide.Should().Contain("ONLY when `page.status` is `inserted`",
                 because: "after already-present the bar on the page is not this call's to remove");
             guide.Should().MatchRegex(
-                @"1\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry .* 2\. `remove-data-binding-row-db` on the `SysDcmSettings` entry .* 3\. `delete-schema` on `case\.schemaName`\. 4\. ONLY when `page\.status` is `inserted`: remove the two inserted items",
-                because: "the link row goes before the settings row it references, and the case schema last of the three");
+                @"1\. `delete-schema \{ schema-name: case\.schemaName, environment-name, remote: true \}` .* 2\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry .* 3\. `remove-data-binding-row-db` on the `SysDcmSettings` entry .* 4\. ONLY when `page\.status` is `inserted`: remove the two inserted items .* `update-page` with `mode: replace` .* 5\. `remove-package-dependency` for each of `dependencies\.added`",
+                because: "the case goes first as the server's own rollback does (an enabled case without its settings rows keeps starting and cannot be opened), delete-schema reaches an environment only with remote: true, append cannot remove the bar, and the dependencies go last");
             guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
             guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");
             guide.Should().Contain("several cases per object", because: "the platform starts every enabled case");
