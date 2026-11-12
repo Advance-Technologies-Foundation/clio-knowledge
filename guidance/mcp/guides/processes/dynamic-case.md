@@ -40,7 +40,7 @@ deleting an existing case: the case designer does those. No mobile page, mini pa
 == The call ==
 `create-dynamic-case { environment-name, package-name, entity-schema-name, stage-column-name, stages?,
 order-column?, name?, caption?, add-progress-bar = true, page-schema-name?, add-package-dependencies = true,
-dry-run = false }`; it writes, so it is destructive. Version boundary: `create-dynamic-case` needs clio <CLIO-TBD>
+dry-run = false }`; it writes, so it is destructive. Version boundary: `create-dynamic-case` needs clio 8.1.0.150
 or later; on an older clio, stop here and tell the user to update clio - do not build a case by other means.
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
   pass `stages` (every value exactly once, by Id or exact display value) whenever the business order matters.

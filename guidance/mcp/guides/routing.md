@@ -10,7 +10,7 @@ how a guide points at a rule it does not own. Other backticks are ordinary code 
 page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
 precondition kept next to the instruction it guards — names that guide as the owner.
 
-- Stages of an object or a stage bar on its page: set up, changed or only asked about (DCM, clio <CLIO-TBD>+) -> name=process-dynamic-case
+- Stages of an object or a stage bar on its page: set up, changed or only asked about (DCM, clio 8.1.0.150+) -> name=process-dynamic-case
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
