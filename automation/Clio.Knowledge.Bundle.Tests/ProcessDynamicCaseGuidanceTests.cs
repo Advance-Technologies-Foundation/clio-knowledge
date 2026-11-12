@@ -91,19 +91,29 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "deleting a reused settings row cascades away other cases' link rows");
             guide.Should().Contain("Steps 1-3 ONLY for a call whose `case.status` is `created`",
                 because: "after already-present the case and its link row were never written by this call");
-            guide.Should().Contain("Steps 4 and 5 follow `page.status` and `dependencies.added` alone",
+            guide.Should().Contain("Steps 4 and 5 follow `page.status` and `dependencies.status` alone",
                 because: "a call that found the case can still have inserted the bar or added dependencies");
+            guide.Should().Contain("ONLY when `dependencies.status` is `added` or `left-after-failure`; for `kept-for-leftovers` only after the leftovers are gone",
+                because: "removed-after-failure dependencies are already gone, and kept ones still hold the leftovers");
             guide.Should().Contain("stop at the first failure",
                 because: "a later step assumes the earlier ones took");
-            guide.Should().Contain("Re-run the SAME call before anything else",
-                because: "after a lost reply the case may exist, and a re-run is the read that says so");
+            guide.Should().Contain("Re-run the call with `dry-run: true` before anything else",
+                because: "after a lost reply the case may exist; the tool's own message says the same, and a real re-run would create it unasked");
+            guide.Should().Contain("KEEP this result's `dependencies.added`: no later result reports them",
+                because: "a re-run finds the dependencies present and reports none added, so step 5 would never remove them");
+            guide.Should().Contain("With `outcome: refused` nothing was written",
+                because: "request-failed and page-append-rejected also follow a write, under unknown and created-page-failed");
+            guide.Should().Contain("or one without its settings row or link row",
+                because: "already-present needs the settings row and the link row too, not only the same stages");
+            guide.Should().Contain("AUTO-SAVE mode (`saveOnChange: true`, `askUserToChangeSchema: false`)",
+                because: "a stage click saves the whole record, which the user must be told; the designer's default is manual");
             guide.Should().Contain("MUST have the user's explicit agreement",
                 because: "the undo tools delete live data and ask for no confirmation");
             guide.Should().Contain("ONLY when `page.status` is `inserted`",
                 because: "after already-present the bar on the page is not this call's to remove");
             guide.Should().MatchRegex(
-                @"1\. `delete-schema \{ schema-name: case\.schemaName, environment-name, remote: true \}` .* 2\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry .* 3\. `remove-data-binding-row-db` on the `SysDcmSettings` entry .* 4\. ONLY when `page\.status` is `inserted`: remove the two inserted items .* `update-page` with `mode: replace` .* 5\. `remove-package-dependency` for each of `dependencies\.added`",
-                because: "the case goes first as the server's own rollback does (an enabled case without its settings rows keeps starting and cannot be opened), delete-schema reaches an environment only with remote: true, append cannot remove the bar, and the dependencies go last");
+                @"1\. `delete-schema \{ schema-name: case\.schemaName, environment-name, remote: true \}` .* 2\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings\.bindings`, package-name `case\.packageName`, key .* 3\. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings\.bindings`, package-name `case\.packageName`, key .* 4\. ONLY when `page\.status` is `inserted`: remove the two inserted items .* `update-page` with `mode: replace` .* 5\. `remove-package-dependency` for each of `dependencies\.added`",
+                because: "the case goes first as the server's own rollback does (an enabled case without its settings rows keeps starting and cannot be opened), delete-schema reaches an environment only with remote: true, remove-data-binding-row-db requires the package the server bound the rows to, append cannot remove the bar, and the dependencies go last");
             guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
             guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");
             guide.Should().Contain("several cases per object", because: "the platform starts every enabled case");

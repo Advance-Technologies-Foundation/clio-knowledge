@@ -13,7 +13,7 @@ business process: `process-digest`. A case is not the `Case` object.
   caller can see, and the target package is editable.
 - The case's package must reach the packages of the object, the column and the lookup, and CrtCoreBase / CrtBase
   (the case settings tables). The tool adds the missing ones itself (`dependencies.added`); with
-  `add-package-dependencies: false` it refuses `dependencies-missing` and names them.
+  `add-package-dependencies: false` it refuses `dependencies-missing` and reports them in `dependencies.missing`.
 - The call runs as a General user with `CanManageDcm`, `CanManageSolution` and the right to add `SysDcmSettings` and
   `SysDcmSchemaInSettings` records (by default only System administrators); it is refused `rights-missing` naming
   the missing one, before anything is read. `CanManageProcessDesign` is not needed.
@@ -45,7 +45,10 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 - The record page: a `ProgressBarContainer` at index 0 of `MainContainer` holding `crt.EntityStageProgressBar` with
   the object's `entityName`, in the default design package (as `update-page` writes). Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
-  the page has a bar already.
+  the page has a bar already. The bar is inserted in AUTO-SAVE mode (`saveOnChange: true`,
+  `askUserToChangeSchema: false`): a stage click saves the whole record, with any other unsaved edit on the form,
+  and a failed save reverts the stage. Tell the user; the manual mode (the click only sets the field, the user
+  saves) is the "Save on change" toggle in the bar's properties in the page designer.
 - NO compile and NO restart, on .NET Framework and on .NET 8 (measured 2026-11-11 on Creatio 10.2.1102
   .NET Framework MSSQL and 10.2.1081 .NET 8 PostgreSQL): a case is interpreted. `obligations.compileRequired` and
   `restartRequired` are false; do not run `compile-creatio` or `restart` after it. One exception: with
@@ -64,11 +67,14 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 - The case opens in the designer at `case.designerUrl`.
 
 == Refusals that need the user ==
-Nothing was written after any of these, unless the item says otherwise.
-- `case-exists`: the object already has an enabled case with other stages or another column; the platform starts
-  every enabled case, so a second one is never created, and changing a case is not supported. A re-run with the
-  SAME object, column and order answers `already-present` and writes nothing to the case (it still adds the bar
-  when the page has none), so a failed call is safe to repeat.
+With `outcome: refused` nothing was written, unless the item says otherwise. The same `errorCode` can come with
+another outcome (`request-failed` with `unknown`, `page-append-rejected` with `created-page-failed`): then read
+"Partial and unknown outcomes".
+- `case-exists`: the object already has an enabled case that is not this call's equivalent: other stages, another
+  column, or one without its settings row or link row. The platform starts every enabled case, so a second one is
+  never created, and changing a case is not supported. A re-run with the SAME object, column and order answers
+  `already-present` and writes nothing to the case (it still adds the bar when the page has none), so a failed
+  call is safe to repeat.
 - `settings-conflict`: the object's case settings use another stage column or a filter column, or there are
   several rows. When another call created a row at the same moment this call removes its own: retry.
 - Page refusals, all BEFORE anything is written: `record-page-not-found` (no record page could be found: pass
@@ -86,34 +92,40 @@ Nothing was written after any of these, unless the item says otherwise.
   (`core-rules`), is the remedy.
 
 == Partial and unknown outcomes ==
-- `unknown`: the reply to the writing pass was lost, so the case may or may not exist. Re-run the SAME call before
-  anything else: it answers `already-present` when the case was written. Never undo after `unknown`.
+- `unknown`: the reply to the writing pass was lost, so the case may or may not exist. Re-run the call with
+  `dry-run: true` before anything else (it writes nothing), and KEEP this result's `dependencies.added`: no later
+  result reports them. `case.status: already-present` means the case was written, but that answer names no link
+  row or binding, so undo steps 1-3 cannot be driven from it: tell the user it can be removed in the case
+  designer. `planned` means it was not: with the user's agreement run the real call, or remove those dependencies
+  (step 5). Never undo from the `unknown` result itself.
 - `created-page-failed`: the case is in place (`case.status` `created` or `already-present`) and kept; the bar is
   not. `page.retry` carries the exact `update-page` call.
 - `failed-rolled-back` / `failed-leftover`: the build failed after writing; the second lists what to remove by
-  hand, in order, and keeps the dependencies this call added (`dependencies.status: kept-for-leftovers`): remove
-  them only after the leftovers. Either way the platform's own save may have left a start-event row
+  hand, in order (the case schema with the undo step 1 call, `remote: true` included), and keeps the dependencies
+  this call added (`dependencies.status: kept-for-leftovers`): remove them only after the leftovers. Either way the platform's own save may have left a start-event row
   (`SysEntityPrcStartEvent`); the message says so.
 
 == Undo (sequential, in this order; stop at the first failure) ==
 Steps 1-3 ONLY for a call whose `case.status` is `created`; after `already-present` this call wrote no case, so
-never remove the case or its link row. Steps 4 and 5 follow `page.status` and `dependencies.added` alone. Each
+never remove the case or its link row. Steps 4 and 5 follow `page.status` and `dependencies.status` alone. Each
 step deletes live data and none asks for confirmation: it MUST have the user's explicit agreement for the named
 environment and rows first (`core-rules`). Take every name from the result, never compose one from an Id.
 1. `delete-schema { schema-name: case.schemaName, environment-name, remote: true }` (without `remote` it acts
    on a local workspace). The case goes first, as the server's own rollback does: an enabled case without its
    settings rows keeps starting and cannot be opened in the designer.
-2. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings.bindings`, key
-   `settings.sysDcmSchemaInSettingsId`.
-3. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings.bindings`, key `settings.sysDcmSettingsId`,
-   ONLY when the call answered `settings.status: created`: a reused row carries other cases' link rows, which
+2. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings.bindings`, package-name
+   `case.packageName`, key `settings.sysDcmSchemaInSettingsId`.
+3. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings.bindings`, package-name
+   `case.packageName`, key `settings.sysDcmSettingsId`, ONLY when the call answered `settings.status: created`: a reused row carries other cases' link rows, which
    deleting it would cascade away. A reused row this call bound stays bound (no tool removes only the binding):
    tell the user the package now ships it.
 4. ONLY when `page.status` is `inserted`: remove the two inserted items (the container and the
    `crt.EntityStageProgressBar` in it, by the exact names in `page.fragment`): `get-page`, then `update-page` with
    `mode: replace` and the body without them (append cannot remove). Never delete the page schema. After
    `already-present` the bar was there before the call.
-5. `remove-package-dependency` for each of `dependencies.added`, unless something else in the package needs it.
+5. `remove-package-dependency` for each of `dependencies.added`, unless something else in the package needs it,
+   ONLY when `dependencies.status` is `added` or `left-after-failure`; for `kept-for-leftovers` only after the
+   leftovers are gone; `removed-after-failure` needs nothing.
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or
