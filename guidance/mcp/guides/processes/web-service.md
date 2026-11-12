@@ -6,8 +6,7 @@ This guide owns the `webService` block of the Call web service element.
 collection). A C# web service that Creatio EXPOSES is not this element: `configuration-webservice`.
 Needs CrtProcessBuilder 1.6.6.150 or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`;
-a clio whose contract lacks it refuses the block before sending. The default reply is shortened: its silence
-proves nothing. Always read the element back: its parameter names come from the service.
+a clio whose contract lacks it refuses the block before sending. Read the element back: the service names its params.
 
 == Only a registered service ==
 The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP: built with REST's parameter
@@ -49,7 +48,8 @@ URI, authentication, header or parameter defaults - comes back in any answer.
    nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown
    `method`: that refusal lists them. A create probe needs an unused process name: a taken one is refused first.
    Pick the pair that fits; when several fit, ASK the user which; never guess between them.
-2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
+2. When none fits, STOP: no process, no placeholder element, no Script task in its place. If clio lists
+   `register-web-service`, use `web-service-registration` first. Else tell the user to register
    it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.

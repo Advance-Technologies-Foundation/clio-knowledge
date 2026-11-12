@@ -42,8 +42,9 @@ Credential rule (MUST)
   `auth`, `credential`, `signature`, `session` or `cookie` anywhere, in any letter case (so `author` and `keyword`
   count too), MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
   tool refuses a constant there and never echoes the refused value.
-- Every referenced system setting MUST exist before the call; a reference to a missing setting is refused,
-  because at run time the platform drops it silently and the request goes out without the header. Create the
+- Every system setting a call references anew MUST exist before the call; such a reference to a missing
+  setting is refused, because at run time the platform drops it silently and the request goes out without the
+  header. A reference the service already had and whose setting was deleted since comes back as a notice. Create the
   setting first with `create-sys-setting` and no value, `value-type-name` SecureText for a key, token or
   password, and let the user fill it (`get-guidance name=sys-settings`).
 - An API key the built-in authentication types do not cover (a key header, a key query parameter, a Bearer
@@ -138,9 +139,8 @@ Changing a registered service
   order, all or nothing: `addMethod` (`method`), `setMethod` (`method`; replaces the method of the same code,
   keeping the UIds of parameters it keeps), `removeMethod` (`method-code`), `setBaseUri` (`base-uri`),
   `setRetryCount` (`retry-count`), `setAuth` (`auth`; `type` none, basic, digest or oauth20, and none removes the
-  authentication). Only REST services can be changed; a SOAP service stays in Studio. A system setting a call adds a
-  reference to must exist; a setting the service already referenced and that was deleted since does not block the
-  change but comes back as a notice. Each operation names its kind in `op`:
+  authentication). Only REST services can be changed; a SOAP service stays in Studio. Missing settings follow the
+  credential rule above. Each operation names its kind in `op`:
   `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
 - What `describe-web-service` returns can be sent back as it is (except a method whose `{placeholder}` differs
   in letter case from its path parameter; the platform never fills it, so fix the case): a method (with its parameters) as the
