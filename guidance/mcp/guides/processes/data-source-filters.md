@@ -53,7 +53,11 @@ is the one contract all three share, which is why it reads as its own subject.
   `values` (each an id or a unique display name) with `equal` (the record is any of them) or `notEqual` (it is
   none of them). "Status in (To do, In progress)" is
   `{ "column": "Status", "comparison": "equal", "values": ["To do", "In progress"] }`. The server stores it as
-  the designer stores its multi-select: one condition, run as IN / NOT IN, shown as one row. `values` is a
+  the designer stores its multi-select: one condition, run as IN / NOT IN, shown as one row. On a lookup column
+  `notEqual`, with one value or with `values`, also selects records whose column is EMPTY: "none of them"
+  includes records with no value, and a `deleteData` element deletes those too. To leave them out, add an
+  `isNotNull` condition on the same column beside it in an `and` group. Measured on Creatio 10.2.522
+  (.NET Framework, MSSQL) in November 2026, on Contact.Country. `values` is a
   right-hand source of its own and takes lookup columns, records and `equal` / `notEqual` only; a list in
   `value` is refused. For a column that is not a lookup, or for references, the form follows the comparison.
   "Any of" several values is an `or` group with one condition per value, nested under the AND group when other
@@ -61,9 +65,9 @@ is the one contract all three share, which is why it reads as its own subject.
   `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every
   record, and on a `deleteData` element deletes them all.
   Gate: use `values` only when the FULL `create-business-process` contract (`get-tool-contract` with
-  `detail=full`) says several lookup records are ONE condition with values, as clio 8.1.0.150 and later does;
-  that clio refuses an older CrtProcessBuilder up front. Otherwise build "any of" as that `or` group of `equal`
-  conditions, and "none of" as `notEqual` conditions in an `and` group.
+  `detail=full`) says "any of several lookup records is ONE condition with values", as clio 8.1.0.150 and
+  later does; that clio refuses an older CrtProcessBuilder up front. Otherwise build "any of" as that `or`
+  group of `equal` conditions, and "none of" as `notEqual` conditions in an `and` group.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
   `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
