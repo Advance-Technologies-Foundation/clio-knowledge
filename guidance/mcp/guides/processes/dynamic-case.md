@@ -7,6 +7,25 @@ the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI
 asks for "stages", "a status lifecycle", "a progress bar on the record page" or "a case". "When X happens, do Y" is a
 business process: `process-digest`. A case is not the `Case` object.
 
+== Answer the user from the tool ==
+- Whether or how an EXISTING object can get stages, even "just tell me, change nothing": answer only after the call
+  with `dry-run: true` (it writes nothing) in any editable package and WITHOUT `stages` (a stage list is checked
+  before the object's case). Schema reads cannot see an existing case; the dry run does. A `case-exists` or
+  `settings-conflict` refusal IS the answer, in user words: "orders already have stages; this tool cannot change
+  them - the case designer does". Never offer to rename, replace or add lookup values, or another column, to get
+  around it.
+- Stages need a field with a fixed list of values (a lookup); an amount, a date or a text cannot be stages
+  (`column-not-lookup`). Say exactly that; do not first ask which field was meant.
+- Anything under "Not supported yet": say "<it> is not supported yet; the case designer does that" first, and do
+  not build it another way unasked.
+- Saving: a stage click saves the record at once (the bar's "Save on change" toggle is on); with the toggle off in
+  the page designer the click only sets the field and the user saves. Name the toggle.
+
+== Not supported yet ==
+Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or
+unsuccessful stages, transition rules, start conditions, several cases per object, and changing, disabling or
+deleting an existing case: the case designer does those. No mobile page, mini page or Classic page bar.
+
 == Before the call ==
 - The object and the lookup column are PUBLISHED: a column saved and not published is refused `column-not-published`
   (publish the object, then retry), one that does not exist `column-not-found`. The lookup has 2 to 20 values the
@@ -28,8 +47,7 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
   `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order turns "New, In progress, Done" into
   "Done, In progress, New". The result ALWAYS states `case.orderSource` and the ordered captions: read them back to
-  the user. `dry-run: true` runs every check and returns the whole plan with nothing written: use it to confirm the
-  order first.
+  the user. The dry run returns the whole plan: confirm the order with it first.
 - A subset, a value named twice and an unknown or ambiguous value are refused (`stage-list-incomplete`,
   `stage-list-duplicate`, `stage-value-unknown`, `stage-value-ambiguous`): a record holding a value that is not a
   stage shows no current stage.
@@ -49,10 +67,8 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
   the page has a bar already. The bar is inserted in AUTO-SAVE mode (`saveOnChange: true`,
   `askUserToChangeSchema: false`): a stage click saves the whole record, with any other unsaved edit on the form,
-  and a failed save reverts the stage. Tell the user; the manual mode (the click only sets the field, the user
-  saves) is the "Save on change" toggle in the bar's properties in the page designer.
-- NO compile and NO restart, on .NET Framework and on .NET 8 (measured 2026-11-11 on Creatio 10.2.1102
-  .NET Framework MSSQL and 10.2.1081 .NET 8 PostgreSQL): a case is interpreted. `obligations.compileRequired` and
+  and a failed save reverts the stage. Tell the user, naming the toggle (Saving, above).
+- NO compile and NO restart, on .NET Framework and on .NET 8: a case is interpreted. `obligations.compileRequired` and
   `restartRequired` are false; do not run `compile-creatio` or `restart` after it. One exception: with
   `dependencies.compilationRequired: true` the dependency save asked for a compilation, `obligations` lists
   `package-dependencies`, and a configuration compile (`compile-creatio` without `package-name`) is due. Tell the
@@ -74,7 +90,7 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
 "Partial and unknown outcomes".
 - `case-exists`: the object already has an enabled case that is not this call's equivalent: other stages, another
   column, or one without its settings row or link row. The platform starts every enabled case, so a second one is
-  never created, and changing a case is not supported. A re-run with the SAME object, column and order answers
+  never created. A re-run with the SAME object, column and order answers
   `already-present` and writes nothing to the case (it still adds the bar when the page has none), so a failed
   call is safe to repeat.
 - `settings-conflict`: the object's case settings use another stage column or a filter column, or there are
@@ -132,11 +148,5 @@ environment and rows first (`core-rules`). Take every name from the result, neve
    ONLY when `dependencies.status` is `added` or `left-after-failure`; for `kept-for-leftovers` only after the
    leftovers are gone; `removed-after-failure` needs nothing.
 
-== Not supported yet ==
-Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or
-unsuccessful stages, transition rules, start conditions, several cases per object, and changing, disabling or
-deleting an existing case: the case designer does those. No mobile page, mini page or Classic page bar.
-
 Troubleshooting: no bar after F5 - the object has no enabled active-version case, or the feature
-`DisableEntityStageProgressBarPreprocessing` is ON on the environment (the bar is then not wired). Academy: Case
-Designer (8.x), Set up case stages, Execute a case.
+`DisableEntityStageProgressBarPreprocessing` is ON on the environment (the bar is then not wired).

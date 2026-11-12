@@ -129,6 +129,35 @@ public sealed class ProcessDynamicCaseGuidanceTests
     }
 
     [Test]
+    [Description("The guide makes an agent answer a stage question from a dry run, not from schema reads, and answer the cases the tool cannot do in user words: a field that is not a lookup, what is not supported, and the Save on change toggle.")]
+    public void Article_ShouldMakeTheAgentAnswerFromTheTool()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().Contain("answer only after the call with `dry-run: true` (it writes nothing)",
+                because: "agents answered from schema reads, which cannot see the object's case or case settings");
+            guide.Should().Contain("WITHOUT `stages` (a stage list is checked before the object's case)",
+                because: "a stage the lookup does not have is refused before case-exists and settings-conflict, hiding them");
+            guide.Should().Contain("refusal IS the answer",
+                because: "agents offered to rewrite the lookup values instead of relaying case-exists or settings-conflict");
+            guide.Should().Contain("Never offer to rename, replace or add lookup values, or another column, to get around it",
+                because: "a new column or new values still meet the existing case, which the tool does not change");
+            guide.Should().Contain("Stages need a field with a fixed list of values (a lookup)",
+                because: "an agent asked a clarifying question instead of saying an amount cannot be stages");
+            guide.Should().Contain("is not supported yet; the case designer does that",
+                because: "an agent planned a task inside a stage instead of saying steps are not supported");
+            guide.Should().Contain("Name the toggle", because: "an agent answered the save question without the Save on change toggle");
+            guide.IndexOf("== Answer the user from the tool ==", StringComparison.Ordinal).Should().BeLessThan(
+                guide.IndexOf("== Before the call ==", StringComparison.Ordinal),
+                because: "these answers come before any call is planned, so they lead the guide");
+        }
+    }
+
+    [Test]
     [Description("process-modeling no longer lists DCM among the schemas that carry their own compile obligations: a case is interpreted.")]
     public void ProcessModeling_ShouldNotClaimACaseNeedsACompile()
     {
