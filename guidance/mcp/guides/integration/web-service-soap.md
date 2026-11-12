@@ -19,13 +19,14 @@ Registering a SOAP service
 - `base-uri` is the endpoint URL as the WSDL's `soap:address` gives it (`http://www.dneonline.com/calculator.asmx`).
   It is stored as given: no trailing slash is added, and a `{placeholder}` is refused, because a SOAP method has no
   address of its own. A fixed query stays in it (SAP: `?sap-client=100`), since SOAP has no query parameters; a
-  credential-like key with a constant value there is refused.
+  credential-like key with a constant value there is refused, and so is `?wsdl` / `?singleWsdl`: that is the WSDL
+  address, not the endpoint.
 - Each method: `code` (prefixed) and `message-element`, the request body's root element with its prefix
   (`tem:Add`), one segment only; without a prefix it goes out in the default namespace. No `uri`: a SOAP method
   is always POST with XML, so `http-method` may only be POST and `content-type` only xml, and both can be left out.
 - `soap-action` is optional: take it from the WSDL (the binding operation's `soapAction`) or ask the user; NEVER
-  make one up. Left out, no SOAPAction header is sent and many SOAP 1.1 servers refuse the call; the tool then
-  returns a notice starting "Tell the user:". Pass the whole notice on, risk sentence included, and ask the user
+  make one up. Left out, no SOAPAction header is sent and many SOAP 1.1 servers refuse the call; for a SOAP 1.1
+  service (also after `setType` to soap11) the tool then returns a notice starting "Tell the user:". Pass the whole notice on, risk sentence included, and ask the user
   for the action. The platform sends the action only as that header, for SOAP 1.1 and 1.2 alike: a SOAP 1.2
   method without one carries no action at all.
 - Request parameters: `in` is `body` (default), `header` or `cookie`; there are no path or query parameters.
@@ -47,7 +48,8 @@ Registering a SOAP service
   followed by a letter (not `compass`, `bypass`, `passport`).
 - `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
   `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it. An empty one on a
-  response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`.
+  response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`. On a
+  request array a blank one is stored as `item`.
 - The tool reports most problems of the definition in one refusal (at most 50); fix them all before
   repeating, and expect a retry to surface a few more.
 
