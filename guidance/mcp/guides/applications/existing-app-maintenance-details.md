@@ -1,7 +1,7 @@
 clio MCP existing-app-maintenance-details guide — column-default round trip, section-creation background, and the evidence behind the maintenance rules
 
 A details article of the application guides, reached through `existing-app-maintenance`, which points here and is read first.
-This article owns the field-by-field round trip of a column default (`default-value-config`) through `get-app-info` and `sync-schemas update-entity`, the background behind the section-creation rules and the `error-class` values, why merged column reads return unknown values, how section-title languages are preserved and the evidence behind the translation rules, and the full schema-reuse example. Split out of `existing-app-maintenance`, which keeps every rule, refusal and required order of steps; read that first. Nothing here overrides it.
+This article owns the field-by-field round trip of a column default (`default-value-config`) through `get-app-info` and `sync-schemas update-entity`, the background behind the section-creation rules and the `error-class` values, why merged column reads return unknown values, and the full schema-reuse example. Split out of `existing-app-maintenance`, which keeps every rule, refusal and required order of steps; read that first. Nothing here overrides it.
 
 Discover the target app
 - `find-app` replaces a `list-apps` + per-app `list-app-sections` scan: it searches application name/code/description and section captions and returns the matching app(s) WITH their sections in a single call.
@@ -25,10 +25,6 @@ Preferred minimal mutations
 - `default-value-config` per source: the per-source payload fields `existing-app-maintenance` lists are what you SEND. A read may also carry read-only enrichment the write path does not accept: `Settings` and `SystemValue` come back with `resolved-value-source` alongside `value-source`. Treat the read shape as non-exhaustive; an extra field is not drift.
 - Removing a default: replace the whole object with `{"source": "None"}`. Flipping `source` on the object you hold fails, because the validator rejects `None` sent together with any surviving `value` / `value-source` / `sequence-prefix` / `sequence-number-of-chars`: "cannot set value, value-source, or sequence fields when default-value-config source is None".
 - When the field is absent: it is absent whenever the column has no default, including when its stored source is `None`. Absence is only meaningful on a clio that returns the field at all — an older clio omits it for every column, defaulted or not — which is why `get-tool-contract` for `get-app-info` must name `default-value-config` in its `entities` output before absence is read as "no default".
-
-Translations (other cultures)
-- How section-title languages are preserved: when the `update-app-section` contract lists `caption-culture`, clio reads the section title and description in the non-default languages first, writes them back after the update, and re-saves the app package's `SysModule_<SectionCode>` data binding; the result lists the kept languages.
-- Evidence boundary: measured on Creatio 10.2.254 / .NET Framework under an `en-US` profile, September 2026. Section-title writes under a non-`en-US` profile were not measured.
 
 Verification
 - Full schema-reuse example: if `get-app-info` or refreshed schema metadata already exposes `Support Case Knowledge Link` / `UsrSupportCaseKbLink`, a request to add a Related Knowledge detail on the Support Case form is a page mutation that reuses that schema. Do not create `UsrSupportCaseKnowledgeBase`.

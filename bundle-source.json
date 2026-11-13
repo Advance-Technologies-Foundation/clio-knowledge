@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.201",
+  "libraryVersion": "1.15.211",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -141,6 +141,7 @@
       "process-send-email-template",
       "process-send-email-attachments",
       "process-web-service",
+      "process-dynamic-case",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -218,6 +219,7 @@
       "ui-project",
       "virtual-entities",
       "websocket-messaging",
+      "web-service-registration",
       "when-to-use-requests",
       "list-widget",
       "record-permissions",
@@ -348,6 +350,7 @@
       "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "docs://knowledge/com.creatio.clio/process-web-service",
+      "docs://knowledge/com.creatio.clio/process-dynamic-case",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -425,6 +428,7 @@
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
+      "docs://knowledge/com.creatio.clio/web-service-registration",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
       "docs://knowledge/com.creatio.clio/list-widget",
       "docs://knowledge/com.creatio.clio/record-permissions",
@@ -1133,7 +1137,7 @@
     {
       "itemId": "existing-app-maintenance-details",
       "title": "Existing application maintenance details",
-      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; how update-app-section preserves section-title languages and the translations evidence boundary; and the full schema-reuse example. Split out of existing-app-maintenance.",
+      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; and the full schema-reuse example. Split out of existing-app-maintenance.",
       "topicId": "creatio.existing-app-maintenance-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance-details",
@@ -1641,7 +1645,7 @@
     {
       "itemId": "process-data-source-filters",
       "title": "Process data source filters",
-      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the five right-hand value sources (value, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only a constant, a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
+      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the right-hand value sources (value, values for several lookup records, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only constants (value or values), a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
       "topicId": "creatio.process-data-source-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-source-filters",
@@ -1917,6 +1921,17 @@
       "uri": "docs://knowledge/com.creatio.clio/process-web-service",
       "sourcePath": "guidance/mcp/guides/processes/web-service.md",
       "bundlePath": "resources/process-web-service.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-dynamic-case",
+      "title": "Dynamic case from a lookup column",
+      "description": "Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). The prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty stages, full-mesh connections, the link row bound to the package and the settings row bound unless another package already carries it, the page fragment in the design package), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet.",
+      "topicId": "creatio.process-dynamic-case",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case",
+      "sourcePath": "guidance/mcp/guides/processes/dynamic-case.md",
+      "bundlePath": "resources/process-dynamic-case.md",
       "mediaType": "text/plain"
     },
     {
@@ -2900,7 +2915,7 @@
     {
       "itemId": "sys-settings",
       "title": "System settings MCP operations",
-      "description": "Canonical MCP guidance for the Creatio sys-settings CRU surface: tool order, supported value-type-names and aliases, Lookup resolution, SecureText masking, Date/Time TZ caveat, and Binary file upload and exact-byte readback through clio-run when the download contract is available.",
+      "description": "Canonical MCP guidance for the Creatio sys-settings CRU surface: tool order, supported value-type-names and aliases, Lookup resolution, SecureText masking, Date/Time TZ caveat, and Binary file upload and exact-byte readback through clio-run when the download contract is available, and shipping a setting with its package as the SysSettings_<Code> / SysSettingsValue_<Code> binding pair.",
       "topicId": "creatio.sys-settings",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/sys-settings",
@@ -2951,6 +2966,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/virtual-entities.md",
       "bundlePath": "resources/virtual-entities.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "web-service-registration",
+      "title": "REST web service registration",
+      "description": "Owns the clio tools that register, read, change and test-call a REST web service in Creatio Studio > Web services (register-web-service, list-web-services, describe-web-service, modify-web-service, test-web-service-method): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), the real-request warning for test calls, and the usage guard that refuses changing or removing a method a process calls until the user acknowledges the named processes.",
+      "topicId": "creatio.web-service-registration",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-registration",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-registration.md",
+      "bundlePath": "resources/web-service-registration.md",
       "mediaType": "text/plain"
     },
     {
@@ -3180,7 +3206,7 @@
     {
       "itemId": "page-schema-translation",
       "title": "Page translation",
-      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
+      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, choosing the text (platform terms read from the environment in the target culture, the page's inherited strings as the glossary, other labels by meaning, ambiguous labels reported), object, column and section titles in another culture (title-localizations, update-app-section caption-culture) and when to ask first, and the full compile a newly activated culture needs.",
       "topicId": "creatio.page-schema-translation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-translation",
