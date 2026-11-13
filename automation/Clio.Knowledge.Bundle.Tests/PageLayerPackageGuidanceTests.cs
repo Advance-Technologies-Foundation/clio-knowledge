@@ -49,8 +49,10 @@ public sealed class PageLayerPackageGuidanceTests
     {
         string overview = Collapse(Read(Overview));
 
-        overview.Should().Contain("one option per entry of `packageChoice.layers`, the default target first and marked `(default)` — never `(Recommended)`",
-            because: "the user chooses among every layer clio reports, and the default must not read as advice");
+        overview.Should().Contain("one option per entry of `packageChoice.layers` whose `packageLocked` is not `true`, the default target first and marked `(default)` — never `(Recommended)`",
+            because: "with required: true clio lists locked layers too, and only the editable ones are a choice; the default must not read as advice");
+        overview.Should().Contain("the locked layers are in `packageChoice.layers` with `packageLocked: true`",
+            because: "clio reports every replacing layer, locked or not, once required is true, so the override check reads them from there");
         overview.Should().Contain("plus the default target as its own option when no layer has `isDefaultTarget: true`",
             because: "keeping the default target is a valid choice even before it holds a layer");
         overview.Should().Contain("`packageLocked: true` layers cannot receive the change: name them only when they override the user's element (below), never as an option",
@@ -65,7 +67,7 @@ public sealed class PageLayerPackageGuidanceTests
     {
         string overview = Collapse(Read(Overview));
 
-        overview.Should().Contain("save with `target-package-uid` set to `packageChoice.defaultTargetPackageUId`",
+        overview.Should().Contain("save through `update-page` (`sync-pages` refuses the page while `required` is `true` and cannot name a target package) with `target-package-uid` set to `packageChoice.defaultTargetPackageUId`",
             because: "clio 8.1.0.152+ refuses a save without a target while another editable layer exists");
     }
 
