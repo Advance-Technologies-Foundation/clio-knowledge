@@ -3,15 +3,59 @@ clio MCP SOAP web service guide — register and change a SOAP 1.1 or SOAP 1.2 s
 Scope and ownership
 - Read `web-service-registration` first: it owns the five web service tools, the credential rule, the prefix and
   `path` rules, the usage guard and the follow-up steps, and all of it applies to a SOAP service too. This guide
-  owns only what differs for SOAP: the service type, the namespaces, the method's message element and SOAP
-  action, element paths, the SOAP header, array items, and the two operations only a SOAP service has.
+  owns only what differs for SOAP: reading a WSDL, the service type, the namespaces, the method's message element
+  and SOAP action, element paths, the SOAP header, array items, and the two operations only a SOAP service has.
 - Availability: SOAP registration exists only in a clio whose `register-web-service` contract
   (`get-tool-contract`) has the `type` and `namespaces` arguments. Without them, tell the user that a SOAP service is
   registered in Studio > Web services and stop. Reading and test-calling a SOAP service works as for REST. A
   test call whose reply has a status but a withheld body means a system-setting value sent in the envelope could
   not be located for masking; that is the masking rule, not a broken definition.
-- There is no WSDL import. The agent describes the service from what the user gives: the WSDL text, its
-  documentation, or the operations they name. Never guess an operation, an element name or a namespace.
+- From a WSDL (a URL or files the user gives): call `read-wsdl` first and register what it returns. Describe a
+  service by hand only when there is no WSDL, or for what read-wsdl says it left out; never hand-build what it
+  returned (the one exception, copying a method's own parameters back from `describe-web-service`, is below). Never
+  guess an operation, an element name or a namespace. A clio whose `get-tool-contract` does not list
+  `read-wsdl` has no WSDL reading: describe the service from the WSDL text or its documentation then.
+
+Reading a WSDL (read-wsdl)
+- Arguments: `environment-name` and either `wsdl-url` or `wsdl-files`; optional `port`, `operations` and
+  `service-code`. It saves nothing. A `wsdl-url` is downloaded, with the schemas it imports by an absolute
+  `schemaLocation`, by the stand through Studio's own endpoint; clio never fetches it. `wsdl-files` are absolute
+  paths, on the machine clio runs on, of the WSDL and of every schema it imports; they are refused when clio is
+  reached as an HTTP MCP server, where only `wsdl-url` works.
+- Refused before anything is sent: a URL with `user:password@` or a key or token in its query, and a loopback,
+  link-local or cloud metadata address (an advisory check: a name that only resolves to the stand itself gets past
+  it). A network path in `wsdl-files` is not read. Ask the user to download the WSDL and its schemas themselves and
+  pass them as `wsdl-files`. A failed download comes back with the platform's reason and the same advice.
+- The result's `services` has one entry per SOAP 1.1 and SOAP 1.2 port (HTTP ports are dropped): `port`,
+  `studio-pick` (the port Studio's quick setup would create, the SOAP 1.2 one when both exist), `arguments`, and
+  `existing-methods` with `service-code`. `warnings` and `notices` are listed once for the whole result.
+- Before registering, show the user the operations, and the ports when there are several. Register the
+  `studio-pick` port unless the user asks for another. When they want only some operations, read again with
+  `operations` (and `port`) instead of editing the arguments.
+- Register a port's `arguments` with `register-web-service` as they are, adding only `package-name` and what a
+  warning asks the user for. Do not rename codes or rewrite paths: a response path comes with its prefix
+  (`tem:AddResult`); keep it. Method and parameter codes are the prefix plus the full WSDL names in PascalCase, the
+  same on every read: `UsrIntA`, `UsrAddResult`; a nested field joins its whole path (`customer/name` ->
+  `UsrCustomerName`); an array adds the element that repeats (the array `lines` repeating inside `order` ->
+  `UsrOrderLines`).
+- Pass every warning on. Some ask for the user: a `base-uri` left out (the address failed the base-URI check, had a
+  fragment, had spaces, control or non-ASCII characters, or was too long) needs the real endpoint from the user
+  before registering; while a namespace is left out, `register-web-service` refuses the call if a request element
+  uses its prefix, until the user gives the URI; a `soap-action` left out needs the right value from the API owner.
+- Notices: when the code is already used by a web service, ask the user which way to go and do not pick a code
+  yourself: register under a code the user names, or change that service (read again with `service-code`). When the
+  WSDL sends calls to another host than the one it came from, show the user the `base-uri` before registering.
+- A result too large to return whole lists only the operation names, with a notice: ask the user which operations
+  they need and read again with `operations` (and `port`). When even one operation of one port is too large, the
+  notice says so: ask the user which of its fields they need and describe that method by hand.
+- Operations into an existing SOAP service: read with `service-code`. `existing-methods` lists the codes of its
+  methods that an operation matched (same root element and SOAP action); those operations keep the codes. Add the
+  others with
+  `modify-web-service` `addMethod`, and send the `namespaces` with `setNamespaces` when they changed. Replace an
+  existing one with `setMethod` only when the user wants it updated: the arguments then carry what Studio set on it
+  (timeout, authentication, each parameter's default and required flag), and a warning names its parameters the
+  WSDL lacks, which `setMethod` would remove; copy those from `describe-web-service` or ask the user. The usage
+  guard applies.
 
 Registering a SOAP service
 - `type`: `soap11` or `soap12` (default `rest`). REST and SOAP cannot be switched later.
@@ -38,8 +82,9 @@ Registering a SOAP service
   an undeclared one is refused with its name. A prefixed segment must be `prefix:name` with letters, digits,
   `_` and `-` only, each part starting with a letter or `_`: the platform cuts a name at any other character (`tem:Api.Key` would go out as `<tem:Api>`), so the
   tool refuses it. An unprefixed name may use any letters (`ДатаНачала`) and goes to the default namespace.
-- Response parameters: `path` is an element path read from the response body, local element names joined by
-  `/` (`AddResult` or `AddResponse/AddResult`), NEVER a JSONPath; `$.AddResult` is refused.
+- Response parameters: `path` is an element path read from the response body: local element names joined by
+  `/` (`AddResult` or `AddResponse/AddResult`), or with their prefixes as read-wsdl writes them
+  (`tem:AddResult`). NEVER a JSONPath; `$.AddResult` is refused.
 - `soap-header: true` on a top-level body request parameter sends it in the envelope's Header instead of the
   Body (WS-Security and similar); its `items` go with it. Example of a WS-Security password:
   `{"code": "UsrWsPassword", "path": "wsse:Security/wsse:UsernameToken/wsse:Password", "soap-header": true,
@@ -74,7 +119,8 @@ Changing a SOAP service
 
 Test calls
 - `test-web-service-method` (`code`, `method`, `parameters`) works for a SOAP method as for REST. Every SOAP call
-  is a POST that may change data on the other side: confirm with the user before calling. Values sent from
+  is a POST that may change data on the other side, so the confirmation rule of `web-service-registration` applies
+  to every SOAP method, a read-wsdl one included: ask the user first. Values sent from
   system settings are masked inside the envelope and its Header too; when such a value cannot be found in what was
   sent, the body is withheld and only the status comes back. `response-values` gives the response
   parameters as the platform read them by their element paths.
@@ -87,3 +133,10 @@ Evidence
   switch from SOAP 1.1 to 1.2 after the user's yes, the calling process unchanged in the designer and returning
   the result; undeclared prefixes, a JSONPath response and a constant licence header refused; a used namespace
   kept; a missing SOAP action reported and relayed, with no SOAPAction header sent. Other versions are unknown.
+- read-wsdl, measured on the same platform in November 2026: the public calculator WSDL through Studio's SOAP quick
+  setup and through read-wsdl and register-web-service gave equal services (type, address, namespaces, every
+  method's SOAP action and every parameter's path and type), except Studio's random method-code suffix, its
+  shortened parameter codes and its bare message element; both answered 2 + 3 = 5. Isolated agents given only the
+  WSDL URL called read-wsdl on their own in 2 of 2 sessions, registered the SOAP 1.2 pick, test-called it and built
+  a process that called it and returned the result. One of them rewrote the response paths without their prefixes
+  (`AddResult`); both forms read the result.
