@@ -115,6 +115,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the user must know what a save on click also saves and starts");
             guide.Should().Contain("Pass `save-on-change: true` only for the second",
                 because: "the default needs no argument");
+            guide.Should().Contain("keeps its own mode: `save-on-change` does not change it, the toggle does",
+                because: "the call never rewrites a bar it found, so the user's choice does not reach it");
             guide.Should().Contain("A page stored in the full form (every record page `create-app` makes) takes it too",
                 because: "an agent that read the old refusal would otherwise skip the bar on every create-app page");
             guide.Should().Contain("Remedy: `add-progress-bar: false`, fix the page as the message says, then re-run the same call",

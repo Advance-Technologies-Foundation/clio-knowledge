@@ -73,7 +73,8 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   the page has a bar already. The bar is inserted with `saveOnChange` from `save-on-change` (default false) and
   `askUserToChangeSchema: true`; `page.saveOnChange` reports it. With true a stage click saves the whole record,
   with any other unsaved edit on the form, and a failed save reverts the stage. Tell the user which mode, naming
-  the toggle (Saving, above).
+  the toggle (Saving, above). A bar that was already there (`already-present`) keeps its own mode: `save-on-change`
+  does not change it, the toggle does.
 - NO compile and NO restart, on .NET Framework and on .NET 8: a case is interpreted. `obligations.compileRequired` and
   `restartRequired` are false; do not run `compile-creatio` or `restart` after it. One exception: with
   `dependencies.compilationRequired: true` the dependency save asked for a compilation, `obligations` lists
