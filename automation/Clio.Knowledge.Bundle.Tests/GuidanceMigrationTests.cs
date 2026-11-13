@@ -59,6 +59,7 @@ public sealed class GuidanceMigrationTests
         "default-record-rights",
         "portal-sections",
         "page-modal-size",
+        "process-dynamic-case",
         "web-service-registration",
         "web-service-soap"
     ];

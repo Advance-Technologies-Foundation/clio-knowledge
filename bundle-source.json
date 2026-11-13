@@ -141,6 +141,7 @@
       "process-send-email-template",
       "process-send-email-attachments",
       "process-web-service",
+      "process-dynamic-case",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -350,6 +351,7 @@
       "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "docs://knowledge/com.creatio.clio/process-web-service",
+      "docs://knowledge/com.creatio.clio/process-dynamic-case",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -1921,6 +1923,17 @@
       "uri": "docs://knowledge/com.creatio.clio/process-web-service",
       "sourcePath": "guidance/mcp/guides/processes/web-service.md",
       "bundlePath": "resources/process-web-service.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-dynamic-case",
+      "title": "Dynamic case from a lookup column",
+      "description": "Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). The prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty stages, full-mesh connections, the link row bound to the package and the settings row bound unless another package already carries it, the page fragment in the design package), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet.",
+      "topicId": "creatio.process-dynamic-case",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case",
+      "sourcePath": "guidance/mcp/guides/processes/dynamic-case.md",
+      "bundlePath": "resources/process-dynamic-case.md",
       "mediaType": "text/plain"
     },
     {
