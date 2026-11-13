@@ -48,8 +48,7 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-versions` - the version model and which member runs. Read it BEFORE editing or launching
     ANY existing process.
   * `process-version-writes` - saving a new version, a restore point, rollback.
-Each is sized to be read WHOLE through `get-guidance`. Never infer another article's rule from this
-one; read that article.
+Each is sized to be read WHOLE through `get-guidance`; never infer another article's rule from this one.
 
 == How clio builds processes (read first) ==
 - clio makes no LLM call: you own the intent->BPMN translation. You NEVER hand-author process
@@ -61,7 +60,7 @@ one; read that article.
     RETIRED schemas (`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`) as equal peers with no
     marker, and TWO schemas share the caption "Send email" (`EmailTemplateUserTask` is the live one,
     `SendEmailUserTask` creates nothing): always key on the schema NAME, never on a caption.
-  * create-business-process - build a NEW process from a JSON descriptor, and save it.
+  * create-business-process - build and save a NEW process from a JSON descriptor.
   * modify-business-process - edit an EXISTING process by an ordered list of operations.
   * describe-business-process - read a process back as a graph; from clio 8.1.0.141 a large
     one is a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Every `mode=full` in these
@@ -118,8 +117,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON
-   object itself; a clio that answers "must be a string" predates that - pass a string holding the
-   same JSON.
+   object itself; an older clio answers "must be a string": pass the same JSON as a string.
 5. Verify with `describe-business-process mode=full` (element types, user-task names, parameter sources +
    direction - an output you can map FROM has `isOutput:true`, not `isResult` - and the signal
    trigger), never with a raw `execute-esq`/`odata-read` of the process record. A runtime check is
@@ -143,6 +141,8 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
      access to whoever it names, with nothing reported at run time; show the user the target object, the
      record `filter` and every grantee with its operations and level, and get an explicit yes first
      (`process-access-rights`);
+   * a `chatMessage` block - partial; a switch to custom needs `message` (`process-send-chat-message`;
+     FULL contract only);
    * a sendEmail `email` block - a partial update; recipients MATCH-OR-APPEND (none removable), a sent
      `email.attachments` list REPLACES (`process-send-email-attachments`; only when the FULL contract names it).
 - On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB
