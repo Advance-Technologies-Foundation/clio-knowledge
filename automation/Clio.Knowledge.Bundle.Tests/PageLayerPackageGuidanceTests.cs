@@ -28,17 +28,39 @@ public sealed class PageLayerPackageGuidanceTests
     }
 
     [Test]
-    [Description("A page with an unlocked layer outside the default target stops for the user's choice.")]
+    [Description("packageChoice.required or a package-choice-required refusal stops for the user's choice, even when one layer looks obvious.")]
     public void Overview_ShouldStopAndAskBeforeTheFirstWrite()
     {
         string overview = Collapse(Read(Overview));
 
-        overview.Should().Contain("STOP and ask the user which package to change before writing anything",
-            because: "the backend saves to one layer and the response never mentions the others");
-        overview.Should().Contain("do not pick one yourself",
-            because: "the package choice is the user's");
-        overview.Should().Contain("Skip the check for a page `create-page` made in this task",
+        overview.Should().Contain("`packageChoice.required: true`, or a `package-choice-required` refusal: STOP and ask the user which package to change before writing anything",
+            because: "clio reports the case in get-page and refuses the write, and the agent must turn both into a question");
+        overview.Should().Contain("never pick a package yourself — not even when one layer looks like the obvious choice",
+            because: "in QA the agent read the rule and still saved to the top layer because it looked obvious");
+        overview.Should().Contain("Skip the question only for a page `create-page` made in this task",
             because: "the create-page -> update-page flow owns that first write, and keeping the default would leave a created mobile schema empty");
+    }
+
+    [Test]
+    [Description("Keeping the default target is an explicit target-package-uid, because clio refuses a write without one.")]
+    public void Overview_ShouldNameTheDefaultTargetWhenTheUserKeepsIt()
+    {
+        string overview = Collapse(Read(Overview));
+
+        overview.Should().Contain("save with `target-package-uid` set to `packageChoice.defaultTargetPackageUId`",
+            because: "clio 8.1.0.152+ refuses a save without a target while another editable layer exists");
+    }
+
+    [Test]
+    [Description("The base page is located by rootSchemaUId, never as the chain root at level 0.")]
+    public void Overview_ShouldNotOfferTheBasePageAsALayer()
+    {
+        string overview = Collapse(Read(Overview));
+
+        overview.Should().Contain("NOT the chain root at `hierarchyLevel` 0, which is a platform template such as `BaseTemplate`",
+            because: "reading level 0 as the base made the agent offer, and write into, the base page");
+        overview.Should().NotContain("except the root (base) schema at `hierarchyLevel` 0",
+            because: "that definition is wrong for every page built from a template");
     }
 
     [Test]
@@ -61,9 +83,9 @@ public sealed class PageLayerPackageGuidanceTests
     {
         string overview = Collapse(Read(Overview));
 
-        overview.Should().Contain("`get-page-hierarchy` failed: no layers are known. Do not write",
+        overview.Should().Contain("If `get-page-hierarchy` fails, do not write",
             because: "with no layers known the agent cannot tell whether another package already customizes the page");
-        overview.Should().Contain("do not write silently",
+        overview.Should().Contain("or `packageLocked: null`, or no `packageLocked` key at all, ask as above",
             because: "an unknown lock state must reach the user as a question");
     }
 
@@ -73,7 +95,7 @@ public sealed class PageLayerPackageGuidanceTests
     {
         string index = Collapse(Read(Index));
 
-        index.Should().Contain("| the FIRST write (`update-page` / `sync-pages`) to a page in this task | `page-modification-overview` |",
+        index.Should().Contain("| the FIRST write (`update-page` / `sync-pages`) to a page in this task, `get-page` `page.packageChoice.required` is true, or a save was refused with `package-choice-required` | `page-modification-overview` |",
             because: "the GATE table is how an agent learns that the first write needs the check");
     }
 
