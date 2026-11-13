@@ -4,17 +4,19 @@ Scope
 This guide owns `create-dynamic-case`: it gives an object a stage lifecycle. One call builds a dynamic case (DCM)
 whose stages are the values of one lookup column of the object (for example `Status`), in a stated order, and adds
 the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI record page. Use it when the user
-asks for "stages", "a status lifecycle", "a progress bar on the record page" or "a case". "When X happens, do Y" is a
+asks for "stages", "a status lifecycle", an order or outcomes of status values, "a progress bar on the record
+page" or "a case". "When X happens, do Y" is a
 business process: `process-digest`. A case is not the `Case` object. `describe-dynamic-case` and
 `modify-dynamic-case` read and change an existing case ("Change an existing case").
 
 == Answer the user from the tool ==
-- Anything about an EXISTING object's stages, even "just tell me, change nothing": answer only after
+- Anything about an EXISTING object's stages or status flow ("ends Approved or Rejected", "move X before Y"),
+  even "just tell me, change nothing": answer only after
   `describe-dynamic-case { entity-schema-name }` (read-only); on clio older than <CLIO-TBD>, only after the call
   with `dry-run: true` (it writes nothing) and WITHOUT `stages` (a stage list is checked before the object's case).
   Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case"), never a
   second one; on an older clio its `case-exists` or `settings-conflict` refusal IS the answer. Never offer to
-  rename, replace or add lookup values, or another column, to get around it.
+  rename, replace or add lookup values, or another column (an order column), to get around it.
 - Stages need a field with a fixed list of values (a lookup); an amount, a date or a text cannot be stages
   (`column-not-lookup`). Say exactly that; do not first ask which field was meant.
 - Anything under "Not supported yet": say "<it> is not supported yet; the case designer does that" first, and do
