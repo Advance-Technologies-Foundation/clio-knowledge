@@ -35,8 +35,10 @@ public sealed class PageLayerPackageGuidanceTests
 
         overview.Should().Contain("`packageChoice.required: true`, or a `package-choice-required` refusal: STOP and ask the user which package to change before writing anything",
             because: "clio reports the case in get-page and refuses the write, and the agent must turn both into a question");
-        overview.Should().Contain("never pick a package yourself — not even when one layer looks like the obvious choice",
+        overview.Should().Contain("never pick or recommend a package yourself — not even when one layer looks like the obvious choice",
             because: "in QA the agent read the rule and still saved to the top layer because it looked obvious");
+        overview.Should().Contain("No recommendation anywhere",
+            because: "in the stand check the agent asked but marked the default as recommended, which steers the user's choice");
         overview.Should().Contain("Skip the question only for a page `create-page` made in this task",
             because: "the create-page -> update-page flow owns that first write, and keeping the default would leave a created mobile schema empty");
     }
