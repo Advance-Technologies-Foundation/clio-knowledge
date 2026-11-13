@@ -149,7 +149,9 @@ Testing
 - The request reaches the external API. Before test-calling a method that can change data there (POST, PUT,
   PATCH, DELETE, and every SOAP method), ALWAYS tell the user it sends a real request that can change data in that
   API and wait for their explicit yes, even when they asked you to "test" it: a request to test is not a
-  confirmation. A GET needs no question.
+  confirmation. Only after the yes, call with `user-confirmed: true`; never set it on your own. Without it the
+  tool refuses such a call with `confirmation-required: true` and sends nothing. A GET needs no question. A clio
+  that answers `user-confirmed` as an unknown argument predates the check: still ask first, then call without it.
 - A call returning 401 or 403: first check in `describe-web-service` that the method has `use-auth: true` when
   the service has authentication. If it does, the system-setting values are usually still empty: an empty setting
   sends no header or parameter at all, without any error. Say so instead of changing the service.
