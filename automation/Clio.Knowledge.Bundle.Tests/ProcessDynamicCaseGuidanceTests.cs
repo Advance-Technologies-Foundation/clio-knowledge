@@ -225,6 +225,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
         {
             routing.Should().Contain("or the order or outcomes of its status values (no \"stage\" needed)",
                 because: "routing is what an agent reads first, and the failing prompts never said stage");
+            routing.Should().Contain("the user names the object by its caption: `list-apps` / `get-app-info` when a schema-name search misses",
+                because: "a rerun reached the routing and still stopped: find-entity-schema matches schema names, not \"purchase requests\"");
             guide.Should().Contain("an order or outcomes of status values",
                 because: "the scope names the wording that belongs to a case");
             guide.Should().Contain("stages or status flow (\"ends Approved or Rejected\", \"move X before Y\")",
