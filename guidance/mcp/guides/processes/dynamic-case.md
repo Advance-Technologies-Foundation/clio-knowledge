@@ -19,15 +19,18 @@ business process: `process-digest`. A case is not the `Case` object.
 - Anything under "Not supported yet": say "<it> is not supported yet; the case designer does that" first, and do
   not build it another way unasked.
 - Saving, on clio OLDER than 8.1.0.152 (8.1.0.151 and earlier have no `save-on-change`): do not ask and do not
-  pass it. Tell the user a stage click saves the record at once and starts what reacts to the save, and that the
-  bar's "Save on change" toggle in the page designer is the only way to change that.
+  pass it. Tell the user a stage click on a bar this call inserts saves the record at once and starts what reacts
+  to the save, and that the bar's "Save on change" toggle in the page designer is the only way to change that; a
+  bar already on the page (`already-present`) keeps its own mode.
 - Saving, on clio 8.1.0.152 or later: by default a stage click only sets the field and the user presses Save (the
-  bar's "Save on change" toggle off, as on Leads). Unless the user already said, ask once before the call, naming
-  what each choice means:
+  bar's "Save on change" toggle off, as on Leads). When the dry run plans a bar (`page.status: planned`) and the
+  user has not already said, ask once before the call, naming what each choice means:
   the default - a click only marks the stage, and nothing that reacts to a saved record (processes started by the
   stage or the record change, rules on the saved data) runs until Save; or save at once - a click saves the whole
   record with any other unsaved edit, starts what reacts to the save, and a failed save reverts the stage. Pass
-  `save-on-change: true` only for the second; with no one to ask, keep the default. Name the toggle.
+  `save-on-change: true` only for the second; with no one to ask, keep the default. Name the toggle. With
+  `page.status: already-present` do not ask and do not pass it: the bar on the page keeps its own mode, and only
+  the toggle changes it.
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or
@@ -73,8 +76,9 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   form (every record page `create-app` makes) takes it too: its body is saved by `replace` with only these two items
   added, pinned to the checksum the plan read. Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
-  the page has a bar already. The bar is inserted with `saveOnChange` from `save-on-change` (default false) and
-  `askUserToChangeSchema: true`; `page.saveOnChange` reports it. With true a stage click saves the whole record,
+  the page has a bar already. From clio 8.1.0.152 the bar is inserted with `saveOnChange` from `save-on-change`
+  (default false) and `askUserToChangeSchema: true`; `page.saveOnChange` reports it (8.1.0.151 and earlier:
+  `saveOnChange: true`, `askUserToChangeSchema: false`, no `page.saveOnChange`). With true a stage click saves the whole record,
   with any other unsaved edit on the form, and a failed save reverts the stage. Tell the user which mode, naming
   the toggle (Saving, above). A bar that was already there (`already-present`) keeps its own mode: `save-on-change`
   does not change it, the toggle does.

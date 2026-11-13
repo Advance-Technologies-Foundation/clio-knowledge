@@ -119,6 +119,14 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the user must know what a save on click also saves and starts");
             guide.Should().Contain("Pass `save-on-change: true` only for the second",
                 because: "the default needs no argument");
+            guide.Should().Contain("When the dry run plans a bar (`page.status: planned`) and the user has not already said, ask once",
+                because: "a choice asked for a page that already has a bar would not be applied");
+            guide.Should().Contain("With `page.status: already-present` do not ask and do not pass it",
+                because: "the call never rewrites a bar it found, so the question would promise a mode the user does not get");
+            guide.Should().Contain("a stage click on a bar this call inserts saves the record at once",
+                because: "on an older clio only the bar the call inserts saves on a click; an existing bar keeps its toggle");
+            guide.Should().Contain("(8.1.0.151 and earlier: `saveOnChange: true`, `askUserToChangeSchema: false`, no `page.saveOnChange`)",
+                because: "the record-page facts differ by clio version, and an older result has no page.saveOnChange");
             guide.Should().Contain("keeps its own mode: `save-on-change` does not change it, the toggle does",
                 because: "the call never rewrites a bar it found, so the user's choice does not reach it");
             guide.Should().Contain("A page stored in the full form (every record page `create-app` makes) takes it too",
