@@ -146,8 +146,10 @@ Testing
   nothing is sent. A single Object parameter takes no value. A clio that refuses every array with "one text,
   number or boolean value per top-level parameter" predates array values.
   A body field given no value goes out as `null`, not left out (measured), so a strict API may reject it.
-- The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
-  changes data on their side.
+- The request reaches the external API. Before test-calling a method that can change data there (POST, PUT,
+  PATCH, DELETE, and every SOAP method), ALWAYS tell the user it sends a real request that can change data in that
+  API and wait for their explicit yes, even when they asked you to "test" it: a request to test is not a
+  confirmation. A GET needs no question.
 - A call returning 401 or 403: first check in `describe-web-service` that the method has `use-auth: true` when
   the service has authentication. If it does, the system-setting values are usually still empty: an empty setting
   sends no header or parameter at all, without any error. Say so instead of changing the service.
