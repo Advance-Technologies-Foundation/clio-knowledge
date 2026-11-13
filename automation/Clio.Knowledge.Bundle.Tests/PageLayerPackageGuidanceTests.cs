@@ -44,6 +44,22 @@ public sealed class PageLayerPackageGuidanceTests
     }
 
     [Test]
+    [Description("The question lists one option per layer, the default target first, and never offers a locked layer.")]
+    public void Overview_ShouldListEveryEditableLayerAsAnOption()
+    {
+        string overview = Collapse(Read(Overview));
+
+        overview.Should().Contain("one option per entry of `packageChoice.layers`, the default target first and marked `(default)` — never `(Recommended)`",
+            because: "the user chooses among every layer clio reports, and the default must not read as advice");
+        overview.Should().Contain("plus the default target as its own option when no layer has `isDefaultTarget: true`",
+            because: "keeping the default target is a valid choice even before it holds a layer");
+        overview.Should().Contain("`packageLocked: true` layers cannot receive the change: name them only when they override the user's element (below), never as an option",
+            because: "a save into a locked package fails, so offering it would lead the user into a dead end");
+        overview.Should().Contain("warn the user, before writing, that the higher layer overrides the change at runtime",
+            because: "a change into a lower layer is invisible at runtime when a higher layer changes the same element");
+    }
+
+    [Test]
     [Description("Keeping the default target is an explicit target-package-uid, because clio refuses a write without one.")]
     public void Overview_ShouldNameTheDefaultTargetWhenTheUserKeepsIt()
     {
