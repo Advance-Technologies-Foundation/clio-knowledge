@@ -7,7 +7,9 @@ Scope and ownership
   action, element paths, the SOAP header, array items, and the two operations only a SOAP service has.
 - Availability: SOAP registration exists only in a clio whose `register-web-service` contract
   (`get-tool-contract`) has the `type` and `namespaces` arguments. Without them, tell the user that a SOAP service is
-  registered in Studio > Web services and stop. Reading and test-calling a SOAP service works as for REST.
+  registered in Studio > Web services and stop. Reading and test-calling a SOAP service works as for REST. A
+  test call whose reply has a status but a withheld body means a system-setting value sent in the envelope could
+  not be located for masking; that is the masking rule, not a broken definition.
 - There is no WSDL import. The agent describes the service from what the user gives: the WSDL text, its
   documentation, or the operations they name. Never guess an operation, an element name or a namespace.
 
@@ -19,8 +21,8 @@ Registering a SOAP service
 - `base-uri` is the endpoint URL as the WSDL's `soap:address` gives it (`http://www.dneonline.com/calculator.asmx`).
   It is stored as given: no trailing slash is added, and a `{placeholder}` is refused, because a SOAP method has no
   address of its own. A fixed query stays in it (SAP: `?sap-client=100`), since SOAP has no query parameters; a
-  credential-like key with a constant value there is refused, and so is `?wsdl` / `?singleWsdl`: that is the WSDL
-  address, not the endpoint.
+  credential-like key with a constant value there is refused, and so is `?wsdl`, `?singleWsdl` or `?xsd` (a WCF
+  `.svc?xsd=xsd0`): that is the WSDL or schema address, not the endpoint.
 - Each method: `code` (prefixed) and `message-element`, the request body's root element with its prefix
   (`tem:Add`), one segment only; without a prefix it goes out in the default namespace. No `uri`: a SOAP method
   is always POST with XML, so `http-method` may only be POST and `content-type` only xml, and both can be left out.

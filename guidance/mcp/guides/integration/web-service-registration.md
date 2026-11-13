@@ -42,8 +42,9 @@ Credential rule (MUST)
   client id and secret, is created by the user; nothing else is needed on the service side.
 - A header, a cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
   `auth`, `credential`, `signature`, `session`, `cookie`, `licence`, `license`, `nonce`, `passcode`, `passphrase`, `bearer` or
-  `jwt` anywhere, or `pass` not followed by a letter (`AdminPass`, `Pass_1`; not `compass`, `bypass`, `surpass`,
-  `passport` or `passenger`), in any letter case (so `author` and `keyword` count too), MUST NOT get
+  `jwt` anywhere, or `pass` not followed by a lowercase letter and not after `com`, `by` or `sur` (`AdminPass`,
+  `Pass_1`, `UsrPassId`, `PASSPORT_NO`; not `compass`, `bypass`, `surpass`, `passport` or `passenger`), in any
+  letter case (so `author` and `keyword` count too), MUST NOT get
   `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
   tool refuses a constant there and never echoes the refused value.
 - Every system setting a call references anew MUST exist before the call; such a reference to a missing
