@@ -109,8 +109,8 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, enabled?,
    confirm-running-instances?, dry-run }` writes. `stages` is the WHOLE new list: a stage left out is REMOVED, a
    value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, after asking).
-   Fields an item leaves out keep their values; `group: null` ungroups; `caption` renames the stage in the case
-   only, never the value every record shares. First `dry-run: true`: show the user `diff` and the notes, write only
+   Fields an item leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours it;
+   `caption` renames the stage in the case only, never the value every record shares. First `dry-run: true`: show the user `diff` and the notes, write only
    after their yes. `unchanged` means nothing to do.
 3. While cases run (`runningInstances.total` > 0) every write is refused `running-instances-confirmation-required`:
    tell the user how many run and in which stages; pass `confirm-running-instances: true` only after they say yes,
