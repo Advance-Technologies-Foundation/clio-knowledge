@@ -37,6 +37,33 @@ public sealed class StepperActiveStepGuidanceTests
             because: "a bound stepper keeps its open step in the bound attribute, and only a declared attribute lets it change step");
         guide.Should().Contain("unbound: the generated `<StepperName>_ActiveStep`",
             because: "an unbound stepper exposes the generated attribute");
+        guide.Should().Contain("A constant step name (`\"activeStep\": \"DeliveryStep\"`) only sets the opening step and uses the generated attribute too.",
+            because: "a constant activeStep is not a binding and exposes the generated attribute");
+        guide.Should().Contain("a property binding (`$Attr:prop`)",
+            because: "a property binding leaves the stepper unprepared, like a nested path");
+    }
+
+    [Test]
+    public void Guide_States_Version_Boundaries()
+    {
+        string guide = Guide();
+
+        guide.Should().Contain("`RentalStep`); requires clio 8.1.0.150 or later.",
+            because: "the bound attribute is offered from clio 8.1.0.150");
+        guide.Should().Contain("`RentalStepper_ActiveStep`); requires clio 8.1.0.148 or later.",
+            because: "the generated attribute is offered from clio 8.1.0.148");
+        guide.Should().Contain("a dotted stepper name requires clio 8.1.0.150 or later.",
+            because: "clio 8.1.0.148-8.1.0.149 keep the dots and the rule never fires");
+        guide.Should().Contain("on clio below 8.1.0.150 a bound stepper has no working active-step condition",
+            because: "clio 8.1.0.148-8.1.0.149 save a generated-name rule on a bound stepper that never fires");
+    }
+
+    [Test]
+    public void Guide_Requires_Not_Filled_In_Clause_For_First_Step()
+    {
+        Guide().Should().Contain(
+            "a rule for the first step also needs an `is-not-filled-in` condition on the attribute, joined with OR (`RentalStepper_ActiveStep = <FirstStepName> OR RentalStepper_ActiveStep is not filled in`)",
+            because: "the attribute stays empty until the first step change, so an equal-only rule misses the first step");
     }
 
     [Test]
