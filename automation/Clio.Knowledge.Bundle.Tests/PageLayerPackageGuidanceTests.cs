@@ -68,7 +68,7 @@ public sealed class PageLayerPackageGuidanceTests
         string overview = Collapse(Read(Overview));
 
         overview.Should().Contain("save through `update-page` (`sync-pages` refuses the page while `required` is `true` and cannot name a target package) with `target-package-uid` set to `packageChoice.defaultTargetPackageUId`",
-            because: "clio 8.1.0.152+ refuses a save without a target while another editable layer exists");
+            because: "clio <CLIO-TBD>+ refuses a save without a target while another editable layer exists");
     }
 
     [Test]
