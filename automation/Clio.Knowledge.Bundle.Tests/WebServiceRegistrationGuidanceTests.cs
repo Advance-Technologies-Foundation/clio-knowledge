@@ -139,6 +139,57 @@ public sealed class WebServiceRegistrationGuidanceTests
             because: "read-wsdl reads a WSDL now");
     }
 
+    [Test]
+    [Description("The registration guide guards a real change of the base URI or the authentication like a changed method, leaves setRetryCount unguarded, says a method without use-auth sends no authentication, and that Digest goes out as Basic.")]
+    public void Guide_ShouldGuardEveryCallChangesAndStatePerMethodAuthentication()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`setAuth` that really changes the authentication changes every call of the methods with `use-auth: true`",
+            "The tool compares the service before and after the whole call",
+            "`setRetryCount` is never guarded.",
+            "a method with `use-auth: false` sends no authentication at all",
+            "The platform sends Digest as a preemptive `Authorization: Basic` header"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "without it an agent repoints or re-authenticates a service a process calls unasked, or expects a new authentication to reach every method");
+        }
+    }
+
+    [Test]
+    [Description("The SOAP guide sends the agent to the SOAP 1.1 port a read-wsdl warning names, explains why WCF refuses the platform's SOAP 1.2 and WS-Addressing calls, and gives the measured workarounds only with the user's agreement.")]
+    public void SoapGuide_ShouldSendTheAgentToACallablePort()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "Register the port a warning names to register instead, else the `studio-pick` port",
+            "Studio's choice, not a recommendation",
+            "never as the `action` parameter of `Content-Type`",
+            "`application/soap+xml;charset=utf-8;action=\"<the soap-action>\"`",
+            "two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI)",
+            "Do this only with the user's agreement, and test a call."
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent registers Studio's SOAP 1.2 pick of a WCF service and every call fails with a SOAP fault");
+        }
+    }
+
     private static string ReadCollapsed(string relativePath) =>
         Regex.Replace(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath), @"\s+", " ");
 }

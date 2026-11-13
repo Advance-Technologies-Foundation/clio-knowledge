@@ -40,6 +40,9 @@ Credential rule (MUST)
   id of an existing OAuth application. The tool resolves it to the application's id, stores that id (the reply
   shows it as `oauth-app-id`, which `setAuth` accepts back) and refuses one no application carries. The application itself, with its
   client id and secret, is created by the user; nothing else is needed on the service side.
+- The platform sends Digest as a preemptive `Authorization: Basic` header, with no challenge and response
+  (measured): an API that accepts only Digest refuses every call, and no service setting fixes that; and Digest
+  protects nothing more than Basic, so on an `http` base URI the password travels readable. Tell the user.
 - A header, a cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
   `auth`, `credential`, `signature`, `session`, `cookie`, `licence`, `license`, `nonce`, `passcode`, `passphrase`, `bearer` or
   `jwt` anywhere, or `pass` not followed by a lowercase letter and not after `com`, `by` or `sur` (`AdminPass`,
@@ -179,9 +182,10 @@ Changing a registered service
   returned it: an omitted field is not kept but reset (`in` to body, `type` to Text, `array` and `required` to
   false, the caption to the code, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
   secret constant carry over. To add one parameter, send the whole method from describe plus the new one.
-- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth`; to
-  make an existing method send the new authentication, send it with `setMethod` and `use-auth: true` (the usage
-  guard applies).
+- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth`, and
+  a method with `use-auth: false` sends no authentication at all (measured on SOAP 1.2; REST takes the same code
+  path); after a change of the authentication the tool names such methods in a notice. Pass it on; to make one send the new authentication, send it with
+  `setMethod` and `use-auth: true` (the usage guard applies).
 - One exception: an `auth` block with `constant-credentials-masked: true` (Basic or Digest credentials typed
   in Studio as constants, both or only one of them) cannot be sent back; `setAuth` needs BOTH
   `username-sys-setting` and `password-sys-setting` codes, and the user fills those settings.
@@ -192,6 +196,14 @@ Changing a registered service
   from the refusal (not the captions), exactly those. Never fill `acknowledge-usages` on your own. A process
   that names the service but whose metadata cannot be read (or that names it outside a Call web service
   element) is listed with no element and counts as calling every method.
+- `setBaseUri` that really changes the base URI changes every call those processes make, and `setAuth` that
+  really changes the authentication changes every call of the methods with `use-auth: true`, so both are refused
+  the same way while a process calls such a method; the refusal says what changes ("the new base URI changes every
+  call ..."), and the elements keep their parameters. The tool compares the service before and after the whole call:
+  values sent back unchanged (as `describe-web-service` returned them) are not a change. `setRetryCount` is never
+  guarded. A clio that
+  saves such a change without a refusal predates this check: before changing the base URI or the authentication
+  of a service, list its callers with `describe-web-service` `usages: true` and ask the user first.
 - `addMethod` never breaks a caller and is not guarded. Adding a parameter to a method a process already calls
   is a `setMethod` and is guarded; after the user agrees, the new parameter appears on that element at its next
   load, unbound, and until it is bound a body field goes out as `null` (measured), so bind it or tell the user.
