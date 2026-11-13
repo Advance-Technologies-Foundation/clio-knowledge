@@ -18,10 +18,10 @@ business process: `process-digest`. A case is not the `Case` object.
   (`column-not-lookup`). Say exactly that; do not first ask which field was meant.
 - Anything under "Not supported yet": say "<it> is not supported yet; the case designer does that" first, and do
   not build it another way unasked.
-- Saving, on clio OLDER than <CLIO-TBD> (8.1.0.151 and earlier have no `save-on-change`): do not ask and do not
+- Saving, on clio OLDER than 8.1.0.152 (8.1.0.151 and earlier have no `save-on-change`): do not ask and do not
   pass it. Tell the user a stage click saves the record at once and starts what reacts to the save, and that the
   bar's "Save on change" toggle in the page designer is the only way to change that.
-- Saving, on clio <CLIO-TBD> or later: by default a stage click only sets the field and the user presses Save (the
+- Saving, on clio 8.1.0.152 or later: by default a stage click only sets the field and the user presses Save (the
   bar's "Save on change" toggle off, as on Leads). Unless the user already said, ask once before the call, naming
   what each choice means:
   the default - a click only marks the stage, and nothing that reacts to a saved record (processes started by the

@@ -107,7 +107,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "already-present needs the settings row and the link row too, not only the same stages");
             guide.Should().Contain("`saveOnChange` from `save-on-change` (default false)",
                 because: "the bar keeps its own default, a click that only sets the field, unless the user asks for a save on click");
-            guide.Should().Contain("on clio OLDER than <CLIO-TBD> (8.1.0.151 and earlier have no `save-on-change`): do not ask and do not pass it",
+            guide.Should().Contain("on clio OLDER than 8.1.0.152 (8.1.0.151 and earlier have no `save-on-change`): do not ask and do not pass it",
                 because: "an older clio always saves on a click, so offering the choice would promise a bar the user does not get");
             guide.Should().Contain("the bar's \"Save on change\" toggle in the page designer is the only way to change that",
                 because: "on an older clio the toggle is the only lever");
