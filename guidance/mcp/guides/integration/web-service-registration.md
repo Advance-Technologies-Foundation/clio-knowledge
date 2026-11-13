@@ -131,19 +131,20 @@ Testing
   carrying a secret is masked (a number or boolean whole), and the other keys and values stay readable; a masked
   JSON body comes back re-indented. Values shorter than four characters are not masked. When a value
   filled from a system setting cannot be found in what the platform reports as sent (a path value not found in
-  the URL, nothing reported for a failed call, or a request body that is not JSON), the response is withheld
-  and only the status code comes back. Response values read from a cookie, a credential-named header, or with a
+  the URL, a body value or an array item field missing from the body, nothing reported for a failed call, or a
+  request body that is not JSON), the response is withheld and only the status code comes back. Response values read from a cookie, a credential-named header, or with a
   setting or secret default are masked too.
 - A REST method with `content-type` xml cannot be test-called: the platform refuses it and nothing is sent; a process sends its XML body through the Call web
   service element's `RequestBody`.
 - `parameters` maps top-level request parameter codes to values: text, a number or a boolean for a scalar; a
-  JSON array of them for an array (`["a", "b"]`); and for an Object array a JSON array of objects keyed by the
+  JSON array of them for a body array (`["a", "b"]`); and for an Object array a JSON array of objects keyed by the
   item's field codes (`[{"UsrSku": "A1", "UsrQty": 2}]`), where a field that is itself an array takes a JSON
-  array the same way. A field left out of an item, or null, gets its default, and a system-setting default is
-  filled in every item. A code the method does not have (at any level), a field given twice and a value of the
-  wrong shape are refused with their location (`parameters.UsrLines[0].UsrSku`) and the valid codes, and nothing
-  is sent. A single Object parameter takes no value. A clio that refuses every array with "one text, number or
-  boolean value per top-level parameter" predates array values.
+  array the same way. A path, query, header or cookie value is one text even when the parameter is marked as an
+  array: give a list as `"1,2"`. A field left out of an item, or null, gets its default, and a system-setting
+  default is filled in every item. A code the method does not have (at any level), a field given twice and a value
+  of the wrong shape are refused with their location (`parameters.UsrLines[0].UsrSku`) and the valid codes, and
+  nothing is sent. A single Object parameter takes no value. A clio that refuses every array with "one text,
+  number or boolean value per top-level parameter" predates array values.
   A body field given no value goes out as `null`, not left out (measured), so a strict API may reject it.
 - The request reaches the external API. For POST, PUT, PATCH or DELETE, confirm with the user first: it
   changes data on their side.
@@ -211,5 +212,5 @@ Rights and limits
   paths went out as one nested object, a dotted response JSONPath filled the element output, and a
   setting-bound body field was masked in the test-call reply. A test call with a text array and an Object
   array whose items held a text array and an inner Object array went out with every value in place, in a REST
-  JSON body and in a SOAP envelope, and a setting-bound item field was filled in every item. Other versions are
-  unknown.
+  JSON body and in a SOAP envelope, and a setting-bound item field was filled in every item; a JSON array given to
+  a query, header or path parameter went out as `System.Object[]`, a text as written. Other versions are unknown.
