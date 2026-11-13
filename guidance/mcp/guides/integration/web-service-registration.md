@@ -1,8 +1,10 @@
-clio MCP web service registration guide — REST services in Studio > Web services
+clio MCP web service registration guide — REST and SOAP services in Studio > Web services
 
 Scope and ownership
-- Use this guide when an external REST API must be registered in Creatio (Studio > Web services) so a
-  business process can call it, or when a registered REST service must be read, changed or test-called.
+- Use this guide when an external REST or SOAP API must be registered in Creatio (Studio > Web services) so a
+  business process can call it, or when a registered service must be read, changed or test-called. For a SOAP
+  service also read `get-guidance name=web-service-soap`: it owns what differs (type, namespaces, message element,
+  SOAP action, element paths, SOAP header, `setNamespaces`, `setType`); everything here applies to SOAP too.
 - This guide owns `register-web-service`, `list-web-services`, `describe-web-service`,
   `modify-web-service` and `test-web-service-method`: their arguments, the credential rule, the usage guard
   and the follow-up steps the user owns.
@@ -39,8 +41,11 @@ Credential rule (MUST)
   shows it as `oauth-app-id`, which `setAuth` accepts back) and refuses one no application carries. The application itself, with its
   client id and secret, is created by the user; nothing else is needed on the service side.
 - A header, a cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
-  `auth`, `credential`, `signature`, `session` or `cookie` anywhere, in any letter case (so `author` and `keyword`
-  count too), MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
+  `auth`, `credential`, `signature`, `session`, `cookie`, `licence`, `license`, `nonce`, `passcode`, `passphrase`, `bearer` or
+  `jwt` anywhere, or `pass` not followed by a lowercase letter and not after `com`, `by` or `sur` (`AdminPass`,
+  `Pass_1`, `UsrPassId`, `PASSPORT_NO`; not `compass`, `bypass`, `surpass`, `passport` or `passenger`), in any
+  letter case (so `author` and `keyword` count too), MUST NOT get
+  `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
   tool refuses a constant there and never echoes the refused value.
 - Every system setting a call references anew MUST exist before the call; such a reference to a missing
   setting is refused, because at run time the platform drops it silently and the request goes out without the
@@ -115,15 +120,22 @@ After registering — tell the user (the tool also returns these as notices)
 
 Testing
 - `test-web-service-method` sends ONE real request, as Studio's Send test request does, and returns the
-  HTTP status and the response body (cut at 20,000 characters). Request and response headers are never
-  returned. Values the request carried from system settings (path parameters included) or in `Authorization`,
+  HTTP status, the response body (cut at 20,000 characters) and `response-values`: the response parameters as
+  the platform parsed them, by code, so you can check that a response `path` reads what the process needs. It is
+  absent when the platform returns none, and too long ones give `response-values-omitted: true` instead. Request and response headers are never
+  returned whole. Its arguments are `code` (the service) and `method` (the method code), not `service-code` or
+  `method-code`. `notices` flags a definition problem: a response parameter with a JSONPath on an XML response,
+  which reads nothing. Values the request carried from system settings (path parameters included) or in `Authorization`,
   and the secret constant defaults describe hides, are replaced with `[masked]` in the body and the error
   (`sent-secrets-masked: true`), because an API may echo them. In a JSON body every value and every property name
   carrying a secret is masked (a number or boolean whole), and the other keys and values stay readable; a masked
   JSON body comes back re-indented. Values shorter than four characters are not masked. When a value
   filled from a system setting cannot be found in what the platform reports as sent (a path value not found in
   the URL, nothing reported for a failed call, or a request body that is not JSON), the response is withheld
-  and only the status code comes back.
+  and only the status code comes back. Response values read from a cookie, a credential-named header, or with a
+  setting or secret default are masked too.
+- A REST method with `content-type` xml cannot be test-called: the platform refuses it and nothing is sent; a process sends its XML body through the Call web
+  service element's `RequestBody`.
 - `parameters` maps top-level request parameter codes to values; text, numbers and booleans are accepted. A
   code the method does not have is refused with the valid codes.
   A body field given no value goes out as `null`, not left out (measured), so a strict API may reject it.
@@ -140,8 +152,8 @@ Changing a registered service
   order, all or nothing: `addMethod` (`method`), `setMethod` (`method`; replaces the method of the same code,
   keeping the UIds of parameters it keeps), `removeMethod` (`method-code`), `setBaseUri` (`base-uri`),
   `setRetryCount` (`retry-count`), `setAuth` (`auth`; `type` none, basic, digest or oauth20, and none removes the
-  authentication). Only REST services can be changed; a SOAP service stays in Studio. Missing settings follow the
-  credential rule above. Each operation names its kind in `op`:
+  authentication); a SOAP service also takes `setNamespaces` and `setType` (`web-service-soap`). Missing settings
+  follow the credential rule above. Each operation names its kind in `op`:
   `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
 - What `describe-web-service` returns can be sent back as it is (except a method whose `{placeholder}` differs
   in letter case from its path parameter; the platform never fills it, so fix the case): a method (with its parameters) as the
