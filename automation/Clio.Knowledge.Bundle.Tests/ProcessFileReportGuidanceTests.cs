@@ -233,7 +233,7 @@ public sealed class ProcessFileReportGuidanceTests
             "{\"sourceElement\": \"AddDNSGuideReport\", \"sourceElementParameter\": \"RecordId\"}",
             "\"values\": [{\"column\": \"SenderDomain\", \"processParameter\": \"SenderDomainParameter\"}, {\"column\": \"SiteUrl\", \"processParameter\": \"SiteUrlParameter\"}]",
             "\"saveTo\": {\"object\": \"DNSGuideFile\", \"linkColumn\": \"SenderDomain\", \"recordId\": {\"processParameter\": \"SenderDomainParameter\"}}",
-            "\"parameters\": [{\"name\": \"SenderDomainParameter\", \"type\": \"Lookup\", \"referenceSchema\": \"SenderDomain\"}, {\"name\": \"SiteUrlParameter\", \"type\": \"Text\"}]",
+            "\"parameters\": [{\"name\": \"SenderDomainParameter\", \"type\": \"Lookup\", \"direction\": \"In\", \"referenceSchema\": \"SenderDomain\"}, {\"name\": \"SiteUrlParameter\", \"type\": \"Text\", \"direction\": \"In\"}]",
             "a column left unset prints blank, with no error.",
             "The shipped process that generates it saves to DNSGuideFile too, naming the sender domain as the record but no link column, and links the files to it afterwards with a Modify data on the file name.",
             "`saveTo.recordId` takes a Lookup of SenderDomain, as declared, or a Guid.",

@@ -4,10 +4,12 @@ A details article of the process guide set, reached through `process-parameters`
 This article is the authoritative owner of what a SUB-PROCESS element's parameters do at RUN TIME: the rule to
 re-synchronize every caller, which `setElement` shapes re-synchronize, what a re-synchronization costs and
 reports, how values cross by name, which version of a versioned callee runs, what `inSync` and describe can and
-cannot show, how a rename is followed, and why the designer card cannot check any of it; and the evidence
-for the process-parameter binding rule `process-parameters` owns, with the Formula-per-branch shape. Split out of
-`process-parameters`, which keeps process parameters, the mappings that bind them, type compatibility and the
-date/time/lookup default-value rule; read that first.
+cannot show, how a rename is followed, and why the designer card cannot check any of it; the evidence
+for the process-parameter binding rule `process-parameters` owns, with the Formula-per-branch shape; and the
+default direction switch in full - its conditions, what the response says in each case, the steps before you
+change an existing parameter's direction, and the measurements. Split out of `process-parameters`, which keeps
+process parameters, the direction rule, the mappings that bind them, type compatibility and the date/time/lookup
+default-value rule; read that first.
 
 == Sub-process element parameters at run time ==
 - A SUB-PROCESS element's parameters are the CALLED process's contract, copied onto the element and
@@ -135,6 +137,44 @@ date/time/lookup default-value rule; read that first.
     "formula": { "body": "[#ReadModifiedRequest.ResultEntity.UsrDaysLeft#]", "resultProcessParameter": "DaysLeftParameter" } }
 ]
 ```
+  Declare the shared parameter as a helper - no caller passes or reads it:
+  `"parameters": [ { "name": "DaysLeftParameter", "type": "Integer", "direction": "Internal", "caption": "Days left" } ]`.
   Flow each start into its own read, each read into its own Formula and both Formulas into the shared next
   step; `mappings[]` carries no `targetProcessParameter` entry for `DaysLeftParameter`. One mapping per branch
   instead is the shape the build warns about, and it reads the default on every run but one branch's.
+
+== The default direction switch, in full ==
+`process-parameters` owns the direction rule: state a direction on every parameter you declare. This is what clio
+8.1.0.153 and later (its bundled CrtProcessBuilder 1.6.6.172) does when a direction is left out, and what it says.
+- THE SWITCH. A top-level parameter that a create-business-process, modify-business-process or
+  modify-business-process-as-new-version request creates with no direction (and that no later setParameter in that
+  request gives one), which an element of the process fills (an element output mapped onto it, an expression that
+  reads an element, or a Formula element's result), and which is not a collection, is saved as Internal. The
+  response carries a warning naming it and the way back: if the process returns the value to a caller, set Out (or
+  Variable when a caller also passes it in). A constant default does not count as filling it.
+- NEVER SWITCHED: a direction the request states - a stated Variable on a parameter the request creates and an
+  element fills is kept and advised once, in that request; a FileCollection, which keeps its Variable default and is
+  never advised; and a parameter that existed before the request.
+- AN EXISTING PARAMETER. When the request makes an element fill an existing Variable parameter - maps an element
+  output onto it, maps an expression that reads an element onto it, or points a Formula element's result at it (an
+  edit that keeps the Formula's target does not count) - it stays Variable and the response reports it. Because the parameter existed before the request, the report adds that
+  other processes may already call it, that changing its direction clears a calling Sub-process element's mapping for
+  it on that caller's next synchronization with no error, and that its callers must be found (or the user asked)
+  first. It is a report, never an order to switch.
+- BEFORE YOU CHANGE THE DIRECTION of a parameter that existed before the request: change it only when the user
+  asked for that change; otherwise ask the user first. The caller check - `execute-esq` over `VwProcessLib` for the
+  candidates, then `describe` each and look for a `subProcess.process` naming this process, as THE RULE at the top
+  of this article says - finds Sub-process callers only. A Creatio AI skill built on the process and a page button
+  that runs it are callers it cannot see, so never conclude from it that nobody calls the process. With the user's
+  answer: if no caller passes or reads it, Internal keeps it out of the signature; a caller that only reads it needs
+  Out; a caller that passes it in keeps it Variable. After the change, re-synchronize every Sub-process caller with
+  `subProcess: {resync: true}` and read its notices.
+- ONLY WHAT A REQUEST TOUCHES IS JUDGED, so no warning after a modify does not mean the process has no Variable
+  helpers, and an older CrtProcessBuilder neither switches nor advises. Neither is a reason to look for them: a
+  request changes only the directions the user asked for, and a report on an existing parameter is passed to the
+  user, not acted on.
+- Measured on Creatio 10.2.522 (.NET Framework, MSSQL) with CrtProcessBuilder 1.6.6.172, 2026-11-13: a
+  Formula-filled, a mapping-filled and an expression-filled parameter declared with no direction read back Internal,
+  a stated Variable stayed Variable with the advice, a constant-only one stayed Variable with no warning, a
+  FileCollection a Process file element fills stayed Variable with no advice, and a modify that mapped onto an
+  existing Variable parameter kept it and advised once, asking for its callers first.

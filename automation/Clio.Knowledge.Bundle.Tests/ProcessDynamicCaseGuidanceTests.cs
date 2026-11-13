@@ -105,8 +105,30 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "request-failed and page-append-rejected also follow a write, under unknown and created-page-failed");
             guide.Should().Contain("or one without its settings row or link row",
                 because: "already-present needs the settings row and the link row too, not only the same stages");
-            guide.Should().Contain("AUTO-SAVE mode (`saveOnChange: true`, `askUserToChangeSchema: false`)",
-                because: "a stage click saves the whole record, which the user must be told; the designer's default is manual");
+            guide.Should().Contain("`saveOnChange` from `save-on-change` (default false)",
+                because: "the bar keeps its own default, a click that only sets the field, unless the user asks for a save on click");
+            guide.Should().Contain("on clio OLDER than 8.1.0.152 (8.1.0.151 and earlier have no `save-on-change`): do not ask and do not pass it",
+                because: "an older clio always saves on a click, so offering the choice would promise a bar the user does not get");
+            guide.Should().Contain("the bar's \"Save on change\" toggle in the page designer is the only way to change that",
+                because: "on an older clio the toggle is the only lever");
+            guide.Should().Contain("ask once before the call, naming what each choice means",
+                because: "the save mode is the user's choice, and the default is the manual one");
+            guide.Should().Contain("nothing that reacts to a saved record (processes started by the stage or the record change, rules on the saved data) runs until Save",
+                because: "the user must know that without a save no automation reacts to the new stage");
+            guide.Should().Contain("a click saves the whole record with any other unsaved edit, starts what reacts to the save, and a failed save reverts the stage",
+                because: "the user must know what a save on click also saves and starts");
+            guide.Should().Contain("Pass `save-on-change: true` only for the second",
+                because: "the default needs no argument");
+            guide.Should().Contain("When the dry run plans a bar (`page.status: planned`) and the user has not already said, ask once",
+                because: "a choice asked for a page that already has a bar would not be applied");
+            guide.Should().Contain("With `page.status: already-present` do not ask and do not pass it",
+                because: "the call never rewrites a bar it found, so the question would promise a mode the user does not get");
+            guide.Should().Contain("a stage click on a bar this call inserts saves the record at once",
+                because: "on an older clio only the bar the call inserts saves on a click; an existing bar keeps its toggle");
+            guide.Should().Contain("(8.1.0.151 and earlier: `saveOnChange: true`, `askUserToChangeSchema: false`, no `page.saveOnChange`)",
+                because: "the record-page facts differ by clio version, and an older result has no page.saveOnChange");
+            guide.Should().Contain("keeps its own mode: `save-on-change` does not change it, the toggle does",
+                because: "the call never rewrites a bar it found, so the user's choice does not reach it");
             guide.Should().Contain("A page stored in the full form (every record page `create-app` makes) takes it too",
                 because: "an agent that read the old refusal would otherwise skip the bar on every create-app page");
             guide.Should().Contain("Remedy: `add-progress-bar: false`, fix the page as the message says, then re-run the same call",
