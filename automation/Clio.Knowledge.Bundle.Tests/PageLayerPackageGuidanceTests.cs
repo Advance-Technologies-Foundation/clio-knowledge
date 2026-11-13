@@ -55,6 +55,8 @@ public sealed class PageLayerPackageGuidanceTests
             because: "clio reports every replacing layer, locked or not, once required is true, so the override check reads them from there");
         overview.Should().Contain("plus the default target as its own option when no layer has `isDefaultTarget: true`",
             because: "keeping the default target is a valid choice even before it holds a layer");
+        overview.Should().Contain("for the default target added as its own option, `packageChoice.defaultTargetPackageName`, or `packageChoice.defaultTargetPackageUId` when the name is absent",
+            because: "a default target that holds no layer has no layers entry to take its name from, and clio sets the name only when it could read it");
         overview.Should().Contain("`packageLocked: true` layers cannot receive the change: name them only when they override the user's element (below), never as an option",
             because: "a save into a locked package fails, so offering it would lead the user into a dead end");
         overview.Should().Contain("warn the user, before writing, that the higher layer overrides the change at runtime",
