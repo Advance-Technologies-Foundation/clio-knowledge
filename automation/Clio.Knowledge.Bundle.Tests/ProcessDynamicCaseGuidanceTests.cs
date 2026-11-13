@@ -105,8 +105,16 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "request-failed and page-append-rejected also follow a write, under unknown and created-page-failed");
             guide.Should().Contain("or one without its settings row or link row",
                 because: "already-present needs the settings row and the link row too, not only the same stages");
-            guide.Should().Contain("AUTO-SAVE mode (`saveOnChange: true`, `askUserToChangeSchema: false`)",
-                because: "a stage click saves the whole record, which the user must be told; the designer's default is manual");
+            guide.Should().Contain("`saveOnChange` from `save-on-change` (default false)",
+                because: "the bar keeps its own default, a click that only sets the field, unless the user asks for a save on click");
+            guide.Should().Contain("ask once before the call, naming what each choice means",
+                because: "the save mode is the user's choice, and the default is the manual one");
+            guide.Should().Contain("nothing that reacts to a saved record (processes started by the stage or the record change, rules on the saved data) runs until Save",
+                because: "the user must know that without a save no automation reacts to the new stage");
+            guide.Should().Contain("a click saves the whole record with any other unsaved edit, starts what reacts to the save, and a failed save reverts the stage",
+                because: "the user must know what a save on click also saves and starts");
+            guide.Should().Contain("Pass `save-on-change: true` only for the second",
+                because: "the default needs no argument");
             guide.Should().Contain("A page stored in the full form (every record page `create-app` makes) takes it too",
                 because: "an agent that read the old refusal would otherwise skip the bar on every create-app page");
             guide.Should().Contain("Remedy: `add-progress-bar: false`, fix the page as the message says, then re-run the same call",

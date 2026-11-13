@@ -18,8 +18,13 @@ business process: `process-digest`. A case is not the `Case` object.
   (`column-not-lookup`). Say exactly that; do not first ask which field was meant.
 - Anything under "Not supported yet": say "<it> is not supported yet; the case designer does that" first, and do
   not build it another way unasked.
-- Saving: a stage click saves the record at once (the bar's "Save on change" toggle is on); with the toggle off in
-  the page designer the click only sets the field and the user saves. Name the toggle.
+- Saving: by default a stage click only sets the field and the user presses Save (the bar's "Save on change"
+  toggle off, as on Leads). Unless the user already said, ask once before the call, naming what each choice means:
+  the default - a click only marks the stage, and nothing that reacts to a saved record (processes started by the
+  stage or the record change, rules on the saved data) runs until Save; or save at once - a click saves the whole
+  record with any other unsaved edit, starts what reacts to the save, and a failed save reverts the stage. Pass
+  `save-on-change: true` only for the second; with no one to ask, keep the default. Name the toggle.
+  `save-on-change` needs clio <CLIO-TBD> or later; clio 8.1.0.150 always saves on a click.
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, alternative or
@@ -65,9 +70,10 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
   form (every record page `create-app` makes) takes it too: its body is saved by `replace` with only these two items
   added, pinned to the checksum the plan read. Never add `recordId`,
   `value`, `stages` or handlers to it: the runtime wires them on every open. `page.status = already-present` when
-  the page has a bar already. The bar is inserted in AUTO-SAVE mode (`saveOnChange: true`,
-  `askUserToChangeSchema: false`): a stage click saves the whole record, with any other unsaved edit on the form,
-  and a failed save reverts the stage. Tell the user, naming the toggle (Saving, above).
+  the page has a bar already. The bar is inserted with `saveOnChange` from `save-on-change` (default false) and
+  `askUserToChangeSchema: true`; `page.saveOnChange` reports it. With true a stage click saves the whole record,
+  with any other unsaved edit on the form, and a failed save reverts the stage. Tell the user which mode, naming
+  the toggle (Saving, above).
 - NO compile and NO restart, on .NET Framework and on .NET 8: a case is interpreted. `obligations.compileRequired` and
   `restartRequired` are false; do not run `compile-creatio` or `restart` after it. One exception: with
   `dependencies.compilationRequired: true` the dependency save asked for a compilation, `obligations` lists
