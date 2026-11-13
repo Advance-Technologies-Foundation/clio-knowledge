@@ -153,6 +153,8 @@ public sealed class PageLayerPackageGuidanceTests
 
         index.Should().Contain("| the FIRST write (`update-page` / `sync-pages`) to a page in this task, `get-page` `page.packageChoice.required` is true, or a save was refused with `package-choice-required` | `page-modification-overview` |",
             because: "the GATE table is how an agent learns that the first write needs the check");
+        index.Should().Contain("finds an unlocked layer, or one whose lock state is unknown, outside the default target",
+            because: "the fallback must ask when lock state is unknown as well as when a layer is unlocked");
     }
 
     private static string Read(string relativePath) =>
