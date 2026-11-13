@@ -177,9 +177,10 @@ modes, see `process-send-email`, and `process-send-email-template` for the templ
 `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:"fileProcessing"` with the matching
 `attachments`, `report` or `files` group, see `process-files` (`files`: `process-files-parameter`) — the generic route carries no file source, record or
 target, and it is REFUSED. `WebServiceUserTask` ("Call web service" in list-user-tasks) is a legacy SOAP task,
-REFUSED too: build `webService` (`process-web-service`). `SendChatMessageUserTask` (Send chat message) is REFUSED on
-create: the generic route cannot type-check its template or write its chat column values, so build
-`sendChatMessage` (`process-send-chat-message`).)
+REFUSED too: build `webService` (`process-web-service`). `SendChatMessageUserTask` (Send chat message): from
+CrtProcessBuilder **<CRTPROCESSBUILDER-CHATMESSAGE-TBD>** REFUSED on create; on an older package do not build it on the
+generic route either - it cannot type-check the template or write the chat column values. Build `sendChatMessage`
+(`process-send-chat-message`).)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use

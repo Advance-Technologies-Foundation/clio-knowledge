@@ -19,7 +19,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   `[#Lookup…#]` macro describe echoes. The server resolves it at BUILD against the templates of type "Email
   template" (the set the designer's picker offers) and REFUSES, naming the template: an unknown name (`no
   email template is named '<name>'`), an id no row carries, another type (`is not an email template` — a CHAT
-  template is one: it belongs to `sendChatMessage`, `process-send-chat-message`), and an AMBIGUOUS name (`more than one email template is named '<name>'. Pass the record
+  template is one: `process-send-chat-message`, only when the FULL contract names `sendChatMessage`), and an AMBIGUOUS name (`more than one email template is named '<name>'. Pass the record
   id of the one you mean.`). It is stored TOGETHER with the mode (`BodyTemplateType="0"` + `EmailTemplateId`),
   never one without the other — the missing-message trap in `process-send-email`'s AUTO-MODE CHECKLIST is why (its mechanism is in
 `process-send-email-details`). `template` and `body`/`bodyFormat` in one block
