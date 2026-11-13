@@ -220,6 +220,7 @@
       "virtual-entities",
       "websocket-messaging",
       "web-service-registration",
+      "web-service-soap",
       "when-to-use-requests",
       "list-widget",
       "record-permissions",
@@ -429,6 +430,7 @@
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/web-service-registration",
+      "docs://knowledge/com.creatio.clio/web-service-soap",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
       "docs://knowledge/com.creatio.clio/list-widget",
       "docs://knowledge/com.creatio.clio/record-permissions",
@@ -2970,13 +2972,24 @@
     },
     {
       "itemId": "web-service-registration",
-      "title": "REST web service registration",
-      "description": "Owns the clio tools that register, read, change and test-call a REST web service in Creatio Studio > Web services (register-web-service, list-web-services, describe-web-service, modify-web-service, test-web-service-method): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), the real-request warning for test calls, and the usage guard that refuses changing or removing a method a process calls until the user acknowledges the named processes.",
+      "title": "Web service registration",
+      "description": "Owns the clio tools that register, read, change and test-call a REST or SOAP web service in Creatio Studio > Web services (register-web-service, list-web-services, describe-web-service, modify-web-service, test-web-service-method): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), the real-request warning for test calls, and the usage guard that refuses changing or removing a method a process calls until the user acknowledges the named processes.",
       "topicId": "creatio.web-service-registration",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/web-service-registration",
       "sourcePath": "guidance/mcp/guides/integration/web-service-registration.md",
       "bundlePath": "resources/web-service-registration.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "web-service-soap",
+      "title": "SOAP web service registration",
+      "description": "What differs when a SOAP 1.1 or SOAP 1.2 web service is registered or changed with register-web-service and modify-web-service: the service type, the namespaces and the default one, the method's message element, the SOAP action taken from the WSDL or the user and never made up, element paths with declared prefixes instead of JSONPath, SOAP header parameters bound to system settings (WS-Security), array item elements, the base URI stored without an added trailing slash, and setNamespaces and setType under the usage guard.",
+      "topicId": "creatio.web-service-soap",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-soap",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-soap.md",
+      "bundlePath": "resources/web-service-soap.md",
       "mediaType": "text/plain"
     },
     {
