@@ -145,7 +145,7 @@ default-value rule; read that first.
 
 == The default direction switch, in full ==
 `process-parameters` owns the direction rule: state a direction on every parameter you declare. This is what clio
-8.1.0.152 and later (its bundled CrtProcessBuilder 1.6.6.172) does when a direction is left out, and what it says.
+8.1.0.153 and later (its bundled CrtProcessBuilder 1.6.6.172) does when a direction is left out, and what it says.
 - THE SWITCH. A top-level parameter that a create-business-process, modify-business-process or
   modify-business-process-as-new-version request creates with no direction (and that no later setParameter in that
   request gives one), which an element of the process fills (an element output mapped onto it, an expression that

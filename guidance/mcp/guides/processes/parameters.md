@@ -36,7 +36,7 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   * `Out` — the process returns it to its caller.
   * `Variable` — a caller passes it in AND reads it back. Use it only when both are true.
   Omitting the direction gives Variable, and Out for a generic Collection: that Out is this builder's choice, as the
-  designer's plain Add gives every type Variable, a collection included. From clio 8.1.0.152 (its bundled
+  designer's plain Add gives every type Variable, a collection included. From clio 8.1.0.153 (its bundled
   CrtProcessBuilder 1.6.6.172) a top-level parameter, not a collection, that the request creates with no direction
   and an element of the process fills is saved as Internal instead, with a warning naming it - a report, not an
   error: if the process returns the value to a caller, set Out (or Variable when a caller also passes it in). A
