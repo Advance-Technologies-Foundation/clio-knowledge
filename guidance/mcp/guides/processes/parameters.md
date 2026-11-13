@@ -3,7 +3,7 @@ clio MCP process-parameters guide — process parameters, mappings and formula d
 Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
 the card or this article sends you there.
 This article is the authoritative owner of process parameters, the mappings that bind them, and the date/time/lookup default macros.
-Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element. Also there: the evidence for the binding rule below and the Formula-per-branch shape with its wiring - how to SET a parameter on each branch where `mergeFrom` (`process-multi-start`) does not apply, or on a clio without it.
+Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN TIME — re-synchronizing callers, what crosses, `inSync`, the designer card. Read it when you change the parameters of a process that others call, or re-synchronize a Sub-process element. Also there: the evidence for the binding rule below and the Formula-per-branch shape with its wiring - how to SET a parameter on each branch where `mergeFrom` (`process-multi-start`) does not apply, or on a clio without it; and the default direction switch in full.
 
 == Parameters / mapping / formulas ==
 - Process parameters (`parameters[]`): { name, type (Text/Long text/Integer/Float/Money/Boolean/Date/Date-time/Time/Guid/Lookup/Collection/File/FileCollection),
@@ -23,11 +23,11 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   file and several, carried by reference: `process-files`) — other types (composite object / entity / binary /
   ...) are not supported yet, and binary never will be: a process parameter carries a file by reference (File). Name a process parameter per N8 in `process-naming`
   (summarised in `process-digest`).
-- CHOOSE THE DIRECTION BY WHO USES THE VALUE, and state it on every parameter you declare. The direction is the
-  process signature: a Sub-process element that calls the process maps its `In` and `Variable` parameters and reads
-  its `Out` and `Variable` ones, and a Creatio AI skill built on the process exposes every parameter but an
-  `Internal` one. `Internal` is offered to neither. `run-process` does not check direction - it accepts a value for
-  an `Internal` parameter too - so a run that succeeds says nothing about the signature.
+- CHOOSE THE DIRECTION BY WHO USES THE VALUE, and state it on every parameter you declare except a `mergeFrom` one,
+  where you leave it out (`process-multi-start`). The direction is the process signature: a Sub-process element
+  that calls the process maps its In and Variable parameters and reads its Out and Variable ones, and a Creatio AI
+  skill built on the process exposes every parameter but an Internal one. `run-process` does not check direction -
+  it accepts a value for an Internal parameter too - so a run that succeeds says nothing about the signature.
   * `Internal` — the value only passes between elements of THIS process: a record Id copied from a read to a later
     element, a counter, a flag, the shared parameter each branch of a multi-start process sets
     (`process-parameters-details`; a `mergeFrom` parameter is always `Internal`). This is the right choice for every
@@ -35,26 +35,20 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   * `In` — a caller passes it in (the record the button was pressed on, a sub-process input).
   * `Out` — the process returns it to its caller.
   * `Variable` — a caller passes it in AND reads it back. Use it only when both are true.
-  Omitting `direction` gives `Variable` for every type but a generic `Collection` (`Out`), as the designer's plain
-  Add does, with one exception from clio 8.1.0.150 (its bundled CrtProcessBuilder): a parameter the SAME build or
-  modify creates with no direction (and gives none in a later `setParameter`), which an element of the process fills
-  (a mapping or an expression that reads an element's output, or a Formula element's result), and which is not a
-  collection, is saved as `Internal`, and the response carries a warning naming it. That warning is a report, not an
-  error: if the process returns the value to a caller, set `Out` (or `Variable` when a caller also passes it in). A
-  direction the request states is never switched, but a `Variable` stated for a parameter the request creates and an
-  element fills gets the advice below once, in that request. A `FileCollection` keeps `Variable` and is not advised
-  otherwise, and a parameter that already existed before the request is never changed: when the request maps an
-  element output onto an existing `Variable` one, or a Formula element it adds or edits writes into it, the response
-  advises `Internal` if only elements of this process use it, `Out` if a caller reads it back, `Variable` only if a
-  caller also passes it in. Only parameters the request reaches that way are judged, so no warning after a modify
-  does not mean the process has no `Variable` helpers. An older CrtProcessBuilder neither switches nor warns, so
-  silence proves nothing: state `Internal` yourself. Measured on Creatio 10.2.522 (.NET Framework, MSSQL) with
-  CrtProcessBuilder 1.6.6.170, 2026-11-12: a Formula-filled and a mapping-filled parameter declared with no
-  direction read back `Internal`, a stated `Variable` stayed `Variable` with that advice, a constant-only one stayed
-  `Variable` with no warning, and a modify that mapped onto an existing `Variable` parameter kept it and advised.
-  Change a direction with `setParameter` and `parameterUpdate.direction` — the UId and every reference survive. A
-  multi-instance conversion of a Sub-process element drops the callee's `Internal` parameters
-  (`process-sub-process`).
+  Omitting the direction gives Variable, and Out for a generic Collection: that Out is this builder's choice, as the
+  designer's plain Add gives every type Variable, a collection included. From clio 8.1.0.152 (its bundled
+  CrtProcessBuilder 1.6.6.172) a top-level parameter, not a collection, that the request creates with no direction
+  and an element of the process fills is saved as Internal instead, with a warning naming it - a report, not an
+  error: if the process returns the value to a caller, set Out (or Variable when a caller also passes it in). A
+  stated direction, a FileCollection and a parameter that existed before the request are never switched. The exact
+  conditions, what the response says in each case, and the measurements: `process-parameters-details`. An older
+  CrtProcessBuilder neither switches nor warns, so silence proves nothing: state Internal yourself.
+  Change a direction with setParameter and `parameterUpdate.direction` — the UId and every reference INSIDE this
+  process survive, but once it is no longer In or Variable a caller's Sub-process mapping onto it is cleared on that
+  caller's next synchronization, with no error (`process-sub-process`). So before you change the direction of a
+  parameter that existed before this request you MUST find its callers (execute-esq over VwProcessLib, then describe
+  each: `process-parameters-details`) or ask the user, and afterwards re-synchronize every caller. A multi-instance
+  conversion of a Sub-process element drops the callee's Internal parameters (`process-sub-process`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.

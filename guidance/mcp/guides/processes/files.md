@@ -16,17 +16,18 @@ you run only after the user approves it (`core-rules`).
 == The two types ==
 - `File` — ONE file, carried by reference: the platform's FileLocator type. Aliases `file`, `filelocator` and
   `file locator`, case-insensitive. The platform's own type NAME "File" is a different, byte-carrying type the flow
-  cannot store. `Binary` and `Blob` are refused: a process parameter carries a file
+  cannot store, so the alias never reaches it. `Binary` and `Blob` are refused: a process parameter carries a file
   by reference, not its bytes.
 - `FileCollection` — SEVERAL files: a record collection (`CompositeObjectList`) with exactly ONE item, `File`
   (FileLocator, Variable, no tag). Aliases `filecollection`, `file collection` and `collection of files`. The alias
   builds the shape.
-- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File to Variable as well
-  (exception: `process-parameters`). An explicit direction always wins. A helper: `Internal`.
+- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File to Variable as well, or to
+  Internal when an element fills it (`process-parameters` owns the choice). An explicit direction always wins.
+  State one; a helper is Internal.
 - Neither takes a `value` (a file has no constant form) nor a `referenceSchema` (it is not a lookup): both are
   refused.
 - Declare them in parameters[] (create) or with addParameter (modify), for example
-  "parameters": [{"name": "ContractFileParameter", "type": "File"},
+  "parameters": [{"name": "ContractFileParameter", "type": "File", "direction": "In"},
     {"name": "DocumentsParameter", "type": "FileCollection", "direction": "In"}]
 
 == Reading them back ==
@@ -57,9 +58,9 @@ you run only after the user approves it (`core-rules`).
 
 == Binding a collection: both levels ==
 When an element or a sub-process reads a collection input, the run time builds each row from the items of that
-input: an unbound item reads empty, and the Process file element fails on it. So a collection
-is bound at two levels, the collection (which rows) and its item (what each row holds).
-With a File-aware clio every structured mapping
+input (platform source): an unbound item reads empty, and the Process file element fails on it. So a collection
+is bound at two levels, the collection (which rows) and its item (what each row holds), as the designer does at
+once. With a File-aware clio every structured mapping
 (`sourceElement` + `sourceElementParameter`, or `processParameter`, without `sourceColumn`) applies the rules below,
 through mappings[], addMapping, setConnections and the approval block; a refused mapping writes no value. A dotted
 name addresses an item on either side: DocumentsParameter.File as processParameter or targetProcessParameter,
@@ -112,12 +113,9 @@ targets only.
    {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
    "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File,
    with a notice.
-2. Hand them to a Process parameter element: its `files` group (`process-files-parameter`), or onto one built in
-   the designer
-   {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
-   "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on
-   CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one run of recipes 1 and 2 copied the three
-   source files to the target record, names and bytes equal.
+2. Hand them to a Process parameter element: its `files` group (`process-files-parameter`), which also shows the
+   addMapping onto one built in the designer. Measured on CrtProcessBuilder 1.6.6.98 on a stand, on designer-made
+   elements: one run of recipes 1 and 2 copied the three source files to the target record, names and bytes equal.
 3. One called-process run per file: the callee declares a File input; the calling Sub-process element is
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.
