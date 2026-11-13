@@ -20,6 +20,10 @@ useInProcess is refused.
   A single File must be set before the element runs: an unset one stops the process with an error. An empty
   collection copies nothing, silently.
 - An expression goes onto Files.File as given, with a notice: nothing checks that it yields one file.
+- Onto one built in the designer, an addMapping onto its Files input does the same, through P2 (`process-files`):
+  {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
+  "processParameter": "DocumentsParameter"}} binds Files.File to DocumentsParameter.File. That is the run
+  `process-files` measured on designer-made elements, in its recipe 2.
 - Outputs: ObjectFiles (item ObjectFile) holds the COPIES, and CreatedObjectFileIds their ids. It has no filter.
 - Describe adds the describe-only fileProcessing.bindingLevels (both, itemOnly, outerOnly or none), with an issue
   for a stored shape that fails at run time or would not resubmit as stored (none: nothing bound, the platform
