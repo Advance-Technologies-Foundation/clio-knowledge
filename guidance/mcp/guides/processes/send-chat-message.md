@@ -4,7 +4,7 @@ Scope
 This guide owns the `chatMessage` block of the Send chat message element (`SendChatMessageUserTask`, package
 OmnichannelMessaging). `process-parameters` owns mappings, `process-formulas` formula syntax, `process-data-elements`
 the Read data column a source can name. Email is `process-send-email`.
-Needs CrtProcessBuilder <CRTPROCESSBUILDER-CHATMESSAGE-TBD> or later on the environment. Use it only when the FULL
+Needs CrtProcessBuilder 1.6.6.174 or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names
 `sendChatMessage`; a clio whose contract lacks it refuses the block before sending. The default reply is shortened:
 its silence proves nothing. Always read the element back.
@@ -179,7 +179,7 @@ checkbox reads false), `columnValues`, and the describe-only `outputs` (`SendSta
 mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged;
 when `template` is a raw provider-template id, drop `template` too (`setElement` keeps it; sent, it is refused).
 
-Evidence: the build-time rules are the CrtProcessBuilder <CRTPROCESSBUILDER-CHATMESSAGE-TBD> contract. Measured on
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.174 contract. Measured on
 Creatio 10.2.1122 (.NET Framework) with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an
 untouched `ignoreErrors` failing the process on an inactive channel; `ignoreErrors` on giving `"Error"` and the
 channel text in mapped outputs; a send on an SMS channel without messenger settings resolving the recipient from the

@@ -148,7 +148,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   route carries no file source, record or target.
 - `webService` (Call web service), from CrtProcessBuilder **1.6.6.150** and only when the FULL contract names it:
   calls a service REGISTERED in Studio > Web services; `process-web-service` owns its `webService` block.
-- `sendChatMessage` (Send chat message), from CrtProcessBuilder **<CRTPROCESSBUILDER-CHATMESSAGE-TBD>** and only when
+- `sendChatMessage` (Send chat message), from CrtProcessBuilder **1.6.6.174** and only when
   the FULL contract names it: sends one message to one contact through a chat channel, from a chat template or as
   custom text; `process-send-chat-message` owns its `chatMessage` block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
@@ -178,7 +178,7 @@ modes, see `process-send-email`, and `process-send-email-template` for the templ
 `attachments`, `report` or `files` group, see `process-files` (`files`: `process-files-parameter`) — the generic route carries no file source, record or
 target, and it is REFUSED. `WebServiceUserTask` ("Call web service" in list-user-tasks) is a legacy SOAP task,
 REFUSED too: build `webService` (`process-web-service`). `SendChatMessageUserTask` (Send chat message): from
-CrtProcessBuilder **<CRTPROCESSBUILDER-CHATMESSAGE-TBD>** REFUSED on create; on an older package do not build it on the
+CrtProcessBuilder **1.6.6.174** REFUSED on create; on an older package do not build it on the
 generic route either - it cannot type-check the template or write the chat column values. Build `sendChatMessage`
 (`process-send-chat-message`).)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
