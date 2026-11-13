@@ -139,7 +139,8 @@ public sealed class SendChatMessageGuidanceTests
         // Act
         string[] clauses =
         [
-            "a bulk or campaign send: it is not a campaign sender, so never loop it over a list of contacts as one;",
+            "a bulk send - a marketing broadcast to an audience: that is a campaign, not this element. A per-record notification is this element",
+            "each send still needs the identity and the 24-hour window",
             "\"send, then wait for the answer\": the chat is created Completed, and a reply opens a NEW chat;",
             "Prefer a Lookup SYSTEM SETTING that references the ROOT Channel object: an `expression` `[#SysSettings.<Code>#]`.",
             "It is stored in the typed form the designer writes, `[#SysSettings.<Code><Guid>#]`, where `<Guid>` is literal text (the value type), as in `[#SysSettings.UsrSupportChatChannel<Guid>#]`; describe echoes that.",
@@ -174,7 +175,7 @@ public sealed class SendChatMessageGuidanceTests
         // Act
         string[] clauses =
         [
-            "a `[#...#]` macro or a `[[...]]` token in `message` is REFUSED. Personalise with a FORMULA on the element's `Message` parameter through a mapping",
+            "a `[#...#]` macro or a `[[keyword:...]]` token in `message` is REFUSED; other bracket text is sent literally. Personalise with a FORMULA on the element's `Message` parameter through a mapping",
             "the parameter reference form is owned by `process-formulas`",
             "Line breaks in a constant are kept, with a notice: the designer's message field is one line",
             "`ignoreErrors` omitted on `create-business-process` and `addElement` is FALSE: a failed send STOPS the process, and the element log carries the error.",
@@ -209,11 +210,13 @@ public sealed class SendChatMessageGuidanceTests
         [
             "`setElement` with `elementName` and `elementUpdate.chatMessage` is a PARTIAL update: omitted members keep their stored values.",
             "Template to custom: send `message` in the SAME call, or the switch is refused - even when the element shows text:",
-            "A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto `Channel` or `Contact`, is refused, naming the block member to use.",
+            "A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto `Channel`, `Contact` or `Message` (use `chatMessage.message`), is refused, naming the block member to use.",
+            "A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those readers first, in a SEPARATE, earlier call.",
+            "a constant reads back as `{value: <record id>, display: <name>}`, and the describe-only `display` names the channel and the contact",
             "ignore them and NEVER replay them - `setConnections` refuses this task and the edit aborts. Edit through `chatMessage`.",
             "On `setElement` an omitted list is kept, a sent list REPLACES the stored set, and `[]` clears it.",
             "`ignoreErrors` (always stated, `false` included: an untouched designer checkbox reads false)",
-            "To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged; when `template` is a raw provider-template id, drop `template` too (`setElement` keeps it; sent, it is refused).",
+            "To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.",
             "The generic `userTask` route REFUSES `SendChatMessageUserTask` on create: build `sendChatMessage`."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];

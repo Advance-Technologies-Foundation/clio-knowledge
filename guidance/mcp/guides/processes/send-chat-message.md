@@ -4,7 +4,7 @@ Scope
 This guide owns the `chatMessage` block of the Send chat message element (`SendChatMessageUserTask`, package
 OmnichannelMessaging). `process-parameters` owns mappings, `process-formulas` formula syntax, `process-data-elements`
 the Read data column a source can name. Email is `process-send-email`.
-Needs CrtProcessBuilder 1.6.6.174 or later on the environment. Use it only when the FULL
+Needs CrtProcessBuilder 1.6.6.175 or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names
 `sendChatMessage`; a clio whose contract lacks it refuses the block before sending. The default reply is shortened:
 its silence proves nothing. Always read the element back.
@@ -16,7 +16,10 @@ holds the message, so the message shows in the contact's chat history; a reply o
 Not this element:
 - a message to employees, or a bot broadcast with no contact: `process-send-email`; a bot API is
   called with `process-web-service`;
-- a bulk or campaign send: it is not a campaign sender, so never loop it over a list of contacts as one;
+- a bulk send - a marketing broadcast to an audience: that is a campaign, not this element. A per-record
+  notification is this element (a reminder to each contact with an appointment today: a multi-instance sub-process
+  over the records, `process-sub-process`), and each send still needs the identity and the 24-hour window
+  (== Before it can send ==);
 - a contact who never wrote on the channel: the recipient needs an identity on that channel (Twilio SMS aside; == Before
   it can send ==);
 - "send, then wait for the answer": the chat is created Completed, and a reply opens a NEW chat; model no wait for
@@ -61,8 +64,8 @@ state in the reply which rung you took and why:
    show it; recreate it on the root object). No value yet: built with a notice; the run fails until it has one.
    Create a setting only after the user confirms (an environment change), then SET ITS VALUE.
 2. Then a Lookup process parameter (Channel), or the channel column of a record the process read.
-3. A constant channel LAST: `value` takes a channel id, its name or the `[#Lookup…#]` macro describe echoes; an
-   unknown one is refused, an ambiguous name too (pass the id). An INACTIVE channel is built with a notice: the
+3. A constant channel LAST: `value` takes a channel id, its name or its `[#Lookup…#]` macro; an unknown one is
+   refused, an ambiguous name too (pass the id). An INACTIVE channel is built with a notice: the
    designer offers active channels only, and the run fails until the channel is activated.
 
 == To: which contact ==
@@ -96,7 +99,7 @@ TEMPLATE (`messageSource` `template`):
   there.
 CUSTOM (`messageSource` `custom`):
 - `message` is plain text, sent as written; HTML is stripped. Nothing in a constant is resolved: a `[#...#]` macro
-  or a `[[...]]` token in `message` is REFUSED. Personalise with a FORMULA on the element's `Message` parameter
+  or a `[[keyword:...]]` token in `message` is REFUSED; other bracket text is sent literally. Personalise with a FORMULA on the element's `Message` parameter
   through a mapping, as the email subject does: `{ "elementName": "NotifyCaseContact", "elementParameter":
   "Message", "expression": "<formula>" }`; the parameter reference form is owned by
   `process-formulas`. A raw newline inside a formula fails validation. On create, send `messageSource: "custom"`
@@ -162,8 +165,10 @@ stored values.
   a designer-built element holds the template's text with its macros, which would be sent literally. The switch
   clears the template.
 - Custom to template: a stored constant message is cleared.
+- A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those
+  readers first, in a SEPARATE, earlier call.
 - A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto
-  `Channel` or `Contact`, is refused, naming the block member to use. Allowed: a formula onto `Message`; a process
+  `Channel`, `Contact` or `Message` (use `chatMessage.message`), is refused, naming the block member to use. Allowed: a formula onto `Message`; a process
   parameter, element output or formula onto `Channel` or `Contact`; mappings FROM `SendStatus` and
   `SendStatusDetails`.
 - describe also lists this element's `MessageType` and `Contact` under `connections[]`. They are not "Connected to"
@@ -172,14 +177,17 @@ stored values.
 
 == Read back ==
 `describe-business-process` (`element=<name>` or `mode=full`) returns the element's `chatMessage` block: `from` and
-`to` in the source forms above, `messageSource`, `template` (the `[#Lookup…#]` macro) with the describe-only
+`to` in the source forms above - a constant reads back as `{value: <record id>, display: <name>}`, and the
+describe-only `display` names the channel and the contact when you explain what the process sends and to whom -
+`messageSource`, `template` (the `[#Lookup…#]` macro) with the describe-only
 `templateName`, `message` (custom mode only), `ignoreErrors` (always stated, `false` included: an untouched designer
 checkbox reads false), `columnValues`, and the describe-only `outputs` (`SendStatus`, `SendStatusDetails`) and
 `issues` (no channel, no contact, template mode with no template - an unset mode runs as template mode - and custom
-mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged;
-when `template` is a raw provider-template id, drop `template` too (`setElement` keeps it; sent, it is refused).
+mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged
+(`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the
+same id sent back is a no-op and any other is refused, and on create it is refused.
 
-Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.174 contract. Measured on
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.175 contract. Measured on
 Creatio 10.2.1122 (.NET Framework) with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an
 untouched `ignoreErrors` failing the process on an inactive channel; `ignoreErrors` on giving `"Error"` and the
 channel text in mapped outputs; a send on an SMS channel without messenger settings resolving the recipient from the
