@@ -156,19 +156,23 @@ default-value rule; read that first.
   element fills is kept and advised once, in that request; a FileCollection, which keeps its Variable default and is
   never advised; and a parameter that existed before the request.
 - AN EXISTING PARAMETER. When the request makes an element fill an existing Variable parameter - maps an element
-  output onto it, or points a Formula element's result at it (an edit that keeps the Formula's target does not count) - it
-  stays Variable and the response reports it. Because the parameter existed before the request, the report adds that
+  output onto it, maps an expression that reads an element onto it, or points a Formula element's result at it (an
+  edit that keeps the Formula's target does not count) - it stays Variable and the response reports it. Because the parameter existed before the request, the report adds that
   other processes may already call it, that changing its direction clears a calling Sub-process element's mapping for
   it on that caller's next synchronization with no error, and that its callers must be found (or the user asked)
   first. It is a report, never an order to switch.
-- BEFORE YOU CHANGE THE DIRECTION of a parameter that existed before the request, find its callers - `execute-esq`
-  over `VwProcessLib` for the candidates, then `describe` each and look for a `subProcess.process` naming this
-  process, as THE RULE at the top of this article says - or ask the user. If no caller passes or reads it, Internal
-  keeps it out of the signature; a caller that only reads it needs Out; a caller that passes it in keeps it
-  Variable. After the change, re-synchronize every caller with `subProcess: {resync: true}` and read its notices.
+- BEFORE YOU CHANGE THE DIRECTION of a parameter that existed before the request: change it only when the user
+  asked for that change; otherwise ask the user first. The caller check - `execute-esq` over `VwProcessLib` for the
+  candidates, then `describe` each and look for a `subProcess.process` naming this process, as THE RULE at the top
+  of this article says - finds Sub-process callers only. A Creatio AI skill built on the process and a page button
+  that runs it are callers it cannot see, so never conclude from it that nobody calls the process. With the user's
+  answer: if no caller passes or reads it, Internal keeps it out of the signature; a caller that only reads it needs
+  Out; a caller that passes it in keeps it Variable. After the change, re-synchronize every Sub-process caller with
+  `subProcess: {resync: true}` and read its notices.
 - ONLY WHAT A REQUEST TOUCHES IS JUDGED, so no warning after a modify does not mean the process has no Variable
-  helpers. An older CrtProcessBuilder neither switches nor advises: the steps above apply to any Variable parameter
-  you consider changing.
+  helpers, and an older CrtProcessBuilder neither switches nor advises. Neither is a reason to look for them: a
+  request changes only the directions the user asked for, and a report on an existing parameter is passed to the
+  user, not acted on.
 - Measured on Creatio 10.2.522 (.NET Framework, MSSQL) with CrtProcessBuilder 1.6.6.172, 2026-11-13: a
   Formula-filled, a mapping-filled and an expression-filled parameter declared with no direction read back Internal,
   a stated Variable stayed Variable with the advice, a constant-only one stayed Variable with no warning, a

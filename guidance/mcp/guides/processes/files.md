@@ -21,9 +21,10 @@ you run only after the user approves it (`core-rules`).
 - `FileCollection` — SEVERAL files: a record collection (`CompositeObjectList`) with exactly ONE item, `File`
   (FileLocator, Variable, no tag). Aliases `filecollection`, `file collection` and `collection of files`. The alias
   builds the shape.
-- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File to Variable as well, or to
-  Internal when an element fills it (`process-parameters` owns the choice). An explicit direction always wins.
-  State one; a helper is Internal.
+- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File to Variable as well, except
+  one the request adds with no direction and an element fills: Internal from the clio release `process-parameters` names
+  (older: state it); an existing one is never switched. An explicit direction always wins. State one; a helper is
+  Internal.
 - Neither takes a `value` (a file has no constant form) nor a `referenceSchema` (it is not a lookup): both are
   refused.
 - Declare them in parameters[] (create) or with addParameter (modify), for example
@@ -113,9 +114,9 @@ targets only.
    {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
    "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File,
    with a notice.
-2. Hand them to a Process parameter element: its `files` group (`process-files-parameter`), which also shows the
-   addMapping onto one built in the designer. Measured on CrtProcessBuilder 1.6.6.98 on a stand, on designer-made
-   elements: one run of recipes 1 and 2 copied the three source files to the target record, names and bytes equal.
+2. Hand them to a Process parameter element, one built in the designer included: its `files` group
+   (`process-files-parameter`). Measured on CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one
+   run of recipes 1 and 2 copied the three source files to the target record, names and bytes equal.
 3. One called-process run per file: the callee declares a File input; the calling Sub-process element is
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.

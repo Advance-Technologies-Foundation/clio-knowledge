@@ -24,6 +24,18 @@ public sealed class ParameterDirectionGuidanceTests
     private static readonly Regex SwitchBoundary = new(
         @"clio (?<clio>\d+\.\d+\.\d+\.\d+)(?: and later)? \(its bundled CrtProcessBuilder (?<package>\d+\.\d+\.\d+\.\d+)\)");
 
+    /// <summary>The package the evidence line of process-parameters-details was measured on.</summary>
+    private static readonly Regex EvidencePackage = new(
+        @"Measured on Creatio [^:]*? with CrtProcessBuilder (?<package>\d+\.\d+\.\d+\.\d+), \d{4}-\d{2}-\d{2}:");
+
+    /// <summary>
+    /// A flat JSON object whose <c>type</c> is a process-parameter type (an element's type is camelCase and is never one
+    /// of these) or that mirrors one with <c>typeFromElement</c>; the key order and the parameter name do not matter.
+    /// </summary>
+    private static readonly Regex ParameterDeclaration = new(
+        @"\{[^{}]*(?:""type"": ?""(?:Text|Long text|Integer|Float|Money|Boolean|Date|Date-time|Time|Guid|Lookup|Collection|File|FileCollection|FileLocator)""|""typeFromElement"")[^{}]*\}",
+        RegexOptions.IgnoreCase);
+
     [Test]
     [Description("process-parameters states the direction rule: choose by who uses the value, state it on every parameter but a mergeFrom one, Internal for every helper, and the four directions as the process signature.")]
     public void Parameters_ShouldStateTheDirectionRule()
@@ -79,7 +91,7 @@ public sealed class ParameterDirectionGuidanceTests
     }
 
     [Test]
-    [Description("process-parameters scopes 'every reference survives' to this process and, before the direction of an existing parameter changes, requires its callers to be found or the user asked, and every caller re-synchronized afterwards.")]
+    [Description("process-parameters scopes 'every reference survives' to this process, forbids changing the direction of an existing parameter the user did not ask to change, says the caller check finds Sub-process callers only, and re-synchronizes every Sub-process caller after a change.")]
     public void Parameters_ShouldGuardTheDirectionOfAnExistingParameter()
     {
         // Arrange
@@ -89,7 +101,9 @@ public sealed class ParameterDirectionGuidanceTests
         string[] clauses =
         [
             "the UId and every reference INSIDE this process survive, but once it is no longer In or Variable a caller's Sub-process mapping onto it is cleared on that caller's next synchronization, with no error (`process-sub-process`).",
-            "So before you change the direction of a parameter that existed before this request you MUST find its callers (execute-esq over VwProcessLib, then describe each: `process-parameters-details`) or ask the user, and afterwards re-synchronize every caller."
+            "So you MUST NOT change the direction of a parameter that existed before this request unless the user asked for that change or agreed when you asked",
+            "the caller check (execute-esq over VwProcessLib, then describe each: `process-parameters-details`) finds Sub-process callers only, not an AI skill or a page button that runs the process, so it never proves there are none.",
+            "After a change, re-synchronize every Sub-process caller."
         ];
 
         // Assert
@@ -122,16 +136,24 @@ public sealed class ParameterDirectionGuidanceTests
                 "a stated direction is the author's choice and is never switched"),
             ("a FileCollection, which keeps its Variable default and is never advised",
                 "the FileCollection default is the builder's own choice"),
+            ("maps an element output onto it, maps an expression that reads an element onto it, or points a Formula element's result at it",
+                "an expression mapping that reads an element is judged like a structured one"),
             ("(an edit that keeps the Formula's target does not count)",
                 "only a Formula whose result the request points at the parameter makes the request judge it"),
             ("that changing its direction clears a calling Sub-process element's mapping for it on that caller's next synchronization with no error, and that its callers must be found (or the user asked) first. It is a report, never an order to switch.",
                 "the advice on an existing parameter must not lead an agent to switch one other processes call"),
-            ("find its callers - `execute-esq` over `VwProcessLib` for the candidates, then `describe` each and look for a `subProcess.process` naming this process",
+            ("change it only when the user asked for that change; otherwise ask the user first.",
+                "a direction the user did not ask to change is changed only with their answer"),
+            ("`execute-esq` over `VwProcessLib` for the candidates, then `describe` each and look for a `subProcess.process` naming this process",
                 "nothing lists a process's callers, so the steps must be spelled out"),
-            ("After the change, re-synchronize every caller with `subProcess: {resync: true}` and read its notices.",
+            ("finds Sub-process callers only. A Creatio AI skill built on the process and a page button that runs it are callers it cannot see, so never conclude from it that nobody calls the process.",
+                "the Sub-process check cannot see every kind of caller, so its silence is no evidence"),
+            ("After the change, re-synchronize every Sub-process caller with `subProcess: {resync: true}` and read its notices.",
                 "a caller left unsynchronized keeps a contract the callee no longer has"),
-            ("ONLY WHAT A REQUEST TOUCHES IS JUDGED, so no warning after a modify does not mean the process has no Variable helpers.",
-                "silence after a modify proves nothing about parameters the request did not reach")
+            ("ONLY WHAT A REQUEST TOUCHES IS JUDGED, so no warning after a modify does not mean the process has no Variable helpers",
+                "silence after a modify proves nothing about parameters the request did not reach"),
+            ("Neither is a reason to look for them: a request changes only the directions the user asked for, and a report on an existing parameter is passed to the user, not acted on.",
+                "the report must not turn a modify into an audit of the process signature")
         ];
 
         // Assert
@@ -145,7 +167,7 @@ public sealed class ParameterDirectionGuidanceTests
     }
 
     [Test]
-    [Description("process-parameters and process-parameters-details state the same clio release and bundled package for the switch, so correcting the boundary in one article and not the other fails.")]
+    [Description("process-parameters and process-parameters-details state the same clio release and bundled package for the switch, and the evidence line names that package, so correcting the boundary in one place and not the others fails.")]
     public void SwitchBoundary_ShouldBeTheSameInBothArticles()
     {
         // Arrange
@@ -155,6 +177,7 @@ public sealed class ParameterDirectionGuidanceTests
         // Act
         Match inParameters = SwitchBoundary.Match(parameters);
         Match inDetails = SwitchBoundary.Match(details);
+        Match evidence = EvidencePackage.Match(details);
 
         // Assert
         inParameters.Success.Should().BeTrue(because: "anti-vacuity: process-parameters states the boundary");
@@ -163,10 +186,13 @@ public sealed class ParameterDirectionGuidanceTests
             because: "the two articles describe one switch, shipped by one clio release");
         inDetails.Groups["package"].Value.Should().Be(inParameters.Groups["package"].Value,
             because: "the two articles describe one switch, shipped by one package version");
+        evidence.Success.Should().BeTrue(because: "anti-vacuity: process-parameters-details carries the measurement");
+        evidence.Groups["package"].Value.Should().Be(inDetails.Groups["package"].Value,
+            because: "the measurement is of the package the boundary names; a re-cut that moves the boundary must re-measure and re-date the evidence");
     }
 
     [Test]
-    [Description("Every example in the process articles that declares a parameter states its direction, except a mergeFrom parameter, which leaves it out as process-parameters says: an agent copies the examples, and one without a direction teaches the default.")]
+    [Description("Every example in the process articles that declares a parameter states its direction, whatever its name and key order, except a mergeFrom parameter, which leaves it out as process-parameters says: an agent copies the examples, and one without a direction teaches the default.")]
     public void EveryParameterExample_ShouldStateItsDirection()
     {
         // Arrange
@@ -174,9 +200,10 @@ public sealed class ParameterDirectionGuidanceTests
 
         // Act
         (string Path, string Declaration)[] declarations = [.. ProcessGuideSet.Declared(repositoryRoot)
-            .SelectMany(article => Regex.Matches(Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath)),
-                    @"\{ ?""name"": ?""[A-Za-z]+Parameter""[^{}]*\}")
-                .Select(match => (article.SourcePath, match.Value)))];
+            .SelectMany(article => ParameterDeclaration
+                .Matches(Collapse(ProcessGuideSet.Read(repositoryRoot, article.SourcePath)))
+                .Select(match => (article.SourcePath, match.Value))
+                .Where(item => item.Value.Contains("\"name\"", StringComparison.Ordinal)))];
         string[] withoutDirection = [.. declarations
             .Where(item => !item.Declaration.Contains("\"direction\"", StringComparison.Ordinal)
                 && !item.Declaration.Contains("\"mergeFrom\"", StringComparison.Ordinal))
@@ -208,7 +235,7 @@ public sealed class ParameterDirectionGuidanceTests
         files.Should().Contain(helperFileCollection,
             because: "recipe 1 keeps files an element produced for later elements, and the builder leaves a FileCollection Variable");
         files.Should().Contain("{\"name\": \"ContractFileParameter\", \"type\": \"File\", \"direction\": \"In\"}",
-            because: "recipe 3's callee takes the file from its caller");
+            because: "the type example declares the File input a caller fills, the one recipe 3's callee takes");
         files.Should().Contain("An explicit direction always wins. State one; a helper is Internal.",
             because: "the Direction bullet of process-files must not contradict process-parameters");
         filesReport.Should().Contain("{\"name\": \"SenderDomainParameter\", \"type\": \"Lookup\", \"direction\": \"In\"",

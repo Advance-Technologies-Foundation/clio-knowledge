@@ -45,10 +45,12 @@ Moved to `process-parameters-details`: a SUB-PROCESS element's parameters at RUN
   CrtProcessBuilder neither switches nor warns, so silence proves nothing: state Internal yourself.
   Change a direction with setParameter and `parameterUpdate.direction` — the UId and every reference INSIDE this
   process survive, but once it is no longer In or Variable a caller's Sub-process mapping onto it is cleared on that
-  caller's next synchronization, with no error (`process-sub-process`). So before you change the direction of a
-  parameter that existed before this request you MUST find its callers (execute-esq over VwProcessLib, then describe
-  each: `process-parameters-details`) or ask the user, and afterwards re-synchronize every caller. A multi-instance
-  conversion of a Sub-process element drops the callee's Internal parameters (`process-sub-process`).
+  caller's next synchronization, with no error (`process-sub-process`). So you MUST NOT change the direction of a
+  parameter that existed before this request unless the user asked for that change or agreed when you asked: the
+  caller check (execute-esq over VwProcessLib, then describe each: `process-parameters-details`) finds Sub-process
+  callers only, not an AI skill or a page button that runs the process, so it never proves there are none. After a
+  change, re-synchronize every Sub-process caller. A multi-instance conversion of a Sub-process element drops the
+  callee's Internal parameters (`process-sub-process`).
 - To create a process parameter that mirrors an element parameter's EXACT type (e.g. expose a user-task
   OUTPUT for mapping with NO conversion), set `typeFromElement` + `typeFromElementParameter` instead of
   `type`/`referenceSchema` — the data value type (and lookup reference object) is copied verbatim.
