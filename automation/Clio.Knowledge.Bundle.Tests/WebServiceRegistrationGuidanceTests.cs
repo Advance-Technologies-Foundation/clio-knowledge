@@ -182,7 +182,8 @@ public sealed class WebServiceRegistrationGuidanceTests
             "two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI)",
             "Do this only with the user's agreement, and test a call.",
             "never register first and warn afterwards.",
-            "keep the SOAP 1.2 port and switch only if a test call answers `ActionNotSupported`."
+            "keep the SOAP 1.2 port and switch only if a test call fails because the action or operation is not found",
+            "Switch the registered service with `modify-web-service` `setType` soap11"
         ];
 
         // Assert

@@ -51,8 +51,10 @@ Reading a WSDL (read-wsdl)
   "Register port ... instead", tell the user and register that port. When it names the SOAP 1.1 port with a
   difference (another host, or http where the warned port is https), show the user its `base-uri` and register it
   only on their yes. When it names the SOAP 1.1 port only for a failed test call (a SOAP 1.2 port of a WSDL WCF did
-  not write; an ASMX service answers SOAP 1.2), keep the SOAP 1.2 port and switch only if a test call answers
-  `ActionNotSupported`. The platform sends a SOAP 1.2
+  not write; an ASMX service answers SOAP 1.2), keep the SOAP 1.2 port and switch only if a test call fails
+  because the action or operation is not found (WCF: `ActionNotSupported`, Action ''). Switch the registered
+  service with `modify-web-service` `setType` soap11, plus `setBaseUri` when the SOAP 1.1 port's base-uri differs;
+  `register-web-service` refuses a code already used. The platform sends a SOAP 1.2
   action only as a `SOAPAction` header, never as the `action` parameter of `Content-Type`, so a service that
   dispatches SOAP 1.2 by that parameter (WCF) answers every call with `ActionNotSupported` and Action ''; and it
   writes no WS-Addressing header, so a port that requires WS-Addressing (WCF `wsHttpBinding` with security mode
@@ -148,8 +150,8 @@ Test calls
   sent, the body is withheld and only the status comes back. `response-values` gives the response
   parameters as the platform read them by their element paths.
 - A SOAP 1.2 call answered with a fault `ActionNotSupported` and Action '', or `DestinationUnreachable` and To '',
-  hit the limits above: register the WSDL's SOAP 1.1 port instead, or use the workaround the read-wsdl warning
-  gives. Authentication goes out on a SOAP call exactly as on REST, for a method with `use-auth: true`.
+  hit the limits above: switch to the WSDL's SOAP 1.1 port (`setType` soap11), or use the workaround the
+  read-wsdl warning gives. Authentication goes out on a SOAP call exactly as on REST, for a method with `use-auth: true`.
 
 Evidence
 - Measured on Creatio 10.2 (.NET Framework, MSSQL, prefix `Usr`) in November 2026, through an isolated agent:
