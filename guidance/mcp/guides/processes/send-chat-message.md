@@ -176,8 +176,8 @@ Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.176 contract. Mea
 failing the process; `ignoreErrors` on giving `"Error"` and the channel text in mapped outputs; an SMS send without
 messenger settings resolving the primary mobile, then failing (`Username can not be null`) with no chat left; the
 designer's typed system setting, lookup macros, one-line message field and empty template after a switch to custom.
-On 2026-11-13/14, agent sessions: the discovery reads above (the `IsActive` filter excepted), and a name-form Lookup
-macro in `columnValues` saving green and showing `<entity not found>` on the card. Read from the OmnichannelMessaging
+On 2026-11-13/14: the discovery reads above as written, the `SysSchema` UId read (without `ExtendParent` false it
+also returns a replacement's row), and a name-form Lookup macro in `columnValues` showing `<entity not found>`. Read from the OmnichannelMessaging
 and core source and the product documentation, not measured: template macros against the chat, column values on a
 delivered chat, the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, the not-found
 channel text, an empty system setting failing the run, the template language order. Inferred: an unset mode running
