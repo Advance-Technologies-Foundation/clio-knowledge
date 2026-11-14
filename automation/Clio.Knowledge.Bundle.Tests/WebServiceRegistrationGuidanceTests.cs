@@ -183,7 +183,9 @@ public sealed class WebServiceRegistrationGuidanceTests
             "Do this only with the user's agreement, and test a call.",
             "never register first and warn afterwards.",
             "keep the SOAP 1.2 port and switch only if a test call fails because the action or operation is not found",
-            "Switch the registered service with `modify-web-service` `setType` soap11"
+            "Switch the registered service with `modify-web-service` `setType` soap11",
+            "When the user named the code of a NEW service, pass it as `code`",
+            "`service-code` is ONLY for an existing SOAP service the operations go into"
         ];
 
         // Assert

@@ -17,11 +17,13 @@ Scope and ownership
   `read-wsdl` has no WSDL reading: describe the service from the WSDL text or its documentation then.
 
 Reading a WSDL (read-wsdl)
-- Arguments: `environment-name` and either `wsdl-url` or `wsdl-files`; optional `port`, `operations` and
-  `service-code`. It saves nothing. A `wsdl-url` is downloaded, with the schemas it imports by an absolute
-  `schemaLocation`, by the stand through Studio's own endpoint; clio never fetches it. `wsdl-files` are absolute
-  paths, on the machine clio runs on, of the WSDL and of every schema it imports; they are refused when clio is
-  reached as an HTTP MCP server, where only `wsdl-url` works.
+- Arguments: `environment-name` and either `wsdl-url` or `wsdl-files`; optional `port`, `operations`, and `code` or
+  `service-code`. When the user named the code of a NEW service, pass it as `code`: the arguments then carry it, so
+  they are registered as they are. `service-code` is ONLY for an existing SOAP service the operations go into (a
+  service-code that names no service is refused); never both. It saves nothing. A `wsdl-url` is downloaded, with the
+  schemas it imports by an absolute `schemaLocation`, by the stand through Studio's own endpoint; clio never fetches
+  it. `wsdl-files` are absolute paths, on the machine clio runs on, of the WSDL and of every schema it imports; they
+  are refused when clio is reached as an HTTP MCP server, where only `wsdl-url` works.
 - Refused before anything is sent: a URL with `user:password@` or a key or token in its query, and a loopback,
   link-local or cloud metadata address (an advisory check: a name that only resolves to the stand itself gets past
   it). A network path in `wsdl-files` is not read. Ask the user to download the WSDL and its schemas themselves and
@@ -67,7 +69,8 @@ Reading a WSDL (read-wsdl)
   refused on both, so their values come from a system setting (`default-sys-setting`) or from the process. Do this
   only with the user's agreement, and test a call.
 - Notices: when the code is already used by a web service, ask the user which way to go and do not pick a code
-  yourself: register under a code the user names, or change that service (read again with `service-code`). When the
+  yourself: register under a code the user names (read again with that `code`), or change that service (read again
+  with `service-code`). When the
   WSDL sends calls to another host than the one it came from, show the user the `base-uri` before registering.
 - A result too large to return whole lists only the operation names, with a notice: ask the user which operations
   they need and read again with `operations` (and `port`). When even one operation of one port is too large, the
