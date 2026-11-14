@@ -154,7 +154,8 @@ described value reads back raw.
 - `value` is a plain constant for TEXT columns ONLY, and non-empty. The platform stores it as the raw string
   and the runtime reads every non-text column TYPED — a date/lookup/numeric constant would save green and
   fail at run time, so the server REFUSES it at build. Assign non-text columns via `processParameter`,
-  `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` / `[#Lookup.…#]` —
+  `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` /
+  `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]`, both GUIDs: the referenced object's schema UId, never its name —
   same macro grammar as parameter defaults — see the DEFAULT-value macro rules in `process-parameters`). An empty `value` is refused
   for every type: the runtime silently discards an empty assignment.
 - The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean

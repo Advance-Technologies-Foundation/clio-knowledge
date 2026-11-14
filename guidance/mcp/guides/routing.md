@@ -132,7 +132,7 @@ precondition kept next to the instruction it guards — names that guide as the 
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
   - SEND a chat message (Telegram, WhatsApp, SMS and the like) to ONE contact from a process — the Send chat message
-    element (`sendChatMessage`; build it only when the FULL contract names it): channel, recipient, chat template or
+    element (`sendChatMessage`; the default create contract lists it): channel, recipient, chat template or
     custom text, `ignoreErrors` and the send status -> name=process-send-chat-message
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process

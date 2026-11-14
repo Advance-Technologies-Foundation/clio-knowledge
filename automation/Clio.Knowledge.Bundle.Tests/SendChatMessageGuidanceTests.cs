@@ -28,7 +28,7 @@ public sealed class SendChatMessageGuidanceTests
     private const string FloorPattern = @"(?:<[A-Z][A-Z0-9-]*TBD>|\d+(?:\.\d+){3})";
 
     private const string ClioGate =
-        "Use it only when the FULL contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `sendChatMessage`; a clio whose contract lacks it refuses the block before sending.";
+        "The default create contract lists `chatMessage (sendChatMessage)`; a clio without it refuses the block before sending.";
 
     private const string ItemId = "process-send-chat-message";
 
@@ -50,7 +50,7 @@ public sealed class SendChatMessageGuidanceTests
     private const int DesignTargetResponseCharacters = 21_500;
 
     [Test]
-    [Description("The guide owns the block and states the FULL-contract gate and the floor; it is registered banner-less, ungated and without a legacy route, required by the library, and the element catalog, its details, process-modeling and routing send the reader to it, with one floor everywhere.")]
+    [Description("The guide owns the block and states the create-contract gate and the floor; it is registered banner-less, ungated and without a legacy route, required by the library, and the element catalog, its details, process-modeling and routing send the reader to it, with one floor everywhere.")]
     public void Guide_ShouldOwnTheBlock_AndTheEntryArticlesShouldRouteToIt()
     {
         // Arrange
@@ -72,9 +72,9 @@ public sealed class SendChatMessageGuidanceTests
         string routing = ReadCollapsed(RoutingPath);
         string description = resource.GetProperty("description").GetString()!;
         Match guideFloor = Regex.Match(guide, $@"Needs CrtProcessBuilder (?<floor>{FloorPattern}) or later on the environment\.");
-        Match catalogFloor = Regex.Match(catalog, $@"- `sendChatMessage` \(Send chat message\), from CrtProcessBuilder \*\*(?<floor>{FloorPattern})\*\* and only when the FULL contract names it:");
-        Match detailsFloor = Regex.Match(details, $@"BUILDABLE from CrtProcessBuilder \*\*(?<floor>{FloorPattern})\*\* via `type:""sendChatMessage""` with a `chatMessage` block, only when the FULL contract names it; `process-send-chat-message` owns it");
-        Match descriptionFloor = Regex.Match(description, $@"\(CrtProcessBuilder (?<floor>{FloorPattern}) or newer; only when the FULL create-business-process contract names sendChatMessage\)");
+        Match catalogFloor = Regex.Match(catalog, $@"- `sendChatMessage` \(Send chat message\), from CrtProcessBuilder \*\*(?<floor>{FloorPattern})\*\*; the default create contract lists `chatMessage \(sendChatMessage\)`, and a clio without it refuses the block:");
+        Match detailsFloor = Regex.Match(details, $@"BUILDABLE from CrtProcessBuilder \*\*(?<floor>{FloorPattern})\*\* via `type:""sendChatMessage""` with a `chatMessage` block, which the default create contract lists; `process-send-chat-message` owns it");
+        Match descriptionFloor = Regex.Match(description, $@"\(CrtProcessBuilder (?<floor>{FloorPattern}) or newer; the default create-business-process contract lists it\)");
 
         // Assert
         using (new AssertionScope())
@@ -88,7 +88,7 @@ public sealed class SendChatMessageGuidanceTests
             resource.GetProperty("role").GetString().Should().Be("guidance",
                 because: "get-guidance serves only guidance resources");
             resource.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
-                because: "the clio side is gated by the FULL contract, not by a feature; a gated guide would be hidden while the tool accepts the block");
+                because: "the clio side is gated by the create contract, not by a feature; a gated guide would be hidden while the tool accepts the block");
             resource.TryGetProperty("legacyUris", out _).Should().BeFalse(
                 because: "the guide was born after the v0 migration and has no v0 route to preserve");
             requiredItems.Should().Contain(ItemId,
@@ -120,9 +120,9 @@ public sealed class SendChatMessageGuidanceTests
                 because: "the catalog names the owner of every block it lists");
             Regex.IsMatch(catalog, $@"`SendChatMessageUserTask` \(Send chat message\): from CrtProcessBuilder \*\*{FloorPattern}\*\* REFUSED on create; on an older package do not build it on the generic route either")
                 .Should().BeTrue(because: "the data-id paragraph maps a task name to a build type; the refusal arrives with the package floor, and below it the generic route builds an element that cannot carry its template or column values");
-            modeling.Should().Contain("* a `chatMessage` block - partial; a switch to custom needs `message` (`process-send-chat-message`; FULL contract only);",
+            modeling.Should().Contain("* a `chatMessage` block - partial; a switch to custom needs `message` (`process-send-chat-message`);",
                 because: "process-modeling lists the blocks whose partial-update rule an edit gets wrong, and the switch to custom is that rule here");
-            routing.Should().Contain("(`sendChatMessage`; build it only when the FULL contract names it):",
+            routing.Should().Contain("(`sendChatMessage`; the default create contract lists it):",
                 because: "routing carries the guide's contract gate, as it does for the other blocks a released clio may not know");
             routing.Should().Contain("-> name=process-send-chat-message",
                 because: "an article nothing routes to is never read");
@@ -155,7 +155,15 @@ public sealed class SendChatMessageGuidanceTests
             "No system setting selects the template. The template's language is chosen at run time: the contact's language, then the channel's, then the `DefaultMessageLanguage` setting, then the default language.",
             "Template macros resolve against the CREATED CHAT, not the process's record:",
             "PROVIDER templates (WhatsApp approved templates) are not supported by this tool yet",
-            "build the process here and let the user pick the provider template in the Process Designer."
+            "build the process here and let the user pick the provider template in the Process Designer.",
+            "SEND NOW (\"send this to <contact> now\"): clio sends only through a process; say so in one line.",
+            "build a reusable process whose `to` is a Lookup (Contact) input parameter and run it once for this contact",
+            "The process is the deliverable, not scratch to delete. Ask for the package only when `get-target-package` fails.",
+            "Run `odata-read` through `clio-run`. Shape: `entity`, never `entity-set`; `filters` is an OBJECT",
+            "filter a lookup on its path `X/Id`, never `XId` or `X`; `select` takes columns, never a path.",
+            "entity: \"Channel\", select: [\"Id\", \"Name\", \"IsActive\"], filters: { all: [ { field: \"IsActive\", op: \"eq\", value: true } ] }",
+            "entity: \"EmailTemplate\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"TemplateType/Id\", op: \"eq\", value: \"62215de1-23e0-4037-88c9-65ccf72904a4\" } ] }",
+            "entity: \"Contact\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"Name\", op: \"contains\", value: \"<name>\" } ] }"
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -182,6 +190,10 @@ public sealed class SendChatMessageGuidanceTests
             "`SendStatus` is `\"Sent\"` or `\"Error\"`; `SendStatusDetails` is empty on success, else the error text.",
             "It also swallows INPUT errors",
             "so a completed run is not a delivered message: read `SendStatus`.",
+            "`value` is for TEXT columns only. A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: \"[#Lookup.<referenced object schema UId>.<record Id>#]\"`: the object's schema UId, never its name.",
+            "an older package saves it green, and the designer card then shows `<entity not found>`.",
+            "No clio discovery tool returns a schema UId:",
+            "Read it with `execute-esq` on `SysSchema`: `UId` where `Name` is the referenced object, `ManagerName` is `EntitySchemaManager` and `ExtendParent` is false",
             "An unknown column and `Id` are refused, and so is `selectionColumn`.",
             "is accepted with a notice: your value overwrites it.",
             "A `Channel` row alone is not a working channel: it needs its messenger settings",

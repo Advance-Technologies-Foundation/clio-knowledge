@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.220",
+  "libraryVersion": "1.15.221",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1563,7 +1563,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: starts, end, user tasks, Send email (custom and template), flows (kind, condition, label), parameters and mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all four Read data modes, the exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess), Script task (scriptTask), Open edit page, Approval, Pre-configured page, Process file (fileProcessing), Call web service (webService, only when the FULL contract names it; owner process-web-service) and Send chat message (sendChatMessage, same gate; owner process-send-chat-message) -- while inclusive/event-based gateways and timer/message and intermediate events remain read-only. A read collection IS consumed: a multi-instance Sub-process iterates one (from 1.6.6.14). Also owns the data-id -> build type map and the custom user-task compile rule. The data-id catalog and its READ-ONLY markers: process-element-catalog-details.",
+      "description": "Owns what create-business-process can build TODAY and what it cannot: starts, end, user tasks, Send email (custom and template), flows (kind, condition, label), parameters and mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all four Read data modes, the exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess), Script task (scriptTask), Open edit page, Approval, Pre-configured page, Process file (fileProcessing), Call web service (webService, only when the FULL contract names it; owner process-web-service) and Send chat message (sendChatMessage; owner process-send-chat-message) -- while inclusive/event-based gateways and timer/message and intermediate events remain read-only. A read collection IS consumed: a multi-instance Sub-process iterates one (from 1.6.6.14). Also owns the data-id -> build type map and the custom user-task compile rule. The data-id catalog and its READ-ONLY markers: process-element-catalog-details.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1930,7 +1930,7 @@
     {
       "itemId": "process-send-chat-message",
       "title": "Send chat message element",
-      "description": "Owns the chatMessage block of the Creatio Send chat message process element (CrtProcessBuilder 1.6.6.175 or newer; only when the FULL create-business-process contract names sendChatMessage): {from, to, messageSource, template, message, ignoreErrors, columnValues} on create, addElement and setElement; one message to one contact, not bulk, no wait for a reply; ranking the channel (system setting on the root Channel object first, constant last) and the contact; chat templates only, choose or ask, provider templates left to the designer; custom text without macros, a formula on Message to personalise; ignoreErrors (omitted = false: the process stops), SendStatus and SendStatusDetails; column values on the created chat; run-time prerequisites (active channel, contact identity or primary mobile for SMS, the 24-hour window) and failure classes; partial setElement, the switch to custom that needs message, raw-mapping refusals, connections[] never replayed; read-back.",
+      "description": "Owns the chatMessage block of the Creatio Send chat message process element (CrtProcessBuilder 1.6.6.176 or newer; the default create-business-process contract lists it): {from, to, messageSource, template, message, ignoreErrors, columnValues} on create, addElement and setElement; one message to one contact, not bulk, no wait for a reply; ranking the channel (system setting on the root Channel object first, constant last) and the contact; chat templates only, choose or ask, provider templates left to the designer; custom text without macros, a formula on Message to personalise; ignoreErrors (omitted = false: the process stops), SendStatus and SendStatusDetails; column values on the created chat; run-time prerequisites (active channel, contact identity or primary mobile for SMS, the 24-hour window) and failure classes; partial setElement, the switch to custom that needs message, raw-mapping refusals, connections[] never replayed; read-back.",
       "topicId": "creatio.process-send-chat-message",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-chat-message",

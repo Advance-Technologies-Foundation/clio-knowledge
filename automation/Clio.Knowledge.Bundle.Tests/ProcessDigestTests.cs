@@ -51,7 +51,7 @@ public sealed class ProcessDigestTests
         "process-activity-result-branches", "process-perform-task", "process-task-performer",
         "process-send-email", "process-approval", "process-open-edit-page", "process-access-rights",
         "process-sub-process", "process-activity-connections", "process-script-task", "process-versions",
-        "process-modeling", "process-preconfigured-page"
+        "process-modeling", "process-preconfigured-page", "process-send-chat-message"
     ];
 
     /// <summary>
