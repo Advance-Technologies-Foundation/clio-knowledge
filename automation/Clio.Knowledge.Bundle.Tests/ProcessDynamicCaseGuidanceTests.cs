@@ -21,6 +21,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
 {
     private const string ItemId = "process-dynamic-case";
     private const string ArticlePath = "guidance/mcp/guides/processes/dynamic-case.md";
+    private const string ChangeItemId = "process-dynamic-case-change";
+    private const string ChangeArticlePath = "guidance/mcp/guides/processes/dynamic-case-change.md";
     private const string ModelingPath = "guidance/mcp/guides/processes/process-modeling.md";
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
 
@@ -142,8 +144,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the case goes first as the server's own rollback does (an enabled case without its settings rows keeps starting and cannot be opened), delete-schema reaches an environment only with remote: true, remove-data-binding-row-db requires the package the server bound the rows to, append cannot remove the bar, and the dependencies go last");
             guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
             guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");
-            guide.Should().Contain("several cases per object", because: "the platform starts every enabled case");
-            guide.Should().Contain("a new version of a case, deleting a case or changing its stage column",
+            guide.Should().Contain("a catch-all case", because: "a value no case is for gets no case, as in the designer");
+            guide.Should().Contain("A value left out of `stages` is not a stage",
+                because: "a case may take some of the lookup's values, and a record holding another shows no current stage");
+            guide.Should().Contain("a new version of a case, deleting a case or changing its stage or filter column",
                 because: "a case is changed in place only; versions, deletion and the stage column are the case designer's");
             guide.Should().NotContain("Part of the process guide set",
                 because: "a banner would make process-modeling index the guide, which has no room");
@@ -164,7 +168,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "agents answered from schema reads, which cannot see the object's case or case settings");
             guide.Should().Contain("only after the call with `dry-run: true` (it writes nothing)",
                 because: "an older clio has no describe tool, and its dry run still sees the case");
-            guide.Should().Contain("gets it CHANGED (\"Change an existing case\"), never a second one",
+            guide.Should().Contain("gets it CHANGED (\"Change an existing case\" in `process-dynamic-case-change`), never a second one unless the user splits its records by a filter",
                 because: "on prompt 11 an agent changed nothing and did not say how a case is changed");
             guide.Should().Contain("WITHOUT `stages` (a stage list is checked before the object's case)",
                 because: "a stage the lookup does not have is refused before case-exists and settings-conflict, hiding them");
@@ -188,7 +192,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
     public void Article_ShouldGuideAChangeToAnExistingCase()
     {
         // Arrange & Act
-        string guide = ReadCollapsed(ArticlePath);
+        string guide = ReadCollapsed(ChangeArticlePath);
+        string createGuide = ReadCollapsed(ArticlePath);
 
         // Assert
         using (new AssertionScope())
@@ -205,9 +210,9 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "every save changes what the running cases follow");
             guide.Should().Contain("goes ALONE (`invalid-request` otherwise)",
                 because: "switching a case on or off is a save of its own");
-            guide.Should().Contain("change that case instead (`modify-dynamic-case`)",
+            createGuide.Should().Contain("change that case instead (`modify-dynamic-case`)",
                 because: "case-exists now has a remedy");
-            guide.Should().Contain("`successful: false` (final group only",
+            createGuide.Should().Contain("`successful: false` (final group only",
                 because: "only the final group can end a case as unsuccessful, as in the case designer");
         }
     }
@@ -258,5 +263,80 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         modeling.Should().NotContain("DCM",
             because: "the compile-obligation list sent agents to compile after creating a case, wherever DCM stands in it");
+    }
+
+    [Test]
+    [Description("The change guide is registered, required and routed on its own row, and both case guides fit one inline reply each: the create guide was split at a section boundary to stay under it.")]
+    public void ChangeGuide_ShouldBeRegisteredRoutedAndFitOneReply()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        JsonElement requirements = source.RootElement.GetProperty("requirements");
+
+        // Act
+        JsonElement resource = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ChangeItemId);
+        string routing = ReadCollapsed(RoutingPath);
+        int changeReply = GuidanceInlineReplyBudgetTests.ReplyBytes(ProcessGuideSet.Read(repositoryRoot, ChangeArticlePath));
+        string createGuide = ReadCollapsed(ArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            resource.GetProperty("sourcePath").GetString().Should().Be(ChangeArticlePath,
+                because: "the manifest must point at the article this fixture pins");
+            resource.GetProperty("bundlePath").GetString().Should().Be($"resources/{ChangeItemId}.md",
+                because: "the flat resources folder names each article by its itemId");
+            resource.GetProperty("topicId").GetString().Should().Be($"creatio.{ChangeItemId}",
+                because: "the topic is the stable cross-library identity of the guide");
+            requirements.GetProperty("itemIds").EnumerateArray().Select(item => item.GetString())
+                .Should().Contain(ChangeItemId, because: "the library requires every guide it ships");
+            routing.Should().Contain($"split its records into several cases by a type (different stages for B2B and B2C orders) -> name={ChangeItemId}",
+                because: "a request for different stages per type must reach the guide that owns filters");
+            createGuide.Should().Contain($"`{ChangeItemId}`", because: "the create guide hands changes and filters over");
+            changeReply.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
+                because: "a reply past the inline limit is spilled to a file the release gate's agents do not read");
+        }
+    }
+
+    [Test]
+    [Description("The change guide carries the rules of several cases on one object: one filter column, no shared value, the designer's two ways from one unfiltered case and deactivate-unfiltered only after the user's choice, the refusals, the edit right, values no case is for, and what a filter does to running cases and the bar.")]
+    public void ChangeGuide_ShouldCarryTheRulesOfSeveralCases()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().Contain("== Several cases on one object (clio <CLIO-TBD>+) ==",
+                because: "filters ship with a clio release, and the guide publishes to every clio at once");
+            guide.Should().Contain("The platform starts EVERY enabled case whose filter matches a new record",
+                because: "that is why two cases must never share a value");
+            guide.Should().Contain("split by ONE lookup column, the filter column (never the stage column)",
+                because: "the bar binds one filter column per object, as the designer allows");
+            guide.Should().Contain("`filter: {column, empty: true}`", because: "records with an empty column can have a case too");
+            guide.Should().Contain("`stages` takes any 2 to 20 values of the stage lookup",
+                because: "each type has stages of its own");
+            guide.Should().Contain("Offer the case designer's two ways, each with its dry run, and let the user choose",
+                because: "turning the existing case off cancels what runs on it; the user decides");
+            guide.Should().Contain("Pass `deactivate-unfiltered` ONLY after the user chose (2), never on your own",
+                because: "the disabled case's running cases are cancelled at their next status change");
+            guide.Should().Contain("`filter-overlap` (another enabled case has one of these values",
+                because: "one record never starts two cases");
+            guide.Should().Contain("`filter-required` (the cases are split by a column",
+                because: "a case without a filter would start for every record next to them");
+            guide.Should().Contain("right to edit `SysDcmSettings` records",
+                because: "the first filter sets the filter column on the case settings with the caller's rights");
+            guide.Should().Contain("There is no catch-all case",
+                because: "records of a value no case is for start no case and show no bar");
+            guide.Should().Contain("A filter decides only which NEW records start a case: running cases continue",
+                because: "a filter added to a case does not move the records already going through it");
+            guide.Should().Contain("`askUserToChangeSchema`", because: "the bar's switch offer is a page change the user may want");
+            guide.Should().Contain("Answer \"which stages do B2B orders have\" from it",
+                because: "a read-only question is answered from describe, changing nothing");
+        }
     }
 }
