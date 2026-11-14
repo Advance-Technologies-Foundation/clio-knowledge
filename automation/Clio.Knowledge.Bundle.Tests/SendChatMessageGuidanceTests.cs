@@ -44,7 +44,7 @@ public sealed class SendChatMessageGuidanceTests
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
-    /// is about 21,900 response characters after the reviewed addition of the literal schema UId read, so a new clause pays
+    /// is about 21,900 response characters after the reviewed addition of a literal execute-esq read, so a new clause pays
     /// for itself with a trim, and a larger addition is reviewed, or split, rather than absorbed. The 19,000-byte inline
     /// rule is asserted separately.
     /// </summary>
@@ -164,7 +164,10 @@ public sealed class SendChatMessageGuidanceTests
             "filter a lookup on its path `X/Id`, never `XId` or `X`; `select` takes columns, never a path.",
             "entity: \"Channel\", select: [\"Id\", \"Name\", \"IsActive\"], filters: { all: [ { field: \"IsActive\", op: \"eq\", value: true } ] }",
             "entity: \"EmailTemplate\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"TemplateType/Id\", op: \"eq\", value: \"62215de1-23e0-4037-88c9-65ccf72904a4\" } ] }",
-            "entity: \"Contact\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"Name\", op: \"contains\", value: \"<name>\" } ] }"
+            "entity: \"Contact\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"Name\", op: \"contains\", value: \"<name>\" } ] }",
+            "Lookup settings on the ROOT Channel object (`a26e0c98-...` is its schema UId; odata-read cannot filter a GUID column, and `list-sys-settings` takes no filter):",
+            "clio-run { command: \"execute-esq\", args: { environment-name: \"<env>\", query: { rootSchemaName: \"SysSettings\", columns: { items: { Code: { expression: { expressionType: 0, columnPath: \"Code\" } }, Name: { expression: { expressionType: 0, columnPath: \"Name\" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ReferenceSchemaUId\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: \"a26e0c98-9a52-4e80-9a04-75221742fed7\" } } } } } } } }",
+            "DISCOVER first: the active channels and the Lookup settings on Channel (the reads above)."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -191,10 +194,10 @@ public sealed class SendChatMessageGuidanceTests
             "`SendStatus` is `\"Sent\"` or `\"Error\"`; `SendStatusDetails` is empty on success, else the error text.",
             "It also swallows INPUT errors",
             "so a completed run is not a delivered message: read `SendStatus`.",
-            "`value` is for TEXT columns only. A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: \"[#Lookup.<referenced object schema UId>.<record Id>#]\"`: the object's schema UId, never its name.",
-            "an older package saves it green, and the designer card then shows `<entity not found>`.",
-            "No clio discovery tool returns a schema UId (`find-entity-schema` gives names). Read it with this call; the `ExtendParent` false comparison keeps a replacing schema's row out:",
-            "clio-run { command: \"execute-esq\", args: { environment-name: \"<env>\", query: { rootSchemaName: \"SysSchema\", columns: { items: { UId: { expression: { expressionType: 0, columnPath: \"UId\" } } } }, filters: { filterType: 6, items: { n: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"Name\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: \"<Object>\" } } }, m: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ManagerName\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: \"EntitySchemaManager\" } } }, e: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ExtendParent\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 12, value: false } } } } } } }",
+            "`value` is for TEXT columns only: a record id there is refused, and the refusal quotes the macro to send.",
+            "A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: \"[#Lookup.<object name or schema UId>.<record Id>#]\"`, as in `[#Lookup.ChatQueue.<record Id>#]`.",
+            "The server stores the designer's form, the object's schema UId, and says so in a \"stored as ...\" warning: expected, not a failure.",
+            "describe lists both outputs in the generic `parameters` (`isOutput: true`) and under the block's `outputs`.",
             "An unknown column and `Id` are refused, and so is `selectionColumn`.",
             "is accepted with a notice: your value overwrites it.",
             "A `Channel` row alone is not a working channel: it needs its messenger settings",
@@ -223,6 +226,8 @@ public sealed class SendChatMessageGuidanceTests
         [
             "`setElement` with `elementName` and `elementUpdate.chatMessage` is a PARTIAL update: omitted members keep their stored values.",
             "Template to custom: send `message` in the SAME call, or the switch is refused - even when the element shows text:",
+            "The exception: `Message` already bound to a formula or another non-constant source (an `addMapping` in an earlier call).",
+            "Custom to template needs `template` in the same call, or it is refused;",
             "A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto `Channel`, `Contact` or `Message` (use `chatMessage.message`), is refused, naming the block member to use.",
             "A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those readers first, in a SEPARATE, earlier call.",
             "a constant reads back as `{value: <record id>, display: <name>}`, and the describe-only `display` names the channel and the contact",

@@ -4,7 +4,7 @@ Scope
 This guide owns the `chatMessage` block of the Send chat message element (`SendChatMessageUserTask`, package
 OmnichannelMessaging). `process-parameters` owns mappings, `process-formulas` formula syntax, `process-data-elements`
 the Read data column a source can name. Email is `process-send-email`.
-Needs CrtProcessBuilder 1.6.6.176 or later on the environment. The default create contract lists
+Needs CrtProcessBuilder 1.6.6.177 or later on the environment. The default create contract lists
 `chatMessage (sendChatMessage)`; a clio without it refuses the block before sending. Always read the element back.
 
 == When to use it, and when not ==
@@ -53,10 +53,12 @@ clio-run { command: "odata-read", args: { environment-name: "<env>", <one line b
 - active channels: entity: "Channel", select: ["Id", "Name", "IsActive"], filters: { all: [ { field: "IsActive", op: "eq", value: true } ] }
 - chat templates: entity: "EmailTemplate", select: ["Id", "Name"], filters: { all: [ { field: "TemplateType/Id", op: "eq", value: "62215de1-23e0-4037-88c9-65ccf72904a4" } ] }
 - a contact by name: entity: "Contact", select: ["Id", "Name"], filters: { all: [ { field: "Name", op: "contains", value: "<name>" } ] }
+Lookup settings on the ROOT Channel object (`a26e0c98-...` is its schema UId; odata-read cannot filter a GUID
+column, and `list-sys-settings` takes no filter):
+clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { rootSchemaName: "SysSettings", columns: { items: { Code: { expression: { expressionType: 0, columnPath: "Code" } }, Name: { expression: { expressionType: 0, columnPath: "Name" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ReferenceSchemaUId" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: "a26e0c98-9a52-4e80-9a04-75221742fed7" } } } } } } } }
 
 == From: which channel ==
-DISCOVER first: the active channels, and an existing Lookup setting on Channel (`list-sys-settings` with a
-`search-pattern`). When several channels could fit, ASK which one; never guess. Then rank the sources
+DISCOVER first: the active channels and the Lookup settings on Channel (the reads above). When several channels could fit, ASK which one; never guess. Then rank the sources
 and say which rung you took and why:
 1. Prefer a Lookup SYSTEM SETTING that references the ROOT Channel object: an `expression` `[#SysSettings.<Code>#]`.
    An administrator can then move the process to another channel without reopening it. It is stored in the designer's
@@ -112,19 +114,17 @@ CUSTOM (`messageSource` `custom`):
   on success, else the error text. Map them downstream and branch on `SendStatus` (`process-branch-conditions`).
 - It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel), so a
   completed run is not a delivered message: read `SendStatus`.
-- describe's generic `parameters` omit the two outputs while unmapped; the block lists them under `outputs`.
+- describe lists both outputs in the generic `parameters` (`isOutput: true`) and under the block's `outputs`.
 
 == Column values on the chat ==
 `columnValues` sets columns of the created chat (object OmniChat) in the Modify data entry shape (`column` + one
 source; `process-data-elements`). Link the chat to its record (`Case`, `Lead`, where the column exists); template
 macros can then read that record.
-- `value` is for TEXT columns only. A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: "[#Lookup.<referenced object schema UId>.<record Id>#]"`: the object's schema UId, never its name.
-  From CrtProcessBuilder 1.6.6.176 a name there is rewritten to the UId with a notice; an older package saves it
-  green, and the designer card then shows `<entity not found>`. A record known only at run time comes from
+- `value` is for TEXT columns only: a record id there is refused, and the refusal quotes the macro to send.
+  A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: "[#Lookup.<object name or schema UId>.<record Id>#]"`,
+  as in `[#Lookup.ChatQueue.<record Id>#]`. The server stores the designer's form, the object's schema UId, and
+  says so in a "stored as ..." warning: expected, not a failure. A record known only at run time comes from
   `processParameter` or `sourceElement`.
-- No clio discovery tool returns a schema UId (`find-entity-schema` gives names). Read it with this call; the
-  `ExtendParent` false comparison keeps a replacing schema's row out:
-clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { rootSchemaName: "SysSchema", columns: { items: { UId: { expression: { expressionType: 0, columnPath: "UId" } } } }, filters: { filterType: 6, items: { n: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "Name" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: "<Object>" } } }, m: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ManagerName" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: "EntitySchemaManager" } } }, e: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ExtendParent" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 12, value: false } } } } } } }
 - An unknown column and `Id` are refused, and so is `selectionColumn`. A column the element fills itself (`Status`,
   `Channel`, `Contact`, `Operator`, `Queue`, `ChatPreview`) is accepted with a notice: your value overwrites it.
 - On `setElement` an omitted list is kept, a sent list REPLACES the stored set, and `[]` clears it.
@@ -152,8 +152,10 @@ On current builds a failed send leaves no chat (measured on 10.2.1122); older Om
 `setElement` with `elementName` and `elementUpdate.chatMessage` is a PARTIAL update: omitted members keep their
 stored values.
 - Template to custom: send `message` in the SAME call, or the switch is refused - even when the element shows text:
-  a designer-built element holds the template's text with its macros, which would be sent literally. The switch
-  clears the template; custom to template clears a stored constant message.
+  a designer-built element holds the template's text with its macros, which would be sent literally. The exception:
+  `Message` already bound to a formula or another non-constant source (an `addMapping` in an earlier call). The
+  switch clears the template. Custom to template needs `template` in the same call, or it is refused; it clears a
+  stored constant message.
 - A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those
   readers first, in a SEPARATE, earlier call.
 - A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto
@@ -171,13 +173,13 @@ describe-only `templateName`, `message` (custom mode only), `ignoreErrors` (alwa
 `outputs` and `issues` (no channel, no contact, template mode with no template - an unset mode runs as template
 mode - or custom mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.
 
-Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.176 contract. Measured on Creatio 10.2.1122 with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an untouched `ignoreErrors`
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.177 contract. Measured on Creatio 10.2.1122 with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an untouched `ignoreErrors`
 failing the process; `ignoreErrors` on giving `"Error"` and the channel text in mapped outputs; an SMS send without
 messenger settings resolving the primary mobile, then failing (`Username can not be null`) with no chat left; the
 designer's typed system setting, lookup macros, one-line message field and empty template after a switch to custom.
-On 2026-11-13/14: the discovery reads and the `SysSchema` call above as written, a name-form Lookup macro in
-`columnValues` showing `<entity not found>`, and an agent run on 1.6.6.176 reading a UId with that call. Read from
-the source and the product documentation, not measured: template macros against the chat, column values on a
+On 2026-11-13/14: the discovery reads above as written (the `SysSettings` read finding a Lookup setting on Channel),
+and a name-form Lookup macro in `columnValues`: shown as `<entity not found>` before 1.6.6.176, stored as the UId
+with the queue on the card from it. Read from the source and the product documentation, not measured: template macros against the chat, column values on a
 delivered chat, the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, the not-found
 channel text, an empty system setting failing the run, the template language order. Inferred: an unset mode running
 as template mode, the card's display of multi-line text or a server-built template, a run of a server-written

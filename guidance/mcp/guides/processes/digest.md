@@ -7,7 +7,7 @@ Part of the process guide set. Owners win.
 5. `describe-business-process mode=full`; `compile-creatio` only if the save warns.
 No/old CrtProcessBuilder refusal: STOP and ask the user before `install-process-builder`.
 Set only what was asked; ask only an unsaid approver/performer/recipient.
-Types (else `process-element-catalog`): startEvent signalStart endEvent exclusiveGateway parallelGateway formulaTask(1.6.3.16+) subProcess(1.6.3.26+) scriptTask(1.6.6.30+) sendChatMessage(1.6.6.176+); sendEmail approval openEditPage preconfiguredPage fileProcessing (never as a userTask); userTask+userTaskName or alias type readData changeData addData deleteData performTask changeAccessRights.
+Types (else `process-element-catalog`): startEvent signalStart endEvent exclusiveGateway parallelGateway formulaTask(1.6.3.16+) subProcess(1.6.3.26+) scriptTask(1.6.6.30+) sendChatMessage(1.6.6.177+); sendEmail approval openEditPage preconfiguredPage fileProcessing (never as a userTask); userTask+userTaskName or alias type readData changeData addData deleteData performTask changeAccessRights.
 == Names N1-N10 (`process-naming`: relabel, clash) ==
 Process `<prefix><Object>_<Action>` (`get-schema-name-prefix`); a callee ends in `SubProcess`. Captions (process, EVERY element): sentence case; element <= 60 chars, activity verb first, event a noun phrase.
 Element `name` = caption in PascalCase minus only a/an/the/is/are/was/were/be/been/has/have/had; punctuation splits words; `<X>Start`, `<X>Signal`, `End<X>`; never against the type (no `EndNormal`), no `UserTask` postfix, counter or GUID.
