@@ -52,7 +52,9 @@ Credential rule (MUST)
   tool refuses a constant there and never echoes the refused value. A query parameter whose code or `path` is
   `sig`, `sas`, `code`, `appid`, `sign` or `hmac` follows the same rule when its constant is 16 characters or
   longer (an OpenWeatherMap `appid`, an Azure Functions `code`); a short value such as `code=USD` stays. So does
-  a path parameter whose `{placeholder}` is the whole value of such a key in the `uri` (`search?api_key={k}`).
+  a path parameter whose `{placeholder}` is the whole value of such a key in the `uri` (`search?api_key={k}`):
+  describe hides its constant, which is kept when no default is sent while the `uri` keeps that key;
+  `default-value ""` clears it, and a `uri` that would show it is refused.
 - Every system setting a call references anew MUST exist before the call; such a reference to a missing
   setting is refused, because at run time the platform drops it silently and the request goes out without the
   header. A reference the same method (or the authentication) already had, whose setting was deleted since,
@@ -68,7 +70,8 @@ Credential rule (MUST)
   kept in the query of a base URI, a method `uri` or a `soap-action` (a service made in Studio can hold one) shows
   as `[masked]`, and the tools never write such a key back: a `setMethod` or `setBaseUri` that sends `[masked]` is
   refused. Leave that method or base URI out of the call, make the key a parameter with `default-sys-setting`
-  the user fills (REST), or ask the user to change it in Studio.
+  the user fills (REST), or ask the user to change it in Studio. A `soap-action` with such a key is kept when
+  `setMethod` leaves `soap-action` out.
 
 Registering
 - `register-web-service` arguments: `environment-name`, `package-name`, `code`, `base-uri`, `methods`

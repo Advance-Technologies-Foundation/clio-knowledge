@@ -142,8 +142,9 @@ Changing a SOAP service
   the prefix.
 - What `describe-web-service` returns is valid input: a method as the `method` of `setMethod`, and the
   `namespaces` list for `setNamespaces`, except a `soap-action`, base URI or namespace `uri` that shows a
-  `[masked]` key (see `web-service-registration`): that is refused. `setMethod` replaces the method: an omitted `soap-action` is cleared, so
-  send describe's value back to keep it, and send `soap-header` and `sequence-element` back on the parameters that
+  `[masked]` key (see `web-service-registration`): that is refused. `setMethod` replaces the method: an omitted
+  `soap-action` is cleared, so send describe's value back to keep it (one that shows a `[masked]` key: leave it
+  out, and the stored action is kept), and send `soap-header` and `sequence-element` back on the parameters that
   have them.
 - USAGE GUARD: `setNamespaces` and `setType` change every call the service makes, so when they really change the
   namespaces or the version while any process calls the service, they are refused like `setMethod` and
