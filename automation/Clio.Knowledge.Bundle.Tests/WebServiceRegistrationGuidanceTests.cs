@@ -183,9 +183,7 @@ public sealed class WebServiceRegistrationGuidanceTests
             "Do this only with the user's agreement, and test a call.",
             "never register first and warn afterwards.",
             "keep the SOAP 1.2 port and switch only if a test call fails because the action or operation is not found",
-            "Switch the registered service with `modify-web-service` `setType` soap11",
-            "When the user named the code of a NEW service, pass it as `code`",
-            "`service-code` is ONLY for an existing SOAP service the operations go into"
+            "Switch the registered service with `modify-web-service` `setType` soap11"
         ];
 
         // Assert
@@ -193,6 +191,29 @@ public sealed class WebServiceRegistrationGuidanceTests
         {
             soap.Should().Contain(clause,
                 because: "without it an agent registers Studio's SOAP 1.2 pick of a WCF service and every call fails with a SOAP fault");
+        }
+    }
+
+    [Test]
+    [Description("The SOAP guide has the agent pass the code the user named for a new service to read-wsdl as code, keeps service-code for an existing service, and reads again with code when the code is taken.")]
+    public void SoapGuide_ShouldPassANewServiceCodeAsCode()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "When the user named the code of a NEW service, pass it as `code`",
+            "`service-code` is ONLY for an existing SOAP service the operations go into",
+            "(read again with that `code`)"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent passes a new service's code as service-code, fails, and edits the arguments it should register as they are");
         }
     }
 

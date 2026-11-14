@@ -70,8 +70,8 @@ Reading a WSDL (read-wsdl)
   only with the user's agreement, and test a call.
 - Notices: when the code is already used by a web service, ask the user which way to go and do not pick a code
   yourself: register under a code the user names (read again with that `code`), or change that service (read again
-  with `service-code`). When the
-  WSDL sends calls to another host than the one it came from, show the user the `base-uri` before registering.
+  with `service-code`). When the WSDL sends calls to another host than the one it came from, show the user the
+  `base-uri` before registering.
 - A result too large to return whole lists only the operation names, with a notice: ask the user which operations
   they need and read again with `operations` (and `port`). When even one operation of one port is too large, the
   notice says so: ask the user which of its fields they need and describe that method by hand.
