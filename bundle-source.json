@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.220",
+  "libraryVersion": "1.15.221",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -142,6 +142,7 @@
       "process-send-email-attachments",
       "process-web-service",
       "process-dynamic-case",
+      "process-dynamic-case-change",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -352,6 +353,7 @@
       "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "docs://knowledge/com.creatio.clio/process-web-service",
       "docs://knowledge/com.creatio.clio/process-dynamic-case",
+      "docs://knowledge/com.creatio.clio/process-dynamic-case-change",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -1928,12 +1930,23 @@
     {
       "itemId": "process-dynamic-case",
       "title": "Dynamic case from a lookup column",
-      "description": "Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). The prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty stages, full-mesh connections, the link row bound to the package and the settings row bound unless another package already carries it, the page fragment in the design package), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet.",
+      "description": "Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). The prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty stages, full-mesh connections, the link row bound to the package and the settings row bound unless another package already carries it, the page fragment in the design package), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet. Changing an existing case and several cases on one object: process-dynamic-case-change.",
       "topicId": "creatio.process-dynamic-case",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case",
       "sourcePath": "guidance/mcp/guides/processes/dynamic-case.md",
       "bundlePath": "resources/process-dynamic-case.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-dynamic-case-change",
+      "title": "Change a dynamic case; several cases on one object",
+      "description": "Owns describe-dynamic-case and modify-dynamic-case (read first, dry run, the user's yes, confirm-running-instances only after it, enabled alone, the refusals) and several dynamic cases on one object split by one lookup filter column: filter {column, values | empty}, a stage subset per case, the designer's two ways from one unfiltered case to several (a filter on it, or deactivate-unfiltered only after the user's yes), filter-overlap, filter-required, unfiltered-case-exists, the filter column on the case settings and its edit right, values no case is for, and that a filter decides only which new records start a case.",
+      "topicId": "creatio.process-dynamic-case-change",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-change",
+      "sourcePath": "guidance/mcp/guides/processes/dynamic-case-change.md",
+      "bundlePath": "resources/process-dynamic-case-change.md",
       "mediaType": "text/plain"
     },
     {

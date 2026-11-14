@@ -1,4 +1,4 @@
-clio MCP process-dynamic-case guide - a minimal dynamic case (DCM) from a lookup column, the record-page stage progress bar, and changes to an existing case
+clio MCP process-dynamic-case guide - a minimal dynamic case (DCM) from a lookup column and the record-page stage progress bar
 
 Scope
 This guide owns `create-dynamic-case`: it gives an object a stage lifecycle. One call builds a dynamic case (DCM)
@@ -6,16 +6,18 @@ whose stages are the values of one lookup column of the object (for example `Sta
 the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI record page. Use it when the user
 asks for "stages", "a status lifecycle", an order or outcomes of status values, "a progress bar on the record
 page" or "a case". "When X happens, do Y" is a
-business process: `process-digest`. A case is not the `Case` object. `describe-dynamic-case` and
-`modify-dynamic-case` read and change an existing case ("Change an existing case").
+business process: `process-digest`. A case is not the `Case` object. Reading and changing an existing case
+(`describe-dynamic-case`, `modify-dynamic-case`) and several cases on one object split by a filter (B2B and B2C
+orders with stages of their own): `process-dynamic-case-change`.
 
 == Answer the user from the tool ==
 - Anything about an EXISTING object's stages or status flow ("ends Approved or Rejected", "move X before Y"),
   even "just tell me, change nothing": answer only after
   `describe-dynamic-case { entity-schema-name }` (read-only); on clio older than <CLIO-TBD>, only after the call
   with `dry-run: true` (it writes nothing) and WITHOUT `stages` (a stage list is checked before the object's case).
-  Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case"), never a
-  second one; on an older clio its `case-exists` or `settings-conflict` refusal IS the answer. Never offer to
+  Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case" in
+  `process-dynamic-case-change`), never a second one unless the user splits its records by a filter (same guide);
+  on an older clio its `case-exists` or `settings-conflict` refusal IS the answer. Never offer to
   rename, replace or add lookup values, or another column (an order column), to get around it.
 - Stages need a field with a fixed list of values (a lookup); an amount, a date or a text cannot be stages
   (`column-not-lookup`). Say exactly that; do not first ask which field was meant.
@@ -37,27 +39,29 @@ business process: `process-digest`. A case is not the `Case` object. `describe-d
 
 == Not supported yet ==
 Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, transition rules,
-start conditions, several cases per object, a new version of a case, deleting a case or changing its stage column:
-the case designer does those. No mobile page, mini page or Classic page bar.
+a start condition other than one filter column, a catch-all case, a new version of a case, deleting a case or
+changing its stage or filter column: the case designer does those. No mobile page, mini page or Classic page bar.
 
 == Before the call ==
 - The object and the lookup column are PUBLISHED: a column saved and not published is refused `column-not-published`
-  (publish the object, then retry), one that does not exist `column-not-found`. The lookup has 2 to 20 values the
-  caller can see, and the target package is editable.
+  (publish the object, then retry), one that does not exist `column-not-found`. The case takes 2 to 20 values of
+  the lookup the caller can see, and the target package is editable.
 - The case's package must reach the packages of the object, the column and the lookup, and CrtCoreBase / CrtBase
   (the case settings tables). The tool adds the missing ones itself (`dependencies.added`); with
   `add-package-dependencies: false` it refuses `dependencies-missing` and reports them in `dependencies.missing`.
 - The call runs as a General user with `CanManageDcm`, `CanManageSolution` and the right to add `SysDcmSettings` and
-  `SysDcmSchemaInSettings` records (by default only System administrators); it is refused `rights-missing` naming
-  the missing one, before anything is read. `CanManageProcessDesign` is not needed.
+  `SysDcmSchemaInSettings` records (by default only System administrators), and with a filter the right to edit
+  `SysDcmSettings`; it is refused `rights-missing` naming the missing one, before anything is read.
+  `CanManageProcessDesign` is not needed.
 
 == The call ==
-`create-dynamic-case { environment-name, package-name, entity-schema-name, stage-column-name, stages?,
-order-column?, name?, caption?, add-progress-bar = true, page-schema-name?, add-package-dependencies = true,
-dry-run = false }`; it writes, so it is destructive. Version boundary: `create-dynamic-case` needs clio 8.1.0.150
+`create-dynamic-case { environment-name, package-name, entity-schema-name, stage-column-name, stages?, filter?,
+deactivate-unfiltered?, order-column?, name?, caption?, add-progress-bar = true, page-schema-name?,
+add-package-dependencies = true, dry-run = false }`; it writes, so it is destructive. `filter` and
+`deactivate-unfiltered` (clio <CLIO-TBD>+): `process-dynamic-case-change`. Version boundary: `create-dynamic-case` needs clio 8.1.0.150
 or later; on an older clio, stop here and tell the user to update clio - do not build a case by other means.
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
-  pass `stages` (every value exactly once, by Id or exact display value) whenever the business order matters.
+  pass `stages` (2 to 20 values in order, by Id or exact display value) whenever the business order matters.
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
   `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order turns "New, In progress, Done" into
   "Done, In progress, New". The result ALWAYS states `case.orderSource` and the ordered captions: read them back to
@@ -65,15 +69,15 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 - GROUPS: an item may name `group` (another stage's value: they share one bar slot, the member right after it; one
   level) and `successful: false` (final group only - the last stage and its members: it ends the case as
   unsuccessful), e.g. Rejected with `group: Approved, successful: false`; else `stage-group-invalid`.
-- A subset, a value named twice and an unknown or ambiguous value are refused (`stage-list-incomplete`,
-  `stage-list-duplicate`, `stage-value-unknown`, `stage-value-ambiguous`): a record holding a value that is not a
-  stage shows no current stage.
+- A value named twice and an unknown or ambiguous value are refused (`stage-list-duplicate`,
+  `stage-value-unknown`, `stage-value-ambiguous`). A value left out of `stages` is not a stage (clio <CLIO-TBD>+;
+  older: `stage-list-incomplete`): a note names it, and a record holding it shows no current stage. Tell the user.
 
 == What one call writes ==
 - The case schema in the package: one EMPTY stage per value (`Stage1..N`, caption = the display value, colour
   `#0C8701`), every stage connected to every other (so every stage is clickable on the bar), enabled, the active
   version. Its link row (`SysDcmSchemaInSettings`), bound to the package, and its settings row (`SysDcmSettings`):
-  created and bound, or reused when the object already has one with the same column and no filter column. A reused
+  created and bound, or reused when the object already has one with the same stage column. A reused
   row no package carries yet is bound to this package; one another package carries stays there, and the note names
   that package to deploy with this one: relay it. The case designer needs both rows to open the case;
   `settings.bindings` names the bindings this call wrote.
@@ -104,38 +108,18 @@ or later; on an older clio, stop here and tell the user to update clio - do not 
 - A business process that also sets the stage column fights the case; the Academy recommends disabling it.
 - The case opens in the designer at `case.designerUrl`.
 
-== Change an existing case (clio <CLIO-TBD>+) ==
-1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
-   in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, and `enabled`. Several cases
-   on the object (`case-ambiguous`): name one with `case-name`.
-2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, enabled?,
-   confirm-running-instances?, dry-run }` writes. `stages` is the WHOLE new list: a stage left out is REMOVED, a
-   value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, after asking).
-   Fields an item leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours it;
-   `caption` renames the stage in the case only, never the value every record shares. First `dry-run: true`: show the user `diff` and the notes, write only
-   after their yes. `unchanged` means nothing to do.
-3. While cases run (`runningInstances.total` > 0) every write is refused `running-instances-confirmation-required`:
-   tell the user how many run and in which stages; pass `confirm-running-instances: true` only after they say yes,
-   NEVER on your own. Running cases continue, possibly on the stages as they were.
-4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
-   nothing is deleted, running cases continue, new records start no case. Re-enabling while another case of the
-   object is enabled: `case-exists`.
-Refusals: `stage-in-use` (cases sit in a stage being removed: move them first), `stage-has-steps` (it has steps or
-a step condition targets it: the case designer), `package-read-only` (a new version is not supported yet).
-`failed-restored`: the save did not take, the case is as before; `failed-leftover`: check it in the designer.
-No compile or restart; F5.
-
 == Refusals that need the user ==
 With `outcome: refused` nothing was written, unless the item says otherwise. The same `errorCode` can come with
 another outcome (`request-failed` with `unknown`, `page-append-rejected` with `created-page-failed`): then read
 "Partial and unknown outcomes".
-- `case-exists`: the object already has an enabled case that is not this call's equivalent: other stages, another
-  column, or one without its settings row or link row. The platform starts every enabled case, so a second one is
+- `case-exists`: the object already has an enabled case without a filter that is not this call's equivalent:
+  other stages, another column, or one without its settings row or link row. The platform starts every enabled case, so a second one is
   never created: change that case instead (`modify-dynamic-case`). A re-run with the SAME object, column and order
   answers `already-present` and writes nothing to the case (it still adds the bar when the page has none), so a failed
   call is safe to repeat.
-- `settings-conflict`: the object's case settings use another stage column or a filter column, or there are
-  several rows. When another call created a row at the same moment this call removes its own: retry.
+- `settings-conflict`: the object's case settings use another stage column, or there are several rows. When
+  another call created a row at the same moment this call removes its own: retry. The filter refusals
+  (`unfiltered-case-exists`, `filter-required`, `filter-overlap`, ...): `process-dynamic-case-change`.
 - Page refusals, all BEFORE anything is written: `record-page-not-found` (no record page could be found: pass
   `page-schema-name`), `record-page-ambiguous` (a typed page set such as Activity: pass `page-schema-name`),
   `record-page-not-freedom` (a Classic page: create a Freedom UI page and its related-page add-on first),
