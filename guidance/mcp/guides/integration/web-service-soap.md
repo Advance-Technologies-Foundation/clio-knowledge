@@ -43,7 +43,7 @@ Reading a WSDL (read-wsdl)
   it; never register first and warn afterwards. Check the `arguments` yourself for two things and tell the user: a
   `base-uri` on `localhost` or another placeholder host (common in a WSDL saved from a developer machine; read-wsdl
   flags it only when a `wsdl-url` came from another host, never for `wsdl-files`), and a method without
-  `soap-action` (register names one only after saving, and only for SOAP 1.1).
+  `soap-action` (register's notice names such a method only after saving, and only for SOAP 1.1).
 - Register a port's `arguments` with `register-web-service` as they are, adding only `package-name` and what a
   warning asks the user for. Do not rename codes or rewrite paths: a response path comes with its prefix
   (`tem:AddResult`); keep it. Method and parameter codes are the prefix plus the full WSDL names in PascalCase, the
@@ -97,7 +97,8 @@ Registering a SOAP service
 - `base-uri` is the endpoint URL as the WSDL's `soap:address` gives it (`http://www.dneonline.com/calculator.asmx`).
   It is stored as given: no trailing slash is added, and a `{placeholder}` is refused, because a SOAP method has no
   address of its own. A fixed query stays in it (SAP: `?sap-client=100`), since SOAP has no query parameters; a
-  credential-like key with a constant value there is refused, and so is `?wsdl`, `?singleWsdl` or `?xsd` (a WCF
+  key there is refused by the rule of `web-service-registration` (a credential name, or a 16+ character `sig`,
+  `sas`, `code`, `appid`, `sign` or `hmac`), and so is `?wsdl`, `?singleWsdl` or `?xsd` (a WCF
   `.svc?xsd=xsd0`): that is the WSDL or schema address, not the endpoint.
 - Each method: `code` (prefixed) and `message-element`, the request body's root element with its prefix
   (`tem:Add`), one segment only; without a prefix it goes out in the default namespace. No `uri`: a SOAP method
@@ -125,7 +126,8 @@ Registering a SOAP service
   `default-value` (refused like a header constant): give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. The credential-name
   check also covers `licence`/`license`, `nonce`, `passcode`, `passphrase`, `bearer`, `jwt` and `pass` not
-  followed by a lowercase letter (not `compass`, `bypass`, `passport`; `UsrPassId` and `PASSPORT` do count).
+  followed by a lowercase letter and not after `com`, `by` or `sur` (not `compass`, `bypass`, `surpass`,
+  `passport`; `UsrPassId` and `PASSPORT` do count).
 - `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
   `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it. An empty one on a
   response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`. On a
@@ -139,7 +141,8 @@ Changing a SOAP service
   `soap12`). A prefix that a kept method still uses must stay; removing it is refused, naming the method and
   the prefix.
 - What `describe-web-service` returns is valid input: a method as the `method` of `setMethod`, and the
-  `namespaces` list for `setNamespaces`. `setMethod` replaces the method: an omitted `soap-action` is cleared, so
+  `namespaces` list for `setNamespaces`, except a `soap-action`, base URI or namespace `uri` that shows a
+  `[masked]` key (see `web-service-registration`): that is refused. `setMethod` replaces the method: an omitted `soap-action` is cleared, so
   send describe's value back to keep it, and send `soap-header` and `sequence-element` back on the parameters that
   have them.
 - USAGE GUARD: `setNamespaces` and `setType` change every call the service makes, so when they really change the
