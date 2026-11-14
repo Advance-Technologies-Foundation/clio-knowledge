@@ -143,8 +143,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
             guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");
             guide.Should().Contain("several cases per object", because: "the platform starts every enabled case");
-            guide.Should().Contain("changing, disabling or deleting an existing case",
-                because: "the tool only creates; the case designer changes a case");
+            guide.Should().Contain("a new version of a case, deleting a case or changing its stage column",
+                because: "a case is changed in place only; versions, deletion and the stage column are the case designer's");
             guide.Should().NotContain("Part of the process guide set",
                 because: "a banner would make process-modeling index the guide, which has no room");
         }
@@ -160,13 +160,17 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().Contain("answer only after the call with `dry-run: true` (it writes nothing)",
+            guide.Should().Contain("answer only after `describe-dynamic-case { entity-schema-name }` (read-only)",
                 because: "agents answered from schema reads, which cannot see the object's case or case settings");
+            guide.Should().Contain("only after the call with `dry-run: true` (it writes nothing)",
+                because: "an older clio has no describe tool, and its dry run still sees the case");
+            guide.Should().Contain("gets it CHANGED (\"Change an existing case\"), never a second one",
+                because: "on prompt 11 an agent changed nothing and did not say how a case is changed");
             guide.Should().Contain("WITHOUT `stages` (a stage list is checked before the object's case)",
                 because: "a stage the lookup does not have is refused before case-exists and settings-conflict, hiding them");
             guide.Should().Contain("refusal IS the answer",
                 because: "agents offered to rewrite the lookup values instead of relaying case-exists or settings-conflict");
-            guide.Should().Contain("Never offer to rename, replace or add lookup values, or another column, to get around it",
+            guide.Should().Contain("Never offer to rename, replace or add lookup values, or another column (an order column), to get around it",
                 because: "a new column or new values still meet the existing case, which the tool does not change");
             guide.Should().Contain("Stages need a field with a fixed list of values (a lookup)",
                 because: "an agent asked a clarifying question instead of saying an amount cannot be stages");
@@ -179,6 +183,71 @@ public sealed class ProcessDynamicCaseGuidanceTests
         }
     }
 
+    [Test]
+    [Description("The guide sends an agent to describe and dry-run before changing an existing case, never lets it confirm running cases on its own, and keeps enabled a call of its own.")]
+    public void Article_ShouldGuideAChangeToAnExistingCase()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().Contain("== Change an existing case (clio <CLIO-TBD>+) ==",
+                because: "the tools ship with a clio release, and the guide publishes to every clio at once");
+            guide.Should().Contain("`describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only)",
+                because: "the agent reads the case before it plans a change");
+            guide.Should().Contain("a stage left out is REMOVED",
+                because: "stages is the whole new list, and a dropped item removes a stage");
+            guide.Should().Contain("First `dry-run: true`: show the user `diff` and the notes, write only after their yes",
+                because: "agents answered about existing cases without a dry run and missed what would change");
+            guide.Should().Contain("pass `confirm-running-instances: true` only after they say yes, NEVER on your own",
+                because: "every save changes what the running cases follow");
+            guide.Should().Contain("goes ALONE (`invalid-request` otherwise)",
+                because: "switching a case on or off is a save of its own");
+            guide.Should().Contain("change that case instead (`modify-dynamic-case`)",
+                because: "case-exists now has a remedy");
+            guide.Should().Contain("`successful: false` (final group only",
+                because: "only the final group can end a case as unsuccessful, as in the case designer");
+        }
+    }
+
+    [Test]
+    [Description("A request about the order or outcomes of an object's status values reaches the case without the word \"stage\": a stand run had one agent draw a diagram and another add an order column to the lookup instead of reading the case.")]
+    public void StatusFlowWording_ShouldRouteToTheCase()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ArticlePath);
+        string routing = ReadCollapsed(RoutingPath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            routing.Should().Contain("or the order or outcomes of its status values (no \"stage\" needed)",
+                because: "routing is what an agent reads first, and the failing prompts never said stage");
+            routing.Should().Contain("the user names the object by its caption: `list-apps` / `get-app-info` when a schema-name search misses",
+                because: "a rerun reached the routing and still stopped: find-entity-schema matches schema names, not \"purchase requests\"");
+            guide.Should().Contain("an order or outcomes of status values",
+                because: "the scope names the wording that belongs to a case");
+            guide.Should().Contain("stages or status flow (\"ends Approved or Rejected\", \"move X before Y\")",
+                because: "the read-first rule covers the two prompts that failed");
+        }
+    }
+
+    [Test]
+    [Description("The whole guide fits one inline get-guidance reply: it is not one of the split articles, so nothing else measures it.")]
+    public void Article_ShouldFitOneInlineReply()
+    {
+        // Arrange
+        string article = ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ArticlePath);
+
+        // Act
+        int replyBytes = GuidanceInlineReplyBudgetTests.ReplyBytes(article);
+
+        // Assert
+        replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
+            because: "a reply past the inline limit is spilled to a file the release gate's agents do not read; split the article at a section boundary instead");
+    }
     [Test]
     [Description("process-modeling no longer lists DCM among the schemas that carry their own compile obligations: a case is interpreted.")]
     public void ProcessModeling_ShouldNotClaimACaseNeedsACompile()
