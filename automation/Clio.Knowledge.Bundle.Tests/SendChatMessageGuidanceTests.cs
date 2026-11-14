@@ -44,10 +44,11 @@ public sealed class SendChatMessageGuidanceTests
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
-    /// is about 20,500 response characters, so a new clause pays for itself with a trim, and a larger addition is reviewed, or
-    /// split, rather than absorbed. The 19,000-byte inline rule is asserted separately.
+    /// is about 21,900 response characters after the reviewed addition of the literal schema UId read, so a new clause pays
+    /// for itself with a trim, and a larger addition is reviewed, or split, rather than absorbed. The 19,000-byte inline
+    /// rule is asserted separately.
     /// </summary>
-    private const int DesignTargetResponseCharacters = 21_500;
+    private const int DesignTargetResponseCharacters = 22_000;
 
     [Test]
     [Description("The guide owns the block and states the create-contract gate and the floor; it is registered banner-less, ungated and without a legacy route, required by the library, and the element catalog, its details, process-modeling and routing send the reader to it, with one floor everywhere.")]
@@ -143,7 +144,7 @@ public sealed class SendChatMessageGuidanceTests
             "each send still needs the identity and the 24-hour window",
             "\"send, then wait for the answer\": the chat is created Completed, and a reply opens a NEW chat;",
             "Prefer a Lookup SYSTEM SETTING that references the ROOT Channel object: an `expression` `[#SysSettings.<Code>#]`.",
-            "It is stored in the typed form the designer writes, `[#SysSettings.<Code><Guid>#]`, where `<Guid>` is literal text (the value type), as in `[#SysSettings.UsrSupportChatChannel<Guid>#]`; describe echoes that.",
+            "It is stored in the designer's typed form `[#SysSettings.<Code><Guid>#]` (`<Guid>` is literal text, the value type); describe echoes that.",
             "no setting with that code, not a Lookup, or a Lookup of another object: REFUSED, naming the code. A Lookup of a replacing Channel schema: built with a notice",
             "Create a setting only after the user confirms (an environment change), then SET ITS VALUE.",
             "A constant channel LAST:",
@@ -159,7 +160,7 @@ public sealed class SendChatMessageGuidanceTests
             "SEND NOW (\"send this to <contact> now\"): clio sends only through a process; say so in one line.",
             "build a reusable process whose `to` is a Lookup (Contact) input parameter and run it once for this contact",
             "The process is the deliverable, not scratch to delete. Ask for the package only when `get-target-package` fails.",
-            "Run `odata-read` through `clio-run`. Shape: `entity`, never `entity-set`; `filters` is an OBJECT",
+            "Shape: `entity`, never `entity-set`; `filters` is an OBJECT",
             "filter a lookup on its path `X/Id`, never `XId` or `X`; `select` takes columns, never a path.",
             "entity: \"Channel\", select: [\"Id\", \"Name\", \"IsActive\"], filters: { all: [ { field: \"IsActive\", op: \"eq\", value: true } ] }",
             "entity: \"EmailTemplate\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"TemplateType/Id\", op: \"eq\", value: \"62215de1-23e0-4037-88c9-65ccf72904a4\" } ] }",
@@ -192,8 +193,8 @@ public sealed class SendChatMessageGuidanceTests
             "so a completed run is not a delivered message: read `SendStatus`.",
             "`value` is for TEXT columns only. A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: \"[#Lookup.<referenced object schema UId>.<record Id>#]\"`: the object's schema UId, never its name.",
             "an older package saves it green, and the designer card then shows `<entity not found>`.",
-            "No clio discovery tool returns a schema UId:",
-            "Read it with `execute-esq` on `SysSchema`: `UId` where `Name` is the referenced object, `ManagerName` is `EntitySchemaManager` and `ExtendParent` is false",
+            "No clio discovery tool returns a schema UId (`find-entity-schema` gives names). Read it with this call; the `ExtendParent` false comparison keeps a replacing schema's row out:",
+            "clio-run { command: \"execute-esq\", args: { environment-name: \"<env>\", query: { rootSchemaName: \"SysSchema\", columns: { items: { UId: { expression: { expressionType: 0, columnPath: \"UId\" } } } }, filters: { filterType: 6, items: { n: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"Name\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: \"<Object>\" } } }, m: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ManagerName\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: \"EntitySchemaManager\" } } }, e: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ExtendParent\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 12, value: false } } } } } } }",
             "An unknown column and `Id` are refused, and so is `selectionColumn`.",
             "is accepted with a notice: your value overwrites it.",
             "A `Channel` row alone is not a working channel: it needs its messenger settings",

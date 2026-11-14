@@ -10,7 +10,7 @@ Needs CrtProcessBuilder 1.6.6.176 or later on the environment. The default creat
 == When to use it, and when not ==
 The element sends ONE message to ONE contact through a Creatio chat channel (Telegram, WhatsApp, Facebook Messenger,
 SMS and the like): a case update, a reminder, an appointment confirmation. It creates a Completed chat holding the
-message, so it shows in the contact's chat history; a reply opens a new chat in the queue.
+message, so it shows in the contact's chat history.
 Not this element:
 - a message to employees, or a bot broadcast with no contact: `process-send-email`; a bot API: `process-web-service`;
 - a bulk send - a marketing broadcast to an audience: that is a campaign, not this element. A per-record
@@ -46,7 +46,7 @@ for the package only when `get-target-package` fails.
   fails: settle the missing part WITH the user.
 
 == Discovery reads ==
-Run `odata-read` through `clio-run`. Shape: `entity`, never `entity-set`; `filters` is an OBJECT
+Shape: `entity`, never `entity-set`; `filters` is an OBJECT
 (`{all|any: [{field, op, value}]}`), never a string or a raw `filter`; filter a lookup on its path `X/Id`, never
 `XId` or `X`; `select` takes columns, never a path. Each call is
 clio-run { command: "odata-read", args: { environment-name: "<env>", <one line below> } }:
@@ -56,12 +56,11 @@ clio-run { command: "odata-read", args: { environment-name: "<env>", <one line b
 
 == From: which channel ==
 DISCOVER first: the active channels, and an existing Lookup setting on Channel (`list-sys-settings` with a
-`search-pattern`). When several channels could fit, ASK which one; never guess. Then rank the sources the way
-`process-send-email` ranks a RECIPIENT, and say which rung you took and why:
+`search-pattern`). When several channels could fit, ASK which one; never guess. Then rank the sources
+and say which rung you took and why:
 1. Prefer a Lookup SYSTEM SETTING that references the ROOT Channel object: an `expression` `[#SysSettings.<Code>#]`.
-   An administrator can then move the process to another channel without reopening it. It is stored in the typed
-   form the designer writes, `[#SysSettings.<Code><Guid>#]`, where `<Guid>` is literal text (the value type), as in
-   `[#SysSettings.UsrSupportChatChannel<Guid>#]`; describe echoes that. The build checks the setting:
+   An administrator can then move the process to another channel without reopening it. It is stored in the designer's
+   typed form `[#SysSettings.<Code><Guid>#]` (`<Guid>` is literal text, the value type); describe echoes that. The build checks the setting:
    no setting with that code, not a Lookup, or a Lookup of another object: REFUSED, naming the code. A Lookup of a
    replacing Channel schema: built with a notice (the designer will not list it; recreate it on the root object).
    No value yet: built with a notice; the run fails until it has one.
@@ -123,9 +122,9 @@ macros can then read that record.
   From CrtProcessBuilder 1.6.6.176 a name there is rewritten to the UId with a notice; an older package saves it
   green, and the designer card then shows `<entity not found>`. A record known only at run time comes from
   `processParameter` or `sourceElement`.
-- No clio discovery tool returns a schema UId: `find-entity-schema` and `get-entity-schema-properties` give names
-  only. Read it with `execute-esq` on `SysSchema`: `UId` where `Name` is the referenced object, `ManagerName` is
-  `EntitySchemaManager` and `ExtendParent` is false (the root schema, not a replacement).
+- No clio discovery tool returns a schema UId (`find-entity-schema` gives names). Read it with this call; the
+  `ExtendParent` false comparison keeps a replacing schema's row out:
+clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { rootSchemaName: "SysSchema", columns: { items: { UId: { expression: { expressionType: 0, columnPath: "UId" } } } }, filters: { filterType: 6, items: { n: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "Name" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: "<Object>" } } }, m: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ManagerName" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 1, value: "EntitySchemaManager" } } }, e: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ExtendParent" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 12, value: false } } } } } } }
 - An unknown column and `Id` are refused, and so is `selectionColumn`. A column the element fills itself (`Status`,
   `Channel`, `Contact`, `Operator`, `Queue`, `ChatPreview`) is accepted with a notice: your value overwrites it.
 - On `setElement` an omitted list is kept, a sent list REPLACES the stored set, and `[]` clears it.
@@ -167,7 +166,7 @@ stored values.
 == Read back ==
 `describe-business-process` (`element=<name>` or `mode=full`) returns the `chatMessage` block: `from` and `to` in the
 source forms above - a constant reads back as `{value: <record id>, display: <name>}`, and the describe-only `display` names the channel and the contact
-when you explain what the process sends and to whom - `messageSource`, `template` (the `[#Lookup…#]` macro) with the
+for your explanation - `messageSource`, `template` (the `[#Lookup…#]` macro) with the
 describe-only `templateName`, `message` (custom mode only), `ignoreErrors` (always stated, `false` included: an untouched designer checkbox reads false), `columnValues`, and the describe-only
 `outputs` and `issues` (no channel, no contact, template mode with no template - an unset mode runs as template
 mode - or custom mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.
@@ -176,9 +175,9 @@ Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.176 contract. Mea
 failing the process; `ignoreErrors` on giving `"Error"` and the channel text in mapped outputs; an SMS send without
 messenger settings resolving the primary mobile, then failing (`Username can not be null`) with no chat left; the
 designer's typed system setting, lookup macros, one-line message field and empty template after a switch to custom.
-On 2026-11-13/14: the discovery reads above as written, the `SysSchema` UId read (without `ExtendParent` false it
-also returns a replacement's row), and a name-form Lookup macro in `columnValues` showing `<entity not found>`. Read from the OmnichannelMessaging
-and core source and the product documentation, not measured: template macros against the chat, column values on a
+On 2026-11-13/14: the discovery reads and the `SysSchema` call above as written, a name-form Lookup macro in
+`columnValues` showing `<entity not found>`, and an agent run on 1.6.6.176 reading a UId with that call. Read from
+the source and the product documentation, not measured: template macros against the chat, column values on a
 delivered chat, the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, the not-found
 channel text, an empty system setting failing the run, the template language order. Inferred: an unset mode running
 as template mode, the card's display of multi-line text or a server-built template, a run of a server-written
