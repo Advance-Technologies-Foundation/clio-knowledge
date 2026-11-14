@@ -184,7 +184,9 @@ Changing a registered service
   secret constant carry over. To add one parameter, send the whole method from describe plus the new one.
 - `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth`, and
   a method with `use-auth: false` sends no authentication at all (measured on SOAP 1.2; REST takes the same code
-  path); after a change of the authentication the tool names such methods in a notice. Pass it on; to make one send the new authentication, send it with
+  path). Which methods send the authentication is the user's decision: before or after `setAuth`, ASK the user about
+  each method with `use-auth: false` (the tool names them in a notice after a change of the authentication); never
+  set `use-auth` on your own, not even in the same call as `setAuth`. Only on their yes, send that method with
   `setMethod` and `use-auth: true` (the usage guard applies).
 - One exception: an `auth` block with `constant-credentials-masked: true` (Basic or Digest credentials typed
   in Studio as constants, both or only one of them) cannot be sent back; `setAuth` needs BOTH

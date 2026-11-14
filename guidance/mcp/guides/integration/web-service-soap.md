@@ -31,8 +31,12 @@ Reading a WSDL (read-wsdl)
   a recommendation), `arguments`, and `existing-methods` with `service-code`. `warnings` and `notices` are listed
   once for the whole result.
 - Before registering, show the user the operations, and the ports when there are several. Register the port a
-  warning names to register instead, else the `studio-pick` port, unless the user asks for another. When they
-  want only some operations, read again with `operations` (and `port`) instead of editing the arguments.
+  warning names to register instead ("Register port ... instead"), else the `studio-pick` port, unless the user asks
+  for another. When they want only some operations, read again with `operations` (and `port`) instead of editing
+  the arguments.
+- BEFORE `register-web-service`, show the user every warning and notice about the port you are about to register
+  (its SOAP version, a base URI on another host or on localhost, a missing soap-action) and wait for their answer
+  where one asks for it; never register first and warn afterwards.
 - Register a port's `arguments` with `register-web-service` as they are, adding only `package-name` and what a
   warning asks the user for. Do not rename codes or rewrite paths: a response path comes with its prefix
   (`tem:AddResult`); keep it. Method and parameter codes are the prefix plus the full WSDL names in PascalCase, the
@@ -43,10 +47,12 @@ Reading a WSDL (read-wsdl)
   fragment, had spaces, control or non-ASCII characters, or was too long) needs the real endpoint from the user
   before registering; while a namespace is left out, `register-web-service` refuses the call if a request element
   uses its prefix, until the user gives the URI; a `soap-action` left out needs the right value from the API owner.
-- A port warning says the platform may not be able to call that port as the WSDL describes it, and names a SOAP 1.1
-  port to register instead when the WSDL has one: tell the user and register that port. When the warning names it
-  with a difference instead (another host, or http where the warned port is https), show the user its `base-uri`
-  and register it only on their yes. The platform sends a SOAP 1.2
+- A port warning says the platform may not be able to call that port as the WSDL describes it. When it says
+  "Register port ... instead", tell the user and register that port. When it names the SOAP 1.1 port with a
+  difference (another host, or http where the warned port is https), show the user its `base-uri` and register it
+  only on their yes. When it names the SOAP 1.1 port only for a failed test call (a SOAP 1.2 port of a WSDL WCF did
+  not write; an ASMX service answers SOAP 1.2), keep the SOAP 1.2 port and switch only if a test call answers
+  `ActionNotSupported`. The platform sends a SOAP 1.2
   action only as a `SOAPAction` header, never as the `action` parameter of `Content-Type`, so a service that
   dispatches SOAP 1.2 by that parameter (WCF) answers every call with `ActionNotSupported` and Action ''; and it
   writes no WS-Addressing header, so a port that requires WS-Addressing (WCF `wsHttpBinding` with security mode

@@ -151,6 +151,7 @@ public sealed class WebServiceRegistrationGuidanceTests
         [
             "`setAuth` that really changes the authentication changes every call of the methods with `use-auth: true`",
             "The tool compares the service before and after the whole call",
+            "never set `use-auth` on your own, not even in the same call as `setAuth`",
             "`setRetryCount` is never guarded.",
             "a method with `use-auth: false` sends no authentication at all",
             "The platform sends Digest as a preemptive `Authorization: Basic` header"
@@ -174,12 +175,14 @@ public sealed class WebServiceRegistrationGuidanceTests
         // Act
         string[] clauses =
         [
-            "Register the port a warning names to register instead, else the `studio-pick` port",
+            "Register the port a warning names to register instead (\"Register port ... instead\"), else the `studio-pick` port",
             "Studio's choice, not a recommendation",
             "never as the `action` parameter of `Content-Type`",
             "`application/soap+xml;charset=utf-8;action=\"<the soap-action>\"`",
             "two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI)",
-            "Do this only with the user's agreement, and test a call."
+            "Do this only with the user's agreement, and test a call.",
+            "never register first and warn afterwards.",
+            "keep the SOAP 1.2 port and switch only if a test call answers `ActionNotSupported`."
         ];
 
         // Assert
