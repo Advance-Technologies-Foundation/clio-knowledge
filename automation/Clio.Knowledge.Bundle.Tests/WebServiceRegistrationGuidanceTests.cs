@@ -107,8 +107,36 @@ public sealed class WebServiceRegistrationGuidanceTests
             because: "SOAP services are registered and changed by the tools now");
         guide.Should().Contain("get-guidance name=web-service-soap",
             because: "the owner guide must send a SOAP task to the SOAP article");
-        routing.Should().Contain("for a SOAP service (SOAP 1.1 / 1.2, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap",
-            because: "a SOAP registration task must reach the SOAP article from routing");
+        routing.Should().Contain("for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap",
+            because: "a SOAP registration task, and a WSDL the user gives, must reach the SOAP article from routing");
+    }
+
+    [Test]
+    [Description("The SOAP guide sends a WSDL to read-wsdl, registers its output as it is, leaves the code choice and the test call to the user, and keeps the fallback for a clio without the tool.")]
+    public void SoapGuide_ShouldSendAWsdlToReadWsdl()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "call `read-wsdl` first and register what it returns",
+            "never hand-build what it returned",
+            "does not list `read-wsdl` has no WSDL reading",
+            "Register a port's `arguments` with `register-web-service` as they are, adding only `package-name`",
+            "ask the user which way to go and do not pick a code yourself",
+            "the confirmation rule of `web-service-registration` applies to every SOAP method"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent builds a SOAP service by hand from a WSDL, rewrites what read-wsdl returned, picks a code over a taken one, or calls a SOAP method unasked");
+        }
+        soap.Should().NotContain("There is no WSDL import",
+            because: "read-wsdl reads a WSDL now");
     }
 
     private static string ReadCollapsed(string relativePath) =>
