@@ -61,7 +61,11 @@ Credential rule (MUST)
   `Authorization: Bearer <token>` the setting holds the whole `Bearer <token>` text. A request that must be
   signed per call (HMAC and similar) cannot be described this way; tell the user.
 - `describe-web-service` never returns credential values or secret-like constant defaults
-  (`default-masked: true`, `constant-credentials-masked: true`). Do not try to read them another way.
+  (`default-masked: true`, `constant-credentials-masked: true`). Do not try to read them another way. A
+  key-like query value in a base URI, a method `uri` or a `soap-action` shows as `[masked]`. Sent back unchanged by
+  `setMethod` or `setBaseUri` of the same service it is restored, but a constant under a credential name
+  (`api_key`, `token`) is still refused on save: make it a parameter with `default-sys-setting`. A changed URI that
+  still carries `[masked]` is refused.
 
 Registering
 - `register-web-service` arguments: `environment-name`, `package-name`, `code`, `base-uri`, `methods`
@@ -203,9 +207,9 @@ Changing a registered service
   the same way while a process calls such a method; the refusal says what changes ("the new base URI changes every
   call ..."), and the elements keep their parameters. The tool compares the service before and after the whole call:
   values sent back unchanged (as `describe-web-service` returned them) are not a change. `setRetryCount` is never
-  guarded. A clio that
-  saves such a change without a refusal predates this check: before changing the base URI or the authentication
-  of a service, list its callers with `describe-web-service` `usages: true` and ask the user first.
+  guarded. A clio whose `modify-web-service` contract does not say that `setBaseUri` and `setAuth` are refused
+  while a process calls the service predates this check and saves them without a refusal, so with it check before
+  the call: list the service's callers with `describe-web-service` `usages: true` and ask the user first.
 - `addMethod` never breaks a caller and is not guarded. Adding a parameter to a method a process already calls
   is a `setMethod` and is guarded; after the user agrees, the new parameter appears on that element at its next
   load, unbound, and until it is bound a body field goes out as `null` (measured), so bind it or tell the user.

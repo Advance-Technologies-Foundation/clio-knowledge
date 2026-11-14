@@ -20,7 +20,9 @@ Reading a WSDL (read-wsdl)
 - Arguments: `environment-name` and either `wsdl-url` or `wsdl-files`; optional `port`, `operations`, and `code` or
   `service-code`. When the user named the code of a NEW service, pass it as `code`: the arguments then carry it, so
   they are registered as they are. `service-code` is ONLY for an existing SOAP service the operations go into (a
-  service-code that names no service is refused); never both. It saves nothing. A `wsdl-url` is downloaded, with the
+  service-code that names no service is refused); never both. A clio whose `read-wsdl` contract has no `code` predates
+  it: read without `code`, then change only the service `code` in the arguments to the user's code. It saves
+  nothing. A `wsdl-url` is downloaded, with the
   schemas it imports by an absolute `schemaLocation`, by the stand through Studio's own endpoint; clio never fetches
   it. `wsdl-files` are absolute paths, on the machine clio runs on, of the WSDL and of every schema it imports; they
   are refused when clio is reached as an HTTP MCP server, where only `wsdl-url` works.
@@ -37,8 +39,11 @@ Reading a WSDL (read-wsdl)
   for another. When they want only some operations, read again with `operations` (and `port`) instead of editing
   the arguments.
 - BEFORE `register-web-service`, show the user every warning and notice about the port you are about to register
-  (its SOAP version, a base URI on another host or on localhost, a missing soap-action) and wait for their answer
-  where one asks for it; never register first and warn afterwards.
+  (its SOAP version; a base URI on another host than the `wsdl-url`) and wait for their answer where one asks for
+  it; never register first and warn afterwards. Check the `arguments` yourself for two things and tell the user: a
+  `base-uri` on `localhost` or another placeholder host (common in a WSDL saved from a developer machine; read-wsdl
+  flags it only when a `wsdl-url` came from another host, never for `wsdl-files`), and a method without
+  `soap-action` (register names one only after saving, and only for SOAP 1.1).
 - Register a port's `arguments` with `register-web-service` as they are, adding only `package-name` and what a
   warning asks the user for. Do not rename codes or rewrite paths: a response path comes with its prefix
   (`tem:AddResult`); keep it. Method and parameter codes are the prefix plus the full WSDL names in PascalCase, the
@@ -120,7 +125,7 @@ Registering a SOAP service
   `default-value` (refused like a header constant): give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. The credential-name
   check also covers `licence`/`license`, `nonce`, `passcode`, `passphrase`, `bearer`, `jwt` and `pass` not
-  followed by a letter (not `compass`, `bypass`, `passport`).
+  followed by a lowercase letter (not `compass`, `bypass`, `passport`; `UsrPassId` and `PASSPORT` do count).
 - `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
   `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it. An empty one on a
   response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`. On a
@@ -153,7 +158,8 @@ Test calls
   sent, the body is withheld and only the status comes back. `response-values` gives the response
   parameters as the platform read them by their element paths.
 - A SOAP 1.2 call answered with a fault `ActionNotSupported` and Action '', or `DestinationUnreachable` and To '',
-  hit the limits above: switch to the WSDL's SOAP 1.1 port (`setType` soap11), or use the workaround the
+  hit the limits above: switch to the WSDL's SOAP 1.1 port (`setType` soap11, plus `setBaseUri` when that port's
+  base-uri differs, as it does for WCF), or use the workaround the
   read-wsdl warning gives. Authentication goes out on a SOAP call exactly as on REST, for a method with `use-auth: true`.
 
 Evidence
