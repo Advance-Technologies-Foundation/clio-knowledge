@@ -240,20 +240,6 @@ public sealed class ProcessDynamicCaseGuidanceTests
     }
 
     [Test]
-    [Description("The whole guide fits one inline get-guidance reply: it is not one of the split articles, so nothing else measures it.")]
-    public void Article_ShouldFitOneInlineReply()
-    {
-        // Arrange
-        string article = ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ArticlePath);
-
-        // Act
-        int replyBytes = GuidanceInlineReplyBudgetTests.ReplyBytes(article);
-
-        // Assert
-        replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
-            because: "a reply past the inline limit is spilled to a file the release gate's agents do not read; split the article at a section boundary instead");
-    }
-    [Test]
     [Description("process-modeling no longer lists DCM among the schemas that carry their own compile obligations: a case is interpreted.")]
     public void ProcessModeling_ShouldNotClaimACaseNeedsACompile()
     {
@@ -266,8 +252,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
     }
 
     [Test]
-    [Description("The change guide is registered, required and routed on its own row, and both case guides fit one inline reply each: the create guide was split at a section boundary to stay under it.")]
-    public void ChangeGuide_ShouldBeRegisteredRoutedAndFitOneReply()
+    [Description("The change guide is registered, required and routed on its own row; GuidanceInlineReplyBudgetTests measures both case guides as split articles.")]
+    public void ChangeGuide_ShouldBeRegisteredAndRouted()
     {
         // Arrange
         string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
@@ -279,7 +265,6 @@ public sealed class ProcessDynamicCaseGuidanceTests
             .EnumerateArray()
             .Single(item => item.GetProperty("itemId").GetString() == ChangeItemId);
         string routing = ReadCollapsed(RoutingPath);
-        int changeReply = GuidanceInlineReplyBudgetTests.ReplyBytes(ProcessGuideSet.Read(repositoryRoot, ChangeArticlePath));
         string createGuide = ReadCollapsed(ArticlePath);
 
         // Assert
@@ -296,8 +281,6 @@ public sealed class ProcessDynamicCaseGuidanceTests
             routing.Should().Contain($"split its records into several cases by a type (different stages for B2B and B2C orders) -> name={ChangeItemId}",
                 because: "a request for different stages per type must reach the guide that owns filters");
             createGuide.Should().Contain($"`{ChangeItemId}`", because: "the create guide hands changes and filters over");
-            changeReply.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
-                because: "a reply past the inline limit is spilled to a file the release gate's agents do not read");
         }
     }
 
