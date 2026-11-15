@@ -7,6 +7,10 @@ the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI
 asks for "stages", "a status lifecycle", "a progress bar on the record page" or "a case". "When X happens, do Y" is a
 business process: `process-digest`. A case is not the `Case` object.
 
+Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `get-tool-contract`
+does not list it, the clio serving you is older: stop here and tell the user to update clio - do not build a case by
+other means.
+
 == Answer the user from the tool ==
 - Whether or how an EXISTING object can get stages, even "just tell me, change nothing": answer only after the call
   with `dry-run: true` (it writes nothing) in any editable package and WITHOUT `stages` (a stage list is checked
@@ -51,8 +55,7 @@ deleting an existing case: the case designer does those. No mobile page, mini pa
 == The call ==
 `create-dynamic-case { environment-name, package-name, entity-schema-name, stage-column-name, stages?,
 order-column?, name?, caption?, add-progress-bar = true, page-schema-name?, add-package-dependencies = true,
-dry-run = false }`; it writes, so it is destructive. Version boundary: `create-dynamic-case` needs clio 8.1.0.150
-or later; on an older clio, stop here and tell the user to update clio - do not build a case by other means.
+dry-run = false }`; it writes, so it is destructive (clio 8.1.0.150 or later: see Scope).
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
   pass `stages` (every value exactly once, by Id or exact display value) whenever the business order matters.
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
