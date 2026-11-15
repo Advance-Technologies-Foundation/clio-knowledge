@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentAssertions;
@@ -82,8 +83,11 @@ public sealed class ProcessDynamicCaseGuidanceTests
         {
             guide.Should().Contain("create-dynamic-case", because: "the guide owns this tool");
             guide.Should().MatchRegex(
-                @"Version boundary: `create-dynamic-case` needs clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later; on an older clio, stop here",
+                @"Version boundary, before anything else: `create-dynamic-case` needs clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later\. If `get-tool-contract` does not list it, the clio serving you is older: stop here",
                 because: "a published guide reaches every clio, and an older one has no such tool to call");
+            guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal).Should().BeLessThan(
+                guide.IndexOf("== Answer the user from the tool ==", StringComparison.Ordinal),
+                because: "an agent on an older clio must meet the boundary before it reads how to call the tool");
             guide.Should().Contain("pass `stages`", because: "only the caller knows the business order");
             guide.Should().Contain("orderSource", because: "the order used is always answered and must be relayed");
             guide.Should().Contain("NO compile and NO restart", because: "a case is interpreted; a compile only costs time");
