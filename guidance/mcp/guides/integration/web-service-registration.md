@@ -8,6 +8,9 @@ Scope and ownership
 - This guide owns `register-web-service`, `list-web-services`, `describe-web-service`,
   `modify-web-service` and `test-web-service-method`: their arguments, the credential rule, the usage guard
   and the follow-up steps the user owns.
+- Version boundary, before anything else: these five tools need clio 8.1.0.150 or later. If `get-tool-contract`
+  does not list `register-web-service`, the clio serving you is older: tell the user to update clio, or that the
+  service is registered in Studio > Web services, and stop.
 - It does NOT own the Call web service process element: `get-guidance name=process-web-service` owns the
   element, and the process element catalog (`get-guidance name=process-element-catalog`) owns whether it can be
   built. This guide only produces the service such an element calls.
