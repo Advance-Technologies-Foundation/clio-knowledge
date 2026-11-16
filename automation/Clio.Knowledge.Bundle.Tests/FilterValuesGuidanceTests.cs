@@ -53,7 +53,7 @@ public sealed class FilterValuesGuidanceTests
     }
 
     [Test]
-    [Description("The values source is gated on the create-business-process contract, quoted verbatim. The short form a default lookup returns, which is what agents read, counts when it says the sentence, and its silence sends the agent to the full form before any fallback, because clio 8.1.0.150 to 8.1.0.152 say it only there. The gate names the clio release that ships the sentence, never a CrtProcessBuilder number, which a cut from main without values can overtake (1.6.6.158 and 1.6.6.159 did), and both fallbacks: 'any of' as an or group of equal conditions, 'none of' as notEqual conditions in an and group. So a clio or package that does not carry values never builds a field it cannot send, never falls back to the AND form, and never sends an or group of exclusions, which matches every record.")]
+    [Description("The values source is gated on the create-business-process contract, quoted verbatim. The short form a default lookup returns, which is what agents read, counts when it says the sentence, and its silence sends the agent to the full form before any fallback. The article gives no last release whose short form is silent, since a release without the short-form sentence could overtake any number it named. The gate names the clio release that ships the sentence, never a CrtProcessBuilder number, which a cut from main without values can overtake (1.6.6.158 and 1.6.6.159 did), and both fallbacks: 'any of' as an or group of equal conditions, 'none of' as notEqual conditions in an and group. So a clio or package that does not carry values never builds a field it cannot send, never falls back to the AND form, and never sends an or group of exclusions, which matches every record.")]
     public void Guide_ShouldGateValuesAndNameTheFallback()
     {
         // Arrange
@@ -64,14 +64,14 @@ public sealed class FilterValuesGuidanceTests
             + "  \"any of several lookup records is ONE condition with values\"");
         bool shortFormCounts = guide.Contains("The short form a default `get-tool-contract` lookup returns\n"
             + "  counts, but its silence proves nothing");
-        bool silentShortForm = guide.Contains("clio 8.1.0.150 to 8.1.0.152 say it only in the full form (`detail=full`),\n"
-            + "  so read that before you fall back");
+        bool silentShortForm = guide.Contains("the full form (`detail=full`) says it from clio 8.1.0.150, the short\n"
+            + "  form only from a later release, so read the full form before you fall back");
         bool fullFormOnly = guide.Contains("only when the FULL `create-business-process` contract");
         bool shippingClio = guide.Contains("as clio 8.1.0.150 and later does; that clio\n"
             + "  refuses an older CrtProcessBuilder up front");
         bool packageNumber = guide.Contains("`values` needs CrtProcessBuilder");
-        bool fallback = guide.Contains("If neither form says it, build \"any of\" as that `or` group of `equal`\n"
-            + "  conditions, and \"none of\" as `notEqual` conditions in an `and` group");
+        bool fallback = guide.Contains("If neither form says it, build\n"
+            + "  \"any of\" as that `or` group of `equal` conditions, and \"none of\" as `notEqual` conditions in an `and` group");
         bool noneOfNeverOr = guide.Contains("\"None of\" them is one `notEqual` condition per value in an `and` group (the root when it is\n"
             + "  `and`, otherwise a nested `and` group), never in an `or` group: an `or` of `notEqual` conditions matches every\n"
             + "  record");
@@ -84,7 +84,7 @@ public sealed class FilterValuesGuidanceTests
             because: "agents read the short form a default lookup returns, and a clio that says the sentence there "
                 + "needs no detail=full read");
         silentShortForm.Should().BeTrue(
-            because: "clio 8.1.0.150 to 8.1.0.152 carry values but say it only in the full form, and an agent that took "
+            because: "a clio from 8.1.0.150 carries values and may say so only in the full form, and an agent that took "
                 + "a silent short form for a no built an or group although its clio carried values");
         fullFormOnly.Should().BeFalse(
             because: "a gate on the full form alone would make every agent pay a detail=full read for a sentence "

@@ -67,9 +67,9 @@ is the one contract all three share, which is why it reads as its own subject.
   Gate: use `values` only when the `create-business-process` contract says
   "any of several lookup records is ONE condition with values", as clio 8.1.0.150 and later does; that clio
   refuses an older CrtProcessBuilder up front. The short form a default `get-tool-contract` lookup returns
-  counts, but its silence proves nothing: clio 8.1.0.150 to 8.1.0.152 say it only in the full form (`detail=full`),
-  so read that before you fall back. If neither form says it, build "any of" as that `or` group of `equal`
-  conditions, and "none of" as `notEqual` conditions in an `and` group.
+  counts, but its silence proves nothing: the full form (`detail=full`) says it from clio 8.1.0.150, the short
+  form only from a later release, so read the full form before you fall back. If neither form says it, build
+  "any of" as that `or` group of `equal` conditions, and "none of" as `notEqual` conditions in an `and` group.
 - `macro` vocabulary (COMPLETE set — an unknown name is rejected at BUILD, validated against the platform
   macro catalog, never silently accepted): **relative periods** `Yesterday` | `Today` | `Tomorrow`, plus
   `Previous`/`Current`/`Next` for each of `Week` | `Month` | `Quarter` | `HalfYear` | `Year` | `Hour`
