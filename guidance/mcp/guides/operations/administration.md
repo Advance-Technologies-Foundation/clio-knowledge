@@ -69,14 +69,24 @@ when PortalUserManagementV2 is enabled. Keep the connection domain consistent wh
 
 1. Resolve an existing Contact and verify the intended login is not already used. User creation needs
    a Contact GUID; it does not create a Contact or silently adopt an existing account.
-2. Have the operator provision a temporary account password in a process variable named
-   `CLIO_ADMIN_PASSWORD_<SUFFIX>`, where SUFFIX uses uppercase letters, digits or underscores.
-   This dedicated namespace is an explicit opt-in; never copy unrelated credentials into it.
-   The variable must be available to the executing Clio/MCP process and removed after use.
-   Pass only its name as password-env. Do not put a password in tool arguments, CLI arguments,
-   examples, files, logs, comments or evidence. An agent must not echo the variable's value.
-3. Call manage-user action=create with a new id, user-login, contact-id, password-env and the intended
-   force-change-password value. external selects an external account. Read the returned identity.
+2. The new password reaches clio by reference, never as a value, through exactly one of two channels.
+   Do not put a password in tool arguments, CLI arguments, examples, files you write, logs, comments or
+   evidence, and never echo it.
+   - password-file (clio 8.1.0.153 or later), preferred where the host offers it: the host or the
+     operator writes the password, one line, to `<clio home>/secrets/<name>`, readable by its owner only,
+     and gives you the name. Pass only that name as password-file. Use only a name the host gave you:
+     never a path, never one you invent. A clio that has the channel lists password-file in manage-user's
+     input schema (`get-tool-contract`); without it, use password-env. clio refuses a link, a file others
+     can read, an empty or multi-line file, and naming both channels.
+   - password-env: have the operator provision a temporary account password in a process variable named
+     `CLIO_ADMIN_PASSWORD_<SUFFIX>`, where SUFFIX uses uppercase letters, digits or underscores. This
+     dedicated namespace is an explicit opt-in; never copy unrelated credentials into it. The variable must
+     be available to the executing Clio/MCP process and removed after use. Pass only its name as
+     password-env. A long-running process's environment can be read by other processes of the same user,
+     which is why password-file is preferred.
+3. Call manage-user action=create with a new id, user-login, contact-id, one password reference
+   (password-file or password-env) and the intended force-change-password value. external selects an
+   external account. Read the returned identity.
 4. Assign roles separately with manage-role action=add-member. The account can persist even if a
    later membership call fails. Inspect state before retrying; do not create a second account.
 5. Inspect and assign licenses as a separate step. Account existence is not proof of usable login.
@@ -95,7 +105,7 @@ inspect-user action=lock-status reads the native blocked state. manage-user acti
 native password/MFA lockout counters. Unlock is separate from activation: it preserves Active=false.
 Use update active=true only when activation is part of the authorized change.
 
-manage-user action=password takes id, password-env and force-change-password. It changes only the
+manage-user action=password takes id, one password reference (step 2) and force-change-password. It changes only the
 password-related fields; it must not rename, reactivate or detach the Contact. LDAP-synchronized
 accounts are rejected because their password authority is external. A server-accepted password is
 not a fresh-login proof: password policy, forced change, account state, IP rules and licenses can
