@@ -307,6 +307,8 @@ Handlers — reference-only, from an existing remote module:
   Custom request handlers can be referenced (e.g. via `clicked` binding to a custom request
   type) only if the user explicitly asks for them AND the handler is already implemented in
   a remote module. Do not author handler code inside the mobile page body.
+  To implement and deliver such a module (handlers, custom requests, virtual data sources),
+  read get-guidance name=mobile-remote-module.
 
 ────────────────────────────────────────────────────────
 crt.Scaffold — do NOT re-insert

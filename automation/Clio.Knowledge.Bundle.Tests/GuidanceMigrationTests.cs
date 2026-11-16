@@ -61,7 +61,8 @@ public sealed class GuidanceMigrationTests
         "page-modal-size",
         "process-dynamic-case",
         "web-service-registration",
-        "web-service-soap"
+        "web-service-soap",
+        "mobile-remote-module",
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

@@ -20,6 +20,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
     to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
   - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
+  - custom code for a mobile page (a handler for save / load / attribute change, a custom request behind a
+    button, a virtual data source) -> name=mobile-remote-module
   - a stage progress bar (crt.EntityStageProgressBar) shows only for an object with a case -> name=process-dynamic-case
   - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
     requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
