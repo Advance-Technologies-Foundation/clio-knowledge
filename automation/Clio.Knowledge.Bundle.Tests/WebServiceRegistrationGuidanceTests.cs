@@ -78,6 +78,67 @@ public sealed class WebServiceRegistrationGuidanceTests
             because: "a process task with no registered service must reach the registration tools, not stop at Studio");
     }
 
+    [Test]
+    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps soap-header parameters on system settings, guards setNamespaces and setType, and routing reaches it.")]
+    public void SoapGuide_ShouldStateItsSafetyRules()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+        string guide = ReadCollapsed(ArticlePath);
+        string routing = ReadCollapsed("guidance/mcp/guides/routing.md");
+
+        // Act
+        string[] clauses =
+        [
+            "take it from the WSDL (the binding operation's `soapAction`) or ask the user; NEVER make one up.",
+            "Pass the whole notice on, risk sentence included",
+            "A soap-header parameter takes no `default-value`",
+            "NEVER a JSONPath",
+            "`removeMethod`, with the processes listed"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent invents a SOAP action, stores a WS-Security secret as a constant, or switches a called service unasked");
+        }
+        guide.Should().NotContain("a SOAP service stays in Studio",
+            because: "SOAP services are registered and changed by the tools now");
+        guide.Should().Contain("get-guidance name=web-service-soap",
+            because: "the owner guide must send a SOAP task to the SOAP article");
+        routing.Should().Contain("for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap",
+            because: "a SOAP registration task, and a WSDL the user gives, must reach the SOAP article from routing");
+    }
+
+    [Test]
+    [Description("The SOAP guide sends a WSDL to read-wsdl, registers its output as it is, leaves the code choice and the test call to the user, and keeps the fallback for a clio without the tool.")]
+    public void SoapGuide_ShouldSendAWsdlToReadWsdl()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "call `read-wsdl` first and register what it returns",
+            "never hand-build what it returned",
+            "does not list `read-wsdl` has no WSDL reading",
+            "Register a port's `arguments` with `register-web-service` as they are, adding only `package-name`",
+            "ask the user which way to go and do not pick a code yourself",
+            "the confirmation rule of `web-service-registration` applies to every SOAP method"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent builds a SOAP service by hand from a WSDL, rewrites what read-wsdl returned, picks a code over a taken one, or calls a SOAP method unasked");
+        }
+        soap.Should().NotContain("There is no WSDL import",
+            because: "read-wsdl reads a WSDL now");
+    }
+
     private static string ReadCollapsed(string relativePath) =>
         Regex.Replace(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath), @"\s+", " ");
 }
