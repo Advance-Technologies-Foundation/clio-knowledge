@@ -128,7 +128,7 @@ public sealed class ProcessGuideResponseSizeTests
     /// article the figure was measured on; and two of its inputs — the harness limit and the response
     /// envelope — belong to other repositories, which can move them without anything here going red.
     /// </summary>
-    private const int MaxResponseCharacters = (int)(LargestObservedPass * 0.85);
+    internal const int MaxResponseCharacters = (int)(LargestObservedPass * 0.85);
 
 
     /// <summary>
