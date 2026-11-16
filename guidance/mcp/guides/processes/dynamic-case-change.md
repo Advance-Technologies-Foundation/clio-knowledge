@@ -1,32 +1,50 @@
 clio MCP process-dynamic-case-change guide - change an existing dynamic case, and several cases on one object split by a filter
 
 Scope
-Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` and `modify-dynamic-case`, and splits
-an object's records between several cases by one lookup column (for example B2B and B2C orders with stages of their
-own). Building a case, the bar, the refusals of `create-dynamic-case` and the undo: `process-dynamic-case`.
+Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` and `modify-dynamic-case`: its stages,
+their order, groups, captions and colours, the case caption, its filter, and whether it is enabled. Splits an
+object's records between several cases by one lookup column (for example B2B and B2C orders with stages of their
+own), and owns the filter rules of `create-dynamic-case` too. Building a case, the bar, the other refusals of
+`create-dynamic-case` and the undo: `process-dynamic-case`.
 
-== Change an existing case (clio <CLIO-TBD>+) ==
+Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio <CLIO-TBD> or
+later. If `get-tool-contract` does not list `describe-dynamic-case`, the clio serving you is older: stop here and
+tell the user to update clio (until then the case designer changes a case); answer a question about the case as
+`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
+environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
+`install-process-builder`, once the user approves it (`core-rules`), is the remedy.
+
+== Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
    in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, and `enabled`. Several cases
    on the object (`case-ambiguous`): name one with `case-name`.
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
-   remove-filter?, enabled?, confirm-running-instances?, dry-run }` writes. `stages` is the WHOLE new list: a stage
-   left out is REMOVED, a value not yet a stage is ADDED (it must be in the lookup: add it with the data tools
-   first, after asking). Fields an item leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`)
-   recolours it; `caption` renames the stage in the case only, never the value every record shares. First
-   `dry-run: true`: show the user `diff` and the notes, write only after their yes. `unchanged` means nothing to do.
+   remove-filter?, enabled?, confirm-running-instances?, dry-run }` writes; the top-level `caption` renames the
+   CASE. `stages` is the WHOLE new list of items `{"value": Id or exact display value, "caption"?, "color"?,
+   "group"?, "successful"?}`, e.g. `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is
+   REMOVED, a value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, after
+   asking; the user asked for that stage, so this changes the case, it does not get around it). Fields an item
+   leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours it; an item's `caption`
+   renames the stage in the case only, never the value every record shares. `filter` and `remove-filter`: "Several
+   cases on one object". First `dry-run: true`: show the user `diff` and the notes, write only after their yes.
+   `unchanged` means nothing to do.
 3. While cases run (`runningInstances.total` > 0) every write is refused `running-instances-confirmation-required`:
    tell the user how many run and in which stages; pass `confirm-running-instances: true` only after they say yes,
    NEVER on your own. Running cases continue, possibly on the stages as they were.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
    nothing is deleted, running cases continue, new records start no case. Re-enabling next to another enabled case
-   that would start for the same records: `case-exists` or `filter-overlap`.
-Refusals: `stage-in-use` (cases sit in a stage being removed: move them first), `stage-has-steps` (it has steps or
-a step condition targets it: the case designer), `package-read-only` (a new version is not supported yet).
-`failed-restored`: the save did not take, the case is as before; `failed-leftover`: check it in the designer.
-No compile or restart; F5.
+   that would start for the same records: `case-exists` or `filter-overlap`; ask the user whether to disable that
+   case first or keep this one disabled. A case without a filter while the cases are split by a column:
+   `filter-required` (give it a filter first). `settings-conflict` on re-enabling: the object's case settings name
+   another stage column or another filter column, or there are several rows; the case designer settles that.
+Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
+the cases end - never change records' stage on your own. `stage-has-steps` (it has steps or a step condition
+targets it: the case designer), `package-read-only` (a new version is not supported yet).
+Outcomes: `failed-restored`: the save did not take, the case is as before; `failed-leftover`: relay its `leftovers`
+and have the user check the case in the designer; `unknown`: the reply was lost, so the change may or may not have
+been written - describe the case before retrying. No compile or restart; F5.
 
-== Several cases on one object (clio <CLIO-TBD>+) ==
+== Several cases on one object ==
 - The platform starts EVERY enabled case whose filter matches a new record. One object's cases are split by ONE
   lookup column, the filter column (never the stage column): each case takes some of its values
   (`filter: {column, values: [Id or exact display value]}`) or its empty value (`filter: {column, empty: true}`),
@@ -38,13 +56,18 @@ No compile or restart; F5.
   `unfiltered-case-exists`. Offer the case designer's two ways, each with its dry run, and let the user choose:
   (1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then
   `create-dynamic-case { filter, stages }` for the others; nothing is disabled. (2) turn the existing stages off:
-  `create-dynamic-case { filter, stages, deactivate-unfiltered: true }` disables that case; records going through it
-  lose it at their next status change. Pass `deactivate-unfiltered` ONLY after the user chose (2), never on your own.
-- Refusals: `filter-overlap` (another enabled case has one of these values, or the empty value: change that case
-  instead, one record never starts two cases); `filter-required` (the cases are split by a column, so the case
-  needs a filter; removing the last filter column is not supported yet); `settings-conflict` (they are split by
-  another column: not supported yet); `filter-column-invalid` (not a lookup column of the object, or the stage
-  column); `filter-value-unknown` / `filter-value-ambiguous` (as for stages).
+  `create-dynamic-case { filter, stages, deactivate-unfiltered: true }` disables that case: new records start only
+  the filtered cases, its running cases continue. Pass `deactivate-unfiltered` ONLY after the user chose (2), never
+  on your own. Undoing (2) (the undo in `process-dynamic-case`) also re-enables that case:
+  `modify-dynamic-case { enabled: true }`, alone, after the user's yes. The filter column the create set stays (no
+  tool removes it yet), so a case without a filter is then refused `filter-required`: offer it a filter first.
+- Refusals, all before anything is written: `filter-overlap` (another enabled case has one of these values, or the
+  empty value: change that case instead, one record never starts two cases); `filter-required` (the cases are split
+  by a column, so the case needs a filter). `remove-filter: true` removes the case's filter: refused
+  `filter-required` while the settings row names a filter column (removing the last filter column is not supported
+  yet), `invalid-request` with `filter`. `settings-conflict` (they are split by another column: not supported yet);
+  `filter-column-invalid` (not a lookup column of the object, or the stage column); `filter-value-unknown` /
+  `filter-value-ambiguous` (as for stages).
 - The first filter sets the filter column on the object's case settings (`settings.filterColumnSet`): from then on
   every case of the object needs one. A call with a filter needs the right to edit `SysDcmSettings` records too
   (`rights-missing` otherwise).
