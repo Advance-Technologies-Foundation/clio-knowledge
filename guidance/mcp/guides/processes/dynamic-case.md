@@ -18,7 +18,7 @@ other means.
 - Anything about an EXISTING object's stages or status flow ("ends Approved or Rejected", "move X before Y"),
   even "just tell me, change nothing": answer only after
   `describe-dynamic-case { entity-schema-name }` (read-only). When `get-tool-contract` does not list
-  `describe-dynamic-case` (clio older than <CLIO-TBD>), answer only after the call with `dry-run: true` (it writes
+  `describe-dynamic-case` (clio older than 8.1.0.153), answer only after the call with `dry-run: true` (it writes
   nothing) in any editable package and WITHOUT `stages` (a stage list is checked before the object's case). A newer
   clio refuses both for a CrtProcessBuilder older than 1.6.6.179: `install-process-builder` restarts the site, so
   only once the user approves it (`core-rules`).
@@ -68,19 +68,19 @@ filter column: the case designer does those. No mobile page, mini page or Classi
 deactivate-unfiltered?, order-column?, name?, caption?, add-progress-bar = true, page-schema-name?,
 add-package-dependencies = true, dry-run = false }`; it writes, so it is destructive (clio 8.1.0.150 or later: see
 Scope). `deactivate-unfiltered` disables the object's unfiltered case: pass it only after the user chose that, never
-on your own; `filter` and `deactivate-unfiltered` (clio <CLIO-TBD>+): `process-dynamic-case-change`.
+on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dynamic-case-change`.
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
   pass `stages` (2 to 20 values in order, by Id or exact display value) whenever the business order matters.
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
   `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order turns "New, In progress, Done" into
   "Done, In progress, New". The result ALWAYS states `case.orderSource` and the ordered captions: read them back to
   the user. The dry run returns the whole plan: confirm the order with it first.
-- GROUPS (clio <CLIO-TBD>+ with CrtProcessBuilder 1.6.6.179+; an older clio refuses them: `unknown-keys`): an item may
+- GROUPS (clio 8.1.0.153+ with CrtProcessBuilder 1.6.6.179+; an older clio refuses them: `unknown-keys`): an item may
   name `group` (another stage's value: they share one bar slot, the member right after it; one level) and
   `successful: false` (final group only - the last stage and its members: it ends the case as unsuccessful), e.g.
   `{"value":"Rejected","group":"Approved","successful":false}`; else `stage-group-invalid`.
 - A value named twice and an unknown or ambiguous value are refused (`stage-list-duplicate`,
-  `stage-value-unknown`, `stage-value-ambiguous`). A value left out of `stages` is not a stage (clio <CLIO-TBD>+;
+  `stage-value-unknown`, `stage-value-ambiguous`). A value left out of `stages` is not a stage (clio 8.1.0.154+;
   older: `stage-list-incomplete`): a note names it, and a record holding it shows no current stage. Tell the user.
 
 == What one call writes ==

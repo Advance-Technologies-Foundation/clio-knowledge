@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.222",
+  "libraryVersion": "1.15.223",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1941,7 +1941,7 @@
     {
       "itemId": "process-dynamic-case-change",
       "title": "Change a dynamic case; several cases on one object",
-      "description": "Needs clio <CLIO-TBD> or later with CrtProcessBuilder 1.6.6.179 or later. Owns describe-dynamic-case and modify-dynamic-case: read an existing dynamic case (DCM) first, then change it in place with a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, captions, colours, the case caption, its filter; confirm-running-instances only after the user's yes; enabled alone; the refusals and outcomes. And several cases on one object split by one lookup filter column: filter {column, values | empty}, a stage subset per case, the designer's two ways from one unfiltered case to several (a filter on it, or deactivate-unfiltered only after the user's yes), filter-overlap, filter-required, remove-filter, unfiltered-case-exists, the filter column on the case settings and its edit right, values no case is for, and that a filter decides only which new records start a case.",
+      "description": "Needs clio 8.1.0.154 or later with CrtProcessBuilder 1.6.6.179 or later. Owns describe-dynamic-case and modify-dynamic-case: read an existing dynamic case (DCM) first, then change it in place with a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, captions, colours, the case caption, its filter; confirm-running-instances only after the user's yes; enabled alone; the refusals and outcomes. And several cases on one object split by one lookup filter column: filter {column, values | empty}, a stage subset per case, the designer's two ways from one unfiltered case to several (a filter on it, or deactivate-unfiltered only after the user's yes), filter-overlap, filter-required, remove-filter, unfiltered-case-exists, the filter column on the case settings and its edit right, values no case is for, and that a filter decides only which new records start a case.",
       "topicId": "creatio.process-dynamic-case-change",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-change",
@@ -2944,7 +2944,7 @@
     {
       "itemId": "theming",
       "title": "Custom themes",
-      "description": "Guides creation, reading, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes.",
+      "description": "Guides creation, reading, modification, deletion, discovery, application, reset, default selection, and deployment of custom Creatio themes and their backgrounds.",
       "topicId": "creatio.theming",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/theming",
