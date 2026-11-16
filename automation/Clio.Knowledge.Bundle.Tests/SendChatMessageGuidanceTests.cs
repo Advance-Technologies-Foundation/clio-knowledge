@@ -193,7 +193,7 @@ public sealed class SendChatMessageGuidanceTests
             "`ignoreErrors` omitted on `create-business-process` and `addElement` is FALSE: a failed send STOPS the process, and the element log carries the error.",
             "`SendStatus` is `\"Sent\"` or `\"Error\"`; `SendStatusDetails` is empty on success, else the error text.",
             "It also swallows INPUT errors",
-            "so a completed run is not a delivered message: read `SendStatus`.",
+            "`\"Sent\"` is \"handed to the connector\", NOT delivered: a provider rejection after that (a Telegram user who blocked the bot) still reads `\"Sent\"`. Say \"sent\", never \"delivered\".",
             "`value` is for TEXT columns only: a record id there is refused, and the refusal quotes the macro to send.",
             "A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: \"[#Lookup.<object name or schema UId>.<record Id>#]\"`, as in `[#Lookup.ChatQueue.<record Id>#]`.",
             "The server stores the designer's form, the object's schema UId, and says so in a \"stored as ...\" warning: expected, not a failure.",

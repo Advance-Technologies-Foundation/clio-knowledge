@@ -112,8 +112,9 @@ CUSTOM (`messageSource` `custom`):
   `ignoreErrors` explicitly either way.
 - With `ignoreErrors: true` the process goes on. `SendStatus` is `"Sent"` or `"Error"`; `SendStatusDetails` is empty
   on success, else the error text. Map them downstream and branch on `SendStatus` (`process-branch-conditions`).
-- It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel), so a
-  completed run is not a delivered message: read `SendStatus`.
+- It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel). `"Sent"` is
+  "handed to the connector", NOT delivered: a provider rejection after that (a Telegram user who blocked the bot)
+  still reads `"Sent"`. Say "sent", never "delivered".
 - describe lists both outputs in the generic `parameters` (`isOutput: true`) and under the block's `outputs`.
 
 == Column values on the chat ==
