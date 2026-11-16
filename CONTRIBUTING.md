@@ -221,6 +221,22 @@ A guidance contribution should state:
 - supporting evidence;
 - related reference implementations without treating their incidental choices as universal requirements.
 
+### A boundary that gates the whole article comes first
+
+When the tool an article's Scope owns needs a clio newer than `compatibility.clio.min` in
+`bundle-source.json`, an agent must meet that boundary before it reads anything else, because a knowledge
+library is updated apart from the clio that serves it: an agent on an older clio otherwise reads the whole
+article, calls the tool and only then learns it is not there. So:
+
+- the article states the boundary right after its Scope paragraph, with how to tell (the tool, or the argument
+  that carries the feature, is missing from `get-tool-contract`) and what to do (stop and tell the user to update
+  clio); a check on the contract alone is enough while no released clio has the tool yet;
+- the article's `description` in `bundle-source.json` starts with it (`Needs clio 8.1.0.150 or later.`), so the
+  `get-guidance` catalog shows it before the article is opened;
+- the boundary is stated once there; a later mention points back to it.
+
+A boundary for one step, one argument or one value stays inline next to the instruction it gates.
+
 ### An article must fit in one `get-guidance` response
 
 An article is delivered as a single JSON line. Past a size limit the caller cannot accept it, the
