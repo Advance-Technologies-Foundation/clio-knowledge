@@ -1,13 +1,13 @@
-clio MCP process-dynamic-case guide - a minimal dynamic case (DCM) from a lookup column, the record-page stage progress bar, and changes to an existing case
+clio MCP process-dynamic-case guide - a minimal dynamic case (DCM) from a lookup column and the record-page stage progress bar
 
 Scope
 This guide owns `create-dynamic-case`: it gives an object a stage lifecycle. One call builds a dynamic case (DCM)
 whose stages are the values of one lookup column of the object (for example `Status`), in a stated order, and adds
 the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI record page. Use it when the user
-asks for "stages", "a status lifecycle", an order or outcomes of status values, "a progress bar on the record
-page" or "a case". "When X happens, do Y" is a
-business process: `process-digest`. A case is not the `Case` object. `describe-dynamic-case` and
-`modify-dynamic-case` read and change an existing case ("Change an existing case").
+asks for "stages", "a status lifecycle", the order records move through status values or how that flow ends (not
+a lookup's sort order in lists or dropdowns), "a progress bar on the record page" or "a case".
+"When X happens, do Y" is a business process: `process-digest`. A case is not the `Case` object. Reading and
+changing an existing case (`describe-dynamic-case`, `modify-dynamic-case`): `process-dynamic-case-change`.
 
 Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `get-tool-contract`
 does not list it, the clio serving you is older: stop here and tell the user to update clio - do not build a case by
@@ -16,11 +16,14 @@ other means.
 == Answer the user from the tool ==
 - Anything about an EXISTING object's stages or status flow ("ends Approved or Rejected", "move X before Y"),
   even "just tell me, change nothing": answer only after
-  `describe-dynamic-case { entity-schema-name }` (read-only); on clio older than <CLIO-TBD>, only after the call
-  with `dry-run: true` (it writes nothing) and WITHOUT `stages` (a stage list is checked before the object's case).
-  Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case"), never a
-  second one; on an older clio its `case-exists` or `settings-conflict` refusal IS the answer. Never offer to
-  rename, replace or add lookup values, or another column (an order column), to get around it.
+  `describe-dynamic-case { entity-schema-name }` (read-only). When `get-tool-contract` does not list
+  `describe-dynamic-case` (clio older than <CLIO-TBD>), or describe is refused for a CrtProcessBuilder older than
+  1.6.6.173, answer only after the call with `dry-run: true` (it writes nothing) in any editable package and WITHOUT
+  `stages` (a stage list is checked before the object's case): lighter than an install, which restarts the site.
+  Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case" in
+  `process-dynamic-case-change`), never a second one; on an older clio its `case-exists` or `settings-conflict`
+  refusal IS the answer. Never offer to rename, replace or add lookup values, or another column (an order column),
+  to get around an existing case; adding a value the user asked to make a stage is part of changing the case.
 - Stages need a field with a fixed list of values (a lookup); an amount, a date or a text cannot be stages
   (`column-not-lookup`). Say exactly that; do not first ask which field was meant.
 - Anything under "Not supported yet": say "<it> is not supported yet; the case designer does that" first, and do
@@ -65,9 +68,10 @@ dry-run = false }`; it writes, so it is destructive (clio 8.1.0.150 or later: se
   `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order turns "New, In progress, Done" into
   "Done, In progress, New". The result ALWAYS states `case.orderSource` and the ordered captions: read them back to
   the user. The dry run returns the whole plan: confirm the order with it first.
-- GROUPS: an item may name `group` (another stage's value: they share one bar slot, the member right after it; one
-  level) and `successful: false` (final group only - the last stage and its members: it ends the case as
-  unsuccessful), e.g. Rejected with `group: Approved, successful: false`; else `stage-group-invalid`.
+- GROUPS (clio <CLIO-TBD>+ with CrtProcessBuilder 1.6.6.173+; an older one refuses them: `unknown-keys`): an item may
+  name `group` (another stage's value: they share one bar slot, the member right after it; one level) and
+  `successful: false` (final group only - the last stage and its members: it ends the case as unsuccessful), e.g.
+  `{"value":"Rejected","group":"Approved","successful":false}`; else `stage-group-invalid`.
 - A subset, a value named twice and an unknown or ambiguous value are refused (`stage-list-incomplete`,
   `stage-list-duplicate`, `stage-value-unknown`, `stage-value-ambiguous`): a record holding a value that is not a
   stage shows no current stage.
@@ -103,30 +107,9 @@ dry-run = false }`; it writes, so it is destructive (clio 8.1.0.150 or later: se
   whose stage column is empty, or holds a value that is not a stage, shows no current stage. Offer (do not do it
   unasked) to set the column's default to the first stage with the entity tools.
 - The lookup values are referenced by Id and NOT bound to the package: another environment needs the same value
-  Ids. A value added to the lookup LATER has no stage until the case is changed in the case designer.
+  Ids. A value added to the lookup LATER has no stage until the case is changed (`process-dynamic-case-change`).
 - A business process that also sets the stage column fights the case; the Academy recommends disabling it.
 - The case opens in the designer at `case.designerUrl`.
-
-== Change an existing case (clio <CLIO-TBD>+) ==
-1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
-   in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, and `enabled`. Several cases
-   on the object (`case-ambiguous`): name one with `case-name`.
-2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, enabled?,
-   confirm-running-instances?, dry-run }` writes. `stages` is the WHOLE new list: a stage left out is REMOVED, a
-   value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, after asking).
-   Fields an item leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours it;
-   `caption` renames the stage in the case only, never the value every record shares. First `dry-run: true`: show the user `diff` and the notes, write only
-   after their yes. `unchanged` means nothing to do.
-3. While cases run (`runningInstances.total` > 0) every write is refused `running-instances-confirmation-required`:
-   tell the user how many run and in which stages; pass `confirm-running-instances: true` only after they say yes,
-   NEVER on your own. Running cases continue, possibly on the stages as they were.
-4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
-   nothing is deleted, running cases continue, new records start no case. Re-enabling while another case of the
-   object is enabled: `case-exists`.
-Refusals: `stage-in-use` (cases sit in a stage being removed: move them first), `stage-has-steps` (it has steps or
-a step condition targets it: the case designer), `package-read-only` (a new version is not supported yet).
-`failed-restored`: the save did not take, the case is as before; `failed-leftover`: check it in the designer.
-No compile or restart; F5.
 
 == Refusals that need the user ==
 With `outcome: refused` nothing was written, unless the item says otherwise. The same `errorCode` can come with
@@ -134,9 +117,9 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
 "Partial and unknown outcomes".
 - `case-exists`: the object already has an enabled case that is not this call's equivalent: other stages, another
   column, or one without its settings row or link row. The platform starts every enabled case, so a second one is
-  never created: change that case instead (`modify-dynamic-case`). A re-run with the SAME object, column and order
-  answers `already-present` and writes nothing to the case (it still adds the bar when the page has none), so a failed
-  call is safe to repeat.
+  never created: change that case instead (`modify-dynamic-case`) as `process-dynamic-case-change` says. A re-run
+  with the SAME object, column and order answers `already-present` and writes nothing to the case (it still adds
+  the bar when the page has none), so a failed call is safe to repeat.
 - `settings-conflict`: the object's case settings use another stage column or a filter column, or there are
   several rows. When another call created a row at the same moment this call removes its own: retry.
 - Page refusals, all BEFORE anything is written: `record-page-not-found` (no record page could be found: pass
@@ -153,7 +136,8 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
   login page); read the message and retry once the environment answers.
 - `process-builder-without-build-case`: BuildCase answered 404, so the environment's CrtProcessBuilder has no
   dynamic-case operation (it needs 1.6.6.165 or later); `install-process-builder`, once the user approves it
-  (`core-rules`), is the remedy.
+  (`core-rules`), is the remedy. Its twin for describe and modify, `process-builder-without-case-change`:
+  `process-dynamic-case-change`.
 
 == Partial and unknown outcomes ==
 - `unknown`: the reply to the writing pass was lost, so the case may or may not exist. Re-run the call with
