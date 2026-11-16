@@ -1,5 +1,5 @@
 clio MCP existing-app maintenance guide
-Moved to `existing-app-maintenance-details`: column-default round-trip fields, section-creation failure background, why merged column reads return unknowns, section-title language preservation, translations evidence, the full reuse example. Read it when you re-apply, remove or read back a column default, when `create-app-section` keeps failing, or before deleting a section.
+Moved to `existing-app-maintenance-details`: column-default round-trip fields, section-creation failure background, why merged column reads return unknowns, the full reuse example. Read it when you re-apply, remove or read back a column default, when `create-app-section` keeps failing, or before deleting a section.
 
 Canonical flow
 - Prefer `discover -> inspect -> mutate -> verify` for minimal edits to an existing app.
@@ -64,12 +64,8 @@ Preferred minimal mutations
 - For standalone lookup seeding or local binding artifacts, follow `get-guidance` with `name` set to `data-bindings`. When that guide resolves to a DB-first binding path, prefer `create-data-binding-db` or `upsert-data-binding-row-db` over direct SQL commands.
 
 Translations (other cultures)
-- This section owns object, column and section titles in another culture. Page captions: `page-schema-translation`. Culture rules (absent or inactive culture): `localizable-values`.
+- Section, object, column and page titles in another culture, and how to choose their text: `get-guidance name=page-schema-translation`.
 - MUST call `get-tool-contract` for `update-app-section` before ANY update of an existing section and before using `caption-culture`. Creatio deletes the section title and description in every non-default language on EVERY section update, even an icon-only one. When the contract lists `caption-culture`, clio preserves those languages and the result lists them. When it does not, `caption-culture` is silently ignored, `caption` overwrites the profile-culture (English) title with success reported, and any update deletes the other languages: translate the section title in the native designer and do not update a translated section with that clio.
-- Section title, when the contract lists `caption-culture`: send `caption` with `caption-culture` (for example `es-ES`), one language per call; only that language changes. `description` stays in the profile culture.
-- Object or column title: send `title-localizations` with the new culture — `set-entity-schema-properties` for the object, `modify-entity-schema-column` / `update-entity-schema` (or `sync-schemas`) for a column. A column map must also carry the current `en-US` value, re-sent unchanged; unsent cultures are preserved. The title shows on every page, list and app using the object: change only objects created in the app's own package (not a replacing schema of another package's object); for another package's object, list the titles and ask the user.
-- Right after creation a non-`en-US` title is not blank, yet not translated (`localizable-values`): translate each target culture explicitly. Readback: `set-entity-schema-properties` compares the object title in every culture it writes and fails on a mismatch; the column tools check only that the column exists (an inherited column also its profile-culture title): check a column title in the target culture yourself, in the object designer or the UI (`core-rules` verification-in-browser preference).
-- A DS-bound field label on a page is the column title: translate the column, not the page.
 
 Verification
 - `sync-pages` keeps client-side validation on by default; enable its `verify` only for read-back within the same call (default `false`). After `update-page` or `sync-pages`, read the page again with `get-page` when you need explicit read-back.

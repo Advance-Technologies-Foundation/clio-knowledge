@@ -153,7 +153,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction. WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
-  without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task
+  without one. Other schemas (source code, business objects, value lists, a CUSTOM user-task
   schema - `process-element-catalog`) carry their own compile obligations.
 
 == Set what was asked for, and nothing else ==

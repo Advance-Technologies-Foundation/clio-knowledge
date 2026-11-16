@@ -7,7 +7,7 @@ collection). A C# web service that Creatio EXPOSES is not this element: `configu
 Needs CrtProcessBuilder 1.6.6.150 or later on the environment. Use it only when the FULL
 contract (`get-tool-contract` with `tool-names: ["create-business-process"]`, `detail: "full"`) names `webService`;
 a clio whose contract lacks it refuses the block before sending. The default reply is shortened: its silence
-proves nothing. Always read the element back: its parameter names come from the service.
+proves nothing. Always read the element back.
 
 == Only a registered service ==
 The element calls only a web service REGISTERED in Studio > Web services (REST, or SOAP: built with REST's parameter
@@ -26,7 +26,7 @@ URI, authentication, header or parameter defaults - comes back in any answer.
 - `ignoreErrors`: `true` lets the process go on after a call with no HTTP answer (== Run time ==).
 - Nothing else: request values are mappings; no member for a base URI, credential, default or multi-instance.
   `type: "webService"` without the block, or the block on another type, is refused.
-- Caption: omitted, it is `<service caption, or its name> <N>`; a sent `caption` is kept.
+- Caption: omitted, it is `<service caption, or its name> <N>`; a sent one is kept.
 - The generic `userTask` route REFUSES `WebServiceUserTask`: a legacy SOAP task, not this element.
 
 == Naming the service and method ==
@@ -49,8 +49,9 @@ URI, authentication, header or parameter defaults - comes back in any answer.
    nothing and lists the registered services (bounds above). Listed without methods? Probe it with an unknown
    `method`: that refusal lists them. A create probe needs an unused process name: a taken one is refused first.
    Pick the pair that fits; when several fit, ASK the user which; never guess between them.
-2. When none fits, STOP: no process, no placeholder element, no Script task in its place. Tell the user to register
-   it in Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
+2. When none fits, STOP: no process, no placeholder element, no Script task in its place. If clio lists
+   `register-web-service`, use `web-service-registration` first. Else tell the user to use
+   Studio > Web services, and what that needs: the base URL, the method and its parameters, and the
    authentication. The user enters any credential there, not you.
 3. Build in two steps: the element first, then the mappings, from the names the answer and describe report.
    Declare their process parameters by the rule below, never with a guessed `type`.
@@ -181,7 +182,7 @@ them stop working, and a save keeps them removed.
   value.
 
 == Notices (warnings: the process saves) ==
-Tell the user each. Besides those above: a required input with no value (the designer marks the element invalid).
+Tell the user each; also a required input with no value (the designer marks it invalid).
 
 == Read back ==
 `describe-business-process` (`element=<name>` or `mode=full`) returns the element's `webService` block: `service` (the

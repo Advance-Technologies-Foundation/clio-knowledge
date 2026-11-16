@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.204",
+  "libraryVersion": "1.15.221",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -141,6 +141,7 @@
       "process-send-email-template",
       "process-send-email-attachments",
       "process-web-service",
+      "process-dynamic-case",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -218,6 +219,8 @@
       "ui-project",
       "virtual-entities",
       "websocket-messaging",
+      "web-service-registration",
+      "web-service-soap",
       "when-to-use-requests",
       "list-widget",
       "record-permissions",
@@ -348,6 +351,7 @@
       "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "docs://knowledge/com.creatio.clio/process-web-service",
+      "docs://knowledge/com.creatio.clio/process-dynamic-case",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -425,6 +429,8 @@
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
+      "docs://knowledge/com.creatio.clio/web-service-registration",
+      "docs://knowledge/com.creatio.clio/web-service-soap",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
       "docs://knowledge/com.creatio.clio/list-widget",
       "docs://knowledge/com.creatio.clio/record-permissions",
@@ -1133,7 +1139,7 @@
     {
       "itemId": "existing-app-maintenance-details",
       "title": "Existing application maintenance details",
-      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; how update-app-section preserves section-title languages and the translations evidence boundary; and the full schema-reuse example. Split out of existing-app-maintenance.",
+      "description": "Owns the background and evidence behind the existing-app maintenance rules: the field-by-field round trip of a column default (default-value-config) between get-app-info and sync-schemas update-entity - the read-only resolved-value-source enrichment, the exact rejection when source None keeps other fields, and why an absent field needs the get-tool-contract capability check; why sections are created one at a time and what the creatio-timeout and contention error classes mean; get-page-hierarchy paging options and the full caption and proxy-attribute examples; why merged column reads return null for three flags; and the full schema-reuse example. Split out of existing-app-maintenance.",
       "topicId": "creatio.existing-app-maintenance-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/existing-app-maintenance-details",
@@ -1641,7 +1647,7 @@
     {
       "itemId": "process-data-source-filters",
       "title": "Process data source filters",
-      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the five right-hand value sources (value, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only a constant, a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
+      "description": "Owns the data source filter that a record trigger, a Read data element and a Modify data element all carry: the object/logicalOperation/conditions/groups shape the server serializes to Terrasoft.FilterGroup, entity COLUMN names and lookup dot-paths, the full comparison set, the right-hand value sources (value, values for several lookup records, processParameter, elementParameter, expression, macro), the COMPLETE relative-date and system macro vocabulary an unknown name is rejected against at build, the datePart left-hand modifier and its refusal alongside a macro, the signal-start restriction that allows only constants (value or values), a macro or isNull before a process instance exists, and setFilter/clearFilter plus the describe read-back -- setFilter REPLACES the whole filter, so read the current one first. Split out of process-data-elements, which keeps the three elements themselves.",
       "topicId": "creatio.process-data-source-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-data-source-filters",
@@ -1669,7 +1675,7 @@
     {
       "itemId": "process-parameters-details",
       "title": "Sub-process parameter sync",
-      "description": "Owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side: the rule to re-synchronize every caller after a called process's parameters change, and the setElement shapes that perform one (resync:true, a block naming the already-called process, an empty subProcess:{}); what a re-synchronization costs (a dropped parameter's mapping row deleted, replacements carrying new UIds), the full notice set a re-sync answers with, and how far the dangling-reference scan reaches; values crossing by NAME, case-sensitively, with an unmatched name skipped silently, and which version of a versioned callee actually runs; what inSync and multiInstanceOptions.calleeInSync can and cannot see, how a rename is followed and when a value survives it, describe's read-back of direction/isRequired/isResult, and the designer card, whose parameter row has no code column and must not be saved from. Also the mapping-binding evidence and example. Split out of process-parameters.",
+      "description": "Owns the SUB-PROCESS element's parameters on their RUN-TIME and observability side: the rule to re-synchronize every caller after a called process's parameters change, and the setElement shapes that perform one (resync:true, a block naming the already-called process, an empty subProcess:{}); what a re-synchronization costs (a dropped parameter's mapping row deleted, replacements carrying new UIds), the notices a re-sync answers with, and how far the dangling-reference scan reaches; values crossing by NAME, case-sensitively, an unmatched name skipped silently, and which version of a versioned callee actually runs; what inSync and multiInstanceOptions.calleeInSync can and cannot see, how a rename is followed and when a value survives it, describe's read-back of direction/isRequired/isResult, and the designer card, whose parameter row has no code column and must not be saved from. Also the mapping-binding evidence and example, and the direction switch. Split out of process-parameters.",
       "topicId": "creatio.process-parameters-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-parameters-details",
@@ -1920,6 +1926,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "process-dynamic-case",
+      "title": "Dynamic case from a lookup column",
+      "description": "Needs clio 8.1.0.150 or later. Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). The prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty stages, full-mesh connections, the link row bound to the package and the settings row bound unless another package already carries it, the page fragment in the design package), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet.",
+      "topicId": "creatio.process-dynamic-case",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case",
+      "sourcePath": "guidance/mcp/guides/processes/dynamic-case.md",
+      "bundlePath": "resources/process-dynamic-case.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "process-approval",
       "title": "Approval element",
       "description": "Owns the Creatio Approval element (approval / ApprovalUserTask), which requests a visa on a record. Covers the object and record under approval and why a foreign record id is refused, the approver -- named user, role, or the employee whose manager approves -- and why it is required rather than defaulted, the two email notifications and why a notification without a template silently never sends, the purpose default, the visa settings derived server-side, and the outcome, which is branched on without a gateway and is declared with flows[].results or setFlowResults rather than a formula - a condition on a verdict connector is refused, because the designer edits it as a result selection and offers no formula field.",
@@ -2111,7 +2128,7 @@
     {
       "itemId": "process-files-parameter",
       "title": "Process files: the Process parameter variant of the Process file element",
-      "description": "Owns the files group of the Process file element (fileProcessing): copying the files the process holds to a record's attachments and only that (saveTo required on create, useInProcess refused), its one source (processParameter, sourceElement + sourceElementParameter or expression; a value, a source with no file item or several, a parameter of the element itself and a mapping from its Files refused), both levels bound for a collection and one file for a single File, an unset single File stopping the process, an empty collection copying nothing, an expression going through as given, the ObjectFiles and CreatedObjectFileIds outputs, and the describe-only bindingLevels with its issues. Read after process-files.",
+      "description": "Owns the files group of the Process file element (fileProcessing): copying the files the process holds to a record's attachments and only that (saveTo required on create, useInProcess refused), its one source (processParameter, sourceElement + sourceElementParameter or expression; a value, a source with no file item or several, a parameter of the element itself and a mapping from its Files refused), both levels bound for a collection and one file for a single File, an unset single File stopping the process, an empty collection copying nothing, an expression going through as given, an addMapping onto the Files input of an element built in the designer, the ObjectFiles and CreatedObjectFileIds outputs, and the describe-only bindingLevels with its issues. Read after process-files.",
       "topicId": "creatio.process-files-parameter",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-files-parameter",
@@ -2954,6 +2971,28 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "web-service-registration",
+      "title": "Web service registration",
+      "description": "Needs clio 8.1.0.150 or later. Owns the clio tools that register, read, change and test-call a REST or SOAP web service in Creatio Studio > Web services (register-web-service, list-web-services, describe-web-service, modify-web-service, test-web-service-method): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), the real-request warning for test calls, and the usage guard that refuses changing or removing a method a process calls until the user acknowledges the named processes.",
+      "topicId": "creatio.web-service-registration",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-registration",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-registration.md",
+      "bundlePath": "resources/web-service-registration.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "web-service-soap",
+      "title": "SOAP web service registration",
+      "description": "What differs when a SOAP 1.1 or SOAP 1.2 web service is registered or changed with register-web-service and modify-web-service: the service type, the namespaces and the default one, the method's message element, the SOAP action taken from the WSDL or the user and never made up, element paths with declared prefixes instead of JSONPath, SOAP header parameters bound to system settings (WS-Security), array item elements, the base URI stored without an added trailing slash, and setNamespaces and setType under the usage guard.",
+      "topicId": "creatio.web-service-soap",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-soap",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-soap.md",
+      "bundlePath": "resources/web-service-soap.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "websocket-messaging",
       "title": "Creatio WebSocket messaging",
       "description": "Canonical Creatio guidance for backend-to-frontend push, frontend PTP and BROADCAST routes, lifecycle-safe MessageChannelService subscriptions, transient delivery, and the internal-only SERVER receive boundary.",
@@ -3180,7 +3219,7 @@
     {
       "itemId": "page-schema-translation",
       "title": "Page translation",
-      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, which titles live outside the page and when to ask first, and the full compile a newly activated culture needs.",
+      "description": "Canonical MCP guidance for translating a Freedom UI page into another culture with localize-page: arguments, report-only coverage, what the tool guarantees, empty values, choosing the text (platform terms read from the environment in the target culture, the page's inherited strings as the glossary, other labels by meaning, ambiguous labels reported), object, column and section titles in another culture (title-localizations, update-app-section caption-culture) and when to ask first, and the full compile a newly activated culture needs.",
       "topicId": "creatio.page-schema-translation",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/page-schema-translation",
