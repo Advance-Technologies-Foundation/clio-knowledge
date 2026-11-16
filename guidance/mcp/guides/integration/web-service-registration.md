@@ -78,7 +78,7 @@ Credential rule (MUST)
 
 Registering
 - `register-web-service` arguments: `environment-name`, `package-name`, `code`, `base-uri`, `methods`
-  (required); `caption`, `retry-count`, `auth` (optional).
+  (required); `caption` (default: the code), `description`, `retry-count`, `auth` (optional).
 - `base-uri` is an absolute http(s) URI without credentials, a query or a fragment; the tool adds the trailing
   slash the designer needs, because Studio joins base URI and method URI verbatim. A `{placeholder}` in it is
   filled from a path parameter like one in a method `uri`. A method `uri` may carry a fixed query
@@ -91,12 +91,15 @@ Registering
   `request-parameters`, `response-parameters`.
 - `use-auth` says whether the method sends the service authentication. Left out, it is true when the service
   has authentication once the whole call is applied (a `setAuth` in the same `modify-web-service` call counts,
-  whatever its position), false otherwise.
+  whatever its position), false otherwise. A service registered without authentication keeps no method with
+  `use-auth: true` (a notice names any it cleared).
 - Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body, header
   or cookie for a response; default body), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid,
   Object; default Text), `path`, `array`, `required`, `default-value` or `default-sys-setting`, and `items` for an
   Object array. Give `in` on every top-level request parameter of a GET method: one without it is a body
-  parameter and is refused. Fields inside an Object array (`items`) take no `in`.
+  parameter and is refused. Fields inside an Object array (`items`) take no `in`. A parameter sent without
+  `caption` is captioned with the name the API sees (a body path's last field, a SOAP path's last element, a query,
+  header, cookie or path name as given), or its code when it has no `path`.
 - Object is ONLY an array (`"type": "Object", "array": true`, its element fields in `items`), for a list of
   records such as order lines. A single nested object is NOT an Object parameter: describe each of its fields
   as its own parameter with a dotted `path`, the way Studio's quick setup does - request body
@@ -188,7 +191,8 @@ Changing a registered service
   order, all or nothing: `addMethod` (`method`), `setMethod` (`method`; replaces the method of the same code,
   keeping the UIds of parameters it keeps), `removeMethod` (`method-code`), `setBaseUri` (`base-uri`),
   `setRetryCount` (`retry-count`), `setAuth` (`auth`; `type` none, basic, digest or oauth20, and none removes the
-  authentication); a SOAP service also takes `setNamespaces` and `setType` (`web-service-soap`). Missing settings
+  authentication and clears `use-auth` on every method), `setDescription` (`description`; "" clears it); a SOAP
+  service also takes `setNamespaces` and `setType` (`web-service-soap`). Missing settings
   follow the credential rule above. Each operation names its kind in `op`:
   `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
 - What `describe-web-service` returns can be sent back as it is (except a method whose `{placeholder}` differs
@@ -202,9 +206,11 @@ Changing a registered service
   where it would show (a query parameter, a path that does not look like a credential) is refused.
 - `setMethod` REPLACES the method. Every parameter it keeps must be sent complete, as `describe-web-service`
   returned it: an omitted field is not kept but reset (`in` to body, `type` to Text, `array` and `required` to
-  false, the caption to the code, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
+  false, the caption to the name the API sees, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
   secret constant carry over. To add one parameter, send the whole method from describe plus the new one.
-- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth`, and
+- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth` (except
+  that removing the authentication, type none, clears it on every method and a notice names them: if
+  authentication comes back later, each of those methods needs `use-auth: true` again, by the same rule below), and
   a method with `use-auth: false` sends no authentication at all (measured on SOAP 1.2; REST takes the same code
   path). Which methods send the authentication is the user's decision: before or after `setAuth`, ASK the user about
   each method with `use-auth: false` (the tool names them in a notice after a change of the authentication); never
