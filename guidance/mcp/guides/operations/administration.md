@@ -72,7 +72,7 @@ when PortalUserManagementV2 is enabled. Keep the connection domain consistent wh
 2. The new password reaches clio by reference, never as a value, through exactly one of two channels.
    Do not put a password in tool arguments, CLI arguments, examples, files you write, logs, comments or
    evidence, and never echo it.
-   - password-file (clio <CLIO-TBD> or later), preferred where the host offers it: the host or the
+   - password-file (clio 8.1.0.153 or later), preferred where the host offers it: the host or the
      operator writes the password, one line, to `<clio home>/secrets/<name>`, readable by its owner only,
      and gives you the name. Pass only that name as password-file. Use only a name the host gave you:
      never a path, never one you invent. A clio that has the channel lists password-file in manage-user's
