@@ -96,7 +96,9 @@ public sealed class GuidanceInlineReplyBudgetTests
         "process-perform-task",
         "process-perform-task-details",
         "core-rules",
-        "core-rules-details"
+        "core-rules-details",
+        "process-dynamic-case",
+        "process-dynamic-case-change"
     ];
 
     [Test]
