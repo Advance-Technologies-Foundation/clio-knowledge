@@ -388,9 +388,11 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "one record never starts two cases");
             guide.Should().Contain("`filter-required` (the cases are split by a column",
                 because: "a case without a filter would start for every record next to them");
-            guide.Should().Contain("`remove-filter: true` removes the case's filter: refused `filter-required` while the settings row names a filter column",
+            guide.Should().Contain("`remove-filter: true` removes the case's filter, but only where the settings row names no filter column",
                 because: "removing the last filter column is not supported yet, so remove-filter cannot merge split cases back");
-            guide.Should().Contain("`invalid-request` with `filter`",
+            guide.Should().Contain("it is refused `filter-required`, so do not offer it",
+                because: "every filter these tools set also sets the filter column, so the agent must not offer a removal that is always refused");
+            guide.Should().Contain("with `filter`: `invalid-request`",
                 because: "clio refuses a call that sends a filter and removes it at once");
             guide.Should().Contain("`filter-column-invalid` (not a lookup column of the object, or the stage column)",
                 because: "the filter column must be a lookup of the object other than the stage column");

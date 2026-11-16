@@ -63,9 +63,10 @@ been written - describe the case before retrying. No compile or restart; F5.
   tool removes it yet), so a case without a filter is then refused `filter-required`: offer it a filter first.
 - Refusals, all before anything is written: `filter-overlap` (another enabled case has one of these values, or the
   empty value: change that case instead, one record never starts two cases); `filter-required` (the cases are split
-  by a column, so the case needs a filter). `remove-filter: true` removes the case's filter: refused
-  `filter-required` while the settings row names a filter column (removing the last filter column is not supported
-  yet), `invalid-request` with `filter`. `settings-conflict` (they are split by another column: not supported yet);
+  by a column, so the case needs a filter). `remove-filter: true` removes the case's filter, but only where the
+  settings row names no filter column (a filter made in the designer): once a filter column is set, which every
+  filter set by these tools does, it is refused `filter-required`, so do not offer it; with `filter`:
+  `invalid-request`. `settings-conflict` (they are split by another column: not supported yet);
   `filter-column-invalid` (not a lookup column of the object, or the stage column); `filter-value-unknown` /
   `filter-value-ambiguous` (as for stages).
 - The first filter sets the filter column on the object's case settings (`settings.filterColumnSet`): from then on
