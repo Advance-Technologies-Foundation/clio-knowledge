@@ -57,8 +57,10 @@ been written - describe the case before retrying. No compile or restart; F5.
   (1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then
   `create-dynamic-case { filter, stages }` for the others; nothing is disabled. (2) turn the existing stages off:
   `create-dynamic-case { filter, stages, deactivate-unfiltered: true }` disables that case: new records start only
-  the filtered cases, its running cases continue. Pass `deactivate-unfiltered` ONLY after the user chose (2), never
-  on your own. Undoing (2) (the undo in `process-dynamic-case`) also re-enables that case:
+  the filtered cases, and each running case of it is CANCELLED at its record's next status change; the record then
+  starts the filtered case its value fits, in its current status, or none. Say so, with the running count from
+  describe, before the user chooses. Pass `deactivate-unfiltered` ONLY after the user chose (2), never on your own.
+  Undoing (2) (the undo in `process-dynamic-case`) also re-enables that case (cancelled cases stay cancelled):
   `modify-dynamic-case { enabled: true }`, alone, after the user's yes. The filter column the create set stays (no
   tool removes it yet), so a case without a filter is then refused `filter-required`: offer it a filter first.
 - Refusals, all before anything is written: `filter-overlap` (another enabled case has one of these values, or the

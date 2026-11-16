@@ -372,16 +372,18 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "turning the existing case off changes which case new records start; the user decides");
             guide.Should().Contain("(1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then `create-dynamic-case { filter, stages }` for the others; nothing is disabled",
                 because: "the designer's first way keeps the existing case for its values and disables nothing");
-            guide.Should().Contain("disables that case: new records start only the filtered cases, its running cases continue",
-                because: "measured on stands: a disabled case's running cases continue and move on a field change; only new records lose it");
+            guide.Should().Contain("disables that case: new records start only the filtered cases, and each running case of it is CANCELLED at its record's next status change",
+                because: "measured on a stand: after deactivate-unfiltered both running cases of the disabled case were Canceled at their record's next status change");
+            guide.Should().Contain("starts the filtered case its value fits, in its current status, or none",
+                because: "measured: the B2B record started the B2B case at its new status, the B2C record was left without a case");
+            guide.Should().Contain("Say so, with the running count from describe, before the user chooses",
+                because: "the user loses those running cases, so the choice of way (2) must be informed");
             guide.Should().Contain("Pass `deactivate-unfiltered` ONLY after the user chose (2), never on your own",
                 because: "it disables the case every new record of the object starts today");
-            guide.Should().Contain("Undoing (2) (the undo in `process-dynamic-case`) also re-enables that case: `modify-dynamic-case { enabled: true }`, alone, after the user's yes",
+            guide.Should().Contain("Undoing (2) (the undo in `process-dynamic-case`) also re-enables that case (cancelled cases stay cancelled): `modify-dynamic-case { enabled: true }`, alone, after the user's yes",
                 because: "removing the new case alone would leave the case it disabled switched off");
             guide.Should().Contain("so a case without a filter is then refused `filter-required`: offer it a filter first",
                 because: "the filter column the create set stays on the settings row, and no tool removes it yet");
-            guide.Should().NotContain("lose it at their next status change",
-                because: "nothing measured shows a disabled case's running cases ending at a status change");
             guide.Should().Contain("Refusals, all before anything is written",
                 because: "a refused filter call writes nothing, so it is safe to correct and repeat");
             guide.Should().Contain("`filter-overlap` (another enabled case has one of these values",
