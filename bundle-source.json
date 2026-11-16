@@ -1941,7 +1941,7 @@
     {
       "itemId": "process-dynamic-case-change",
       "title": "Change an existing dynamic case",
-      "description": "Needs clio <CLIO-TBD> or later with CrtProcessBuilder 1.6.6.173 or later. Owns describe-dynamic-case and modify-dynamic-case: read an existing dynamic case (DCM) first, then change it in place with a dry run and the user's yes before the write - the whole stage list (a stage left out is removed, a lookup value not yet a stage is added), order, groups and the unsuccessful final stage, stage captions and colours, the case caption; confirm-running-instances only after the user's yes; disable or re-enable it alone; the refusals (stage-in-use, stage-has-steps, case-exists, settings-conflict, package-read-only, process-builder-without-case-change) and the failed-restored, failed-leftover and unknown outcomes.",
+      "description": "Needs clio 8.1.0.153 or later with CrtProcessBuilder 1.6.6.173 or later. Owns describe-dynamic-case and modify-dynamic-case: read an existing dynamic case (DCM) first, then change it in place with a dry run and the user's yes before the write - the whole stage list (a stage left out is removed, a lookup value not yet a stage is added), order, groups and the unsuccessful final stage, stage captions and colours, the case caption; confirm-running-instances only after the user's yes; disable or re-enable it alone; the refusals (stage-in-use, stage-has-steps, case-exists, settings-conflict, package-read-only, process-builder-without-case-change) and the failed-restored, failed-leftover and unknown outcomes.",
       "topicId": "creatio.process-dynamic-case-change",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-change",

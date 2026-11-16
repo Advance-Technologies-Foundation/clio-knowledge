@@ -5,7 +5,7 @@ Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` an
 their order, groups, captions and colours, the case caption, and whether it is enabled. Building a case, the bar,
 the refusals of `create-dynamic-case` and the undo: `process-dynamic-case`.
 
-Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio <CLIO-TBD> or
+Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `get-tool-contract` does not list `describe-dynamic-case`, the clio serving you is older: stop here and
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
 `process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.173 or later on the
@@ -15,7 +15,7 @@ environment: an older one refuses them (`process-builder-without-case-change` wh
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
    in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, and `enabled`. Several cases
-   on the object (`case-ambiguous`): name one with `case-name`.
+   on the object: name one with `case-name` (modify by object answers `case-ambiguous`).
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, enabled?,
    confirm-running-instances?, dry-run }` writes; the top-level `caption` renames the CASE. `stages` is the WHOLE
    new list of items `{"value": Id or exact display value, "caption"?, "color"?, "group"?, "successful"?}`, e.g.

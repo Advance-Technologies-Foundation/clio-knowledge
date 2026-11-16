@@ -17,7 +17,7 @@ other means.
 - Anything about an EXISTING object's stages or status flow ("ends Approved or Rejected", "move X before Y"),
   even "just tell me, change nothing": answer only after
   `describe-dynamic-case { entity-schema-name }` (read-only). When `get-tool-contract` does not list
-  `describe-dynamic-case` (clio older than <CLIO-TBD>), or describe is refused for a CrtProcessBuilder older than
+  `describe-dynamic-case` (clio older than 8.1.0.153), or describe is refused for a CrtProcessBuilder older than
   1.6.6.173, answer only after the call with `dry-run: true` (it writes nothing) in any editable package and WITHOUT
   `stages` (a stage list is checked before the object's case): lighter than an install, which restarts the site.
   Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case" in
@@ -68,7 +68,7 @@ dry-run = false }`; it writes, so it is destructive (clio 8.1.0.150 or later: se
   `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order turns "New, In progress, Done" into
   "Done, In progress, New". The result ALWAYS states `case.orderSource` and the ordered captions: read them back to
   the user. The dry run returns the whole plan: confirm the order with it first.
-- GROUPS (clio <CLIO-TBD>+ with CrtProcessBuilder 1.6.6.173+; an older one refuses them: `unknown-keys`): an item may
+- GROUPS (clio 8.1.0.153+ with CrtProcessBuilder 1.6.6.173+; an older one refuses them: `unknown-keys`): an item may
   name `group` (another stage's value: they share one bar slot, the member right after it; one level) and
   `successful: false` (final group only - the last stage and its members: it ends the case as unsuccessful), e.g.
   `{"value":"Rejected","group":"Approved","successful":false}`; else `stage-group-invalid`.
