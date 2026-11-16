@@ -79,7 +79,7 @@ Delivering with clio
 - MUST NOT push a stale local copy of a package that people edit in the designers: `push-workspace`
   installs the workspace copy of every package it holds and replaces what changed on the environment
   since the copy was taken. When the module has to live in such a package, run `restore-workspace`
-  immediately before adding the script and push straight after.
+  before adding the script, and run it again when the push does not follow at once.
 - A delivered script is NOT withdrawn by removing it. Measured in the run under Evidence: after
   `delete-app` (package and files gone from the environment), after a later push of the package without
   the script, and after a push that ran "File content generation" with the script absent
@@ -99,7 +99,7 @@ How a mobile page refers to the module
 - A custom request from a component event. `validate-page` and `update-page` do not check request
   names, so a misspelt name passes validation and does nothing on the device — copy it from the
   `@CrtRequest({ type })` in the module:
-    "clicked": { "request": "usr.UsrApplyDiscountRequest", "params": { "percent": 10 } }
+    "clicked": { "request": "usr.ApplyDiscountRequest", "params": { "percent": 10 } }
   A parameter value may be an attribute binding ("$UsrDiscountPercent"). Do not put `type` or `scopes`
   into `params`.
 - A handler for a built-in request needs no page change. It is attached by `scopes` in
