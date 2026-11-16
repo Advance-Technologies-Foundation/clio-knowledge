@@ -111,6 +111,22 @@ public sealed class PageLayerPackageGuidanceTests
             because: "get-page returns the default target's body and would overwrite the chosen layer's diff");
         overview.Should().Contain("save through `update-page` only",
             because: "sync-pages has no package selector and always writes to the default target");
+        overview.Should().Contain("that replace is refused with `package-choice-replace-refused` and saves nothing",
+            because: "clio refuses a replace into an existing non-default layer, so the replace fallback must expect the refusal");
+        overview.Should().Contain("repeat it with `force: true` only after they confirm",
+            because: "force overwrites the chosen layer's whole body and needs the user's consent");
+    }
+
+    [Test]
+    [Description("A layer whose own changes clio could not read is never described as changing nothing.")]
+    public void Overview_ShouldNameALayerWithUnreadableChanges()
+    {
+        string overview = Collapse(Read(Overview));
+
+        overview.Should().Contain("when `changesUnreadable` is `true`, say that its changes could not be read — never that it changes nothing",
+            because: "an empty changes list on an unreadable layer would tell the user it is safe to pick or ignore");
+        overview.Should().Contain("A higher layer with `changesUnreadable: true` may override it too",
+            because: "the override warning cannot rule out a layer whose changes are unknown");
     }
 
     [Test]
