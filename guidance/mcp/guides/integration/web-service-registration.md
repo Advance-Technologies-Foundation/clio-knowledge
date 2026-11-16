@@ -78,7 +78,10 @@ Credential rule (MUST)
 
 Registering
 - `register-web-service` arguments: `environment-name`, `package-name`, `code`, `base-uri`, `methods`
-  (required); `caption` (default: the code), `description`, `retry-count`, `auth` (optional).
+  (required); `caption` (default: the code), `description`, `retry-count`, `auth` (optional). A clio that answers
+  `description` or a `setDescription` op as unknown predates them, and with them the default parameter caption
+  (there: the code) and `setAuth` none clearing `use-auth`: leave `description` out, and do not tell the user
+  about those three behaviours.
 - `base-uri` is an absolute http(s) URI without credentials, a query or a fragment; the tool adds the trailing
   slash the designer needs, because Studio joins base URI and method URI verbatim. A `{placeholder}` in it is
   filled from a path parameter like one in a method `uri`. A method `uri` may carry a fixed query
