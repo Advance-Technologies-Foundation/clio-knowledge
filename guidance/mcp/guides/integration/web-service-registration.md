@@ -174,8 +174,9 @@ Testing
 - A call returning 401 or 403: first check in `describe-web-service` that the method has `use-auth: true` when
   the service has authentication. If it does, the system-setting values are usually still empty: an empty setting
   sends no header or parameter at all, without any error. Say so instead of changing the service.
-- An OAuth 2.0 call that fails before anything is sent comes back withheld, with status 0 and no body: the
-  access token could not be retrieved. That is the OAuth application, not the service: ask the user to check its
+- A test call on an OAuth 2.0 method that comes back withheld with status 0, no body and an error naming the
+  OAuth application usually means the access token could not be retrieved (or the API host is unreachable).
+  That is the OAuth application, not the service: ask the user to check its
   client id and secret, scope and token URL, and, when the token endpoint refuses client credentials in a Basic
   header, to set "Send client credentials" to "In request body" (measured: the default Basic header failed every
   call where the request body worked). Studio's test request on the same method shows the platform's error.
