@@ -31,7 +31,7 @@ public sealed class WebServiceRegistrationGuidanceTests
             "Create the setting first with `create-sys-setting` and no value",
             "Do not try to read them another way.",
             "a constant whose value looks like a key is refused too, and describe hides one Studio stored.",
-            "The tool accepting a value does not make it public: a key or password the user gives, short or not, still goes into a system setting."
+            "the tool accepting a value does not make it public: a key, password or PIN the user gives, short or not, still goes into a system setting."
         ];
 
         // Assert

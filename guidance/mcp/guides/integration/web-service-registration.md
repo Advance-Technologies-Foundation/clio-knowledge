@@ -60,17 +60,21 @@ Credential rule (MUST)
   `default-value ""` clears it, and a `uri` that would show it is refused.
 - A header parameter, and a SOAP `soap-header` element, follows the name rule above (so `Authorization`, an
   `auth` name, always takes `default-sys-setting`) and one more: a constant whose value looks like a key is
-  refused too, and describe hides one Studio stored. The value is split at spaces, commas and semicolons. It is
-  a key when it starts with an authentication scheme (`Basic`, `Bearer`, `Token`...) followed by anything, or
-  when a part, without quotes, base64 padding and a leading `name=`, is a credential pair (`password=...`), 16 or
-  more characters mixing letters and digits (a generated key; also a GUID, an ISO timestamp or a build tag such
-  as `4.18.2-build20240101`), 24 or more letters, 12 or more digits, or a password-shaped word (upper and lower
-  case, a digit and a symbol); an address is one when its user information, a path segment (a webhook token), a
-  query or a fragment value is. Any other value is an ordinary constant, as Studio allows it:
-  `Accept-Language: en-US`, `X-Api-Version: 2`, `Content-Type: application/xml`, `Cache-Control: max-age=3600`,
-  `Accept: application/vnd.github.v3+json` or a `User-Agent` are written, shown by describe and left readable in
-  a test-call echo. The tool accepting a value does not make it public: a key or password the user gives, short
-  or not, still goes into a system setting. A refusal that says "refused on a header, cookie or
+  refused too, and describe hides one Studio stored. The value is split at spaces, commas, semicolons and `&`. It
+  is a key when it starts with an authentication scheme (`Basic`, `Bearer`, `Token`...) followed by anything, or
+  when a part, without quotes, base64 padding and a leading `name=`, is a credential pair (`password=...`, or
+  `sig=`/`code=`... with 16 or more characters), 16 or more characters mixing letters and digits (a generated key;
+  also a GUID, an ISO timestamp, a build tag such as `4.18.2-build20240101` or a multipart boundary), 24 or more
+  letters, 12 or more digits, or a password-shaped word (8 or more characters with upper and lower case, a digit
+  and one of `!@#$%^&*?~`); an address is one when it has user information, or when a path segment (a webhook
+  token), a query or a fragment value is one. Words, short numbers and short versions joined by `/ . + - _` stay
+  plain. Any other value is an ordinary constant, as Studio allows it: `Accept-Language: en-US`,
+  `X-Api-Version: 2`, `Content-Type: application/xml`, `Cache-Control: max-age=3600`,
+  `Accept: application/vnd.github.v3+json`, a `User-Agent`, a host name or `production-eu-west-1` are written,
+  shown by describe and left readable in a test-call echo. The rule is a deny-list: a short chosen secret under a
+  neutral name (`X-Pin: 4821`, `Winter-2024`) is not recognised, so the tool accepting a value does not make it
+  public: a key, password or PIN the user gives, short or not, still goes into a system setting. A refusal that
+  says "refused on a header, cookie or
   credential-like parameter" comes from a clio released before this rule, which refuses every header constant:
   tell the user to update clio instead of moving a plain value into a system setting. A refusal that says the
   value "looks like a key" comes from this rule; then use `default-sys-setting`.
@@ -222,7 +226,8 @@ Changing a registered service
   like `oauth-app`. A kept parameter whose secret constant default describe hid (`default-masked: true`)
   keeps that default when no default is sent; the agent never needs, and never gets, the value. To remove
   such a constant send `"default-value": ""`, or replace it with `default-sys-setting`; moving it to a place
-  where it would show (a query or body parameter, a path that does not look like a credential) is refused.
+  where describe would show it (a query or body parameter, or a code or path where neither the name nor the value
+  hides it) is refused.
 - `setMethod` REPLACES the method. Every parameter it keeps must be sent complete, as `describe-web-service`
   returned it: an omitted field is not kept but reset (`in` to body, `type` to Text, `array` and `required` to
   false, the caption to the name the API sees, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
@@ -283,6 +288,4 @@ Rights and limits
   written. On the same stand in November 2026: a plain `Accept-Language: en-US` header constant was registered,
   shown by describe and echoed readable by an echo API, while a key-like constant stored the Studio way under the
   neutral header `X-Partner` was hidden by describe, masked in the echo, and refused when sent back as a constant.
-  The rule is a deny-list: a short chosen secret under a neutral name (`X-Pin: 4821`) is not recognised, which is
-  why the credential rule above never relies on the tool to refuse one.
   Other versions are unknown.
