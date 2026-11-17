@@ -157,7 +157,11 @@ Testing
   filled from a system setting cannot be found in what the platform reports as sent (a path value not found in
   the URL, a body value or an array item field missing from the body, nothing reported for a failed call, or a
   request body that is neither JSON nor XML), the response is withheld and only the status code comes back. Response values read from a cookie, a credential-named header, or with a
-  setting or secret default are masked too.
+  setting or secret default are masked too. For the same reason, in a process that calls a web service or reads a
+  SecureText setting (the platform decrypts it into a parameter), `run-process` returns every text, Guid or collection
+  result as `[withheld]`, named in `withheldResultParameters`; flags, numbers and dates (`Success`, `StatusCode`) come
+  back. Map a SecureText setting only into element inputs, never copy a response or a key elsewhere to read it: the
+  user sees the values in the process log.
 - A REST method with `content-type` xml cannot be test-called: the platform refuses it and nothing is sent; a process sends its XML body through the Call web
   service element's `RequestBody`.
 - `parameters` maps top-level request parameter codes to values: text, a number or a boolean for a scalar; a
