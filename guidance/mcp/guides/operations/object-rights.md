@@ -229,11 +229,11 @@ Results:
   the read-back: its failure says so — re-read the object with get-object-rights before retrying or
   reporting a failure.
 - Concurrent writes. On clio 8.1.0.155 and earlier, read-modify-write is last-writer-wins: a change another
-  client saves between the read and the save is overwritten. From a clio release newer than 8.1.0.155 a
-  write holds a lease on the object (shared with set-default-record-rights and set-column-rights) and
-  re-reads the object after the confirmation: a second write of the object while the lease is held, or a
-  switch or operation row another client changed since the plan, is refused, writing nothing — re-run the
-  call to plan on the object as it is now. Calls for one object MUST NOT run in parallel.
+  client saves between the read and the save is overwritten. From clio 8.1.0.156 a write holds a lease on the
+  object (shared with set-default-record-rights and set-column-rights) and re-reads the object after the
+  confirmation: a second write of the object while the lease is held, or a switch or operation row another
+  client changed since the plan, is refused, writing nothing — re-run the call to plan on the object as it is
+  now. Calls for one object MUST NOT run in parallel.
 - It does NOT change column permissions (`get-guidance name=column-rights`) or record permissions.
 
 Package binding (the rows ship with the app; clio 8.1.0.148 or later, see Version boundary):

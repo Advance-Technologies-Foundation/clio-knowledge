@@ -109,7 +109,7 @@ enable-record-permissions; disable-record-permissions; preview.
   get-object-rights. A save that got no answer may still be applied: re-read before retrying. A repeated
   call reports no change. It does NOT change operation or column permissions, and it NEVER applies the rules
   to existing records.
-- Concurrent writes (a clio release newer than 8.1.0.155): a write holds a lease on the object, shared with
+- Concurrent writes (clio 8.1.0.156 or later): a write holds a lease on the object, shared with
   set-object-rights and set-column-rights, and re-reads the object after the confirmation; a second write of
   the object while the lease is held, or a switch or rule another client changed since the plan, is refused,
   writing nothing — re-run the call to plan on the object as it is now. Calls for one object MUST NOT run in

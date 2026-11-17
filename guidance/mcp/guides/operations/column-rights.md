@@ -5,8 +5,8 @@ column permissions" switch, the row priority rule of a column, the get-column-ri
 rules for a grant, a move, a removal and the switch, and the fact that clio does not bind these rows to a
 package.
 
-Version boundary: get-column-rights and set-column-rights require a clio release newer than 8.1.0.155;
-clio 8.1.0.155 and earlier have neither tool. How to tell: get-column-rights and set-column-rights are
+Version boundary: get-column-rights and set-column-rights require clio 8.1.0.156 or later; clio
+8.1.0.155 and earlier have neither tool. How to tell: get-column-rights and set-column-rights are
 missing from get-tool-contract. Then stop: tell the developer that clio needs updating for this, and that
 the manual way is the "Column permissions" tab of the Object permissions designer. You MUST NOT write
 column rights any other way (see "Never by hand").

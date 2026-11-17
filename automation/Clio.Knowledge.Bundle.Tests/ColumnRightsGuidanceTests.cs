@@ -218,14 +218,14 @@ public sealed class ColumnRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateTheSharedWriteLease")]
     [TestCase("guidance/mcp/guides/operations/default-record-rights.md",
         TestName = "DefaultRecordRights_ShouldStateTheSharedWriteLease")]
-    [Description("From a clio release newer than 8.1.0.155 the three rights writers share one lease per object and refuse a save when the object changed after the plan; each article tells the agent not to run them in parallel.")]
+    [Description("From clio 8.1.0.156 the three rights writers share one lease per object and refuse a save when the object changed after the plan; each article tells the agent not to run them in parallel.")]
     public void RightsWriters_ShouldStateTheSharedWriteLease(string path)
     {
         // Act
         string normalized = Normalized(Read(path));
 
         // Assert
-        normalized.Should().Contain("a clio release newer than 8.1.0.155",
+        normalized.Should().Contain("clio 8.1.0.156",
             because: "the lease exists only from that clio on");
         normalized.Should().Contain("Calls for one object MUST NOT run in parallel",
             because: "a second write of the object is refused while the first holds the lease");
