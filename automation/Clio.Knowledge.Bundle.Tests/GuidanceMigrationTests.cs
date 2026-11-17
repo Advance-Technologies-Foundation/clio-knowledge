@@ -62,7 +62,8 @@ public sealed class GuidanceMigrationTests
         "process-dynamic-case",
         "process-dynamic-case-change",
         "web-service-registration",
-        "web-service-soap"
+        "web-service-soap",
+        "column-rights"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

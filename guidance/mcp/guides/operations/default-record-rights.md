@@ -109,6 +109,11 @@ enable-record-permissions; disable-record-permissions; preview.
   get-object-rights. A save that got no answer may still be applied: re-read before retrying. A repeated
   call reports no change. It does NOT change operation or column permissions, and it NEVER applies the rules
   to existing records.
+- Concurrent writes (clio 8.1.0.156 or later): a write holds a lease on the object, shared with
+  set-object-rights and set-column-rights, and re-reads the object after the confirmation; a second write of
+  the object while the lease is held, or a switch or rule another client changed since the plan, is refused,
+  writing nothing — re-run the call to plan on the object as it is now. Calls for one object MUST NOT run in
+  parallel.
 
 ## Apply the rules to existing records — the user's decision
 - You MUST NOT run apply-default-record-rights on your own initiative. After an enable or a rule change that
@@ -147,5 +152,5 @@ enable-record-permissions; disable-record-permissions; preview.
   A DataService read that is denied returns success with ZERO rows, not an error.
 
 Scope boundary: the record-permissions switch and the default record rules of one object, and applying them
-to its records. NOT operation permissions, NOT column permissions, NOT one record's grants, NOT putting the
-switch or the rules into a package (they are environment settings).
+to its records. NOT operation permissions, NOT column permissions (`get-guidance name=column-rights`), NOT one
+record's grants, NOT putting the switch or the rules into a package (they are environment settings).
