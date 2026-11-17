@@ -232,9 +232,9 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the top-level caption renames the case; only an item's caption renames a stage");
             guide.Should().Contain("`{\"value\":\"Rejected\",\"group\":\"Approved\",\"successful\":false}`",
                 because: "an item is keyed by value, and one example shows the shape the tool takes");
-            guide.Should().Contain("an item's `caption` renames the stage AND its lookup value, as the case designer does (the bar shows the value's name): the new name shows on EVERY record holding that value",
+            guide.Should().Contain("an item's `caption` renames the stage AND its lookup value, as the case designer does (the bar shows the value's name): the lookup's value is renamed WHEREVER it is used",
                 because: "the bar and the designer show the value's name, so a stage renamed alone is shown nowhere (dev testing A6)");
-            guide.Should().Contain("`value-rename-confirmation-required` (a caption renames the value for every record) -> `confirm-value-rename: true`",
+            guide.Should().Contain("`value-rename-confirmation-required` (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`",
                 because: "a value rename shows on every record of the object, so the user agrees first");
             guide.Should().Contain("`stage-records-confirmation-required` (records hold a removed stage's value, finished cases included",
                 because: "records in a final stage have no running case, and still lose their current stage (dev testing A13)");
@@ -244,8 +244,12 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a new lookup value shows in every record's choice list");
             guide.Should().Contain("`color` (`#RRGGBB`) recolours the stage",
                 because: "the colour is changed through the tool, not left to the designer");
-            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.183",
+            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.184",
                 because: "a clio with the confirmations floors describe and modify at the package that asks for them");
+            guide.Should().Contain("An older clio (no `confirm-value-rename`) works the older way",
+                because: "a knowledge release reaches every clio at once, and an older one renames only the stage and refuses no removal");
+            guide.Should().Contain("describe has no `records` (absent is not 0",
+                because: "an agent on an older clio must not read a missing count as no records");
             guide.Should().Contain("a stage left out is REMOVED",
                 because: "stages is the whole new list, and a dropped item removes a stage");
             guide.Should().Contain("so this changes the case, it does not get around it",

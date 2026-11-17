@@ -12,9 +12,12 @@ later. If `get-tool-contract` does not list `describe-dynamic-case`, the clio se
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
 `process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
 environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
-`install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose `modify-dynamic-case`
-takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.183; an older clio cannot pass the confirmations of
-step 3 that 1.6.6.183 asks for, so on such a refusal tell the user to update clio.
+`install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose
+`modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.184 the same
+way. An older clio (no `confirm-value-rename`) works the older way, so read steps 1-3 with that: describe has no
+`records` (absent is not 0: count the records with the data tools); an item's `caption` renames only the stage in the
+case, which the bar and the designer do not show, so do not offer it, and to rename a stage tell the user to update
+clio; removing a stage that records hold is not refused, so check them with the data tools and ask the user first.
 
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
@@ -31,15 +34,17 @@ step 3 that 1.6.6.183 asks for, so on such a refusal tell the user to update cli
    value, never unasked; the user asked for that stage, so this changes the case, it does not get around it). Fields
    an item leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours the stage; an item's
    `caption` renames the stage AND its lookup value, as the case designer does (the bar shows the value's name): the
-   new name shows on EVERY record holding that value, in every case of the object. A name another value already has:
-   `stage-value-ambiguous`. `filter` and `remove-filter`: "Several cases on one object". First `dry-run: true`: show
-   the user `diff` and the notes, write only after their yes. `unchanged` means nothing to do.
+   lookup's value is renamed WHEREVER it is used (every record, list and filter of every object that shows it), in
+   the user's language; ask for the yes in those words. A name another value already has, or two items given the same
+   name: `stage-value-ambiguous`; no right to edit the lookup: `rights-missing`. `filter` and `remove-filter`:
+   "Several cases on one object". First `dry-run: true`: show the user `diff` and the notes, write only after their
+   yes. `unchanged` means nothing to do.
 3. Some writes need the user's own yes, and are refused until then; one refusal, and the dry run's notes, name
    every one still missing: `running-instances-confirmation-required` (cases run: how many, in which stages; they
    continue, possibly on the stages as they were) -> `confirm-running-instances: true`;
    `stage-records-confirmation-required` (records hold a removed stage's value, finished cases included: they keep
    their data and show no current stage) -> `confirm-stage-records: true`; `value-rename-confirmation-required`
-   (a caption renames the value for every record) -> `confirm-value-rename: true`. Tell the user each reason, and
+   (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`. Tell the user each reason, and
    pass each flag only after they say yes to it, NEVER on your own.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
    nothing is deleted, new records start no case, and its running cases continue, unless another case of the
