@@ -232,16 +232,38 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the top-level caption renames the case; only an item's caption renames a stage");
             guide.Should().Contain("`{\"value\":\"Rejected\",\"group\":\"Approved\",\"successful\":false}`",
                 because: "an item is keyed by value, and one example shows the shape the tool takes");
-            guide.Should().Contain("an item's `caption` renames the stage in the case only, never the value every record shares",
-                because: "renaming a stage must not rename the lookup value every record holds");
+            guide.Should().Contain("an item's `caption` renames the stage AND its lookup value, as the case designer does (the bar shows the value's name): the lookup's value is renamed WHEREVER it is used",
+                because: "the bar and the designer show the value's name, so a stage renamed alone is shown nowhere (dev testing A6)");
+            guide.Should().Contain("`value-rename-confirmation-required` (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`",
+                because: "a value rename shows on every record of the object, so the user agrees first");
+            guide.Should().Contain("`stage-records-confirmation-required` (records hold a removed stage's value, finished cases included",
+                because: "records in a final stage have no running case, and still lose their current stage (dev testing A13)");
+            guide.Should().Contain("`records` (the records holding its value, finished cases included)",
+                because: "describe counts the records per stage, so the agent can tell the user before a removal");
+            guide.Should().Contain("add it with the data tools first, only after the user agreed to that new value, never unasked",
+                because: "a new lookup value shows in every record's choice list");
+            guide.Should().Contain("`color` (`#RRGGBB`) recolours the stage",
+                because: "the colour is changed through the tool, not left to the designer");
+            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.185",
+                because: "a clio with the confirmations floors describe and modify at the package that asks for them");
+            guide.Should().Contain("An older clio (no `confirm-value-rename`) works the older way",
+                because: "a knowledge release reaches every clio at once, and an older one renames only the stage and refuses no removal");
+            guide.Should().Contain("describe has no `records` (absent is not 0",
+                because: "an agent on an older clio must not read a missing count as no records");
             guide.Should().Contain("a stage left out is REMOVED",
                 because: "stages is the whole new list, and a dropped item removes a stage");
             guide.Should().Contain("so this changes the case, it does not get around it",
                 because: "adding a missing value the user asked for is part of the change, still after their yes");
             guide.Should().Contain("First `dry-run: true`: show the user `diff` and the notes, write only after their yes",
                 because: "agents answered about existing cases without a dry run and missed what would change");
-            guide.Should().Contain("pass `confirm-running-instances: true` only after they say yes, NEVER on your own",
-                because: "every save changes what the running cases follow");
+            guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }",
+                because: "an agent builds its call from the signature, so every flag the tool takes is listed there");
+            guide.Should().Contain("`invalid-request` for a case that is not the active version (name the active one the message gives)",
+                because: "the package refuses an inactive version and names the active one (phase A follow-up P3)");
+            guide.Should().Contain("pass each flag only after they say yes to it, NEVER on your own",
+                because: "every confirmation flag stands for the user's own yes");
+            guide.Should().Contain("its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at its record's next stage change",
+                because: "measured on both stands: the platform cancels a disabled case's running instances when another case of the object is enabled (dev testing X7)");
             guide.Should().Contain("goes ALONE (`invalid-request` otherwise)",
                 because: "switching a case on or off is a save of its own");
             guide.Should().Contain("`filter-overlap`; ask the user whether to disable that case first or keep this one disabled",
@@ -368,7 +390,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "each type has stages of its own");
             guide.Should().Contain("a filtered `create-dynamic-case` is refused `unfiltered-case-exists`",
                 because: "the package refuses a filtered case next to an enabled case without one, before any write");
-            guide.Should().Contain("Offer the case designer's two ways, each with its dry run, and let the user choose",
+            guide.Should().Contain("In the FIRST answer, before any write, offer the case designer's two ways, each with its dry run, and let the user choose",
                 because: "turning the existing case off changes which case new records start; the user decides");
             guide.Should().Contain("(1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then `create-dynamic-case { filter, stages }` for the others; nothing is disabled",
                 because: "the designer's first way keeps the existing case for its values and disables nothing");

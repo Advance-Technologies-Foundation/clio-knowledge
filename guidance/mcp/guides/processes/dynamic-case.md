@@ -21,7 +21,8 @@ other means.
   `describe-dynamic-case` (clio older than 8.1.0.153), answer only after the call with `dry-run: true` (it writes
   nothing) in any editable package and WITHOUT `stages` (a stage list is checked before the object's case). A newer
   clio refuses both for a CrtProcessBuilder older than 1.6.6.179: `install-process-builder` restarts the site, so
-  only once the user approves it (`core-rules`).
+  only once the user approves it (`core-rules`). A clio whose `modify-dynamic-case` takes `confirm-value-rename`
+  refuses describe below 1.6.6.185.
   Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case" in
   `process-dynamic-case-change`), never a second one unless the user splits its records by a filter (same guide);
   on an older clio its `case-exists` or `settings-conflict` refusal IS the answer. Never offer to rename, replace or
