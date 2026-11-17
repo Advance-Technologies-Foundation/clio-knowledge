@@ -1,15 +1,15 @@
 Part of the process guide set. Owners win.
-0. A request produces ONE process (an asked split is built as asked); split only on D1 (per item of a set, unless one filtered data/rights element does it all), D2 (3+ element fragment at 2+ places), D4 (2+ long human phases): `process-sub-process-when`. Never restructure an existing process without being asked (D1 only, per item).
+0. A request produces ONE process (an asked split is built as asked); split only on D1 (per item, unless one set-based element does it all), D2 (3+ elements at 2+ places), D4 (2+ long phases): `process-sub-process-when`. Never restructure an existing process without being asked (D1 only, per item).
 1. ONE START PER TRIGGER (add+change: two `signalStart`s; shared chain: `process-multi-start`).
 2. `validate-process-graph`; fix all errors.
 3. `list-user-tasks` -> `userTaskName`; key on the schema NAME (retired: `CallUserTask`, `EmailUserTask`, `SendEmailUserTask`).
-4. ONE `get-target-package` (named/app `package`); on `success: false` ask. `create-business-process`: the descriptor as the JSON object itself, {name,caption,packageName,elements[{name,type,caption,block}],flows[],parameters,mappings}.
-5. `describe-business-process mode=full`; `compile-creatio` only if the save warns.
-No/old CrtProcessBuilder refusal: STOP and ask the user before `install-process-builder`.
+4. ONE `get-target-package` (named/app `package`); on `success: false` ask. `create-business-process`: descriptor as the JSON object itself, {name,caption,packageName,elements[{name,type,caption,block}],flows[{source,target,kind,condition,label}],parameters,mappings}.
+5. `describe-business-process mode=full`; `compile-creatio` only if save warns.
+No/old CrtProcessBuilder refusal: STOP and ask the user before `install-process-builder` (`core-rules`).
 Set only what was asked; ask only an unsaid approver/performer/recipient.
 Types (else `process-element-catalog`): startEvent signalStart endEvent exclusiveGateway parallelGateway formulaTask(1.6.3.16+) subProcess(1.6.3.26+) scriptTask(1.6.6.30+) sendChatMessage(1.6.6.180+); sendEmail approval openEditPage preconfiguredPage fileProcessing (never as a userTask); userTask+userTaskName or alias type readData changeData addData deleteData performTask changeAccessRights.
-== Names N1-N10 (`process-naming`: relabel, clash) ==
-Process `<prefix><Object>_<Action>` (`get-schema-name-prefix`); a callee ends in `SubProcess`. Captions (process, EVERY element): sentence case; element <= 60 chars, activity verb first, event a noun phrase.
+== Names (`process-naming`: relabel, clash) ==
+Process `<prefix><Object>_<Action>` (`get-schema-name-prefix`); a callee ends in `SubProcess`. Captions (process, EVERY element): sentence case; element <= 60 chars, activity verb-first, event noun phrase.
 Element `name` = caption in PascalCase minus only a/an/the/is/are/was/were/be/been/has/have/had; punctuation splits words; `<X>Start`, `<X>Signal`, `End<X>`; never against the type (no `EndNormal`), no `UserTask` postfix, counter or GUID.
 Parameter: PascalCase plus a `Parameter` suffix, caption without; never rename an element's own. LABEL EVERY CONDITIONAL AND DEFAULT ARM; leave an ordinary continuation bare.
 == Articles ==
