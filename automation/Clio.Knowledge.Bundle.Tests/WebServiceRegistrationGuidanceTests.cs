@@ -29,7 +29,9 @@ public sealed class WebServiceRegistrationGuidanceTests
             "No credential value ever passes through the agent.",
             "MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead.",
             "Create the setting first with `create-sys-setting` and no value",
-            "Do not try to read them another way."
+            "Do not try to read them another way.",
+            "a constant whose value looks like a key is refused too, and describe hides one Studio stored.",
+            "`Accept-Language: en-US`, `X-Api-Version: 2`, `Content-Type: application/xml`"
         ];
 
         // Assert
@@ -79,7 +81,7 @@ public sealed class WebServiceRegistrationGuidanceTests
     }
 
     [Test]
-    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps soap-header parameters on system settings, guards setNamespaces and setType, and routing reaches it.")]
+    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps credential-like or key-like soap-header values on system settings, guards setNamespaces and setType, and routing reaches it.")]
     public void SoapGuide_ShouldStateItsSafetyRules()
     {
         // Arrange
@@ -92,7 +94,8 @@ public sealed class WebServiceRegistrationGuidanceTests
         [
             "take it from the WSDL (the binding operation's `soapAction`) or ask the user; NEVER make one up.",
             "Pass the whole notice on, risk sentence included",
-            "A soap-header parameter takes no `default-value`",
+            "or with a value that looks like a key it takes no `default-value`: give it `default-sys-setting`",
+            "every element of the path counts, so `wsse:Security/wsse:UsernameToken/wsse:Username` is one",
             "NEVER a JSONPath",
             "`removeMethod`, with the processes listed"
         ];
