@@ -17,9 +17,10 @@ Manage column permissions with two tools:
   remove that role's row in the column, or turn the object's column permissions on or off. DESTRUCTIVE:
   it writes in one call, with no publish step.
 
-Column permissions are access rights set on the object, not layout: hiding a field on one page (a page
-setting or a business rule, `get-guidance name=business-rules`) leaves its data reachable everywhere else.
-Who may read/create/edit/delete ANY record of the object is
+Column permissions restrict the DATA of a column (every page, list, export and API read). The STATE of a
+field's control — hidden, read-only, required, also by the current user's role — is a business rule
+(`get-guidance name=business-rules`, CurrentUserRoles): it leaves the data reachable. When it is unclear
+which the developer means, ask. Who may read/create/edit/delete ANY record of the object is
 `get-guidance name=object-rights`; who reaches ONE record is `get-guidance name=record-rights`; the "Use
 record permissions" switch and default record rules are `get-guidance name=default-record-rights`.
 
@@ -52,24 +53,30 @@ measurements. Who actually reaches a column was not measured: verify it as below
 
 ## Never by hand
 You MUST NOT write column rights with execute-esq, DataService or a hand-built call to
-RightManagementService. A save there REPLACES the rows of EVERY column of the object: each column it
-lists gets exactly the rows sent, and each column it leaves out gets the default row, erasing that
-column's rows. The service read also FILTERS (it hides default-only columns while the switch is ON and
-every column while it is OFF), so a list built from it loses rows. set-column-rights builds the full list
-from storage, checks it against the service, and reads the rows back. Reads are fine: resolving a role
-name to its id is a read.
+RightManagementService. A RightManagementService save with a column list REPLACES the rows of EVERY
+column of the object: each column it lists gets exactly the rows sent, and each column it leaves out gets
+the default row, erasing that column's rows. The service read also FILTERS (it hides default-only
+columns while the switch is ON and every column while it is OFF), so a list built from it loses rows.
+set-column-rights builds the full list from storage, checks it against the service, and reads the rows
+back. Reads are fine: resolving a role name to its id is a read.
 
 ## Common requests
 | The request | The call(s) |
 |---|---|
 | Hide column Z from role X | grantee X, access=denied |
-| Column Z read-only for every employee except role Y | grantee All employees, access=read (its new row goes to the bottom); then grantee Y, access=edit (its new row goes to the top, above it) |
+| Column Z read-only for every employee except role Y | grantee All employees, access=read (a new row goes to the bottom; an existing one keeps its place); then grantee Y, access=edit, above the All employees row |
 | Portal / external users must not see column Z | grantee `All external users` (or the portal role), access=denied |
-| Let role X see column Z again | a grant of the level X should have; remove X's row only when X should follow the other rows (see Remove) |
+| Let role X see column Z again | a grant of the level X should have; remove X's row only when X should follow the other rows (see Move and remove) |
 
-The first write on an object whose column permissions are OFF carries enable-column-permissions (see
-Enable). Each call is previewed and asked first. A new column row goes to the TOP, while a new object
-operation row (object-rights) goes to the bottom: do not carry one tool's placement over to the other.
+Read the column with get-column-rights FIRST. The placements above are for a role with NO row: a role
+that has a row keeps its place and only changes its level. When the role's row sits — or would sit — below
+a row that must not decide for its members (All employees, All external users, or any role with a wider
+level), you MUST pass position above that row in the same call; clio warns only about an All employees
+row above, not about any other. "Read-only for every employee" also needs each role row above All
+employees with a wider level brought down to read. The first write on an object whose column permissions
+are OFF carries enable-column-permissions (see Enable and disable). Each call is previewed and asked
+first. A new column row goes to the TOP, while a new object operation row (object-rights) goes to the
+bottom: do not carry one tool's placement over to the other.
 
 ## Before any write
 - entity-schema-name is the object's SCHEMA name (its code); a developer's word for an object can be its
@@ -86,10 +93,12 @@ operation row (object-rights) goes to the bottom: do not carry one tool's placem
   refused. Show those facts, get the yes, then make the same call without preview. On the CLI: --preview
   first, ask, then --confirm.
 - Calls for one object MUST NOT run in parallel. A write holds a lease on the object, shared with
-  set-object-rights and set-default-record-rights, among the clio processes of one OS user; a second write
+  set-object-rights and set-default-record-rights, among the clio processes of one OS user (on Windows, of
+  the machine); a second write
   of it is refused while the lease is held. Without a writable lock folder a write goes on without the
   lease and warns. Either way the object is read again right before the save, and a change since the
-  plan — by another clio, the designer or another client — refuses the save.
+  plan — by another clio, the designer or another client — refuses the save (a disable compares the
+  switches only).
 
 ## get-column-rights
 Args: entity-schema-name (required); column, grantee (optional).
@@ -132,7 +141,9 @@ Move and remove:
   take access away: remove-row=true deletes the row, and its members then follow the next matching row or
   the object's operation permissions, which can WIDEN their access. Removing a column's last row leaves
   the column with no rows: every user follows the object's operation permissions; the preview says when
-  that widens access. Name that effect to the developer before the write.
+  that widens access. For an EXTERNAL role the preview's next row can be All employees, which does not
+  apply to external users: name the row that does (All external users, or none — the object's operation
+  permissions) yourself. Name that effect to the developer before the write.
 - A move or a removal while column permissions are OFF is refused.
 
 Enable and disable:
@@ -150,8 +161,8 @@ Enable and disable:
 Refused, writing nothing: a grantee with several rows in the column; rows of the column that share a
 position; an unknown column or grantee; storage that disagrees with the service, is cut short or cannot be
 read (a disable does not depend on the stored rows: it goes ahead with a warning); stored rows or switches
-that changed between the plan and the save; another write of the object running. Read the refusal and act
-on it; never work around it by hand.
+that changed between the plan and the save (for a disable, the switches); another write of the object
+running. Read the refusal and act on it; never work around it by hand.
 
 Results:
 - After every save the switch is read back from the service and the stored rows from storage, and both are

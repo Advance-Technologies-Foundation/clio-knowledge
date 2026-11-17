@@ -39,7 +39,7 @@ public sealed class ColumnRightsGuidanceTests
 
     private static string Read(string relativePath) => File.ReadAllText(Path.Combine(Root(), relativePath));
 
-    [TestCase("A save there REPLACES the rows of EVERY column of the object",
+    [TestCase("A RightManagementService save with a column list REPLACES the rows of EVERY column of the object",
         TestName = "ColumnRights_ShouldStateThatASaveReplacesEveryColumn")]
     [TestCase("You MUST NOT write column rights with execute-esq, DataService or a hand-built call to RightManagementService",
         TestName = "ColumnRights_ShouldForbidWritingByHand")]
@@ -115,6 +115,20 @@ public sealed class ColumnRightsGuidanceTests
         TestName = "ColumnRights_ShouldStateTheSystemColumnRuleForExternalUsers")]
     [TestCase("what a portal audience gets is derived from them",
         TestName = "ColumnRights_ShouldLabelThePortalRuleAsDerived")]
+    [TestCase("The placements above are for a role with NO row: a role that has a row keeps its place and only changes its level",
+        TestName = "ColumnRights_ShouldStateThatAnExistingRowKeepsItsPlace")]
+    [TestCase("you MUST pass position above that row in the same call; clio warns only about an All employees row above, not about any other",
+        TestName = "ColumnRights_ShouldPlaceTheRowAboveARowThatMustNotDecide")]
+    [TestCase("Read the column with get-column-rights FIRST",
+        TestName = "ColumnRights_ShouldReadTheColumnBeforeACommonRequest")]
+    [TestCase("Column permissions restrict the DATA of a column",
+        TestName = "ColumnRights_ShouldStateThatColumnRightsRestrictTheData")]
+    [TestCase("is a business rule (`get-guidance name=business-rules`, CurrentUserRoles): it leaves the data reachable. When it is unclear which the developer means, ask",
+        TestName = "ColumnRights_ShouldSendControlStateToBusinessRules")]
+    [TestCase("For an EXTERNAL role the preview's next row can be All employees, which does not apply to external users",
+        TestName = "ColumnRights_ShouldStateTheExternalRemovalGap")]
+    [TestCase("(a disable compares the switches only)",
+        TestName = "ColumnRights_ShouldStateWhatADisableReReads")]
     [Description("column-rights keeps each rule an agent must weigh before changing column permissions; losing one in an edit would let a call erase, widen or narrow column access without the developer's decision.")]
     public void ColumnRights_ShouldStateTheContractRule(string rule)
     {
@@ -186,6 +200,9 @@ public sealed class ColumnRightsGuidanceTests
         undeclared.Should().BeEmpty(because: "a guide the bundle does not declare is not published");
         Read("guidance/mcp/guides/routing.md").Should().Contain("name=column-rights",
             because: "a request to restrict a field must reach the owner");
+        Read("guidance/mcp/guides/routing.md").Should().Contain(
+            "-> name=column-rights; a field's visibility or editability on pages only (the control's state, the data stays reachable) -> name=business-rules",
+            because: "routing must tell restricting the data apart from the state of a page control");
         Normalized(Read("guidance/mcp/guides/operations/object-rights.md")).Should().Contain(
             "NOT column permissions (`get-guidance name=column-rights`)",
             because: "object operation permissions and column permissions are different tools");

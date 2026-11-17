@@ -55,11 +55,11 @@ Do them in this order — a later step assumes the earlier one exists.
    what the portal page shows, ASK THE USER before designing it: which fields and details external
    users see, which of them they may edit, and whether they add records. That scope drives the rest:
    step 2 binds this page, and step 4 grants only the objects it shows. The page is a LAYOUT, not an
-   access boundary: the object grant of step 4 exposes EVERY column of the object to every external
-   user, whatever the page shows. Hiding a field from them needs column permissions, which this flow
-   does not set — say so to the user when the scope leaves fields out for confidentiality. Setting them is
-   a separate step the user decides: `get-guidance name=column-rights` (an `All external users` row with
-   access denied).
+   access boundary: the object grant of step 4 exposes EVERY column of the object (system columns aside)
+   to every external user, whatever the page shows. Hiding a field from them needs column permissions,
+   which this flow does not set — say so to the user when the scope leaves fields out for
+   confidentiality. Setting them is a separate step the user decides: `get-guidance name=column-rights`
+   (an `All external users` row with access denied).
 
 2. Bind the portal page for the portal audience — owner: `related-page-binding`. Give the section's
    object an explicit `All external users` entry that opens the portal page of step 1
