@@ -13,8 +13,8 @@ tell the user to update clio (until then the case designer changes a case); answ
 `process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
 environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
 `install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose `modify-dynamic-case`
-takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.182; an older clio cannot pass the confirmations of
-step 3 that 1.6.6.182 asks for, so on such a refusal tell the user to update clio.
+takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.183; an older clio cannot pass the confirmations of
+step 3 that 1.6.6.183 asks for, so on such a refusal tell the user to update clio.
 
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
