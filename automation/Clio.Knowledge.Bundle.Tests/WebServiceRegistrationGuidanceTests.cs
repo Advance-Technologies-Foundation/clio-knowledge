@@ -107,8 +107,137 @@ public sealed class WebServiceRegistrationGuidanceTests
             because: "SOAP services are registered and changed by the tools now");
         guide.Should().Contain("get-guidance name=web-service-soap",
             because: "the owner guide must send a SOAP task to the SOAP article");
-        routing.Should().Contain("for a SOAP service (SOAP 1.1 / 1.2, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap",
-            because: "a SOAP registration task must reach the SOAP article from routing");
+        routing.Should().Contain("for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap",
+            because: "a SOAP registration task, and a WSDL the user gives, must reach the SOAP article from routing");
+    }
+
+    [Test]
+    [Description("The SOAP guide sends a WSDL to read-wsdl, registers its output as it is, leaves the code choice and the test call to the user, and keeps the fallback for a clio without the tool.")]
+    public void SoapGuide_ShouldSendAWsdlToReadWsdl()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "call `read-wsdl` first and register what it returns",
+            "never hand-build what it returned",
+            "does not list `read-wsdl` has no WSDL reading",
+            "Register a port's `arguments` with `register-web-service` as they are, adding only `package-name`",
+            "ask the user which way to go and do not pick a code yourself",
+            "the confirmation rule of `web-service-registration` applies to every SOAP method"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent builds a SOAP service by hand from a WSDL, rewrites what read-wsdl returned, picks a code over a taken one, or calls a SOAP method unasked");
+        }
+        soap.Should().NotContain("There is no WSDL import",
+            because: "read-wsdl reads a WSDL now");
+    }
+
+    [Test]
+    [Description("The registration guide guards a real change of the base URI or the authentication like a changed method, leaves setRetryCount unguarded, says a method without use-auth sends no authentication, and that Digest goes out as Basic.")]
+    public void Guide_ShouldGuardEveryCallChangesAndStatePerMethodAuthentication()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`setAuth` that really changes the authentication changes every call of the methods with `use-auth: true`",
+            "The tool compares the service before and after the whole call",
+            "never set `use-auth` on your own, not even in the same call as `setAuth`",
+            "`setRetryCount` is never guarded.",
+            "a method with `use-auth: false` sends no authentication at all",
+            "The platform sends Digest as a preemptive `Authorization: Basic` header"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "without it an agent repoints or re-authenticates a service a process calls unasked, or expects a new authentication to reach every method");
+        }
+    }
+
+    [Test]
+    [Description("The SOAP guide sends the agent to the SOAP 1.1 port a read-wsdl warning names, explains why WCF refuses the platform's SOAP 1.2 and WS-Addressing calls, and gives the measured workarounds only with the user's agreement.")]
+    public void SoapGuide_ShouldSendTheAgentToACallablePort()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "Register the port a warning names to register instead (\"Register port ... instead\"), else the `studio-pick` port",
+            "Studio's choice, not a recommendation",
+            "never as the `action` parameter of `Content-Type`",
+            "`application/soap+xml;charset=utf-8;action=\"<the soap-action>\"`",
+            "two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI)",
+            "Do this only with the user's agreement, and test a call.",
+            "never register first and warn afterwards.",
+            "keep the SOAP 1.2 port and switch only if a test call fails because the action or operation is not found",
+            "Switch the registered service with `modify-web-service` `setType` soap11"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent registers Studio's SOAP 1.2 pick of a WCF service and every call fails with a SOAP fault");
+        }
+    }
+
+    [Test]
+    [Description("The SOAP guide has the agent pass the code the user named for a new service to read-wsdl as code, keeps service-code for an existing service, and reads again with code when the code is taken.")]
+    public void SoapGuide_ShouldPassANewServiceCodeAsCode()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "When the user named the code of a NEW service, pass it as `code`",
+            "`service-code` is ONLY for an existing SOAP service the operations go into",
+            "(read again with that `code`)"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent passes a new service's code as service-code, fails, and edits the arguments it should register as they are");
+        }
+    }
+
+    [Test]
+    [Description("The guide says run-process withholds the text results of a process that calls a web service or reads a SecureText setting, and that the agent never copies a response or a key elsewhere to read it.")]
+    public void Guide_ShouldStateThatRunProcessWithholdsCredentialResults()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "in a process that calls a web service or reads a SecureText setting",
+            "`run-process` returns every text, Guid or collection result as `[withheld]`, named in `withheldResultParameters`",
+            "never copy a response or a key elsewhere to read it"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "an agent that has not read the rule takes [withheld] for a broken run, or works around it and puts the key into its context");
+        }
     }
 
     private static string ReadCollapsed(string relativePath) =>

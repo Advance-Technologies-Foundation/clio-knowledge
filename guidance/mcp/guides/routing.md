@@ -10,7 +10,8 @@ how a guide points at a rule it does not own. Other backticks are ordinary code 
 page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
 precondition kept next to the instruction it guards — names that guide as the owner.
 
-- Stages of an object or a stage bar on its page: set up, changed or only asked about (DCM, clio 8.1.0.150+) -> name=process-dynamic-case
+- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM, clio 8.1.0.150+; the user names the object by its caption: `list-apps` / `get-app-info` when a schema-name search misses) -> name=process-dynamic-case
+  - an object that already has a case: read, change (stages, order, groups), disable or re-enable it, or split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-change
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -190,7 +191,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
-  - register, read, change or test-call a REST or SOAP web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration; for a SOAP service (SOAP 1.1 / 1.2, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
+  - register, read, change or test-call a REST or SOAP web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration; for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
@@ -200,7 +201,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - identity assertion / Identity Service V3 -> name=identity-assertion
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
-  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
+  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) or a theme's own background -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
   - external users, external organizations, PortalAccount and organization membership -> name=external-organizations
   - custom configuration web services for portal/external users, DefaultServiceRoute or SspServiceRoute -> name=portal-service-routing

@@ -156,7 +156,7 @@ described value reads back raw.
   fail at run time, so the server REFUSES it at build. Assign non-text columns via `processParameter`,
   `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` /
   `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]`: the referenced object's schema UId; from CrtProcessBuilder
-  1.6.6.176 its name is accepted and stored as the UId with a "stored as" warning, while an older package saves
+  1.6.6.180 its name is accepted and stored as the UId with a "stored as" warning, while an older package saves
   a name green and the designer card shows `<entity not found>` — same macro grammar as parameter defaults — see the DEFAULT-value macro rules in `process-parameters`). An empty `value` is refused
   for every type: the runtime silently discards an empty assignment.
 - The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean

@@ -61,6 +61,7 @@ public sealed class GuidanceMigrationTests
         "portal-sections",
         "page-modal-size",
         "process-dynamic-case",
+        "process-dynamic-case-change",
         "web-service-registration",
         "web-service-soap"
     ];
