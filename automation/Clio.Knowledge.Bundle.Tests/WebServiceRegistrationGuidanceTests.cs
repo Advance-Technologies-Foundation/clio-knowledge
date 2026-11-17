@@ -29,7 +29,9 @@ public sealed class WebServiceRegistrationGuidanceTests
             "No credential value ever passes through the agent.",
             "MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead.",
             "Create the setting first with `create-sys-setting` and no value",
-            "Do not try to read them another way."
+            "Do not try to read them another way.",
+            "a constant whose value looks like a key is refused too, and describe hides one Studio stored.",
+            "the tool accepting a value does not make it public: a key, password or PIN the user gives, short or not, still goes into a system setting."
         ];
 
         // Assert
@@ -37,6 +39,28 @@ public sealed class WebServiceRegistrationGuidanceTests
         {
             guide.Should().Contain(clause,
                 because: "an agent that has not read the rule stores an API key as a constant every reader of the schema sees");
+        }
+    }
+
+    [Test]
+    [Description("The guide lets a plain header constant stay a constant and tells an old clio's blanket refusal apart from the key-like refusal.")]
+    public void Guide_ShouldAllowPlainHeaderConstants()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`Accept-Language: en-US`, `X-Api-Version: 2`, `Content-Type: application/xml`",
+            "A refusal that says \"refused on a header, cookie or credential-like parameter\" comes from a clio released before this rule"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "without it an agent pushes a harmless value such as a language into a system setting the user must fill");
         }
     }
 
@@ -79,7 +103,7 @@ public sealed class WebServiceRegistrationGuidanceTests
     }
 
     [Test]
-    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps soap-header parameters on system settings, guards setNamespaces and setType, and routing reaches it.")]
+    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps credential-like or key-like soap-header values on system settings, guards setNamespaces and setType, and routing reaches it.")]
     public void SoapGuide_ShouldStateItsSafetyRules()
     {
         // Arrange
@@ -92,7 +116,8 @@ public sealed class WebServiceRegistrationGuidanceTests
         [
             "take it from the WSDL (the binding operation's `soapAction`) or ask the user; NEVER make one up.",
             "Pass the whole notice on, risk sentence included",
-            "A soap-header parameter takes no `default-value`",
+            "or with a value that looks like a key it takes no `default-value`: give it `default-sys-setting`",
+            "every element of the path counts, so `wsse:Security/wsse:UsernameToken/wsse:Username` is one",
             "NEVER a JSONPath",
             "`removeMethod`, with the processes listed"
         ];
@@ -214,6 +239,29 @@ public sealed class WebServiceRegistrationGuidanceTests
         {
             soap.Should().Contain(clause,
                 because: "without it an agent passes a new service's code as service-code, fails, and edits the arguments it should register as they are");
+        }
+    }
+
+    [Test]
+    [Description("The guide says run-process withholds the text results of a process that calls a web service or reads a SecureText setting, and that the agent never copies a response or a key elsewhere to read it.")]
+    public void Guide_ShouldStateThatRunProcessWithholdsCredentialResults()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "in a process that calls a web service or reads a SecureText setting",
+            "`run-process` returns every text, Guid or collection result as `[withheld]`, named in `withheldResultParameters`",
+            "never copy a response or a key elsewhere to read it"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "an agent that has not read the rule takes [withheld] for a broken run, or works around it and puts the key into its context");
         }
     }
 
