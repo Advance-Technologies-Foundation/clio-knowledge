@@ -17,7 +17,7 @@ public sealed class ColumnRightsGuidanceTests
     private const string GuidePath = "guidance/mcp/guides/operations/column-rights.md";
 
     private static readonly Regex VersionBoundary = new(
-        @"Version boundary: get-column-rights and set-column-rights require (clio \d+(\.\d+){2,3} or later|a clio release newer than \d+(\.\d+){2,3})[;.]",
+        @"Version boundary: get-column-rights and set-column-rights require (clio (?<min>\d+(\.\d+){2,3}) or later|a clio release newer than (?<newer>\d+(\.\d+){2,3}))[;.]",
         RegexOptions.Compiled);
 
     private static readonly Regex CitedGuide = new(@"get-guidance name=([a-z0-9][a-z0-9.-]*[a-z0-9])",
@@ -71,8 +71,12 @@ public sealed class ColumnRightsGuidanceTests
         TestName = "ColumnRights_ShouldStateThatARemovalCanWiden")]
     [TestCase("When an All employees row ends ABOVE a row with another level, the preview and the result warn",
         TestName = "ColumnRights_ShouldStateTheShadowingWarning")]
-    [TestCase("Before an enable you MUST name to the developer the rows that start to apply",
+    [TestCase("Before an enable you MUST read the rows with get-column-rights (while OFF it lists every stored row) and name to the developer the rows that start to apply",
         TestName = "ColumnRights_ShouldRequireStatingTheEnableEffect")]
+    [TestCase("EVERY stored row of the object starts to apply",
+        TestName = "ColumnRights_ShouldStateThatAnEnableAppliesEveryStoredRow")]
+    [TestCase("The preview names only the columns whose rows start to apply (cut after 20), not the rows",
+        TestName = "ColumnRights_ShouldStateWhatTheEnablePreviewLacks")]
     [TestCase("You MUST NOT disable unless that widening is the developer's intent",
         TestName = "ColumnRights_ShouldGuardTheDisable")]
     [TestCase("read them with get-column-rights first (the disable preview gives only their number)",
@@ -85,10 +89,32 @@ public sealed class ColumnRightsGuidanceTests
         TestName = "ColumnRights_ShouldStateThatTheGranteeFilterIsExact")]
     [TestCase("re-read with get-column-rights before retrying or reporting",
         TestName = "ColumnRights_ShouldReReadAfterAFailedOrUnverifiedSave")]
-    [TestCase("You MUST tell the developer that the column rights do not ship with the app",
+    [TestCase("You MUST tell the developer that clio does not ship these column rights with the app",
         TestName = "ColumnRights_ShouldStateThatTheRowsAreNotPackaged")]
-    [TestCase("test AS that user — a non-administrator in a session opened after the write",
+    [TestCase("whether Creatio carries them to another environment with a package is not established",
+        TestName = "ColumnRights_ShouldNotClaimMoreThanTheEvidenceOnDelivery")]
+    [TestCase("test AS that user — a non-administrator, or a portal user for a portal audience, in a session opened after the write",
         TestName = "ColumnRights_ShouldVerifyAsTheUser")]
+    [TestCase("Then stop: tell the developer that clio needs updating for this",
+        TestName = "ColumnRights_ShouldStopOnAnOlderClio")]
+    [TestCase("You MUST NOT write column rights any other way",
+        TestName = "ColumnRights_ShouldForbidAFallbackOnAnOlderClio")]
+    [TestCase("A role with no row gets a new row at the TOP (position 0, which decides first), except All employees, whose new row goes to the BOTTOM",
+        TestName = "ColumnRights_ShouldStateWhereANewRowGoes")]
+    [TestCase("When the grant gives more than a row below it, you MUST name those rows to the developer before the write",
+        TestName = "ColumnRights_ShouldStateThatATopRowCanWiden")]
+    [TestCase("You MUST tell the developer before the write; a row that must decide for internal users goes above All employees",
+        TestName = "ColumnRights_ShouldRequireStatingTheShadowing")]
+    [TestCase("Name that effect to the developer before the write",
+        TestName = "ColumnRights_ShouldRequireStatingTheRemovalEffect")]
+    [TestCase("A grant while column permissions are OFF is refused unless enable-column-permissions is passed with it",
+        TestName = "ColumnRights_ShouldRefuseAGrantWhileOffWithoutTheEnable")]
+    [TestCase("do not carry one tool's placement over to the other",
+        TestName = "ColumnRights_ShouldContrastThePlacementWithObjectRights")]
+    [TestCase("system columns are not available to external users at all",
+        TestName = "ColumnRights_ShouldStateTheSystemColumnRuleForExternalUsers")]
+    [TestCase("what a portal audience gets is derived from them",
+        TestName = "ColumnRights_ShouldLabelThePortalRuleAsDerived")]
     [Description("column-rights keeps each rule an agent must weigh before changing column permissions; losing one in an edit would let a call erase, widen or narrow column access without the developer's decision.")]
     public void ColumnRights_ShouldStateTheContractRule(string rule)
     {
@@ -117,7 +143,7 @@ public sealed class ColumnRightsGuidanceTests
     }
 
     [Test]
-    [Description("The catalog description of column-rights starts with its clio boundary, so get-guidance name=list shows it before the article is opened.")]
+    [Description("The catalog description of column-rights starts with the same clio boundary the article states, so get-guidance name=list shows it before the article is opened.")]
     public void ColumnRights_CatalogDescriptionShouldStartWithTheBoundary()
     {
         // Arrange
@@ -128,13 +154,20 @@ public sealed class ColumnRightsGuidanceTests
             .Single(resource => resource.GetProperty("itemId").GetString() == "column-rights")
             .GetProperty("description").GetString()!;
 
+        Match boundary = VersionBoundary.Match(Normalized(Read(GuidePath)));
+        string expected = boundary.Groups["newer"].Success
+            ? $"Needs a clio release newer than {boundary.Groups["newer"].Value}."
+            : $"Needs clio {boundary.Groups["min"].Value} or later.";
+
         // Assert
-        description.Should().StartWith("Needs a clio release newer than 8.1.0.155.",
-            because: "a knowledge library is updated apart from the clio that serves it");
+        boundary.Success.Should().BeTrue(because: "the article states the boundary the catalog repeats");
+        description.Should().StartWith(expected,
+            because: "a knowledge library is updated apart from the clio that serves it, and the catalog must name "
+                + "the same clio as the article");
     }
 
     [Test]
-    [Description("The article is published, routed, reached from object-rights and default-record-rights, and every guide it cites is declared.")]
+    [Description("The article is published, routed, reached from object-rights, default-record-rights and portal-sections, and every guide it cites is declared.")]
     public void ColumnRights_ShouldBePublishedRoutedAndCiteOnlyDeclaredGuides()
     {
         // Arrange
@@ -159,6 +192,9 @@ public sealed class ColumnRightsGuidanceTests
         Normalized(Read("guidance/mcp/guides/operations/default-record-rights.md")).Should().Contain(
             "NOT column permissions (`get-guidance name=column-rights`)",
             because: "the record layer and the column layer are different tools");
+        Normalized(Read("guidance/mcp/guides/applications/portal-sections.md")).Should().Contain(
+            "Setting them is a separate step the user decides: `get-guidance name=column-rights`",
+            because: "the portal flow names the field-hiding gap and must route it to its owner");
     }
 
     [TestCase("guidance/mcp/guides/operations/object-rights.md",

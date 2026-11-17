@@ -233,8 +233,7 @@ Results:
   write holds a lease on the object (shared with set-default-record-rights and set-column-rights) and
   re-reads the object after the confirmation: a second write of the object while the lease is held, or a
   switch or operation row another client changed since the plan, is refused, writing nothing — re-run the
-  call to plan on the object as it is now. Calls
-  for one object MUST NOT run in parallel.
+  call to plan on the object as it is now. Calls for one object MUST NOT run in parallel.
 - It does NOT change column permissions (`get-guidance name=column-rights`) or record permissions.
 
 Package binding (the rows ship with the app; clio 8.1.0.148 or later, see Version boundary):
