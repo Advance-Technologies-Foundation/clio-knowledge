@@ -12,27 +12,39 @@ later. If `get-tool-contract` does not list `describe-dynamic-case`, the clio se
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
 `process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
 environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
-`install-process-builder`, once the user approves it (`core-rules`), is the remedy.
+`install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose `modify-dynamic-case`
+takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.180; an older clio cannot pass the confirmations of
+step 3 that 1.6.6.180 asks for, so on such a refusal tell the user to update clio.
 
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
-   in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, and `enabled`. Several cases
-   on the object: name one with `case-name` (modify by object answers `case-ambiguous`).
+   in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, `records` (the records holding
+   its value, finished cases included), and `enabled`. Several cases on the object: name one with `case-name`
+   (modify by object answers `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the
+   designer show the value's name, not the stage caption; a rename (step 2) fixes it.
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
    remove-filter?, enabled?, confirm-running-instances?, dry-run }` writes; the top-level `caption` renames the
    CASE. `stages` is the WHOLE new list of items `{"value": Id or exact display value, "caption"?, "color"?,
    "group"?, "successful"?}`, e.g. `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is
-   REMOVED, a value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, after
-   asking; the user asked for that stage, so this changes the case, it does not get around it). Fields an item
-   leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours it; an item's `caption`
-   renames the stage in the case only, never the value every record shares. `filter` and `remove-filter`: "Several
+   REMOVED, a value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, only
+   after the user agreed to that new value, never unasked; the user asked for that stage, so this changes the case,
+   it does not get around it). Fields an item leaves out keep their values; `group: null` ungroups; `color`
+   (`#RRGGBB`) recolours the stage; an item's `caption` renames the stage AND its lookup value, as the case designer
+   does (the bar shows the value's name): the new name shows on EVERY record holding that value, in every case of
+   the object. A name another value already has: `stage-value-ambiguous`. `filter` and `remove-filter`: "Several
    cases on one object". First `dry-run: true`: show the user `diff` and the notes, write only after their yes.
    `unchanged` means nothing to do.
-3. While cases run (`runningInstances.total` > 0) every write is refused `running-instances-confirmation-required`:
-   tell the user how many run and in which stages; pass `confirm-running-instances: true` only after they say yes,
-   NEVER on your own. Running cases continue, possibly on the stages as they were.
+3. Some writes need the user's own yes, and are refused until then; one refusal, and the dry run's notes, name
+   every one still missing: `running-instances-confirmation-required` (cases run: how many, in which stages; they
+   continue, possibly on the stages as they were) -> `confirm-running-instances: true`;
+   `stage-records-confirmation-required` (records hold a removed stage's value, finished cases included: they keep
+   their data and show no current stage) -> `confirm-stage-records: true`; `value-rename-confirmation-required`
+   (a caption renames the value for every record) -> `confirm-value-rename: true`. Tell the user each reason, and
+   pass each flag only after they say yes to it, NEVER on your own.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
-   nothing is deleted, running cases continue, new records start no case. Re-enabling next to another enabled case
+   nothing is deleted, new records start no case, and its running cases continue, unless another case of the
+   object stays enabled: then each is CANCELLED at its record's next stage change (the note says so; tell the user
+   before their yes). Re-enabling next to another enabled case
    that would start for the same records: `case-exists` or `filter-overlap`; ask the user whether to disable that
    case first or keep this one disabled. A case without a filter while the cases are split by a column:
    `filter-required` (give it a filter first). `settings-conflict` on re-enabling: the object's case settings name
@@ -54,7 +66,8 @@ been written - describe the case before retrying. No compile or restart; F5.
 - Describe first: `describe-dynamic-case { entity-schema-name }` shows each case's `filter` and the settings row's
   `filterColumnName`; its notes name the values no case is for. Answer "which stages do B2B orders have" from it.
 - The object has ONE case without a filter (the usual start), so a filtered `create-dynamic-case` is refused
-  `unfiltered-case-exists`. Offer the case designer's two ways, each with its dry run, and let the user choose:
+  `unfiltered-case-exists`. In the FIRST answer, before any write, offer the case designer's two ways, each with
+  its dry run, and let the user choose:
   (1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then
   `create-dynamic-case { filter, stages }` for the others; nothing is disabled. (2) turn the existing stages off:
   `create-dynamic-case { filter, stages, deactivate-unfiltered: true }` disables that case: new records start only
