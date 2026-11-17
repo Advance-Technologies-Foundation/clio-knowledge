@@ -31,7 +31,7 @@ public sealed class WebServiceRegistrationGuidanceTests
             "Create the setting first with `create-sys-setting` and no value",
             "Do not try to read them another way.",
             "a constant whose value looks like a key is refused too, and describe hides one Studio stored.",
-            "`Accept-Language: en-US`, `X-Api-Version: 2`, `Content-Type: application/xml`"
+            "The tool accepting a value does not make it public: a key or password the user gives, short or not, still goes into a system setting."
         ];
 
         // Assert
@@ -39,6 +39,28 @@ public sealed class WebServiceRegistrationGuidanceTests
         {
             guide.Should().Contain(clause,
                 because: "an agent that has not read the rule stores an API key as a constant every reader of the schema sees");
+        }
+    }
+
+    [Test]
+    [Description("The guide lets a plain header constant stay a constant and tells an old clio's blanket refusal apart from the key-like refusal.")]
+    public void Guide_ShouldAllowPlainHeaderConstants()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`Accept-Language: en-US`, `X-Api-Version: 2`, `Content-Type: application/xml`",
+            "A refusal that says \"refused on a header, cookie or credential-like parameter\" comes from a clio released before this rule"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "without it an agent pushes a harmless value such as a language into a system setting the user must fill");
         }
     }
 

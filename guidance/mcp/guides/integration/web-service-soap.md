@@ -70,10 +70,11 @@ Reading a WSDL (read-wsdl)
   warning gives the workaround, measured to work: for SOAP 1.2, a request header parameter (a prefixed code) whose
   `path` is `Content-Type` and whose value is `application/soap+xml;charset=utf-8;action="<the soap-action>"`, one
   per method; for WS-Addressing, the namespace the warning names (usually `http://www.w3.org/2005/08/addressing`)
-  and two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI). Both values are
-  plain (a media type with the action address, an action, an address), so a constant works on both under the
-  header rule of `web-service-registration`; when the base URI carries a key in its query, `wsa:To` takes it from
-  a system setting (`default-sys-setting`) or from the process instead. Do this
+  and two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI). Their values are
+  plain (a media type with the action address, an action, an address), so a constant works on each under the
+  header rule of `web-service-registration`; when one is refused as key-like (a URN action with a long code, a base
+  URI with a key in it), it takes its value from a system setting (`default-sys-setting`) or from the process
+  instead. Do this
   only with the user's agreement, and test a call.
 - Notices: when the code is already used by a web service, ask the user which way to go and do not pick a code
   yourself: register under a code the user names (read again with that `code`), or change that service (read again
@@ -127,8 +128,9 @@ Registering a SOAP service
   `{"code": "UsrWsPassword", "path": "wsse:Security/wsse:UsernameToken/wsse:Password", "soap-header": true,
   "default-sys-setting": "UsrErpWsPassword"}`, with `wsse` declared. A soap-header element follows
   the header rule of `web-service-registration`, its items too: under a credential-like code or element path
-  (every element of the path counts, so `wsse:Security/wsse:UsernameToken/wsse:Username` is one) or with a value
-  that looks like a key it takes no `default-value`: give it `default-sys-setting` naming an EXISTING setting;
+  (every element of the path counts, so `wsse:Security/wsse:UsernameToken/wsse:Username` is one), as an item of a
+  credential-like soap-header parent (`tem:AuthHeader` with an item `tem:Pin`), or with a value that looks like a key
+  it takes no `default-value`: give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. A plain value (a
   mode, a version, a language) may be a constant, and describe shows it; read-wsdl with `service-code` carries
   such a constant into the Header and leaves out, with a warning, one that would be a key there. The credential-name
