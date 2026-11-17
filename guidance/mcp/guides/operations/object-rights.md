@@ -228,8 +228,13 @@ Results:
 - The save is sent once, with no automatic retry. A save that did not answer in time may still land after
   the read-back: its failure says so — re-read the object with get-object-rights before retrying or
   reporting a failure.
-- Read-modify-write is last-writer-wins: a change another client saves between the read and the save is
-  overwritten. It does NOT change column or record permissions.
+- Concurrent writes. On clio 8.1.0.155 and earlier, read-modify-write is last-writer-wins: a change another
+  client saves between the read and the save is overwritten. From clio 8.1.0.156 a write holds a lease on the
+  object (shared with set-default-record-rights and set-column-rights) and re-reads the object after the
+  confirmation: a second write of the object while the lease is held, or a switch or operation row another
+  client changed since the plan, is refused, writing nothing — re-run the call to plan on the object as it is
+  now. Calls for one object MUST NOT run in parallel.
+- It does NOT change column permissions (`get-guidance name=column-rights`) or record permissions.
 
 Package binding (the rows ship with the app; clio 8.1.0.148 or later, see Version boundary):
 - After every successful call that writes (not preview=true) — a re-run that changes no row included —
@@ -337,5 +342,6 @@ RightManagementService. get-object-rights reads it for you; you MUST NOT query t
 RightManagementService is authoritative; get-entity-schema-properties reports DESIGN-TIME schema metadata
 that can disagree with it, so use that tool to inspect the schema, not to settle that question.
 
-Scope boundary: object operation permissions for a role on one object. NOT column permissions, NOT
-record-level rights or default record rules (`default-record-rights`), NOT role/user provisioning.
+Scope boundary: object operation permissions for a role on one object. NOT column permissions
+(`get-guidance name=column-rights`), NOT record-level rights or default record rules (`default-record-rights`),
+NOT role/user provisioning.

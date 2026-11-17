@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.233",
+  "libraryVersion": "1.15.235",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -164,6 +164,7 @@
       "record-rights",
       "object-rights",
       "default-record-rights",
+      "column-rights",
       "reference.atf-repository-dev.models-and-relations",
       "reference.atf-repository-dev.package-and-version",
       "reference.atf-repository-dev.provider-and-context",
@@ -375,6 +376,7 @@
       "docs://knowledge/com.creatio.clio/record-rights",
       "docs://knowledge/com.creatio.clio/object-rights",
       "docs://knowledge/com.creatio.clio/default-record-rights",
+      "docs://knowledge/com.creatio.clio/column-rights",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.models-and-relations",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.package-and-version",
       "docs://knowledge/com.creatio.clio/reference.atf-repository-dev.provider-and-context",
@@ -2197,6 +2199,17 @@
       "uri": "docs://knowledge/com.creatio.clio/object-rights",
       "sourcePath": "guidance/mcp/guides/operations/object-rights.md",
       "bundlePath": "resources/object-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "column-rights",
+      "title": "Column rights",
+      "description": "Needs clio 8.1.0.156 or later. Canonical MCP guidance for COLUMN (field-level) permissions of an object (the \"Use column permissions\" switch and its per-column rows: denied, read or edit per role): read with get-column-rights, changed one role on one column of one object per call with set-column-rights. Owns the column row priority rule (the higher row decides; a role with no row follows the object's operation permissions; object and record permissions outrank column rows), the ask-and-preview-first rule, the rule never to write column rights by hand (a save replaces every column's rows), the enable and disable effects, and the fact that the rows are not bound to a package.",
+      "topicId": "creatio.column-rights",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/column-rights",
+      "sourcePath": "guidance/mcp/guides/operations/column-rights.md",
+      "bundlePath": "resources/column-rights.md",
       "mediaType": "text/plain"
     },
     {
