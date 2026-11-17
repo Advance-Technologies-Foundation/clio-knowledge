@@ -256,9 +256,9 @@ So size is a delivery contract, not a matter of taste:
   `automation/Clio.Knowledge.Bundle.Tests/GuidanceInlineReplyBudgetTests.cs`: 19,000 UTF-8 bytes as
   clio writes the reply, below the size a Copilot CLI agent receives inline instead of spilling it to
   a file. The set is read from `bundle-source.json`, so a new article is measured from its first pull
-  request. The only way out is the fixture's exemption list, where each entry states why that article
-  cannot be split. An edit that pushes an article over moves text to a `-details` article; it does not
-  raise the budget.
+  request. The only way out is the fixture's exemption list of articles that were already over the
+  budget; an entry is removed once its article fits. An edit that pushes an article over moves text to a
+  `-details` article; it does not raise the budget.
 - When an article outgrows the budget, split it at a section boundary rather than trimming
   evidence. Give each piece its own `itemId` in `bundle-source.json`, keep the original `itemId`,
   `uri` and `legacyUris` on the piece that stays the entry point, and have that entry index the
