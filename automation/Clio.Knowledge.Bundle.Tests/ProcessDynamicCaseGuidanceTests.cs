@@ -244,7 +244,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a new lookup value shows in every record's choice list");
             guide.Should().Contain("`color` (`#RRGGBB`) recolours the stage",
                 because: "the colour is changed through the tool, not left to the designer");
-            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.180",
+            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.182",
                 because: "a clio with the confirmations floors describe and modify at the package that asks for them");
             guide.Should().Contain("a stage left out is REMOVED",
                 because: "stages is the whole new list, and a dropped item removes a stage");
@@ -252,6 +252,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "adding a missing value the user asked for is part of the change, still after their yes");
             guide.Should().Contain("First `dry-run: true`: show the user `diff` and the notes, write only after their yes",
                 because: "agents answered about existing cases without a dry run and missed what would change");
+            guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }",
+                because: "an agent builds its call from the signature, so every flag the tool takes is listed there");
             guide.Should().Contain("pass each flag only after they say yes to it, NEVER on your own",
                 because: "every confirmation flag stands for the user's own yes");
             guide.Should().Contain("its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at its record's next stage change",

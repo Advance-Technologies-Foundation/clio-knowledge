@@ -13,8 +13,8 @@ tell the user to update clio (until then the case designer changes a case); answ
 `process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
 environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
 `install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose `modify-dynamic-case`
-takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.180; an older clio cannot pass the confirmations of
-step 3 that 1.6.6.180 asks for, so on such a refusal tell the user to update clio.
+takes `confirm-value-rename` (`get-tool-contract`) needs 1.6.6.182; an older clio cannot pass the confirmations of
+step 3 that 1.6.6.182 asks for, so on such a refusal tell the user to update clio.
 
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
@@ -23,9 +23,9 @@ step 3 that 1.6.6.180 asks for, so on such a refusal tell the user to update cli
    (modify by object answers `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the
    designer show the value's name, not the stage caption; a rename (step 2) fixes it.
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
-   remove-filter?, enabled?, confirm-running-instances?, dry-run }` writes; the top-level `caption` renames the
-   CASE. `stages` is the WHOLE new list of items `{"value": Id or exact display value, "caption"?, "color"?,
-   "group"?, "successful"?}`, e.g. `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is
+   remove-filter?, enabled?, confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }`
+   writes; the top-level `caption` renames the CASE. `stages` is the WHOLE new list of items `{"value": Id or exact
+   display value, "caption"?, "color"?, "group"?, "successful"?}`, e.g. `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is
    REMOVED, a value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, only
    after the user agreed to that new value, never unasked; the user asked for that stage, so this changes the case,
    it does not get around it). Fields an item leaves out keep their values; `group: null` ungroups; `color`
