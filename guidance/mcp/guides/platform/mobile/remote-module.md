@@ -64,7 +64,11 @@ Delivering with clio
 3. `push-workspace`. It packs each package folder whole, `Files/` included, and installs it through the
    application installer — the same route `get-guidance name=ui-project` uses for `Files/src/js`.
    The installer regenerates the served file content itself; a script-only package needs no
-   `compile-creatio`. A workspace without an application descriptor is registered on the environment
+   `compile-creatio`. A package that carries a C# project (`Type` 1 or a `ProjectPath` in its
+   descriptor) is compiled by the push itself after the installation, and the push adds the project
+   files `restore-workspace` generated to the package; a failure of that compilation ends the push
+   with a non-zero exit code although the script is delivered, so confirm the script before calling
+   the delivery failed. A workspace without an application descriptor is registered on the environment
    as an installed application named `CreatioPackages`. The `push-workspace` contract describes a new
    package as locked; a package whose descriptor `Maintainer` equals the environment's `Maintainer`
    setting arrived editable in both measured deliveries. Either state suits a code-only package, which
@@ -124,6 +128,10 @@ How a mobile page refers to the module
   `virtualDataSourceType` is the name passed to `@CrtVirtualDataSource` (the data source's own name is
   used when it is omitted). `parameters` declares the attributes the source returns. The primary and
   display attribute names are required unless `parameters` contains `Id` and `Name`.
+  A source that feeds a `crt.List` sits next to the page's own data source with
+  `"scope": "viewElement"`; the list reads a collection attribute (`isCollection: true`,
+  `modelConfig.path` = the data source name) whose row attributes are declared inside it, under
+  `viewModelConfig.attributes`. This is the one case where a page declares a second data source.
 - A button whose request the web-to-mobile conversion dropped as `drop-unknown-request` can be added
   back once a module implements that request.
 
@@ -146,6 +154,15 @@ Evidence
   `console.info` and `console.debug` were undefined inside the script, a handler error reached the app
   log as `ERROR Type: JSError`, and `Logger.console` output appeared only in the device system log.
 - The `add-package` scaffold contents and the `CreatioPackages` application: observed in the same run.
+- A third delivery the same day, of a module into an existing application package with a C# project
+  (`Type` 1, `ProjectPath` set), with a `crt.List` on a record page fed by a `crt.VirtualDataSource`:
+  the push log reached "Application installed successfully" and "Files saved in package", then ran a
+  package build that failed with "Cannot run compilation because another compilation is in progress"
+  and the call returned exit code 1; `get-package-file` returned the script byte for byte;
+  `list-package-files` afterwards listed `<Package>.csproj`, `Directory.Build.props`,
+  `Directory.Build.targets` and `obj/` files that were not there before the push; the package stayed
+  in its own application. On the device the list showed the rows the source returned, with subtitle
+  labels taken from the parameter captions.
 - A second delivery the same day, of a module with a `crt.SaveRecordRequest` handler scoped to a record
   page: an invalid value showed the handler's dialog and the record stayed unsaved on the server; a
   value the handler rewrote with `setAttribute` before calling the next handler was saved in its
