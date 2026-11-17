@@ -13,7 +13,7 @@ tell the user to update clio (until then the case designer changes a case); answ
 `process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
 environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
 `install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose
-`modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.184 the same
+`modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.185 the same
 way. An older clio (no `confirm-value-rename`) works the older way, so read steps 1-3 with that: describe has no
 `records` (absent is not 0: count the records with the data tools); an item's `caption` renames only the stage in the
 case, which the bar and the designer do not show, so do not offer it, and to rename a stage tell the user to update

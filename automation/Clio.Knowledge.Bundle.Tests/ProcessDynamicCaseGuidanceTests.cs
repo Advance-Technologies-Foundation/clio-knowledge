@@ -244,7 +244,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a new lookup value shows in every record's choice list");
             guide.Should().Contain("`color` (`#RRGGBB`) recolours the stage",
                 because: "the colour is changed through the tool, not left to the designer");
-            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.184",
+            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.185",
                 because: "a clio with the confirmations floors describe and modify at the package that asks for them");
             guide.Should().Contain("An older clio (no `confirm-value-rename`) works the older way",
                 because: "a knowledge release reaches every clio at once, and an older one renames only the stage and refuses no removal");
