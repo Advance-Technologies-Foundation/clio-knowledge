@@ -202,9 +202,9 @@ That reports pass or fail. It does NOT print the per-article size table, and tha
 early warning there is: an article between 80% and 100% of the response budget is green, by design,
 because gating that band blocked open pull requests that were doing nothing wrong. The table is
 written to the test output and needs a logger the default command does not attach, so an article
-sliding toward the limit is invisible under the line above. When you touch a process guide, run it
-this way and read the `of budget` lines -- an article marked `approaching the budget` should be split
-before it is grown further:
+sliding toward the limit is invisible under the line above. When you touch a guide, run it this way
+and read the `of budget` lines (`GuidanceInlineReplyBudgetTests` prints one for every guidance
+article) -- an article marked `approaching the budget` should be split before it is grown further:
 
 ```bash
 dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj --logger "console;verbosity=detailed"
@@ -252,11 +252,12 @@ So size is a delivery contract, not a matter of taste:
   `automation/Clio.Knowledge.Bundle.Tests/ProcessGuideResponseSizeTests.cs`, which is the enforcing
   check. Measure the JSON-escaped payload, not the file on disk — escaping inflates a
   backtick-dense article by 20–35%.
-- The core and `-details` articles split out of process-modeling, app-modeling, workplaces,
-  existing-app-maintenance and core-rules are also held to the inline budget in
+- Every guidance article is also held to the inline budget in
   `automation/Clio.Knowledge.Bundle.Tests/GuidanceInlineReplyBudgetTests.cs`: 19,000 UTF-8 bytes as
   clio writes the reply, below the size a Copilot CLI agent receives inline instead of spilling it to
-  a file. An edit that pushes one of them over moves text to its `-details` article; it does not
+  a file. The set is read from `bundle-source.json`, so a new article is measured from its first pull
+  request. The only way out is the fixture's exemption list, where each entry states why that article
+  cannot be split. An edit that pushes an article over moves text to a `-details` article; it does not
   raise the budget.
 - When an article outgrows the budget, split it at a section boundary rather than trimming
   evidence. Give each piece its own `itemId` in `bundle-source.json`, keep the original `itemId`,
