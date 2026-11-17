@@ -25,10 +25,10 @@ step 3 that 1.6.6.182 asks for, so on such a refusal tell the user to update cli
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
    remove-filter?, enabled?, confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }`
    writes; the top-level `caption` renames the CASE. `stages` is the WHOLE new list of items `{"value": Id or exact
-   display value, "caption"?, "color"?, "group"?, "successful"?}`, e.g. `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is
-   REMOVED, a value not yet a stage is ADDED (it must be in the lookup: add it with the data tools first, only
-   after the user agreed to that new value, never unasked; the user asked for that stage, so this changes the case,
-   it does not get around it). Fields an item leaves out keep their values; `group: null` ungroups; `color`
+   display value, "caption"?, "color"?, "group"?, "successful"?}`, e.g.
+   `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is REMOVED, a value not yet a
+   stage is ADDED (it must be in the lookup: add it with the data tools first, only after the user agreed to that
+   new value, never unasked; the user asked for that stage, so this changes the case, it does not get around it). Fields an item leaves out keep their values; `group: null` ungroups; `color`
    (`#RRGGBB`) recolours the stage; an item's `caption` renames the stage AND its lookup value, as the case designer
    does (the bar shows the value's name): the new name shows on EVERY record holding that value, in every case of
    the object. A name another value already has: `stage-value-ambiguous`. `filter` and `remove-filter`: "Several
