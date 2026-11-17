@@ -56,7 +56,9 @@ clio; removing a stage that records hold is not refused, so check them with the 
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own. `stage-has-steps` (it has steps or a step condition
-targets it: the case designer), `package-read-only` (a new version is not supported yet).
+targets it: the case designer), `package-read-only` (a new version is not supported yet), `invalid-request` for a
+case that is not the active version (name the active one the message gives) or not a case of `entity-schema-name`,
+`stage-list-duplicate` for a case with two stages on one value (the case designer fixes it).
 Outcomes: `failed-restored`: the save did not take, the case is as before; `failed-leftover`: relay its `leftovers`
 and have the user check the case in the designer; `unknown`: the reply was lost, so the change may or may not have
 been written - describe the case before retrying. No compile or restart; F5.

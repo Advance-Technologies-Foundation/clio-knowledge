@@ -258,6 +258,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "agents answered about existing cases without a dry run and missed what would change");
             guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }",
                 because: "an agent builds its call from the signature, so every flag the tool takes is listed there");
+            guide.Should().Contain("`invalid-request` for a case that is not the active version (name the active one the message gives)",
+                because: "the package refuses an inactive version and names the active one (phase A follow-up P3)");
             guide.Should().Contain("pass each flag only after they say yes to it, NEVER on your own",
                 because: "every confirmation flag stands for the user's own yes");
             guide.Should().Contain("its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at its record's next stage change",
