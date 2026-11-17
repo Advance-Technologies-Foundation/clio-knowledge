@@ -107,11 +107,13 @@ How a mobile page refers to the module
   A parameter value may be an attribute binding ("$UsrDiscountPercent"). Do not put `type` or `scopes`
   into `params`.
 - A handler for a built-in request needs no page change. It is attached by `scopes` in
-  `@CrtRequestHandler`: `['<PageSchemaName>']` for the page and its nested view models,
-  `['<PageSchemaName>_Root']` for the root view model only, omitted for every page. Use the schema name
-  exactly as `get-page` returns it. A request also carries the names of the schemas the page inherits
-  from, so a handler scoped to a parent schema runs on every page derived from it. `get-request-info` with `schema-type: "mobile"` lists the built-in
-  requests a handler can intercept.
+  `@CrtRequestHandler`: `['<PageSchemaName>']` for the page, omitted for every page. Use the schema name
+  exactly as `get-page` returns it. A request also carries the names of the templates the page is built
+  on, so a handler scoped to a template runs on every page derived from it. A row of a list or a detail
+  carries no scopes: a request processed on a row reaches only handlers declared without `scopes`. A
+  Freedom UI page reports no `_Root` scope, so a handler scoped to `<PageSchemaName>_Root` never runs
+  on it. `get-request-info` with `schema-type: "mobile"` lists the built-in requests a handler can
+  intercept.
 - A virtual data source is declared in the page's data sources and bound like any other:
     "UsrOrderHintsDS": {
       "type": "crt.VirtualDataSource",
@@ -154,6 +156,11 @@ Evidence
   `console.info` and `console.debug` were undefined inside the script, a handler error reached the app
   log as `ERROR Type: JSError`, and `Logger.console` output appeared only in the device system log.
 - The `add-package` scaffold contents and the `CreatioPackages` application: observed in the same run.
+- Request scopes as the page's template chain followed by its schema name, rows of a list or a detail
+  created without scopes, and no `_Root` scope on a Freedom UI page: Creatio Mobile app source read at
+  commit `87053f2a69` (the view model takes its scopes from the schema's `tag`; a collection item is
+  generated with none), matching the scopes the device reported in the first run above. The web
+  Freedom UI source at commit `65359d398d` assigns scopes the same way.
 - A third delivery the same day, of a module into an existing application package with a C# project
   (`Type` 1, `ProjectPath` set), with a `crt.List` on a record page fed by a `crt.VirtualDataSource`:
   the push log reached "Application installed successfully" and "Files saved in package", then ran a
