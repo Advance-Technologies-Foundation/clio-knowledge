@@ -8,8 +8,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
 /// Pins the <c>process-send-chat-message</c> guide: the <c>chatMessage</c> block of the Send chat message element. It is
-/// registered as <c>process-web-service</c> is - banner-less, ungated, no legacy route, loaded on demand rather than
-/// indexed by the process digest - and reached from the element catalog, its details, process-modeling and routing.
+/// registered as <c>process-web-service</c> is - banner-less, ungated, no legacy route, loaded on demand and listed on
+/// the process digest card - and reached from the element catalog, its details, process-modeling and routing.
 /// </summary>
 /// <remarks>
 /// TRIM ALARMS: every clause below is a rule CrtProcessBuilder enforces, a refusal or notice an agent has to recognise,
@@ -165,9 +165,11 @@ public sealed class SendChatMessageGuidanceTests
             "entity: \"Channel\", select: [\"Id\", \"Name\", \"IsActive\"], filters: { all: [ { field: \"IsActive\", op: \"eq\", value: true } ] }",
             "entity: \"EmailTemplate\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"TemplateType/Id\", op: \"eq\", value: \"62215de1-23e0-4037-88c9-65ccf72904a4\" } ] }",
             "entity: \"Contact\", select: [\"Id\", \"Name\"], filters: { all: [ { field: \"Name\", op: \"contains\", value: \"<name>\" } ] }",
-            "Lookup settings on the ROOT Channel object (`a26e0c98-...` is its schema UId; odata-read cannot filter a GUID column, and `list-sys-settings` takes no filter):",
+            "Lookup settings on the ROOT Channel object (schema UId `a26e0c98-...`; odata-read cannot filter a GUID, and `list-sys-settings` takes no filter):",
             "clio-run { command: \"execute-esq\", args: { environment-name: \"<env>\", query: { rootSchemaName: \"SysSettings\", columns: { items: { Code: { expression: { expressionType: 0, columnPath: \"Code\" } }, Name: { expression: { expressionType: 0, columnPath: \"Name\" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ReferenceSchemaUId\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: \"a26e0c98-9a52-4e80-9a04-75221742fed7\" } } } } } } } }",
-            "DISCOVER first: the active channels and the Lookup settings on Channel (the reads above)."
+            "DISCOVER first (the reads above). When several channels could fit, ASK which one; never guess.",
+            "- a message to employees: `process-send-email`; a bot broadcast with no contact (a bot API): `process-web-service`;",
+            "With `ignoreErrors` true a failed send ends green: return `SendStatus` and `SendStatusDetails` in output parameters (`result-parameters`) before saying \"sent\", or keep `ignoreErrors` false."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -229,11 +231,12 @@ public sealed class SendChatMessageGuidanceTests
             "The exception: `Message` already bound to a formula or another non-constant source (an `addMapping` in an earlier call).",
             "Custom to template needs `template` in the same call, or it is refused;",
             "A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto `Channel`, `Contact` or `Message` (use `chatMessage.message`), is refused, naming the block member to use.",
+            "Allowed: a formula, parameter or element output onto `Message`;",
             "A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those readers first, in a SEPARATE, earlier call.",
             "a constant reads back as `{value: <record id>, display: <name>}`, and the describe-only `display` names the channel and the contact",
             "ignore them and NEVER replay them - `setConnections` refuses this task and the edit aborts. Edit through `chatMessage`.",
             "On `setElement` an omitted list is kept, a sent list REPLACES the stored set, and `[]` clears it.",
-            "`ignoreErrors` (always stated, `false` included: an untouched designer checkbox reads false)",
+            "`ignoreErrors` (`false` included: an untouched designer checkbox reads false; `null` when mapped: do not re-send it)",
             "To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.",
             "The generic `userTask` route REFUSES `SendChatMessageUserTask` on create: build `sendChatMessage`."
         ];
