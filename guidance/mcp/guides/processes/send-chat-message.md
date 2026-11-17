@@ -4,7 +4,7 @@ Scope
 This guide owns the `chatMessage` block of the Send chat message element (`SendChatMessageUserTask`, package
 OmnichannelMessaging). `process-parameters` owns mappings, `process-formulas` formula syntax, `process-data-elements`
 the Read data column a source can name.
-Needs CrtProcessBuilder 1.6.6.180 or later on the environment. The default create contract lists
+Needs CrtProcessBuilder 1.6.6.186 or later on the environment. The default create contract lists
 `chatMessage (sendChatMessage)`; a clio without it refuses the block before sending. Always read the element back.
 
 == When to use it, and when not ==
@@ -176,11 +176,11 @@ describe-only `templateName`, `message` (custom mode only), `ignoreErrors` (`fal
 `outputs` and `issues` (no channel, no contact, template mode with no template - an unset mode runs as template
 mode - or custom mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.
 
-Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.180 contract. Measured on Creatio 10.2.1122 with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an untouched `ignoreErrors`
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.186 contract. Measured on Creatio 10.2.1122 with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an untouched `ignoreErrors`
 stopping the process; `ignoreErrors` on giving `"Error"` with the channel text; an SMS send without messenger
 settings resolving the primary mobile, then failing (`Username can not be null`) with no chat left; the designer's typed system setting, lookup macros, one-line message field and empty template after a switch to custom.
 On 2026-11-13/14: the discovery reads above as written; a name-form Lookup macro in `columnValues` showing
-`<entity not found>` before 1.6.6.180 and stored as the UId from it. On a Telegram channel on 2026-11-16: column values on the created chat (shown on
+`<entity not found>` before 1.6.6.186 and stored as the UId from it. On a Telegram channel on 2026-11-16: column values on the created chat (shown on
 its timeline), and `"Sent"` for a user who blocked the bot. Read from source and documentation, not
 measured: template macros against the chat, the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, the not-found
 channel text, an empty system setting failing the run, the template language order. Inferred: an unset mode running

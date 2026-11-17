@@ -79,11 +79,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
-  impossible requirement). Verified against the designer's own property pages (`CrtProcessDesigner`,
-  2026-08-21): `ProcessTerminateEventPropertiesPage`, `ProcessTimerStartEventPropertiesPage`,
-  `IntermediateThrowMessagePropertiesPage` and `SendEmailUserTaskPropertiesPage` each apply a schema-diff
-  `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
-  background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
+  impossible requirement): Terminate, Start timer, the message throw and `SendEmailUserTask` remove it (evidence:
+  `process-element-catalog-details`), so a Terminate element CANNOT be put in background mode and its `false` is
+  correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
   which does not. Do NOT set it on the elements of a signal-started process just because the process is
   signal-started: the start's own default (below) already runs the instance in a background worker up to its first
@@ -94,9 +92,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   user's screen (the platform's `ForbidUserInteractionInBackground`, on by default, skips it; the step still waits
   in the performer's task list), and an `openEditPage` step with the flag ON was
   measured not to resume — `process-open-edit-page` owns that rule and `process-open-edit-page-details` the
-  measurement. Shipped signal-started processes carry the flag on
-  28 of the 166 elements after their start, all 28 behind a background start (108 processes of the shipped
-  packages, packages named Test or Demo excluded; scanned 2026-09-24). The designer gates the control on
+  measurement. The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op
@@ -148,9 +144,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   route carries no file source, record or target.
 - `webService` (Call web service), from CrtProcessBuilder **1.6.6.150** and only when the FULL contract names it:
   calls a service REGISTERED in Studio > Web services; `process-web-service` owns its `webService` block.
-- `sendChatMessage` (Send chat message), from CrtProcessBuilder **1.6.6.180**; the default create contract
-  lists `chatMessage (sendChatMessage)`, and a clio without it refuses the block: sends one message to one contact through a chat channel, from a chat template or as
-  custom text; `process-send-chat-message` owns its `chatMessage` block.
+- `sendChatMessage` (Send chat message), from CrtProcessBuilder **1.6.6.186**; the default create contract
+  lists `chatMessage (sendChatMessage)`, and a clio without it refuses the block: one message to one contact through a chat
+  channel; `process-send-chat-message` owns its `chatMessage` block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,
@@ -178,9 +174,8 @@ modes, see `process-send-email`, and `process-send-email-template` for the templ
 `attachments`, `report` or `files` group, see `process-files` (`files`: `process-files-parameter`) — the generic route carries no file source, record or
 target, and it is REFUSED. `WebServiceUserTask` ("Call web service" in list-user-tasks) is a legacy SOAP task,
 REFUSED too: build `webService` (`process-web-service`). `SendChatMessageUserTask` (Send chat message): from
-CrtProcessBuilder **1.6.6.180** REFUSED on create; on an older package do not build it on the
-generic route either - it cannot type-check the template or write the chat column values. Build `sendChatMessage`
-(`process-send-chat-message`).)
+CrtProcessBuilder **1.6.6.186** REFUSED on create; on an older package do not build it on the
+generic route either: it cannot carry the template or the chat column values: build `sendChatMessage`.)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use
