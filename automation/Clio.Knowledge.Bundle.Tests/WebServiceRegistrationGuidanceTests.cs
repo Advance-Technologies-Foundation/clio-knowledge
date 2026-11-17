@@ -217,6 +217,29 @@ public sealed class WebServiceRegistrationGuidanceTests
         }
     }
 
+    [Test]
+    [Description("The guide says run-process withholds the text results of a process that calls a web service or reads a SecureText setting, and that the agent never copies a response or a key elsewhere to read it.")]
+    public void Guide_ShouldStateThatRunProcessWithholdsCredentialResults()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "in a process that calls a web service or reads a SecureText setting",
+            "`run-process` returns every text, Guid or collection result as `[withheld]`, named in `withheldResultParameters`",
+            "never copy a response or a key elsewhere to read it"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "an agent that has not read the rule takes [withheld] for a broken run, or works around it and puts the key into its context");
+        }
+    }
+
     private static string ReadCollapsed(string relativePath) =>
         Regex.Replace(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath), @"\s+", " ");
 }
