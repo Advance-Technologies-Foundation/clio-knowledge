@@ -46,7 +46,7 @@ Credential rule (MUST)
 - The platform sends Digest as a preemptive `Authorization: Basic` header, with no challenge and response
   (measured): an API that accepts only Digest refuses every call, and no service setting fixes that; and Digest
   protects nothing more than Basic, so on an `http` base URI the password travels readable. Tell the user.
-- A header, a cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
+- A cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
   `auth`, `credential`, `signature`, `session`, `cookie`, `licence`, `license`, `nonce`, `passcode`, `passphrase`, `bearer` or
   `jwt` anywhere, or `pass` not followed by a lowercase letter and not after `com`, `by` or `sur` (`AdminPass`,
   `Pass_1`, `UsrPassId`, `PASSPORT_NO`; not `compass`, `bypass`, `surpass`, `passport` or `passenger`), in any
@@ -58,6 +58,26 @@ Credential rule (MUST)
   a path parameter whose `{placeholder}` is the whole value of such a key in the `uri` (`search?api_key={k}`):
   describe hides its constant, which is kept when no default is sent while the `uri` keeps that key;
   `default-value ""` clears it, and a `uri` that would show it is refused.
+- A header parameter, and a SOAP `soap-header` element, follows the name rule above (so `Authorization`, an
+  `auth` name, always takes `default-sys-setting`) and one more: a constant whose value looks like a key is
+  refused too, and describe hides one Studio stored. The value is split at spaces, commas, semicolons and `&`. It
+  is a key when it starts with an authentication scheme (`Basic`, `Bearer`, `Token`...) followed by anything, or
+  when a part, without quotes, base64 padding and a leading `name=`, is a credential pair (`password=...`, or
+  `sig=`/`code=`... with 16 or more characters), 16 or more characters mixing letters and digits (a generated key;
+  also a GUID, an ISO timestamp, a build tag such as `4.18.2-build20240101` or a multipart boundary), 24 or more
+  letters, 12 or more digits, or a password-shaped word (8 or more characters with upper and lower case, a digit
+  and one of `!@#$%^&*?~`); an address is one when it has user information, or when a path segment (a webhook
+  token), a query or a fragment value is one. Words, short numbers and short versions joined by `/ . + - _` stay
+  plain. Any other value is an ordinary constant, as Studio allows it: `Accept-Language: en-US`,
+  `X-Api-Version: 2`, `Content-Type: application/xml`, `Cache-Control: max-age=3600`,
+  `Accept: application/vnd.github.v3+json`, a `User-Agent`, a host name or `production-eu-west-1` are written,
+  shown by describe and left readable in a test-call echo. The rule is a deny-list: a short chosen secret under a
+  neutral name (`X-Pin: 4821`, `Winter-2024`) is not recognised, so the tool accepting a value does not make it
+  public: a key, password or PIN the user gives, short or not, still goes into a system setting. A refusal that
+  says "refused on a header, cookie or
+  credential-like parameter" comes from a clio released before this rule, which refuses every header constant:
+  tell the user to update clio instead of moving a plain value into a system setting. A refusal that says the
+  value "looks like a key" comes from this rule; then use `default-sys-setting`.
 - Every system setting a call references anew MUST exist before the call; such a reference to a missing
   setting is refused, because at run time the platform drops it silently and the request goes out without the
   header. A reference the same method (or the authentication) already had, whose setting was deleted since,
@@ -68,8 +88,8 @@ Credential rule (MUST)
   token) is an ordinary request parameter with `default-sys-setting`. The value cannot be composed: for
   `Authorization: Bearer <token>` the setting holds the whole `Bearer <token>` text. A request that must be
   signed per call (HMAC and similar) cannot be described this way; tell the user.
-- `describe-web-service` never returns credential values or secret-like constant defaults
-  (`default-masked: true`, `constant-credentials-masked: true`). Do not try to read them another way. A key
+- `describe-web-service` never returns credential values or secret-like constant defaults by the rules above
+  (`default-masked: true`, `constant-credentials-masked: true`); a plain header constant is returned as is. Do not try to read them another way. A key
   kept in the query of a base URI, a method `uri` or a `soap-action` (a service made in Studio can hold one) shows
   as `[masked]`, and the tools never write such a key back: a `setMethod` or `setBaseUri` that sends `[masked]` is
   refused. Leave that method or base URI out of the call, make the key a parameter with `default-sys-setting`
@@ -210,7 +230,8 @@ Changing a registered service
   like `oauth-app`. A kept parameter whose secret constant default describe hid (`default-masked: true`)
   keeps that default when no default is sent; the agent never needs, and never gets, the value. To remove
   such a constant send `"default-value": ""`, or replace it with `default-sys-setting`; moving it to a place
-  where it would show (a query parameter, a path that does not look like a credential) is refused.
+  where describe would show it (a query or body parameter, or a code or path where neither the name nor the value
+  hides it) is refused.
 - `setMethod` REPLACES the method. Every parameter it keeps must be sent complete, as `describe-web-service`
   returned it: an omitted field is not kept but reset (`in` to body, `type` to Text, `array` and `required` to
   false, the caption to the name the API sees, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
@@ -268,4 +289,7 @@ Rights and limits
   array whose items held a text array and an inner Object array went out with every value in place, in a REST
   JSON body and in a SOAP envelope, and a setting-bound item field was filled in every item; the platform sent a
   JSON array given to a query, header or path parameter as `System.Object[]` (so clio refuses one) and a text as
-  written. Other versions are unknown.
+  written. On the same stand in November 2026: a plain `Accept-Language: en-US` header constant was registered,
+  shown by describe and echoed readable by an echo API, while a key-like constant stored the Studio way under the
+  neutral header `X-Partner` was hidden by describe, masked in the echo, and refused when sent back as a constant.
+  Other versions are unknown.
