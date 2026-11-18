@@ -1,227 +1,290 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Pins the metric-widget rules of <c>dashboard-and-home-page-layout</c> and <c>widget-color-and-icon</c>, and the
-/// lines that route the sibling dashboard guides to them.
+/// Pins the metric-widget rules of <c>dashboard-and-home-page-layout</c>, <c>widget-color-and-icon</c> and the
+/// "Metric title and text" section of <c>indicator-widget</c>, and the lines that route the sibling dashboard
+/// guides to them.
 /// </summary>
 /// <remarks>
-/// The rules come from the stock product pages, read with <c>get-page</c> on a Sales/Service Enterprise
-/// environment on 2026-10-15: the <c>Main</c> grid has 28px rows on a dashboard and 64px rows on a home page,
-/// so one metric <c>rowSpan</c> for both surfaces renders a 100px tile on one and a 208px tile on the other;
-/// no stock dashboard metric is wider than 4 columns, while on a home page the engineer chose metric and chart
-/// rows that fill all 12 columns (two tiles 6 + 6, not 3 + 3 with an empty right half, from runtime screenshots
-/// on 2026-10-22) for new rows only, never resizing the tiles already on a page; every stock dashboard metric
-/// has an icon; four widget color presets fall below a 3:1 WCAG contrast ratio on the white card; and all 76
-/// stock metric tiles show the value alone (<c>text.template</c> <c>{0}</c>, the name only in
-/// <c>config.title</c>), with <c>text.fontSizeMode</c> "medium" on every dashboard (the engineer chose "large"
-/// for home pages); their titles name the measure in 2-4 words, about 22 characters at the median, and none
-/// appends a filter after a comma (the engineer set the 25- and 30-character bounds). The layout guide owns
-/// size, placement, card theme and the metric text rules; the color palette and the icon rule were split out
-/// into <c>widget-color-and-icon</c> to keep the layout guide inside the inline reply budget. Every other
-/// dashboard guide only cites them, so each guide is pinned for its own part and the family is scanned for
-/// phrases that would contradict the owners.
+/// The rules come from the stock product pages, read with <c>get-page</c> from 9 stock analytics dashboards and
+/// 4 stock home pages (13 pages) of a Sales/Service Enterprise environment on 2026-10-15 and re-read unchanged
+/// on Creatio 10.3.1163.0 on 2026-11-18: the <c>Main</c> grid has 28px rows on a dashboard and 64px rows on a
+/// home page, so one metric <c>rowSpan</c> for both surfaces renders a 100px tile on one and a 208px tile on the
+/// other; no stock dashboard metric is wider than 4 columns, while on a home page the engineer chose new metric
+/// and chart rows that fill all 12 columns (from runtime screenshots on 2026-10-22), never resizing the tiles
+/// already on a page; every stock dashboard metric has an icon; four widget color presets fall below a 3:1 WCAG
+/// contrast ratio on the white card; and all 76 stock metric tiles show the value alone (<c>text.template</c>
+/// <c>{0}</c>) under a 2-4 word title. The tests assert key tokens and the section a rule sits in, not whole
+/// sentences, so a guide can be reworded without breaking the build while a rule cannot move, vanish or be
+/// stated twice.
 /// </remarks>
 [TestFixture]
 public sealed class DashboardLayoutGuidanceTests
 {
-    private const string DashboardsFolder = "guidance/mcp/guides/dashboards";
+    private const string GuidesFolder = "guidance/mcp/guides";
+    private const string DashboardsFolder = GuidesFolder + "/dashboards";
     private const string LayoutPath = DashboardsFolder + "/layout.md";
     private const string ColorAndIconPath = DashboardsFolder + "/widget-color-and-icon.md";
     private const string ChartWidgetPath = DashboardsFolder + "/chart-widget.md";
     private const string IndicatorWidgetPath = DashboardsFolder + "/indicator-widget.md";
+    private const string LayoutItemId = "dashboard-and-home-page-layout";
     private const string LayoutOwner = "`dashboard-and-home-page-layout`";
     private const string ColorAndIconItemId = "widget-color-and-icon";
     private const string ColorAndIconOwner = "`widget-color-and-icon`";
     private const string ColorAndIconCitation = "get-guidance name=widget-color-and-icon";
-
-    /// <summary>
-    /// The chart size floor; only its metric-tile parenthetical changed, from a dashboard row count to a
-    /// citation of the layout guide that owns the metric size per surface.
-    /// </summary>
-    private const string ChartSizeFloor =
-        "SIZE FLOOR — never ship a tiny chart. In a `crt.GridContainer` set `layoutConfig.rowSpan` >= 6 "
-        + "(platform default 9; funnels 15). In a `crt.FlexContainer` the parent uses `FlexLayoutConfig` — "
-        + "set `layoutConfig.height` >= 350 (px) so the flex child doesn't collapse. The same floor applies "
-        + "to list/pivot widgets. Metric TILES are exempt (their size is owned by `dashboard-and-home-page-layout`).";
+    private const string TitleAndTextSection = "## Metric title and text";
 
     private static readonly string[] BannedColors = ["orange-red", "orange", "light-green", "turquoise"];
 
+    private static readonly string[] DefaultColors =
+    [
+        "dark-blue", "navy-blue", "forest-green", "burnt-coral", "vivid-purple", "steel-blue", "blue", "violet",
+        "cadmium-red", "dark-turquoise"
+    ];
+
+    private static readonly string[] AllowedColors =
+    [
+        "celestial-blue", "coral", "red", "purple", "green", "rusty-orange", "light-blue", "bright-red", "dark-green"
+    ];
+
     [Test]
-    [Description("The layout guide sizes metric tiles per surface from the Main grid rows read with get-page, not with one rowSpan for both.")]
+    [Description("The layout guide runs from sizes to widths, new page, existing page and card theme.")]
+    public void LayoutGuide_ShouldOrderItsSectionsFromSizesToCardTheme()
+    {
+        // Arrange
+        string[] expectedOrder =
+        [
+            "## Core rules", "## Metric tile size", "## Row widths", "### Dashboard", "### Home page",
+            "## New page layout", "## Adding to an existing page", "## Card theme", "## Widget catalog",
+            "## Finish checklist"
+        ];
+
+        // Act
+        string[] headings = [.. Headings(Read(LayoutPath))];
+        int[] positions = [.. expectedOrder.Select(heading => Array.FindIndex(headings, line => line.StartsWith(heading, StringComparison.Ordinal)))];
+
+        // Assert
+        positions.Should().NotContain(-1, because: "every section of the layout guide must exist");
+        positions.Should().BeInAscendingOrder(because: "the guide reads sizes, widths, new page, existing page, card theme");
+    }
+
+    [Test]
+    [Description("The layout guide sizes metric tiles and their text per surface from the Main grid rows read with get-page.")]
     public void LayoutGuide_ShouldSizeMetricTilesPerSurface()
     {
         // Arrange
-        string guide = Read(LayoutPath);
+        string section = Section(Read(LayoutPath), "## Metric tile size");
 
         // Act
-        string[] lines = Lines(guide);
+        string dashboardRow = Lines(section).Single(line => line.StartsWith("| Dashboard", StringComparison.Ordinal));
+        string homePageRow = Lines(section).Single(line => line.StartsWith("| Home page", StringComparison.Ordinal));
 
         // Assert
-        guide.Should().Contain("read the `rows` of the page's `Main` `crt.GridContainer` with `get-page`",
+        section.Should().ContainAll(["`rows`", "`Main`", "`get-page`"],
             because: "the row height decides how tall a rowSpan renders, and it differs per surface");
-        lines.Should().Contain("| Dashboard (`BaseDashboardTemplate`) | `28px` | 3, or 2 in a dense band | 3 |",
-            because: "a dashboard metric is 3 rows of 28px, about 100px tall, as on the stock dashboards");
-        lines.Should().Contain(
-            "| Home page (`BaseHomePage`) | `64px` | a row fills 12 per \"Home page widths\"; a single metric 3-4; beside a chart 3, or 2 dense | 2 |",
-            because: "a home-page metric is 2 rows of 64px, and the table must show the width exceptions next to the fill rule");
+        dashboardRow.Should().ContainAll(["`BaseDashboardTemplate`", "`28px`"]).And.EndWith("| 3 |",
+            because: "a dashboard metric is 3 rows of 28px, about 100px tall");
+        homePageRow.Should().ContainAll(["`BaseHomePage`", "`64px`", "\"Row widths\""]).And.EndWith("| 2 |",
+            because: "a home-page metric is 2 rows of 64px, and its widths are owned by the row widths section");
+        Flatten(section).Should().ContainAll(["`text.fontSizeMode` \"medium\"", "\"large\"", "sibling tiles' text settings"],
+            because: "dashboard metrics are medium, home-page metrics large, and an existing page keeps its siblings' text");
+    }
+
+    [Test]
+    [Description("The indicator guide owns the metric title and text template for a metric on any page.")]
+    public void IndicatorWidgetGuide_ShouldOwnTheMetricTitleAndText()
+    {
+        // Arrange
+        string section = Flatten(Section(Read(IndicatorWidgetPath), TitleAndTextSection));
+
+        // Act
+        string[] tokens =
+        [
+            "any page", "`config.title`", "2-4 words", "ONE line", "25 characters", "never more than 30",
+            "`#ResourceString(...)#`", "unit after a comma", "qualifier in parentheses", "Never append a filter",
+            "fold it into the words", "`text.template` is exactly `{0}`", "never repeat it as a caption",
+            "comparison metric"
+        ];
+
+        // Assert
+        section.Should().ContainAll(tokens,
+            because: "the stock titles name the measure in 2-4 words with the value alone in the tile, on any page");
+        section.Should().Contain(LayoutOwner,
+            because: "the text size depends on the surface and stays with the layout guide");
+    }
+
+    [Test]
+    [Description("The layout guide cites the indicator guide for the metric title and text instead of restating them.")]
+    public void LayoutGuide_ShouldLeaveTheMetricTitleAndTextToTheIndicatorGuide()
+    {
+        // Arrange
+        string guide = Flatten(Read(LayoutPath));
+
+        // Act
+        int citations = Occurrences(guide, "\"Metric title and text\"");
+
+        // Assert
+        guide.Should().Contain("get-guidance name=indicator-widget", because: "the owner is cited by get-guidance name");
+        citations.Should().BeGreaterThanOrEqualTo(3,
+            because: "the owner paragraph, the existing-page steps and the finish checklist all point to the section");
         guide.Should().NotContainAny(
-            ["metric tile 3, gauge 3", "~3 for a metric tile", "Metric tiles are 1 row tall", "metric tiles stay short"],
-            because: "a single metric rowSpan for both surfaces is the defect this guide replaced");
+            ["2-4 word", "25 characters", "more than 30", "Satisfaction 1", "VALUE ONLY", "is exactly `{0}`"],
+            because: "the title and template rules have one owner; a copy in the layout guide would drift");
     }
 
     [Test]
-    [Description("The layout guide sets the metric text size per surface and keeps the siblings' text settings on an existing page.")]
-    public void LayoutGuide_ShouldSetTheMetricTextSizePerSurface()
+    [Description("The dashboard width limits sit only in the dashboard part of the row widths, each stated once.")]
+    public void LayoutGuide_ShouldScopeTheDashboardWidthLimitsToDashboards()
     {
         // Arrange
-        string guide = Read(LayoutPath);
+        string guide = Flatten(Read(LayoutPath));
+        string dashboard = Flatten(Section(Read(LayoutPath), "### Dashboard"));
+        string[] dashboardOnly =
+        [
+            "12 divided by the tile count", "at most `colSpan` 4", "3 + 3, not 6 + 6", "5 or 6 tiles across",
+            "FILLED AREA"
+        ];
 
         // Act
-        string flattened = Flatten(guide);
+        string[] misplaced = [.. dashboardOnly.Where(token => Occurrences(guide, token) != 1 || Occurrences(dashboard, token) != 1)];
 
         // Assert
-        flattened.Should().Contain(
-            "TEXT SIZE: `text.fontSizeMode` \"medium\" (the designer's size M) on a dashboard, \"large\" (size L) on a home page.",
-            because: "every stock dashboard metric uses medium, and a home-page metric is large");
-        flattened.Should().ContainAll(
-        [
-            "On an existing page copy the sibling tiles' text settings instead",
-            "Copy the SIZE and TEXT settings of the sibling metric tiles (`colSpan`, `rowSpan`, `text.fontSizeMode`, `text.labelPosition`)",
-            "`text.fontSizeMode` \"medium\" like its siblings"
-        ], because: "a new tile on an existing page matches the tiles already there rather than the surface default");
+        misplaced.Should().BeEmpty(
+            because: "no stock dashboard metric is wider than 4 columns, but a home page fills its rows");
     }
 
     [Test]
-    [Description("The layout guide keeps a metric's text template to the value alone, with the name only in the title, on new and existing pages.")]
-    public void LayoutGuide_ShouldShowTheMetricValueAloneInTheTile()
-    {
-        // Arrange
-        string guide = Read(LayoutPath);
-
-        // Act
-        string flattened = Flatten(guide);
-
-        // Assert
-        flattened.Should().ContainAll(
-        [
-            "VALUE ONLY: `text.template` is exactly `{0}`, the value alone",
-            "The metric's name is `config.title`: never repeat it as a caption inside the tile",
-            "Text beside `{0}` belongs only to a comparison metric"
-        ], because: "all 76 stock metric tiles show the value alone; a caption repeating the title is what the designer flagged");
-        flattened.Should().ContainAll(
-        [
-            "Its `text.template` is `{0}` even when a sibling repeats its name as a caption",
-            "`text.template` `{0}`, its name only in `config.title`"
-        ], because: "the existing-page steps and the finish checklist must not let a copied or invented caption through");
-    }
-
-    [Test]
-    [Description("The layout guide keeps a metric title a short one-line name of the measure, with a filter folded into the words, on new and existing pages.")]
-    public void LayoutGuide_ShouldKeepTheMetricTitleShortOnOneLine()
-    {
-        // Arrange
-        string guide = Read(LayoutPath);
-
-        // Act
-        string flattened = Flatten(guide);
-
-        // Assert
-        flattened.Should().ContainAll(
-        [
-            "TITLE: `config.title` is a short noun phrase naming the measure, 2-4 words on ONE line: aim at 25 characters or fewer, never more than 30.",
-            "After the name only a unit after a comma (\"Average resolution time, hours\") or a qualifier in parentheses (\"Overdue cases (response)\").",
-            "Never append a filter as a comma list, as in \"Closed requests, Satisfaction 1\": fold it into the words (\"Requests rated 1\", \"Low-rated requests\")."
-        ], because: "the stock titles name the measure in 2-4 words and none appends a filter; a filter list is what made the agent's title unclear");
-        flattened.Should().ContainAll(
-        [
-            "Its title follows TITLE (\"Metric tile size\") even when a sibling's title is longer",
-            "Every metric title is a 2-4 word noun phrase on one line (25 characters or fewer, never more than 30) with no filter appended after a comma"
-        ], because: "the existing-page steps and the finish checklist must not let a long or filter-listing title through");
-    }
-
-    [Test]
-    [Description("The layout guide never stretches a metric tile to fill a row on a dashboard, keeps a widget beside a stack bottom-aligned, and states every dashboard width limit only for dashboards.")]
-    public void LayoutGuide_ShouldNotStretchMetricTilesOnADashboard()
-    {
-        // Arrange
-        string guide = Read(LayoutPath);
-
-        // Act
-        string flattened = Flatten(guide);
-
-        // Assert
-        flattened.Should().ContainAll(
-        [
-            "DASHBOARD WIDTH: NEVER derive a tile width from 12 divided by the tile count",
-            "a dashboard tile is at most `colSpan` 4. On a dashboard two tiles are 3 + 3, not 6 + 6.",
-            "Dense band, `colSpan` 2: on a dashboard 5 or 6 tiles across (more go on a second tile row) or a block "
-                + "two tiles wide in 4 columns; on a home page only that 2-wide block beside a chart.",
-            "On a dashboard the 12-column rule applies to the FILLED AREA, not to each row",
-            "BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total"
-        ], because: "no stock dashboard metric is wider than 4 columns; two tiles stretched to 6 + 6 look nothing like the product");
-        UnscopedOccurrences(flattened, "tile is at most `colSpan` 4", "a dashboard ").Should().Be(0,
-            because: "the colSpan 4 limit is a dashboard rule: a home page fills its rows");
-        UnscopedOccurrences(flattened, "two tiles are 3 + 3, not 6 + 6", "on a dashboard ").Should().Be(0,
-            because: "3 + 3 is a dashboard rule: a home page row with two tiles is 6 + 6");
-        UnscopedOccurrences(flattened, "the 12-column rule applies to the filled area", "on a dashboard ").Should().Be(0,
-            because: "the filled-area rule is a dashboard rule: a home page fills each row");
-        UnscopedOccurrences(flattened, "5 or 6 tiles across", "on a dashboard ").Should().Be(0,
-            because: "a home-page metric block beside a chart is only ever the 2-wide block in 4 columns");
-        flattened.Should().ContainAll(
-        [
-            "| Number of accounts | metric, `steel-blue`, `work-icon` | `{ \"column\": 1, \"row\": 1, \"colSpan\": 3, \"rowSpan\": 3 }` |",
-            "| Accounts by industry | doughnut | `{ \"column\": 7, \"row\": 1, \"colSpan\": 6, \"rowSpan\": 12 }` |"
-        ], because: "the Accounts analytics reference shows the real layoutConfig of a metric block with a widget beside it");
-        guide.Should().NotContainAny(
-            ["metric tile width = 12 /", "12 / (tiles in the band)", "Every row's widget widths must sum to a full 12"],
-            because: "deriving a tile width from the tile count is what stretched the tiles");
-    }
-
-    [Test]
-    [Description("The layout guide fills new metric and chart rows of a home page across 12 columns with the exceptions visible, keeps heights, and never resizes what is already on a page.")]
+    [Description("The home-page row widths fill new metric and chart rows across 12 columns, with the exceptions stated once.")]
     public void LayoutGuide_ShouldFillTheRowsOfAHomePage()
     {
         // Arrange
-        string guide = Read(LayoutPath);
+        string guide = Flatten(Read(LayoutPath));
+        string homePage = Flatten(Section(Read(LayoutPath), "### Home page"));
 
         // Act
-        string flattened = Flatten(guide);
+        string[] tokens =
+        [
+            "METRIC ROW", "2 -> 6 + 6", "3 -> 4 + 4 + 4", "4 -> 3 + 3 + 3 + 3", "6 -> 2 each",
+            "7 -> a row of 4 tiles (3 columns each) then a row of 3 (4 each)", "8 -> two rows of 4",
+            "`rowSpan` stays 2", "EXCEPTIONS", "`colSpan` 3-4", "never stretched to 12", "CHARTS",
+            "one chart takes 12 columns", "Never 4 or more charts in a row", "same `rowSpan`",
+            "Chart heights and floors do not change"
+        ];
 
         // Assert
-        flattened.Should().ContainAll(
+        homePage.Should().ContainAll(tokens,
+            because: "the engineer chose rows that fill 12 columns on a home page, without changing chart heights");
+        Occurrences(guide, "`colSpan` 3-4").Should().Be(1,
+            because: "the home-page exceptions are stated in the row widths and referred to elsewhere");
+        guide.Should().NotContainAny(["7 -> 4 + 3", "8 -> 4 + 4"],
+            because: "tile counts written like column sums read as widths");
+    }
+
+    [Test]
+    [Description("The layout guide states the no-resize rule once, in the existing-page steps, and calls a horizontal group of tiles a metric row.")]
+    public void LayoutGuide_ShouldStateTheNoResizeRuleOnceAndUseOneTermForARowOfTiles()
+    {
+        // Arrange
+        string guide = Read(LayoutPath);
+        string existingPage = Section(guide, "## Adding to an existing page");
+
+        // Act
+        string[] otherTerms = [.. new[] { @"\bband\b", @"\bstrip\b", @"\btile row\b" }
+            .Where(pattern => Regex.IsMatch(guide, pattern, RegexOptions.IgnoreCase))];
+
+        // Assert
+        Occurrences(guide, "resize").Should().Be(1, because: "the never-resize rule has one owner section");
+        Occurrences(existingPage, "resize").Should().Be(1, because: "the existing-page steps own the never-resize rule");
+        otherTerms.Should().BeEmpty(because: "a horizontal group of metric tiles is always a metric row");
+        guide.Should().ContainAll(["METRIC BLOCK", "METRIC ROWS"], because: "the core rule defines both terms");
+    }
+
+    [Test]
+    [Description("The layout guide gives the same steps for adding a metric to an existing dashboard or home page, never appending, with the Case Intelligence worked example.")]
+    public void LayoutGuide_ShouldPlaceANewMetricInsideTheExistingBlock()
+    {
+        // Arrange
+        string section = Flatten(Section(Read(LayoutPath), "## Adding to an existing page"));
+
+        // Act
+        string[] steps =
         [
-            "## Home page widths",
-            "METRIC ROW: with nothing beside it, a home-page metric row fills all 12 columns with equal tiles: "
-                + "2 -> 6 + 6, 3 -> 4 + 4 + 4, 4 -> 3 + 3 + 3 + 3, 5 -> 4 + 4 + 4 then 6 + 6, 6 -> 2 each.",
-            "7 or more: rows of at most 6 tiles, as even as possible, each row 2, 3, 4 or 6 tiles so it fills 12 (7 -> 4 + 3, 8 -> 4 + 4).",
-            "A single metric stays `colSpan` 3-4, never stretched to 12, or sits beside a chart.",
-            "The metric `rowSpan` stays 2."
-        ], because: "the engineer chose 6 + 6 over 3 + 3 with an empty right half for a home page's metric row");
-        flattened.Should().ContainAll(
+            "on a dashboard and on a home page", "NEVER resize", "SIZE and TEXT settings", "never their `theme`",
+            ColorAndIconOwner, "free slot", "directly UNDER the block", "down by the tile's `rowSpan`",
+            "exactly match the block", "NEVER append"
+        ];
+        string[] workedExample =
         [
-            "CHARTS: one chart takes 12 columns.",
-            "Ordinary charts (bar, line/spline, area) go at most 2 per row (6 + 6); an odd last one stretches to 12, "
-                + "preferably the one with the most data points (a trend or timeline).",
-            "Compact charts (doughnut/pie, a bar with few short bars) may go 3 per row (4 + 4 + 4), the remainder split evenly "
-                + "(6 + 6 or 12); 4 compact charts are 6 + 6, 6 + 6.",
-            "Never 4 or more charts in a row.",
-            "Charts in one row share the same `rowSpan`.",
-            "A mixed row such as doughnut 4 + wide chart 8 is fine.",
-            "Chart heights and floors do not change"
-        ], because: "a home page's chart rows fill the width the same way, without changing chart heights");
-        flattened.Should().ContainAll(
+            "Case Intelligence", "`{ \"column\": 1, \"row\": 13, \"colSpan\": 2, \"rowSpan\": 3 }`",
+            "`{ \"column\": 5, \"row\": 1, \"colSpan\": 8, \"rowSpan\": 15 }`", "row 16", "row 26",
+            "`{ \"column\": 3, \"row\": 13, \"colSpan\": 2, \"rowSpan\": 3 }`"
+        ];
+
+        // Assert
+        section.Should().ContainAll(steps,
+            because: "a tile appended at the bottom, or siblings resized or restyled to make room, is what the stock pages never show");
+        section.Should().ContainAll(workedExample,
+            because: "the worked example shows the insertion rule on a full stock metric block");
+        section.Should().NotContainEquivalentOf("re-split",
+            because: "re-splitting an existing home-page row resized stock tiles; the engineer dropped it");
+    }
+
+    [Test]
+    [Description("The card theme is plain white on dashboards and home pages, the home-page difference from stock is deliberate, and it overrides the component doc.")]
+    public void LayoutGuide_ShouldKeepEveryCardPlainWhite()
+    {
+        // Arrange
+        string guide = Read(LayoutPath);
+        string section = Flatten(Section(guide, "## Card theme"));
+
+        // Act
+        string[] tokens = ["\"without-fill\"", "home page", "on purpose", "OVERRIDES", "`crt.IndicatorWidget`", "\"full-fill\""];
+
+        // Assert
+        section.Should().ContainAll(tokens,
+            because: "stock home pages use filled cards, new widgets deliberately do not, and the component doc says full-fill");
+        guide.Should().NotContainAny(["base product", "like stock", "as stock"],
+            because: "home pages differ from the stock ones on purpose");
+    }
+
+    [Test]
+    [Description("The finish checklist refers to the owner sections and keeps the gauge floor.")]
+    public void LayoutGuide_ShouldReferToTheOwnersInTheFinishChecklist()
+    {
+        // Arrange
+        string section = Flatten(Section(Read(LayoutPath), "## Finish checklist"));
+
+        // Act
+        string[] tokens =
         [
-            "Dashboards keep the widths above.",
-            "These widths lay out new rows; on an existing page never resize the widgets already there",
-            "On a home page a metric row with nothing beside it and every chart row fill 12 columns per \"Home page widths\", "
-                + "except a single metric (`colSpan` 3-4) and a metric block beside a chart (`colSpan` 3, or 2 dense).",
-            "On a home page a new metric row with nothing beside it and every new chart row fill 12 columns per \"Home page widths\", "
-                + "except a single metric (3-4 columns) and a block beside a chart (3, or 2 dense); existing tiles keep their size."
-        ], because: "the core rule and the finish checklist must show where the fill rule stops, and never let it resize an existing tile");
+            "\"Row widths\"", "\"Adding to an existing page\"", "\"Metric title and text\"", ColorAndIconOwner,
+            "each gauge is 6 (floor 5)", ">= 6"
+        ];
+
+        // Assert
+        section.Should().ContainAll(tokens, because: "the checklist checks every rule by its owner and keeps the size floors");
+    }
+
+    [Test]
+    [Description("The layout and color guides state the 13-page evidence and the Creatio version it was re-read on.")]
+    public void LayoutGuides_ShouldStateTheirEvidenceAndVersion()
+    {
+        // Arrange
+        string[] guides = [Read(LayoutPath), Read(ColorAndIconPath)];
+
+        // Act
+        string[] evidence = [.. guides.Select(guide => Blocks(guide).Single(block => block.StartsWith("Evidence:", StringComparison.Ordinal)))];
+
+        // Assert
+        evidence.Should().AllSatisfy(text => text.Should().ContainAll(["9 stock analytics dashboards", "4 stock home pages", "10.3.1163.0"],
+            because: "evidence names what was measured and on which version"));
+        guides.Should().AllSatisfy(guide => guide.Should().NotContainAny(["8 stock", "platform version not read"],
+            because: "the survey covered 9 dashboards and the version is now known"));
     }
 
     [Test]
@@ -230,47 +293,43 @@ public sealed class DashboardLayoutGuidanceTests
     {
         // Arrange
         string guide = Read(ColorAndIconPath);
+        string[] lines = Lines(Section(guide, "## Color"));
 
         // Act
-        string flattened = Flatten(guide);
+        string banned = Flatten(Block(lines, "- MUST NOT"));
+        string defaults = Flatten(Block(lines, "- DEFAULT"));
+        string allowed = Flatten(Block(lines, "- Allowed"));
 
         // Assert
-        flattened.Should().ContainAll(
-        [
-            "MUST NOT use in any widget (below 3:1, unreadable on white): `orange-red` 2.39, `turquoise` 2.33, `orange` 1.88, `light-green` 1.61.",
-            "DEFAULT choice (4.5:1 or more): `dark-blue` 13.83, `navy-blue` 7.21, `forest-green` 6.73, `burnt-coral` 6.01, "
-                + "`vivid-purple` 5.79, `steel-blue` 5.78, `blue` 5.77, `violet` 5.30, `cadmium-red` 5.01, `dark-turquoise` 4.50.",
-            "Allowed (3:1 to 4.5:1): `celestial-blue` 4.05, `coral` 3.65, `red` 3.50, `purple` 3.08, `green` 3.05, "
-                + "`rusty-orange` 3.03, `light-blue` 3.03, `bright-red` 3.02, `dark-green` 3.01."
-        ], because: "the banned, default and allowed presets are decided by their WCAG contrast on the white card");
-        flattened.Should().ContainAll(
-        [
-            "| Neutral count, amount or time | `steel-blue` |",
-            "| Negative: overdue, missing data, expiring, inactive | `cadmium-red` |",
-            "| New, this month, inflow | `dark-turquoise` |",
-            "| Attention: waiting, reopened | `burnt-coral` |",
-            "| Good result | `forest-green` |"
-        ], because: "color follows meaning, as on the stock dashboards, never variety");
-        flattened.Should().Contain("This guide is the single owner of the widget color palette and the metric icon rule",
-            because: "the split article states which rules it owns");
+        banned.Should().ContainAll([.. BannedColors.Select(color => $"`{color}`"), "3:1"]);
+        defaults.Should().ContainAll([.. DefaultColors.Select(color => $"`{color}`"), "4.5:1"]);
+        allowed.Should().ContainAll([.. AllowedColors.Select(color => $"`{color}`"), "3:1 to 4.5:1"]);
+        Occurrences(guide, "WCAG 2").Should().Be(1, because: "the contrast method is explained once");
+        lines.Should().Contain(line => line.StartsWith("| Neutral", StringComparison.Ordinal) && line.Contains("`steel-blue`"))
+            .And.Contain(line => line.StartsWith("| Negative", StringComparison.Ordinal) && line.Contains("`cadmium-red`"),
+                because: "color follows meaning, as on the stock dashboards, never variety");
+        Flatten(guide).Should().Contain("single owner of the widget color palette and the metric icon rule");
     }
 
     [Test]
-    [Description("The color guide makes an icon mandatory on every metric tile and gives meaning-to-icon examples.")]
+    [Description("The color guide makes an icon mandatory on every metric tile and keys the overdue icons by measure.")]
     public void ColorAndIconGuide_ShouldRequireAnIconOnEveryMetricTile()
     {
         // Arrange
-        string guide = Read(ColorAndIconPath);
+        string section = Section(Read(ColorAndIconPath), "## Icon");
 
         // Act
-        string flattened = Flatten(guide);
+        string hourglass = Lines(section).Single(line => line.Contains("`hourglass-icon`", StringComparison.Ordinal));
+        string slaBreach = Lines(section).Single(line => line.Contains("`message-warning-icon`", StringComparison.Ordinal));
 
         // Assert
-        flattened.Should().Contain("Every metric tile MUST carry an icon (`config.layout.icon.iconName`) chosen by meaning",
-            because: "every metric on the stock dashboards has an icon");
-        guide.Should().ContainAll(
-            ["`hourglass-icon`", "`clock-icon`", "`coins-icon`", "`bell-icon`", "`checkmark-filled-icon`"],
+        Flatten(section).Should().ContainAll(["MUST carry an icon", "`config.layout.icon.iconName`", "by meaning"]);
+        section.Should().ContainAll(["`clock-icon`", "`coins-icon`", "`bell-icon`", "`checkmark-filled-icon`"],
             because: "the agent needs concrete icon names to choose from");
+        hourglass.Should().Contain("Elapsed or waiting time").And.NotContain("SLA",
+            because: "the hourglass marks elapsed or waiting time");
+        slaBreach.Should().ContainAll(["SLA breached", "`problem-icon`"],
+            because: "message-warning and problem mark a breached SLA, so one measure maps to one icon");
     }
 
     [Test]
@@ -284,8 +343,7 @@ public sealed class DashboardLayoutGuidanceTests
         string flattened = Flatten(guide);
 
         // Assert
-        flattened.Should().Contain(
-            $"MUST read {ColorAndIconCitation} before you choose a widget color or a metric icon",
+        flattened.Should().Contain($"MUST read {ColorAndIconCitation}",
             because: "an agent routed to the layout guide must reach the palette and the icon rule");
         guide.Should().NotContainAny(
             ["## Color", "## Icon", "2.39", "13.83", "4.05", "| Neutral count", "| Amounts |"],
@@ -293,116 +351,67 @@ public sealed class DashboardLayoutGuidanceTests
     }
 
     [Test]
-    [Description("The layout guide makes every home-page widget without-fill and names the component-doc default it overrides.")]
-    public void LayoutGuide_ShouldOverrideTheComponentDocThemeOnHomePages()
-    {
-        // Arrange
-        string guide = Read(LayoutPath);
-
-        // Act
-        string flattened = Flatten(guide);
-
-        // Assert
-        flattened.Should().ContainAll(
-        [
-            "Every widget on a dashboard AND on a home page uses the plain-white card, `theme` \"without-fill\"",
-            "On a home page this OVERRIDES the `crt.IndicatorWidget` component documentation, which says `theme` \"full-fill\" for home pages"
-        ], because: "the component documentation still says full-fill for home pages, and an agent reads both");
-    }
-
-    [Test]
-    [Description("The layout guide gives the same steps for adding a metric to an existing dashboard or home page, never resizing a sibling and never appending, with the Case Intelligence worked example.")]
-    public void LayoutGuide_ShouldPlaceANewMetricInsideTheExistingBlock()
-    {
-        // Arrange
-        string guide = Read(LayoutPath);
-
-        // Act
-        string flattened = Flatten(guide);
-
-        // Assert
-        flattened.Should().ContainAll(
-        [
-            "## Adding to an existing page",
-            "The same steps hold on a dashboard and on a home page.",
-            "Never resize an existing sibling tile to make room, even on a home page whose metric row fills 12 columns.",
-            "Copy the SIZE and TEXT settings of the sibling metric tiles",
-            "but never their `theme` or a banned color",
-            $"color by meaning per {ColorAndIconOwner}",
-            "Put the tile in a free slot of the metric block",
-            "add a new tile row directly UNDER the block",
-            "move every widget that starts on or below that row down by the tile's `rowSpan`, in every column",
-            "a side widget whose rows exactly match the block",
-            "NEVER append the tile at the bottom of the page",
-            "never restyle, resize, or move an existing widget beyond step 4."
-        ], because: "a tile appended at the bottom, or siblings resized or restyled to make room, is what the stock pages never show");
-        flattened.Should().NotContainEquivalentOf("re-split",
-            because: "re-splitting an existing home-page row resized stock tiles; the engineer dropped it");
-        flattened.Should().ContainAll(
-        [
-            "Case Intelligence dashboard",
-            "the new tile is `{ \"column\": 1, \"row\": 13, \"colSpan\": 2, \"rowSpan\": 3 }`",
-            "it becomes `{ \"column\": 5, \"row\": 1, \"colSpan\": 8, \"rowSpan\": 15 }`",
-            "the widgets on row 13 move to row 16 and those on row 23 to row 26"
-        ], because: "the worked example shows the insertion rule on a full stock metric block with concrete layoutConfig values");
-    }
-
-    [Test]
-    [Description("The layout guide keeps routing list authors to list-widget, and it and the color guide each fit a get-guidance reply inline.")]
+    [Description("The layout guide keeps routing list authors to list-widget, and the dashboard guides it touches each fit a get-guidance reply inline.")]
     public void LayoutGuides_ShouldKeepTheirRoutesAndFitTheInlineReplyBudget()
     {
         // Arrange
         string layout = Read(LayoutPath);
-        string colorAndIcon = Read(ColorAndIconPath);
+        (string itemId, int size)[] replies =
+        [
+            (LayoutItemId, GuidanceInlineReplyBudgetTests.ReplyBytes(layout)),
+            (ColorAndIconItemId, GuidanceInlineReplyBudgetTests.ReplyBytes(Read(ColorAndIconPath))),
+            ("indicator-widget", GuidanceInlineReplyBudgetTests.ReplyBytes(Read(IndicatorWidgetPath)))
+        ];
 
         // Act
-        int layoutReplyBytes = GuidanceInlineReplyBudgetTests.ReplyBytes(layout);
-        int colorAndIconReplyBytes = GuidanceInlineReplyBudgetTests.ReplyBytes(colorAndIcon);
-        foreach ((string itemId, int size) in new[]
-        {
-            ("dashboard-and-home-page-layout", layoutReplyBytes),
-            (ColorAndIconItemId, colorAndIconReplyBytes)
-        })
+        foreach ((string itemId, int size) in replies)
         {
             TestContext.WriteLine(
                 $"{itemId,-36} {size,7:N0}  {(double)size / GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,6:P1} of budget");
         }
 
         // Assert
-        layout.Should().Contain("MUST read `list-widget`",
-            because: "list authors reach the binding contract from the layout guide");
-        layout.Should().Contain("`desktop-page`",
-            because: "desktops keep their own guide");
-        layoutReplyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
-            because: "a reply over the inline budget is spilled to a file the agent reads back in pieces; "
-                + "rewrite a section or split the article rather than append one");
-        colorAndIconReplyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
-            because: "the split-out article must fit the same inline budget");
+        layout.Should().Contain("MUST read `list-widget`", because: "list authors reach the binding contract from the layout guide");
+        layout.Should().Contain("`desktop-page`", because: "desktops keep their own guide");
+        replies.Should().AllSatisfy(reply => reply.size.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
+            because: $"{reply.itemId} must not spill to a file the agent reads back in pieces"));
     }
 
     [Test]
-    [Description("The manifest declares the color guide as its own guidance item with a stable identity.")]
+    [Description("The manifest declares the color guide with a stable identity, sorted after when-to-use-requests, and names only topics in the dashboard descriptions.")]
     public void Manifest_ShouldDeclareTheColorAndIconGuide()
     {
         // Arrange
         string root = ProcessGuideSet.FindRepositoryRoot();
         using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "bundle-source.json")));
+        JsonElement[] resources = [.. manifest.RootElement.GetProperty("resources").EnumerateArray()];
+        JsonElement requirements = manifest.RootElement.GetProperty("requirements");
 
         // Act
-        JsonElement resource = manifest.RootElement.GetProperty("resources").EnumerateArray()
-            .Single(item => item.GetProperty("itemId").GetString() == ColorAndIconItemId);
-        JsonElement requirements = manifest.RootElement.GetProperty("requirements");
+        string?[] resourceIds = [.. resources.Select(item => item.GetProperty("itemId").GetString())];
+        string?[] itemIds = [.. requirements.GetProperty("itemIds").EnumerateArray().Select(item => item.GetString())];
+        string?[] uris = [.. requirements.GetProperty("resourceUris").EnumerateArray().Select(item => item.GetString())];
+        JsonElement resource = resources.Single(item => item.GetProperty("itemId").GetString() == ColorAndIconItemId);
+        string[] descriptions = [.. resources
+            .Where(item => item.GetProperty("itemId").GetString() is LayoutItemId or ColorAndIconItemId)
+            .Select(item => item.GetProperty("description").GetString() ?? string.Empty)];
 
         // Assert
         resource.GetProperty("topicId").GetString().Should().Be("creatio.widget-color-and-icon");
-        resource.GetProperty("role").GetString().Should().Be("guidance",
-            because: "get-guidance resolves a bare name only for the guidance role");
+        resource.GetProperty("role").GetString().Should().Be("guidance", because: "get-guidance resolves a bare name only for the guidance role");
         resource.GetProperty("uri").GetString().Should().Be("docs://knowledge/com.creatio.clio/widget-color-and-icon");
         resource.GetProperty("sourcePath").GetString().Should().Be(ColorAndIconPath);
-        requirements.GetProperty("itemIds").EnumerateArray().Select(item => item.GetString())
-            .Should().Contain(ColorAndIconItemId);
-        requirements.GetProperty("resourceUris").EnumerateArray().Select(item => item.GetString())
-            .Should().Contain("docs://knowledge/com.creatio.clio/widget-color-and-icon");
+        Array.IndexOf(resourceIds, ColorAndIconItemId).Should().Be(Array.IndexOf(resourceIds, "when-to-use-requests") + 1);
+        Array.IndexOf(itemIds, ColorAndIconItemId).Should().Be(Array.IndexOf(itemIds, "when-to-use-requests") + 1);
+        Array.IndexOf(uris, "docs://knowledge/com.creatio.clio/widget-color-and-icon")
+            .Should().Be(Array.IndexOf(uris, "docs://knowledge/com.creatio.clio/when-to-use-requests") + 1,
+                because: "the new item takes its alphabetical place in every list");
+        descriptions.Should().HaveCount(2).And.AllSatisfy(description =>
+        {
+            description.Length.Should().BeLessThanOrEqualTo(300, because: "a description names topics, not rules");
+            description.Should().NotContainAny(["Split out", "never", "stretched", "filling 12"],
+                because: "history and rules belong in the guide, not in the item an agent picks it by");
+        });
     }
 
     [Test]
@@ -413,17 +422,16 @@ public sealed class DashboardLayoutGuidanceTests
         string guide = Read(ChartWidgetPath);
 
         // Act
-        string[] colorLines = Lines(guide).Where(line => line.Contains("`orange-red`", StringComparison.Ordinal)).ToArray();
+        string[] colorLines = [.. Lines(guide).Where(line => line.Contains("`orange-red`", StringComparison.Ordinal))];
+        string sizeFloor = Blocks(guide).Single(block => block.Contains("SIZE FLOOR", StringComparison.Ordinal));
 
         // Assert
         colorLines.Should().ContainSingle(because: "the chart guide states the color ban in one line and cites its owner");
         colorLines[0].Should().ContainAll(
             [.. BannedColors.Select(color => $"`{color}`"), "`config.color`", "`series[*].color`", ColorAndIconOwner, ColorAndIconCitation],
             because: "the ban covers the title accent and every series color, and the color guide owns the palette");
-        Flatten(guide).Should().Contain(ChartSizeFloor,
+        sizeFloor.Should().ContainAll(["`layoutConfig.rowSpan` >= 6", "funnels 15", ">= 350", "Metric TILES are exempt", LayoutOwner],
             because: "the chart size floor must not move, and the metric size it exempts is owned by the layout guide");
-        guide.Should().NotContain("they stay ~3 rows",
-            because: "3 rows is a dashboard metric height; a home-page metric is 2 rows");
     }
 
     [Test]
@@ -431,27 +439,47 @@ public sealed class DashboardLayoutGuidanceTests
     public void IndicatorWidgetGuide_ShouldRouteTileLayoutToItsOwners()
     {
         // Arrange
-        string guide = Read(IndicatorWidgetPath);
+        string rule = Blocks(Read(IndicatorWidgetPath)).Single(block => block.Contains("tile size and placement", StringComparison.Ordinal));
 
         // Act
-        string flattened = Flatten(guide);
+        string[] tokens = ["dashboard or home page", LayoutOwner, ColorAndIconOwner, ColorAndIconCitation, "read both"];
 
         // Assert
-        flattened.Should().Contain(
-            $"On a dashboard or home page, tile size and placement are owned by {LayoutOwner}, and the tile's color and icon by "
-                + $"{ColorAndIconOwner} ({ColorAndIconCitation}): read both before you add or move a tile.",
+        rule.Should().ContainAll(tokens,
             because: "an agent that reads only the widget guide must still reach both owners, scoped to the surfaces they cover");
     }
 
     [Test]
-    [Description("No dashboard guide but the layout guide's owner text carries a phrase that contradicts the per-surface sizes or names a removed section.")]
+    [Description("home-page, dashboard-design and the dashboards router name the owner guides without restating what they cover; the routing map names the color guide.")]
+    public void SiblingGuides_ShouldOnlyNameTheOwnerGuides()
+    {
+        // Arrange
+        string[] siblings = [DashboardsFolder + "/home-page.md", DashboardsFolder + "/design.md", DashboardsFolder + "/index.md"];
+        string[] restated = ["12-column grid", "metric block", "per-surface metric sizes", "plain-white card", "row widths", "by contrast"];
+
+        // Act
+        string[] offenders = [.. siblings.SelectMany(path => restated
+            .Where(phrase => Read(path).Contains(phrase, StringComparison.OrdinalIgnoreCase))
+            .Select(phrase => $"{path}: {phrase}"))];
+        string homePage = Read(DashboardsFolder + "/home-page.md");
+        string routingLine = Lines(Read(GuidesFolder + "/routing.md")).Single(line => line.Contains("-> name=dashboards ", StringComparison.Ordinal));
+
+        // Assert
+        offenders.Should().BeEmpty(because: "the sibling guides name the owner and its topic, they do not re-list its rules");
+        siblings.Should().AllSatisfy(path => Read(path).Should().ContainAll([LayoutItemId, ColorAndIconItemId]));
+        Occurrences(homePage, LayoutOwner).Should().Be(1, because: "home-page names the layout guide once");
+        routingLine.Should().ContainAll([LayoutItemId, ColorAndIconItemId], because: "the router lists every dashboards target it routes onward to");
+    }
+
+    [Test]
+    [Description("No dashboard guide but the layout guide carries a phrase that contradicts the per-surface sizes or names a removed section.")]
     public void DashboardGuides_ShouldNotCarryStaleLayoutPhrases()
     {
         // Arrange
         string[] stalePhrases =
         [
             "metric-band-then-chart-grid", "worked patterns", "per-type sizes as a dashboard", "same layout and the same",
-            "they stay ~3 rows", "re-split"
+            "they stay ~3 rows", "re-split", "like the base product"
         ];
 
         // Act
@@ -499,9 +527,61 @@ public sealed class DashboardLayoutGuidanceTests
 
     private static string[] Lines(string text) => text.Split('\n');
 
-    /// <summary>Joins wrapped Markdown lines so a pinned sentence does not depend on where the text wraps.</summary>
+    /// <summary>Joins wrapped Markdown lines so a pinned token does not depend on where the text wraps.</summary>
     private static string Flatten(string text) =>
         string.Join(' ', Lines(text).Select(line => line.Trim()).Where(line => line.Length > 0));
+
+    /// <summary>The Markdown headings of a guide, outside code fences, in document order.</summary>
+    private static IEnumerable<string> Headings(string text)
+    {
+        bool inFence = false;
+        foreach (string line in Lines(text))
+        {
+            if (line.StartsWith("```", StringComparison.Ordinal))
+            {
+                inFence = !inFence;
+            }
+            else if (!inFence && line.StartsWith('#'))
+            {
+                yield return line;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The body of the section whose heading starts with <paramref name="heading"/>, up to the next heading of
+    /// the same or a higher level, so a test can tell which section a rule sits in.
+    /// </summary>
+    private static string Section(string text, string heading)
+    {
+        int level = heading.TakeWhile(character => character == '#').Count();
+        string[] lines = Lines(text);
+        int start = Array.FindIndex(lines, line => line.StartsWith(heading, StringComparison.Ordinal));
+        start.Should().BeGreaterThanOrEqualTo(0, because: $"the guide must have a section \"{heading}\"");
+        List<string> body = [];
+        bool inFence = false;
+        foreach (string line in lines.Skip(start + 1))
+        {
+            if (line.StartsWith("```", StringComparison.Ordinal))
+            {
+                inFence = !inFence;
+            }
+            else if (!inFence && line.StartsWith('#') && line.TakeWhile(character => character == '#').Count() <= level)
+            {
+                break;
+            }
+            body.Add(line);
+        }
+        return string.Join('\n', body);
+    }
+
+    /// <summary>The list item that starts with <paramref name="prefix"/>, with its wrapped lines.</summary>
+    private static string Block(string[] lines, string prefix)
+    {
+        int start = Array.FindIndex(lines, line => line.StartsWith(prefix, StringComparison.Ordinal));
+        start.Should().BeGreaterThanOrEqualTo(0, because: $"the section must have an item \"{prefix}\"");
+        return string.Join('\n', lines.Skip(start).TakeWhile((line, index) => index == 0 || line.StartsWith("  ", StringComparison.Ordinal)));
+    }
 
     /// <summary>
     /// Splits Markdown into its paragraphs, list items, table rows and headings, each with its wrapped lines
@@ -531,23 +611,15 @@ public sealed class DashboardLayoutGuidanceTests
         }
     }
 
-    /// <summary>
-    /// Counts the places a phrase occurs, ignoring case, without the scope words directly before it, so a
-    /// dashboard-only limit cannot come back as a universal one.
-    /// </summary>
-    private static int UnscopedOccurrences(string text, string phrase, string scope)
+    /// <summary>Counts the places a token occurs, ignoring case.</summary>
+    private static int Occurrences(string text, string token)
     {
         int count = 0;
-        for (int index = text.IndexOf(phrase, StringComparison.OrdinalIgnoreCase);
+        for (int index = text.IndexOf(token, StringComparison.OrdinalIgnoreCase);
             index >= 0;
-            index = text.IndexOf(phrase, index + phrase.Length, StringComparison.OrdinalIgnoreCase))
+            index = text.IndexOf(token, index + token.Length, StringComparison.OrdinalIgnoreCase))
         {
-            bool scoped = index >= scope.Length
-                && string.Compare(text, index - scope.Length, scope, 0, scope.Length, StringComparison.OrdinalIgnoreCase) == 0;
-            if (!scoped)
-            {
-                count++;
-            }
+            count++;
         }
         return count;
     }
