@@ -8,7 +8,7 @@ Needs CrtProcessBuilder 1.6.6.186 or later on the environment. The default creat
 `chatMessage (sendChatMessage)`; a clio without it refuses the block before sending. Always read the element back.
 
 == When to use it, and when not ==
-The element sends ONE message to ONE contact through a Creatio chat channel (Telegram, WhatsApp, Facebook Messenger,
+The element sends ONE message to ONE contact through a Creatio chat channel (Telegram, WhatsApp, Messenger,
 SMS and the like). It creates a Completed chat holding the message, shown in the contact's chat history.
 Not this element:
 - a message to employees: `process-send-email`; a bot broadcast with no contact (a bot API): `process-web-service`;
@@ -31,7 +31,7 @@ for the package only when `get-target-package` fails. With `ignoreErrors` true a
 "elements": [{ "name": "NotifyCaseContact", "type": "sendChatMessage", "caption": "Notify the case contact",
   "chatMessage": { "from": { "expression": "[#SysSettings.UsrSupportChatChannel#]" },
     "to": { "sourceElement": "ReadCase", "sourceElementParameter": "ResultEntity", "sourceColumn": "Contact" },
-    "messageSource": "template", "template": "Case status update", "ignoreErrors": true,
+    "messageSource": "template", "template": "Case status update", "ignoreErrors": false,
     "columnValues": [ { "column": "Case", "processParameter": "CaseIdParameter" } ] } }]
 "chatMessage": { "from": { "processParameter": "ChatChannelParameter" },
   "to": { "processParameter": "ContactIdParameter" }, "messageSource": "custom",
@@ -108,8 +108,8 @@ CUSTOM (`messageSource` `custom`):
 
 == Ignore errors and the outputs ==
 - `ignoreErrors` omitted on `create-business-process` and `addElement` is FALSE: a failed send STOPS the process,
-  and the element log carries the error. Do not ask: on a new element send `ignoreErrors: false` unless the
-  request talks about failures or going on after one, and state that default; on `setElement` omit it unless asked.
+  and the element log carries the error. Do not ask: on a new element send `ignoreErrors: true` only when the
+  request says to go on after a failed send, else `false`; state which; on `setElement` omit it unless asked.
 - With `ignoreErrors: true` the process goes on. `SendStatus` is `"Sent"` or `"Error"`; `SendStatusDetails` is empty
   on success, else the error text. Map them downstream and branch on `SendStatus`.
 - It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel). `"Sent"` is
@@ -183,6 +183,6 @@ On 2026-11-13/14: the discovery reads above as written (and on 2026-11-18 the Lo
 its timeline), and `"Sent"` for a user who blocked the bot. From source and documentation, not
 measured: the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, an empty system
 setting failing the run, the template language order. Inferred: an unset mode running
-as template mode. QA on 2026-11-18 (.NET Framework, OmnichannelMessaging 7.8.0, 1.6.6.186): template macros against
-the chat, the card's one-line view of multi-line text and empty message preview for a server-built template, and
+as template mode. QA on 2026-11-18 (.NET Framework, OmnichannelMessaging 7.8.0, 1.6.6.186) measured: template macros against
+the chat, the card's one-line view of multi-line text and empty preview for a server-built template, and
 a server-written `ignoreErrors` false stopping the run.

@@ -194,7 +194,7 @@ public sealed class SendChatMessageGuidanceTests
             "the parameter reference form is owned by `process-formulas`",
             "Line breaks in a constant are kept, with a notice: the designer's message field is one line",
             "`ignoreErrors` omitted on `create-business-process` and `addElement` is FALSE: a failed send STOPS the process, and the element log carries the error.",
-            "Do not ask: on a new element send `ignoreErrors: false` unless the request talks about failures or going on after one, and state that default; on `setElement` omit it unless asked.",
+            "Do not ask: on a new element send `ignoreErrors: true` only when the request says to go on after a failed send, else `false`; state which; on `setElement` omit it unless asked.",
             "`SendStatus` is `\"Sent\"` or `\"Error\"`; `SendStatusDetails` is empty on success, else the error text.",
             "It also swallows INPUT errors",
             "`\"Sent\"` is \"handed to the connector\", NOT delivered: a provider rejection after that (a Telegram user who blocked the bot) still reads `\"Sent\"`. Say \"sent\", never \"delivered\".",
