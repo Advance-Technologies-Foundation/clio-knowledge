@@ -198,6 +198,11 @@ public sealed class ProcessGuideContentPreservationTests
         // refusal naming types it did not ask about.
         ("process-element-catalog-details", "`callActivity`      Sub-process", "1.6.3.26",
             "the version floor on the entry that changed from read-only to buildable"),
+        // timerStart joined the Events clause when the Timer start element became buildable. A save that schedules
+        // runs owes the user a confirmation, so the catalog entry must keep pointing at the article that carries it.
+        ("process-element-catalog", "`timerStart` (schedule;", "the confirmation it needs",
+            "the catalog says the element builds; without the pointer to its confirmation an agent builds a schedule "
+            + "that runs unattended as the System operations user without asking anyone"),
         ("process-element-catalog", "Add the element", "NOT in a build descriptor",
             "the OTHER cannot-build fact, and the one a short form of this list dropped: the Connected-to "
             + "links are not in a build descriptor at all, so the flagship \"a task connected to the "

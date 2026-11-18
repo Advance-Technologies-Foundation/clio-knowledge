@@ -1,0 +1,379 @@
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using FluentAssertions;
+using FluentAssertions.Execution;
+using NUnit.Framework;
+
+namespace Clio.Knowledge.Bundle.Tests;
+
+/// <summary>
+/// Pins the <c>process-timer-start</c> guide: the <c>timer</c> block of the Timer start element, the <c>setTimer</c>
+/// operation and the confirmation owed before a save that schedules runs. It is registered as
+/// <c>process-web-service</c> is - banner-less, ungated, no legacy route, loaded on demand - and reached from the element
+/// catalog, its details, process-modeling and routing. It stays OFF the process digest card, as <c>webService</c> does.
+/// </summary>
+/// <remarks>
+/// TRIM ALARMS: every clause below is a gate an agent must pass, a refusal it has to recognise, or a run-time fact it
+/// cannot see from a green build (a saved timer runs unattended as the System operations user, with no parameters; a
+/// day step restarts every month; a kept past start can fire at once). A reword that keeps the rule updates the clause
+/// here; a trim that drops it is the failure these tests exist for.
+/// </remarks>
+[TestFixture]
+public sealed class TimerStartGuidanceTests
+{
+    /// <summary>
+    /// The floor sentence, in the form <c>process-multi-start</c> uses. It names no version: the clio side of the gate is
+    /// the FULL create contract naming <c>timerStart</c>, and that clio refuses an older package up front. A package or
+    /// clio version is added here and in the article together once it is released; a placeholder never is.
+    /// </summary>
+    private const string FloorSentence =
+        "Gate: use `timerStart` and `setTimer` only when the FULL `create-business-process` contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `timerStart` - that clio refuses an older package up front. Otherwise this clio does not carry it: build no timer start, and tell the user that a clio update adds it.";
+
+    /// <summary>
+    /// The confirm-before-save gate, worded on the trigger rather than on a list of tools, so an action nobody listed
+    /// is still covered.
+    /// </summary>
+    private const string GateTrigger =
+        "Before any action after which a timer that did not fire before, or now fires on a different schedule or zone, sits in the enabled, active version of a process, you MUST state the following and get an explicit yes BEFORE you call the tool";
+
+    /// <summary>The wording the gate shares with the confirm-first rule of <c>process-delete-data</c>.</summary>
+    private const string ConfirmFirstWording = "and get an explicit yes BEFORE you call";
+
+    private const string ItemId = "process-timer-start";
+
+    private const string ArticlePath = "guidance/mcp/guides/processes/timer-start.md";
+
+    private const string CatalogPath = "guidance/mcp/guides/processes/element-catalog.md";
+
+    private const string CatalogDetailsPath = "guidance/mcp/guides/processes/element-catalog-details.md";
+
+    private const string ModelingPath = "guidance/mcp/guides/processes/process-modeling.md";
+
+    private const string ConnectionsDetailsPath = "guidance/mcp/guides/processes/activity-connections-details.md";
+
+    private const string DeleteDataPath = "guidance/mcp/guides/processes/delete-data.md";
+
+    private const string DigestPath = "guidance/mcp/guides/processes/digest.md";
+
+    private const string RoutingPath = "guidance/mcp/guides/routing.md";
+
+    /// <summary>
+    /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
+    /// is about 17,450 response characters, so a new clause pays for itself with a trim, and a larger addition is
+    /// reviewed, or split into a <c>-details</c> article, rather than absorbed. The 19,000-byte inline rule is asserted
+    /// separately.
+    /// </summary>
+    private const int DesignTargetResponseCharacters = 18_000;
+
+    [Test]
+    [Description("The guide is registered banner-less, ungated and without a legacy route, required by the library, its description opens with the contract gate, and the element catalog, its details, process-modeling and routing send the reader to it while the digest card does not list it.")]
+    public void Guide_ShouldBeRegistered_AndTheEntryArticlesShouldRouteToIt()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        JsonElement requirements = source.RootElement.GetProperty("requirements");
+
+        // Act
+        JsonElement resource = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ItemId);
+        string[] requiredItems = [.. requirements.GetProperty("itemIds").EnumerateArray().Select(item => item.GetString()!)];
+        string[] requiredUris = [.. requirements.GetProperty("resourceUris").EnumerateArray().Select(uri => uri.GetString()!)];
+        string raw = ProcessGuideSet.Read(repositoryRoot, ArticlePath);
+        string catalog = ReadCollapsed(CatalogPath);
+        string details = ReadCollapsed(CatalogDetailsPath);
+        string modeling = ReadCollapsed(ModelingPath);
+        string routing = ReadCollapsed(RoutingPath);
+        string card = ReadCollapsed(DigestPath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            resource.GetProperty("sourcePath").GetString().Should().Be(ArticlePath,
+                because: "the manifest must point at the article this fixture pins");
+            resource.GetProperty("bundlePath").GetString().Should().Be($"resources/{ItemId}.md",
+                because: "the flat resources folder names each article by its itemId");
+            resource.GetProperty("topicId").GetString().Should().Be($"creatio.{ItemId}",
+                because: "the topic is the stable cross-library identity of the guide");
+            resource.GetProperty("role").GetString().Should().Be("guidance",
+                because: "get-guidance serves only guidance resources");
+            resource.GetProperty("description").GetString().Should().StartWith(
+                "Only when the FULL create-business-process contract names timerStart.",
+                because: "a boundary that gates the whole article comes first, so the get-guidance catalog shows it before the article is opened");
+            resource.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
+                because: "the clio side is gated by the create contract, not by a feature; a gated guide would be hidden while the tool accepts the block");
+            resource.TryGetProperty("legacyUris", out _).Should().BeFalse(
+                because: "the guide was born after the v0 migration and has no v0 route to preserve");
+            requiredItems.Should().Contain(ItemId,
+                because: "the library requires every item it publishes for the process tools");
+            requiredUris.Should().Contain($"docs://knowledge/com.creatio.clio/{ItemId}",
+                because: "the requirement lists the canonical route next to the item id");
+            raw.Should().NotContain(ProcessGuideSet.SetBanner,
+                because: "the guide is loaded on demand; a banner obliges process-modeling to index it, and that article has no room left under the inline rule");
+
+            catalog.Should().Contain("`timerStart` (schedule; `process-timer-start` owns its `timer` block and the confirmation it needs)",
+                because: "the catalog owns what builds today, and the element it lists must carry its owner and the confirmation it needs");
+            catalog.Should().Contain("`startEventTimer`->`timerStart`",
+                because: "the data-id map turns the catalog's Start timer into the build type");
+            catalog.Should().Contain("filter, signal, timer or connections with setFilter / setSignal / setTimer / setConnections, not in `setElement`",
+                because: "a timer is written with setTimer; setElement refuses a timer key");
+            details.Should().Contain("`startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:\"timerStart\"` with a `timer` block, owned by `process-timer-start`)",
+                because: "the element entry names the build type and the owner of its block");
+            details.Should().Contain("a timer start inside an event sub-process is not handled at all",
+                because: "only top-level timer starts are built and described; a nested one is out of reach of every tool");
+            modeling.Should().Contain("setTimer (`process-timer-start`)",
+                because: "process-modeling lists every edit op and names the owner of each that carries its own rules");
+            routing.Should().Contain("-> name=process-timer-start (read it BEFORE planning: it carries the confirmation you owe the user)",
+                because: "routing carries the read-first note process-delete-data does, so the confirmation is read before the plan");
+            routing.Should().Contain("Timer start (timerStart, setTimer; FULL contract only)",
+                because: "routing carries the guide's contract gate, as it does for the other blocks a released clio may not know");
+            card.Should().NotContain("timerStart",
+                because: "the timer start stays off the digest card; agents reach it through the create contract, the catalog and routing");
+            card.Should().NotContain(ItemId,
+                because: "the card's budget is unchanged by this element; ProcessDigestTests holds the budget itself");
+        }
+    }
+
+    [Test]
+    [Description("The guide states the floor sentence in the process-multi-start form, with no version placeholder in the article or its description.")]
+    public void Guide_ShouldStateTheFloor_WithoutAPlaceholder()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        Regex placeholder = new(@"<[A-Z][A-Z0-9-]*TBD>", RegexOptions.Compiled);
+
+        // Act
+        string raw = ProcessGuideSet.Read(repositoryRoot, ArticlePath);
+        string guide = Collapse(raw);
+        string description = source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == ItemId)
+            .GetProperty("description").GetString()!;
+        int scope = guide.IndexOf("Scope", StringComparison.Ordinal);
+        int gate = guide.IndexOf(FloorSentence, StringComparison.Ordinal);
+        int firstSection = guide.IndexOf("== ", StringComparison.Ordinal);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            gate.Should().BeGreaterThan(scope,
+                because: "the floor sentence follows the Scope paragraph, in the form process-multi-start uses");
+            gate.Should().BeLessThan(firstSection,
+                because: "a boundary that gates the whole article is met before anything else is read");
+            placeholder.IsMatch(raw).Should().BeFalse(
+                because: "a published body never carries an unresolved version boundary; merging publishes");
+            placeholder.IsMatch(description).Should().BeFalse(
+                because: "the manifest description is published too");
+            guide.Should().Contain("Always read the element back.",
+                because: "an older package drops what it does not know; describe is the only proof of what was saved");
+        }
+    }
+
+    [Test]
+    [Description("The confirm-before-save gate is worded on the trigger, shares the confirm-first wording of process-delete-data, lists every action it covers and what the user is told, and exempts only an edit that leaves a scheduled timer unchanged.")]
+    public void Guide_ShouldGateEverySaveThatSchedulesRuns()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+        string deleteData = ReadCollapsed(DeleteDataPath);
+        string[] coveredActions =
+        [
+            "a create with a `timerStart`",
+            "adding a `timerStart` to an existing process (next to the Simple start, or to a timer-only process)",
+            "the Simple -> Timer replace",
+            "a `setTimer`",
+            "`set-active-business-process-version` on a version that carries a timer (one added through `modify-business-process-as-new-version` fires only from then)",
+            "enabling a disabled process that carries a timer"
+        ];
+        string[] statedToTheUser =
+        [
+            "the schedule in words (a step's real cadence)",
+            "the zone and its source",
+            "the first run (computed as the notice would; it may be immediate, above)",
+            "that runs use the System operations user's rights",
+            "which data the process writes or deletes"
+        ];
+
+        // Act
+        string gateSection = Regex.Match(guide, @"== Confirm before a save that schedules runs ==(?<body>.+?)== ").Groups["body"].Value;
+        string[] missingActions = [.. coveredActions.Where(action => !gateSection.Contains(action, StringComparison.Ordinal))];
+        string[] missingStatements = [.. statedToTheUser.Where(item => !gateSection.Contains(item, StringComparison.Ordinal))];
+
+        // Assert
+        using (new AssertionScope())
+        {
+            gateSection.Should().NotBeEmpty(because: "anti-vacuity: the gate has its own section");
+            gateSection.Should().Contain("STOP AND CONFIRM FIRST.",
+                because: "the gate opens the way the other confirm-first rules of the process set do");
+            gateSection.Should().Contain(GateTrigger,
+                because: "the trigger covers an action nobody listed: what counts is a new or changed schedule landing in the enabled, active version");
+            gateSection.Should().Contain(ConfirmFirstWording,
+                because: "the gate is modelled on the confirm-first rule of process-delete-data, and the yes comes before the call");
+            deleteData.Should().Contain(ConfirmFirstWording,
+                because: "the wording this gate shares must still be the delete-data wording, or the two rules have drifted apart");
+            missingActions.Should().BeEmpty(
+                because: "each of these puts a new or changed schedule into the active version. Missing: " + string.Join(" | ", missingActions));
+            missingStatements.Should().BeEmpty(
+                because: "the user approves a schedule they can picture: when, in which zone, first when, with whose rights, on which data. Missing: "
+                    + string.Join(" | ", missingStatements));
+            gateSection.Should().Contain("Then read the post-save notice and pass it on.",
+                because: "the notice is the only place the saved schedule's next run, or the reason there is none, is reported");
+            gateSection.Should().Contain("An edit that leaves an already scheduled timer unchanged (a caption, an added script task) needs no schedule confirmation; other confirm gates, such as the one of `process-delete-data`, still apply.",
+                because: "the exemption is narrow and does not lift any other confirmation the edit owes");
+        }
+    }
+
+    [Test]
+    [Description("Replacing the Simple start is gated on a describe, a SysSubProcessInProcess caller query and asking the user about manual starts; adding a timer next to it is the default.")]
+    public void Guide_ShouldGateTheReplace_OnTheCallerCheck()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string section = Regex.Match(guide, @"== A timer on an existing process ==(?<body>.+?)== setTimer ==").Groups["body"].Value;
+
+        // Assert
+        using (new AssertionScope())
+        {
+            section.Should().NotBeEmpty(because: "anti-vacuity: the existing-process section is where the replace rule lives");
+            section.Should().Contain("By default ADD it: `addElement` a `timerStart` and `addFlow` from it to the first element, next to the existing Simple start",
+                because: "adding keeps every manual start and every caller working, so it is the default");
+            section.Should().Contain("REPLACE the Simple start (`removeElement` it, `addElement`, `addFlow`) only after a `describe-business-process mode=full`, the caller check below and the user's confirmation",
+                because: "a timer-only process loses every manual start and every caller, and the save does not say so");
+            section.Should().Contain("one `execute-esq` on `SysSubProcessInProcess` by the family root (`versionRootSchemaUId` from describe); any row is a caller",
+                because: "SysSubProcessInProcess is the table behind the process library's used-as-a-sub-process detail");
+            section.Should().Contain("rootSchemaName: \"SysSubProcessInProcess\"",
+                because: "the literal query is what the agent runs; a paraphrase is where the filter column goes wrong");
+            section.Should().Contain("columnPath: \"ParentSubProcessUId\"",
+                because: "the callee is matched by its family root in ParentSubProcessUId");
+            section.Should().Contain("is reported to the user, never taken as \"no callers\"",
+                because: "the read needs an admin operation, and a refused read is not an empty one");
+            section.Should().Contain("no tool can search for them, so ASK the user whether anything starts the process by hand",
+                because: "page buttons, classic pages, dashboards, integrations and run-process calls leave no index to query");
+            section.Should().Contain("is a partial check, never proof of absence",
+                because: "reading one app's pages cannot prove that nothing else starts the process");
+        }
+    }
+
+    [Test]
+    [Description("The guide states the run-time facts, the step semantics, the every-N-weeks refusal, the zone default chain and the read-back rules an agent cannot see from a green build.")]
+    public void Guide_ShouldStateWhatAGreenBuildDoesNotShow()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+        string[] clauses =
+        [
+            "It runs as the System operations user (the `SystemUser` system setting, Supervisor by default)",
+            "It receives NO process parameters: each one starts at its default value.",
+            "To test one, keep or add a Simple start next to it",
+            "Prefer ONE timer that reads the due records and handles each",
+            "The block builds nothing finer than every minute, and the platform sets no minimum interval and no cap on runs",
+            "(0..23, BOTH hours inclusive, default 0..23; it may wrap, 22..6)",
+            "A 5-field Unix cron is refused.",
+            "(`0 0 7 1 2/3 ? *`: every 3 months from February)",
+            "\"Every N\" is a cron step, not an interval",
+            "Every step above 1 gets a notice naming the real cadence",
+            "Every N WEEKS is not supported by the platform scheduler: `every` on `week` is refused",
+            "a `day` step of 7, 14, 21 or 28 and a `cron` whose day-of-month field is a step that is a multiple of 7 (`0 0 8 */14 * ? *`)",
+            "Do not build a substitute",
+            "A designer-built timer with such a day step is described as it is; a rebuild from that describe, and a `setTimer` that sends the schedule group, are refused; a `setTimer` without the schedule group keeps it.",
+            "the schedule must fire at least once before it",
+            "A `start`, `end` or `once` time in the zone's skipped spring-forward hour is refused",
+            "A timer that keeps a past `start` may run ONCE immediately when it is registered afresh",
+            "your profile's zone, else the `DefaultTimeZone` system setting, else refused",
+            "When the user did not name a zone, CONFIRM it: the clio login may be a technical user",
+            "A `setTimer` without `timeZone` keeps the stored zone",
+            "promise the user nothing from it, either way",
+            "The schedule group is REPLACED",
+            "From describe: leave out an unchanged stored past `start`.",
+            "`setElement` with a `timer` key (\"use setTimer\")",
+            "`staleTrigger` - the stored trigger differs from the timer or belongs to another version: re-save the active version",
+            "the edit IS saved. Fix the timer and re-save it with `setTimer`; do NOT retry the same edit.",
+            "neither built, described nor found by `setTimer`"
+        ];
+
+        // Act
+        string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "none of these is visible from a green build. Missing: " + string.Join(" | ", missing));
+    }
+
+    [Test]
+    [Description("No process article and no manifest description still claims that the timer start is read-only or cannot be built.")]
+    public void NoProcessArticleOrManifestDescription_ShouldClaimTimerStartIsUnbuildable()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+        using JsonDocument source = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        string catalog = ReadCollapsed(CatalogPath);
+        string details = ReadCollapsed(CatalogDetailsPath);
+        string modeling = ReadCollapsed(ModelingPath);
+        string connections = ReadCollapsed(ConnectionsDetailsPath);
+
+        // Act
+        string catalogDescription = Collapse(source.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("itemId").GetString() == "process-element-catalog")
+            .GetProperty("description").GetString()!);
+        string readOnlyInDescription = Regex.Match(catalogDescription, @"while (?<list>[^.]+?) remain read-only").Groups["list"].Value;
+        string notBuildable = Regex.Match(catalog, @"NOT yet buildable(?<list>.+?)== Building from a data-id").Groups["list"].Value;
+        string readOnlyInDetails = Regex.Match(details, @"`endEvent` builds Terminate today \(see N6 in `process-naming`\)\. (?<sentence>[^.]+?) are READ-ONLY here").Groups["sentence"].Value;
+        string cannotCreate = Regex.Match(modeling, @"Constructs the builder cannot create \((?<list>[^)]+)\)").Groups["list"].Value;
+        string notInSlice = Regex.Match(connections, @"are all in that slice now; (?<list>.+?) are not\.").Groups["list"].Value;
+        string[] stale = [.. ProcessGuideSet.Declared(repositoryRoot)
+            .Where(article => ReadCollapsed(article.SourcePath).Contains("timer/message", StringComparison.Ordinal))
+            .Select(article => article.ItemId)];
+
+        // Assert
+        using (new AssertionScope())
+        {
+            notBuildable.Should().NotBeEmpty(because: "anti-vacuity: the catalog lists what does not build");
+            notBuildable.Should().NotContain("timer", because: "the timer start is buildable now");
+            notBuildable.Should().Contain("message start", because: "the message start is still not buildable");
+            readOnlyInDetails.Should().NotBeEmpty(because: "anti-vacuity: the details catalog names what is read-only");
+            readOnlyInDetails.Should().NotContain("Timer start", because: "the read-only marker would now be a lie");
+            cannotCreate.Should().NotBeEmpty(because: "anti-vacuity: process-modeling lists what the builder cannot create");
+            cannotCreate.Should().NotContain("timer", because: "the builder creates a timer start now");
+            notInSlice.Should().NotBeEmpty(because: "anti-vacuity: the R1-R20 heading lists what is outside the buildable slice");
+            notInSlice.Should().NotContain("timer", because: "a validated timer start is buildable now");
+            readOnlyInDescription.Should().NotBeEmpty(because: "anti-vacuity: the description lists what remains read-only");
+            readOnlyInDescription.Should().NotContain("timer",
+                because: "a manifest description is what an MCP client shows an agent choosing a guide");
+            catalogDescription.Should().Contain("Timer start: timerStart, FULL contract only; owner process-timer-start",
+                because: "the description lists what builds today, with the guide's contract gate, and names the owner");
+            stale.Should().BeEmpty(
+                because: "\"timer/message\" is the shape every not-buildable list used before the timer start was buildable. Found in: "
+                    + string.Join(", ", stale));
+        }
+    }
+
+    [Test]
+    [Description("The guide stays inside its design target and the inline reply rule.")]
+    public void Guide_ShouldStayInsideItsSizeTargets()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        int responseCharacters = ProcessGuideResponseSizeTests.ResponseSize(repositoryRoot, ArticlePath);
+        int replyBytes = GuidanceInlineReplyBudgetTests.ReplyBytes(ProcessGuideSet.Read(repositoryRoot, ArticlePath));
+        TestContext.WriteLine($"{ItemId}: {responseCharacters:N0} response characters of {DesignTargetResponseCharacters:N0}, "
+            + $"{replyBytes:N0} reply bytes of {GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes:N0}");
+
+        // Assert
+        responseCharacters.Should().BeLessThanOrEqualTo(DesignTargetResponseCharacters,
+            because: "a larger addition should be reviewed, or split, rather than absorbed");
+        replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
+            because: "a reply over the inline rule is spilled to a file and read back in pieces");
+    }
+
+    private static string ReadCollapsed(string relativePath) =>
+        Collapse(ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), relativePath));
+
+    private static string Collapse(string text) => Regex.Replace(text, @"\s+", " ");
+}

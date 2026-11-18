@@ -95,10 +95,12 @@ User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialo
   that rule, and no guide here owns User dialog or Auto-generated page, so treat a branch off either the
   same way.
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
-  signal), `startEventTimer` Start timer (schedule/CRON), `startEventMessage` Start message, intermediate
+  signal), `startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:"timerStart"` with a `timer` block,
+  owned by `process-timer-start`), `startEventMessage` Start message, intermediate
   catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
   BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6 in `process-naming`).
-  Timer start, message start and the intermediate catch/throw events are READ-ONLY here.
+  Message start and the intermediate catch/throw events are READ-ONLY here; a timer start inside an event
+  sub-process is not handled at all.
 Gateways: `exclusiveGateway` (XOR, BUILDABLE), `parallelGateway` (AND, BUILDABLE),
   `inclusiveGateway` (OR, read-only), `eventBasedGateway` (read-only) -- see
   `process-branch-conditions`.

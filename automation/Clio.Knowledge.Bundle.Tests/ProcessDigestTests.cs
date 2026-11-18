@@ -113,7 +113,9 @@ public sealed class ProcessDigestTests
         ("process-sub-process-when", "D1 is the one exception, stated above: a requested change that is itself per-item."),
         ("process-sub-process-when", "An EXISTING process that repeats a fragment is left as it is"),
         ("process-sub-process-when", "EXISTING process: never propose restructuring one on your own, whatever its size."),
-        ("process-element-catalog", "Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`."),
+        // The Timer start element made `timerStart` buildable: the Events clause gained it, with its owner and the
+        // confirmation it needs. The card itself does not list it (it stays off the card, as `webService` does).
+        ("process-element-catalog", "Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule; `process-timer-start` owns its `timer` block and the confirmation it needs), `endEvent`."),
         ("process-element-catalog", "(aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,"),
         ("process-access-rights", "(`changeAccessRights` / `ChangeAdminRightsUserTask`)"),
         ("process-element-catalog", "Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE"),
@@ -137,7 +139,8 @@ public sealed class ProcessDigestTests
         ("process-element-catalog", "DESTRUCTIVE — count the matching records, name the object and what the filter selects, and get an explicit yes BEFORE you build it"),
         ("process-access-rights", "and every grantee with its operations and level, and get an explicit yes before building"),
         ("process-element-catalog", "UNSUPPORTED through `create-business-process`"),
-        ("process-element-catalog", "the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated page (REFUSED), timer/message start, intermediate events,"),
+        // The timer start left this list when it became buildable; the message start stays on it.
+        ("process-element-catalog", "the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated page (REFUSED), message start, intermediate events,"),
         ("process-element-catalog", "reading one COLUMN out of a read COLLECTION's items"),
         ("process-element-catalog", "NOT in a build descriptor: the \"Connected to\" links of an Activity a task creates."),
         ("process-element-catalog", "`useBackgroundMode` on any element that OFFERS it"),

@@ -67,6 +67,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-data-elements
   - SEVERAL record starts that run the same steps (one shared chain, one record Id) ->
     name=process-multi-start
+  - start a process ON A SCHEDULE (once, hourly, daily, weekly, monthly, cron) or change it: Timer start (timerStart,
+    setTimer; FULL contract only) -> name=process-timer-start (read it BEFORE planning: it carries the confirmation
+    you owe the user)
   - READ records from inside a process (one record, a collection, a count or an aggregate) ->
     name=process-read-data
   - add data (create records from a process, one or one per filtered selection) -> name=process-add-data

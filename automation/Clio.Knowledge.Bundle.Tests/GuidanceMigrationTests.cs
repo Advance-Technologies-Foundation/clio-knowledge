@@ -46,6 +46,7 @@ public sealed class GuidanceMigrationTests
         "process-send-email-attachments",
         "process-web-service",
         "process-send-chat-message",
+        "process-timer-start",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",
