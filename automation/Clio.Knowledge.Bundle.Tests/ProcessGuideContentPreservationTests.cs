@@ -203,10 +203,10 @@ public sealed class ProcessGuideContentPreservationTests
         ("process-element-catalog", "`timerStart` (schedule,", "the confirmation it needs",
             "the catalog says the element builds; without the pointer to its confirmation an agent builds a schedule "
             + "that runs unattended as the System operations user without asking anyone"),
-        ("process-element-catalog", "`timerStart` (schedule,", "only when the FULL contract names it",
+        ("process-element-catalog", "`timerStart` (schedule,", "only when the create contract names it",
             "the element builds only through a clio whose contract carries it; without the gate the catalog presents "
             + "it as always buildable to an agent whose clio is older than the library"),
-        ("process-element-catalog-details", "`startEventTimer` Start timer", "only when the FULL contract names it",
+        ("process-element-catalog-details", "`startEventTimer` Start timer", "only when the create contract names it",
             "the same contract gate on the details entry, as the webService entry carries it"),
         // Activation is owned by process-version-writes, and it is where a version carrying a timer becomes
         // the scheduled one. The agent that activates follows routing there, not to process-timer-start, so

@@ -7,10 +7,14 @@ owns the build recipe and the other edit ops; `process-version-writes` owns maki
 `process-sub-process` owns calling a process from another; `process-parameters` owns setting a parameter on a
 start's branch. A timer start inside an event sub-process is not handled by these tools: it is neither built,
 described nor found by `setTimer`.
-Gate: use `timerStart` and `setTimer` only when the FULL `create-business-process` contract (`get-tool-contract`
-with `tool-names: ["create-business-process"]`, `detail: "full"`) names `timerStart` - that clio refuses an older
-package up front. Otherwise this clio does not carry it: build no timer start, and tell the user that a clio update
-adds it. Always read the element back.
+Gate: use `timerStart` and `setTimer` only when the `create-business-process` contract (`get-tool-contract`
+with `tool-names: ["create-business-process"]`) names `timerStart` - that clio refuses an older package up front.
+The short reply names it in its SHAPE line, so read `detail: "full"` only when the short one does not. Otherwise
+this clio does not carry it: build no timer start, and tell the user that a clio update adds it.
+Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule,
+stored cron, zone, scheduler state, next fire) read from the saved process, so do not run a describe after it for
+that. Run `describe-business-process mode=full` only for what the summary does not carry (`start`, `end`,
+`repeatOnMisfire`), after an activation or an enable, and before a replace.
 
 == When to use it ==
 - A timer start runs the WHOLE process on a schedule, once or repeatedly: a nightly clean-up, a sync, a reminder

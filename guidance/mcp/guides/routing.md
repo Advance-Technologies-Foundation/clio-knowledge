@@ -41,6 +41,8 @@ precondition kept next to the instruction it guards — names that guide as the 
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=page-schema-translation (the `update-app-section` contract check: name=existing-app-maintenance); lookup values -> name=data-bindings (lookup value translations)
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
+- Creatio work ON A SCHEDULE or at a set time -> a timer-start process: name=process-digest, then
+  name=process-timer-start. NEVER your client's own cron or scheduler tool
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
@@ -67,7 +69,6 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-data-elements
   - SEVERAL record starts that run the same steps (one shared chain, one record Id) ->
     name=process-multi-start
-  - a process ON A SCHEDULE (timerStart, setTimer; FULL contract only) -> name=process-timer-start first
   - READ records from inside a process (one record, a collection, a count or an aggregate) ->
     name=process-read-data
   - add data (create records from a process, one or one per filtered selection) -> name=process-add-data

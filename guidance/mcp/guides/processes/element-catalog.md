@@ -29,7 +29,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule,
-  only when the FULL contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs),
+  only when the create contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs),
   `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,

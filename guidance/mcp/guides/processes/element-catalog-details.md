@@ -96,7 +96,7 @@ User actions: `activityUserTask` Perform task, `userQuestionUserTask` User dialo
   same way.
 Events: `startEvent` Simple start, `startEventSignal` Signal start (record add/modify/delete or custom
   signal), `startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:"timerStart"` with a `timer` block,
-  only when the FULL contract names it; owned by `process-timer-start`), `startEventMessage` Start message,
+  only when the create contract names it; owned by `process-timer-start`), `startEventMessage` Start message,
   intermediate catch/throw (`intermediateCatchEvent*`/`intermediateThrowEvent*`), `endEvent` End/Terminate — the
   BPMN catalog has both, but a `create-business-process` `endEvent` builds Terminate today (see N6 in `process-naming`).
   Message start and the intermediate catch/throw events are READ-ONLY here; a timer start inside an event

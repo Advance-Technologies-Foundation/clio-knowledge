@@ -27,7 +27,7 @@ public sealed class TimerStartGuidanceTests
     /// clio version is added here and in the article together once it is released; a placeholder never is.
     /// </summary>
     private const string FloorSentence =
-        "Gate: use `timerStart` and `setTimer` only when the FULL `create-business-process` contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`, `detail: \"full\"`) names `timerStart` - that clio refuses an older package up front. Otherwise this clio does not carry it: build no timer start, and tell the user that a clio update adds it.";
+        "Gate: use `timerStart` and `setTimer` only when the `create-business-process` contract (`get-tool-contract` with `tool-names: [\"create-business-process\"]`) names `timerStart` - that clio refuses an older package up front. The short reply names it in its SHAPE line, so read `detail: \"full\"` only when the short one does not. Otherwise this clio does not carry it: build no timer start, and tell the user that a clio update adds it.";
 
     /// <summary>
     /// The confirm-before-save gate, worded on the trigger rather than on a list of tools, so an action nobody listed
@@ -113,7 +113,7 @@ public sealed class TimerStartGuidanceTests
             resource.GetProperty("role").GetString().Should().Be("guidance",
                 because: "get-guidance serves only guidance resources");
             resource.GetProperty("description").GetString().Should().StartWith(
-                "Only when the FULL create-business-process contract names timerStart.",
+                "Only when the create-business-process contract names timerStart (the short reply names it).",
                 because: "a boundary that gates the whole article comes first, so the get-guidance catalog shows it before the article is opened");
             resource.TryGetProperty("requiredFeatures", out _).Should().BeFalse(
                 because: "the clio side is gated by the create contract, not by a feature; a gated guide would be hidden while the tool accepts the block");
@@ -126,20 +126,23 @@ public sealed class TimerStartGuidanceTests
             raw.Should().NotContain(ProcessGuideSet.SetBanner,
                 because: "the guide is loaded on demand; a banner obliges process-modeling to index it, and that article has no room left under the inline rule");
 
-            catalog.Should().Contain("`timerStart` (schedule, only when the FULL contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs)",
+            catalog.Should().Contain("`timerStart` (schedule, only when the create contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs)",
                 because: "the catalog owns what builds today, and the element it lists must carry its contract gate, its owner and the confirmation it needs");
             catalog.Should().Contain("`startEventTimer`->`timerStart`",
                 because: "the data-id map turns the catalog's Start timer into the build type");
             catalog.Should().Contain("filter, signal, timer or connections with setFilter / setSignal / setTimer / setConnections, not in `setElement`",
                 because: "a timer is written with setTimer; setElement refuses a timer key");
-            details.Should().Contain("`startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:\"timerStart\"` with a `timer` block, only when the FULL contract names it; owned by `process-timer-start`)",
+            details.Should().Contain("`startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:\"timerStart\"` with a `timer` block, only when the create contract names it; owned by `process-timer-start`)",
                 because: "the element entry names the build type, its contract gate and the owner of its block");
             details.Should().Contain("a timer start inside an event sub-process is not handled at all",
                 because: "only top-level timer starts are built and described; a nested one is out of reach of every tool");
             modeling.Should().Contain("setTimer (`process-timer-start`)",
                 because: "process-modeling lists every edit op and names the owner of each that carries its own rules");
-            routing.Should().Contain("- a process ON A SCHEDULE (timerStart, setTimer; FULL contract only) -> name=process-timer-start first",
-                because: "routing carries the guide's contract gate and a read-first note, so the confirmation is read before the plan");
+            routing.Should().Contain("- Creatio work ON A SCHEDULE or at a set time -> a timer-start process: name=process-digest, then name=process-timer-start. NEVER your client's own cron or scheduler tool",
+                because: "a measured agent with the routing guide already read answered 'every 5 minutes add a note' with its own client's cron tool, which runs nothing in Creatio");
+            routing.IndexOf("Creatio work ON A SCHEDULE", StringComparison.Ordinal).Should().BeLessThan(
+                routing.IndexOf("- Business processes (BPMN)", StringComparison.Ordinal),
+                because: "the scheduling row is a top-level domain row met before the process section, since the request does not say 'process'");
             versionWrites.Should().Contain("Activating a version that carries a timer, a rollback included, or enabling a disabled process that has one, owes the confirmation of `process-timer-start` first.",
                 because: "an agent activating a version follows routing to process-version-writes, so the schedule confirmation the timer article postpones to activation must be pointed at from there");
             card.Should().NotContain("timerStart",
@@ -180,8 +183,10 @@ public sealed class TimerStartGuidanceTests
                 because: "a published body never carries an unresolved version boundary; merging publishes");
             placeholder.IsMatch(description).Should().BeFalse(
                 because: "the manifest description is published too");
-            guide.Should().Contain("Always read the element back.",
-                because: "an older package drops what it does not know; describe is the only proof of what was saved");
+            guide.Should().Contain("Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule, stored cron, zone, scheduler state, next fire) read from the saved process, so do not run a describe after it for that.",
+                because: "the write's summary is a describe of the saved process, so a describe right after it only repeats the read");
+            guide.Should().Contain("Run `describe-business-process mode=full` only for what the summary does not carry (`start`, `end`, `repeatOnMisfire`), after an activation or an enable, and before a replace.",
+                because: "the summary omits the validity window and misfire, and an activation, an enable and a replace return no timer summary of their own");
         }
     }
 
@@ -390,7 +395,7 @@ public sealed class TimerStartGuidanceTests
             readOnlyInDescription.Should().NotBeEmpty(because: "anti-vacuity: the description lists what remains read-only");
             readOnlyInDescription.Should().NotContainEquivalentOf("timer",
                 because: "a manifest description is what an MCP client shows an agent choosing a guide");
-            catalogDescription.Should().Contain("Timer start: timerStart, FULL contract only; owner process-timer-start",
+            catalogDescription.Should().Contain("Timer start: timerStart, contract-gated; owner process-timer-start",
                 because: "the description lists what builds today, with the guide's contract gate, and names the owner");
             stale.Should().BeEmpty(
                 because: "\"timer/message\" is the shape every not-buildable list used before the timer start was buildable. Found in: "
