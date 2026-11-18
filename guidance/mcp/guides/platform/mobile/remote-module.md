@@ -14,17 +14,15 @@ Scope
   that rule; this guide is where the code goes instead.
 
 What a module can and cannot do
-- A module registers request handlers and virtual data sources and calls the SDK services (dialogs,
-  masks, system settings, geolocation, barcode and NFC scanning, the data model).
-- UNSUPPORTED in `@creatio/mobile-common` 0.834.0: registering a custom validator, a custom converter
-  or a UI component, and an authenticated HTTP call. Do not invent an API for them. Offer instead: an
-  entity or page business rule; a built-in converter; a handler on `crt.SaveRecordRequest` that shows a
-  dialog and does not call the next handler; an attribute computed by a handler; a business process
-  started with `crt.RunBusinessProcessRequest`.
-- The SDK a module runs against is the one inside the installed Mobile app, not the npm version the
-  project compiled against. A feature newer than the user's app is absent at run time. The package's
-  CHANGELOG.md lists the version that introduced each feature; virtual data sources and
-  `crt.RunBusinessProcessRequest` arrive with 0.834.0.
+- A module registers request handlers and virtual data sources and calls the SDK services.
+- The npm package `@creatio/mobile-common` (https://www.npmjs.com/package/@creatio/mobile-common) is
+  the reference for what a module can do. Install its newest release and read the package itself: its
+  type declarations (`index.d.ts`) list the decorators, base classes, requests and services a module can
+  use, and its `CHANGELOG.md` says which release introduced each of them. What the declarations do not
+  export does not exist: do not invent an API for it; solve the task with what they export or with a
+  page or entity business rule.
+- The SDK a module runs against is the one inside the installed Mobile app, not the npm release the
+  project compiled against. A feature newer than the user's app is absent at run time.
 
 The script contract
 - ONE self-running script named `main.js`, built as an IIFE. The SDK import MUST be an external mapped
@@ -141,7 +139,8 @@ Evidence
 - Placement under `Files/src/mobile/<ModuleName>/`, the `EnableMobileSDK` feature, `scopes`, the
   `clicked` request binding and synchronization as the delivery step: Creatio Academy, "Custom request
   handler implemented using remote module in Creatio Mobile" (8.x), read 2026-11-16.
-- API surface and its absences: `index.d.ts` and `CHANGELOG.md` of `@creatio/mobile-common` 0.834.0.
+- The package as the API reference: the `@creatio/mobile-common` npm package holds no runtime code,
+  only type declarations (`index.d.ts`), a README and a `CHANGELOG.md` with one section per release.
 - Folder name as module name, evaluation of every script in the folder, the `crtSdk` global and the
   `crt.VirtualDataSource` configuration keys: Creatio Mobile app source read at commit `fde23346cf`
   (2026-11-16).
