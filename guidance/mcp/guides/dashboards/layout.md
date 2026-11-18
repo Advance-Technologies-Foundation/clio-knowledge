@@ -14,26 +14,25 @@ color or a metric icon. This guide does NOT own the rest of a widget's runtime p
 `get-component-info`. For page structure and containers read `page-modification`; filtering a
 dashboard's widgets by its page data (`DashboardDS`) is in `dashboard-design`.
 
-Evidence: the sizes below were read with `get-page` from the 8 stock analytics dashboards and 4 stock
-home pages of a Sales/Service Enterprise environment on 2026-10-15, their 76 metric tiles' text settings
-and titles on 2026-10-22 (platform version not read). The home-page widths were chosen from runtime
-screenshots on 2026-10-22. The reference is the Accounts analytics dashboard
-(`AccountsAnalyticsDashboard`).
+Evidence: the sizes below were read with `get-page` from the 9 stock analytics dashboards and 4 stock
+home pages of a Sales/Service Enterprise environment on 2026-10-15 and their 76 metric tiles' text
+settings on 2026-10-22, and re-read unchanged on Creatio 10.3.1163.0 on 2026-11-18. The home-page
+widths were chosen from runtime screenshots on 2026-10-22. The reference is the Accounts analytics
+dashboard (`AccountsAnalyticsDashboard`).
 
 ## Core rules (in priority order)
 
 Hard rules unless the user explicitly overrides one.
 
-1. PLACE: metric tiles form a METRIC BLOCK at the top, either a band across the page or a block of
-   columns with a tall widget beside it. Charts go below or beside the block, never inside it; a metric
-   never goes below the charts. On an existing page follow "Adding to an existing page". A surface that
-   covers several subjects is split into LABELED sections (a header and spacing, never card color), each
-   its own metric block and chart row.
+1. PLACE: metric tiles form one METRIC BLOCK at the top, made of METRIC ROWS (a metric row is one
+   horizontal row of tiles): rows across the page, or rows stacked in a few columns with a tall widget
+   beside them. Charts go below or beside the block, never inside it; a metric never goes below the
+   charts. On an existing page follow "Adding to an existing page". A surface that covers several
+   subjects is split into LABELED sections (a header and spacing, never card color), each its own
+   metric block and chart rows.
 2. SIZE: read the page grid first; a metric tile takes the size and text size of its SURFACE ("Metric
-   tile size"). On a dashboard a tile is never stretched to fill a row. On a home page a metric row
-   with nothing beside it and every chart row fill 12 columns per "Home page widths", except a single
-   metric (`colSpan` 3-4) and a metric block beside a chart (`colSpan` 3, or 2 dense). Charts are sized
-   by type ("Widget catalog").
+   tile size"), and new rows take the widths of its surface ("Row widths"). Charts are sized by type
+   ("Widget catalog").
 3. STYLE: every widget is a plain-white card ("Card theme") and takes a color by MEANING; every metric
    tile carries an icon chosen by meaning (both per `widget-color-and-icon`) and a title and text per
    `indicator-widget`.
@@ -45,26 +44,67 @@ merged `bundle.json`). Both surfaces have a 12-column grid and an 8px gap, but d
 
 | Surface | `Main` rows | Metric `colSpan` | Metric `rowSpan` |
 |---|---|---|---|
-| Dashboard (`BaseDashboardTemplate`) | `28px` | 3, or 2 in a dense band | 3 |
-| Home page (`BaseHomePage`) | `64px` | a row fills 12 per "Home page widths"; a single metric 3-4; beside a chart 3, or 2 dense | 2 |
+| Dashboard (`BaseDashboardTemplate`) | `28px` | 3, or 2 in a dense metric row | 3 |
+| Home page (`BaseHomePage`) | `64px` | per "Row widths" | 2 |
 
 Height in px = `rowSpan` x row height + (`rowSpan` - 1) x gap. The same `rowSpan` 3 is 100px on a
 dashboard and 208px on a home page, so a `rowSpan` copied from one surface to the other renders a
 bloated or squashed tile. For any other `rows` value copy the sibling tiles' size; with none, pick the
 `rowSpan` whose height is closest to the stock 100-136px.
 
-- DASHBOARD WIDTH: NEVER derive a tile width from 12 divided by the tile count, and never widen a tile
-  to fill a row: a dashboard tile is at most `colSpan` 4. On a dashboard two tiles are 3 + 3, not 6 + 6.
-- Dense band, `colSpan` 2: on a dashboard 5 or 6 tiles across (more go on a second tile row) or a block
-  two tiles wide in 4 columns; on a home page only that 2-wide block beside a chart.
-- On a dashboard the 12-column rule applies to the FILLED AREA, not to each row. When the tiles of a row
-  do not reach 12 columns, put a tall widget beside the block, or leave the rest of the row empty.
-- BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total, so both end on
-  the same row.
-
 TEXT SIZE: `text.fontSizeMode` "medium" (the designer's size M) on a dashboard, "large" (size L) on a
 home page. On an existing page copy the sibling tiles' text settings instead ("Adding to an existing
 page"). The title and `text.template` follow "Metric title and text" of `indicator-widget`.
+
+## Row widths
+
+On both surfaces a widget beside a stack has a `rowSpan` equal to the stack's total (BOTTOM
+ALIGNMENT), so both end on the same row.
+
+### Dashboard
+
+- NEVER derive a tile width from 12 divided by the tile count, and never widen a tile to fill a row: a
+  tile is at most `colSpan` 4. Two tiles are 3 + 3, not 6 + 6.
+- A dense metric row has tiles of `colSpan` 2: 5 or 6 tiles across (more go on a second metric row), or
+  a stack two tiles wide in 4 columns.
+- The 12-column rule applies to the FILLED AREA, not to each row. When a metric row does not reach 12
+  columns, put a tall widget beside the block, or leave the rest of the row empty.
+
+### Home page
+
+A home page fills its width. These widths lay out new rows only ("Adding to an existing page").
+
+- METRIC ROW: with nothing beside it, a metric row fills all 12 columns with equal tiles: 2 -> 6 + 6,
+  3 -> 4 + 4 + 4, 4 -> 3 + 3 + 3 + 3, 5 -> 4 + 4 + 4 then 6 + 6, 6 -> 2 each. 7 or more: metric rows of
+  at most 6 tiles, as even as possible, each with 2, 3, 4 or 6 tiles so it fills 12: 7 -> a row of 4
+  tiles (3 columns each) then a row of 3 (4 each); 8 -> two rows of 4. The metric `rowSpan` stays 2.
+- EXCEPTIONS: a single metric stays `colSpan` 3-4, never stretched to 12, or sits beside a chart. A
+  metric block with a chart beside it uses `colSpan` 3, or 2 as a stack two tiles wide in 4 columns.
+- CHARTS: one chart takes 12 columns. Ordinary charts (bar, line/spline, area) go at most 2 per row
+  (6 + 6); an odd last one stretches to 12, preferably the one with the most data points (a trend or
+  timeline). Compact charts (doughnut/pie, a bar with few short bars) may go 3 per row (4 + 4 + 4), the
+  remainder split evenly (6 + 6 or 12); 4 compact charts are 6 + 6, 6 + 6. Never 4 or more charts in a
+  row. Charts in one row share the same `rowSpan`. A mixed row such as doughnut 4 + wide chart 8 is fine.
+  Chart heights and floors do not change ("Widget catalog").
+
+## New page layout
+
+Every native analytics surface has the same top-down shape: a metric block, then chart rows.
+
+```
+METRIC ROW   [tile 3][tile 3][tile 3][tile 3]          (dashboard: 4 tiles; or 6 tiles at 2 columns)
+CHART ROW    [ chart 4 ][ chart 4 ][ chart 4 ]
+CHART ROW    [   chart 6   ][   chart 6   ]
+WIDE TREND   [          line / timeline 12          ]
+```
+
+- A chart row's widths sum to 12; mix widths only so they still do. Doughnuts come in threes at 4
+  columns. Each surface's widths are in "Row widths".
+- Wide trends go last, full width when they have many time points.
+- Patterns from the product: a 6-tile metric row then [chart 4][chart 8] rows (a small breakdown
+  beside a wide trend); a metric block in columns 1-4 or 1-6 beside a focal doughnut (the reference
+  below); a 6-tile metric row then [bar 6][bar 6] then three doughnuts (by service, by category, by
+  channel).
 
 The reference, a metric block with a doughnut beside it (dashboard grid):
 
@@ -79,35 +119,10 @@ The reference, a metric block with a doughnut beside it (dashboard grid):
 
 The doughnut's `rowSpan` 12 = 3 (tiles) + 9 (bar under them), so it ends on the same row as the bar.
 
-## Home page widths
-
-A home page fills its width. Dashboards keep the widths above. These widths lay out new rows; on an
-existing page never resize the widgets already there: follow "Adding to an existing page".
-
-- METRIC ROW: with nothing beside it, a home-page metric row fills all 12 columns with equal tiles:
-  2 -> 6 + 6, 3 -> 4 + 4 + 4, 4 -> 3 + 3 + 3 + 3, 5 -> 4 + 4 + 4 then 6 + 6, 6 -> 2 each. 7 or more:
-  rows of at most 6 tiles, as even as possible, each row 2, 3, 4 or 6 tiles so it fills 12
-  (7 -> 4 + 3, 8 -> 4 + 4). A single metric stays `colSpan` 3-4, never stretched to 12, or sits beside
-  a chart. A block with a chart beside it uses `colSpan` 3, or 2 in a dense band. The metric `rowSpan`
-  stays 2.
-- CHARTS: one chart takes 12 columns. Ordinary charts (bar, line/spline, area) go at most 2 per row
-  (6 + 6); an odd last one stretches to 12, preferably the one with the most data points (a trend or
-  timeline). Compact charts (doughnut/pie, a bar with few short bars) may go 3 per row (4 + 4 + 4), the
-  remainder split evenly (6 + 6 or 12); 4 compact charts are 6 + 6, 6 + 6. Never 4 or more charts in a
-  row. Charts in one row share the same `rowSpan`. A mixed row such as doughnut 4 + wide chart 8 is fine.
-  Chart heights and floors do not change ("Widget catalog").
-
-## Card theme
-
-Every widget on a dashboard AND on a home page uses the plain-white card, `theme` "without-fill", like
-the base product: a customization should not stand out. On a home page this OVERRIDES the
-`crt.IndicatorWidget` component documentation, which says `theme` "full-fill" for home pages: follow
-this guide. Use a colored card only when the user explicitly asks for one, and never in a banned color.
-
 ## Adding to an existing page
 
-The same steps hold on a dashboard and on a home page. Never resize an existing sibling tile to make
-room, even on a home page whose metric row fills 12 columns.
+The same steps hold on a dashboard and on a home page. NEVER resize, restyle, or move an existing
+widget beyond what step 4 requires, even on a home page whose metric row fills 12 columns.
 
 1. Read the page with `get-page`: the `Main` rows and every widget's `layoutConfig`, `theme`, and color.
 2. Copy the SIZE and TEXT settings of the sibling metric tiles (`colSpan`, `rowSpan`,
@@ -116,15 +131,14 @@ room, even on a home page whose metric row fills 12 columns.
    color by meaning per `widget-color-and-icon`, even when its siblings are full-fill or use a banned
    color. Its title and `text.template` follow "Metric title and text" of `indicator-widget`, whatever
    the siblings carry.
-3. Put the tile in a free slot of the metric block: the next free columns of the block's rows.
-4. When the block is full, add a new tile row directly UNDER the block, in the block's columns:
+3. Put the tile in a free slot of the metric block: the next free columns of the block's metric rows.
+4. When the block is full, add a new metric row directly UNDER the block, in the block's columns:
    - move every widget that starts on or below that row down by the tile's `rowSpan`, in every column,
      so nothing below overlaps;
    - extend by the same `rowSpan` a side widget whose rows exactly match the block, or the block and
      the widgets under it (it starts on the block's first row and ends on the same row as that stack),
      so the bottoms stay aligned. A side widget that does not match keeps its size.
-5. NEVER append the tile at the bottom of the page or among the charts, and never restyle, resize, or
-   move an existing widget beyond step 4.
+5. NEVER append the tile at the bottom of the page or among the charts.
 
 Worked example: "Add a metric with the number of closed cases to the Case Intelligence dashboard".
 Before: 8 metric tiles 2x3 fill columns 1-4, rows 1-12 (at rows 1, 4, 7, 10 in columns 1 and 3); a
@@ -139,23 +153,13 @@ The block is full, so:
 - the widgets on row 13 move to row 16 and those on row 23 to row 26;
 - a second new tile takes the free slot `{ "column": 3, "row": 13, "colSpan": 2, "rowSpan": 3 }`.
 
-## New page layout
+## Card theme
 
-Every native analytics surface has the same top-down shape: a metric block, then chart rows.
-
-```
-METRIC BAND  [tile 3][tile 3][tile 3][tile 3]          (4 tiles; or 6 tiles at 2 columns)
-CHART ROW    [ chart 4 ][ chart 4 ][ chart 4 ]
-CHART ROW    [   chart 6   ][   chart 6   ]
-WIDE TREND   [          line / timeline 12          ]
-```
-
-- A chart row's widths sum to 12; mix widths only so they still do. Doughnuts come in threes at 4 columns.
-  On a home page the widths follow "Home page widths".
-- Wide trends go last, full width when they have many time points.
-- Patterns from the product: a 6-tile strip then [chart 4][chart 8] rows (a small breakdown beside a wide
-  trend); a metric block in columns 1-4 or 1-6 beside a focal doughnut ("Metric tile size"); a 6-tile
-  strip then [bar 6][bar 6] then three doughnuts (by service, by category, by channel).
+Every widget on a dashboard AND on a home page uses the plain-white card, `theme` "without-fill". On a
+home page this differs from the stock home pages on purpose: they use filled cards, and new widgets do
+not copy them. It OVERRIDES the `crt.IndicatorWidget` component documentation, which says `theme`
+"full-fill" for home pages: follow this guide. Use a colored card only when the user explicitly asks
+for one, and never in a banned color.
 
 ## Concept -> widget map
 
@@ -195,18 +199,17 @@ small to read. Give a gauge `rowSpan` 6, floor 5.
 
 ## Finish checklist
 
-- `Main` rows read; every metric tile has its surface size. On a dashboard it is at most 4 columns wide
-  and not stretched to fill a row. On a home page a new metric row with nothing beside it and every new
-  chart row fill 12 columns per "Home page widths", except a single metric (3-4 columns) and a block
-  beside a chart (3, or 2 dense); existing tiles keep their size.
-- Metric tiles form one block at the top (or under it on an existing page), never among the charts or
-  appended at the bottom.
+- `Main` rows read; every metric tile has its surface size, and every new metric row and chart row
+  follows its surface's "Row widths".
+- Metric tiles form one block at the top, never among the charts or appended at the bottom; on an
+  existing page the tile was placed per "Adding to an existing page".
 - A widget beside a stack ends on the same row as the stack; every chart row sums to 12 columns.
 - Every widget is "without-fill" (home pages too); its color and every metric icon pass the checklist
   of `widget-color-and-icon`.
 - Every metric tile has its surface's `text.fontSizeMode` (on an existing page its siblings'); its
   title and `text.template` pass "Metric title and text" of `indicator-widget`.
-- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); each gauge is 6.
+- Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); each gauge is 6
+  (floor 5).
 - Multi-topic surfaces are split into labeled sections.
 
 For a List widget's binding and clone/repair contract, MUST read `list-widget` and fetch
