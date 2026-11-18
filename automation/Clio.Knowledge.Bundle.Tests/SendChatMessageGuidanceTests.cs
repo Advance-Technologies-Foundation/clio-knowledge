@@ -152,7 +152,7 @@ public sealed class SendChatMessageGuidanceTests
             "ONE contact; an array is refused. `value` is a contact id or its `[#Lookup…#]` macro, never a name",
             "A fixed contact LAST: advise against it and take it only when the user insists.",
             "REFUSED, naming it: an unknown name or id, another type (an email template), no type, and an ambiguous name (pass the id).",
-            "When you cannot tell which fits, ASK the user to name the template, or offer a custom message instead; never guess",
+            "Use one only when the user names it exactly, or names none and only one chat template exists (say which). Otherwise ASK which one, or offer custom text, and build or save NOTHING until answered; never pick the closest name.",
             "No system setting selects the template. The template's language is chosen at run time: the contact's language, then the channel's, then the `DefaultMessageLanguage` setting, then the default language.",
             "Template macros resolve against the CREATED CHAT, not the process's record:",
             "PROVIDER templates (WhatsApp approved templates) are not supported by this tool yet",
@@ -168,6 +168,7 @@ public sealed class SendChatMessageGuidanceTests
             "Lookup settings on the ROOT Channel object (schema UId `a26e0c98-...`; odata-read cannot filter a GUID, and `list-sys-settings` takes no filter):",
             "clio-run { command: \"execute-esq\", args: { environment-name: \"<env>\", query: { rootSchemaName: \"SysSettings\", columns: { items: { Code: { expression: { expressionType: 0, columnPath: \"Code\" } }, Name: { expression: { expressionType: 0, columnPath: \"Name\" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: \"ReferenceSchemaUId\" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: \"a26e0c98-9a52-4e80-9a04-75221742fed7\" } } } } } } } }",
             "DISCOVER first (the reads above). When several channels could fit, ASK which one; never guess.",
+            "A Lookup setting's value is a record id: read it with `get-sys-setting` (`code`); its TextValue is always empty; only an empty or all-zero id means unset.",
             "- a message to employees: `process-send-email`; a bot broadcast with no contact (a bot API): `process-web-service`;",
             "With `ignoreErrors` true a failed send ends green: return `SendStatus` and `SendStatusDetails` in output parameters (`result-parameters`) before saying \"sent\", or keep `ignoreErrors` false."
         ];
@@ -193,6 +194,7 @@ public sealed class SendChatMessageGuidanceTests
             "the parameter reference form is owned by `process-formulas`",
             "Line breaks in a constant are kept, with a notice: the designer's message field is one line",
             "`ignoreErrors` omitted on `create-business-process` and `addElement` is FALSE: a failed send STOPS the process, and the element log carries the error.",
+            "Do not ask: on a new element send `ignoreErrors: false` unless the request talks about failures or going on after one, and state that default; on `setElement` omit it unless asked.",
             "`SendStatus` is `\"Sent\"` or `\"Error\"`; `SendStatusDetails` is empty on success, else the error text.",
             "It also swallows INPUT errors",
             "`\"Sent\"` is \"handed to the connector\", NOT delivered: a provider rejection after that (a Telegram user who blocked the bot) still reads `\"Sent\"`. Say \"sent\", never \"delivered\".",
@@ -205,6 +207,7 @@ public sealed class SendChatMessageGuidanceTests
             "A `Channel` row alone is not a working channel: it needs its messenger settings",
             "the recipient is taken from the contact's PRIMARY \"Mobile phone\" communication (not the `MobilePhone` column)",
             "WhatsApp and Facebook Messenger: the provider's 24-hour window.",
+            "With custom text or a chat template there, TELL the user: it reaches the contact only within 24 hours of their last message; after that, only a provider template picked in the designer.",
             "Recognise the class; never key on the exact text, which can change between builds:",
             "`Channel with Id=<id> is not active.`",
             "On current builds a failed send leaves no chat (measured on 10.2.1122); older OmnichannelMessaging builds may leave an empty Completed chat."

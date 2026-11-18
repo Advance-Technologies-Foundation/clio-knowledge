@@ -9,17 +9,15 @@ Needs CrtProcessBuilder 1.6.6.186 or later on the environment. The default creat
 
 == When to use it, and when not ==
 The element sends ONE message to ONE contact through a Creatio chat channel (Telegram, WhatsApp, Facebook Messenger,
-SMS and the like): a case update, a reminder. It creates a Completed chat holding the
-message, so it shows in the contact's chat history.
+SMS and the like). It creates a Completed chat holding the message, shown in the contact's chat history.
 Not this element:
 - a message to employees: `process-send-email`; a bot broadcast with no contact (a bot API): `process-web-service`;
 - a bulk send - a marketing broadcast to an audience: that is a campaign, not this element. A per-record
   notification is this element (a reminder per appointment: a multi-instance sub-process over the records,
   `process-sub-process`), and each send still needs the identity and the 24-hour window;
-- a contact who never wrote on the channel: the recipient needs an identity there (Twilio SMS aside);
 - "send, then wait for the answer": the chat is created Completed, and a reply opens a NEW chat; model no wait;
 - a raw phone number or messenger id (`to` is a Contact); attachments (text only);
-- a channel of a custom provider, or Web Chat: these cannot start a chat from a process, so the send fails.
+- a channel of a custom provider, or Web Chat: these cannot start a chat from a process.
 SEND NOW ("send this to <contact> now"): clio sends only through a process; say so in one line. Do the discovery
 first, then ask ONE question: build a reusable process whose `to` is a Lookup (Contact) input parameter and run it
 once for this contact (`run-process` with `parameters`). The process is the deliverable, not scratch to delete. Ask
@@ -58,13 +56,14 @@ clio-run { command: "odata-read", args: { environment-name: "<env>", <one line b
 Lookup settings on the ROOT Channel object (schema UId `a26e0c98-...`; odata-read cannot filter a GUID, and
 `list-sys-settings` takes no filter):
 clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { rootSchemaName: "SysSettings", columns: { items: { Code: { expression: { expressionType: 0, columnPath: "Code" } }, Name: { expression: { expressionType: 0, columnPath: "Name" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ReferenceSchemaUId" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: "a26e0c98-9a52-4e80-9a04-75221742fed7" } } } } } } } }
+A Lookup setting's value is a record id: read it with `get-sys-setting` (`code`); its TextValue is always empty;
+only an empty or all-zero id means unset.
 
 == From: which channel ==
 DISCOVER first (the reads above). When several channels could fit, ASK which one; never guess. Rank the sources
 and say which rung you took and why:
 1. Prefer a Lookup SYSTEM SETTING that references the ROOT Channel object: an `expression` `[#SysSettings.<Code>#]`.
-   An administrator can then switch channels in one place. It is stored in the designer's
-   typed form `[#SysSettings.<Code><Guid>#]` (`<Guid>` is literal text, the value type); describe echoes that. The build checks the setting:
+   It is stored in the designer's typed form `[#SysSettings.<Code><Guid>#]` (`<Guid>` is literal text, the value type); describe echoes that. The build checks the setting:
    no setting with that code, not a Lookup, or a Lookup of another object: REFUSED, naming the code. A Lookup of a
    replacing Channel schema: built with a notice (the designer will not list it; recreate it on the root object).
    No value yet: built with a notice; the run fails until it has one.
@@ -86,15 +85,15 @@ and say which rung you took and why:
 TEMPLATE (`messageSource` `template`):
 - `template` names a CHAT template by name, record id or the `[#Lookup…#]` macro describe echoes. REFUSED, naming it: an unknown name or id, another type (an email template),
   no type, and an ambiguous name (pass the id).
-- CHOOSE OR ASK: read the chat templates. When one plainly fits, use it and say which. When you cannot tell which
-  fits, ASK the user to name the template, or offer a custom message instead; never guess: the stored value is an id,
-  and a wrong pick is invisible afterwards.
+- CHOOSE OR ASK: read the chat templates. Use one only when the user names it exactly, or names none and only one
+  chat template exists (say which). Otherwise ASK which one, or offer custom text, and build or save NOTHING until
+  answered; never pick the closest name.
 - No system setting selects the template. The template's language is chosen at run time: the contact's language,
   then the channel's, then the `DefaultMessageLanguage` setting, then the default language.
 - Template macros resolve against the CREATED CHAT, not the process's record: they reach its contact and channel, and
   a case or lead only when `columnValues` links the chat to it.
 - PROVIDER templates (WhatsApp approved templates) are not supported by this tool yet: a provider template is
-  refused. To reach WhatsApp outside the 24-hour window, build the process here and let the user pick the provider template in the Process Designer.
+  refused; build the process here and let the user pick the provider template in the Process Designer.
 - The card's message preview stays empty for a template set here; the run does not use it.
 CUSTOM (`messageSource` `custom`):
 - `message` is plain text, sent as written; HTML is stripped. Nothing in a constant is resolved: a `[#...#]` macro
@@ -105,15 +104,14 @@ CUSTOM (`messageSource` `custom`):
   `message`, then the `addMapping`, in that order in one request.
 - An empty `message` is refused. Line breaks in a constant are kept, with a notice: the designer's message field is
   one line, and editing there loses the breaks. A character XML cannot store (a control
-  character other than tab, LF and CR, U+FFFE, U+FFFF, a lone surrogate) is refused, naming its code point.
-- The text is stored in the current culture; describe reads it in the profile's culture.
+  character other than tab, LF or CR, U+FFFE, U+FFFF, or a lone surrogate) is refused, naming its code point.
 
 == Ignore errors and the outputs ==
 - `ignoreErrors` omitted on `create-business-process` and `addElement` is FALSE: a failed send STOPS the process,
-  and the element log carries the error. Ask the user whether a failed send should stop the process, and send
-  `ignoreErrors` explicitly either way.
+  and the element log carries the error. Do not ask: on a new element send `ignoreErrors: false` unless the
+  request talks about failures or going on after one, and state that default; on `setElement` omit it unless asked.
 - With `ignoreErrors: true` the process goes on. `SendStatus` is `"Sent"` or `"Error"`; `SendStatusDetails` is empty
-  on success, else the error text. Map them downstream and branch on `SendStatus` (`process-branch-conditions`).
+  on success, else the error text. Map them downstream and branch on `SendStatus`.
 - It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel). `"Sent"` is
   "handed to the connector", NOT delivered: a provider rejection after that (a Telegram user who blocked the bot)
   still reads `"Sent"`. Say "sent", never "delivered".
@@ -121,32 +119,33 @@ CUSTOM (`messageSource` `custom`):
 
 == Column values on the chat ==
 `columnValues` sets columns of the created chat (object OmniChat) in the Modify data entry shape (`column` + one
-source; `process-data-elements`). Link the chat to its record (`Case`, `Lead`, where the column exists); template
+source; `process-data-elements`). Link the chat to its record (Case, Lead, where the column exists); template
 macros can then read that record.
 - `value` is for TEXT columns only: a record id there is refused, and the refusal quotes the macro to send.
   A Lookup column (`Case`, `Lead`, `Queue`) takes `expression: "[#Lookup.<object name or schema UId>.<record Id>#]"`,
   as in `[#Lookup.ChatQueue.<record Id>#]`. The server stores the designer's form, the object's schema UId, and
   says so in a "stored as ..." warning: expected, not a failure. A record known only at run time comes from
   `processParameter` or `sourceElement`.
-- An unknown column and `Id` are refused, and so is `selectionColumn`. A column the element fills itself (`Status`,
-  `Channel`, `Contact`, `Operator`, `Queue`, `ChatPreview`) is accepted with a notice: your value overwrites it.
+- An unknown column and `Id` are refused, and so is `selectionColumn`. A column the element fills itself (Status,
+  Channel, Contact, Operator, Queue, ChatPreview) is accepted with a notice: your value overwrites it.
 - On `setElement` an omitted list is kept, a sent list REPLACES the stored set, and `[]` clears it.
 
 == Before it can send ==
 Not checked at build; each fails the run, or with `ignoreErrors` yields `SendStatus` `"Error"`:
 - An ACTIVE channel. A `Channel` row alone is not a working channel: it needs its messenger settings
   (the provider's credentials).
-- A recipient on THAT channel: a contact identity, which exists once the contact has written there. Twilio SMS is the
-  exception: the recipient is taken from the contact's PRIMARY "Mobile phone" communication (not the `MobilePhone` column), and an identity is saved on the first send.
+- A recipient on THAT channel: a contact identity, which exists once the contact has written there; say so if they may
+  not have. Twilio SMS is the exception: the recipient is taken from the contact's PRIMARY "Mobile phone" communication (not the `MobilePhone` column), and an identity is saved on the first send.
 - WhatsApp and Facebook Messenger: the provider's 24-hour window. Refused when the contact never chatted on the
-  channel, the window has expired, or another operator holds an open chat; outside it only a provider template goes
-  through (designer-only).
+  channel, the window has expired, or another operator holds an open chat. With custom text or a chat template there,
+  TELL the user: it reaches the contact only within 24 hours of their last message; after that, only a provider
+  template picked in the designer.
 - A value behind a system setting used by `from` or `to`.
 
 == When a send fails ==
 Recognise the class; never key on the exact text, which can change between builds:
-- a required input empty ("... parameter is required ..."); the channel (`Channel with Id=<id> not found.`,
-  `Channel with Id=<id> is not active.`); the WhatsApp or Messenger gate; the template ("Failed to process template
+- a required input empty ("... parameter is required ..."); the channel (`Channel with Id=<id> is not active.`, or
+  not found); the WhatsApp or Messenger gate; the template ("Failed to process template
   ..."); the recipient ("Failed to get recipient for contact ..."); the provider's own text (`Username can not be
   null` on SMS).
 On current builds a failed send leaves no chat (measured on 10.2.1122); older OmnichannelMessaging builds may leave an empty Completed chat.
@@ -179,10 +178,11 @@ mode - or custom mode with an empty message). To resubmit, drop `templateName`, 
 Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.186 contract. Measured on Creatio 10.2.1122 with Omnichannel Messaging 1.0.63 on 2026-11-13, on designer-built elements: an untouched `ignoreErrors`
 stopping the process; `ignoreErrors` on giving `"Error"` with the channel text; an SMS send without messenger
 settings resolving the primary mobile, then failing (`Username can not be null`) with no chat left; the designer's typed system setting, lookup macros, one-line message field and empty template after a switch to custom.
-On 2026-11-13/14: the discovery reads above as written; a name-form Lookup macro in `columnValues` showing
-`<entity not found>` before 1.6.6.186 and stored as the UId from it. On a Telegram channel on 2026-11-16: column values on the created chat (shown on
-its timeline), and `"Sent"` for a user who blocked the bot. Read from source and documentation, not
-measured: template macros against the chat, the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, the not-found
-channel text, an empty system setting failing the run, the template language order. Inferred: an unset mode running
-as template mode, the card's display of multi-line text or a server-built template, a run of a server-written
-`ignoreErrors` false.
+On 2026-11-13/14: the discovery reads above as written (and on 2026-11-18 the Lookup setting read); a name-form Lookup macro in `columnValues` showing
+`<entity not found>` before 1.6.6.186 and stored as the UId from it. On a Telegram channel on 2026-11-16: column values on the created chat (on
+its timeline), and `"Sent"` for a user who blocked the bot. From source and documentation, not
+measured: the identity and 24-hour gates, HTML stripping, `ignoreErrors` covering empty inputs, an empty system
+setting failing the run, the template language order. Inferred: an unset mode running
+as template mode. QA on 2026-11-18 (.NET Framework, OmnichannelMessaging 7.8.0, 1.6.6.186): template macros against
+the chat, the card's one-line view of multi-line text and empty message preview for a server-built template, and
+a server-written `ignoreErrors` false stopping the run.
