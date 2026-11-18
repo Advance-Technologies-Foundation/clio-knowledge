@@ -114,8 +114,9 @@ public sealed class ProcessDigestTests
         ("process-sub-process-when", "An EXISTING process that repeats a fragment is left as it is"),
         ("process-sub-process-when", "EXISTING process: never propose restructuring one on your own, whatever its size."),
         // The Timer start element made `timerStart` buildable: the Events clause gained it, with its owner and the
-        // confirmation it needs. The card itself does not list it (it stays off the card, as `webService` does).
-        ("process-element-catalog", "Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule; `process-timer-start` owns its `timer` block and the confirmation it needs), `endEvent`."),
+        // contract gate and the confirmation it needs. The card itself does not list it (it stays off the card, as
+        // `webService` does).
+        ("process-element-catalog", "Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule, only when the FULL contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs), `endEvent`."),
         ("process-element-catalog", "(aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,"),
         ("process-access-rights", "(`changeAccessRights` / `ChangeAdminRightsUserTask`)"),
         ("process-element-catalog", "Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE"),

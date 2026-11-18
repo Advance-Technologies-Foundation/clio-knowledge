@@ -36,7 +36,10 @@ public sealed class TimerStartGuidanceTests
     private const string GateTrigger =
         "Before any action after which a timer that did not fire before, or now fires on a different schedule or zone, sits in the enabled, active version of a process, you MUST state the following and get an explicit yes BEFORE you call the tool";
 
-    /// <summary>The wording the gate shares with the confirm-first rule of <c>process-delete-data</c>.</summary>
+    /// <summary>
+    /// The wording the gate shares with the confirm-first rule of <c>process-delete-data</c>. It is part of
+    /// <see cref="GateTrigger"/>, so it is asserted against delete-data only: the gate's copy is pinned by the trigger.
+    /// </summary>
     private const string ConfirmFirstWording = "and get an explicit yes BEFORE you call";
 
     private const string ItemId = "process-timer-start";
@@ -57,13 +60,23 @@ public sealed class TimerStartGuidanceTests
 
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
 
+    private const string VersionWritesPath = "guidance/mcp/guides/processes/version-writes.md";
+
+    /// <summary>
+    /// The one exemption from the gate. Pinned whole, and asserted to be the only one: a second "needs no"
+    /// anywhere in the article is a widened gate whatever it is worded as.
+    /// </summary>
+    private const string Exemption =
+        "An edit that leaves an already scheduled timer unchanged (a caption, a label) needs no schedule confirmation; other confirm gates still apply: a change to what a scheduled run writes is an in-place edit of the active version (`process-modeling`), and `process-delete-data` keeps its own.";
+
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
-    /// is about 17,450 response characters, so a new clause pays for itself with a trim, and a larger addition is
-    /// reviewed, or split into a <c>-details</c> article, rather than absorbed. The 19,000-byte inline rule is asserted
-    /// separately.
+    /// is about 20,800 response characters: the fact-check round added the run's system access, the misfire behaviour,
+    /// the recovery paths and the year and cron limits, and was reviewed rather than absorbed. A new clause pays for
+    /// itself with a trim; a larger addition is split into a <c>-details</c> article. The 19,000-byte inline rule is
+    /// asserted separately.
     /// </summary>
-    private const int DesignTargetResponseCharacters = 18_000;
+    private const int DesignTargetResponseCharacters = 21_500;
 
     [Test]
     [Description("The guide is registered banner-less, ungated and without a legacy route, required by the library, its description opens with the contract gate, and the element catalog, its details, process-modeling and routing send the reader to it while the digest card does not list it.")]
@@ -86,6 +99,7 @@ public sealed class TimerStartGuidanceTests
         string modeling = ReadCollapsed(ModelingPath);
         string routing = ReadCollapsed(RoutingPath);
         string card = ReadCollapsed(DigestPath);
+        string versionWrites = ReadCollapsed(VersionWritesPath);
 
         // Assert
         using (new AssertionScope())
@@ -112,22 +126,22 @@ public sealed class TimerStartGuidanceTests
             raw.Should().NotContain(ProcessGuideSet.SetBanner,
                 because: "the guide is loaded on demand; a banner obliges process-modeling to index it, and that article has no room left under the inline rule");
 
-            catalog.Should().Contain("`timerStart` (schedule; `process-timer-start` owns its `timer` block and the confirmation it needs)",
-                because: "the catalog owns what builds today, and the element it lists must carry its owner and the confirmation it needs");
+            catalog.Should().Contain("`timerStart` (schedule, only when the FULL contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs)",
+                because: "the catalog owns what builds today, and the element it lists must carry its contract gate, its owner and the confirmation it needs");
             catalog.Should().Contain("`startEventTimer`->`timerStart`",
                 because: "the data-id map turns the catalog's Start timer into the build type");
             catalog.Should().Contain("filter, signal, timer or connections with setFilter / setSignal / setTimer / setConnections, not in `setElement`",
                 because: "a timer is written with setTimer; setElement refuses a timer key");
-            details.Should().Contain("`startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:\"timerStart\"` with a `timer` block, owned by `process-timer-start`)",
-                because: "the element entry names the build type and the owner of its block");
+            details.Should().Contain("`startEventTimer` Start timer (schedule/CRON; BUILDABLE via `type:\"timerStart\"` with a `timer` block, only when the FULL contract names it; owned by `process-timer-start`)",
+                because: "the element entry names the build type, its contract gate and the owner of its block");
             details.Should().Contain("a timer start inside an event sub-process is not handled at all",
                 because: "only top-level timer starts are built and described; a nested one is out of reach of every tool");
             modeling.Should().Contain("setTimer (`process-timer-start`)",
                 because: "process-modeling lists every edit op and names the owner of each that carries its own rules");
-            routing.Should().Contain("-> name=process-timer-start (read it BEFORE planning: it carries the confirmation you owe the user)",
-                because: "routing carries the read-first note process-delete-data does, so the confirmation is read before the plan");
-            routing.Should().Contain("Timer start (timerStart, setTimer; FULL contract only)",
-                because: "routing carries the guide's contract gate, as it does for the other blocks a released clio may not know");
+            routing.Should().Contain("- a process ON A SCHEDULE (timerStart, setTimer; FULL contract only) -> name=process-timer-start first",
+                because: "routing carries the guide's contract gate and a read-first note, so the confirmation is read before the plan");
+            versionWrites.Should().Contain("Activating a version that carries a timer, a rollback included, or enabling a disabled process that has one, owes the confirmation of `process-timer-start` first.",
+                because: "an agent activating a version follows routing to process-version-writes, so the schedule confirmation the timer article postpones to activation must be pointed at from there");
             card.Should().NotContain("timerStart",
                 because: "the timer start stays off the digest card; agents reach it through the create contract, the catalog and routing");
             card.Should().NotContain(ItemId,
@@ -172,7 +186,7 @@ public sealed class TimerStartGuidanceTests
     }
 
     [Test]
-    [Description("The confirm-before-save gate is worded on the trigger, shares the confirm-first wording of process-delete-data, lists every action it covers and what the user is told, and exempts only an edit that leaves a scheduled timer unchanged.")]
+    [Description("The confirm-before-save gate is worded on the trigger, shares the confirm-first wording of process-delete-data, lists every action it covers and what the user is told, says what to do when the notice differs or never comes, exempts exactly one edit, and the existing-process section points back to it.")]
     public void Guide_ShouldGateEverySaveThatSchedulesRuns()
     {
         // Arrange
@@ -183,16 +197,16 @@ public sealed class TimerStartGuidanceTests
             "a create with a `timerStart`",
             "adding a `timerStart` to an existing process (next to the Simple start, or to a timer-only process)",
             "the Simple -> Timer replace",
-            "a `setTimer`",
+            "a `setTimer`, the re-save below included",
             "`set-active-business-process-version` on a version that carries a timer (one added through `modify-business-process-as-new-version` fires only from then)",
             "enabling a disabled process that carries a timer"
         ];
         string[] statedToTheUser =
         [
             "the schedule in words (a step's real cadence)",
-            "the zone and its source",
-            "the first run (computed as the notice would; it may be immediate, above)",
-            "that runs use the System operations user's rights",
+            "the zone you will send as `timeZone`",
+            "the first run as your estimate (it may be immediate, above)",
+            "that runs use the System operations user with system access (no permission checks)",
             "which data the process writes or deletes"
         ];
 
@@ -200,6 +214,8 @@ public sealed class TimerStartGuidanceTests
         string gateSection = Regex.Match(guide, @"== Confirm before a save that schedules runs ==(?<body>.+?)== ").Groups["body"].Value;
         string[] missingActions = [.. coveredActions.Where(action => !gateSection.Contains(action, StringComparison.Ordinal))];
         string[] missingStatements = [.. statedToTheUser.Where(item => !gateSection.Contains(item, StringComparison.Ordinal))];
+        int exemptions = Regex.Matches(guide, @"needs no|no confirmation|without (?:a |the )?confirm", RegexOptions.IgnoreCase).Count;
+        string existingProcess = Regex.Match(guide, @"== A timer on an existing process ==(?<body>.+?)== ").Groups["body"].Value;
 
         // Assert
         using (new AssertionScope())
@@ -209,8 +225,6 @@ public sealed class TimerStartGuidanceTests
                 because: "the gate opens the way the other confirm-first rules of the process set do");
             gateSection.Should().Contain(GateTrigger,
                 because: "the trigger covers an action nobody listed: what counts is a new or changed schedule landing in the enabled, active version");
-            gateSection.Should().Contain(ConfirmFirstWording,
-                because: "the gate is modelled on the confirm-first rule of process-delete-data, and the yes comes before the call");
             deleteData.Should().Contain(ConfirmFirstWording,
                 because: "the wording this gate shares must still be the delete-data wording, or the two rules have drifted apart");
             missingActions.Should().BeEmpty(
@@ -220,13 +234,21 @@ public sealed class TimerStartGuidanceTests
                     + string.Join(" | ", missingStatements));
             gateSection.Should().Contain("Then read the post-save notice and pass it on.",
                 because: "the notice is the only place the saved schedule's next run, or the reason there is none, is reported");
-            gateSection.Should().Contain("An edit that leaves an already scheduled timer unchanged (a caption, an added script task) needs no schedule confirmation; other confirm gates, such as the one of `process-delete-data`, still apply.",
+            gateSection.Should().Contain("tell the user at once and offer to revert",
+                because: "a notice that differs from what the user approved means the user approved something else");
+            gateSection.Should().Contain("An activation or an enable returns no timer notice: read `scheduled` from `describe-business-process mode=full` instead.",
+                because: "an agent waiting for a notice that never comes reports nothing");
+            gateSection.Should().Contain(Exemption,
                 because: "the exemption is narrow and does not lift any other confirmation the edit owes");
+            exemptions.Should().Be(1,
+                because: "the exemption above is the only one; a second 'needs no' or 'no confirmation' anywhere in the article widens the gate, however it is worded");
+            existingProcess.Should().Contain("(the confirmation above applies)",
+                because: "adding a timer to an existing process is the commonest way to schedule runs, and the pointer back to the gate is what stops it being treated as an ordinary edit");
         }
     }
 
     [Test]
-    [Description("Replacing the Simple start is gated on a describe, a SysSubProcessInProcess caller query and asking the user about manual starts; adding a timer next to it is the default.")]
+    [Description("Replacing the Simple start is gated on the user asking for it, a describe, a SysSubProcessInProcess caller query and asking the user about case, code and manual starts; adding a timer next to it, after checking what the steps read, is the default.")]
     public void Guide_ShouldGateTheReplace_OnTheCallerCheck()
     {
         // Arrange
@@ -239,10 +261,16 @@ public sealed class TimerStartGuidanceTests
         using (new AssertionScope())
         {
             section.Should().NotBeEmpty(because: "anti-vacuity: the existing-process section is where the replace rule lives");
-            section.Should().Contain("By default ADD it: `addElement` a `timerStart` and `addFlow` from it to the first element, next to the existing Simple start",
+            section.Should().Contain("By default ADD it: `addElement` a `timerStart` and `addFlow` from it to the first element, next to the existing start, in one request (the confirmation above applies).",
                 because: "adding keeps every manual start and every caller working, so it is the default");
-            section.Should().Contain("REPLACE the Simple start (`removeElement` it, `addElement`, `addFlow`) only after a `describe-business-process mode=full`, the caller check below and the user's confirmation",
+            section.Should().Contain("First check what the steps read: a parameter or a start's record Id is empty on a timer run, so set it on the timer branch (`process-parameters`) or ask the user.",
+                because: "a timer run carries no parameter and no record Id, and process-parameters owns how to set one on a start's branch");
+            section.Should().Contain("REPLACE the Simple start only when the user asks for a timer-only process, in one request",
+                because: "replacing is never the agent's own idea");
+            section.Should().Contain("and only after a `describe-business-process mode=full`, the caller check below and the user's confirmation",
                 because: "a timer-only process loses every manual start and every caller, and the save does not say so");
+            section.Should().Contain("The table holds process callers only: a case (DCM) step that runs the process, or code that starts it, is not in it - ask about those too",
+                because: "zero rows does not mean no case or code runs the process");
             section.Should().Contain("one `execute-esq` on `SysSubProcessInProcess` by the family root (`versionRootSchemaUId` from describe); any row is a caller",
                 because: "SysSubProcessInProcess is the table behind the process library's used-as-a-sub-process detail");
             section.Should().Contain("rootSchemaName: \"SysSubProcessInProcess\"",
@@ -251,10 +279,10 @@ public sealed class TimerStartGuidanceTests
                 because: "the callee is matched by its family root in ParentSubProcessUId");
             section.Should().Contain("is reported to the user, never taken as \"no callers\"",
                 because: "the read needs an admin operation, and a refused read is not an empty one");
-            section.Should().Contain("no tool can search for them, so ASK the user whether anything starts the process by hand",
+            section.Should().Contain("`VwProcessLib.AddToRunButton` of the process (`execute-esq`) shows a Run process menu entry",
+                because: "the Run process menu is the one manual start a query can find");
+            section.Should().Contain("both are partial checks, never proof of absence, so ASK the user whether anything starts the process by hand",
                 because: "page buttons, classic pages, dashboards, integrations and run-process calls leave no index to query");
-            section.Should().Contain("is a partial check, never proof of absence",
-                because: "reading one app's pages cannot prove that nothing else starts the process");
         }
     }
 
@@ -267,31 +295,49 @@ public sealed class TimerStartGuidanceTests
         string[] clauses =
         [
             "It runs as the System operations user (the `SystemUser` system setting, Supervisor by default)",
-            "It receives NO process parameters: each one starts at its default value.",
-            "To test one, keep or add a Simple start next to it",
+            "with SYSTEM ACCESS: object, column, record and operation permissions are not checked, whatever roles that user has.",
+            "It receives NO process parameters and no record Id: each parameter starts at its default value.",
+            "A Simple start next to it keeps both (on a new process add one only if the user wants that)",
+            "so it does not reproduce a scheduled run",
             "Prefer ONE timer that reads the due records and handles each",
             "The block builds nothing finer than every minute, and the platform sets no minimum interval and no cap on runs",
-            "(0..23, BOTH hours inclusive, default 0..23; it may wrap, 22..6)",
-            "A 5-field Unix cron is refused.",
+            "`schedule` is required on create and `addElement` (`setTimer`: below)",
+            "nothing may fall after 2099 (a `start`, a first fire or a `cron` year)",
+            "(0..23, BOTH hours inclusive, default 0..23; it may wrap, 22..6, computed but not run on a stand)",
+            "(1..31, no `\"last\"`)",
+            "A 5-field Unix cron is refused, and so is a day-of-month `nW` above `28W`.",
             "(`0 0 7 1 2/3 ? *`: every 3 months from February)",
             "\"Every N\" is a cron step, not an interval",
-            "Every step above 1 gets a notice naming the real cadence",
+            "hours from `fromHour` each day (9..18 every 5: 09:00 and 14:00; 22..6 every 3: 22:00, 01:00, 04:00)",
+            "Every step above 1 gets a notice naming the real cadence, but only after the save: work the cadence out yourself for the confirmation",
             "Every N WEEKS is not supported by the platform scheduler: `every` on `week` is refused",
             "a `day` step of 7, 14, 21 or 28 and a `cron` whose day-of-month field is a step that is a multiple of 7 (`0 0 8 */14 * ? *`)",
             "Do not build a substitute",
-            "A designer-built timer with such a day step is described as it is; a rebuild from that describe, and a `setTimer` that sends the schedule group, are refused; a `setTimer` without the schedule group keeps it.",
-            "the schedule must fire at least once before it",
+            "A designer-built timer with such a day step is described as it is; a rebuild from that describe, and a `setTimer` that resends that step, are refused; a `setTimer` with another schedule group replaces it, and one without the schedule group keeps it.",
+            "with no offset, `Z` or milliseconds",
+            "the schedule must fire at least once at or before it",
             "A `start`, `end` or `once` time in the zone's skipped spring-forward hour is refused",
-            "A timer that keeps a past `start` may run ONCE immediately when it is registered afresh",
+            "A timer that keeps a past `start` may run ONCE immediately when it is registered afresh - when the process is re-enabled, or when it had no job.",
             "your profile's zone, else the `DefaultTimeZone` system setting, else refused",
-            "When the user did not name a zone, CONFIRM it: the clio login may be a technical user",
+            "When the user did not name a zone, ASK and send `timeZone`: the clio login may be a technical user",
             "A `setTimer` without `timeZone` keeps the stored zone",
-            "promise the user nothing from it, either way",
-            "The schedule group is REPLACED",
+            "changes nothing at run time: with either value, a fire missed while the scheduler was down runs once as soon as it is back, then the schedule continues. Tell the user that.",
+            "The schedule group is optional, and REPLACED when sent",
+            "with `schedule` required and an omitted `at` back at `00:00`; nothing is merged with the stored one. To change only the zone or the dates, send no schedule field.",
+            "An empty `timer {}` re-saves the timer unchanged: that is the re-save this article asks for.",
             "From describe: leave out an unchanged stored past `start`.",
-            "`setElement` with a `timer` key (\"use setTimer\")",
-            "`staleTrigger` - the stored trigger differs from the timer or belongs to another version: re-save the active version",
-            "the edit IS saved. Fix the timer and re-save it with `setTimer`; do NOT retry the same edit.",
+            "A date you send (no `Z`, no milliseconds) equal to the stored one to the second counts as unchanged",
+            "a `timer` key in `setElement` (use `setTimer`)",
+            "`useBackgroundMode: true` (`false`, as describe reports it, passes)",
+            "a `once` always reads as `once`, a stray cron only in `storedCron`",
+            "a kind named in `designerKind` comes back as Other frequency, and a never-configured timer is refused until a schedule is sent",
+            "`staleTrigger` - the stored trigger differs from the timer, belongs to another version, or is paused or errored: re-save the active version",
+            "`noJob` - normal for a `once` whose time has passed or a recurring timer past its `end` (it has finished), otherwise re-save",
+            "A re-save registers the timer afresh, so a kept past `start` may run once at once.",
+            "the edit IS saved; do NOT resend the original operations.",
+            "If the message says the scheduler refused the timer, fix the timer (confirming again) and re-save it with `setTimer`",
+            "if it says the scheduler itself failed, re-save later with `setTimer` sending the same values",
+            ".NET 8 is not measured",
             "neither built, described nor found by `setTimer`"
         ];
 
@@ -304,7 +350,7 @@ public sealed class TimerStartGuidanceTests
     }
 
     [Test]
-    [Description("No process article and no manifest description still claims that the timer start is read-only or cannot be built.")]
+    [Description("No process article and no manifest description still claims, in any letter case, that the timer start is read-only or cannot be built.")]
     public void NoProcessArticleOrManifestDescription_ShouldClaimTimerStartIsUnbuildable()
     {
         // Arrange
@@ -326,23 +372,23 @@ public sealed class TimerStartGuidanceTests
         string cannotCreate = Regex.Match(modeling, @"Constructs the builder cannot create \((?<list>[^)]+)\)").Groups["list"].Value;
         string notInSlice = Regex.Match(connections, @"are all in that slice now; (?<list>.+?) are not\.").Groups["list"].Value;
         string[] stale = [.. ProcessGuideSet.Declared(repositoryRoot)
-            .Where(article => ReadCollapsed(article.SourcePath).Contains("timer/message", StringComparison.Ordinal))
+            .Where(article => ReadCollapsed(article.SourcePath).Contains("timer/message", StringComparison.OrdinalIgnoreCase))
             .Select(article => article.ItemId)];
 
         // Assert
         using (new AssertionScope())
         {
             notBuildable.Should().NotBeEmpty(because: "anti-vacuity: the catalog lists what does not build");
-            notBuildable.Should().NotContain("timer", because: "the timer start is buildable now");
+            notBuildable.Should().NotContainEquivalentOf("timer", because: "the timer start is buildable now");
             notBuildable.Should().Contain("message start", because: "the message start is still not buildable");
             readOnlyInDetails.Should().NotBeEmpty(because: "anti-vacuity: the details catalog names what is read-only");
-            readOnlyInDetails.Should().NotContain("Timer start", because: "the read-only marker would now be a lie");
+            readOnlyInDetails.Should().NotContainEquivalentOf("timer start", because: "the read-only marker would now be a lie");
             cannotCreate.Should().NotBeEmpty(because: "anti-vacuity: process-modeling lists what the builder cannot create");
-            cannotCreate.Should().NotContain("timer", because: "the builder creates a timer start now");
+            cannotCreate.Should().NotContainEquivalentOf("timer", because: "the builder creates a timer start now");
             notInSlice.Should().NotBeEmpty(because: "anti-vacuity: the R1-R20 heading lists what is outside the buildable slice");
-            notInSlice.Should().NotContain("timer", because: "a validated timer start is buildable now");
+            notInSlice.Should().NotContainEquivalentOf("timer", because: "a validated timer start is buildable now");
             readOnlyInDescription.Should().NotBeEmpty(because: "anti-vacuity: the description lists what remains read-only");
-            readOnlyInDescription.Should().NotContain("timer",
+            readOnlyInDescription.Should().NotContainEquivalentOf("timer",
                 because: "a manifest description is what an MCP client shows an agent choosing a guide");
             catalogDescription.Should().Contain("Timer start: timerStart, FULL contract only; owner process-timer-start",
                 because: "the description lists what builds today, with the guide's contract gate, and names the owner");

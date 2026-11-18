@@ -200,9 +200,20 @@ public sealed class ProcessGuideContentPreservationTests
             "the version floor on the entry that changed from read-only to buildable"),
         // timerStart joined the Events clause when the Timer start element became buildable. A save that schedules
         // runs owes the user a confirmation, so the catalog entry must keep pointing at the article that carries it.
-        ("process-element-catalog", "`timerStart` (schedule;", "the confirmation it needs",
+        ("process-element-catalog", "`timerStart` (schedule,", "the confirmation it needs",
             "the catalog says the element builds; without the pointer to its confirmation an agent builds a schedule "
             + "that runs unattended as the System operations user without asking anyone"),
+        ("process-element-catalog", "`timerStart` (schedule,", "only when the FULL contract names it",
+            "the element builds only through a clio whose contract carries it; without the gate the catalog presents "
+            + "it as always buildable to an agent whose clio is older than the library"),
+        ("process-element-catalog-details", "`startEventTimer` Start timer", "only when the FULL contract names it",
+            "the same contract gate on the details entry, as the webService entry carries it"),
+        // Activation is owned by process-version-writes, and it is where a version carrying a timer becomes
+        // the scheduled one. The agent that activates follows routing there, not to process-timer-start, so
+        // the pointer to the schedule confirmation must live in the activation paragraph itself.
+        ("process-version-writes", "Activating a version that carries a timer", "`process-timer-start` first",
+            "a rollback or a later activation puts a timer into the active version; without this pointer the "
+            + "schedule is never confirmed, because the timer article postponed the confirmation to this step"),
         ("process-element-catalog", "Add the element", "NOT in a build descriptor",
             "the OTHER cannot-build fact, and the one a short form of this list dropped: the Connected-to "
             + "links are not in a build descriptor at all, so the flagship \"a task connected to the "

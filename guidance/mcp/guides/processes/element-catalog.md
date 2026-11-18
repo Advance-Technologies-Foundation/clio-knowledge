@@ -6,8 +6,8 @@ This article is the authoritative owner of what `create-business-process` can bu
 `data-id` maps to a build `type`, and of the custom user-task compile rule. The element catalog itself --
 the `data-id` vocabulary `validate-process-graph` speaks and `describe-business-process` reports back --
 is `process-element-catalog-details`; open it to read a process or reason about an element not listed
-here. Split out of `process-modeling`, which keeps the lifecycle: the tools, the descriptor, the build
-recipe and the safety rules for editing an existing process.
+here. Split out of `process-modeling`, which keeps the lifecycle: tools, descriptor, build recipe and
+edit safety.
 Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
 code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
 `process-naming` only to relabel something that already exists or to settle a name collision.
@@ -28,8 +28,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   in silence: read the result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
-- Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule;
-  `process-timer-start` owns its `timer` block and the confirmation it needs), `endEvent`.
+- Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule,
+  only when the FULL contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs),
+  `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
   `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask,
