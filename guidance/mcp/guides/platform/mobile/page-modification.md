@@ -74,7 +74,9 @@ Specifically, NEVER:
   - Author a `handlers` / `converters` / `validators` section in the body to
     emulate a missing feature.
   - Add a second data source in `modelConfigDiff` to work around the
-    one-data-source-per-page constraint.
+    one-data-source-per-page constraint. The one exception is a
+    `crt.VirtualDataSource` with `"scope": "viewElement"` that a remote
+    module implements — see `mobile-remote-module`.
   - Add a `crt.Scaffold` insert to "make the layout match" a web template.
 
 Instead, report the limitation explicitly to the user. Use this shape:
@@ -307,6 +309,8 @@ Handlers — reference-only, from an existing remote module:
   Custom request handlers can be referenced (e.g. via `clicked` binding to a custom request
   type) only if the user explicitly asks for them AND the handler is already implemented in
   a remote module. Do not author handler code inside the mobile page body.
+  To implement and deliver such a module (handlers, custom requests, virtual data sources),
+  read get-guidance name=mobile-remote-module.
 
 ────────────────────────────────────────────────────────
 crt.Scaffold — do NOT re-insert

@@ -64,6 +64,7 @@ public sealed class GuidanceMigrationTests
         "process-dynamic-case-change",
         "web-service-registration",
         "web-service-soap",
+        "mobile-remote-module",
         "column-rights"
     ];
 

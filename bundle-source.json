@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.236",
+  "libraryVersion": "1.15.237",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -95,6 +95,7 @@
       "localizable-values",
       "knowledge-feedback",
       "mobile-page-modification",
+      "mobile-remote-module",
       "package-dependencies",
       "page-creation",
       "page-modification",
@@ -308,6 +309,7 @@
       "docs://knowledge/com.creatio.clio/localizable-values",
       "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
+      "docs://knowledge/com.creatio.clio/mobile-remote-module",
       "docs://knowledge/com.creatio.clio/package-dependencies",
       "docs://knowledge/com.creatio.clio/page-creation",
       "docs://knowledge/com.creatio.clio/page-modification",
@@ -1319,6 +1321,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/platform/mobile/page-modification.md",
       "bundlePath": "resources/mobile-page-modification.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "mobile-remote-module",
+      "title": "Mobile remote module",
+      "description": "Custom business logic for the Creatio Mobile app as a remote module on @creatio/mobile-common: what the built script must be (one IIFE main.js, SDK external as crtSdk), where it sits in a package (Files/src/mobile/<ModuleName>/main.js), delivery through create-workspace / add-package / push-workspace and confirmation with get-package-file, the EnableMobileSDK feature, and how a mobile page refers to a module (a custom request in a component event, handler scopes, a crt.VirtualDataSource data source). Names what the mobile SDK does not support (custom validators, converters, UI components, HTTP) and the alternative for each.",
+      "topicId": "creatio.mobile-remote-module",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/mobile-remote-module",
+      "sourcePath": "guidance/mcp/guides/platform/mobile/remote-module.md",
+      "bundlePath": "resources/mobile-remote-module.md",
       "mediaType": "text/plain"
     },
     {
