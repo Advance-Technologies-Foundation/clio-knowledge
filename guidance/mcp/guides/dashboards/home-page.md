@@ -6,11 +6,10 @@ appears as a workplace's home page ONLY after that workplace's `SysWorkplace.Hom
 at it, saved as a package data binding so it ships with the package.
 
 For the generic page rules (schema-name format, template catalog, verification, designer mapping)
-read `page-creation`; for laying out and styling the page's widgets read `dashboard-and-home-page-layout` (a home
-page shares the 12-column grid, the metric block on top and the plain-white card style with a dashboard,
-but has its own metric sizes and row widths, given there); for the data-binding
-tool contract and verification discipline read `data-bindings`. This guide adds only the home-page
-specifics and the workplace binding.
+read `page-creation`; for laying out and styling the page's widgets read `dashboard-and-home-page-layout`;
+for widget colors and metric icons read `widget-color-and-icon`; for the data-binding tool contract and
+verification discipline read `data-bindings`. This guide adds only the home-page specifics and the
+workplace binding.
 
 ## Flow
 
@@ -34,12 +33,10 @@ specifics and the workplace binding.
    the value you bind in step 6. `create-page` assigns the home-page schema group automatically
    from the template, so there is no separate group step.
 3. `get-page` to verify the schema reads back.
-4. Add the approved widgets and lay them out and style them per `dashboard-and-home-page-layout` — a home page
-   shares the 12-column grid, the metric block on top and the plain-white cards with a dashboard; take
-   its metric tile sizes and row widths from that guide, never from a dashboard. Widget colors and
-   metric icons are per `widget-color-and-icon`. Author each widget's payload per `indicator-widget` (metrics) /
-   `chart-widget` (charts) and edit the page body per `page-modification`. A home page is
-   standalone: it has no `DashboardDS` page-data filter, so ignore that dashboard-only binding.
+4. Add the approved widgets, laid out and styled per the guides named above. Author each widget's
+   payload per `indicator-widget` (metrics) / `chart-widget` (charts) and edit the page body per
+   `page-modification`. A home page is standalone: it has no `DashboardDS` page-data filter, so ignore
+   that dashboard-only binding.
 5. Choose and read the target workplace(s): read `SysWorkplace` (select `Id`, `Name`, `HomePageUId`)
    via `odata-read` or `execute-esq` — if one path errors, try the other. A workplace has one home
    page, so bind each workplace the page should apply to.
