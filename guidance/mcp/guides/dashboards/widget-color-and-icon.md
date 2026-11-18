@@ -9,16 +9,15 @@ home pages. It does NOT own where a widget goes, how big it is, its card theme o
 those are in `dashboard-and-home-page-layout`. For the rest of the runtime payload read `indicator-widget`
 (`crt.IndicatorWidget`) or `chart-widget` (`crt.ChartWidget`) and call `get-component-info`.
 
-Evidence: the colors and icons below were read with `get-page` from the 8 stock analytics dashboards and
-4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15 (platform version not read).
-Each contrast ratio was computed with the WCAG 2 formula from the preset's swatch color in the widget
-color picker against the white card.
+Evidence: the colors and icons below were read with `get-page` from the 9 stock analytics dashboards and
+4 stock home pages of a Sales/Service Enterprise environment on 2026-10-15, and re-read unchanged on
+Creatio 10.3.1163.0 on 2026-11-18.
 
 ## Color
 
 Applies to every widget: a metric's `config.layout.color`, a chart's `config.color` and its
-`series[*].color`. The number is the WCAG 2 contrast ratio of the preset's swatch color against the
-white card.
+`series[*].color`. The number is the WCAG 2 contrast ratio of the preset's swatch color in the widget
+color picker against the white card.
 
 - MUST NOT use in any widget (below 3:1, unreadable on white): `orange-red` 2.39, `turquoise` 2.33,
   `orange` 1.88, `light-green` 1.61.
@@ -52,9 +51,9 @@ the stock dashboards has one. Examples:
 |---|---|
 | Accounts, contacts, orders | `work-icon`, `contact-group-icon`, `trolley-icon` |
 | Amounts | `coins-icon`, `money-icon` |
-| Overdue, inactive, response time | `hourglass-icon` |
+| Elapsed or waiting time: response time, inactive, overdue by a date | `hourglass-icon` |
 | Duration, resolution time | `clock-icon` |
-| Overdue response, overdue resolution | `message-warning-icon`, `problem-icon` |
+| SLA breached: response overdue, resolution overdue | `message-warning-icon`, `problem-icon` |
 | Waiting, reopened | `bell-icon` |
 | Expiring | `fire-icon` |
 | Missing data, contracts | `document-edit-icon`, `document-icon` |
