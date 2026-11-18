@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.236",
+  "libraryVersion": "1.15.237",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -700,7 +700,7 @@
     {
       "itemId": "business-rule-filters",
       "title": "Business rule filters",
-      "description": "Defines the apply-static-filter friendly filter contract for Freedom UI business rules: leaf comparisons, lookup values, forward paths, nested groups, backward EXISTS/NOT_EXISTS and COUNT/SUM/AVG/MIN/MAX aggregations, relative-date and current-user macros, age/birthday translation, multilingual handling, and the discovery flow.",
+      "description": "Defines the apply-static-filter friendly filter contract for Freedom UI business rules: leaf comparisons, lookup values, forward paths, nested groups, backward EXISTS/NOT_EXISTS and COUNT/SUM/AVG/MIN/MAX aggregations, relative-date and current-user macros, age/birthday translation, multilingual handling, the discovery flow, and checking the filterMatchCount clio reports for the saved filter (execute-esq dry run only as a fallback).",
       "topicId": "creatio.business-rule-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/business-rule-filters",
