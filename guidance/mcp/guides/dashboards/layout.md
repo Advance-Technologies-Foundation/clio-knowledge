@@ -4,9 +4,10 @@ Use this guide whenever you add, arrange, size, group, color, or style Freedom U
 (metrics/indicators and charts) on a DASHBOARD or a HOME PAGE, new or existing, so they look like
 Creatio's own product dashboards. Desktops are a separate surface: read `desktop-page` for those.
 
-This guide is the single owner of WHERE a widget goes, HOW BIG it is (a metric's text size too), its card
-theme, and the metric title and value-only text rules on dashboards and home pages; `indicator-widget`
-and `chart-widget` cite it. The widget color palette and the metric icon rule are owned by
+This guide is the single owner of WHERE a widget goes, HOW BIG it is (a metric's text size too) and its
+card theme on dashboards and home pages; `indicator-widget` and `chart-widget` cite it. A metric's
+title and text template are owned by `indicator-widget` (get-guidance name=indicator-widget, section
+"Metric title and text"). The widget color palette and the metric icon rule are owned by
 `widget-color-and-icon`: MUST read get-guidance name=widget-color-and-icon before you choose a widget
 color or a metric icon. This guide does NOT own the rest of a widget's runtime payload: for
 `crt.IndicatorWidget` read `indicator-widget`, for `crt.ChartWidget` read `chart-widget`, and call
@@ -34,8 +35,8 @@ Hard rules unless the user explicitly overrides one.
    metric (`colSpan` 3-4) and a metric block beside a chart (`colSpan` 3, or 2 dense). Charts are sized
    by type ("Widget catalog").
 3. STYLE: every widget is a plain-white card ("Card theme") and takes a color by MEANING; every metric
-   tile carries an icon chosen by meaning (both per `widget-color-and-icon`) and shows its value alone
-   under a short one-line title.
+   tile carries an icon chosen by meaning (both per `widget-color-and-icon`) and a title and text per
+   `indicator-widget`.
 
 ## Metric tile size
 
@@ -61,21 +62,9 @@ bloated or squashed tile. For any other `rows` value copy the sibling tiles' siz
 - BOTTOM ALIGNMENT: a widget beside a stack has a `rowSpan` equal to the stack's total, so both end on
   the same row.
 
-Metric title and text (`config.title` and `config.text` of the tile):
-
-- TITLE: `config.title` is a short noun phrase naming the measure, 2-4 words on ONE line: aim at 25
-  characters or fewer, never more than 30. Count the text the title registers, not its
-  `#ResourceString(...)#` key. After the name only a unit after a comma ("Average resolution time,
-  hours") or a qualifier in parentheses ("Overdue cases (response)"). Never append a filter as a comma
-  list, as in "Closed requests, Satisfaction 1": fold it into the words ("Requests rated 1",
-  "Low-rated requests"). Stock titles read like "Overdue orders" or "Cases in progress".
-- TEXT SIZE: `text.fontSizeMode` "medium" (the designer's size M) on a dashboard, "large" (size L) on a
-  home page. On an existing page copy the sibling tiles' text settings instead ("Adding to an existing
-  page").
-- VALUE ONLY: `text.template` is exactly `{0}`, the value alone; a `#ResourceString(...)#` template
-  registers the text `{0}`. The metric's name is `config.title`: never repeat it as a caption inside
-  the tile, as in "Open critical requests: {0}". Text beside `{0}` belongs only to a comparison metric
-  (e.g. "10 %"). All 76 stock metric tiles use `{0}`.
+TEXT SIZE: `text.fontSizeMode` "medium" (the designer's size M) on a dashboard, "large" (size L) on a
+home page. On an existing page copy the sibling tiles' text settings instead ("Adding to an existing
+page"). The title and `text.template` follow "Metric title and text" of `indicator-widget`.
 
 The reference, a metric block with a doughnut beside it (dashboard grid):
 
@@ -125,8 +114,8 @@ room, even on a home page whose metric row fills 12 columns.
    `text.fontSizeMode`, `text.labelPosition`), or take them from "Metric tile size" when the page has
    no metric yet, but never their `theme` or a banned color: the new tile is "without-fill" with a
    color by meaning per `widget-color-and-icon`, even when its siblings are full-fill or use a banned
-   color. Its `text.template` is `{0}` even when a sibling repeats its name as a caption. Its title
-   follows TITLE ("Metric tile size") even when a sibling's title is longer.
+   color. Its title and `text.template` follow "Metric title and text" of `indicator-widget`, whatever
+   the siblings carry.
 3. Put the tile in a free slot of the metric block: the next free columns of the block's rows.
 4. When the block is full, add a new tile row directly UNDER the block, in the block's columns:
    - move every widget that starts on or below that row down by the tile's `rowSpan`, in every column,
@@ -215,10 +204,8 @@ small to read. Give a gauge `rowSpan` 6, floor 5.
 - A widget beside a stack ends on the same row as the stack; every chart row sums to 12 columns.
 - Every widget is "without-fill" (home pages too); its color and every metric icon pass the checklist
   of `widget-color-and-icon`.
-- Every metric tile has its surface's `text.fontSizeMode` (on an existing page its siblings') and
-  `text.template` `{0}`, its name only in `config.title`.
-- Every metric title is a 2-4 word noun phrase on one line (25 characters or fewer, never more than 30)
-  with no filter appended after a comma.
+- Every metric tile has its surface's `text.fontSizeMode` (on an existing page its siblings'); its
+  title and `text.template` pass "Metric title and text" of `indicator-widget`.
 - Each chart/list/pivot meets the `rowSpan` floor (>= 6; default 9, funnel 15); each gauge is 6.
 - Multi-topic surfaces are split into labeled sections.
 

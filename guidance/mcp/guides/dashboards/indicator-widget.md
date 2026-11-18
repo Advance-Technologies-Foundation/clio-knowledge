@@ -52,6 +52,23 @@ be registered this way; `validate-page` flags it as a warning  — see `page-sch
   tile's color and icon by `widget-color-and-icon` (get-guidance name=widget-color-and-icon): read both before
   you add or move a tile.
 
+## Metric title and text
+These hold for a metric on any page, also on an existing page whose sibling metrics break them.
+
+- TITLE: `config.title` is a short noun phrase naming the measure, 2-4 words on ONE line: aim at 25
+  characters or fewer, never more than 30. Count the text the title registers, not its
+  `#ResourceString(...)#` key. After the name only a unit after a comma ("Average resolution time,
+  hours") or a qualifier in parentheses ("Overdue cases (response)"). Never append a filter as a comma
+  list, as in "Closed requests, Satisfaction 1": fold it into the words ("Requests rated 1",
+  "Low-rated requests"). Stock titles read like "Overdue orders" or "Cases in progress".
+- VALUE ONLY: `text.template` is exactly `{0}`, the value alone; a `#ResourceString(...)#` template
+  registers the text `{0}`. The metric's name is `config.title`: never repeat it as a caption inside
+  the tile, as in "Open critical requests: {0}". Text beside `{0}` belongs only to a comparison metric
+  (e.g. "10 %"). All 76 stock metric tiles use `{0}`.
+
+The text size (`text.fontSizeMode`) depends on the surface: on a dashboard or home page it is owned by
+`dashboard-and-home-page-layout`.
+
 ## Card theme
 The card theme is set by the SURFACE's guide, not here: `dashboard-and-home-page-layout` for dashboards and home
 pages (plain-white / `theme` "without-fill"), `desktop-page` for desktops (glassmorphism). For the
