@@ -45,6 +45,7 @@ public sealed class GuidanceMigrationTests
         "process-files-parameter",
         "process-send-email-attachments",
         "process-web-service",
+        "process-send-chat-message",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",
@@ -64,6 +65,7 @@ public sealed class GuidanceMigrationTests
         "web-service-registration",
         "web-service-soap",
         "mobile-remote-module",
+        "column-rights"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
