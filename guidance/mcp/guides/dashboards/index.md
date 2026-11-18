@@ -6,9 +6,9 @@ Pick the dashboard guide that matches the task (a dashboard is a page inheriting
 - CREATE a dashboard page — the `BaseDashboardTemplate` schema and its link-back optional properties
   (`DashboardsEntitySchemaName`, `DashboardsElementName`, `DashboardsClientUnitSchemaUId`),
   including how to retrieve each value -> get-guidance name=dashboard-creation
-- LAY OUT / size / group / style the analytical widgets — the 12-column grid, the
-  metric-band-then-chart-grid skeleton, per-widget-type sizes, the plain-white card style ->
+- LAY OUT / size / group / style the analytical widgets, on a new or an existing page ->
   get-guidance name=dashboard-and-home-page-layout
+- COLOR a widget or pick a metric icon -> get-guidance name=widget-color-and-icon
 - FILTER a dashboard's widgets by its page data (the hidden `DashboardDS` source) ->
   get-guidance name=dashboard-design
 - A single widget's runtime payload — get-guidance name=indicator-widget (metrics) or
