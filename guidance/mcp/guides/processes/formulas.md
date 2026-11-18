@@ -188,9 +188,9 @@ substitutes the literal `true`, producing an always-taken branch nobody asked fo
 **Length, at most 2048 characters**, applied before anything is stored — the pre-save gate is what runs
 the platform's macro converters, whose regexes have no match timeout, so a bound applied there would be
 too late. 2048 is generous for a formula but NOT for one built by concatenation: a metapath reference is
-54 to 200 characters, so ten to thirty-seven of them exhaust it - counted as you write it and, in a condition
-or Formula body, again after names expand. The same bound covers a `changeData` value
-`expression`, a connection expression, a Send email recipient and a performer contact. A filter condition
+54 to 200 characters, so ten to thirty-seven of them exhaust it - counted as you write it and, in a condition,
+a Formula body or (1.6.6.140+) a performer contact, again after names expand. The same bound covers a
+`changeData` value `expression`, a connection expression, a Send email recipient and a performer contact. A filter condition
 `expression` gets the same bound but is no formula: it must be the bare meta path of one reference
 (`process-data-source-filters`).
 

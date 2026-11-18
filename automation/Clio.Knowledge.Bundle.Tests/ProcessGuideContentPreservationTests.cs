@@ -188,8 +188,10 @@ public sealed class ProcessGuideContentPreservationTests
         // 1.6.6.30 through type:"scriptTask". The floor is what the entry must still carry.
         ("process-element-catalog-details", "`scriptTask`        Script task", "1.6.6.30",
             "the version floor on the entry that changed from read-only to buildable"),
-        ("process-element-catalog-details", "`webService`        Call web service", "READ-ONLY here",
-            "the per-entry marker on the entry with no other signal that it cannot be built"),
+        // webService lost its READ-ONLY pin with the Call web service element: buildable via type:"webService".
+        // What the entry must still carry is the floor, as formulaTask, scriptTask and callActivity do.
+        ("process-element-catalog-details", "`webService`        Call web service", WebServiceGuidanceTests.Floor,
+            "the version floor on the entry that changed from read-only to buildable"),
         // callActivity lost its READ-ONLY pin in ENG-92707, the same way formulaTask lost its own in
         // ENG-92712: the element became buildable via type:"subProcess". What the entry must still carry
         // is the version floor — without it an agent on an older environment reads "buildable" and gets a

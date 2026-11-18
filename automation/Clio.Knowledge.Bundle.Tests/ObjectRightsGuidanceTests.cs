@@ -109,7 +109,53 @@ public sealed class ObjectRightsGuidanceTests
         TestName = "ObjectRights_ShouldStateThatARevokeKeepsTheRow")]
     [TestCase("the grant changes nothing for internal users",
         TestName = "ObjectRights_ShouldStateThatTheAllEmployeesRowShadowsAnInternalGrant")]
-    [TestCase("The tool never reorders rows", TestName = "ObjectRights_ShouldStateThatTheToolNeverReordersRows")]
+    [TestCase("A grant never reorders rows", TestName = "ObjectRights_ShouldStateThatAGrantNeverReordersRows")]
+    [TestCase("grantee plus exactly ONE of position, above, remove-row — a call of its own",
+        TestName = "ObjectRights_ShouldStateThatAMoveOrRemovalIsACallOfItsOwn")]
+    [TestCase("you MUST NOT remove a row when the developer asked to take operations away",
+        TestName = "ObjectRights_ShouldForbidRemovingARowForARevoke")]
+    [TestCase("any operation they lose is a revoke of EXTERNAL access",
+        TestName = "ObjectRights_ShouldStateThatAnExternalNarrowingIsARevokeOfExternalAccess")]
+    [TestCase("grantee + exactly one of position, above, remove-row for a move or a removal",
+        TestName = "ObjectRights_ShouldListTheLayoutArgumentsInTheArgsLine")]
+    [TestCase("enable-operation-permissions; disable-operation-permissions; package (clio ",
+        TestName = "ObjectRights_ShouldListThePackageArgumentInTheArgsLine")]
+    [TestCase("A clio without them refuses those arguments as unknown: then move or remove the row in the Object permissions designer",
+        TestName = "ObjectRights_ShouldFallBackToTheDesignerOnAClioWithoutTheLayoutArguments")]
+    [TestCase("which can WIDEN their access", TestName = "ObjectRights_ShouldStateThatARemovalCanWidenAccess")]
+    [TestCase("The preview and the result name that next matching row and the operations it gives",
+        TestName = "ObjectRights_ShouldStateThatARemovalNamesTheDecidingRow")]
+    [TestCase("removing the All employees row cuts off every internal user with no other row, except for the operations a \"…any data\" system operation still gives them",
+        TestName = "ObjectRights_ShouldStateThatRemovingAllEmployeesCutsOffInternalUsers")]
+    [TestCase("Removing the All external users row takes the object away from every portal user for whom that row was the deciding row and no other row grants it",
+        TestName = "ObjectRights_ShouldQualifyWhichPortalUsersLoseAccessOnRemoval")]
+    [TestCase("External roles are named as such", TestName = "ObjectRights_ShouldStateThatExternalRolesAreNamed")]
+    [TestCase("a move or a removal changes the stored rows only (a removed row stays removed)",
+        TestName = "ObjectRights_ShouldStateThatARemovalWhileOffIsStillSaved")]
+    [TestCase("Refused, writing nothing: a grantee with no row, or with several rows; above naming a role with no row or several; a removal that would leave an administered object with no row that grants any operation; any of these arguments together with operations, revoke or a switch flag",
+        TestName = "ObjectRights_ShouldListTheMoveAndRemoveRefusals")]
+    [TestCase("renumbered 0..n-1", TestName = "ObjectRights_ShouldStateThatRowsAreRenumbered")]
+    [TestCase("The other rows keep their relative order",
+        TestName = "ObjectRights_ShouldStateThatOtherRowsKeepTheirRelativeOrder")]
+    [TestCase("The preview and the result list every role whose operations change",
+        TestName = "ObjectRights_ShouldStateThatEveryRoleWhoseAccessChangesIsListed")]
+    [TestCase("ANY row that differs from the plan fails the call",
+        TestName = "ObjectRights_ShouldStateThatAWholeListSaveFailsOnAnyDifference")]
+    [TestCase("On Creatio 8.3.4 and later the change applies at once, also to a user who is already logged in (probed on 8.3.4 and 10.2.471, Evidence below)",
+        TestName = "ObjectRights_ShouldBoundTheImmediateEffectToTheProbes")]
+    [TestCase("before you report a narrowing as effective, check it in a session opened after the write",
+        TestName = "ObjectRights_ShouldCheckANarrowingInAFreshSession")]
+    [TestCase("A narrowing is proven only in a session opened after the write",
+        TestName = "ObjectRights_ShouldVerifyANarrowingInAFreshSession")]
+    [TestCase("If that user still sees the old access, logging in to the site again is the reliable way to apply it",
+        TestName = "ObjectRights_ShouldOfferReLoginAsTheReliableFallback")]
+    [TestCase("a Freedom UI list page already open as a non-admin user followed a row move in both directions without a reload",
+        TestName = "ObjectRights_ShouldCiteTheOpenPageProbe")]
+    [TestCase("if it still shows the old access, log in again before you conclude anything",
+        TestName = "ObjectRights_ShouldVerifyAgainAfterAReLoginWhenTheOldAccessShows")]
+    [TestCase("Prefer it whenever the goal is \"decide before role Y\" — do not compute a position for that",
+        TestName = "ObjectRights_ShouldPreferAboveOverAComputedPosition")]
+    [TestCase("There is no below", TestName = "ObjectRights_ShouldStateThatThereIsNoBelow")]
     [TestCase("ONE object per call", TestName = "ObjectRights_ShouldStateOneObjectPerCall")]
     [TestCase("nothing is granted by default", TestName = "ObjectRights_ShouldStateThatOperationsAreRequired")]
     [TestCase("a grant or revoke without it (or with a value that names no operation) is refused before any read or write",
@@ -165,6 +211,41 @@ public sealed class ObjectRightsGuidanceTests
     [TestCase("`All employees` = `a29a3ba5-4b0d-de11-9a51-005056c00008`",
         TestName = "ObjectRights_ShouldOwnTheAllEmployeesId")]
     [TestCase("returns success with ZERO rows", TestName = "ObjectRights_ShouldStateThatADeniedReadIsNotAnError")]
+    [TestCase("holds exactly the rows stored for the object, in priority order",
+        TestName = "ObjectRights_ShouldStateWhatTheBindingHolds")]
+    [TestCase("Without it the package of the object's schema is used",
+        TestName = "ObjectRights_ShouldStateTheDefaultBindingPackage")]
+    [TestCase("When that package is locked (a product object such as Contact or Account, an object of a locked app), the CurrentPackageId package is used instead; no other package is tried, and the call is refused only when the CurrentPackageId package is locked too",
+        TestName = "ObjectRights_ShouldStateTheCurrentPackageFallbackForALockedObject")]
+    [TestCase("A named package is never replaced",
+        TestName = "ObjectRights_ShouldStateThatANamedPackageIsNeverReplaced")]
+    [TestCase("its binding carries EVERY row stored for that object on this site",
+        TestName = "ObjectRights_ShouldStateThatAProductObjectBindingCarriesEveryRow")]
+    [TestCase("You MUST say this to the developer before the write, name the package the preview shows, and let the developer choose the package",
+        TestName = "ObjectRights_ShouldRequireTellingTheDeveloperAboutAProductObjectBinding")]
+    [TestCase("a missing or locked package is refused before any write, and the refusal names a package to use",
+        TestName = "ObjectRights_ShouldStateThatALockedPackageIsRefusedFirst")]
+    [TestCase("A preview does NOT fail on a refused package",
+        TestName = "ObjectRights_ShouldStateThatAPreviewShowsARefusedPackage")]
+    [TestCase("no second binding is written", TestName = "ObjectRights_ShouldStateThatNoSecondBindingIsWritten")]
+    [TestCase("With package naming a different package the call is refused before any write, naming the package that holds the binding",
+        TestName = "ObjectRights_ShouldStateThatAnOwnBindingElsewhereRefusesAnotherPackage")]
+    [TestCase("Without package that package is the target: the binding is updated where it is",
+        TestName = "ObjectRights_ShouldStateThatAnOwnBindingElsewhereIsTheDefaultTarget")]
+    [TestCase("While the switch is OFF the bound rows decide nothing",
+        TestName = "ObjectRights_ShouldStateThatBoundRowsNeedTheSwitch")]
+    [TestCase("Package install adds and updates rows but never deletes them",
+        TestName = "ObjectRights_ShouldStateThatInstallNeverDeletesRows")]
+    [TestCase("revoke the role's operations instead of removing its row",
+        TestName = "ObjectRights_ShouldPreferARevokeToWithdrawInstalledAccess")]
+    [TestCase("run the same call again — it changes no row and binds them",
+        TestName = "ObjectRights_ShouldStateHowToRepairAFailedBinding")]
+    [TestCase("After a failed remove-row the same call is refused",
+        TestName = "ObjectRights_ShouldStateHowToRepairTheBindingAfterARemoval")]
+    [TestCase("MUST: that export rewrites the package folders from the database and deletes on-disk items the database lacks",
+        TestName = "ObjectRights_ShouldCarryTheDestructiveExportPrecondition")]
+    [TestCase("not reproduced by an install on a clean site",
+        TestName = "ObjectRights_ShouldStateTheEvidenceOfTheInstallRules")]
     [Description("object-rights keeps each rule of the one-object, explicit-flag contract that an agent must weigh before a write; losing one of them in an edit turns the article back into the old contract.")]
     public void ObjectRights_ShouldStateTheContractRule(string rule)
     {
@@ -238,6 +319,75 @@ public sealed class ObjectRightsGuidanceTests
 
         // Assert
         naming.Should().BeEmpty(because: $"'{retired}' is no longer a set-object-rights argument");
+    }
+
+    [TestCase("reaches users who are already logged in immediately")]
+    [TestCase("reliably only after they log in again")]
+    [TestCase("logged in again after the write")]
+    [Description("object-rights keeps the probed rule for a logged-in user: a change applied at once in the probes, logging in again is the fallback for a user who still sees the old access, and only a narrowing is checked in a fresh session. It neither promises the effect unconditionally nor makes a re-login a required step after every change.")]
+    public void ObjectRights_ShouldNotMisstateWhenAChangeReachesALoggedInUser(string retired)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().NotContain(retired,
+            because: "an unconditional promise hides a session that still has the old access, and a mandatory re-login after every change contradicts the probes");
+    }
+
+    [Test]
+    [Description("The package binding boundary names the first clio release that binds the rows and takes the package argument — a gated placeholder until that release is tagged — and says what an older clio does.")]
+    public void ObjectRights_ShouldStateTheVersionBoundaryOfPackageBinding()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().MatchRegex(
+            @"Binding the rows to a package \(the package argument and every rule under Package binding\) requires clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later",
+            because: "a released clio without the binding refuses package and binds nothing, so an agent must know the release that has it");
+        normalized.Should().Contain("An older clio refuses package as unknown and binds nothing",
+            because: "the agent must tell the developer the rights do not ship on an older clio");
+    }
+
+    [Test]
+    [Description("The move/remove boundary names the first clio release with position, above and remove-row — a gated placeholder until that release is tagged — so replacing the placeholder with the released version touches only the article.")]
+    public void ObjectRights_ShouldStateTheVersionBoundaryOfMoveAndRemove()
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().MatchRegex(
+            @"Moving or removing a row \(position, above, remove-row\) requires clio (<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3}) or later",
+            because: "an older clio refuses these arguments as unknown, so an agent must know the release that has them");
+    }
+
+    [TestCase("removing a role's row is done in the designer")]
+    [TestCase("the designer sets the order")]
+    [TestCase("moved ABOVE the All employees row in the Object permissions designer")]
+    [TestCase("first (the designer)")]
+    [Description("The designer-only wording for moving and removing a row stays retired: the layout call does both, and the designer remains only the fallback for a clio without the arguments.")]
+    public void ObjectRights_ShouldNotSendMovesAndRemovalsToTheDesigner(string retired)
+    {
+        // Arrange
+        string guide = File.ReadAllText(Path.Combine(Root(), ObjectRightsPath));
+
+        // Act
+        string normalized = Normalized(guide);
+
+        // Assert
+        normalized.Should().NotContain(retired,
+            because: "set-object-rights now moves and removes a row; sending the agent to the designer would bring back the manual step");
     }
 
     [Test]

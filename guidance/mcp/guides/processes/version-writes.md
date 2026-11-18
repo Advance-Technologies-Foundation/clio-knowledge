@@ -119,8 +119,10 @@ and the answer it offers is a new version -- so a session answer of "edit the cu
 survive it. Put the refusal in front of the user, ask whether this edit should become a version, and on
 yes send the SAME operations to `modify-business-process-as-new-version`, which never refuses over
 layout. Q2 then follows normally, and matters MORE here than usual: the new version's diagram is laid
-out afresh, so "look at it before making it actual" is the whole point of asking.
-`process-diagram-layout` owns what counts as a re-draw.
+out afresh, so "look at it before making it actual" is the whole point of asking. From CrtProcessBuilder
+1.6.6.125 a batch with no structural operation is never refused over layout, so it never needs a version
+to keep the diagram - Q1 still decides where it goes. `process-diagram-layout` owns what counts as a
+re-draw and which operations are structural.
 
 That policy is YOUR behaviour, not a field on any request. Neither tool takes a "session mode", and no
 call inherits anything from a previous one: every call states its own destination, and nothing is

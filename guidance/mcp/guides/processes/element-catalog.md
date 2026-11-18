@@ -15,6 +15,19 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 `process-naming` only to relabel something that already exists or to settle a name collision.
 
 == What you can build today (create-business-process) ==
+- Every key is case-sensitive. From CrtProcessBuilder 1.6.6.136 `create-business-process`,
+  `modify-business-process` and `modify-business-process-as-new-version` REFUSE a request carrying a key its
+  contract does not declare (`lable`, `Label`) and save nothing; the message names the key's path and the key
+  meant, or the keys valid there. Do not paste a whole described element into `setElement`: clio refuses its
+  element-level fields before sending. A described readData / addData / changeData / deleteData block may be
+  re-applied: a key describe reports there is ignored, whoever typed it - a success can carry "Read-only fields
+  copied from describe were ignored", and no key it names was saved. Other blocks (email, subProcess,
+  openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
+  filter, signal or connections with setFilter / setSignal / setConnections, not in `setElement`. A bound
+  input in element `parameters`, and a parameter's sourceElement / sourceElementParameter / sourceColumn, are
+  refused: write them as mappings (for an item property, target the dotted `Parameter.Item` path). Flat
+  approval fields are refused everywhere, with the nested key to use. An older package drops an unknown key
+  in silence: read the result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
 - Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
@@ -39,9 +52,10 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   selection`), plus a record `filter` over the SELECTION object.
 - Send email: `sendEmail` (the Send email element / EmailTemplateUserTask) is BUILDABLE and fully
   configurable through its `email` block — mode, sender, recipients, subject, the message as EITHER an HTML
-  body OR an existing email template (with the record its macros resolve against), options and the
-  manual-mode performer. `process-send-email` owns the element and the CUSTOM message;
-  `process-send-email-template` owns the TEMPLATE message and its limits.
+  body OR an existing email template (with the record its macros resolve against), options, the
+  manual-mode performer and, from CrtProcessBuilder **1.6.6.127**, the files it sends - only when the FULL contract
+  names `attachments`. `process-send-email` owns the element and the CUSTOM message; `process-send-email-template`
+  owns the TEMPLATE message and its limits; `process-send-email-attachments` owns `email.attachments`.
 - Open edit page: `openEditPage` (the Open edit page element / OpenEditPageUserTask) is BUILDABLE and fully
   configurable through its `openEditPage` block — page, editing mode, pre-filled values, the record to open,
   performer, Log activity, result column and completion condition. `process-open-edit-page` owns the
@@ -65,11 +79,9 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 - Sequence flows; process-level parameters (with an optional constant default value); element-parameter mappings.
 - `useBackgroundMode` on any element that OFFERS it (it is not signal-specific, but neither is it universal —
   four element kinds REMOVE the control outright, so a rule of the form "tick it on every element" states an
-  impossible requirement). Verified against the designer's own property pages (`CrtProcessDesigner`,
-  2026-08-21): `ProcessTerminateEventPropertiesPage`, `ProcessTimerStartEventPropertiesPage`,
-  `IntermediateThrowMessagePropertiesPage` and `SendEmailUserTaskPropertiesPage` each apply a schema-diff
-  `remove` operation against the background-mode control; a Terminate element therefore CANNOT be put in
-  background mode and its `false` is correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
+  impossible requirement): Terminate, Start timer, the message throw and `SendEmailUserTask` remove it (evidence:
+  `process-element-catalog-details`), so a Terminate element CANNOT be put in background mode and its `false` is
+  correct, not an oversight. `EmailTemplateUserTask` — the `sendEmail`
   element kind — INSERTS the control and so does take the flag; do not confuse it with `SendEmailUserTask`,
   which does not. Do NOT set it on the elements of a signal-started process just because the process is
   signal-started: the start's own default (below) already runs the instance in a background worker up to its first
@@ -80,9 +92,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   user's screen (the platform's `ForbidUserInteractionInBackground`, on by default, skips it; the step still waits
   in the performer's task list), and an `openEditPage` step with the flag ON was
   measured not to resume — `process-open-edit-page` owns that rule and `process-open-edit-page-details` the
-  measurement. Shipped signal-started processes carry the flag on
-  28 of the 166 elements after their start, all 28 behind a background start (108 processes of the shipped
-  packages, packages named Test or Demo excluded; scanned 2026-09-24). The designer gates the control on
+  measurement. The designer gates the control on
   `canUseBackgroundProcessMode()` = the `UseBackgroundProcessMode` feature enabled AND the schema not embedded,
   so on an environment with that feature off the control is absent everywhere and there is nothing to set;
   change it later on an EXISTING element with the `setElement` op
@@ -132,12 +142,15 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   `process-files-parameter` its `files` group. On the generic `userTask` route all three Process file tasks
   (`ObjectFileProcessingUserTask`, `ReportFileProcessingUserTask`, `ProcessFileProcessingUserTask`) are REFUSED: that
   route carries no file source, record or target.
+- `webService` (Call web service), from CrtProcessBuilder **1.6.6.150** and only when the FULL contract names it:
+  calls a service REGISTERED in Studio > Web services; `process-web-service` owns its `webService` block.
+- `sendChatMessage` (Send chat message), from CrtProcessBuilder **1.6.6.186**; the default create contract
+  lists `chatMessage (sendChatMessage)`, and a clio without it refuses the block: one message to one contact through a chat
+  channel; `process-send-chat-message` owns its `chatMessage` block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
   page (REFUSED), timer/message start,
   intermediate events,
-    `webService` (also marked READ-ONLY in the
-    catalog in `process-element-catalog-details`, where silence used to read as "buildable"),
   and reading one COLUMN out of a read COLLECTION's items (a first-record read's column IS a source,
   `sourceColumn` - see `process-data-elements`) — all
   four Read data modes DO build, see the catalog entry in `process-element-catalog-details`. A collection IS consumed now: a multi-instance
@@ -152,15 +165,17 @@ reading processes. To BUILD, map them to the create-business-process `type` + `u
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. SEVEN user tasks have their own dedicated build type and must NOT be built as
 a generic `userTask`: `preconfiguredPageUserTask` -> `type:"preconfiguredPage"`, see
-`process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, so it could
-only build a page-less element that fails at run time, and it is REFUSED; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
-modes (mode/sender/recipients/subject/body OR template + templateEntity/options/performer), see
-`process-send-email`, and `process-send-email-template` for the template mode;
+`process-preconfigured-page` — the generic route cannot carry its page, buttons or data sources, and it is
+REFUSED; `emailTemplateUserTask` -> `type:"sendEmail"` — full configuration in both message
+modes, see `process-send-email`, and `process-send-email-template` for the template mode;
 `openEditPageUserTask` -> `type:"openEditPage"`, see `process-open-edit-page`; `approvalUserTask` ->
 `type:"approval"`, see `process-approval`; and the three Process file tasks, `objectFileProcessingUserTask`,
 `reportFileProcessingUserTask` and `processFileProcessingUserTask` -> `type:"fileProcessing"` with the matching
 `attachments`, `report` or `files` group, see `process-files` (`files`: `process-files-parameter`) — the generic route carries no file source, record or
-target, and it is REFUSED.)
+target, and it is REFUSED. `WebServiceUserTask` ("Call web service" in list-user-tasks) is a legacy SOAP task,
+REFUSED too: build `webService` (`process-web-service`). `SendChatMessageUserTask` (Send chat message): from
+CrtProcessBuilder **1.6.6.186** REFUSED on create; on an older package do not build it on the
+generic route either: it cannot carry the template or the chat column values: build `sendChatMessage`.)
 - Custom user-task compile rule: a CUSTOM user task is a `ProcessUserTask` SCHEMA, not a process element —
   its own C# methods are generated into the package assembly (it has no `IsInterpretable`; that property
   exists only on `ProcessSchema`), so CREATING or CHANGING one needs a compile before any process can use

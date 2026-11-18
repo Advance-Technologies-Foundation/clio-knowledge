@@ -202,9 +202,9 @@ That reports pass or fail. It does NOT print the per-article size table, and tha
 early warning there is: an article between 80% and 100% of the response budget is green, by design,
 because gating that band blocked open pull requests that were doing nothing wrong. The table is
 written to the test output and needs a logger the default command does not attach, so an article
-sliding toward the limit is invisible under the line above. When you touch a process guide, run it
-this way and read the `of budget` lines -- an article marked `approaching the budget` should be split
-before it is grown further:
+sliding toward the limit is invisible under the line above. When you touch a guide, run it this way
+and read the `of budget` lines (`GuidanceInlineReplyBudgetTests` prints one for every guidance
+article) -- an article marked `approaching the budget` should be split before it is grown further:
 
 ```bash
 dotnet test automation/Clio.Knowledge.Bundle.Tests/Clio.Knowledge.Bundle.Tests.csproj --logger "console;verbosity=detailed"
@@ -221,6 +221,22 @@ A guidance contribution should state:
 - supporting evidence;
 - related reference implementations without treating their incidental choices as universal requirements.
 
+### A boundary that gates the whole article comes first
+
+When the tool an article's Scope owns needs a clio newer than `compatibility.clio.min` in
+`bundle-source.json`, an agent must meet that boundary before it reads anything else, because a knowledge
+library is updated apart from the clio that serves it: an agent on an older clio otherwise reads the whole
+article, calls the tool and only then learns it is not there. So:
+
+- the article states the boundary right after its Scope paragraph, with how to tell (the tool, or the argument
+  that carries the feature, is missing from `get-tool-contract`) and what to do (stop and tell the user to update
+  clio); a check on the contract alone is enough while no released clio has the tool yet;
+- the article's `description` in `bundle-source.json` starts with it (`Needs clio 8.1.0.150 or later.`), so the
+  `get-guidance` catalog shows it before the article is opened;
+- the boundary is stated once there; a later mention points back to it.
+
+A boundary for one step, one argument or one value stays inline next to the instruction it gates.
+
 ### An article must fit in one `get-guidance` response
 
 An article is delivered as a single JSON line. Past a size limit the caller cannot accept it, the
@@ -236,12 +252,13 @@ So size is a delivery contract, not a matter of taste:
   `automation/Clio.Knowledge.Bundle.Tests/ProcessGuideResponseSizeTests.cs`, which is the enforcing
   check. Measure the JSON-escaped payload, not the file on disk — escaping inflates a
   backtick-dense article by 20–35%.
-- The core and `-details` articles split out of process-modeling, app-modeling, workplaces,
-  existing-app-maintenance and core-rules are also held to the inline budget in
+- Every guidance article is also held to the inline budget in
   `automation/Clio.Knowledge.Bundle.Tests/GuidanceInlineReplyBudgetTests.cs`: 19,000 UTF-8 bytes as
   clio writes the reply, below the size a Copilot CLI agent receives inline instead of spilling it to
-  a file. An edit that pushes one of them over moves text to its `-details` article; it does not
-  raise the budget.
+  a file. The set is read from `bundle-source.json`, so a new article is measured from its first pull
+  request. The only way out is the fixture's exemption list of articles that were already over the
+  budget; an entry is removed once its article fits. An edit that pushes an article over moves text to a
+  `-details` article; it does not raise the budget.
 - When an article outgrows the budget, split it at a section boundary rather than trimming
   evidence. Give each piece its own `itemId` in `bundle-source.json`, keep the original `itemId`,
   `uri` and `legacyUris` on the piece that stays the entry point, and have that entry index the

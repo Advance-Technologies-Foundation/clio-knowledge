@@ -21,12 +21,14 @@ you run only after the user approves it (`core-rules`).
 - `FileCollection` — SEVERAL files: a record collection (`CompositeObjectList`) with exactly ONE item, `File`
   (FileLocator, Variable, no tag). Aliases `filecollection`, `file collection` and `collection of files`. The alias
   builds the shape.
-- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File defaults to Variable too;
-  declare In or Out only to narrow it. An explicit direction always wins.
+- Direction: a FileCollection defaults to Variable; a generic Collection to Out. A File to Variable as well, except
+  one the request adds with no direction and an element fills: Internal from the clio release `process-parameters` names
+  (older: state it); an existing one is never switched. An explicit direction always wins. State one; a helper is
+  Internal.
 - Neither takes a `value` (a file has no constant form) nor a `referenceSchema` (it is not a lookup): both are
   refused.
 - Declare them in parameters[] (create) or with addParameter (modify), for example
-  "parameters": [{"name": "ContractFileParameter", "type": "File"},
+  "parameters": [{"name": "ContractFileParameter", "type": "File", "direction": "In"},
     {"name": "DocumentsParameter", "type": "FileCollection", "direction": "In"}]
 
 == Reading them back ==
@@ -80,10 +82,10 @@ targets only.
   source is kept. Only file items are paired.
 - R-M2 — a collection with NO file item onto a collection that takes files is refused ("has no File item"): map a
   file output or a FileCollection instead.
-- P2-MI — a mapping that binds a multi-instance `InputRecordCollection` (as its target, or through P1) while one of
-  its file items, a File parameter of the called process, stays unbound is accepted with a notice: that parameter
-  "will be empty on every iteration" unless you map `InputRecordCollection.<F>`. Records without files are
-  legitimate.
+- P2-MI — a multi-instance `InputRecordCollection` a request binds (as its target, or through P1) with a callee
+  File item still unbound when the request ends gets a notice (measured on CrtProcessBuilder 1.6.6.123; older
+  packages: at the mapping): that parameter "will be empty on every iteration" unless you map
+  `InputRecordCollection.<F>`. Rows without files are legal.
 - P3 — a SINGLE file (not an item) onto a file item of a single-instance owner (any element but a multi-instance
   sub-process, or the process itself: `DocumentsParameter.File`) clears every bound collection above that item, one
   notice per level: the collection now carries that one file instead of one row per source row, and reads as one
@@ -107,21 +109,19 @@ targets only.
 
 == Recipes ==
 1. Keep the files an element produced:
-   {"op": "addParameter", "parameter": {"name": "DocumentsParameter", "type": "FileCollection"}}, then
+   {"op": "addParameter", "parameter": {"name": "DocumentsParameter", "type": "FileCollection",
+   "direction": "Internal"}}, then
    {"op": "addMapping", "mapping": {"targetProcessParameter": "DocumentsParameter", "sourceElement": "ReadFiles",
    "sourceElementParameter": "ObjectFiles"}}. P2 binds DocumentsParameter.File to ReadFiles.ObjectFiles.File,
    with a notice.
-2. Hand them to a Process parameter element: its `files` group (`process-files-parameter`), or onto one built in
-   the designer
-   {"op": "addMapping", "mapping": {"elementName": "CopyFiles", "elementParameter": "Files",
-   "processParameter": "DocumentsParameter"}}; P2 binds Files.File to DocumentsParameter.File. Measured on
-   CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one run of recipes 1 and 2 copied the three
-   source files to the target record, names and bytes equal.
+2. Hand them to a Process parameter element, one built in the designer included: its `files` group
+   (`process-files-parameter`). Measured on CrtProcessBuilder 1.6.6.98 on a stand, on designer-made elements: one
+   run of recipes 1 and 2 copied the three source files to the target record, names and bytes equal.
 3. One called-process run per file: the callee declares a File input; the calling Sub-process element is
    multi-instance (`process-sub-process`) and maps InputRecordCollection.ContractFileParameter from
    DocumentsParameter.File (or from ReadFiles.ObjectFiles.File). P1 binds InputRecordCollection too.
-   Send the InputRecordCollection mapping that guide asks for FIRST, from the SAME collection (a P2-MI
-   notice until the item is mapped; see Order matters).
+   Send the InputRecordCollection mapping that guide asks for FIRST, from the SAME collection, and the item
+   mapping in that request.
 4. Into a SINGLE-instance sub-process's FileCollection input: map its ITEM from the source's file item; P1 binds the
    input too. That input does not take files: an outer-only mapping onto it is stored unpaired. Neither form has
    been run on a stand.
@@ -132,7 +132,7 @@ targets only.
 - An addMapping value onto any file or collection target: a file has no constant form, so map it.
 - setParameter with type FileCollection on a collection of another shape: remove it and add it again.
 - removeParameter of a collection while a mapping reads one of its ITEMS (`process-parameters` owns that guard).
-Every refusal here and above names the way forward and saves nothing: fix the call before re-sending.
+Every refusal here and above saves nothing and names the fix.
 
 == The Process file element: `fileProcessing` ==
 Build it only when the FULL contract (as above) names `fileProcessing` (server alias `processFile`); such a clio
@@ -185,8 +185,8 @@ them only here.
   object. Remove the describe-only members before resubmitting: `actionStored`, `outputs`, `issues` and `display` on
   every value source.
 - Shipped product processes end in a record's attachments (Generated report); when a following element needs the
-  files, map its output collection (Recipes). Send email attachments and Creatio.ai file inputs are not buildable
-  here yet.
+  files, map its output collection (Recipes). Send email attachments: `process-send-email-attachments`. Creatio.ai
+  file inputs are not buildable here yet.
 - The saved copies: iterate `CreatedObjectFileIds` with a multi-instance sub-process (its callee takes a Guid), or
   re-select them with Read data (not Modify data) on the target's attachment object, filtered on its link column =
   the target record and `CreatedOn` `CurrentHour`. Hazards: it also matches others' files from that hour, and misses

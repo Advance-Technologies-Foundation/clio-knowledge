@@ -198,5 +198,6 @@ read as "this process has no versions".
   * naming a process, its elements and its parameters    -> `process-digest` (N1-N10), owner `process-naming`
   * building and editing a process at all                -> `process-digest`, then `process-modeling`
   * what a described element or parameter contains       -> `process-modeling`, then the article it routes to
+  * a Call web service element describe reports unresolved -> fix it BEFORE any modify: `process-web-service`
 This article owns the version model and the version fields, and nothing else. It does not restate the
 descriptor, the element catalog (`process-element-catalog`) or the connection rules.

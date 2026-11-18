@@ -96,9 +96,10 @@ the sender domain. The shipped process that generates it saves to DNSGuideFile t
 record but no link column, and links the files to it afterwards with a Modify data on the file name. As a whole
 create-business-process descriptor (`<package>` from `get-target-package`, `<templateId>` from `list-printables`):
 {"name": "UsrSenderDomain_GenerateDNSGuide", "caption": "Generate DNS guide", "packageName": "<package>",
-"parameters": [{"name": "SenderDomainParameter", "type": "Lookup", "referenceSchema": "SenderDomain"}, {"name":
-"SiteUrlParameter", "type": "Text"}], "elements": [{"name": "DNSGuideRequestedStart", "type": "startEvent", "caption":
-"DNS guide requested"}, {"name": "AddDNSGuideReport", "type": "addData", "caption": "Add DNS guide report", "addData":
+"parameters": [{"name": "SenderDomainParameter", "type": "Lookup", "direction": "In", "referenceSchema":
+"SenderDomain"}, {"name": "SiteUrlParameter", "type": "Text", "direction": "In"}], "elements": [{"name":
+"DNSGuideRequestedStart", "type": "startEvent", "caption": "DNS guide requested"}, {"name": "AddDNSGuideReport",
+"type": "addData", "caption": "Add DNS guide report", "addData":
 {"source": "DNSGuideReport", "values": [{"column": "SenderDomain", "processParameter": "SenderDomainParameter"},
 {"column": "SiteUrl", "processParameter": "SiteUrlParameter"}]}}, {"name": "GenerateDNSRequirements", "type":
 "fileProcessing", "caption": "Generate DNS requirements", "fileProcessing": {"report": {"printable": "<templateId>",

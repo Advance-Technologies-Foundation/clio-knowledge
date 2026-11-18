@@ -38,10 +38,14 @@ public sealed class GuidanceMigrationTests
         "process-parameters-details",
         "process-modeling-details",
         "process-script-task-details",
+        "process-multi-start",
         "process-versions-details",
         "process-files",
         "process-files-report",
         "process-files-parameter",
+        "process-send-email-attachments",
+        "process-web-service",
+        "process-send-chat-message",
         "process-data-elements-details",
         "process-perform-task-details",
         "app-modeling-details",
@@ -55,6 +59,12 @@ public sealed class GuidanceMigrationTests
         "m365-addin-customization",
         "default-record-rights",
         "portal-sections",
+        "page-modal-size",
+        "process-dynamic-case",
+        "process-dynamic-case-change",
+        "web-service-registration",
+        "web-service-soap",
+        "column-rights",
         "widget-color-and-icon"
     ];
 

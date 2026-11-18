@@ -32,8 +32,8 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-perform-task` - the Perform task element and its parameter table.
   * `process-task-performer` - who performs a task: the element-level performer block (the only route to
     a TEAM) or OwnerId for one person.
-  * `process-task-category` - how a category or priority must be mapped, and what degrades silently
-    when it is not (not needed to BUILD one: `process-perform-task` carries the ids and refusals).
+  * `process-task-category` - how to map a category or priority, and what degrades silently when it
+    is not (not needed to BUILD one: `process-perform-task` has the ids and refusals).
     Read it when a field shows a raw Guid or a results dropdown offers the wrong set.
   * `process-open-edit-page` - the Open edit page element, and when to choose it.
   * `process-access-rights` - the Change access rights element and its silent no-ops.
@@ -48,8 +48,7 @@ modify safety); every other topic has its own owner -- read the one your task ne
   * `process-versions` - the version model and which member runs. Read it BEFORE editing or launching
     ANY existing process.
   * `process-version-writes` - saving a new version, a restore point, rollback.
-Each is sized to be read WHOLE through `get-guidance`. Never infer another article's rule from this
-one; read that article.
+Each is sized to be read WHOLE through `get-guidance`; never infer another article's rule from this one.
 
 == How clio builds processes (read first) ==
 - clio makes no LLM call: you own the intent->BPMN translation. You NEVER hand-author process
@@ -61,7 +60,7 @@ one; read that article.
     RETIRED schemas (`CallUserTask`, `EmailUserTask`, `SendEmailUserTask`) as equal peers with no
     marker, and TWO schemas share the caption "Send email" (`EmailTemplateUserTask` is the live one,
     `SendEmailUserTask` creates nothing): always key on the schema NAME, never on a caption.
-  * create-business-process - build a NEW process from a JSON descriptor, and save it.
+  * create-business-process - build and save a NEW process from a JSON descriptor.
   * modify-business-process - edit an EXISTING process by an ordered list of operations.
   * describe-business-process - read a process back as a graph; from clio 8.1.0.141 a large
     one is a SUMMARY (no uids, labels, blocks, layout): pass `mode=full` (the whole graph) or `element=<name>` (one element). Every `mode=full` in these
@@ -85,11 +84,11 @@ one; read that article.
     { "name": "EndOnboardingHandedOff", "type": "endEvent", "caption": "Onboarding handed off" }
   ],
   "flows": [ { "source": "OnboardingRequestedStart", "target": "NotifyAccountOwner" },
-             { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
+    { "source": "NotifyAccountOwner", "target": "EndOnboardingHandedOff" } ],
   "parameters": [ { "name": "AccountNameParameter", "type": "Text", "direction": "In",
-                    "caption": "Account name" } ],
+    "caption": "Account name" } ],
   "mappings": [ { "elementName": "NotifyAccountOwner", "elementParameter": "<ParamName>",
-                  "processParameter": "AccountNameParameter" } ]
+    "processParameter": "AccountNameParameter" } ]
 }
 - `packageName` must accept edits: the package the user named, else the application's (`package-name`
   from `get-app-info` / `create-app`), else the environment's current one, resolved with ONE
@@ -98,8 +97,8 @@ one; read that article.
   On `success: false` relay its error and ask; never substitute a package.
 - `name` is the local element handle used by flows (`source`/`target`) and mappings (`elementName`);
   it is `name`, not `id`. A `userTask` element auto-carries the task's parameters; map values into them
-  with `mappings`. For a record trigger use `signalStart` (see `process-data-elements`).
-- EVERY code and caption in these guides' examples is N1-N10 compliant on purpose (see `process-naming`):
+  with `mappings`. For a record trigger use `signalStart` (`process-data-elements`).
+- EVERY code and caption in these guides' examples is N1-N10 compliant on purpose (`process-naming`):
   copy their SHAPE, not just their fields - never a generated `Start1` / `task1` / `End1`.
 
 == Build recipe (intent -> running process) ==
@@ -114,13 +113,11 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
    when it is CHANGED carries TWO signal starts, not two processes and not one trigger. Signal, timer and message starts may be several; the SIMPLE (manual) start only
    once (`validate-process-graph` R3 and `create-business-process` enforce it). Two starts need
    CrtProcessBuilder 1.6.2.24 or later on the environment AND clio 8.1.0.131 or later; older ones refuse
-   the second start (`process-modeling-details`). Branches sharing a parameter each SET it with a
-   `formulaTask`, not a mapping (`process-parameters`).
+   the second start (`process-modeling-details`). Starts sharing a chain: `process-multi-start`.
 2. (recommended) `validate-process-graph(graph)` -> fix every error-severity finding.
 3. `list-user-tasks` -> pick the exact `userTaskName`(s) for your activities.
 4. `create-business-process(descriptor)` -> builds + saves in one call. Pass the descriptor as the JSON
-   object itself; a clio that answers "must be a string" predates that - pass a string holding the
-   same JSON.
+   object itself; an older clio answers "must be a string": pass the same JSON as a string.
 5. Verify with `describe-business-process mode=full` (element types, user-task names, parameter sources +
    direction - an output you can map FROM has `isOutput:true`, not `isResult` - and the signal
    trigger), never with a raw `execute-esq`/`odata-read` of the process record. A runtime check is
@@ -144,8 +141,9 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
      access to whoever it names, with nothing reported at run time; show the user the target object, the
      record `filter` and every grantee with its operations and level, and get an explicit yes first
      (`process-access-rights`);
-   * a sendEmail `email` block - a partial update; to/cc/bcc recipients MATCH-OR-APPEND (a new address
-     is added, an identical one is a no-op, none can be removed).
+   * a `chatMessage` block - partial; a switch to custom needs `message` (`process-send-chat-message`);
+   * a sendEmail `email` block - a partial update; recipients MATCH-OR-APPEND (none removable), a sent
+     `email.attachments` list REPLACES (`process-send-email-attachments`; only when the FULL contract names it).
 - On a file-design-mode (FSD) stand a built process is NOT runtime-active until it is loaded FS->DB
   and published.
 - Do NOT run `compile-creatio` to "make a process runnable" unless its save WARNED it cannot run until
@@ -154,7 +152,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   No `NeedXxx` / `IsXxx` column of a raw read is a compile instruction. WITHIN A PROCESS exactly two
   things pull a compile in, both C# YOU authored: a `scriptTask` (with the `methods` it calls) and a
   `userTask` with an after-activity-save script; all else, USING a compiled user task included, runs
-  without one. Other schemas (source code, business objects, DCM, value lists, a CUSTOM user-task
+  without one. Other schemas (source code, business objects, value lists, a CUSTOM user-task
   schema - `process-element-catalog`) carry their own compile obligations.
 
 == Set what was asked for, and nothing else ==
@@ -180,7 +178,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
 - Constructs the builder cannot create (inclusive/event-based gateways, timer/message starts,
-  intermediate events, `webService`; full list in `process-element-catalog`) survive a save untouched
+  intermediate events; full list in `process-element-catalog`) survive a save untouched
   as data - but you CAN still remove or rewire them by name and nothing will warn you. Gateway
   ELEMENTS, DEFAULT flows and the Formula element are buildable and NOT on that list
   (`process-branch-conditions`, `process-element-catalog`).
@@ -198,8 +196,8 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   `kind: "sequence"` on both, reading exactly like "condition cleared, as asked". Treat such a process
   as high-risk: prefer additive edits, do not remove or rewire those elements, and tell the user what
   you left alone.
-- Every modify re-draws the WHOLE diagram; where that would REPLACE an arrangement the server REFUSES
-  the edit and asks rather than flattening it. Read `process-diagram-layout` before editing a process whose diagram matters.
+- Only add/remove element/flow and `setFlow` re-draw the WHOLE diagram (1.6.6.125+); if that
+  REPLACES an arrangement the server REFUSES and asks. Read `process-diagram-layout` before editing a process whose diagram matters.
 - You MUST read `isActiveVersion` from the describe output before ANY modify of a process that is not
   a build in progress (`process-version-writes`): a modify overwrites the ONE schema you named (a process
   can be a family of them), and the overwrite is irreversible either way. TRUE: you would overwrite the

@@ -112,6 +112,18 @@ public sealed class CollectionParameterGuidanceTests
     }
 
     [Test]
+    [Description("A declared Lookup needs its referenceSchema, as a parameter and as an item: without one it is refused, the guide says why an older describe can read one back that way, and that a bare record id is a Guid.")]
+    public void Guide_ShouldRequireTheObjectOfADeclaredLookup()
+    {
+        string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+
+        guide.Should().Contain("`type: Lookup` without it is refused (older packages saved a lookup to no object); a bare record id is a Guid",
+            because: "the package refuses the shape, and an agent replaying an older describe meets the refusal");
+        guide.Should().Contain("Lookup only with `referenceSchema`",
+            because: "a collection item is refused the same way");
+    }
+
+    [Test]
     [Description("Both mirror-source refusals are stated: no item properties at all, and items without a column UId.")]
     public void Guide_ShouldNameBothMirrorSourceRefusals()
     {

@@ -21,7 +21,7 @@ Read the web guide for the mechanics; this table tells you which sections to app
 | PRE-EDIT: `page-schema-converters` | Concept only — page body must not declare a `converters` section; reference OOTB converters inline (see below) or an already-existing custom converter in a remote module |
 | PRE-EDIT: `page-schema-handlers` | Concept only — page body must not declare a `handlers` section; only reference an already-existing remote handler when the user explicitly asks |
 | PRE-EDIT: `page-schema-validators`, `page-schema-creatio-devkit-common` | Does NOT apply — no validator support on mobile (even OOTB), no devkit-common AMD dependency |
-| Replacing-schema concept, Design-package resolution, Virtual package materialization | Applies in full — same backend; `page.designPackageUId` / `page.willCreateReplacingInDesignPackage` are returned for mobile pages too |
+| Replacing-schema concept, Design-package resolution, Pages customized in more than one package (the check before the FIRST write to a page), Virtual package materialization | Applies in full — same backend; `page.designPackageUId` / `page.willCreateReplacingInDesignPackage` are returned for mobile pages too |
 | Canonical page modification flow (list-pages → get-page → edit → update-page → verify) | Applies in full |
 | `update-page optional-properties`, `update-page verify` flag, `sync-pages optional-properties` | Applies in full — identical semantics |
 | Body formatting (match existing indentation, do not reformat existing code) | Applies in full — mobile JSON bodies are also saved verbatim; match the indentation style already present in the page |
@@ -512,7 +512,8 @@ DRILL-DOWN — an optional `drilldownConfig` on the widget ROOT overrides the dr
 REPLACING CHAINS — a customized mobile page is usually a chain (template → vendor package → your
   design package). `get-page-hierarchy` is the tool that settles it; `parentSchemaName` from `get-page` /
   `list-pages` is ambiguous (it may name the TEMPLATE or the replaced schema). Author into the leaf
-  (`get-page`'s `designPackageName`) — the runtime merges every level. Two consequences: the section is
+  (`get-page`'s `designPackageName`) unless the user chose another layer in the web guide's "Pages customized
+  in more than one package" check — the runtime merges every level. Two consequences: the section is
   registered against the ROOT UId, and a replacing schema inherits its parent's name, so the
   `SchemaNamePrefix` check never fires when you edit an existing page (only when creating one).
 

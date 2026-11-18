@@ -154,8 +154,10 @@ described value reads back raw.
 - `value` is a plain constant for TEXT columns ONLY, and non-empty. The platform stores it as the raw string
   and the runtime reads every non-text column TYPED — a date/lookup/numeric constant would save green and
   fail at run time, so the server REFUSES it at build. Assign non-text columns via `processParameter`,
-  `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` / `[#Lookup.…#]` —
-  same macro grammar as parameter defaults — see the DEFAULT-value macro rules in `process-parameters`). An empty `value` is refused
+  `sourceElement`+`sourceElementParameter`, or an `expression` macro (`[#DateValue.…#]` /
+  `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]`: the referenced object's schema UId; from CrtProcessBuilder
+  1.6.6.186 its name is accepted and stored as the UId with a "stored as" warning, while an older package saves
+  a name green and the designer card shows `<entity not found>` — same macro grammar as parameter defaults — see the DEFAULT-value macro rules in `process-parameters`). An empty `value` is refused
   for every type: the runtime silently discards an empty assignment.
 - The `filter` is EFFECTIVELY MANDATORY: the runtime refuses to update with an empty filter (it would mean
   "update every record of the object"). To target ONE record, filter on `Id` against a process parameter
