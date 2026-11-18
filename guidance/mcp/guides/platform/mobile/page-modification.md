@@ -18,7 +18,7 @@ Read the web guide for the mechanics; this table tells you which sections to app
 | Web-guide section | On mobile |
 | --- | --- |
 | PRE-EDIT GUIDANCE CHECKLIST: `page-schema-resources`, entity-level `business-rules` (`create-entity-business-rules`), page-level `business-rules` (`create-page-business-rules`) | Applies with mobile-specific limits |
-| PRE-EDIT: `page-schema-converters` | Concept only — page body must not declare a `converters` section; reference OOTB converters inline (see below) or an already-existing custom converter in a remote module |
+| PRE-EDIT: `page-schema-converters` | Concept only — page body must not declare a `converters` section; reference OOTB converters inline (see below). The mobile SDK has no custom converter (see `mobile-remote-module`) |
 | PRE-EDIT: `page-schema-handlers` | Concept only — page body must not declare a `handlers` section; only reference an already-existing remote handler when the user explicitly asks |
 | PRE-EDIT: `page-schema-validators`, `page-schema-creatio-devkit-common` | Does NOT apply — no validator support on mobile (even OOTB), no devkit-common AMD dependency |
 | Replacing-schema concept, Design-package resolution, Pages customized in more than one package (the check before the FIRST write to a page), Virtual package materialization | Applies in full — same backend; `page.designPackageUId` / `page.willCreateReplacingInDesignPackage` are returned for mobile pages too |
@@ -301,8 +301,8 @@ Converters — OOTB inline, or reference an existing custom converter:
       Args: collectionName (string), selectionState (attribute ref)
       ""$Items | crt.ToCollectionFilters : 'Items' : $DataTable_SelectionState""
 
-  Custom converters: only reference one if the user explicitly asks for it AND it already
-  exists in a remote module (the page body still must not declare a `converters` section).
+  Custom converters: the mobile SDK has none, and a remote module cannot register one. Compute
+  the value into an attribute with a handler instead (`get-guidance name=mobile-remote-module`).
 
 Handlers — reference-only, from an existing remote module:
   Do not add a "handlers" section to the page body.

@@ -1326,7 +1326,7 @@
     {
       "itemId": "mobile-remote-module",
       "title": "Mobile remote module",
-      "description": "Custom business logic for the Creatio Mobile app as a remote module on @creatio/mobile-common: what the built script must be (one IIFE main.js, SDK external as crtSdk), where it sits in a package (Files/src/mobile/<ModuleName>/main.js), delivery through create-workspace / add-package / push-workspace and confirmation with get-package-file, the EnableMobileSDK feature, and how a mobile page refers to a module (a custom request in a component event, handler scopes, a crt.VirtualDataSource data source). Names what the mobile SDK does not support (custom validators, converters, UI components, HTTP) and the alternative for each.",
+      "description": "Custom business logic for the Creatio Mobile app as a remote module on @creatio/mobile-common: what the built script must be (one IIFE main.js, SDK external as crtSdk), where it sits in a package (Files/src/mobile/<ModuleName>/main.js), delivery through create-workspace / add-package / push-workspace and confirmation with get-package-file, the EnableMobileSDK feature, and how a mobile page refers to a module (a custom request in a component event, handler scopes, a crt.VirtualDataSource data source). Sends the agent to the npm package's type declarations and changelog as the reference for what a module can do.",
       "topicId": "creatio.mobile-remote-module",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/mobile-remote-module",

@@ -36,8 +36,10 @@ The script contract
   `DoBootstrap`, and calls `bootstrapCrtModule('<ModuleName>', <ModuleClass>)` in `bootstrap()`.
   `<ModuleName>` MUST equal the name of the folder the script is delivered in.
 - Every handler `type`, request `type` and data source name MUST be unique across all modules on the
-  environment and carry the customer prefix (`usr.` / `Usr`); a duplicate replaces the earlier one
-  without an error.
+  environment and MUST carry a customer prefix: the environment's schema prefix (`get-schema-name-prefix`),
+  in lower case with a dot for a type (`usr.OrderSaveGuard` on a `Usr` environment). An environment
+  with an empty schema prefix still needs one, agreed with the developer. A duplicate replaces the
+  earlier one without an error.
 
 Where the script sits
 - `<Package>/Files/src/mobile/<ModuleName>/main.js`.
@@ -51,9 +53,14 @@ Where the script sits
   `clio set-feature EnableMobileSDK 1 -e <environment>`.
 
 Delivering with clio
-1. `create-workspace` (once), then `add-package` for the package that carries the module. Prefer a
-   package that holds only module scripts. `add-package` scaffolds a C# project into it; for a
-   script-only package delete `Files/src/cs/`, `Files/Libs/`, `Files/<Package>.csproj` and
+1. `create-workspace` (once). Put the module into the package that holds the page — `packageName` in
+   the `page` object `get-page` returns — so that it travels with the page's application: list that
+   package under `Packages` in `.clio/workspaceSettings.json` and run `restore-workspace`. Use a
+   separate code package only when the page's package is not the customer's (its maintainer differs
+   from the environment's `Maintainer` setting, as for a package shipped by Creatio or installed from
+   the Marketplace); the module then does not travel with the page's application, and an export of
+   that application arrives without its handlers. Create it with `add-package`, which scaffolds a C#
+   project into it; for a script-only package delete `Files/src/cs/`, `Files/Libs/`, `Files/<Package>.csproj` and
    `Files/Directory.Build.targets`, in `descriptor.json` set the package's own `Descriptor.Type` to 0
    and remove `ProjectPath`, and drop the deleted project's line from the workspace's
    `MainSolution.slnx`, so nothing is compiled on the environment.
@@ -78,10 +85,10 @@ Delivering with clio
    about an unavailable `.csproj` for a script-only package; that is expected.
 5. The user synchronizes the Mobile app (Settings, Synchronize). The app reloads with the new scripts;
    a restart is needed only if the previous behaviour persists.
-- MUST NOT push a stale local copy of a package that people edit in the designers: `push-workspace`
-  installs the workspace copy of every package it holds and replaces what changed on the environment
-  since the copy was taken. When the module has to live in such a package, run `restore-workspace`
-  before adding the script, and run it again when the push does not follow at once.
+- MUST NOT push a stale local copy of the page's package: `push-workspace` installs the workspace copy
+  of every package it holds and replaces what changed on the environment since the copy was taken.
+  Run `restore-workspace` before adding the script, and again when the push does not follow at once;
+  every restore replaces the package folder, so stage the script after it.
 - A delivered script is NOT withdrawn by removing it. Measured in the run under Evidence: after
   `delete-app` (package and files gone from the environment), after a later push of the package without
   the script, and after a push that ran "File content generation" with the script absent
@@ -141,6 +148,7 @@ Evidence
   handler implemented using remote module in Creatio Mobile" (8.x), read 2026-11-16.
 - The package as the API reference: the `@creatio/mobile-common` npm package holds no runtime code,
   only type declarations (`index.d.ts`), a README and a `CHANGELOG.md` with one section per release.
+  Its declarations export no converter and no way to register one, read 2026-11-18.
 - Folder name as module name, evaluation of every script in the folder, the `crtSdk` global and the
   `crt.VirtualDataSource` configuration keys: Creatio Mobile app source read at commit `fde23346cf`
   (2026-11-16).
