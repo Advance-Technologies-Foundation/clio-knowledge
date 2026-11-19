@@ -169,6 +169,8 @@ an existing top-level timer start in place (UId, name and flows kept, so its sch
   operations user and receives no process parameters", or "saved but is NOT scheduled" with the reason (the process
   is disabled; on a new version, "the active version keeps running its current schedule"). A failed scheduler read
   adds "could not read the scheduler" and does not change success. Tell the user.
+- "Nothing was saved ... timer `X` ... would be refused": ask the user about `X`; send its `setTimer` with the edit
+  in one request.
 - "the edit was written but the save did not finish (scheduler: ...)": the edit IS saved; do NOT resend the original
   operations. If the message says the scheduler refused the timer, fix the timer (confirming again) and re-save it
   with `setTimer`; if it says the scheduler itself failed, re-save later with `setTimer` sending the same values.
