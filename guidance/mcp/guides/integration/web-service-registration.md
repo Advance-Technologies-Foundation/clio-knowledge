@@ -43,13 +43,41 @@ Credential rule (MUST)
   id of an existing OAuth application. The tool resolves it to the application's id, stores that id (the reply
   shows it as `oauth-app-id`, which `setAuth` accepts back) and refuses one no application carries. The application itself, with its
   client id and secret, is created by the user; nothing else is needed on the service side.
-- A header, a cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
+- The platform sends Digest as a preemptive `Authorization: Basic` header, with no challenge and response
+  (measured): an API that accepts only Digest refuses every call, and no service setting fixes that; and Digest
+  protects nothing more than Basic, so on an `http` base URI the password travels readable. Tell the user.
+- A cookie, or any parameter whose code or `path` contains `key`, `token`, `secret`, `passw`, `pwd`,
   `auth`, `credential`, `signature`, `session`, `cookie`, `licence`, `license`, `nonce`, `passcode`, `passphrase`, `bearer` or
   `jwt` anywhere, or `pass` not followed by a lowercase letter and not after `com`, `by` or `sur` (`AdminPass`,
   `Pass_1`, `UsrPassId`, `PASSPORT_NO`; not `compass`, `bypass`, `surpass`, `passport` or `passenger`), in any
   letter case (so `author` and `keyword` count too), MUST NOT get
   `default-value`. Give it `default-sys-setting` with a system-setting code instead. The
-  tool refuses a constant there and never echoes the refused value.
+  tool refuses a constant there and never echoes the refused value. A query parameter whose code or `path` is
+  `sig`, `sas`, `code`, `appid`, `sign` or `hmac` follows the same rule when its constant is 16 characters or
+  longer (an OpenWeatherMap `appid`, an Azure Functions `code`); a short value such as `code=USD` stays. So does
+  a path parameter whose `{placeholder}` is the whole value of such a key in the `uri` (`search?api_key={k}`):
+  describe hides its constant, which is kept when no default is sent while the `uri` keeps that key;
+  `default-value ""` clears it, and a `uri` that would show it is refused.
+- A header parameter, and a SOAP `soap-header` element, follows the name rule above (so `Authorization`, an
+  `auth` name, always takes `default-sys-setting`) and one more: a constant whose value looks like a key is
+  refused too, and describe hides one Studio stored. The value is split at spaces, commas, semicolons and `&`. It
+  is a key when it starts with an authentication scheme (`Basic`, `Bearer`, `Token`...) followed by anything, or
+  when a part, without quotes, base64 padding and a leading `name=`, is a credential pair (`password=...`, or
+  `sig=`/`code=`... with 16 or more characters), 16 or more characters mixing letters and digits (a generated key;
+  also a GUID, an ISO timestamp, a build tag such as `4.18.2-build20240101` or a multipart boundary), 24 or more
+  letters, 12 or more digits, or a password-shaped word (8 or more characters with upper and lower case, a digit
+  and one of `!@#$%^&*?~`); an address is one when it has user information, or when a path segment (a webhook
+  token), a query or a fragment value is one. Words, short numbers and short versions joined by `/ . + - _` stay
+  plain. Any other value is an ordinary constant, as Studio allows it: `Accept-Language: en-US`,
+  `X-Api-Version: 2`, `Content-Type: application/xml`, `Cache-Control: max-age=3600`,
+  `Accept: application/vnd.github.v3+json`, a `User-Agent`, a host name or `production-eu-west-1` are written,
+  shown by describe and left readable in a test-call echo. The rule is a deny-list: a short chosen secret under a
+  neutral name (`X-Pin: 4821`, `Winter-2024`) is not recognised, so the tool accepting a value does not make it
+  public: a key, password or PIN the user gives, short or not, still goes into a system setting. A refusal that
+  says "refused on a header, cookie or
+  credential-like parameter" comes from a clio released before this rule, which refuses every header constant:
+  tell the user to update clio instead of moving a plain value into a system setting. A refusal that says the
+  value "looks like a key" comes from this rule; then use `default-sys-setting`.
 - Every system setting a call references anew MUST exist before the call; such a reference to a missing
   setting is refused, because at run time the platform drops it silently and the request goes out without the
   header. A reference the same method (or the authentication) already had, whose setting was deleted since,
@@ -60,29 +88,41 @@ Credential rule (MUST)
   token) is an ordinary request parameter with `default-sys-setting`. The value cannot be composed: for
   `Authorization: Bearer <token>` the setting holds the whole `Bearer <token>` text. A request that must be
   signed per call (HMAC and similar) cannot be described this way; tell the user.
-- `describe-web-service` never returns credential values or secret-like constant defaults
-  (`default-masked: true`, `constant-credentials-masked: true`). Do not try to read them another way.
+- `describe-web-service` never returns credential values or secret-like constant defaults by the rules above
+  (`default-masked: true`, `constant-credentials-masked: true`); a plain header constant is returned as is. Do not try to read them another way. A key
+  kept in the query of a base URI, a method `uri` or a `soap-action` (a service made in Studio can hold one) shows
+  as `[masked]`, and the tools never write such a key back: a `setMethod` or `setBaseUri` that sends `[masked]` is
+  refused. Leave that method or base URI out of the call, make the key a parameter with `default-sys-setting`
+  the user fills (REST), or ask the user to change it in Studio. A `soap-action` with such a key is kept when
+  `setMethod` leaves `soap-action` out.
 
 Registering
 - `register-web-service` arguments: `environment-name`, `package-name`, `code`, `base-uri`, `methods`
-  (required); `caption`, `retry-count`, `auth` (optional).
+  (required); `caption` (default: the code), `description`, `retry-count`, `auth` (optional). A clio that answers
+  `description` or a `setDescription` op as unknown predates them, and with them the default parameter caption
+  (there: the code) and `setAuth` none clearing `use-auth`: leave `description` out, and do not tell the user
+  about those three behaviours.
 - `base-uri` is an absolute http(s) URI without credentials, a query or a fragment; the tool adds the trailing
   slash the designer needs, because Studio joins base URI and method URI verbatim. A `{placeholder}` in it is
   filled from a path parameter like one in a method `uri`. A method `uri` may carry a fixed query
-  (`search?format=json`), but a credential-like key there is refused: make it a query parameter with
-  `default-sys-setting`.
+  (`search?format=json`), but a key there is refused: any value under a credential name, and a value of 16 or
+  more characters under `sig`, `sas`, `code`, `appid`, `sign` or `hmac` (`code=USD` stays), with `&` or `;`
+  between the pairs. Make it a query parameter with `default-sys-setting`.
 - Each method: `code` (prefixed; what a Call web service element stores), `http-method` (GET, POST, PUT,
   PATCH, DELETE), `uri` relative to the base, a path parameter written as `{<its path>}`, its wire name;
   optional `caption`, `timeout-ms` (default 5000), `content-type` (json or xml, default json), `use-auth`,
   `request-parameters`, `response-parameters`.
 - `use-auth` says whether the method sends the service authentication. Left out, it is true when the service
   has authentication once the whole call is applied (a `setAuth` in the same `modify-web-service` call counts,
-  whatever its position), false otherwise.
+  whatever its position), false otherwise. A service registered without authentication keeps no method with
+  `use-auth: true` (a notice names any it cleared).
 - Each parameter: `code` (prefixed), `in` (path, query, header, body or cookie for a request; body, header
   or cookie for a response; default body), `type` (Text, Integer, Float, Boolean, DateTime, Date, Time, Guid,
   Object; default Text), `path`, `array`, `required`, `default-value` or `default-sys-setting`, and `items` for an
   Object array. Give `in` on every top-level request parameter of a GET method: one without it is a body
-  parameter and is refused. Fields inside an Object array (`items`) take no `in`.
+  parameter and is refused. Fields inside an Object array (`items`) take no `in`. A parameter sent without
+  `caption` is captioned with the name the API sees (a body path's last field, a SOAP path's last element, a query,
+  header, cookie or path name as given), or its code when it has no `path`.
 - Object is ONLY an array (`"type": "Object", "array": true`, its element fields in `items`), for a list of
   records such as order lines. A single nested object is NOT an Object parameter: describe each of its fields
   as its own parameter with a dotted `path`, the way Studio's quick setup does - request body
@@ -129,14 +169,19 @@ Testing
   returned whole. Its arguments are `code` (the service) and `method` (the method code), not `service-code` or
   `method-code`. `notices` flags a definition problem: a response parameter with a JSONPath on an XML response,
   which reads nothing. Values the request carried from system settings (path parameters included) or in `Authorization`,
-  and the secret constant defaults describe hides, are replaced with `[masked]` in the body and the error
+  the secret constant defaults describe hides and the keys kept in the stored URIs' queries, are replaced with
+  `[masked]` in the body and the error
   (`sent-secrets-masked: true`), because an API may echo them. In a JSON body every value and every property name
   carrying a secret is masked (a number or boolean whole), and the other keys and values stay readable; a masked
   JSON body comes back re-indented. Values shorter than four characters are not masked. When a value
   filled from a system setting cannot be found in what the platform reports as sent (a path value not found in
   the URL, a body value or an array item field missing from the body, nothing reported for a failed call, or a
   request body that is neither JSON nor XML), the response is withheld and only the status code comes back. Response values read from a cookie, a credential-named header, or with a
-  setting or secret default are masked too.
+  setting or secret default are masked too. For the same reason, in a process that calls a web service or reads a
+  SecureText setting (the platform decrypts it into a parameter), `run-process` returns every text, Guid or collection
+  result as `[withheld]`, named in `withheldResultParameters`; flags, numbers and dates (`Success`, `StatusCode`) come
+  back. Map a SecureText setting only into element inputs, never copy a response or a key elsewhere to read it: the
+  user sees the values in the process log.
 - A REST method with `content-type` xml cannot be test-called: the platform refuses it and nothing is sent; a process sends its XML body through the Call web
   service element's `RequestBody`.
 - `parameters` maps top-level request parameter codes to values: text, a number or a boolean for a scalar; a
@@ -159,6 +204,12 @@ Testing
 - A call returning 401 or 403: first check in `describe-web-service` that the method has `use-auth: true` when
   the service has authentication. If it does, the system-setting values are usually still empty: an empty setting
   sends no header or parameter at all, without any error. Say so instead of changing the service.
+- A test call on an OAuth 2.0 method that comes back withheld with status 0, no body and an error naming the
+  OAuth application usually means the access token could not be retrieved (or the API host is unreachable).
+  That is the OAuth application, not the service: ask the user to check its
+  client id and secret, scope and token URL, and, when the token endpoint refuses client credentials in a Basic
+  header, to set "Send client credentials" to "In request body" (measured: the default Basic header failed every
+  call where the request body worked). Studio's test request on the same method shows the platform's error.
 
 Changing a registered service
 - Read it first with `describe-web-service`. Add `usages: true` to list the processes that call it; the scan
@@ -167,24 +218,32 @@ Changing a registered service
   order, all or nothing: `addMethod` (`method`), `setMethod` (`method`; replaces the method of the same code,
   keeping the UIds of parameters it keeps), `removeMethod` (`method-code`), `setBaseUri` (`base-uri`),
   `setRetryCount` (`retry-count`), `setAuth` (`auth`; `type` none, basic, digest or oauth20, and none removes the
-  authentication); a SOAP service also takes `setNamespaces` and `setType` (`web-service-soap`). Missing settings
+  authentication and clears `use-auth` on every method), `setDescription` (`description`; "" clears it); a SOAP
+  service also takes `setNamespaces` and `setType` (`web-service-soap`). Missing settings
   follow the credential rule above. Each operation names its kind in `op`:
   `"operations": [{"op": "addMethod", "method": {...}}, {"op": "setAuth", "auth": {"type": "oauth20", "oauth-app": "Erp"}}]`.
 - What `describe-web-service` returns can be sent back as it is (except a method whose `{placeholder}` differs
-  in letter case from its path parameter; the platform never fills it, so fix the case): a method (with its parameters) as the
+  in letter case from its path parameter; the platform never fills it, so fix the case; and a `uri`, `soap-action`
+  or base URI that shows a `[masked]` key, which is refused, see above): a method (with its parameters) as the
   `method` of `setMethod`, and the `auth` block as the `auth` of `setAuth`. Read-only fields
   (`default-masked`, `constant-credentials-masked`) are accepted and ignored, and `oauth-app-id` is taken
   like `oauth-app`. A kept parameter whose secret constant default describe hid (`default-masked: true`)
   keeps that default when no default is sent; the agent never needs, and never gets, the value. To remove
   such a constant send `"default-value": ""`, or replace it with `default-sys-setting`; moving it to a place
-  where it would show (a query parameter, a path that does not look like a credential) is refused.
+  where describe would show it (a query or body parameter, or a code or path where neither the name nor the value
+  hides it) is refused.
 - `setMethod` REPLACES the method. Every parameter it keeps must be sent complete, as `describe-web-service`
   returned it: an omitted field is not kept but reset (`in` to body, `type` to Text, `array` and `required` to
-  false, the caption to the code, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
+  false, the caption to the name the API sees, and an omitted `default-sys-setting` is dropped). Only `path` and a hidden
   secret constant carry over. To add one parameter, send the whole method from describe plus the new one.
-- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth`; to
-  make an existing method send the new authentication, send it with `setMethod` and `use-auth: true` (the usage
-  guard applies).
+- `setAuth` changes the service authentication only. Methods the call does not touch keep their `use-auth` (except
+  that removing the authentication, type none, clears it on every method and a notice names them: if
+  authentication comes back later, each of those methods needs `use-auth: true` again, by the same rule below), and
+  a method with `use-auth: false` sends no authentication at all (measured on SOAP 1.2; REST takes the same code
+  path). Which methods send the authentication is the user's decision: before or after `setAuth`, ASK the user about
+  each method with `use-auth: false` (the tool names them in a notice after a change of the authentication); never
+  set `use-auth` on your own, not even in the same call as `setAuth`. Only on their yes, send that method with
+  `setMethod` and `use-auth: true` (the usage guard applies).
 - One exception: an `auth` block with `constant-credentials-masked: true` (Basic or Digest credentials typed
   in Studio as constants, both or only one of them) cannot be sent back; `setAuth` needs BOTH
   `username-sys-setting` and `password-sys-setting` codes, and the user fills those settings.
@@ -195,6 +254,14 @@ Changing a registered service
   from the refusal (not the captions), exactly those. Never fill `acknowledge-usages` on your own. A process
   that names the service but whose metadata cannot be read (or that names it outside a Call web service
   element) is listed with no element and counts as calling every method.
+- `setBaseUri` that really changes the base URI changes every call those processes make, and `setAuth` that
+  really changes the authentication changes every call of the methods with `use-auth: true`, so both are refused
+  the same way while a process calls such a method; the refusal says what changes ("the new base URI changes every
+  call ..."), and the elements keep their parameters. The tool compares the service before and after the whole call:
+  values sent back unchanged (as `describe-web-service` returned them, a `[masked]` key aside) are not a change. `setRetryCount` is never
+  guarded. A clio whose `modify-web-service` contract does not say that `setBaseUri` and `setAuth` are refused
+  while a process calls the service predates this check and saves them without a refusal. With such a clio, before
+  the call list the service's callers with `describe-web-service` `usages: true` and ask the user first.
 - `addMethod` never breaks a caller and is not guarded. Adding a parameter to a method a process already calls
   is a `setMethod` and is guarded; after the user agrees, the new parameter appears on that element at its next
   load, unbound, and until it is bound a body field goes out as `null` (measured), so bind it or tell the user.
@@ -222,4 +289,7 @@ Rights and limits
   array whose items held a text array and an inner Object array went out with every value in place, in a REST
   JSON body and in a SOAP envelope, and a setting-bound item field was filled in every item; the platform sent a
   JSON array given to a query, header or path parameter as `System.Object[]` (so clio refuses one) and a text as
-  written. Other versions are unknown.
+  written. On the same stand in November 2026: a plain `Accept-Language: en-US` header constant was registered,
+  shown by describe and echoed readable by an echo API, while a key-like constant stored the Studio way under the
+  neutral header `X-Partner` was hidden by describe, masked in the echo, and refused when sent back as a constant.
+  Other versions are unknown.

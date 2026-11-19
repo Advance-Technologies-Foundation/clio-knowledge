@@ -10,7 +10,8 @@ how a guide points at a rule it does not own. Other backticks are ordinary code 
 page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
 precondition kept next to the instruction it guards — names that guide as the owner.
 
-- Stages of an object or a stage bar on its page: set up, changed or only asked about (DCM, clio 8.1.0.150+) -> name=process-dynamic-case
+- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM, clio 8.1.0.150+; the user names the object by its caption: `list-apps` / `get-app-info` when a schema-name search misses) -> name=process-dynamic-case
+  - an object that already has a case: read, change (stages, order, groups), disable or re-enable it, or split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-change
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -131,6 +132,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
+  - SEND a chat message (Telegram, WhatsApp, SMS and the like) to ONE contact, from a process or now — the Send chat message
+    element (`sendChatMessage`; the default create contract lists it): channel, recipient, chat template or
+    custom text, `ignoreErrors` and the send status -> name=process-send-chat-message
   - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
   - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
@@ -197,7 +201,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - identity assertion / Identity Service V3 -> name=identity-assertion
   - product telemetry for the run you are doing (which stage to emit, the `workflow` field, consent, withdrawal) -> name=product-telemetry
 - Branding & theming: product logos / browser-tab favicon / shell background image -> name=branding
-  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) -> name=theming
+  - brand colours / fonts / custom themes (create, read, restyle, delete, list, set the default) or a theme's own background -> name=theming
 - User and role administration: create/update/delete users or organizational/functional roles, managers, memberships, unlock/password, licenses, IP access rules, delegation and system-operation permissions -> name=administration
   - external users, external organizations, PortalAccount and organization membership -> name=external-organizations
   - custom configuration web services for portal/external users, DefaultServiceRoute or SspServiceRoute -> name=portal-service-routing
@@ -206,6 +210,7 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 - Access rights (default record rules): turn record permissions on/off for an object, set which rights a NEW record gets by who created it ("records created by role X are visible to role Y"), or apply those rules to existing records -> name=default-record-rights
 - Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer; get-object-rights / set-object-rights), including making a portal section's object available to external users -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
+- Access rights (column-level): who may see or edit one COLUMN (field) of an object, per role — the "Column permissions" layer and its switch (get-column-rights / set-column-rights) -> name=column-rights; a field's visibility or editability on pages only (the control's state, the data stays reachable) -> name=business-rules
 
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
 

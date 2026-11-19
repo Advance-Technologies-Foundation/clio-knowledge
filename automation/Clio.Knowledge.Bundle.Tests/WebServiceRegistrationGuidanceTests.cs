@@ -29,7 +29,9 @@ public sealed class WebServiceRegistrationGuidanceTests
             "No credential value ever passes through the agent.",
             "MUST NOT get `default-value`. Give it `default-sys-setting` with a system-setting code instead.",
             "Create the setting first with `create-sys-setting` and no value",
-            "Do not try to read them another way."
+            "Do not try to read them another way.",
+            "a constant whose value looks like a key is refused too, and describe hides one Studio stored.",
+            "the tool accepting a value does not make it public: a key, password or PIN the user gives, short or not, still goes into a system setting."
         ];
 
         // Assert
@@ -37,6 +39,28 @@ public sealed class WebServiceRegistrationGuidanceTests
         {
             guide.Should().Contain(clause,
                 because: "an agent that has not read the rule stores an API key as a constant every reader of the schema sees");
+        }
+    }
+
+    [Test]
+    [Description("The guide lets a plain header constant stay a constant and tells an old clio's blanket refusal apart from the key-like refusal.")]
+    public void Guide_ShouldAllowPlainHeaderConstants()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`Accept-Language: en-US`, `X-Api-Version: 2`, `Content-Type: application/xml`",
+            "A refusal that says \"refused on a header, cookie or credential-like parameter\" comes from a clio released before this rule"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "without it an agent pushes a harmless value such as a language into a system setting the user must fill");
         }
     }
 
@@ -79,7 +103,7 @@ public sealed class WebServiceRegistrationGuidanceTests
     }
 
     [Test]
-    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps soap-header parameters on system settings, guards setNamespaces and setType, and routing reaches it.")]
+    [Description("The SOAP guide keeps the SOAP action from the WSDL or the user, keeps credential-like or key-like soap-header values on system settings, guards setNamespaces and setType, and routing reaches it.")]
     public void SoapGuide_ShouldStateItsSafetyRules()
     {
         // Arrange
@@ -92,7 +116,8 @@ public sealed class WebServiceRegistrationGuidanceTests
         [
             "take it from the WSDL (the binding operation's `soapAction`) or ask the user; NEVER make one up.",
             "Pass the whole notice on, risk sentence included",
-            "A soap-header parameter takes no `default-value`",
+            "or with a value that looks like a key it takes no `default-value`: give it `default-sys-setting`",
+            "every element of the path counts, so `wsse:Security/wsse:UsernameToken/wsse:Username` is one",
             "NEVER a JSONPath",
             "`removeMethod`, with the processes listed"
         ];
@@ -137,6 +162,107 @@ public sealed class WebServiceRegistrationGuidanceTests
         }
         soap.Should().NotContain("There is no WSDL import",
             because: "read-wsdl reads a WSDL now");
+    }
+
+    [Test]
+    [Description("The registration guide guards a real change of the base URI or the authentication like a changed method, leaves setRetryCount unguarded, says a method without use-auth sends no authentication, and that Digest goes out as Basic.")]
+    public void Guide_ShouldGuardEveryCallChangesAndStatePerMethodAuthentication()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "`setAuth` that really changes the authentication changes every call of the methods with `use-auth: true`",
+            "The tool compares the service before and after the whole call",
+            "never set `use-auth` on your own, not even in the same call as `setAuth`",
+            "`setRetryCount` is never guarded.",
+            "a method with `use-auth: false` sends no authentication at all",
+            "The platform sends Digest as a preemptive `Authorization: Basic` header"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "without it an agent repoints or re-authenticates a service a process calls unasked, or expects a new authentication to reach every method");
+        }
+    }
+
+    [Test]
+    [Description("The SOAP guide sends the agent to the SOAP 1.1 port a read-wsdl warning names, explains why WCF refuses the platform's SOAP 1.2 and WS-Addressing calls, and gives the measured workarounds only with the user's agreement.")]
+    public void SoapGuide_ShouldSendTheAgentToACallablePort()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "Register the port a warning names to register instead (\"Register port ... instead\"), else the `studio-pick` port",
+            "Studio's choice, not a recommendation",
+            "never as the `action` parameter of `Content-Type`",
+            "`application/soap+xml;charset=utf-8;action=\"<the soap-action>\"`",
+            "two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI)",
+            "Do this only with the user's agreement, and test a call.",
+            "never register first and warn afterwards.",
+            "keep the SOAP 1.2 port and switch only if a test call fails because the action or operation is not found",
+            "Switch the registered service with `modify-web-service` `setType` soap11"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent registers Studio's SOAP 1.2 pick of a WCF service and every call fails with a SOAP fault");
+        }
+    }
+
+    [Test]
+    [Description("The SOAP guide has the agent pass the code the user named for a new service to read-wsdl as code, keeps service-code for an existing service, and reads again with code when the code is taken.")]
+    public void SoapGuide_ShouldPassANewServiceCodeAsCode()
+    {
+        // Arrange
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Act
+        string[] clauses =
+        [
+            "When the user named the code of a NEW service, pass it as `code`",
+            "`service-code` is ONLY for an existing SOAP service the operations go into",
+            "(read again with that `code`)"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            soap.Should().Contain(clause,
+                because: "without it an agent passes a new service's code as service-code, fails, and edits the arguments it should register as they are");
+        }
+    }
+
+    [Test]
+    [Description("The guide says run-process withholds the text results of a process that calls a web service or reads a SecureText setting, and that the agent never copies a response or a key elsewhere to read it.")]
+    public void Guide_ShouldStateThatRunProcessWithholdsCredentialResults()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+
+        // Act
+        string[] clauses =
+        [
+            "in a process that calls a web service or reads a SecureText setting",
+            "`run-process` returns every text, Guid or collection result as `[withheld]`, named in `withheldResultParameters`",
+            "never copy a response or a key elsewhere to read it"
+        ];
+
+        // Assert
+        foreach (string clause in clauses)
+        {
+            guide.Should().Contain(clause,
+                because: "an agent that has not read the rule takes [withheld] for a broken run, or works around it and puts the key into its context");
+        }
     }
 
     private static string ReadCollapsed(string relativePath) =>
