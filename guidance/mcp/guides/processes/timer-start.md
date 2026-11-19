@@ -4,17 +4,18 @@ Scope
 This guide owns the `timer` block of the Timer start element (`timerStart`, the designer's Start timer), the
 `setTimer` operation, and the confirmation you owe the user before a save that schedules runs. `process-modeling`
 owns the build recipe and the other edit ops; `process-version-writes` owns making a version active;
-`process-sub-process` owns calling a process from another; `process-parameters` owns setting a parameter on a
-start's branch. A timer start inside an event sub-process is not handled by these tools: it is neither built,
+`process-sub-process` owns calling a process from another; `process-parameters` owns a start branch's
+parameters. A timer start inside an event sub-process is not handled by these tools: it is neither built,
 described nor found by `setTimer`.
 Gate: use `timerStart` and `setTimer` only when the `create-business-process` contract (`get-tool-contract`
 with `tool-names: ["create-business-process"]`) names `timerStart` - that clio refuses an older package up front.
 The short reply names it in its SHAPE line, so read `detail: "full"` only when the short one does not. Otherwise
 this clio does not carry it: build no timer start, and tell the user that a clio update adds it.
 Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule,
-stored cron, zone, scheduler state, next fire) read from the saved process, so do not run a describe after it for
-that. Run `describe-business-process mode=full` only for what the summary does not carry (`start`, `end`,
-`repeatOnMisfire`), after an activation or an enable, and before a replace.
+stored cron, `start`, zone, scheduler state, next fire) read from the saved process, so do not run a describe after
+it for that. When it is absent (a process that calls a sub-process, a failed read-back), for `end` and
+`repeatOnMisfire`, and after an activation or an enable, run `describe-business-process element=<name>` (`mode=full`
+before a replace).
 
 == When to use it ==
 - A timer start runs the WHOLE process on a schedule, once or repeatedly: a nightly clean-up, a sync, a reminder
@@ -31,8 +32,8 @@ that. Run `describe-business-process mode=full` only for what the summary does n
   roles that user has. Not as the user who built it.
 - It receives NO process parameters and no record Id: each parameter starts at its default value. Read what the run
   needs inside it.
-- It runs only while the process is enabled and the version carrying the timer is the active one; a disabled process
-  skips its fires, with only a log entry.
+- It runs only while the process is enabled and the version carrying the timer is the active one; disabling the
+  process removes its timer jobs.
 - A process whose only start is a timer cannot be started by hand (the platform refuses a manual start, so
   `run-process` and a page Run process button fail) or called as a sub-process. A Simple start next to it keeps
   both (on a new process add one only if the user wants that); a run through it is the current user's and may carry
@@ -44,8 +45,8 @@ start?, end?, timeZone?, repeatOnMisfire?}`, on `create-business-process`, `addE
 "elements": [{ "name": "NightlyCleanupTimeStart", "caption": "Nightly cleanup time", "type": "timerStart",
   "timer": { "schedule": "day", "at": "02:30", "timeZone": "FLE Standard Time" } }]
 `schedule` is required on create and `addElement` (`setTimer`: below); `at` is `HH:mm` (default `00:00`); `every`
-defaults to 1; a field the kind does not use is refused; nothing may fall after 2099 (a `start`, a first fire or a
-`cron` year). The kinds:
+defaults to 1; a field the kind does not use is refused; a `start`, the first fire and a `cron` year must not fall
+after 2099 (an `end` may). The kinds:
 - `once`: `"start": "2026-12-31T10:15"`, required and in the future; no `end`.
 - `minute` / `hour`: `"every": 30, "fromHour": 9, "toHour": 18` - minutes 1..59 or hours 1..23, inside an hour window
   (0..23, BOTH hours inclusive, default 0..23; it may wrap, 22..6, computed but not run on a stand). The window keeps
@@ -55,11 +56,11 @@ defaults to 1; a field the kind does not use is refused; nothing may fall after 
 - `month`: `"every": 2` (1..12) and exactly ONE of `"dayOfMonth": 15` (1..31 or `"last"`),
   `"weekday": { "position": "third", "day": "wed" }` (first..fourth or last), `"workday": "first"` (or `"last"`).
 - `year`: `"month": 3` and ONE of `"dayOfMonth": 25` (1..31, no `"last"`) or a `weekday` (first..fifth, no last).
-- `cron`: `"cron": "0 15 10 ? * MON-FRI"` - Quartz: 6 or 7 fields starting with seconds, which must be 0; day of
-  week 1 = Sunday; exactly one of day-of-month and day-of-week is `?`. A 5-field Unix cron is refused, and so is a
-  day-of-month `nW` above `28W`. Use it only for what the kinds cannot say, such as an offset step
-  (`0 0 7 1 2/3 ? *`: every 3 months from February). The server builds each kind as the designer would, so the
-  designer opens it on its own page; a `cron` opens as Other frequency.
+- `cron`: `"cron": "0 15 10 ? * MON-FRI *"` - Quartz: send 7 fields starting with seconds, which must be 0 (6 fields
+  ending in a 4-digit year read as minutes..year); day of week 1 = Sunday; exactly one of day-of-month and
+  day-of-week is `?`. A 5-field Unix cron is refused, and so is a day-of-month `nW` above `28W`. Use it only for what
+  the kinds cannot say, such as an offset step (`0 0 7 1 2/3 ? *`: every 3 months from February). Each kind is built
+  as the designer builds it and opens on its own designer page; a `cron` opens as Other frequency.
 
 == "Every N" is a cron step, not an interval ==
 - `every` is a step counted from the start of its field and restarted there: minutes from :00 of each hour, hours
@@ -89,10 +90,9 @@ defaults to 1; a field the kind does not use is refused; nothing may fall after 
   when it had no job.
 - `timeZone`: a Creatio time zone Code (Windows id: `FLE Standard Time`, `UTC`), case-insensitive; an IANA id
   (`Europe/Kyiv`) is refused. Omitted when a timer is created: your profile's zone, else the `DefaultTimeZone` system
-  setting, else refused ("timeZone is required: neither your profile nor the DefaultTimeZone setting names one").
-  When the user did not name a zone, ASK and send `timeZone`: the clio login may be a technical user whose zone is
-  not theirs. A `setTimer` without `timeZone` keeps the stored zone; an old timer with none stored runs, and is
-  described, as `UTC`.
+  setting, else refused. When the user did not name a zone, ASK and send `timeZone`: the clio login may be a
+  technical user whose zone is not theirs. A `setTimer` without `timeZone` keeps the stored zone; an old timer with
+  none stored runs, and is described, as `UTC`.
 - `repeatOnMisfire` (the designer's "Repeat on misfire") is stored for parity and changes nothing at run time: with
   either value, a fire missed while the scheduler was down runs once as soon as it is back, then the schedule
   continues. Tell the user that.
@@ -106,7 +106,7 @@ defaults to 1; a field the kind does not use is refused; nothing may fall after 
   and which data the process writes or deletes. Then read the post-save notice and pass it on. If it differs from
   what the user approved (another zone or first run, an immediate run, NOT scheduled), tell the user at once and
   offer to revert (`setTimer` back, or remove the timer). An activation or an enable returns no timer notice: read
-  `scheduled` from `describe-business-process mode=full` instead.
+  `scheduled` from `describe-business-process element=<name>` instead.
 - That covers: a create with a `timerStart`; adding a `timerStart` to an existing process (next to the Simple start,
   or to a timer-only process); the Simple -> Timer replace; a `setTimer`, the re-save below included;
   `set-active-business-process-version` on a version that carries a timer (one added through
@@ -127,8 +127,8 @@ defaults to 1; a field the kind does not use is refused; nothing may fall after 
 - Caller check, read-only:
   * Process callers: one `execute-esq` on `SysSubProcessInProcess` by the family root (`versionRootSchemaUId` from
     describe); any row is a caller (`ProcessUId` is the calling version, `ParentProcessUId` its family). The platform
-    writes one set of rows per caller version, active or not. A refused read (it needs the "Access to process data
-    tables" operation) is reported to the user, never taken as "no callers". The table holds process callers only:
+    writes one set of rows per caller version, active or not. A refused or failed read is reported to the user, never
+    taken as "no callers". The table holds process callers only:
     a case (DCM) step that runs the process, or code that starts it, is not in it - ask about those too:
 clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { rootSchemaName: "SysSubProcessInProcess", columns: { items: { ProcessUId: { expression: { expressionType: 0, columnPath: "ProcessUId" } }, ParentProcessUId: { expression: { expressionType: 0, columnPath: "ParentProcessUId" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ParentSubProcessUId" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: "<versionRootSchemaUId>" } } } } } } } }
   * Manual starts - a page button, a classic page, a dashboard, an integration, a `run-process` call: no tool proves
@@ -139,16 +139,16 @@ clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { r
 == setTimer ==
 `{ "op": "setTimer", "elementName": "NightlyCleanupTimeStart", "timer": { "schedule": "day", "at": "04:00" } }` changes
 an existing top-level timer start in place (UId, name and flows kept, so its scheduler job is updated):
-- The schedule group is optional, and REPLACED when sent: any of `schedule`, `every`, `at`, `fromHour`, `toHour`,
-  `daysOfWeek`, `dayOfMonth`, `weekday`, `workday`, `month`, `cron` rebuilds the whole schedule from what is sent,
-  with `schedule` required and an omitted `at` back at `00:00`; nothing is merged with the stored one. To change only
-  the zone or the dates, send no schedule field.
+- The schedule group is optional (required while no complete schedule is stored), and REPLACED when sent: any of
+  `schedule`, `every`, `at`, `fromHour`, `toHour`, `daysOfWeek`, `dayOfMonth`, `weekday`, `workday`, `month`, `cron`
+  rebuilds the whole schedule from what is sent, with `schedule` required and an omitted `at` back at `00:00`;
+  nothing is merged with the stored one. To change only the zone or the dates, send no schedule field.
 - `start`, `end`, `timeZone` and `repeatOnMisfire` change one by one; `start: null` / `end: null` clear. An empty
   `timer {}` re-saves the timer unchanged: that is the re-save this article asks for.
 - A kind change clears `start` and `end` unless you send them; `minute` <-> `hour` is one kind and keeps them.
 - The checks run on the timer as it will be: a `timeZone` change that makes a stored `once` instant past is refused.
 - From describe: leave out an unchanged stored past `start`. A date you send (no `Z`, no milliseconds) equal to the
-  stored one to the second counts as unchanged, and the stored text is kept as it is.
+  stored one to the second counts as unchanged.
 - Refused: a `timer` key in `setElement` (use `setTimer`); `setTimer` on any other element; `useBackgroundMode: true`
   (`false`, as describe reports it, passes) or a `filter` on a timer start.
 
@@ -158,25 +158,26 @@ an existing top-level timer start in place (UId, name and flows kept, so its sch
   kind comes back as `schedule: "cron"`, its kind in `designerKind` (`"empty"`: never configured); a `once` always
   reads as `once`, a stray cron only in `storedCron`. The block sent back to `addElement` rebuilds the same timer,
   except: a past recurring `start` is dropped, milliseconds and a `Z` are trimmed, an expired `end` or a past `once`
-  is refused, a missing zone becomes `UTC`, a day step that is a multiple of 7 is refused, a kind named in
-  `designerKind` comes back as Other frequency, and a never-configured timer is refused until a schedule is sent.
+  is refused, a missing zone becomes `UTC`, a kind named in `designerKind` comes back as Other frequency, and a
+  never-configured timer is refused until a schedule is sent.
 - `scheduled` gives the next and previous fire time in UTC, or why there is none: `processDisabled`;
   `notActiveVersion` (with the active version's next run); `staleTrigger` - the stored trigger differs from the
   timer, belongs to another version, or is paused or errored: re-save the active version; `noJob` - normal for a
   `once` whose time has passed or a recurring timer past its `end` (it has finished), otherwise re-save;
-  `schedulerUnavailable`. A re-save registers the timer afresh, so a kept past `start` may run once at once.
-- Every save that touches a timer adds a notice: "Timer `X` is scheduled: next run ... It runs as the System
-  operations user and receives no process parameters", or "saved but is NOT scheduled" with the reason (the process
-  is disabled; on a new version, "the active version keeps running its current schedule"). A failed scheduler read
-  adds "could not read the scheduler" and does not change success. Tell the user.
-- "Nothing was saved ... timer `X` ... would be refused": ask the user about `X`; send its `setTimer` with the edit
-  in one request.
+  `schedulerUnavailable`. A re-save moves a stored cron trigger to its next fire; only a timer with no trigger is
+  registered afresh, and a kept past `start` may then run once at once.
+- Every save that touches a timer adds a notice: "Timer `X` is scheduled: next run ...", or "saved but is NOT
+  scheduled" with the reason (the process is disabled; on a new version, "the active version keeps running its
+  current schedule"). A failed scheduler read adds "could not read the scheduler" and does not change success. Tell
+  the user.
+- "Nothing was saved ... timer `X` ... would be refused": ask the user about `X`, then send its `setTimer`, or its
+  removal, with the edit in one request; if `setTimer` cannot reach it (event sub-process), the user fixes or removes
+  it in the process designer.
 - "the edit was written but the save did not finish (scheduler: ...)": the edit IS saved; do NOT resend the original
   operations. If the message says the scheduler refused the timer, fix the timer (confirming again) and re-save it
   with `setTimer`; if it says the scheduler itself failed, re-save later with `setTimer` sending the same values.
 
-Evidence: designer saves of every kind, a builder edit and a timer run captured on Creatio 10.2 (.NET Framework) in
-November 2026; .NET 8 is not measured. The run-as user and its system access, the parameters, when a job exists and
-the misfire handling read from the Creatio core source of November 2026; fire times and misfire handling also
-computed with the platform's Quartz 3.2.2 outside a stand. Not run on a stand: a missed fire, a wrapping hour window
-and an `at` in a skipped or repeated hour.
+Evidence: designer saves of every kind, a builder edit and a timer run on Creatio 10.2 (.NET Framework), November
+2026; .NET 8 is not measured. Run-as user, system access, parameters, jobs and misfire handling read from the
+Creatio core source; fire times and misfires also computed with the platform's Quartz 3.2.2. Not run on a stand: a
+missed fire, a wrapping hour window and an `at` in a skipped or repeated hour.

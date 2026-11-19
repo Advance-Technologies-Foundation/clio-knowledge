@@ -183,10 +183,10 @@ public sealed class TimerStartGuidanceTests
                 because: "a published body never carries an unresolved version boundary; merging publishes");
             placeholder.IsMatch(description).Should().BeFalse(
                 because: "the manifest description is published too");
-            guide.Should().Contain("Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule, stored cron, zone, scheduler state, next fire) read from the saved process, so do not run a describe after it for that.",
+            guide.Should().Contain("Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule, stored cron, `start`, zone, scheduler state, next fire) read from the saved process, so do not run a describe after it for that.",
                 because: "the write's summary is a describe of the saved process, so a describe right after it only repeats the read");
-            guide.Should().Contain("Run `describe-business-process mode=full` only for what the summary does not carry (`start`, `end`, `repeatOnMisfire`), after an activation or an enable, and before a replace.",
-                because: "the summary omits the validity window and misfire, and an activation, an enable and a replace return no timer summary of their own");
+            guide.Should().Contain("When it is absent (a process that calls a sub-process, a failed read-back), for `end` and `repeatOnMisfire`, and after an activation or an enable, run `describe-business-process element=<name>` (`mode=full` before a replace).",
+                because: "clio returns no summary for a process that calls a sub-process or whose read-back failed, the summary omits the end and misfire, and an activation and an enable return no timer summary of their own");
         }
     }
 
@@ -241,7 +241,7 @@ public sealed class TimerStartGuidanceTests
                 because: "the notice is the only place the saved schedule's next run, or the reason there is none, is reported");
             gateSection.Should().Contain("tell the user at once and offer to revert",
                 because: "a notice that differs from what the user approved means the user approved something else");
-            gateSection.Should().Contain("An activation or an enable returns no timer notice: read `scheduled` from `describe-business-process mode=full` instead.",
+            gateSection.Should().Contain("An activation or an enable returns no timer notice: read `scheduled` from `describe-business-process element=<name>` instead.",
                 because: "an agent waiting for a notice that never comes reports nothing");
             gateSection.Should().Contain(Exemption,
                 because: "the exemption is narrow and does not lift any other confirmation the edit owes");
@@ -307,7 +307,7 @@ public sealed class TimerStartGuidanceTests
             "Prefer ONE timer that reads the due records and handles each",
             "The block builds nothing finer than every minute, and the platform sets no minimum interval and no cap on runs",
             "`schedule` is required on create and `addElement` (`setTimer`: below)",
-            "nothing may fall after 2099 (a `start`, a first fire or a `cron` year)",
+            "a `start`, the first fire and a `cron` year must not fall after 2099 (an `end` may)",
             "(0..23, BOTH hours inclusive, default 0..23; it may wrap, 22..6, computed but not run on a stand)",
             "(1..31, no `\"last\"`)",
             "A 5-field Unix cron is refused, and so is a day-of-month `nW` above `28W`.",
@@ -327,7 +327,7 @@ public sealed class TimerStartGuidanceTests
             "When the user did not name a zone, ASK and send `timeZone`: the clio login may be a technical user",
             "A `setTimer` without `timeZone` keeps the stored zone",
             "changes nothing at run time: with either value, a fire missed while the scheduler was down runs once as soon as it is back, then the schedule continues. Tell the user that.",
-            "The schedule group is optional, and REPLACED when sent",
+            "The schedule group is optional (required while no complete schedule is stored), and REPLACED when sent",
             "with `schedule` required and an omitted `at` back at `00:00`; nothing is merged with the stored one. To change only the zone or the dates, send no schedule field.",
             "An empty `timer {}` re-saves the timer unchanged: that is the re-save this article asks for.",
             "From describe: leave out an unchanged stored past `start`.",
@@ -338,7 +338,7 @@ public sealed class TimerStartGuidanceTests
             "a kind named in `designerKind` comes back as Other frequency, and a never-configured timer is refused until a schedule is sent",
             "`staleTrigger` - the stored trigger differs from the timer, belongs to another version, or is paused or errored: re-save the active version",
             "`noJob` - normal for a `once` whose time has passed or a recurring timer past its `end` (it has finished), otherwise re-save",
-            "A re-save registers the timer afresh, so a kept past `start` may run once at once.",
+            "A re-save moves a stored cron trigger to its next fire; only a timer with no trigger is registered afresh, and a kept past `start` may then run once at once.",
             "the edit IS saved; do NOT resend the original operations.",
             "If the message says the scheduler refused the timer, fix the timer (confirming again) and re-save it with `setTimer`",
             "if it says the scheduler itself failed, re-save later with `setTimer` sending the same values",
