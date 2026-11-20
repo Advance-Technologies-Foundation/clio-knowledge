@@ -6,10 +6,8 @@ This article is the authoritative owner of what `create-business-process` can bu
 `data-id` maps to a build `type`, and of the custom user-task compile rule. The element catalog itself --
 the `data-id` vocabulary `validate-process-graph` speaks and `describe-business-process` reports back --
 is `process-element-catalog-details`; open it to read a process or reason about an element not listed
-here. Split out of `process-modeling` because that article had no budget headroom left, and because
-both of these sections grow with every element the platform gains while the lifecycle around them does not.
-`process-modeling` keeps the lifecycle: the tools, the descriptor, the build recipe and the safety
-rules for editing an existing process.
+here. Split out of `process-modeling`, which keeps the lifecycle: tools, descriptor, build recipe and
+edit safety.
 Naming anything here? N1-N10 (owner `process-naming`) govern every element, parameter and process
 code and caption; for a build, name from the Names block of `process-digest`, its summary. Open
 `process-naming` only to relabel something that already exists or to settle a name collision.
@@ -23,14 +21,16 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   re-applied: a key describe reports there is ignored, whoever typed it - a success can carry "Read-only fields
   copied from describe were ignored", and no key it names was saved. Other blocks (email, subProcess,
   openEditPage, fileProcessing) can carry describe fields clio refuses before sending - remove them. Write a
-  filter, signal or connections with setFilter / setSignal / setConnections, not in `setElement`. A bound
+  filter, signal, timer or connections with setFilter / setSignal / setTimer / setConnections, not in `setElement`. A bound
   input in element `parameters`, and a parameter's sourceElement / sourceElementParameter / sourceColumn, are
   refused: write them as mappings (for an item property, target the dotted `Parameter.Item` path). Flat
   approval fields are refused everywhere, with the nested key to use. An older package drops an unknown key
   in silence: read the result back with describe.
 - NOT in a build descriptor: the "Connected to" links of an Activity a task creates. Add the element
   first, then bind them with `modify-business-process` → `setConnections` (see `process-activity-connections`).
-- Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `endEvent`.
+- Events: `startEvent` (Simple start), `signalStart` (record signal: add/modify/delete), `timerStart` (schedule,
+  only when the create contract names it; `process-timer-start` owns its `timer` block and the confirmation it needs),
+  `endEvent`.
 - Activities: `userTask` referencing any task from list-user-tasks via `userTaskName`
   (aliases `readData`->ReadDataUserTask, `changeData`->ChangeDataUserTask,
   `addData`->AddDataUserTask, `deleteData`->DeleteDataUserTask, `performTask`->ActivityUserTask,
@@ -149,7 +149,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
   channel; `process-send-chat-message` owns its `chatMessage` block.
 - NOT yet buildable — each of these is UNSUPPORTED through `create-business-process` and MUST NOT be put
   in a build descriptor: the INCLUSIVE and EVENT-BASED gateway elements, User dialog and Auto-generated
-  page (REFUSED), timer/message start,
+  page (REFUSED), message start,
   intermediate events,
   and reading one COLUMN out of a read COLLECTION's items (a first-record read's column IS a source,
   `sourceColumn` - see `process-data-elements`) — all
@@ -161,7 +161,7 @@ code and caption; for a build, name from the Names block of `process-digest`, it
 == Building from a data-id ==
 (The `data-id` strings in `process-element-catalog-details` are the vocabulary for `validate-process-graph` and for reasoning about /
 reading processes. To BUILD, map them to the create-business-process `type` + `userTaskName`: events
-`startEvent`/`startEventSignal`->`signalStart`/`endEvent`; a user/system task -> `type:"userTask"` with
+`startEvent`/`startEventSignal`->`signalStart`/`startEventTimer`->`timerStart`/`endEvent`; a user/system task -> `type:"userTask"` with
 `userTaskName` from list-user-tasks, e.g. Perform task = `performTask`/ActivityUserTask, Read data =
 `readData`/ReadDataUserTask. SEVEN user tasks have their own dedicated build type and must NOT be built as
 a generic `userTask`: `preconfiguredPageUserTask` -> `type:"preconfiguredPage"`, see

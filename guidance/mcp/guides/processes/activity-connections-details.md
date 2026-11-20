@@ -47,8 +47,9 @@ that first.
 == Connection rules R1–R20 (validate-process-graph enforces the structural subset: R1–R3, R7–R15,
    R17–R20; R4–R6 are semantic, verify yourself; R16 fires at build time, see its line below.
    Validation pass ≠ buildable: only the "What you can build today" slice in `process-element-catalog`
-   can be built — conditional flows, DEFAULT flows, the exclusive/parallel gateway ELEMENTS and Sub-process
-   are all in that slice now; inclusive/event-based gateways, timers and intermediate events are not. The
+   can be built — conditional flows, DEFAULT flows, the exclusive/parallel gateway ELEMENTS, Sub-process
+   and the timer start are all in that slice now; inclusive/event-based gateways, message starts and intermediate
+   events are not. The
    exclusive gateway the platform
    synthesizes for a conditional branch is still a GENERATION-TIME construct and never appears as a
    graph node, so R7 and R14 do not apply to it: do not model one when you validate a planned branch,
