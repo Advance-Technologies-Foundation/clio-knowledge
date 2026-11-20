@@ -65,7 +65,7 @@ MACRO FAMILIES — the `[# … #]` tokens a formula may reference:
 |---|---|
 | process / element parameter | a UId meta-path you BUILD from `describe-business-process mode=full` — see below |
 | system variable | `[#SysVariable.CurrentUserContact#]`, `[#SysVariable.CurrentDateTime#]` |
-| system setting | `[#SysSettings.Code#]`; a form carrying the value-type suffix also round-trips. an UNSET setting THROWS at run time, in a condition too — guard one that may be empty with a Read data of SysSettingsValue (GuidValue) |
+| system setting | `[#SysSettings.Code#]`; a form carrying the value-type suffix also round-trips. an UNSET setting THROWS at run time, in a condition too — guard one that may be empty: Read data of SysSettingsValue filtered by SysSettings.Code (a personal setting: and SysAdminUnit), branch on its value column (GuidValue for a Lookup) |
 | lookup record | `[#Lookup.{referenceObjectSchemaUId}.{recordId}#]` — both GUIDs |
 | date / date-time / time | `[#DateValue.dd.MM.yyyy#]` / `[#DateTimeValue.dd.MM.yyyy HH:mm#]` / `[#TimeValue.HH:mm#]` |
 | boolean constant | `[#BooleanValue.False#]` (a bare `false` also still works) |

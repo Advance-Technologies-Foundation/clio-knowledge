@@ -67,8 +67,8 @@ and say which rung you took and why:
    no setting with that code, not a Lookup, or a Lookup of another object: REFUSED, naming the code. A Lookup of a
    replacing Channel schema: built with a notice (the designer will not list it; recreate it on the root object).
    No value yet: built with a notice, and a run reaching the element stops the whole PROCESS: ignoreErrors does
-   not catch it, and a condition on the macro throws too. Guard: Read data of SysSettingsValue (GuidValue, filter
-   SysSettings.Code), branch on GuidValue != Guid.Empty.
+   not catch it, and a condition on the macro throws too. Guard it as `process-formulas` says (system setting row),
+   branching on GuidValue != Guid.Empty.
    Create a setting only after the user confirms (an environment change), then SET ITS VALUE.
 2. Then a Lookup process parameter (Channel), or the channel column of a record the process read.
 3. A constant channel LAST: `value` takes a channel id, its name or its `[#Lookup…#]` macro; an unknown or ambiguous
@@ -151,8 +151,7 @@ Recognise the class; never key on the exact text, which can change between build
   not found); the WhatsApp or Messenger gate; the template ("Failed to process template
   ..."); the recipient ("Failed to get recipient for contact ..."); the provider's own text (`Username can not be
   null` on SMS).
-On current builds a failed send leaves no chat (measured on 10.2.1122); older OmnichannelMessaging builds may leave an empty Completed chat. A failure writing the column values DOES leave
-one.
+On current builds a failed send leaves no chat (measured on 10.2.1122); older OmnichannelMessaging builds may leave an empty Completed chat.
 
 == Changing it (modify) ==
 `setElement` with `elementName` and `elementUpdate.chatMessage` is a PARTIAL update: omitted members keep their
@@ -161,8 +160,8 @@ stored values.
   a designer-built element holds the template's text with its macros, which would be sent literally. The exception:
   `Message` already bound to a formula or another non-constant source (an `addMapping` in an earlier call). The
   switch clears the template. Custom to template needs `template` in the same call, or it is refused; it
-  clears the message text from any source and names a dropped binding (offer to drop what only fed it); an older
-  package clears only a constant: read back.
+  clears the message text from any source and names a dropped binding; before 1.6.6.189
+  only a constant is cleared: read back.
 - A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those
   readers first, in a SEPARATE, earlier call.
 - A raw `addMapping` onto `Template`, `MessageType`, `RecordColumnValues` or `IgnoreErrors`, or of a CONSTANT onto
@@ -180,7 +179,7 @@ describe-only `templateName`, `message` (custom mode only), `ignoreErrors` (`fal
 `outputs` and `issues` (no channel, no contact, template mode with no template - an unset mode runs as template
 mode - or custom mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.
 
-Evidence: the build-time rules are the CrtProcessBuilder contract. Measured on Creatio 10.2.1122, Omnichannel Messaging 1.0.63 (2026-11-13/16):
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.189 contract. Measured on Creatio 10.2.1122, Omnichannel Messaging 1.0.63 (2026-11-13/16):
 ignoreErrors off stopping the run and on giving "Error"; an SMS send
 resolving the primary mobile; the designer's stored forms; column values on the chat; "Sent" for a blocked bot. QA 2026-11-18/20
 (OmnichannelMessaging 7.8.0, 1.6.6.186): template macros against the chat, the empty preview, the empty-setting stop
