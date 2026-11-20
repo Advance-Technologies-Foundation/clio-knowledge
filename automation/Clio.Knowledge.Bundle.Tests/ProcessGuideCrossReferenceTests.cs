@@ -136,7 +136,10 @@ public sealed class ProcessGuideCrossReferenceTests
         // The Send chat message article is added WITH this row. Keyed on the block's name as the element catalog,
         // process-modeling and the article itself write it next to the owner name; a new mention that drops the name
         // turns this red.
-        ("`chatMessage` block", "process-send-chat-message")
+        ("`chatMessage` block", "process-send-chat-message"),
+        // The Timer start article is added WITH this row. Keyed on the block's name as the element catalog and its
+        // details write it next to the owner name; a new mention that drops the name turns this red.
+        ("`timer` block", "process-timer-start")
     ];
 
     // Deliberately NOT here: removeElement / removeParameter. Adding them was the literal reading of
