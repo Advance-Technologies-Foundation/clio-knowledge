@@ -66,8 +66,8 @@ and say which rung you took and why:
    It is stored in the designer's typed form `[#SysSettings.<Code><Guid>#]` (`<Guid>` is literal text, the value type); describe echoes that. The build checks the setting:
    no setting with that code, not a Lookup, or a Lookup of another object: REFUSED, naming the code. A Lookup of a
    replacing Channel schema: built with a notice (the designer will not list it; recreate it on the root object).
-   No value yet: built with a notice, and a run reaching the element stops the whole PROCESS: ignoreErrors does
-   not catch it, and a condition on the macro throws too. Guard it as `process-formulas` says (system setting row),
+   No value: built with a notice, and a run reaching the element stops the whole PROCESS: ignoreErrors does not
+   catch it, and a condition on the macro throws too. An all-zero id instead fails the element (ignoreErrors catches). Guard it as `process-formulas` says (system setting row),
    branching on GuidValue != Guid.Empty.
    Create a setting only after the user confirms (an environment change), then SET ITS VALUE.
 2. Then a Lookup process parameter (Channel), or the channel column of a record the process read.
@@ -114,7 +114,7 @@ CUSTOM (`messageSource` `custom`):
   request says to go on after a failed send, else `false`; state which; on `setElement` omit it unless asked.
 - With `ignoreErrors: true` the process goes on. `SendStatus` is `"Sent"` or `"Error"`; `SendStatusDetails` is empty
   on success, else the error text. Map them downstream and branch on `SendStatus`.
-- It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel), NOT an empty system setting in from/to (the process stops, SendStatus unset). `"Sent"` is
+- It also swallows INPUT errors (an empty channel, contact, template or message; an inactive channel), NOT a system setting with no value in from/to (the process stops, SendStatus unset). `"Sent"` is
   "handed to the connector", NOT delivered: a provider rejection after that (a Telegram user who blocked the bot)
   still reads `"Sent"`. Say "sent", never "delivered".
 - describe lists both outputs in the generic `parameters` (`isOutput: true`) and under the block's `outputs`.
@@ -160,7 +160,7 @@ stored values.
   a designer-built element holds the template's text with its macros, which would be sent literally. The exception:
   `Message` already bound to a formula or another non-constant source (an `addMapping` in an earlier call). The
   switch clears the template. Custom to template needs `template` in the same call, or it is refused; it
-  clears the message text from any source and names a dropped binding; before 1.6.6.189
+  clears the message text from any source and names a dropped binding; before 1.6.6.190
   only a constant is cleared: read back.
 - A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those
   readers first, in a SEPARATE, earlier call.
@@ -179,10 +179,10 @@ describe-only `templateName`, `message` (custom mode only), `ignoreErrors` (`fal
 `outputs` and `issues` (no channel, no contact, template mode with no template - an unset mode runs as template
 mode - or custom mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.
 
-Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.189 contract. Measured on Creatio 10.2.1122, Omnichannel Messaging 1.0.63 (2026-11-13/16):
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.190 contract. Measured on Creatio 10.2.1122, Omnichannel Messaging 1.0.63 (2026-11-13/16):
 ignoreErrors off stopping the run and on giving "Error"; an SMS send
 resolving the primary mobile; the designer's stored forms; column values on the chat; "Sent" for a blocked bot. QA 2026-11-18/20
-(OmnichannelMessaging 7.8.0, 1.6.6.186): template macros against the chat, the empty preview, the empty-setting stop
+(OmnichannelMessaging 7.8.0, 1.6.6.186): template macros against the chat, the empty preview, the empty-setting stop (a zero id caught)
 and its guard, an empty Lookup parameter in from giving "Error", the empty lookup column failure and guard, no chat after a
 missing recipient, the designer dropping a bound text on a template pick. From source, not measured: other empty inputs giving "Error", the identity
 and 24-hour gates, HTML stripping, the language order. Inferred: an unset mode running as template mode.
