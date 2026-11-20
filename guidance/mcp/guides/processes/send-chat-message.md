@@ -67,7 +67,8 @@ and say which rung you took and why:
    no setting with that code, not a Lookup, or a Lookup of another object: REFUSED, naming the code. A Lookup of a
    replacing Channel schema: built with a notice (the designer will not list it; recreate it on the root object).
    No value: built with a notice, and a run reaching the element stops the whole PROCESS: ignoreErrors does not
-   catch it, and a condition on the macro throws too. An all-zero id instead fails the element (ignoreErrors catches). Guard it as `process-formulas` says (system setting row),
+   catch it, and a condition on the macro throws too. An all-zero id fails the element instead (with ignoreErrors:
+   SendStatus "Error"). Guard it as `process-formulas` says (system setting row),
    branching on GuidValue != Guid.Empty.
    Create a setting only after the user confirms (an environment change), then SET ITS VALUE.
 2. Then a Lookup process parameter (Channel), or the channel column of a record the process read.

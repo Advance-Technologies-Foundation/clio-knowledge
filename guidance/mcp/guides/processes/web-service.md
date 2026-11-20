@@ -166,7 +166,7 @@ them stop working, and a save keeps them removed.
   error text, and `StatusCode` is NOT written.
 - While feature `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a
   failing call still stops the process. It does NOT cover computing the inputs (an empty system setting behind
-  `[#SysSettings.<Code>#]` stops the process), an unresolved service or method, or reading the response.
+  `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.
 - Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it.
   `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond
   the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an
