@@ -161,7 +161,7 @@ stored values.
   a designer-built element holds the template's text with its macros, which would be sent literally. The exception:
   `Message` already bound to a formula or another non-constant source (an `addMapping` in an earlier call). The
   switch clears the template. Custom to template needs `template` in the same call, or it is refused; it
-  clears the message text from any source and names a dropped binding; before 1.6.6.190
+  clears the message text from any source and names a dropped binding; before 1.6.6.191
   only a constant is cleared: read back.
 - A switch that clears `Template` or `Message` while another element reads it is refused: re-point or remove those
   readers first, in a SEPARATE, earlier call.
@@ -180,7 +180,7 @@ describe-only `templateName`, `message` (custom mode only), `ignoreErrors` (`fal
 `outputs` and `issues` (no channel, no contact, template mode with no template - an unset mode runs as template
 mode - or custom mode with an empty message). To resubmit, drop `templateName`, `outputs` and `issues` and send the rest unchanged (`display` is tolerated); when `template` is a raw provider-template id, drop `template` too: on `setElement` the same id sent back is a no-op and any other is refused, and on create it is refused.
 
-Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.190 contract. Measured on Creatio 10.2.1122, Omnichannel Messaging 1.0.63 (2026-11-13/16):
+Evidence: the build-time rules are the CrtProcessBuilder 1.6.6.191 contract. Measured on Creatio 10.2.1122, Omnichannel Messaging 1.0.63 (2026-11-13/16):
 ignoreErrors off stopping the run and on giving "Error"; an SMS send
 resolving the primary mobile; the designer's stored forms; column values on the chat; "Sent" for a blocked bot. QA 2026-11-18/20
 (OmnichannelMessaging 7.8.0, 1.6.6.186): template macros against the chat, the empty preview, the empty-setting stop (a zero id caught)
