@@ -67,12 +67,14 @@ public sealed class TimerStartGuidanceTests
     /// anywhere in the article is a widened gate whatever it is worded as.
     /// </summary>
     private const string Exemption =
-        "An edit that leaves an already scheduled timer unchanged (a caption, a label) needs no schedule confirmation; other confirm gates still apply: a change to what a scheduled run writes is an in-place edit of the active version (`process-modeling`), and `process-delete-data` keeps its own.";
+        "An edit that leaves a timer whose `state` is `scheduled` unchanged (a caption, a label) needs no schedule confirmation; other confirm gates still apply: a change to what a scheduled run writes is an in-place edit of the active version (`process-modeling`), and `process-delete-data` keeps its own.";
 
     /// <summary>
     /// This guide's design target, in the response characters of <see cref="ProcessGuideResponseSizeTests"/>. The guide
-    /// is about 20,800 response characters: the fact-check round added the run's system access, the misfire behaviour,
-    /// the recovery paths and the year and cron limits, and was reviewed rather than absorbed. A new clause pays for
+    /// is about 21,500 response characters: the fact-check round added the run's system access, the misfire behaviour,
+    /// the recovery paths and the year and cron limits, and was reviewed rather than absorbed; the second review round
+    /// (the run's missing parameters in the confirmation, the activation's notice and refusal, the every-N-weeks
+    /// alternatives) was paid for by trims. A new clause pays for
     /// itself with a trim; a larger addition is split into a <c>-details</c> article. The 19,000-byte inline rule is
     /// asserted separately.
     /// </summary>
@@ -185,8 +187,8 @@ public sealed class TimerStartGuidanceTests
                 because: "the manifest description is published too");
             guide.Should().Contain("Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule, stored cron, `start`, zone, scheduler state, next fire) read from the saved process, so do not run a describe after it for that.",
                 because: "the write's summary is a describe of the saved process, so a describe right after it only repeats the read");
-            guide.Should().Contain("When it is absent (a process that calls a sub-process, a failed read-back), for `end` and `repeatOnMisfire`, and after an activation or an enable, run `describe-business-process element=<name>` (`mode=full` before a replace).",
-                because: "clio returns no summary for a process that calls a sub-process or whose read-back failed, the summary omits the end and misfire, and an activation and an enable return no timer summary of their own");
+            guide.Should().Contain("When it is absent (a process that calls a sub-process, a failed read-back), for `end` and `repeatOnMisfire`, and after an enable, run `describe-business-process element=<name>` (`mode=full` before a replace).",
+                because: "clio returns no summary for a process that calls a sub-process or whose read-back failed, the summary omits the end and misfire, and an enable returns no timer summary of its own");
         }
     }
 
@@ -211,7 +213,7 @@ public sealed class TimerStartGuidanceTests
             "the schedule in words (a step's real cadence)",
             "the zone you will send as `timeZone`",
             "the first run as your estimate (it may be immediate, above)",
-            "that runs use the System operations user with system access (no permission checks)",
+            "that runs use the System operations user with system access (no permission checks) and get no process parameters or record Id",
             "which data the process writes or deletes"
         ];
 
@@ -241,8 +243,8 @@ public sealed class TimerStartGuidanceTests
                 because: "the notice is the only place the saved schedule's next run, or the reason there is none, is reported");
             gateSection.Should().Contain("tell the user at once and offer to revert",
                 because: "a notice that differs from what the user approved means the user approved something else");
-            gateSection.Should().Contain("An activation or an enable returns no timer notice: read `scheduled` from `describe-business-process element=<name>` instead.",
-                because: "an agent waiting for a notice that never comes reports nothing");
+            gateSection.Should().Contain("An activation answers with the same notice and `startTimers`; an enable answers with none: read `scheduled` from `describe-business-process element=<name>` instead.",
+                because: "an agent waiting for a notice that never comes reports nothing, and one that ignores the activation's notice misses a differing schedule");
             gateSection.Should().Contain(Exemption,
                 because: "the exemption is narrow and does not lift any other confirmation the edit owes");
             exemptions.Should().Be(1,

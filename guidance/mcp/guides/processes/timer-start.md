@@ -14,17 +14,16 @@ this clio does not carry it: build no timer start, and tell the user that a clio
 Read the element back from the write's own summary: a create or a modify answers with `startTimers` (schedule,
 stored cron, `start`, zone, scheduler state, next fire) read from the saved process, so do not run a describe after
 it for that. When it is absent (a process that calls a sub-process, a failed read-back), for `end` and
-`repeatOnMisfire`, and after an activation or an enable, run `describe-business-process element=<name>` (`mode=full`
+`repeatOnMisfire`, and after an enable, run `describe-business-process element=<name>` (`mode=full`
 before a replace).
 
 == When to use it ==
-- A timer start runs the WHOLE process on a schedule, once or repeatedly: a nightly clean-up, a sync, a reminder
-  sweep. It is not a per-record delay or a wait inside a run (an intermediate timer: read-only, see
+- A timer start runs the WHOLE process on a schedule, once or repeatedly. It is not a per-record delay or a wait inside a run (an intermediate timer: read-only, see
   `process-element-catalog`).
-- Prefer ONE timer that reads the due records and handles each (`process-sub-process-when`, D1) to many processes
-  or schedules, one per record or small job: every timer is a job on the environment's shared scheduler threads.
+- Prefer ONE timer that reads the due records and handles each (`process-sub-process-when`, D1) to one timer per
+  record or small job: every timer is a job on the environment's shared scheduler threads.
 - Schedule no more often than the work needs. The block builds nothing finer than every minute, and the platform sets
-  no minimum interval and no cap on runs: each fire is a full process run, competing with every other timer and job.
+  no minimum interval and no cap on runs: each fire is a full process run.
 
 == What a run is ==
 - It runs as the System operations user (the `SystemUser` system setting, Supervisor by default), the author of every
@@ -34,8 +33,8 @@ before a replace).
   needs inside it.
 - It runs only while the process is enabled and the version carrying the timer is the active one; disabling the
   process removes its timer jobs.
-- A process whose only start is a timer cannot be started by hand (the platform refuses a manual start, so
-  `run-process` and a page Run process button fail) or called as a sub-process. A Simple start next to it keeps
+- A process whose only start is a timer cannot be started by hand (`run-process` and a page Run process button are
+  refused) or called as a sub-process. A Simple start next to it keeps
   both (on a new process add one only if the user wants that); a run through it is the current user's and may carry
   parameters, so it does not reproduce a scheduled run.
 
@@ -60,20 +59,20 @@ after 2099 (an `end` may). The kinds:
   ending in a 4-digit year read as minutes..year); day of week 1 = Sunday; exactly one of day-of-month and
   day-of-week is `?`. A 5-field Unix cron is refused, and so is a day-of-month `nW` above `28W`. Use it only for what
   the kinds cannot say, such as an offset step (`0 0 7 1 2/3 ? *`: every 3 months from February). Each kind is built
-  as the designer builds it and opens on its own designer page; a `cron` opens as Other frequency.
+  as the designer builds it and opens on its own designer page; a `cron` opens as Other frequency and is stored
+  normalized, as `storedCron` shows.
 
 == "Every N" is a cron step, not an interval ==
 - `every` is a step counted from the start of its field and restarted there: minutes from :00 of each hour, hours
   from `fromHour` each day (9..18 every 5: 09:00 and 14:00; 22..6 every 3: 22:00, 01:00, 04:00), days from the 1st
   of each month, months from January. `minute` every 45 fires at :00 and :45 of every hour; `day` every 2 fires on
-  the 1st, 3rd, 5th ... and again on the 1st (the 31st and the 1st are one day apart); `month` every 5 fires in
-  January, June and November, then January. Only a step that divides its cycle (60 minutes, 24 hours, 12 months) is
+  the 1st, 3rd, 5th ... and again on the 1st (the 31st and the 1st are one day apart). Only a step that divides its cycle (60 minutes, 24 hours, 12 months) is
   regular. Every step above 1 gets a notice naming the real cadence, but only after the save: work the cadence out
   yourself for the confirmation, and tell the user that cadence, not "every N".
 - Every N WEEKS is not supported by the platform scheduler: `every` on `week` is refused, and so are its look-alikes,
   a `day` step of 7, 14, 21 or 28 and a `cron` whose day-of-month field is a step that is a multiple of 7
   (`0 0 8 */14 * ? *`): a day step restarts on the 1st, so 14 fires on the 1st, 15th and 29th. Do not build a
-  substitute; tell the user and let them choose another schedule.
+  substitute silently: offer weekly on chosen days, an Nth weekday of the month, or days such as `1,15`.
 - A designer-built timer with such a day step is described as it is; a rebuild from that describe, and a `setTimer`
   that resends that step, are refused; a `setTimer` with another schedule group replaces it, and one without the
   schedule group keeps it.
@@ -93,7 +92,7 @@ after 2099 (an `end` may). The kinds:
   setting, else refused. When the user did not name a zone, ASK and send `timeZone`: the clio login may be a
   technical user whose zone is not theirs. A `setTimer` without `timeZone` keeps the stored zone; an old timer with
   none stored runs, and is described, as `UTC`.
-- `repeatOnMisfire` (the designer's "Repeat on misfire") is stored for parity and changes nothing at run time: with
+- `repeatOnMisfire` is stored for parity and changes nothing at run time: with
   either value, a fire missed while the scheduler was down runs once as soon as it is back, then the schedule
   continues. Tell the user that.
 
@@ -102,18 +101,19 @@ after 2099 (an `end` may). The kinds:
   after which a timer that did not fire before, or now fires on a different schedule or zone, sits in the enabled,
   active version of a process, you MUST state the following and get an explicit yes BEFORE you call the tool: the
   schedule in words (a step's real cadence), the zone you will send as `timeZone`, the first run as your estimate
-  (it may be immediate, above), that runs use the System operations user with system access (no permission checks),
-  and which data the process writes or deletes. Then read the post-save notice and pass it on. If it differs from
-  what the user approved (another zone or first run, an immediate run, NOT scheduled), tell the user at once and
-  offer to revert (`setTimer` back, or remove the timer). An activation or an enable returns no timer notice: read
-  `scheduled` from `describe-business-process element=<name>` instead.
+  (it may be immediate, above), that runs use the System operations user with system access (no permission checks)
+  and get no process parameters or record Id, and which data the process writes or deletes. Then read the post-save
+  notice and pass it on. If it differs from what the user approved (another zone or first run, an immediate run, NOT
+  scheduled), tell the user at once and offer to revert (`setTimer` back, or remove the timer). An activation answers
+  with the same notice and `startTimers`; an enable answers with none: read `scheduled` from
+  `describe-business-process element=<name>` instead.
 - That covers: a create with a `timerStart`; adding a `timerStart` to an existing process (next to the Simple start,
   or to a timer-only process); the Simple -> Timer replace; a `setTimer`, the re-save below included;
   `set-active-business-process-version` on a version that carries a timer (one added through
   `modify-business-process-as-new-version` fires only from then); enabling a disabled process that carries a timer.
-- An edit that leaves an already scheduled timer unchanged (a caption, a label) needs no schedule confirmation; other
-  confirm gates still apply: a change to what a scheduled run writes is an in-place edit of the active version
-  (`process-modeling`), and `process-delete-data` keeps its own.
+- An edit that leaves a timer whose `state` is `scheduled` unchanged (a caption, a label) needs no schedule
+  confirmation; other confirm gates still apply: a change to what a scheduled run writes is an in-place edit of the
+  active version (`process-modeling`), and `process-delete-data` keeps its own.
 
 == A timer on an existing process ==
 - By default ADD it: `addElement` a `timerStart` and `addFlow` from it to the first element, next to the existing
@@ -126,9 +126,8 @@ after 2099 (an `end` may). The kinds:
   and nothing in the save says so.
 - Caller check, read-only:
   * Process callers: one `execute-esq` on `SysSubProcessInProcess` by the family root (`versionRootSchemaUId` from
-    describe); any row is a caller (`ProcessUId` is the calling version, `ParentProcessUId` its family). The platform
-    writes one set of rows per caller version, active or not. A refused or failed read is reported to the user, never
-    taken as "no callers". The table holds process callers only:
+    describe); any row is a caller (`ProcessUId` is the calling version, `ParentProcessUId` its family, one set of rows
+    per caller version). A refused or failed read is reported to the user, never taken as "no callers". The table holds process callers only:
     a case (DCM) step that runs the process, or code that starts it, is not in it - ask about those too:
 clio-run { command: "execute-esq", args: { environment-name: "<env>", query: { rootSchemaName: "SysSubProcessInProcess", columns: { items: { ProcessUId: { expression: { expressionType: 0, columnPath: "ProcessUId" } }, ParentProcessUId: { expression: { expressionType: 0, columnPath: "ParentProcessUId" } } } }, filters: { filterType: 6, items: { r: { filterType: 1, comparisonType: 3, leftExpression: { expressionType: 0, columnPath: "ParentSubProcessUId" }, rightExpression: { expressionType: 2, parameter: { dataValueType: 0, value: "<versionRootSchemaUId>" } } } } } } } }
   * Manual starts - a page button, a classic page, a dashboard, an integration, a `run-process` call: no tool proves
@@ -172,7 +171,7 @@ an existing top-level timer start in place (UId, name and flows kept, so its sch
   the user.
 - "Nothing was saved ... timer `X` ... would be refused": ask the user about `X`, then send its `setTimer`, or its
   removal, with the edit in one request; if `setTimer` cannot reach it (event sub-process), the user fixes or removes
-  it in the process designer.
+  it in the process designer. For "Nothing was activated": `setTimer` on that version, then activate again.
 - "the edit was written but the save did not finish (scheduler: ...)": the edit IS saved; do NOT resend the original
   operations. If the message says the scheduler refused the timer, fix the timer (confirming again) and re-save it
   with `setTimer`; if it says the scheduler itself failed, re-save later with `setTimer` sending the same values.
