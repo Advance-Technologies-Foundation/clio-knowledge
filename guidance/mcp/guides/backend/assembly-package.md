@@ -36,15 +36,17 @@ header. Never copy files into the site's `Pkg` folder by hand.
   version alone, with the same `ModifiedOnUtc`, is silently ignored. Keep `"Type": 1` and `"ProjectPath"` in it:
   `add-package` writes both, and `pull-pkg` of an assembly package exports both (with the stored `ModifiedOnUtc`, so
   pushing it back unchanged changes nothing). `create-package` creates an ordinary package (`Type` 0).
-- After every install read both back. When the `list-packages` result carries `type` and `projectPath`, read them
-  there (`type` 1 = assembly package). An older clio does not return them; read `SysPackage` `Type`/`ProjectPath`
+- After every install MUST read both back, even when the service already answers: an answering endpoint does not
+  show the package type. When the `list-packages` result carries `type` and `projectPath`, read them there (`type` 1
+  = assembly package). An older clio does not return them; read `SysPackage` `Type`/`ProjectPath`
   with the read-only `execute-esq` instead. A current clio omits them only when the environment does not store them.
 - A push whose descriptor counts as changed and carries no `"Type": 1` (absent or 0) resets the package to `Type` 0,
   and `ProjectPath` becomes whatever the descriptor carries (empty when absent).
 - Repair a reset through the descriptor: put `"Type": 1` and `ProjectPath` back, set a new `ModifiedOnUtc`, push
-  again and read back. Then run ONE full compile (asking first, `core-rules`): the install that reset the type
-  compiled the package into the configuration assembly, and the restoring push leaves that copy there, so the same
-  types would live in two assemblies.
+  again and read back. The restoring push builds the package's DLL itself, so run no package compile; run only ONE
+  full compile (asking first, `core-rules`): the install that reset the type compiled the package into the
+  configuration assembly, and the restoring push leaves that copy there, so the same types would live in two
+  assemblies.
 - MUST NOT set `Type` or `ProjectPath` with SQL, OData or DataService writes: they skip the platform's type converter
   (it sets `ProjectPath` and resets the type cache), and the next push of a changed descriptor overwrites them
   anyway. The platform's own conversion (package properties) refuses a package installed from an archive

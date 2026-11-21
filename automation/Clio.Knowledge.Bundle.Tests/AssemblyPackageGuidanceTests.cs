@@ -23,9 +23,9 @@ public sealed class AssemblyPackageGuidanceTests
         string[] requiredFacts =
         [
             "Keep `\"Type\": 1` and `\"ProjectPath\"` in it",
-            "After every install read both back",
+            "After every install MUST read both back",
+            "so run no package compile; run only ONE full compile",
             "MUST NOT set `Type` or `ProjectPath` with SQL, OData or DataService writes",
-            "Then run ONE full compile",
             "builds an assembly package ONLY when it has compilable content",
             "`skipped (no compilable schemas)",
             "clio add-schema <Package>Marker -t source-code",
