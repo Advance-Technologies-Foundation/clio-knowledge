@@ -66,7 +66,9 @@ header. Never copy files into the site's `Pkg` folder by hand.
   there, and `push-pkg` ships it): when that DLL loads, the install skips the compile and the old DLL runs. Before
   the push remove only the package's own build output - `Files/Bin/<Package>.dll` and `.pdb`, and the same under
   `Files/Bin/netstandard` - never other DLLs, and ask the user first about files this session did not create.
-  Without it the install compiles the package (the compile log lists it under `compiled:`).
+  Without it the install compiles the package (the compile log lists it under `compiled:`). Then do not compile it
+  again: a package compile with nothing to build logs `compiled: 0` and writes no compilation history, so clio's wait
+  reports a failure although nothing failed. Call the service to see whether it runs.
 - With a skipped package, `compile-package --wait` waits for compilation history that is never written and exits
   non-zero after its timeout ("wrote no compilation history"). Before recompiling, look for the package in the
   compile log's `skipped (no compilable schemas)` list; a timeout alone does not prove a skip.
@@ -74,7 +76,9 @@ header. Never copy files into the site's `Pkg` folder by hand.
   types. One converted from an ordinary package, or installed as an ordinary package even once, also needs ONE full
   compile (asking first, `core-rules`): its package compile built the DLL and, after a restart, served the new code,
   but left its old types in the configuration assembly until a full compile removed them.
-- Every compile that adds or changes a DLL or a service needs the restart in `core-rules` before the change runs.
+- An install that compiled the package reloaded (.NET Framework) or restarted (.NET) the application by itself in the
+  measurements; verify with a call. After an explicit compile, a new or changed DLL or service runs only after the
+  restart in `core-rules`.
 
 == Compile: precompiled delivery ==
 - The other path: build `Files/<PackageName>.csproj` yourself and ship the DLL as `Files/Bin/<PackageName>.dll`
@@ -164,14 +168,14 @@ header. Never copy files into the site's `Pkg` folder by hand.
   `ScheduleImmediateJob<T>` / `TriggerJob<T>` is stored and survives one.
 
 Evidence
-- Measured 2026-11 on Creatio 10.2 (.NET Framework, MSSQL) and on a 10.x trunk build (.NET Framework, MSSQL), clio
-  8.1.0.135, with disposable assembly packages: install copies `Type`/`ProjectPath` from the descriptor; a changed
+- Measured 2026-11 on Creatio 10.2 (.NET Framework, MSSQL), a 10.x trunk build (.NET Framework, MSSQL) and Creatio
+  10.3 (.NET 10, PostgreSQL; compile filter, install compile, routes, CSRF, `Location`), clio 8.1.0.135, with
+  disposable assembly packages: install copies `Type`/`ProjectPath` from the descriptor; a changed
   descriptor without `Type` reset it and a changed descriptor with it restored it; the reset install left a copy in
   the configuration assembly; the platform conversion refused a pushed package; a converted package kept its old
   types until a full compile; the `add-package` template package was skipped by the package compile and the full
   compile and not compiled by the install, and one `add-schema` SourceCode schema made the install compile it; a
   shipped `Files/Bin` DLL was served after a restart and left unchanged by a skipping compile; services answered at
   `/0/rest/...` without a `.svc`; `Assembly.Location` was empty.
-- Read in Creatio platform source (10.2 and trunk), not measured: the compile filter on .NET and its version
-  boundary, the install skipping a package whose shipped DLL loads, references, the wrong `ProjectPath`, and every
-  statement about background jobs.
+- Read in Creatio platform source (10.2 and trunk), not measured: the version boundaries, the install skipping a
+  package whose shipped DLL loads, references, the wrong `ProjectPath`, and every statement about background jobs.
