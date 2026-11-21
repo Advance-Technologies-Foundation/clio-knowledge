@@ -11,6 +11,9 @@ Non-Negotiable Rules
 - Keep the web service thin. Put business logic in an application/service layer when possible.
 - Never throw for expected business or validation flow. Return an error as a value when that pattern exists in the workspace.
 - If tests are part of the task, also follow configuration-webservice-tests.
+- No `.svc` file and no web.config entry for an authenticated service: Creatio registers a route for every `[ServiceContract]` class at application start, in an ordinary or an assembly package (measured on .NET Framework, Creatio 10.2, 2026-11; on .NET read in platform source, not measured). A new or changed service answers only after the restart in `core-rules`.
+- A cookie-authenticated POST, PUT, PATCH or DELETE must send the CSRF cookie's value in a request header of the same name: `BPMCSRF`, or `CRT_CSRF` where the login set that cookie. Without it the server answers 403 with an HTML page, not JSON; GET needs no header. Both names were accepted on .NET Framework (Creatio 10.2, 2026-11). An OAuth bearer request needs no CSRF header. The clio CLI `call-service` sends the header itself.
+- C# under `Files/src/cs` is built only in an assembly package that also has compilable content, or when you ship its built DLL: read `assembly-package` before relying on that folder.
 
 Required Location And Shape
 Source path:
