@@ -9,9 +9,16 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
 (the running code differs from the source), `process-timer-start` (running a process on a schedule),
 `process-script-task` (C# inside a process).
 
+Delivery checklist (each step is explained below): keep `"Type": 1` and `ProjectPath` in `descriptor.json` -> give
+the package compilable content, or ship a freshly built DLL -> install it (`push-pkg` / `push-workspace`; for a
+workspace linked in file system mode, `fsm-mode`) -> read `type`/`projectPath` back -> compile and restart as
+`core-rules` says -> call the changed service with `clio call-service`, which handles the login and the CSRF
+header. Never copy files into the site's `Pkg` folder by hand.
+
 == When to use one ==
 - Default: C# that runs on the server goes into SourceCode schemas of an ordinary package. A package compile builds
-  them into the configuration assembly, and nothing in this guide applies. An ordinary package can also carry
+  them into the configuration assembly, and only the Background work section of this guide applies. An ordinary
+  package can also carry
   imported reference assemblies.
 - Choose an assembly package only when the code needs its own project: references you manage in your own csproj, a
   csproj you build and test locally, or compiling the package without rebuilding the configuration assembly. Each of
@@ -30,8 +37,8 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
   `add-package` writes both, and `pull-pkg` of an assembly package exports both (with the stored `ModifiedOnUtc`, so
   pushing it back unchanged changes nothing). `create-package` creates an ordinary package (`Type` 0).
 - After every install read both back. When the `list-packages` result carries `type` and `projectPath`, read them
-  there (`type` 1 = assembly package); otherwise read `SysPackage` `Type`/`ProjectPath` with the read-only
-  `execute-esq`.
+  there (`type` 1 = assembly package). An older clio does not return them; read `SysPackage` `Type`/`ProjectPath`
+  with the read-only `execute-esq` instead. A current clio omits them only when the environment does not store them.
 - A push whose descriptor counts as changed and carries no `"Type": 1` (absent or 0) resets the package to `Type` 0,
   and `ProjectPath` becomes whatever the descriptor carries (empty when absent).
 - Repair a reset through the descriptor: put `"Type": 1` and `ProjectPath` back, set a new `ModifiedOnUtc`, push
@@ -56,9 +63,10 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
   (`--as-app` adds one). For source delivery add one SourceCode schema before the push: in the workspace run
   `clio add-schema <Package>Marker -t source-code -p <path to the package folder>`.
 - For source delivery the pushed package MUST NOT carry `Files/Bin/<Package>.dll` (a local `dotnet build` writes it
-  there, and `push-pkg` ships it): when that DLL loads, the install skips the compile and the old DLL runs. Delete
-  `Files/Bin` before the push. Without it the install compiles the package (the compile log lists it under
-  `compiled:`).
+  there, and `push-pkg` ships it): when that DLL loads, the install skips the compile and the old DLL runs. Before
+  the push remove only the package's own build output - `Files/Bin/<Package>.dll` and `.pdb`, and the same under
+  `Files/Bin/netstandard` - never other DLLs, and ask the user first about files this session did not create.
+  Without it the install compiles the package (the compile log lists it under `compiled:`).
 - With a skipped package, `compile-package --wait` waits for compilation history that is never written and exits
   non-zero after its timeout ("wrote no compilation history"). Before recompiling, look for the package in the
   compile log's `skipped (no compilable schemas)` list; a timeout alone does not prove a skip.
@@ -72,7 +80,8 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
 - The other path: build `Files/<PackageName>.csproj` yourself and ship the DLL as `Files/Bin/<PackageName>.dll`
   (`Files/Bin/netstandard` on .NET; `core-rules-details`, Precompiled delivery). After a restart the platform loads
   the shipped DLL, whatever the package's type and compile state.
-- The shipped DLL is then the running code. On 10.0.0.171 or later a compile of a package without compilable
+- The shipped DLL is then the running code (this guide owns that rule). On 10.0.0.171 or later a compile of a
+  package without compilable
   content skips it and leaves the shipped DLL as it is, so a source change pushed without a rebuilt DLL keeps the old
   behavior. Rebuild the DLL from the current source on every change; a DLL carried over from an earlier build or
   `pull-pkg` is stale.
@@ -102,13 +111,15 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
 - By default (`LoadAssemblyFromByteArray` on) package assemblies are loaded from bytes, so `Assembly.Location` is an
   empty string, for the package assembly and for the configuration assembly alike. Build file paths from
   `AppDomain.CurrentDomain.BaseDirectory` plus `Terrasoft.Configuration/Pkg/<Package>/Files/...` (on .NET Framework
-  the configuration folder sits under `Terrasoft.WebApp`), never from an assembly's location.
+  the configuration folder sits under `Terrasoft.WebApp`), never from an assembly's location, and never join request
+  input into such a path. An embedded resource read with `GetManifestResourceStream` also works, but a change to the
+  file then needs a rebuild.
 - A service in a precompiled DLL is found only when the assembly carries
   `[assembly: PackageReferenceAssembly(...)]` with service routes, which the generated csproj adds (`All`); keep it
-  in your own csproj. An authenticated `[ServiceContract]` service needs no `.svc` file; routes, CSRF and the base
-  class are `configuration-webservice`.
+  in your own csproj. Routes, `.svc` files, CSRF and the base class are `configuration-webservice`.
 
 == Background work in C# ==
+- An `IJobExecutor` works in an ordinary package (a SourceCode schema) as well; this section applies to both.
 - Work that runs on a schedule is a timer-start process: read `process-timer-start`. Write an `IJobExecutor` only
   when a timer start cannot express the work: each run needs its own parameters, the schedule is computed at
   runtime, or a request hands work off to run later. A timer-start job carries no process parameters.
@@ -122,7 +133,7 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
 - Make `Execute` idempotent: jobs are stored with recovery on, so a run interrupted by a crash (or, on .NET
   Framework, an application-domain unload) runs again.
 - Use the `UserConnection` passed to `Execute`: it is created for this run and closed when `Execute` returns.
-  Resolve services inside `Execute`. The executor is created anew for every run and needs a public parameterless
+  Resolve services inside `Execute`, within its `try`. The executor is created anew for every run and needs a public parameterless
   constructor (unless it has a named `DefaultBinding`). `[DefaultBinding(typeof(IJobExecutor))]` is not required.
 - The stored job names the executor's assembly-qualified type: renaming its class, namespace or assembly makes
   every later run fail (`JobFail`) until the job is scheduled again.
@@ -134,7 +145,10 @@ class, routes, the CSRF header), `core-rules` (the compile confirmation and the 
 - Identity: `CreateAndScheduleJob<T>` always runs as the `SystemUser` system setting's user, with no rights checks.
   `CreateClassJob<T>(jobName, group, userConnection, ...)` does too unless `isSystemUser` is false.
   `ScheduleMinutelyJob<T>`, `ScheduleImmediateJob<T>` and `TriggerJob<T>` default `isSystemUser` to false and run as
-  the `userName` you pass, with that user's rights.
+  the `userName` you pass, with that user's rights. Prefer running as the user who asked for the work
+  (`isSystemUser` false and that user's name); use the system user only when the task needs it, and say so. A job
+  with system access checks no rights, so `Execute` MUST check rights and validate its parameters itself, and request
+  input MUST NOT choose the executor type or the user.
 - Scheduling: `CreateAndScheduleJob<T>` and `ScheduleMinutelyJob<T>` replace the job with the same key, so you do not
   need to remove it first. The key of `ScheduleMinutelyJob<T>` is the executor type and group: one minutely schedule
   per executor type and group. `ScheduleImmediateJob<T>` names every call's job with a new GUID (whatever its doc

@@ -20,22 +20,19 @@ public sealed class AssemblyPackageGuidanceTests
     public void AssemblyPackageGuide_ShouldKeepTheMeasuredRegistrationAndCompileRules()
     {
         // Arrange
-        string guide = Read("guidance", "mcp", "guides", "backend", "assembly-package.md");
-
-        // Act
         string[] requiredFacts =
         [
             "Keep `\"Type\": 1` and `\"ProjectPath\"` in it",
             "After every install read both back",
             "MUST NOT set `Type` or `ProjectPath` with SQL, OData or DataService writes",
             "Then run ONE full compile",
-            "ONLY when it",
+            "builds an assembly package ONLY when it has compilable content",
             "`skipped (no compilable schemas)",
             "clio add-schema <Package>Marker -t source-code",
-            "also needs ONE full",
+            "also needs ONE full compile",
             "The shipped DLL is then the running code",
             "Use one of the two, never both",
-            "`Assembly.Location` is an",
+            "`Assembly.Location` is an empty string",
             "read `process-timer-start`",
             "MUST NOT be `async void`",
             "Make `Execute` total",
@@ -44,8 +41,13 @@ public sealed class AssemblyPackageGuidanceTests
             "Make `Execute` idempotent",
             "MUST NOT carry `Files/Bin/<Package>.dll`",
             "names every call's job with a new GUID",
-            "6 fields with seconds first"
+            "6 fields with seconds first",
+            "`Execute` MUST check rights and validate its parameters itself"
         ];
+
+        // Act
+        string guide = System.Text.RegularExpressions.Regex.Replace(
+            Read("guidance", "mcp", "guides", "backend", "assembly-package.md"), @"\s+", " ");
 
         // Assert
         guide.Should().ContainAll(requiredFacts,
