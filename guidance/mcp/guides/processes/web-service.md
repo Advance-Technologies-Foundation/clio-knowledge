@@ -172,14 +172,9 @@ them stop working, and a save keeps them removed.
   the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an
   HTTP error answer: that answer completes the element. A compiled (not interpretable) process applies neither
   `timeoutSeconds` nor `ignoreErrors`.
-- An inner list with no source of its own while its items are bound (`items_In.parts_In`): Creatio builds without the
-  platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays` on,
-  send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.
-  The notice comes on every environment: the fix cannot be read.
-- While application setting `Feature-ProcessParameterCollections` is on, a name or tag repeated in one top-level
-  list's tree: in a request list a repeated name stops the element once two of those items carry a value, a repeated
-  tag sends one value; in a response list a repeated tag stops it when the result is stored, a repeated name keeps one
-  value.
+- Two list shapes lose or stop values at run time, an inner list with no source of its own while its items are
+  bound and a name or tag repeated in one top-level list's tree: `process-web-service-details` owns both. The
+  notices name them.
 
 == Notices (warnings: the process saves) ==
 Tell the user each; also a required input with no value (the designer marks it invalid).
@@ -195,8 +190,4 @@ fractional `timeoutSeconds` is refused on write (leave it out on `setElement` to
 `service: null` leaves a method-only block, which is refused; a stored method whose case differs from the service's makes the
 block a retarget, not a no-op.
 
-Evidence: build-time rules pinned by CrtProcessBuilder 1.6.6.150 unit tests. Measured on Creatio 10.1.37 (.NET
-Framework) on 2026-11-03 (designer-built elements): a 404 and a refused connection, `ignoreErrors` on and off; the
-designer deleting all parameters when the method is gone; an unrelated modify pruning a case-drifted element. Every other
-run-time rule is read from the Creatio core source and the designer client code,
-not measured.
+Evidence: `process-web-service-details`.

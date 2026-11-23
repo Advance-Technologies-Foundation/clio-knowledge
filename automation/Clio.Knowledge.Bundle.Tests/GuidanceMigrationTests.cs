@@ -45,6 +45,7 @@ public sealed class GuidanceMigrationTests
         "process-files-parameter",
         "process-send-email-attachments",
         "process-web-service",
+        "process-web-service-details",
         "process-send-chat-message",
         "process-timer-start",
         "process-data-elements-details",
@@ -64,7 +65,9 @@ public sealed class GuidanceMigrationTests
         "process-dynamic-case",
         "process-dynamic-case-change",
         "web-service-registration",
+        "web-service-maintenance",
         "web-service-soap",
+        "web-service-soap-details",
         "column-rights",
         "data-bindings-details",
         "assembly-package"

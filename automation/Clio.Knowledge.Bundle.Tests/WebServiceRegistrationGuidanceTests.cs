@@ -14,6 +14,8 @@ namespace Clio.Knowledge.Bundle.Tests;
 public sealed class WebServiceRegistrationGuidanceTests
 {
     private const string ArticlePath = "guidance/mcp/guides/integration/web-service-registration.md";
+    private const string MaintenancePath = "guidance/mcp/guides/integration/web-service-maintenance.md";
+    private const string SoapDetailsPath = "guidance/mcp/guides/integration/web-service-soap-details.md";
 
     [Test]
     [Description("The guide states the credential rule: no credential value passes through the agent, keys are system-setting references, and missing settings are created empty for the user to fill.")]
@@ -65,11 +67,11 @@ public sealed class WebServiceRegistrationGuidanceTests
     }
 
     [Test]
-    [Description("The guide keeps acknowledge-usages for the user's explicit yes and says setMethod replaces kept parameters.")]
+    [Description("The maintenance guide keeps acknowledge-usages for the user's explicit yes and says setMethod replaces kept parameters.")]
     public void Guide_ShouldStateTheUsageGuardAndTheReplacement()
     {
         // Arrange
-        string guide = ReadCollapsed(ArticlePath);
+        string guide = ReadCollapsed(MaintenancePath);
 
         // Act
         string[] clauses =
@@ -151,7 +153,7 @@ public sealed class WebServiceRegistrationGuidanceTests
             "does not list `read-wsdl` has no WSDL reading",
             "Register a port's `arguments` with `register-web-service` as they are, adding only `package-name`",
             "ask the user which way to go and do not pick a code yourself",
-            "the confirmation rule of `web-service-registration` applies to every SOAP method"
+            "the confirmation rule of `web-service-maintenance` applies to every SOAP method"
         ];
 
         // Assert
@@ -165,11 +167,12 @@ public sealed class WebServiceRegistrationGuidanceTests
     }
 
     [Test]
-    [Description("The registration guide guards a real change of the base URI or the authentication like a changed method, leaves setRetryCount unguarded, says a method without use-auth sends no authentication, and that Digest goes out as Basic.")]
+    [Description("The maintenance guide guards a real change of the base URI or the authentication like a changed method, leaves setRetryCount unguarded and says a method without use-auth sends no authentication; the registration guide says Digest goes out as Basic.")]
     public void Guide_ShouldGuardEveryCallChangesAndStatePerMethodAuthentication()
     {
         // Arrange
-        string guide = ReadCollapsed(ArticlePath);
+        string guide = ReadCollapsed(MaintenancePath);
+        string registration = ReadCollapsed(ArticlePath);
 
         // Act
         string[] clauses =
@@ -178,8 +181,7 @@ public sealed class WebServiceRegistrationGuidanceTests
             "The tool compares the service before and after the whole call",
             "never set `use-auth` on your own, not even in the same call as `setAuth`",
             "`setRetryCount` is never guarded.",
-            "a method with `use-auth: false` sends no authentication at all",
-            "The platform sends Digest as a preemptive `Authorization: Basic` header"
+            "a method with `use-auth: false` sends no authentication at all"
         ];
 
         // Assert
@@ -188,6 +190,8 @@ public sealed class WebServiceRegistrationGuidanceTests
             guide.Should().Contain(clause,
                 because: "without it an agent repoints or re-authenticates a service a process calls unasked, or expects a new authentication to reach every method");
         }
+        registration.Should().Contain("The platform sends Digest as a preemptive `Authorization: Basic` header",
+            because: "the registration guide owns the authentication types");
     }
 
     [Test]
@@ -202,7 +206,6 @@ public sealed class WebServiceRegistrationGuidanceTests
         [
             "Register the port a warning names to register instead (\"Register port ... instead\"), else the `studio-pick` port",
             "Studio's choice, not a recommendation",
-            "never as the `action` parameter of `Content-Type`",
             "`application/soap+xml;charset=utf-8;action=\"<the soap-action>\"`",
             "two `soap-header` body parameters `wsa:Action` (the soap-action) and `wsa:To` (the base URI)",
             "Do this only with the user's agreement, and test a call.",
@@ -217,6 +220,8 @@ public sealed class WebServiceRegistrationGuidanceTests
             soap.Should().Contain(clause,
                 because: "without it an agent registers Studio's SOAP 1.2 pick of a WCF service and every call fails with a SOAP fault");
         }
+        ReadCollapsed(SoapDetailsPath).Should().Contain("never as the `action` parameter of `Content-Type`",
+            because: "the details article says why the platform cannot call a WCF SOAP 1.2 port");
     }
 
     [Test]
@@ -243,11 +248,11 @@ public sealed class WebServiceRegistrationGuidanceTests
     }
 
     [Test]
-    [Description("The guide says run-process withholds the text results of a process that calls a web service or reads a SecureText setting, and that the agent never copies a response or a key elsewhere to read it.")]
+    [Description("The maintenance guide says run-process withholds the text results of a process that calls a web service or reads a SecureText setting, and that the agent never copies a response or a key elsewhere to read it.")]
     public void Guide_ShouldStateThatRunProcessWithholdsCredentialResults()
     {
         // Arrange
-        string guide = ReadCollapsed(ArticlePath);
+        string guide = ReadCollapsed(MaintenancePath);
 
         // Act
         string[] clauses =
@@ -263,6 +268,43 @@ public sealed class WebServiceRegistrationGuidanceTests
             guide.Should().Contain(clause,
                 because: "an agent that has not read the rule takes [withheld] for a broken run, or works around it and puts the key into its context");
         }
+    }
+
+    [Test]
+    [Description("The registration guide sends test calls and changes to web-service-maintenance, routing reaches it, and the maintenance guide restates the credential MUST where its changes are made.")]
+    public void Guide_ShouldSendTestCallsAndChangesToTheMaintenanceGuide()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+        string maintenance = ReadCollapsed(MaintenancePath);
+        string routing = ReadCollapsed("guidance/mcp/guides/routing.md");
+
+        // Assert
+        guide.Should().Contain("are owned by `get-guidance name=web-service-maintenance`: read it before either.",
+            because: "a test call or a change needs the rules that moved to the maintenance guide");
+        routing.Should().Contain("test-call or change it -> name=web-service-maintenance",
+            because: "a change task must reach the maintenance guide from routing");
+        maintenance.Should().Contain("MUST: a credential is a system-setting reference, never a value, and every setting a call references anew must exist first",
+            because: "a split never separates a write from its preconditions");
+        maintenance.Should().Contain("ALWAYS tell the user it sends a real request that can change data in that API and wait for their explicit yes",
+            because: "the test call's confirmation rule travels with the test call");
+    }
+
+    [Test]
+    [Description("The guides describe the narrowed replies: methods-not-shown read with methods, the list-web-services filter, and read-wsdl's one port in full.")]
+    public void Guides_ShouldDescribeTheNarrowedReplies()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+        string soap = ReadCollapsed("guidance/mcp/guides/integration/web-service-soap.md");
+
+        // Assert
+        guide.Should().Contain("in `methods-not-shown`: read those with `methods` before you use or send one back",
+            because: "a method listed by code only was not shown, and sending a guess back would replace it");
+        guide.Should().Contain("`filter` keeps the services whose code, caption or package contains a text",
+            because: "a long service list is narrowed with filter");
+        soap.Should().Contain("only the port to register (below) comes with `arguments`; the others list their `operations` names",
+            because: "the agent must read another port with port instead of registering names");
     }
 
     private static string ReadCollapsed(string relativePath) =>

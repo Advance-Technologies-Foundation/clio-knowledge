@@ -39,6 +39,8 @@ public sealed class WebServiceGuidanceTests
 
     private const string ArticlePath = "guidance/mcp/guides/processes/web-service.md";
 
+    private const string DetailsPath = "guidance/mcp/guides/processes/web-service-details.md";
+
     private const string CatalogPath = "guidance/mcp/guides/processes/element-catalog.md";
 
     private const string CatalogDetailsPath = "guidance/mcp/guides/processes/element-catalog-details.md";
@@ -284,9 +286,14 @@ public sealed class WebServiceGuidanceTests
             "While feature `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a failing call still stops the process.",
             "It does NOT cover computing the inputs (an empty system setting behind `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.",
             "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an HTTP error answer: that answer completes the element.",
+            "A compiled (not interpretable) process applies neither `timeoutSeconds` nor `ignoreErrors`.",
+            "`process-web-service-details` owns both. The notices name them."
+        ];
+        string details = ReadCollapsed(DetailsPath);
+        string[] detailClauses =
+        [
             "Creatio builds without the platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
             "While application setting `Feature-ProcessParameterCollections` is on, a name or tag repeated in one top-level list's tree: in a request list a repeated name stops the element once two of those items carry a value, a repeated tag sends one value; in a response list a repeated tag stops it when the result is stored, a repeated name keeps one value.",
-            "A compiled (not interpretable) process applies neither `timeoutSeconds` nor `ignoreErrors`.",
             "Measured on Creatio 10.1.37 (.NET Framework) on 2026-11-03 (designer-built elements):",
             "Every other run-time rule is read from the Creatio core source and the designer client code, not measured."
         ];
@@ -295,6 +302,9 @@ public sealed class WebServiceGuidanceTests
         // Assert
         missing.Should().BeEmpty(
             because: "none of these is visible from a green build. Missing: " + string.Join(" | ", missing));
+        string[] missingDetails = [.. detailClauses.Where(clause => !details.Contains(clause, StringComparison.Ordinal))];
+        missingDetails.Should().BeEmpty(
+            because: "the rare list shapes and the evidence moved to the details article. Missing: " + string.Join(" | ", missingDetails));
     }
 
     [Test]
