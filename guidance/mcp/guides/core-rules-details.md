@@ -13,7 +13,7 @@ invariant, the compile confirmation, and the rule never to call a timed-out comp
 
 ## Precompiled delivery
 - Precompiled delivery is a separate path: build the package for the target Creatio runtime and compatible platform dependencies, include the built binaries in the package, then install it with `push-pkg`. A .NET 8 assembly cannot be deployed as a .NET Framework assembly; do not assume any .NET build matches every .NET target. Rebuild for the actual target or deliver supported source for target-side package compilation. Do not automatically recompile a compatible precompiled package after installation; restart Creatio to load the newly installed DLL, then verify its behavior.
-- For an assembly package the shipped DLL stays the running code and must be rebuilt on every change: `assembly-package` owns that rule.
+- For an assembly package without compilable content the shipped DLL stays the running code and must be rebuilt on every change: `assembly-package` owns that rule.
 
 ## Did the compile, restart or process launch run?
 Read this when compile-status or restart-status answers `not-found` or `requestfailed`, or run-process

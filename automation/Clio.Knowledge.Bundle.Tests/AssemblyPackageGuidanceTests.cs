@@ -24,13 +24,18 @@ public sealed class AssemblyPackageGuidanceTests
         [
             "Keep `\"Type\": 1` and `\"ProjectPath\"` in it",
             "After every install MUST read both back",
-            "so run no package compile; run only ONE full compile",
+            "compile the package only if the install's compile log does not list it under `compiled:`",
+            "do not compile it again",
+            "ask the user first about files this session did not create",
+            "never passwords, tokens or keys",
+            "check the caller's rights in the request handler before scheduling",
+            "MUST NOT copy files into the site's `Pkg` folder by hand",
             "MUST NOT set `Type` or `ProjectPath` with SQL, OData or DataService writes",
             "builds an assembly package ONLY when it has compilable content",
             "`skipped (no compilable schemas)",
             "clio add-schema <Package>Marker -t source-code",
             "also needs ONE full compile",
-            "The shipped DLL is then the running code",
+            "the shipped DLL is the running code",
             "Use one of the two, never both",
             "`Assembly.Location` is an empty string",
             "read `process-timer-start`",
@@ -42,7 +47,7 @@ public sealed class AssemblyPackageGuidanceTests
             "MUST NOT carry `Files/Bin/<Package>.dll`",
             "names every call's job with a new GUID",
             "6 fields with seconds first",
-            "`Execute` MUST check rights and validate its parameters itself"
+            "`Execute` MUST NOT be `async void`"
         ];
 
         // Act
@@ -66,6 +71,8 @@ public sealed class AssemblyPackageGuidanceTests
         string webService = Read("guidance", "mcp", "guides", "backend", "configuration-webservice.md");
         string troubleshooting = Read("guidance", "mcp", "guides", "operations", "backend-deployment-troubleshooting.md");
 
+        string coreRulesDetails = Read("guidance", "mcp", "guides", "core-rules-details.md");
+
         // Act
         string routingRow = routing.Split('\n').SingleOrDefault(line => line.Contains("name=assembly-package")) ?? string.Empty;
 
@@ -82,6 +89,14 @@ public sealed class AssemblyPackageGuidanceTests
             because: "the CSRF header name depends on the cookie the login set");
         troubleshooting.Should().Contain("`skipped (no compilable schemas)`",
             because: "the skipped package is the first boundary to check when no DLL appears");
+        webService.Should().Contain("read `assembly-package`",
+            because: "the web-service owner hands Files/src/cs compile questions to the assembly-package guide");
+        troubleshooting.Should().Contain("`assembly-package`",
+            because: "the troubleshooting rows point to the owner instead of restating it");
+        coreRulesDetails.Should().Contain("`assembly-package` owns that rule",
+            because: "precompiled delivery cites the owner of the shipped-DLL rule");
+        webService.Should().Contain("a method that changes data MUST NOT be a GET",
+            because: "an agent must not dodge the CSRF check by turning a POST into a GET");
     }
 
     [Test]
