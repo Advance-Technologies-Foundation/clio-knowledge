@@ -64,7 +64,8 @@ Reading a WSDL (read-wsdl)
   not write; an ASMX service answers SOAP 1.2), keep the SOAP 1.2 port and switch only if a test call fails
   because the action or operation is not found (WCF: `ActionNotSupported`, Action ''). Switch the registered
   service with `modify-web-service` `setType` soap11, plus `setBaseUri` when the SOAP 1.1 port's base-uri differs;
-  `register-web-service` refuses a code already used. Why the platform cannot call such a port:
+  `register-web-service` refuses a code already used. A port that requires WS-Security message security cannot be
+  called at all; ask the API owner for a plain endpoint. Why the platform cannot call such ports:
   `web-service-soap-details`. With no SOAP 1.1 port the
   warning gives the workaround, measured to work: for SOAP 1.2, a request header parameter (a prefixed code) whose
   `path` is `Content-Type` and whose value is `application/soap+xml;charset=utf-8;action="<the soap-action>"`, one
@@ -170,7 +171,7 @@ Test calls
   sent, the body is withheld and only the status comes back. `response-values` gives the response
   parameters as the platform read them by their element paths.
 - A SOAP 1.2 call answered with a fault `ActionNotSupported` and Action '', or `DestinationUnreachable` and To '',
-  hit the limits above: switch to the WSDL's SOAP 1.1 port (`setType` soap11, plus `setBaseUri` when that port's
+  hit a limit a read-wsdl port warning names (why: `web-service-soap-details`): switch to the WSDL's SOAP 1.1 port (`setType` soap11, plus `setBaseUri` when that port's
   base-uri differs, as it does for WCF), or use the workaround the
   read-wsdl warning gives. Authentication goes out on a SOAP call exactly as on REST, for a method with `use-auth: true`.
 

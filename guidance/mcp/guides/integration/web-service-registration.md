@@ -9,7 +9,8 @@ Scope and ownership
   credential rule and the follow-up steps the user owns. Test-calling a method (`test-web-service-method`, a real
   request the user agrees to first) and changing a registered service (`modify-web-service` and its usage guard)
   are owned by `get-guidance name=web-service-maintenance`: read it before either.
-- Version boundary, before anything else: these five tools need clio 8.1.0.150 or later. If `get-tool-contract`
+- Version boundary, before anything else: the web service tools (these three and the two of
+  `web-service-maintenance`) need clio 8.1.0.150 or later. If `get-tool-contract`
   does not list `register-web-service`, the clio serving you is older: tell the user to update clio, or that the
   service is registered in Studio > Web services, and stop.
 - It does NOT own the Call web service process element: `get-guidance name=process-web-service` owns the
@@ -17,7 +18,7 @@ Scope and ownership
   built. This guide only produces the service such an element calls.
 - It does NOT cover configuration web services (C# endpoints Creatio exposes); for those read
   `configuration-webservice`.
-- Availability: the five tools exist only in a clio that lists `register-web-service`. They are NOT in
+- Availability: the web service tools exist only in a clio that lists `register-web-service`. They are NOT in
   `tools/list`: read their contract with `get-tool-contract` and call them through `clio-run`
   (`{"command": "register-web-service", "args": {...}}`). If `get-tool-contract` does not know
   `register-web-service`, tell the user the registration has to be done in Studio > Web services and stop; do not
@@ -178,4 +179,4 @@ Rights and limits
 - Every tool except `list-web-services` needs the CanManageSolution operation right; without it the call is
   refused before anything is read.
 - There is no delete tool. Removing a service is done in Studio > Web services.
-- Evidence for every web service tool is in `web-service-maintenance`.
+- Evidence for every web service tool is in `web-service-maintenance` (kept there so this article fits one reply).

@@ -128,9 +128,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-send-email-attachments (after name=process-send-email)
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
-  - CALL a REST or SOAP web service registered in Studio > Web services from a process — the Call web service element
-    (`webService`; build it only when the FULL contract names it): service, method, request values, response,
-    retarget -> name=process-web-service; name=process-web-service-details; no registered service fits and clio lists
+  - CALL a REST or SOAP web service registered in Studio > Web services from a process: the Call web service element
+    (`webService`; build it only when the FULL contract names it): service, method, values, response, retarget ->
+    name=process-web-service; rare list shapes -> name=process-web-service-details; no service fits and clio lists
     `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)

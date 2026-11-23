@@ -9,8 +9,7 @@ Why a port warning names another port
   `Content-Type`, so a service that dispatches SOAP 1.2 by that parameter (WCF) answers every call with
   `ActionNotSupported` and Action ''; and it writes no WS-Addressing header, so a port that requires WS-Addressing
   (WCF `wsHttpBinding` with security mode None) answers `DestinationUnreachable` with To ''. A port that requires
-  WS-Security message security (a default `wsHttpBinding`) cannot be called at all; ask the API owner for a plain
-  endpoint.
+  WS-Security message security (a default `wsHttpBinding`) cannot be called at all: the platform cannot produce it.
 
 Evidence
 - Measured on Creatio 10.2 (.NET Framework, MSSQL, prefix `Usr`) in November 2026, through an isolated agent:
