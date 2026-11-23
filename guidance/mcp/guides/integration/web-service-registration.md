@@ -27,8 +27,9 @@ Scope and ownership
 Before registering
 1. Call `list-web-services` and reuse a service whose `base-uri` already points at the same API. A second service for
    the same API is a maintenance burden the user did not ask for. `filter` keeps the services whose code, caption or
-   package contains a text (`Erp`); a list too long to return inline is cut, with a notice to narrow it. A clio that
-   answers `filter` as unknown predates it: list without it.
+   package contains a text (`Erp`); a list too long to return inline is cut, with a notice to narrow it. `filter` does
+   not search the base URI: when the list was cut, try the API's name words as filters, and ask the user before
+   registering a new service. A clio that answers `filter` as unknown predates it: list without it.
 2. Ask the user for what you cannot infer: the base URI, the methods the process needs, the authentication
    type, and the package that should own the service. Never guess a credential.
 3. The service code MUST carry the environment's schema-name prefix, the `SchemaNamePrefix` system setting

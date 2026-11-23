@@ -42,7 +42,8 @@ Reading a WSDL (read-wsdl)
   for another. When they want only some operations, read again with `operations` (and `port`) instead of editing
   the arguments.
 - BEFORE `register-web-service`, show the user every warning and notice about the port you are about to register
-  (its SOAP version; a base URI on another host than the `wsdl-url`) and wait for their answer where one asks for
+  (its SOAP version; a base URI on another host than the `wsdl-url`; when the warnings end with "...and N more
+  warnings", read that port again with `port` and `operations` first) and wait for their answer where one asks for
   it; never register first and warn afterwards. Check the `arguments` yourself for two things and tell the user: a
   `base-uri` on `localhost` or another placeholder host (common in a WSDL saved from a developer machine; read-wsdl
   flags it only when a `wsdl-url` came from another host, never for `wsdl-files`), and a method without
@@ -133,10 +134,8 @@ Registering a SOAP service
   it takes no `default-value`: give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. A plain value (a
   mode, a version, a language) may be a constant, and describe shows it; read-wsdl with `service-code` carries
-  such a constant into the Header and leaves out, with a warning, one that would be a key there. The credential-name
-  check also covers `licence`/`license`, `nonce`, `passcode`, `passphrase`, `bearer`, `jwt` and `pass` not
-  followed by a lowercase letter and not after `com`, `by` or `sur` (not `compass`, `bypass`, `surpass`,
-  `passport`; `UsrPassId` and `PASSPORT` do count).
+  such a constant into the Header and leaves out, with a warning, one that would be a key there. The
+  credential names are the ones `web-service-registration` lists.
 - `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
   `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it. An empty one on a
   response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`. On a

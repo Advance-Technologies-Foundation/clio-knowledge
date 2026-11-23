@@ -21,9 +21,6 @@ evidence of the element's rules.
   block that names nothing is refused.
 - A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and
   describe shows it with an issue. The block itself: `process-web-service`.
-- `RequestBody` replaces the body the element would build. An empty string from a formula or parameter replaces it too
-  (an empty body is sent); a constant "" counts as unset. Nothing checks it as JSON, and nothing warns when it and body parameters are both
-  bound.
 - Besides an unresolved service or method, describe's `issues` report nested items that differ from the service, a
   missing `Success` / `StatusCode` / `Response` (the run stops with an error), an element or parameter marked invalid
   (e.g. a required input not set), and the two list shapes above.

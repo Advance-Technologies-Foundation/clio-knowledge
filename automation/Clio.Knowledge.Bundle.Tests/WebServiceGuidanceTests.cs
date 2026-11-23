@@ -185,6 +185,8 @@ public sealed class WebServiceGuidanceTests
             "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list draws the unsourced-inner-list notice.",
             "when non-null it REPLACES the whole body the element would build from its body parameters; headers, query, path and cookies are still built from theirs.",
             "Use it for a method with no body parameter (as the shipped `ActionGeminiSearch` does with a formula)",
+            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
+            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound.",
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -461,7 +463,7 @@ public sealed class WebServiceGuidanceTests
     }
 
     [Test]
-    [Description("The details article carries the rarer refusals of the block, the multi-instance limit, the RequestBody edge cases and the issues describe reports, and the guide points there.")]
+    [Description("The details article carries the rarer refusals of the block, the multi-instance limit and the issues describe reports, and the guide points there.")]
     public void Details_ShouldCarryTheRarerRefusalsAndEdgeCases()
     {
         // Arrange
@@ -474,8 +476,6 @@ public sealed class WebServiceGuidanceTests
             "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
             "`service` naming ANOTHER service without `method`: refused with that service's methods; the SAME service and nothing else: refused, nothing to change.",
             "an element or parameter marked invalid (e.g. a required input not set)",
-            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
-            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound.",
         ];
         string[] missing = [.. clauses.Where(clause => !details.Contains(clause, StringComparison.Ordinal))];
 

@@ -8,7 +8,7 @@ Scope and ownership
   rule, which every change here follows; read it first. For a SOAP service also read `web-service-soap`.
 - Both tools need clio 8.1.0.150 or later and are NOT in `tools/list`: read their contract with
   `get-tool-contract` and call them through `clio-run`. If `get-tool-contract` does not list
-  `modify-web-service`, tell the user the change is done in Studio > Web services and stop.
+  the tool, tell the user the test call or change is done in Studio > Web services and stop.
 - Every tool here needs the CanManageSolution operation right; without it the call is refused before anything
   is read.
 

@@ -91,9 +91,11 @@ modify, target `elementName` + `elementParameter`. Mappings later in the same re
   as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list
   draws the unsourced-inner-list notice.
 - `RequestBody`: when non-null it REPLACES the whole body the element would build from its body parameters; headers,
-  query, path and cookies are still built from theirs. Use it for a method with no body parameter (as the shipped
+  query, path and cookies are still built from theirs. An empty string from a formula or parameter replaces it too
+  (an empty body is sent); a constant "" counts as unset. Nothing checks it as JSON, and nothing warns when it and
+  body parameters are both bound. Use it for a method with no body parameter (as the shipped
   `ActionGeminiSearch` does with a formula), a body mappings cannot express, and the inner-list workaround
-  (`process-web-service-details`, which also has its edge cases).
+  (`process-web-service-details`).
 
 == Reading the response ==
 - `<name>_Out`, `Success`, `StatusCode` and `Response` are ordinary outputs (`sourceElement` +
