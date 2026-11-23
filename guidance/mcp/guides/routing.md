@@ -30,6 +30,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - a record's connections / "Connected to" block on a page -> name=page-modification-field-contract (CONNECTIONS ARE NOT INSERTED FIELDS) + get-component-info crt.Connections
   - page business rules (create/change/remove; visibility/required/value) -> name=business-rules
   - wire a button/menu action to a platform request (crt.*Request: print, close, cancel, ...) -> get-request-info + name=when-to-use-requests
+  - MS Word printable (build, change, ship, fix) -> name=word-printable
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - change the size of a modal window / popup / mini page -> name=page-modal-size (the size is an add-on setting, not the page body)

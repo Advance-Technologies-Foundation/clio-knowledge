@@ -66,7 +66,10 @@ public sealed class GuidanceMigrationTests
         "web-service-registration",
         "web-service-soap",
         "column-rights",
-        "data-bindings-details"
+        "data-bindings-details",
+        "word-printable",
+        "word-printable-template",
+        "word-printable-troubleshooting"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
