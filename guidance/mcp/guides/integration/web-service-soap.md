@@ -1,8 +1,9 @@
 clio MCP SOAP web service guide — register and change a SOAP 1.1 or SOAP 1.2 service in Studio > Web services
 
 Scope and ownership
-- Read `web-service-registration` first: it owns the five web service tools, the credential rule, the prefix and
-  `path` rules, the usage guard and the follow-up steps, and all of it applies to a SOAP service too. This guide
+- Read `web-service-registration` first: it owns registering and reading, the credential rule, the prefix and
+  `path` rules and the follow-up steps; `web-service-maintenance` owns the test call and changing a service, with
+  the usage guard. All of it applies to a SOAP service too. This guide
   owns only what differs for SOAP: reading a WSDL, the service type, the namespaces, the method's message element
   and SOAP action, element paths, the SOAP header, array items, and the two operations only a SOAP service has.
 - Availability: SOAP registration exists only in a clio whose `register-web-service` contract
@@ -33,13 +34,16 @@ Reading a WSDL (read-wsdl)
 - The result's `services` has one entry per SOAP 1.1 and SOAP 1.2 port (HTTP ports are dropped): `port`,
   `studio-pick` (the port Studio's quick setup would create, the SOAP 1.2 one when both exist; Studio's choice, not
   a recommendation), `arguments`, and `existing-methods` with `service-code`. `warnings` and `notices` are listed
-  once for the whole result.
+  once for the whole result. When the ports in full do not fit one reply, only the port to register (below) comes
+  with `arguments`; the others list their `operations` names, with a notice: read another port with `port`. A clio
+  without this step returns every port in full, or only names.
 - Before registering, show the user the operations, and the ports when there are several. Register the port a
   warning names to register instead ("Register port ... instead"), else the `studio-pick` port, unless the user asks
   for another. When they want only some operations, read again with `operations` (and `port`) instead of editing
   the arguments.
 - BEFORE `register-web-service`, show the user every warning and notice about the port you are about to register
-  (its SOAP version; a base URI on another host than the `wsdl-url`) and wait for their answer where one asks for
+  (its SOAP version; a base URI on another host than the `wsdl-url`; when the warnings end with "...and N more
+  warnings", read that port again with `port` and `operations` first) and wait for their answer where one asks for
   it; never register first and warn afterwards. Check the `arguments` yourself for two things and tell the user: a
   `base-uri` on `localhost` or another placeholder host (common in a WSDL saved from a developer machine; read-wsdl
   flags it only when a `wsdl-url` came from another host, never for `wsdl-files`), and a method without
@@ -61,12 +65,9 @@ Reading a WSDL (read-wsdl)
   not write; an ASMX service answers SOAP 1.2), keep the SOAP 1.2 port and switch only if a test call fails
   because the action or operation is not found (WCF: `ActionNotSupported`, Action ''). Switch the registered
   service with `modify-web-service` `setType` soap11, plus `setBaseUri` when the SOAP 1.1 port's base-uri differs;
-  `register-web-service` refuses a code already used. The platform sends a SOAP 1.2
-  action only as a `SOAPAction` header, never as the `action` parameter of `Content-Type`, so a service that
-  dispatches SOAP 1.2 by that parameter (WCF) answers every call with `ActionNotSupported` and Action ''; and it
-  writes no WS-Addressing header, so a port that requires WS-Addressing (WCF `wsHttpBinding` with security mode
-  None) answers `DestinationUnreachable` with To ''. A port that requires WS-Security message security (a default
-  `wsHttpBinding`) cannot be called at all; ask the API owner for a plain endpoint. With no SOAP 1.1 port the
+  `register-web-service` refuses a code already used. A port that requires WS-Security message security cannot be
+  called at all; ask the API owner for a plain endpoint. Why the platform cannot call such ports:
+  `web-service-soap-details`. With no SOAP 1.1 port the
   warning gives the workaround, measured to work: for SOAP 1.2, a request header parameter (a prefixed code) whose
   `path` is `Content-Type` and whose value is `application/soap+xml;charset=utf-8;action="<the soap-action>"`, one
   per method; for WS-Addressing, the namespace the warning names (usually `http://www.w3.org/2005/08/addressing`)
@@ -81,7 +82,7 @@ Reading a WSDL (read-wsdl)
   with `service-code`). When the WSDL's service name is already the caption of another service, pass a
   `caption` the user names, or leave it out to use the code. When the WSDL sends calls to another host than the
   one it came from, show the user the `base-uri` before registering.
-- A result too large to return whole lists only the operation names, with a notice: ask the user which operations
+- A result still too large lists only the operation names, with a notice: ask the user which operations
   they need and read again with `operations` (and `port`). When even one operation of one port is too large, the
   notice says so: ask the user which of its fields they need and describe that method by hand.
 - Operations into an existing SOAP service: read with `service-code`. `existing-methods` lists the codes of its
@@ -133,10 +134,8 @@ Registering a SOAP service
   it takes no `default-value`: give it `default-sys-setting` naming an EXISTING setting;
   per the credential rule, create it first as SecureText with no value for the user to fill. A plain value (a
   mode, a version, a language) may be a constant, and describe shows it; read-wsdl with `service-code` carries
-  such a constant into the Header and leaves out, with a warning, one that would be a key there. The credential-name
-  check also covers `licence`/`license`, `nonce`, `passcode`, `passphrase`, `bearer`, `jwt` and `pass` not
-  followed by a lowercase letter and not after `com`, `by` or `sur` (not `compass`, `bypass`, `surpass`,
-  `passport`; `UsrPassId` and `PASSPORT` do count).
+  such a constant into the Header and leaves out, with a warning, one that would be a key there. The
+  credential names are the ones `web-service-registration` lists.
 - `sequence-element` on an array parameter names the element of each item: a plain name (`string`; default
   `item`) or `prefix:name` with a declared prefix (`tem:Region`), as Studio's wizard writes it. An empty one on a
   response array reads every child element: send describe's `""` back, or `setMethod` makes it `item`. On a
@@ -161,39 +160,19 @@ Changing a SOAP service
   case applies: a changed or removed method makes its callers' elements lose their parameters; a new version or
   new namespaces keep the elements as they are but change what they send. Show the list to the user and repeat
   with `acknowledge-usages` only on their explicit yes; after a version or namespace change, suggest re-running
-  those processes to check them. `setBaseUri` and `setAuth` are guarded the same way (`web-service-registration`).
+  those processes to check them. `setBaseUri` and `setAuth` are guarded the same way (`web-service-maintenance`).
 
 Test calls
 - `test-web-service-method` (`code`, `method`, `parameters`) works for a SOAP method as for REST. Every SOAP call
-  is a POST that may change data on the other side, so the confirmation rule of `web-service-registration` applies
+  is a POST that may change data on the other side, so the confirmation rule of `web-service-maintenance` applies
   to every SOAP method, a read-wsdl one included: ask the user first. Values sent from
   system settings are masked inside the envelope and its Header too; when such a value cannot be found in what was
   sent, the body is withheld and only the status comes back. `response-values` gives the response
   parameters as the platform read them by their element paths.
 - A SOAP 1.2 call answered with a fault `ActionNotSupported` and Action '', or `DestinationUnreachable` and To '',
-  hit the limits above: switch to the WSDL's SOAP 1.1 port (`setType` soap11, plus `setBaseUri` when that port's
+  hit a limit a read-wsdl port warning names (why: `web-service-soap-details`): switch to the WSDL's SOAP 1.1 port (`setType` soap11, plus `setBaseUri` when that port's
   base-uri differs, as it does for WCF), or use the workaround the
   read-wsdl warning gives. Authentication goes out on a SOAP call exactly as on REST, for a method with `use-auth: true`.
 
 Evidence
-- Measured on Creatio 10.2 (.NET Framework, MSSQL, prefix `Usr`) in November 2026, through an isolated agent:
-  a SOAP 1.1 service registered from a description, opened and saved in Studio with no difference in its
-  stored definition, test-called (HTTP 200, the expected result) and called from a process; a SOAP 1.2 service
-  with a WS-Security password from a SecureText setting, sent in the Header and masked in the echoed reply; a
-  switch from SOAP 1.1 to 1.2 after the user's yes, the calling process unchanged in the designer and returning
-  the result; undeclared prefixes, a JSONPath response and a constant licence header refused; a used namespace
-  kept; a missing SOAP action reported and relayed, with no SOAPAction header sent. Other versions are unknown.
-- read-wsdl, measured on the same platform in November 2026: the public calculator WSDL through Studio's SOAP quick
-  setup and through read-wsdl and register-web-service gave equal services (type, address, namespaces, every
-  method's SOAP action and every parameter's path and type), except Studio's random method-code suffix, its
-  shortened parameter codes and its bare message element; both answered 2 + 3 = 5. Isolated agents given only the
-  WSDL URL called read-wsdl on their own in 2 of 2 sessions, registered the SOAP 1.2 pick, test-called it and built
-  a process that called it and returned the result. One of them rewrote the response paths without their prefixes
-  (`AddResult`); both forms read the result.
-- WCF, measured on the same platform in November 2026 against a .NET Framework 4.8 WCF host with one contract on
-  four endpoints: `BasicHttpBinding` (SOAP 1.1) answered; SOAP 1.2 without WS-Addressing answered
-  `ActionNotSupported`, and with the `Content-Type` workaround the result; SOAP 1.2 with WS-Addressing and
-  `wsHttpBinding` with security mode None answered `DestinationUnreachable`, and with `wsa:Action` and `wsa:To` the
-  result. SOAP 1.1 and
-  1.2 sent `Authorization: Basic` from system settings like REST, and Digest as Basic. An ASMX service answered on
-  SOAP 1.2 as well. Other servers are unknown.
+- What these rules were measured on (Creatio 10.2, an ASMX and a WCF host) is in `web-service-soap-details`.
