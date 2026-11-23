@@ -282,8 +282,8 @@ For a controlled test client, POST credentials to:
 ```
 
 Classic deployments can require the `/0/ServiceModel/...` prefix; use the target environment's route.
-Reuse the returned authentication cookies and copy the `BPMCSRF` cookie value into a `BPMCSRF`
-request header. Prefer OAuth for service-to-service deployments. Never expose Forms credentials to
+Reuse the returned authentication cookies and send the CSRF header as `configuration-webservice`
+describes (`CRT_CSRF` when the login set that cookie, otherwise `BPMCSRF`). Prefer OAuth for service-to-service deployments. Never expose Forms credentials to
 an agent model as tool arguments.
 
 The authenticated Creatio user must have the `CanRunBusinessProcesses` operation permission. The

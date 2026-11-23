@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.244",
+  "libraryVersion": "1.15.247",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -97,6 +97,7 @@
       "knowledge-feedback",
       "mobile-page-modification",
       "package-dependencies",
+      "assembly-package",
       "page-creation",
       "page-modification",
       "page-modification-components",
@@ -312,6 +313,7 @@
       "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
+      "docs://knowledge/com.creatio.clio/assembly-package",
       "docs://knowledge/com.creatio.clio/page-creation",
       "docs://knowledge/com.creatio.clio/page-modification",
       "docs://knowledge/com.creatio.clio/page-modification-components",
@@ -1348,6 +1350,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/package-dependencies.md",
       "bundlePath": "resources/package-dependencies.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "assembly-package",
+      "title": "Assembly packages",
+      "description": "Server-side C# in an assembly package (SysPackage.Type 1, Files/<Name>.csproj, its own DLL): when to choose one over SourceCode schemas in an ordinary package; registration carried by descriptor.json, the read-back after install and the descriptor repair of a reset type; the compilable-content rule (a compile skips a package without a SourceCode, process or user-task schema or a reference assembly, as the add-package template is) and the add-schema fix; the full compile a converted package needs; precompiled delivery and the stale shipped DLL; references, Newtonsoft vs the wrapper; empty Assembly.Location; C# background jobs (IJobExecutor contract, parameters, identity, idempotent scheduling, Quartz cron), with schedules defaulting to a timer-start process.",
+      "topicId": "creatio.assembly-package",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/assembly-package",
+      "sourcePath": "guidance/mcp/guides/backend/assembly-package.md",
+      "bundlePath": "resources/assembly-package.md",
       "mediaType": "text/plain"
     },
     {

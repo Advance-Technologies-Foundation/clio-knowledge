@@ -190,6 +190,7 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
+  - assembly package (own csproj/DLL), C# background job (IJobExecutor) -> name=assembly-package
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
