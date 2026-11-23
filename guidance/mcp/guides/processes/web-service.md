@@ -91,10 +91,9 @@ modify, target `elementName` + `elementParameter`. Mappings later in the same re
   as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list
   draws the unsourced-inner-list notice.
 - `RequestBody`: when non-null it REPLACES the whole body the element would build from its body parameters; headers,
-  query, path and cookies are still built from theirs. An empty string from a formula or parameter replaces it too (an
-  empty body is sent); a constant "" counts as unset. Use it for a method with no body parameter (as the shipped
-  `ActionGeminiSearch` does with a formula), a body mappings cannot express, and the inner-list workaround (== Run
-  time ==). Nothing checks it as JSON, and nothing warns when it and body parameters are both bound.
+  query, path and cookies are still built from theirs. Use it for a method with no body parameter (as the shipped
+  `ActionGeminiSearch` does with a formula), a body mappings cannot express, and the inner-list workaround
+  (`process-web-service-details`, which also has its edge cases).
 
 == Reading the response ==
 - `<name>_Out`, `Success`, `StatusCode` and `Response` are ordinary outputs (`sourceElement` +
@@ -109,10 +108,9 @@ modify, target `elementName` + `elementParameter`. Mappings later in the same re
 == Changing the service or method (modify) ==
 `setElement` with `elementName` and `elementUpdate.webService`, top-level elements only (a nested one: the designer):
 - Omitted members keep their stored values (a service change resets the timeout, below). `method` alone: another
-  method of the same service, refused while the stored service is not registered or readable. `service` naming ANOTHER
-  service without `method`: refused with that service's methods; the SAME service and nothing else: refused, nothing
-  to change. `timeoutSeconds: 0` clears the timeout; `ignoreErrors: false` clears the flag. A block that names nothing
-  is refused.
+  method of the same service, refused while the stored service is not registered or readable. `timeoutSeconds: 0`
+  clears the timeout; `ignoreErrors: false` clears the flag. The other refusals of the block, and a multi-instance
+  element: `process-web-service-details`.
 - The same service and method (case ignored): a SETTINGS change of the timeout and the flag only - UNLESS the
   stored method differs in case from the service's: then it is a retarget, guarded as below.
 - Another method or service: a RETARGET:
@@ -129,8 +127,6 @@ modify, target `elementName` + `elementParameter`. Mappings later in the same re
     of the new method is a new parameter and does not keep its readers. The refusal names each reader. Remove or
     re-point those uses in a SEPARATE, earlier call: the check reads the process as the request found it, so the
     same batch does not help.
-- A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and
-  describe shows it with an issue.
 
 == When the service changes under a process ==
 Every database load of a process re-reads each Call web service element from its service. When the service is gone,
@@ -154,9 +150,7 @@ them stop working, and a save keeps them removed.
   an unrelated one too, nothing saved. Adding the parameter does not repair it, nor does re-pointing the element; the
   notice names the elements and the order: restore as above and repeat (unless the process was saved in the designer
   since); else remove or replace every read in an earlier request, then retarget and re-bind the reads in one request.
-- `issues` also report nested items that differ from the service, a missing `Success` / `StatusCode` / `Response` (the
-  run stops with an error), an element or parameter marked invalid (e.g. a required input not set), and the inner-list
-  and duplicate-item shapes below.
+- The other `issues` describe reports for this element are listed in `process-web-service-details`.
 
 == Run time ==
 - An HTTP error answer (404, 500) never fails the element: it completes with `Success` false and that `StatusCode`,

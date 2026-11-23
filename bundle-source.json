@@ -1968,7 +1968,7 @@
     {
       "itemId": "process-web-service-details",
       "title": "Call web service element details",
-      "description": "Owns two run-time list shapes of the Creatio Call web service element (webService): an inner list with no source of its own while its items are bound sends no value on a Creatio without the nested-array fix or with DisableParametersWithNestedArrays on, and a name or tag repeated in one top-level list's tree under Feature-ProcessParameterCollections; also the evidence behind process-web-service. Split out of process-web-service.",
+      "description": "Owns two run-time list shapes of the Creatio Call web service element (webService): an inner list with no source of its own while its items are bound sends no value on a Creatio without the nested-array fix or with DisableParametersWithNestedArrays on, and a name or tag repeated in one top-level list's tree under Feature-ProcessParameterCollections; the rarer setElement refusals of the webService block, the multi-instance limit, the RequestBody edge cases and the issues describe reports; also the evidence behind process-web-service. Split out of process-web-service.",
       "topicId": "creatio.process-web-service-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-web-service-details",

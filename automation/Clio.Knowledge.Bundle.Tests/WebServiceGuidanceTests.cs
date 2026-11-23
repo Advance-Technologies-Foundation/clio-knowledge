@@ -184,9 +184,7 @@ public sealed class WebServiceGuidanceTests
             "the list is bound to that collection too, one request item per source row (rule P1, `process-files`)",
             "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list draws the unsourced-inner-list notice.",
             "when non-null it REPLACES the whole body the element would build from its body parameters; headers, query, path and cookies are still built from theirs.",
-            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
             "Use it for a method with no body parameter (as the shipped `ActionGeminiSearch` does with a formula)",
-            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound."
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -245,7 +243,6 @@ public sealed class WebServiceGuidanceTests
             "the Process Designer adds that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does not.",
             "REFUSED, nothing written, while anything - another element, a process parameter, a flow condition, a formula - reads ANY other parameter of the element: an output, a nested item, an input, `RequestBody`.",
             "Remove or re-point those uses in a SEPARATE, earlier call",
-            "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
             "UNLESS the stored method differs in case from the service's: then it is a retarget, guarded as below.",
             "`Success`, `Response` and `StatusCode` keep their identity here, so their readers stay valid (the designer re-creates those three under new ids, leaving their readers dangling)",
             "`describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in `issues`: the call fails at run time, `ignoreErrors` or not. An issue saying the service could not be read or checked means UNKNOWN, not failing.",
@@ -259,8 +256,6 @@ public sealed class WebServiceGuidanceTests
             "`methodResolved: false` is the signal (an unreadable service: unknown, above).",
             "`setElement` with `elementName` and `elementUpdate.webService`, top-level elements only (a nested one: the designer):",
             "Omitted members keep their stored values (a service change resets the timeout, below). `method` alone: another method of the same service, refused while the stored service is not registered or readable.",
-            "`service` naming ANOTHER service without `method`: refused with that service's methods; the SAME service and nothing else: refused, nothing to change.",
-            "an element or parameter marked invalid (e.g. a required input not set)"
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -463,6 +458,32 @@ public sealed class WebServiceGuidanceTests
             because: "a larger addition should be reviewed, or split, rather than absorbed");
         replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
             because: "a reply over the inline rule is spilled to a file and read back in pieces");
+    }
+
+    [Test]
+    [Description("The details article carries the rarer refusals of the block, the multi-instance limit, the RequestBody edge cases and the issues describe reports, and the guide points there.")]
+    public void Details_ShouldCarryTheRarerRefusalsAndEdgeCases()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+        string details = ReadCollapsed(DetailsPath);
+
+        // Act
+        string[] clauses =
+        [
+            "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
+            "`service` naming ANOTHER service without `method`: refused with that service's methods; the SAME service and nothing else: refused, nothing to change.",
+            "an element or parameter marked invalid (e.g. a required input not set)",
+            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
+            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound.",
+        ];
+        string[] missing = [.. clauses.Where(clause => !details.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "these moved to the details article to keep the guide inline. Missing: " + string.Join(" | ", missing));
+        guide.Should().Contain("The other refusals of the block, and a multi-instance element: `process-web-service-details`.",
+            because: "the guide sends the agent to the details article for them");
     }
 
     private static string ReadCollapsed(string relativePath) =>
