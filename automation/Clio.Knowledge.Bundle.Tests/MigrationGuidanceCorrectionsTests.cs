@@ -37,6 +37,32 @@ public sealed class MigrationGuidanceCorrectionsTests
             because: "the validator guide cites the owner instead of restating the rule");
     }
 
+    [Test]
+    [Description("The operator table comes before the first filter example, and handler code is routed to the SDK builder.")]
+    public void FrontendFilterGuidance_ShouldShowOperatorsFirst_AndRouteHandlerCodeToSdk()
+    {
+        // Arrange
+        string guidance = ReadGuide("esq-filters", "frontend.md");
+
+        // Act
+        int operatorsIndex = guidance.IndexOf("## Operators (`comparisonType`)", StringComparison.Ordinal);
+        int treeIndex = guidance.IndexOf("## Filter tree structure", StringComparison.Ordinal);
+        int firstExampleIndex = guidance.IndexOf("\"comparisonType\":", StringComparison.Ordinal);
+
+        // Assert
+        operatorsIndex.Should().BePositive(because: "the operator table must stay in the guide");
+        operatorsIndex.Should().BeLessThan(treeIndex,
+            because: "an agent reading the guide in slices skipped a table that sat in the middle");
+        operatorsIndex.Should().BeLessThan(firstExampleIndex,
+            because: "every numeric comparisonType example must come after the table that names it");
+        guidance.Should().Contain("Handler code is not a stored tree.",
+                because: "the numeric JSON shape is for stored filter trees, not runtime handler code")
+            .And.Contain("build it with `sdk.FilterGroup`",
+                because: "handler code uses the SDK builder the devkit guide documents")
+            .And.Contain("`page-schema-creatio-devkit-common`",
+                because: "the SDK calls are owned by the devkit guide");
+    }
+
     private static string ReadGuide(params string[] relativePath)
     {
         string[] parts = [FindRepositoryRoot(), "guidance", "mcp", "guides", .. relativePath];
