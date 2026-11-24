@@ -49,7 +49,7 @@ SCHEMA_CONVERTERS object structure
       }
     }/**SCHEMA_CONVERTERS*/
 - The function receives `value` (the current attribute value) and returns the transformed display value.
-- Custom converter names: `<namespace>.PascalCase` (for example `usr.ToUpperCase`, or `dw.FormatCurrency` in a package whose pages use `dw.`); the namespace rule is in NON-NEGOTIABLES below.
+- Custom converter names: `<namespace>.PascalCase` (for example `usr.ToUpperCase`, or `acme.FormatCurrency` in a package whose pages use `acme.`); the namespace rule is in NON-NEGOTIABLES below.
 
 Async converters
 - Converters MAY be async. The runtime detects a returned Promise via `instanceof Promise` and awaits it automatically.
