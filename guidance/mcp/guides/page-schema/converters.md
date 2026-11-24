@@ -41,7 +41,7 @@ Converter binding syntax
 
 SCHEMA_CONVERTERS object structure
 - OOTB converters (`crt.*`) are built into Creatio — do NOT declare them in `SCHEMA_CONVERTERS`. Only reference them in `viewConfigDiff` bindings.
-- Custom converters (`usr.*`) MUST be declared in `SCHEMA_CONVERTERS`.
+- Custom converters (any name outside `crt.`, for example `usr.*`) MUST be declared in `SCHEMA_CONVERTERS`.
 - Each custom converter entry is a function keyed by its full type name:
     converters: /**SCHEMA_CONVERTERS*/{
       "usr.ToUpperCase": function(value) {
@@ -49,7 +49,7 @@ SCHEMA_CONVERTERS object structure
       }
     }/**SCHEMA_CONVERTERS*/
 - The function receives `value` (the current attribute value) and returns the transformed display value.
-- Custom converter names MUST use the `usr.` prefix followed by PascalCase (for example `usr.ToUpperCase`, `usr.FormatCurrency`).
+- Custom converter names use the package's custom namespace followed by PascalCase (for example `usr.ToUpperCase`, or `dw.FormatCurrency` in a package whose pages use `dw.`). `page-schema-handlers` (NON-NEGOTIABLES, "Custom namespace") owns how to pick the namespace; `usr.` is only its default.
 - Do NOT name custom converters with the `crt.` prefix — that namespace is reserved for Creatio built-ins.
 
 Async converters
@@ -94,8 +94,8 @@ Server-side compilation
 NON-NEGOTIABLES
 - `SCHEMA_CONVERTERS` is an OBJECT, not an array.
 - Converters affect DISPLAY only. They do not write back to the model. Never put side effects inside a converter function.
-- Only declare custom (`usr.*`) converters in `SCHEMA_CONVERTERS`. OOTB (`crt.*`) converters are built-in and need no declaration.
-- Custom converter names must use the `usr.` prefix. PascalCase body is a team convention (e.g. `usr.FormatCurrency`) — the runtime does not enforce it, but follow it for consistency.
+- Only declare custom (non-`crt.`) converters in `SCHEMA_CONVERTERS`. OOTB (`crt.*`) converters are built-in and need no declaration.
+- Custom converter names use the package's custom namespace (`usr.` only when the package has none; see `page-schema-handlers`, "Custom namespace"), never `crt.`. PascalCase body is a team convention (e.g. `usr.FormatCurrency`) — the runtime does not enforce it, but follow it for consistency.
 - Bindings live in `viewConfigDiff`, NOT in `viewModelConfigDiff`.
 - The converter binding syntax uses a pipe: `"$Attr | converterName"`.
 - Async converters are allowed. SDK services from SCHEMA_DEPS closure are allowed. Do NOT call non-cached HTTP endpoints — they fire on every render. `SysSettingsService` is safe: OOTB settings are cached at startup; custom `usr.*` settings are cached after the first call.
@@ -185,10 +185,10 @@ Common custom converter patterns
 
 BEFORE SAVE CHECKLIST
 - The binding expression uses `$Attr | converterName` format, not `$Attr.converterName`.
-- Only `usr.*` converters are declared in `SCHEMA_CONVERTERS`. `crt.*` converters are NOT declared — only referenced in bindings.
+- Only custom (non-`crt.`) converters are declared in `SCHEMA_CONVERTERS`. `crt.*` converters are NOT declared — only referenced in bindings.
 - The converter is bound to a display-only property (caption, label, href, checked on read-only). Not to `control` or `value` on an editable input.
 - If the converter is async, ensure the SDK service used is cached (e.g. `SysSettingsService`). Do NOT call non-cached HTTP endpoints inside a converter.
 - `SCHEMA_CONVERTERS` is an object literal, not an array.
-- Custom converter name uses `usr.` prefix and PascalCase (e.g., `usr.ToUpperCase`).
+- Custom converter name uses the package's custom namespace (`usr.` when it has none) and PascalCase (e.g., `usr.ToUpperCase`), never `crt.`.
 - The `viewModelConfigDiff` section is NOT changed by the converter addition — only `viewConfigDiff` and `SCHEMA_CONVERTERS` are touched.
 - The edited body is syntactically valid JavaScript before calling `sync-pages`.

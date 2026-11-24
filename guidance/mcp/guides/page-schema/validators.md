@@ -40,7 +40,7 @@ Server-side compilation
 NON-NEGOTIABLES
 - Keep validators focused on field-value validation.
 - Implement field validation as a validator entry, not as logic inside a handler.
-- Name validator types with the `usr.` prefix, PascalCase body, and `Validator` suffix, for example `usr.UpperCaseValidator`. The local alias in `validators` may omit the `usr.` prefix.
+- Name validator types with the package's custom namespace, PascalCase body, and `Validator` suffix, for example `usr.UpperCaseValidator`, or `dw.UpperCaseValidator` in a package whose pages use `dw.`. `page-schema-handlers` (NON-NEGOTIABLES, "Custom namespace") owns how to pick the namespace; `usr.` is only its default, and `crt.` is never used. The local alias in `validators` may omit the namespace.
 - The `validators` property is an OBJECT, not an array.
 - `validators.<Alias>.type` MUST equal the `SCHEMA_VALIDATORS` key.
 - The validation error key MUST equal the validator type name.
