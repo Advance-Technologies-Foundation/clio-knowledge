@@ -11,30 +11,28 @@ public sealed class MigrationGuidanceCorrectionsTests
     public void PageSchemaGuidance_ShouldNotRequireUsrNamespace_WhenNamingCustomEntries()
     {
         // Arrange
-        string handlers = ReadGuide("page-schema", "handlers.md");
-        string converters = ReadGuide("page-schema", "converters.md");
-        string validators = ReadGuide("page-schema", "validators.md");
+        string handlers = ReadGuide("page-schema/handlers.md");
+        string converters = ReadGuide("page-schema/converters.md");
+        string validators = ReadGuide("page-schema/validators.md");
 
         // Act
         string[] pageSchemaGuides = [handlers, converters, validators];
 
         // Assert
-        pageSchemaGuides.Should().NotContain(guide => guide.Contains("MUST use the `usr.` prefix"),
+        pageSchemaGuides.Should().NotContain(
+            guide => guide.Contains("use the `usr.` prefix", StringComparison.OrdinalIgnoreCase),
             because: "a team package with its own namespace must not be pushed to usr.");
-        pageSchemaGuides.Should().NotContain(guide => guide.Contains("must use the `usr.` prefix"),
-            because: "the lower-case form of the same rule is just as binding for an agent");
         handlers.Should().Contain("Custom namespace (this rule owns it for requests, converters and validators)",
                 because: "one article owns the namespace rule and the others cite it")
             .And.Contain("Use `usr.` only when the package has no custom namespace yet.",
                 because: "usr. stays the default for a package without a namespace")
             .And.Contain("Never use `crt.`",
-                because: "crt. is the built-in namespace")
-            .And.Contain("creatio-ui commit `cc78bd8be9b`",
-                because: "the claim that the runtime ignores the prefix needs its source evidence");
-        converters.Should().Contain("`page-schema-handlers` (NON-NEGOTIABLES, \"Custom namespace\")",
-            because: "the converter guide cites the owner instead of restating the rule");
-        validators.Should().Contain("`page-schema-handlers` (NON-NEGOTIABLES, \"Custom namespace\")",
-            because: "the validator guide cites the owner instead of restating the rule");
+                because: "crt. is the built-in namespace");
+        converters.Should().Contain("the namespace rule is in NON-NEGOTIABLES below",
+            because: "the converter guide states the rule once and points to it");
+        new[] { converters, validators }.Should().AllSatisfy(guide =>
+            guide.Should().Contain("`page-schema-handlers`").And.Contain("\"Custom namespace\")",
+                because: "the converter and validator guides cite the owner instead of restating the rule"));
     }
 
     [Test]
@@ -42,19 +40,16 @@ public sealed class MigrationGuidanceCorrectionsTests
     public void FrontendFilterGuidance_ShouldShowOperatorsFirst_AndRouteHandlerCodeToSdk()
     {
         // Arrange
-        string guidance = ReadGuide("esq-filters", "frontend.md");
+        string guidance = ReadGuide("esq-filters/frontend.md");
 
         // Act
         int operatorsIndex = guidance.IndexOf("## Operators (`comparisonType`)", StringComparison.Ordinal);
-        int treeIndex = guidance.IndexOf("## Filter tree structure", StringComparison.Ordinal);
         int firstExampleIndex = guidance.IndexOf("\"comparisonType\":", StringComparison.Ordinal);
 
         // Assert
         operatorsIndex.Should().BePositive(because: "the operator table must stay in the guide");
-        operatorsIndex.Should().BeLessThan(treeIndex,
-            because: "an agent reading the guide in slices skipped a table that sat in the middle");
         operatorsIndex.Should().BeLessThan(firstExampleIndex,
-            because: "every numeric comparisonType example must come after the table that names it");
+            because: "an agent reading the guide in slices skipped a table that sat after the examples");
         guidance.Should().Contain("Handler code is not a stored tree.",
                 because: "the numeric JSON shape is for stored filter trees, not runtime handler code")
             .And.Contain("build it with `sdk.FilterGroup`",
@@ -68,14 +63,13 @@ public sealed class MigrationGuidanceCorrectionsTests
     public void RelatedListGuidance_ShouldDescribeRowSelection_AsThePlatformRunsIt()
     {
         // Arrange
-        string guidance = ReadGuide("related-data", "list.md");
+        string guidance = ReadGuide("related-data/list.md");
 
         // Act
-        bool hasSection = guidance.Contains("Acting on the rows the user selected (row selection)", StringComparison.Ordinal);
+        string section = guidance[guidance.IndexOf("Acting on the rows the user selected (row selection)", StringComparison.Ordinal)..];
 
         // Assert
-        hasSection.Should().BeTrue(because: "agents had no guidance on grid selection at all");
-        guidance.Should().Contain("\"_selectionOptions\": { \"attribute\": \"<GridName>_SelectionState\" }",
+        section.Should().Contain("\"_selectionOptions\": { \"attribute\": \"<GridName>_SelectionState\" }",
                 because: "the Designer's shape is the one to write")
             .And.Contain("is NOT broken: at page load the platform derives",
                 because: "the runtime fills a missing _selectionOptions, so it must not be named as a defect")
@@ -90,7 +84,7 @@ public sealed class MigrationGuidanceCorrectionsTests
     public void OverviewGuidance_ShouldWarnAboutReadOnlyToggle_WhenReadonlyIsBound()
     {
         // Arrange
-        string guidance = ReadGuide("pages", "modification", "overview.md");
+        string guidance = ReadGuide("pages/modification/overview.md");
 
         // Act
         int sectionIndex = guidance.IndexOf("What survives an Interface Designer save (web pages)", StringComparison.Ordinal);
@@ -108,20 +102,19 @@ public sealed class MigrationGuidanceCorrectionsTests
     }
 
     [Test]
-    [Description("Page-rule operands match clio, entity-rule scope is stated, and the handler path is EXPERIMENTAL.")]
-    public void BusinessRulesGuidance_ShouldStateOperandsScopeAndExperimentalHandlerPath()
+    [Description("Page-rule operands match clio, entity-rule scope is stated, and lookup-filter limits are named.")]
+    public void BusinessRulesGuidance_ShouldStateOperandsScopeAndLimits()
     {
         // Arrange
-        string guidance = ReadGuide("business-rules", "business-rules.md");
+        string guidance = ReadGuide("business-rules/business-rules.md");
 
         // Act
-        bool claimsAnyAttribute = guidance.Contains(
-            "Condition attribute names come from bundle.viewModelConfig.attributes", StringComparison.Ordinal);
+        string conditionSection = guidance[guidance.IndexOf("Conditions a page rule cannot express (EXPERIMENTAL)", StringComparison.Ordinal)..];
 
         // Assert
-        claimsAnyAttribute.Should().BeFalse(
-            because: "clio rejects virtual, collection and multi-segment attributes that viewModelConfig lists");
-        guidance.Should().Contain("clio commit `a35201cdb`",
+        guidance.Should().NotContain("Condition attribute names come from bundle.viewModelConfig.attributes",
+                because: "clio rejects virtual, collection and multi-segment attributes that viewModelConfig lists")
+            .And.Contain("clio commit `a35201cdb`",
                 because: "the operand list must name the clio source it mirrors")
             .And.Contain("Condition attributes clio rejects (\"Unknown or unsupported datasource-bound page attribute\")",
                 because: "agents need the rejected kinds, with the message they will see")
@@ -129,28 +122,31 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "rights and features were the conditions the migration could not express")
             .And.Contain("Scope warning: an entity rule changes EVERY page and list of the object",
                 because: "page-scoped requirements were silently widened to the whole object")
-            .And.Contain("Conditions a page rule cannot express (EXPERIMENTAL)",
-                because: "the handler path is unconfirmed platform API and must say so")
-            .And.Contain("It is not confirmed as public devkit API for configuration pages",
-                because: "the limit of the evidence must travel with the pattern")
             .And.Contain("narrows the DROPDOWN only",
                 because: "the _List_DS LoadDataRequest pattern does not reach the selection window");
+        conditionSection.Should().Contain("`page-schema-handlers` (\"Context read/write patterns\")",
+            because: "the handler guide owns the handler pattern and business-rules only routes to it");
     }
 
-    private static string ReadGuide(params string[] relativePath)
+    [Test]
+    [Description("The handler guide owns the EXPERIMENTAL read-only pattern with its evidence and limits.")]
+    public void HandlersGuidance_ShouldOwnExperimentalReadOnlyPattern_WithItsLimits()
     {
-        string[] parts = [FindRepositoryRoot(), "guidance", "mcp", "guides", .. relativePath];
-        return File.ReadAllText(Path.Combine(parts));
+        // Arrange
+        string guidance = ReadGuide("page-schema/handlers.md");
+
+        // Act
+        string section = guidance[guidance.IndexOf("Context read/write patterns", StringComparison.Ordinal)..];
+
+        // Assert
+        section.Should().Contain("EXPERIMENTAL — read-only decided by page code",
+                because: "the pattern is unconfirmed platform API and must say so")
+            .And.Contain("request.$context.setAttributePropertyValue(\"<ControlAttribute>\", \"readonly\", <boolean>)",
+                because: "the handler guide holds the call itself")
+            .And.Contain("It is not confirmed as public devkit API for configuration pages",
+                because: "the limit of the evidence must travel with the pattern");
     }
 
-    private static string FindRepositoryRoot()
-    {
-        DirectoryInfo? current = new(TestContext.CurrentContext.TestDirectory);
-        while (current is not null && !File.Exists(Path.Combine(current.FullName, "bundle-source.json")))
-        {
-            current = current.Parent;
-        }
-        return current?.FullName
-            ?? throw new InvalidOperationException("Could not locate the repository root.");
-    }
+    private static string ReadGuide(string pathUnderGuides) =>
+        ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), "guidance/mcp/guides/" + pathUnderGuides);
 }

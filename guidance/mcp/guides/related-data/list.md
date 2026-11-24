@@ -357,13 +357,11 @@ Acting on the rows the user selected (row selection)
   `"_selectionOptions": { "attribute": "<GridName>_SelectionState" }` (the same name, without `$`). Write both, so
   the body has the shape the Designer gives it. A `crt.DataGrid` or `crt.ListWidget` whose body has the
   `selectionState` binding but no `_selectionOptions` is NOT broken: at page load the platform derives
-  `_selectionOptions` from that binding and declares the attribute (`DataGridSelectionOptionsBackwardCompatibilityPreprocessor`
-  and `SelectionOptionsPreprocessor`, `libs/studio-enterprise/feature/components-preprocessors/src/lib/` in
-  creatio-ui commit `cc78bd8be9b`, present since July 2023). So when selection-dependent behavior does not work,
-  look for the cause elsewhere — the handler or the button — not in a missing `_selectionOptions`.
+  `_selectionOptions` from that binding and declares the attribute (creatio-ui commit `cc78bd8be9b`,
+  `DataGridSelectionOptionsBackwardCompatibilityPreprocessor`, since July 2023). Do not "fix" a missing
+  `_selectionOptions`: look for the cause in the handler or the button.
 - The attribute holds `{ "type": "specific", "selected": [<ids>] }`, or `{ "type": "all", "unselected": [<ids>] }`
-  after "select all" (`libs/studio-enterprise/util/common/src/lib/models/selection/selection-state.model.ts`, same
-  commit). Code that reads it (`await request.$context.<GridName>_SelectionState`) handles BOTH types; reading only
+  after "select all" (`selection-state.model.ts`, same commit). Code that reads it (`await request.$context.<GridName>_SelectionState`) handles BOTH types; reading only
   `selected` misses every "select all".
 - To act on the selected rows from a bulk action or a button, pass the selection as filters with the converter chain
   `$<items> | crt.ToCollectionFilters : '<items>' : $<sel> | crt.SkipIfSelectionEmpty : $<sel>`.

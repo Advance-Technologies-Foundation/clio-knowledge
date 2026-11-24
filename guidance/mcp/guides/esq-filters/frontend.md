@@ -7,9 +7,9 @@
 - Read `esq` first for the surrounding query envelope (root schema, columns, aggregation, expression building blocks, and the master enum tables). This guide focuses only on the `filters` tree and the leaf filters inside it.
 - Shape in one line: filters are JSON with NUMERIC enum values (`filterType`/`comparisonType`/`dataValueType` are integers, never strings) and values wrapped in a `parameter` envelope — the exact shape stored in Creatio page bodies and DataService SelectQuery bodies.
 - Handler code is not a stored tree. When a page handler builds a filter at runtime (for example to scope a model load), build it with `sdk.FilterGroup` and name every operator with a named member of `sdk.ComparisonType` (as in `sdk.ComparisonType.Equal`), never a bare integer; read `page-schema-creatio-devkit-common` for the calls. Do not hand-write this guide's numeric JSON inside handler code: nothing checks the integers there, and a related list scoped to the open record needs no handler filter at all (`related-list`, `modelConfig.dependencies`).
-- Read the operator table below before writing any leaf. Pick the operator by its NAME and then take its number; never pick a number from memory.
 
 ## Operators (`comparisonType`)
+- Pick the operator by its NAME, then take its number; never pick a number from memory.
 - 0 = Between, 1 = Is_null, 2 = Is_not_null, 3 = Equal, 4 = Not_equal, 5 = Less, 6 = Less_or_equal, 7 = Greater, 8 = Greater_or_equal, 9 = Start_with, 10 = Not_start_with, 11 = Contain, 12 = Not_contain, 13 = End_with, 14 = Not_end_with, 15 = Exists, 16 = Not_exists.
 - Which operators are valid per column family (mirror of the platform filter-builder):
   - Text/string columns: 3, 4, 9, 10, 11, 12, 13, 14, 1, 2 (equal/not-equal/starts/contains/ends + null tests).

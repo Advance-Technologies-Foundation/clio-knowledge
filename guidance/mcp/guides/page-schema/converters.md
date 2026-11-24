@@ -49,8 +49,7 @@ SCHEMA_CONVERTERS object structure
       }
     }/**SCHEMA_CONVERTERS*/
 - The function receives `value` (the current attribute value) and returns the transformed display value.
-- Custom converter names use the package's custom namespace followed by PascalCase (for example `usr.ToUpperCase`, or `dw.FormatCurrency` in a package whose pages use `dw.`). `page-schema-handlers` (NON-NEGOTIABLES, "Custom namespace") owns how to pick the namespace; `usr.` is only its default.
-- Do NOT name custom converters with the `crt.` prefix — that namespace is reserved for Creatio built-ins.
+- Custom converter names: `<namespace>.PascalCase` (for example `usr.ToUpperCase`, or `dw.FormatCurrency` in a package whose pages use `dw.`); the namespace rule is in NON-NEGOTIABLES below.
 
 Async converters
 - Converters MAY be async. The runtime detects a returned Promise via `instanceof Promise` and awaits it automatically.
@@ -189,6 +188,6 @@ BEFORE SAVE CHECKLIST
 - The converter is bound to a display-only property (caption, label, href, checked on read-only). Not to `control` or `value` on an editable input.
 - If the converter is async, ensure the SDK service used is cached (e.g. `SysSettingsService`). Do NOT call non-cached HTTP endpoints inside a converter.
 - `SCHEMA_CONVERTERS` is an object literal, not an array.
-- Custom converter name uses the package's custom namespace (`usr.` when it has none) and PascalCase (e.g., `usr.ToUpperCase`), never `crt.`.
+- Custom converter name follows the namespace rule in NON-NEGOTIABLES and is PascalCase (e.g., `usr.ToUpperCase`).
 - The `viewModelConfigDiff` section is NOT changed by the converter addition — only `viewConfigDiff` and `SCHEMA_CONVERTERS` are touched.
 - The edited body is syntactically valid JavaScript before calling `sync-pages`.
