@@ -24,7 +24,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - a stage progress bar (crt.EntityStageProgressBar) shows only for an object with a case -> name=process-dynamic-case
   - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
     requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
-  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (it routes onward)
+  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
   - a record's connections / "Connected to" block on a page -> name=page-modification-field-contract (CONNECTIONS ARE NOT INSERTED FIELDS) + get-component-info crt.Connections
@@ -180,10 +180,10 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
-  - lookup seeding / data bindings -> name=data-bindings; colorful lookup values / a Color column -> name=lookup-colors
+  - lookup seeding / data bindings -> name=data-bindings; lookup value colors -> name=lookup-colors
   - create, change, or SHIP a system setting (sys-setting) -> name=sys-settings; a setting that package
-    code, pages or processes read must ship with that package as a binding pair, which sys-settings owns
-    (`SysSettings_<Code>` + `SysSettingsValue_<Code>`); add name=data-bindings for the binding mechanics
+    code, pages or processes read must ship with that package as a binding pair, which sys-settings owns;
+    add name=data-bindings for the binding mechanics
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
 - Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates

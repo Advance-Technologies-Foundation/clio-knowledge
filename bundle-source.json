@@ -2286,7 +2286,7 @@
     {
       "itemId": "lookup-colors",
       "title": "Lookup value colors",
-      "description": "Owns coloring lookup values on Freedom UI pages: the color column (the object's Color setting, which must be of the Color type, whatever its name), checking it with get-entity-schema-properties, asking for the package before adding one through a replacing object and the manual Object Designer step clio cannot do, the #RRGGBB check, the Creatio Academy palette and its deterministic pick order, writing with upsert-data-binding-row-db (clio 8.1.0.118 or later) instead of odata-update or execute-dataservice-batch, and the execute-esq read-back.",
+      "description": "Needs clio 8.1.0.118 or later. EXPERIMENTAL. Owns coloring lookup values on Freedom UI pages: the color column (the object's Color setting, which must be of the Color type, whatever its name), checking it with get-entity-schema-properties, asking for the package before adding the column (to the schema the package holds, or through a replacing object) and the manual Object Designer step clio cannot do, reading every value with execute-esq, the #RRGGBB check, the Creatio Academy palette and its first-unused pick order, writing with upsert-data-binding-row-db instead of odata-update or execute-dataservice-batch, colors not transferring to records that already exist on the target, and the execute-esq read-back.",
       "topicId": "creatio.lookup-colors",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/lookup-colors",
