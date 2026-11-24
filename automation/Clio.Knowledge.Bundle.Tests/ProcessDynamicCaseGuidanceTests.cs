@@ -155,8 +155,12 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "several cases are split by one filter column only; any other start condition is the case designer's");
             guide.Should().Contain("A value left out of `stages` is not a stage",
                 because: "a case may take some of the lookup's values, and a record holding another shows no current stage");
-            guide.Should().Contain("a new version of a case, deleting a case or changing its stage or filter column",
-                because: "a case is changed in place only; versions, deletion and the stage column are the case designer's");
+            guide.Should().Contain("a start condition other than one filter column, deleting a case or changing its stage or filter column",
+                because: "deletion and the stage column are still the case designer's");
+            guide.Should().NotContain("a new version of a case",
+                because: "a version is made and switched by the change guide's tools now, so the guide must not send the user to the designer for it");
+            guide.Should().Contain("its versions, and several cases on one object split by a filter: `process-dynamic-case-change`",
+                because: "an agent reaching the create guide with a version request must find the guide that owns versions");
             guide.Should().NotContain("Part of the process guide set",
                 because: "a banner would make process-modeling index the guide, which has no room");
         }
@@ -258,8 +262,14 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "agents answered about existing cases without a dry run and missed what would change");
             guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }",
                 because: "an agent builds its call from the signature, so every flag the tool takes is listed there");
-            guide.Should().Contain("`invalid-request` for a case that is not the active version (name the active one the message gives)",
-                because: "the package refuses an inactive version and names the active one (phase A follow-up P3)");
+            guide.Should().Contain("`invalid-request` for `enabled` on a case that is not the active version (name the active one the message gives)",
+                because: "a member that is not active is changed in place now, and only enabled, which belongs to the whole family, is refused naming the active one");
+            guide.Should().NotContain("a new version is not supported yet",
+                because: "package-read-only has a remedy now: the change as a new version in an editable package");
+            guide.Should().Contain("`package-read-only` (the case's package is not editable: offer the change as a new version in an editable package",
+                because: "the package's refusal text points at modify-dynamic-case-as-new-version, and the guide gives the same remedy");
+            guide.Should().Contain("or, after their yes, make the change as a new version (\"Versions of a case\"): running cases keep the version they started on",
+                because: "a version has no stage-in-use refusal, since running cases stay on the version they started on");
             guide.Should().Contain("pass each flag only after they say yes to it, NEVER on your own",
                 because: "every confirmation flag stands for the user's own yes");
             guide.Should().Contain("its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at its record's next stage change",
@@ -324,6 +334,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the catalog entry of the create guide must not advertise only create");
             routing.Should().Contain("an object that already has a case: read, change (stages, order, groups), disable or re-enable it",
                 because: "a change to an existing case goes straight to the guide that owns it");
+            routing.Should().Contain("disable or re-enable it, make a new version or switch the active one, or split its records",
+                because: "a case version request must reach the case guide, not the process version row");
+            resource.GetProperty("description").GetString().Should().Contain("set-active-dynamic-case-version",
+                because: "the catalog entry must show that the guide owns the case version tools");
             routing.Should().Contain($"split its records into several cases by a type (different stages for B2B and B2C orders) -> name={ChangeItemId}",
                 because: "a request for different stages per type must reach the guide that owns filters");
             routing.Should().Contain("set up on an object with no case yet, or only asked about",
@@ -429,6 +443,79 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("`askUserToChangeSchema`", because: "the bar's switch offer is a page change the user may want");
             guide.Should().Contain("Answer \"which stages do B2B orders have\" from it",
                 because: "a read-only question is answered from describe, changing nothing");
+        }
+    }
+
+    [Test]
+    [Description("The change guide carries the version flow: its own clio boundary, describe of any member, a draft changed in place, a new version made with a dry run and the user's yes and never activated or removed, a separate ask before the switch, what the switch does to running cases and records, a disabled family, package position, and the outcome remedies.")]
+    public void ChangeGuide_ShouldCarryTheVersionFlow()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+        int section = guide.IndexOf("== Versions of a case ==", StringComparison.Ordinal);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            section.Should().BeGreaterThan(guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal),
+                because: "the article-wide boundary still gates the version section, which adds its own");
+            guide.Should().MatchRegex(
+                $@"== Versions of a case == - Needs clio {ClioVersion} or later: if `get-tool-contract` does not list `modify-dynamic-case-as-new-version`, the clio is older",
+                because: "the version tools ship in a later clio than the change tools, and the boundary leads the section it gates");
+            guide.Should().Contain("a missing list there does not mean the case has no other version",
+                because: "an older clio drops versions from describe, and an agent must not read that as a family of one");
+            guide.Should().Contain("`describe-dynamic-case` takes any member by `case-name` / `case-uid` (one that is not active gets a note naming the active one",
+                because: "the package describes any member of the family by name or UId");
+            guide.Should().Contain("the list is absent for a case with no other version",
+                because: "versions is left out for a family of one");
+            guide.Should().Contain("`modify-dynamic-case` by its `case-name` / `case-uid` changes it in place (`case.activeVersion: false`, a note)",
+                because: "a draft is edited in place, and new records do not see the edit until the draft is active");
+            guide.Should().Contain("on a member that is not active it is refused `invalid-request`; send it for the active one",
+                because: "enabled belongs to the whole family, so the package refuses it on a member that is not active");
+            guide.Should().Contain("`modify-dynamic-case-as-new-version { environment-name, case-name | case-uid | entity-schema-name, package-name?, stages?, caption?, filter?, remove-filter?, confirm-stage-records?, confirm-value-rename?, dry-run? }`",
+                because: "an agent builds its call from the signature, and the tool takes neither enabled nor confirm-running-instances");
+            guide.Should().Contain("copies the family's ACTIVE member (another member is refused, naming the active one) into a new version that is NOT active",
+                because: "only the active member is copied, and creating never activates");
+            guide.Should().Contain("otherwise refused `package-name-required`: ask the user which editable package",
+                because: "the version goes to the source's package only when it is editable, and the target package is the user's choice");
+            guide.Should().Contain("First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only after their yes",
+                because: "every write makes one more version that no tool removes");
+            guide.Should().Contain("NOT idempotent: every write makes one more version, and a saved version is never removed",
+                because: "a saved version is kept even when the call fails after the save, so a careless retry leaves another version behind");
+            guide.Should().Contain("A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active case and every record too - say so before the yes",
+                because: "a lookup value rename is written at once, not at activation");
+            guide.Should().Contain("so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case` first, or leave the version without one)",
+                because: "a first filter sets the object-wide filter column, which would split the live cases at once");
+            guide.Should().Contain("the version was saved and is KEPT, named in `leftovers` with its link row - do not activate it",
+                because: "a failure after the save keeps the version, and it may read back wrong");
+            guide.Should().Contain("no tool removes it, the user can delete it in the case library",
+                because: "the toolkit has no case deletion, and the case library's removal is the user's way to drop it");
+            guide.Should().Contain("After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version",
+                because: "a retry after a saved or possibly saved version adds one more version");
+            guide.Should().Contain("give the user its `designerUrl`",
+                because: "the user checks the version in the case designer before deciding to activate it");
+            guide.Should().Contain("ASK the user whether to make it active: a decision of its own, never part of the yes to create it",
+                because: "the case designer asks separately whether a new version becomes actual, and the tool never activates");
+            guide.Should().Contain("`set-active-dynamic-case-version { environment-name, version-name | version-uid, dry-run? }`, destructive",
+                because: "the switch changes what new records start");
+            guide.Should().Contain("`unchanged`: it is active already, nothing written",
+                because: "the switch is idempotent, so a repeat is answered unchanged");
+            guide.Should().Contain("Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`, `unfiltered-case-exists`, `filter-required`",
+                because: "activation runs the case library's coexistence checks before it writes");
+            guide.Should().Contain("running cases and existing records keep the version they started on, and a record moves only with Change case on its page, which cancels its current case; open pages need F5",
+                because: "a switch never migrates running cases, and the only move cancels the record's case");
+            guide.Should().Contain("A disabled family is switched too, and starts nothing until `modify-dynamic-case { enabled: true }` on the new active member, alone, after the user's yes",
+                because: "activation does not change enabled, so a disabled family stays silent after the switch");
+            guide.Should().Contain("may not become the one new records start",
+                because: "a member in a non-editable package is never written False, and the platform's pick then falls to the package rank");
+            guide.Should().Contain("the remedy is a dependency of the version's package on that member's package, after the user's yes",
+                because: "a dependency ranks the version's package higher, and a package change is the user's to approve");
+            guide.Should().Contain("it does not travel with any package (a note); tell the user",
+                because: "a switch to a member in a non-editable package is kept as a setting of this environment only");
+            guide.Should().Contain("it is never undone, and the same call can be repeated once the cause is fixed",
+                because: "a switch that did not read back is reported, not restored, and the call is idempotent");
+            guide.Should().NotContain("DcmCasesVersioning",
+                because: "only the shipped default of the feature is supported, so the guide says nothing about it");
         }
     }
 

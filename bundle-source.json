@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.249",
+  "libraryVersion": "1.15.251",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2003,7 +2003,7 @@
     {
       "itemId": "process-dynamic-case",
       "title": "Dynamic case from a lookup column",
-      "description": "Needs clio 8.1.0.150 or later. Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). Answering about an existing object's stages from describe-dynamic-case (older clio: the create dry run), the prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages, groups allowed; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty full-mesh stages, the settings and link rows and their bindings, the page fragment), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet. Changing, disabling or regrouping an existing case, filters and several cases on one object: process-dynamic-case-change.",
+      "description": "Needs clio 8.1.0.150 or later. Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). Answering about an existing object's stages from describe-dynamic-case (older clio: the create dry run), the prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages, groups allowed; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty full-mesh stages, the settings and link rows and their bindings, the page fragment), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet. Changing, disabling or regrouping an existing case, its versions, filters and several cases on one object: process-dynamic-case-change.",
       "topicId": "creatio.process-dynamic-case",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case",
@@ -2014,7 +2014,7 @@
     {
       "itemId": "process-dynamic-case-change",
       "title": "Change a dynamic case; several cases on one object",
-      "description": "Needs clio 8.1.0.153 or later with CrtProcessBuilder 1.6.6.179+ (1.6.6.185 with a clio that takes confirm-value-rename). Owns describe-dynamic-case and modify-dynamic-case: read a dynamic case (DCM) and its records per stage first, then change it in place with a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, a stage caption that renames its lookup value wherever it is used, colours, the case caption, its filter; each confirm-* flag only after the user's yes; enabled alone; refusals and outcomes. And several cases on one object split by one lookup filter column: filter {column, values | empty}, a stage subset per case, the designer's two ways from one unfiltered case to several (a filter on it, or deactivate-unfiltered after the user's yes), filter-overlap, filter-required, remove-filter, unfiltered-case-exists, the settings filter column and its edit right, values no case is for, and that a filter decides only which new records start a case.",
+      "description": "Needs clio 8.1.0.153 or later with CrtProcessBuilder 1.6.6.179+ (1.6.6.185 with a clio that takes confirm-value-rename). Owns describe-dynamic-case and modify-dynamic-case: read a dynamic case (DCM) and its records per stage, then change it in place after a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, a stage caption that renames its lookup value everywhere, colours, the case caption, its filter; confirm-* flags only after the user's yes; enabled alone; refusals and outcomes. Case versions (clio <CLIO-TBD>+): a draft changed in place, modify-dynamic-case-as-new-version (dry run, never activates, never removed), ask, then set-active-dynamic-case-version. Several cases on one object split by one lookup filter column: filter {column, values | empty}, stages per case, from one unfiltered case (a filter on it, or deactivate-unfiltered after the user's yes), filter refusals, the edit right, values no case is for, a filter affects only new records.",
       "topicId": "creatio.process-dynamic-case-change",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-change",

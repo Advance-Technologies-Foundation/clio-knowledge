@@ -4,8 +4,9 @@ Scope
 Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` and `modify-dynamic-case`: its stages,
 their order, groups, captions and colours, the case caption, its filter, and whether it is enabled. Splits an
 object's records between several cases by one lookup column (for example B2B and B2C orders with stages of their
-own), and owns the filter rules of `create-dynamic-case` too. Building a case, the bar, the other refusals of
-`create-dynamic-case` and the undo: `process-dynamic-case`.
+own), and owns the filter rules of `create-dynamic-case` too. Owns a case's versions: a change saved as a new
+version (`modify-dynamic-case-as-new-version`) and the switch of the active one (`set-active-dynamic-case-version`).
+Building a case, the bar, the other refusals of `create-dynamic-case` and the undo: `process-dynamic-case`.
 
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `get-tool-contract` does not list `describe-dynamic-case`, the clio serving you is older: stop here and
@@ -14,7 +15,7 @@ tell the user to update clio (until then the case designer changes a case); answ
 environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
 `install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose
 `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.185 the same
-way. An older clio (no `confirm-value-rename`) works the older way, so read steps 1-3 with that: describe has no
+way, and one that lists `modify-dynamic-case-as-new-version` below 1.6.6.194. An older clio (no `confirm-value-rename`) works the older way, so read steps 1-3 with that: describe has no
 `records` (absent is not 0: count the records with the data tools); an item's `caption` renames only the stage in the
 case, which the bar and the designer do not show, so do not offer it, and to rename a stage tell the user to update
 clio; removing a stage that records hold is not refused, so check them with the data tools and ask the user first.
@@ -55,10 +56,13 @@ clio; removing a stage that records hold is not refused, so check them with the 
    `filter-required` (give it a filter first). `settings-conflict` on re-enabling: the object's case settings name
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
-the cases end - never change records' stage on your own. `stage-has-steps` (it has steps or a step condition
-targets it: the case designer), `package-read-only` (a new version is not supported yet), `invalid-request` for a
-case that is not the active version (name the active one the message gives) or not a case of `entity-schema-name`,
-`stage-list-duplicate` for a case with two stages on one value (the case designer fixes it).
+the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
+("Versions of a case"): running cases keep the version they started on. `stage-has-steps` (it has steps or a step
+condition targets it: the case designer), `package-read-only` (the case's package is not editable: offer the change
+as a new version in an editable package, "Versions of a case"), `invalid-request` for `enabled` on a case that is
+not the active version (name the active one the message gives) or for a case not of `entity-schema-name`,
+`not-in-version` (a first filter on a member that is not active: "Versions of a case"), `stage-list-duplicate` for
+a case with two stages on one value (the case designer fixes it).
 Outcomes: `failed-restored`: the save did not take, the case is as before; `failed-leftover`: relay its `leftovers`
 and have the user check the case in the designer; `unknown`: the reply was lost, so the change may or may not have
 been written - describe the case before retrying. No compile or restart; F5.
@@ -101,3 +105,66 @@ been written - describe the case before retrying. No compile or restart; F5.
   case gets the matching one at its next change of the stage or filter column. A record whose filter value changes
   keeps its case. The record page is not changed: the bar switches to the matching case only when its
   `askUserToChangeSchema` is true; offer that page change, do not make it unasked.
+
+== Versions of a case ==
+- Needs clio <CLIO-TBD> or later: if `get-tool-contract` does not list `modify-dynamic-case-as-new-version`, the
+  clio is older: tell the user to update clio, or to save the new version and make it actual in the case designer.
+  An older clio's describe has no `versions`: a missing list there does not mean the case has no other version.
+- A version is a separate case schema of the case's family. At most one member is ACTIVE: new records start that
+  one (`process-versions` owns the version model). `describe-dynamic-case` takes any member by `case-name` /
+  `case-uid` (one that is not active gets a note naming the active one; `entity-schema-name` reads the active one)
+  and lists the family in `versions` (`name`, `uId`, `version`, `packageName`, `packageReadOnly`, `active`,
+  `runningInstances`, `hasLinkRow`, `isDelivered`); the list is absent for a case with no other version.
+- A member that is not active is a draft: `modify-dynamic-case` by its `case-name` / `case-uid` changes it in place
+  (`case.activeVersion: false`, a note); new records do not see it until it is made active. Not fully apart: a stage
+  caption on it still renames the shared value at once, and a member that was active before may still have running
+  cases. `enabled` belongs to the whole family: on a member that is not active it is refused `invalid-request`; send
+  it for the active one.
+- Offer a new version when the user wants the change prepared without new records seeing it yet, when the case's
+  package is not editable (`package-read-only`), or when running cases sit in a stage to remove (`stage-in-use`).
+1. Make it: `modify-dynamic-case-as-new-version { environment-name, case-name | case-uid | entity-schema-name,
+   package-name?, stages?, caption?, filter?, remove-filter?, confirm-stage-records?, confirm-value-rename?,
+   dry-run? }` copies the family's ACTIVE member (another member is refused, naming the active one) into a new
+   version that is NOT active, and applies `stages`, `caption` and `filter` to it with the shapes and the
+   confirmations of `modify-dynamic-case` (no `enabled`; running cases are not asked about: they keep their
+   version). `package-name` left out: the case's own package when it is editable, otherwise refused
+   `package-name-required`: ask the user which editable package (the message may offer the current one; use it only
+   after their yes). `dependencies-missing`: the package must depend on the packages the message names; add them
+   only after the user's yes. `steps-not-supported`: a case with steps gets a version only in its own package (or in
+   the case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write
+   only after their yes. NOT idempotent: every write makes one more version, and a saved version is never removed.
+   A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active
+   case and every record too - say so before the yes. A FIRST filter would set the object's filter column for every
+   case at once, so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case`
+   first, or leave the version without one). The checks against the object's other cases run at activation; here
+   they are notes.
+   Outcomes: `version-created` with `version` (`name`, `uId`, `version`, `packageName`, `active: false`);
+   `failed-rolled-back`: nothing of the version stays; `failed-leftover` WITH a `version` (`version-number-taken` when
+   another writer took its number): the version was saved and is KEPT, named in `leftovers` with its link row - do not
+   activate it, tell the user; no tool removes it, the user can delete it in the case library; `failed-leftover`
+   WITHOUT a `version`: nothing was saved, but a row or a value rename could not be undone - relay `leftovers` (a
+   value left renamed: offer to rename it back); `unknown`: the reply was lost.
+   After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version.
+2. Check it: `describe-dynamic-case { case-name: version.name }` and give the user its `designerUrl` to open the
+   version in the case designer.
+3. ASK the user whether to make it active: a decision of its own, never part of the yes to create it.
+4. Make it active: `set-active-dynamic-case-version { environment-name, version-name | version-uid, dry-run? }`,
+   destructive, any member of the family (the first one too: that is the way back; `version-not-found` otherwise).
+   First `dry-run: true`, relay its notes and warnings, then the call after the user's yes; `unchanged`: it is
+   active already, nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
+   `unfiltered-case-exists`, `filter-required` (as in "Several cases on one object"; the family's own members do
+   not count). Tell the user what the switch does: new records start the active version; running cases and
+   existing records keep the version they started on, and a record moves only with Change case on its page, which
+   cancels its current case; open pages need F5. Relay the notes on records in stages the new version lacks.
+   - A disabled family is switched too, and starts nothing until `modify-dynamic-case { enabled: true }` on the
+     new active member, alone, after the user's yes.
+   - Package position: a version whose package ranks at or below a member in a non-editable package that still
+     reads active may not become the one new records start (a warning at creation, in the dry run and at the
+     switch; `decidedByPackagePosition` names such members). Relay it: the remedy is a dependency of the version's
+     package on that member's package, after the user's yes. A switch to a member in a non-editable package is kept
+     on this environment only: it does not travel with any package (a note); tell the user.
+   Outcomes: `activated`; `failed-not-restored` (`write-failed`): the switch did not read back (relay
+   `activeVersion` and `siblingsStillFlagged`); it is never undone, and the same call can be repeated once the cause
+   is fixed; `failed-leftover`: no switch, a link row it added could not be removed - relay `leftovers`; `unknown`:
+   describe the family (`active` names the member new records start) before repeating the call. No compile or
+   restart.
