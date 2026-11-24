@@ -70,7 +70,8 @@ public sealed class GuidanceMigrationTests
         "web-service-soap-details",
         "column-rights",
         "data-bindings-details",
-        "assembly-package"
+        "assembly-package",
+        "lookup-colors"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

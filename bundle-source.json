@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.248",
+  "libraryVersion": "1.15.249",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -94,6 +94,7 @@
       "indicator-widget",
       "integration-testing",
       "localizable-values",
+      "lookup-colors",
       "knowledge-feedback",
       "mobile-page-modification",
       "package-dependencies",
@@ -313,6 +314,7 @@
       "docs://knowledge/com.creatio.clio/indicator-widget",
       "docs://knowledge/com.creatio.clio/integration-testing",
       "docs://knowledge/com.creatio.clio/localizable-values",
+      "docs://knowledge/com.creatio.clio/lookup-colors",
       "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
@@ -2279,6 +2281,17 @@
       "uri": "docs://knowledge/com.creatio.clio/column-rights",
       "sourcePath": "guidance/mcp/guides/operations/column-rights.md",
       "bundlePath": "resources/column-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "lookup-colors",
+      "title": "Lookup value colors",
+      "description": "Owns coloring lookup values on Freedom UI pages: the color column (the object's Color setting, which must be of the Color type, whatever its name), checking it with get-entity-schema-properties, asking for the package before adding one through a replacing object and the manual Object Designer step clio cannot do, the #RRGGBB check, the Creatio Academy palette and its deterministic pick order, writing with upsert-data-binding-row-db (clio 8.1.0.118 or later) instead of odata-update or execute-dataservice-batch, and the execute-esq read-back.",
+      "topicId": "creatio.lookup-colors",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/lookup-colors",
+      "sourcePath": "guidance/mcp/guides/applications/lookup-colors.md",
+      "bundlePath": "resources/lookup-colors.md",
       "mediaType": "text/plain"
     },
     {
