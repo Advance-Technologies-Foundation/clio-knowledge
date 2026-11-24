@@ -349,6 +349,28 @@ When `filterAttributes` IS appropriate (NOT for record scoping)
   `dependencies` for "records that belong to the open record"; use `filterAttributes` only for a
   user-driven filter on top.
 
+Acting on the rows the user selected (row selection)
+- Checkboxes appear when the grid has `features.rows.selection: { "enable": true, "multiple": true }`
+  (the Designer sets it on every dropped list).
+- The selection lives in a page attribute that the grid binds with `selectionState`, by convention
+  `"selectionState": "$<GridName>_SelectionState"`. The Designer also writes
+  `"_selectionOptions": { "attribute": "<GridName>_SelectionState" }` (the same name, without `$`). Write both, so
+  the body has the shape the Designer gives it. A `crt.DataGrid` or `crt.ListWidget` whose body has the
+  `selectionState` binding but no `_selectionOptions` is NOT broken: at page load the platform derives
+  `_selectionOptions` from that binding and declares the attribute (`DataGridSelectionOptionsBackwardCompatibilityPreprocessor`
+  and `SelectionOptionsPreprocessor`, `libs/studio-enterprise/feature/components-preprocessors/src/lib/` in
+  creatio-ui commit `cc78bd8be9b`, present since July 2023). So when selection-dependent behavior does not work,
+  look for the cause elsewhere — the handler or the button — not in a missing `_selectionOptions`.
+- The attribute holds `{ "type": "specific", "selected": [<ids>] }`, or `{ "type": "all", "unselected": [<ids>] }`
+  after "select all" (`libs/studio-enterprise/util/common/src/lib/models/selection/selection-state.model.ts`, same
+  commit). Code that reads it (`await request.$context.<GridName>_SelectionState`) handles BOTH types; reading only
+  `selected` misses every "select all".
+- To act on the selected rows from a bulk action or a button, pass the selection as filters with the converter chain
+  `$<items> | crt.ToCollectionFilters : '<items>' : $<sel> | crt.SkipIfSelectionEmpty : $<sel>`.
+  `get-component-info component-type="crt.DataGrid"` owns the bulk-action recipe and how the runtime picks `<sel>`;
+  use it rather than a hand-written loop over the ids.
+- Verify selection-dependent behavior by selecting rows in a browser session; a body read-back cannot prove it.
+
 Common mistakes (these are why a detail shows ALL records or none — or the page will not render)
 - Inserting the `crt.ExpansionPanel` (or any wrapping container) without `"items": []` in its
   `values`. The engine rejects it at runtime with `is not a container for other items` and the

@@ -63,6 +63,28 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "the SDK calls are owned by the devkit guide");
     }
 
+    [Test]
+    [Description("Row selection is described as the platform runs it, with source evidence.")]
+    public void RelatedListGuidance_ShouldDescribeRowSelection_AsThePlatformRunsIt()
+    {
+        // Arrange
+        string guidance = ReadGuide("related-data", "list.md");
+
+        // Act
+        bool hasSection = guidance.Contains("Acting on the rows the user selected (row selection)", StringComparison.Ordinal);
+
+        // Assert
+        hasSection.Should().BeTrue(because: "agents had no guidance on grid selection at all");
+        guidance.Should().Contain("\"_selectionOptions\": { \"attribute\": \"<GridName>_SelectionState\" }",
+                because: "the Designer's shape is the one to write")
+            .And.Contain("is NOT broken: at page load the platform derives",
+                because: "the runtime fills a missing _selectionOptions, so it must not be named as a defect")
+            .And.Contain("creatio-ui commit `cc78bd8be9b`",
+                because: "the runtime claim needs its source evidence")
+            .And.Contain("handles BOTH types",
+                because: "a select-all state has no selected list");
+    }
+
     private static string ReadGuide(params string[] relativePath)
     {
         string[] parts = [FindRepositoryRoot(), "guidance", "mcp", "guides", .. relativePath];
