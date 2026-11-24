@@ -102,7 +102,7 @@ NON-NEGOTIABLES
 - Use handler signatures like `async (request, next) => { ... }` only inside `SCHEMA_HANDLERS`.
 - `handlers` is an ARRAY, not an object.
 - Call `next` intentionally: place it `before`, `after`, or omit it only for an intentional chain break or full behavior replacement.
-- Prefer built-in `crt.*Request` names before inventing custom `usr.*Request` names.
+- Prefer built-in `crt.*Request` names before inventing a custom request (named per "Custom namespace" below).
 - Custom namespace (this rule owns it for requests, converters and validators): name every custom request, converter and validator with the namespace the target package's existing pages already use for their own custom names (for example `acme.SetDiscountRequest` when the package's pages use `acme.`). Use `usr.` only when the package has no custom namespace yet. Never use `crt.`, the namespace of Creatio built-ins. Read the namespace from the package's own pages with `get-page` before inventing a name. `usr.` in the examples of these guides is that default, not a requirement: the runtime registers converters and validators under any key (creatio-ui commit `cc78bd8be9b`, `schema-initializer.service.ts`), and clio rejects only a `crt.` converter key.
 - Keep field validation in validators and simple value transforms in converters, not in handlers.
 - Read and write page state through `request.$context`.
@@ -148,7 +148,7 @@ Context read/write patterns
 - Direct property assignment on `request.$context` is allowed only for transient runtime references such as subscriptions or service handles; page attributes still use `await request.$context.set(...)`.
 - Prefer `request.value` over re-reading the triggering attribute through the view-model context.
 - EXPERIMENTAL — read-only decided by page code (an operation right, a feature toggle, a computed value; `business-rules`, "Conditions a page rule cannot express"): after `await next?.handle(request)` in `crt.HandleViewModelInitRequest`, call `request.$context.setAttributePropertyValue("<ControlAttribute>", "readonly", <boolean>)`, where `<ControlAttribute>` is the attribute the element's `control` binds; repeat it in `crt.HandleViewModelAttributeChangeRequest` when the condition can change while the page is open. Do NOT bind the element's `readonly` to a page attribute instead: a Designer Read-only edit flattens it (`page-modification-overview`). This read-only is presentation only, not access control: the server, other pages, lists, DataService and imports still accept the write, so enforce an operation right with object or column permissions or a back-end check, and tell the user which one protects the data.
-  - Evidence and limits: on Creatio 10.2.959.0 (.NET Framework, MSSQL), 2026-11-23, the init handler locked the field, and after a Designer Read-only toggle and save the handler stayed in the body and the field stayed locked. The platform sets read-only the same way (`copilot-page-disable-code-field.handler.ts`, creatio-ui commit `cc78bd8be9b`). It is not confirmed as public devkit API for configuration pages; only `readonly` and the init handler were tested.
+  - Evidence and limits: on Creatio 10.2.959.0 (.NET Framework, MSSQL), 2026-11-23, the init handler locked the field, and after a Designer Read-only toggle and save the handler stayed in the body and the field stayed locked. Only locking (`true`) was observed: unlocking (`false`) on an element that carries a Designer-written literal `"readonly": true` was not tested, and which of the two wins is unknown. The platform sets read-only the same way (`copilot-page-disable-code-field.handler.ts`, creatio-ui commit `cc78bd8be9b`). It is not confirmed as public devkit API for configuration pages; only `readonly` and the init handler were tested.
 - Do NOT use `request.viewModel`, `request.sender`, `.$get(...)`, `.$set(...)`, or `request.$context.get(...)` in deployed page-body handlers.
 - Canonical rule for `crt.HandleViewModelAttributeChangeRequest`: use `request.value` for the triggering attribute, not `request.viewModel.get(...)`.
 - A field control MUST bind to the same declared view-model attribute that handlers read or write through `$context.set("<AttributeName>", ...)`.
@@ -348,7 +348,7 @@ Request selection hints
 - Use `crt.DeleteRecordsRequest` for bulk deletion of multiple selected records from a list (with optional filter or recordIds).
 - Use `crt.CopyRecordRequest` to duplicate an existing record.
 - When dispatching another request imperatively from a handler, pass both `$context: request.$context` and `scopes: [...request.scopes]` unless the target request intentionally changes scope.
-- Use a custom `usr.*Request` only when no built-in request type matches the domain workflow.
+- Use a custom request (named per "Custom namespace") only when no built-in request type matches the domain workflow.
 
 Standard built-in handler catalog
 - Built-in handlers and related user-available request names include:
@@ -384,7 +384,7 @@ Standard built-in handler catalog
   - `crt.DeleteRecordsRequest`
   - `crt.CopyRecordRequest`
   - `crt.ShowDialogRequest`
-- Treat this catalog as the first place to look before inventing custom `usr.*Request` names.
+- Treat this catalog as the first place to look before inventing a custom request name.
 - Prefer the exact built-in request name from this catalog when the requirement matches it directly.
 
 Standard handler parameter catalog
@@ -476,7 +476,7 @@ Safe editing rules
 
 Anti-patterns
 - Do NOT write `handlers: { ... }`; `handlers` must remain an array.
-- Do NOT invent `usr.*Request` when an existing `crt.*Request` already matches the workflow.
+- Do NOT invent a custom request when an existing `crt.*Request` already matches the workflow.
 - Do NOT choose raw `fetch(...)` to a platform endpoint before checking `page-schema-creatio-devkit-common` for a canonical `crt.*Request`, SDK service, or `sdk.Model` pattern.
 - Do NOT invent placeholder SDK services such as `<Service>.subscribe(...)`; when SDK-based subscriptions are required, use a concrete service such as `sdk.MessageChannelService` and keep `SCHEMA_DEPS` / `SCHEMA_ARGS` aligned.
 - Do NOT write `type: "crt.ShowDialog"` in imperative request code; use `type: "crt.ShowDialogRequest"`.
@@ -495,7 +495,7 @@ BEFORE SAVE CHECKLIST
 - Is every handler entry still an object with string `request` and `handler` fields?
 - Do attribute-name guards use strict equality / inequality (`===` / `!==`) unless coercion is intentional?
 - Is the `next` placement intentional (`before`, `after`, or omitted) for this exact workflow?
-- Were built-in request names preferred before introducing any custom `usr.*Request`?
+- Were built-in request names preferred before introducing any custom request, and does it use the package's namespace?
 - Are `$context` and `scopes` forwarded in every imperative follow-up request that stays on the live page scope?
 - If `fetch(...)` is still used, is there an explicit reason why no canonical `crt.*Request`, SDK service, or `sdk.Model` pattern from `page-schema-creatio-devkit-common` covers the scenario?
 - Does page-state writeback use `await request.$context.set(...)` unless the task explicitly matches a compatibility pattern already present in the schema?

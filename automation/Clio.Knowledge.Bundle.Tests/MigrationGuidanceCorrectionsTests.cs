@@ -52,6 +52,8 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "the converter and validator guides cite the owner instead of restating the rule"));
         converters.Should().NotContain("Rename to `usr.<Name>`.",
             because: "the crt. lint remedy must send agents to the package's namespace, not to usr.");
+        handlers.Should().NotContain("custom `usr.*Request`",
+            because: "the article that owns the namespace rule must not name usr. as the form of a custom request");
     }
 
     [Test]
@@ -73,6 +75,8 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "the numeric JSON shape is for stored filter trees, not runtime handler code")
             .And.Contain("build it with `sdk.FilterGroup`",
                 because: "handler code uses the SDK builder the devkit guide documents")
+            .And.Contain("the member names are exactly the names in the Operators table below",
+                because: "the devkit enum uses the table's names, so agents must not invent SDK member names")
             .And.Contain("`page-schema-creatio-devkit-common`",
                 because: "the SDK calls are owned by the devkit guide");
     }
@@ -141,7 +145,13 @@ public sealed class MigrationGuidanceCorrectionsTests
             .And.Contain("Scope warning: an entity rule changes EVERY page and list of the object",
                 because: "page-scoped requirements were silently widened to the whole object")
             .And.Contain("narrows the DROPDOWN only",
-                because: "the _List_DS LoadDataRequest pattern does not reach the selection window");
+                because: "the _List_DS LoadDataRequest pattern does not reach the selection window")
+            .And.Contain("Page parameters are a condition source too",
+                because: "the operand list cites the page-parameter section")
+            .And.Contain("The open step of a `crt.Stepper` is a condition source too",
+                because: "the operand list cites the stepper section")
+            .And.Contain("A. Conditional field/element STATE",
+                because: "the operand list cites decision tree A for system values and system settings");
         conditionSection.Should().Contain("`page-schema-handlers` (\"Context read/write patterns\")",
             because: "the handler guide owns the handler pattern and business-rules only routes to it");
     }

@@ -238,7 +238,7 @@ Wire it in three pieces — a button, a handler, and the same `dependencies`-sco
 guide describes over the JUNCTION entity:
 
 1. A `crt.Button` in the detail's toolbar whose `clicked` dispatches your own request, e.g.
-   `{ "request": "usr.AddExistingSkillsRequest" }`. A custom `usr.*` name is correct here: the platform has
+   `{ "request": "usr.AddExistingSkillsRequest" }`. A custom request name (the package's namespace, `page-schema-handlers` "Custom namespace") is correct here: the platform has
    no declarative request that both opens the window and writes the links, so a handler has to sit between.
    This button REPLACES the "Expanded list" composite's default header add button — it does not coexist with
    it. Either rebind the composite's own add button (point its `clicked` at the `usr.*` request) or remove it
