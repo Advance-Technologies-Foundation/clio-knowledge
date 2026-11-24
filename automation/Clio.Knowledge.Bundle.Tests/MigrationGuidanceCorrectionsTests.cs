@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -6,9 +8,29 @@ namespace Clio.Knowledge.Bundle.Tests;
 [TestFixture]
 public sealed class MigrationGuidanceCorrectionsTests
 {
+    private static readonly Regex UsrPrefixMandate = new(
+        @"(MUST\s+)?(use|with)\s+the\s+`usr\.`\s+prefix",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    [Test]
+    [Description("No guidance article presents usr. as the required namespace for custom names.")]
+    public void Guidance_ShouldNotMandateUsrPrefix_InAnyArticle()
+    {
+        // Arrange
+        string repositoryRoot = ProcessGuideSet.FindRepositoryRoot();
+
+        // Act
+        string[] offenders = [.. DeclaredGuidancePaths(repositoryRoot)
+            .Where(path => UsrPrefixMandate.IsMatch(ProcessGuideSet.Read(repositoryRoot, path)))];
+
+        // Assert
+        offenders.Should().BeEmpty(
+            because: "a team package with its own namespace must not be pushed to usr.; page-schema-handlers owns the rule");
+    }
+
     [Test]
     [Description("Custom requests, converters and validators use the package's namespace; usr. is only the default.")]
-    public void PageSchemaGuidance_ShouldNotRequireUsrNamespace_WhenNamingCustomEntries()
+    public void PageSchemaGuidance_ShouldRouteNamespaceRuleToHandlers_WhenNamingCustomEntries()
     {
         // Arrange
         string handlers = ReadGuide("page-schema/handlers.md");
@@ -16,23 +38,20 @@ public sealed class MigrationGuidanceCorrectionsTests
         string validators = ReadGuide("page-schema/validators.md");
 
         // Act
-        string[] pageSchemaGuides = [handlers, converters, validators];
+        string[] citingGuides = [converters, validators];
 
         // Assert
-        pageSchemaGuides.Should().NotContain(
-            guide => guide.Contains("use the `usr.` prefix", StringComparison.OrdinalIgnoreCase),
-            because: "a team package with its own namespace must not be pushed to usr.");
         handlers.Should().Contain("Custom namespace (this rule owns it for requests, converters and validators)",
                 because: "one article owns the namespace rule and the others cite it")
             .And.Contain("Use `usr.` only when the package has no custom namespace yet.",
                 because: "usr. stays the default for a package without a namespace")
             .And.Contain("Never use `crt.`",
                 because: "crt. is the built-in namespace");
-        converters.Should().Contain("the namespace rule is in NON-NEGOTIABLES below",
-            because: "the converter guide states the rule once and points to it");
-        new[] { converters, validators }.Should().AllSatisfy(guide =>
-            guide.Should().Contain("`page-schema-handlers`").And.Contain("\"Custom namespace\")",
+        citingGuides.Should().AllSatisfy(guide =>
+            guide.Should().Contain("`page-schema-handlers`").And.Contain("\"Custom namespace\"",
                 because: "the converter and validator guides cite the owner instead of restating the rule"));
+        converters.Should().NotContain("Rename to `usr.<Name>`.",
+            because: "the crt. lint remedy must send agents to the package's namespace, not to usr.");
     }
 
     [Test]
@@ -66,7 +85,7 @@ public sealed class MigrationGuidanceCorrectionsTests
         string guidance = ReadGuide("related-data/list.md");
 
         // Act
-        string section = guidance[guidance.IndexOf("Acting on the rows the user selected (row selection)", StringComparison.Ordinal)..];
+        string section = Section(guidance, "Acting on the rows the user selected (row selection)");
 
         // Assert
         section.Should().Contain("\"_selectionOptions\": { \"attribute\": \"<GridName>_SelectionState\" }",
@@ -87,13 +106,12 @@ public sealed class MigrationGuidanceCorrectionsTests
         string guidance = ReadGuide("pages/modification/overview.md");
 
         // Act
-        int sectionIndex = guidance.IndexOf("What survives an Interface Designer save (web pages)", StringComparison.Ordinal);
-        int warningIndex = guidance.IndexOf("A bound `readonly` survives an ordinary save, but NOT a touch of the Read-only checkbox.", StringComparison.Ordinal);
+        string section = Section(guidance, "What survives an Interface Designer save (web pages)");
 
         // Assert
-        warningIndex.Should().BeGreaterThan(sectionIndex,
-            because: "the warning belongs to the Designer-save section agents are routed to");
-        guidance.Should().Contain("writes the literal `\"readonly\": true` to EVERY element bound to the same attribute",
+        section.Should().Contain("A bound `readonly` survives an ordinary save, but NOT a touch of the Read-only checkbox.",
+                because: "the warning belongs to the Designer-save section agents are routed to")
+            .And.Contain("writes the literal `\"readonly\": true` to EVERY element bound to the same attribute",
                 because: "the literal spreads to every element of the attribute")
             .And.Contain("Evidence: Creatio 10.2.959.0",
                 because: "the claim must keep its stand evidence")
@@ -109,7 +127,7 @@ public sealed class MigrationGuidanceCorrectionsTests
         string guidance = ReadGuide("business-rules/business-rules.md");
 
         // Act
-        string conditionSection = guidance[guidance.IndexOf("Conditions a page rule cannot express (EXPERIMENTAL)", StringComparison.Ordinal)..];
+        string conditionSection = Section(guidance, "Conditions a page rule cannot express (EXPERIMENTAL)");
 
         // Assert
         guidance.Should().NotContain("Condition attribute names come from bundle.viewModelConfig.attributes",
@@ -136,17 +154,41 @@ public sealed class MigrationGuidanceCorrectionsTests
         string guidance = ReadGuide("page-schema/handlers.md");
 
         // Act
-        string section = guidance[guidance.IndexOf("Context read/write patterns", StringComparison.Ordinal)..];
+        string section = Section(guidance, "Context read/write patterns");
 
         // Assert
         section.Should().Contain("EXPERIMENTAL — read-only decided by page code",
                 because: "the pattern is unconfirmed platform API and must say so")
             .And.Contain("request.$context.setAttributePropertyValue(\"<ControlAttribute>\", \"readonly\", <boolean>)",
                 because: "the handler guide holds the call itself")
+            .And.Contain("This read-only is presentation only, not access control",
+                because: "an operation right must still be enforced on the server")
             .And.Contain("It is not confirmed as public devkit API for configuration pages",
                 because: "the limit of the evidence must travel with the pattern");
     }
 
     private static string ReadGuide(string pathUnderGuides) =>
         ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), "guidance/mcp/guides/" + pathUnderGuides);
+
+    // The text from a heading line to the next heading line: a non-empty line after a blank line that is
+    // not a list item, an indented continuation or a code fence.
+    private static string Section(string guidance, string heading)
+    {
+        int start = guidance.IndexOf(heading, StringComparison.Ordinal);
+        start.Should().BeGreaterThanOrEqualTo(0, because: $"the heading \"{heading}\" is cited by other articles");
+        Match next = Regex.Match(guidance[(start + heading.Length)..], @"\n\s*\n(?=[^\s\-`|])");
+        return next.Success
+            ? guidance.Substring(start, heading.Length + next.Index)
+            : guidance[start..];
+    }
+
+    private static IEnumerable<string> DeclaredGuidancePaths(string repositoryRoot)
+    {
+        using JsonDocument manifest = JsonDocument.Parse(
+            File.ReadAllBytes(Path.Combine(repositoryRoot, "bundle-source.json")));
+        return [.. manifest.RootElement.GetProperty("resources")
+            .EnumerateArray()
+            .Where(resource => resource.GetProperty("role").GetString() == "guidance")
+            .Select(resource => resource.GetProperty("sourcePath").GetString()!)];
+    }
 }

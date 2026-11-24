@@ -20,7 +20,7 @@ Decision tree
 - If the converter will be reused across multiple pages, add it as a remote module instead of to the page schema.
 
 OOTB converter decision table
-- Use this table as the first-match decision rule before creating any `usr.*` custom converter.
+- Use this table as the first-match decision rule before creating any custom (non-`crt.`) converter.
   | Requirement pattern | Use | Parameters | Custom converter needed |
   | --- | --- | --- | --- |
   | convert value to boolean | `crt.ToBoolean` | none | no |
@@ -28,7 +28,7 @@ OOTB converter decision table
   | wrap email in mailto: link | `crt.ToEmailLink` | none | no |
   | wrap phone number in tel: link | `crt.ToPhoneLink` | none | no |
   | read a specific property from an object attribute | `crt.ToObjectProp` | `prop` (required), `defaultValue` (optional) | no |
-  | requirement is not covered by rows above | custom `usr.*` converter | custom | yes |
+  | requirement is not covered by rows above | custom `<namespace>.*` converter | custom | yes |
 
 Converter binding syntax
 - Converters are bound directly in `viewConfigDiff` element property values, NOT in `viewModelConfigDiff`.
@@ -102,7 +102,7 @@ NON-NEGOTIABLES
 Rules enforced by the AST lint pass (run automatically on every `update-page` / `sync-pages` web body)
 - Note: anti-shape detection that overlaps the existing regex content validators is handled by the regex layer with its own established wording, NOT by the lint pass. Example already covered by the regex layer (and therefore NOT in the lint catalogue): `converters` written as an array literal (rejected by `ValidateMarkerContent` → `ValidateJavaScriptObjectMarkers`).
 - ERROR (blocks the save; body is NOT sent to Creatio):
-  - `converter-crt-prefix-reserved` — any converter key that is a direct entry of the `converters` object and starts with `crt.` (the reserved built-in namespace). Rename to `usr.<Name>`. The rule is scoped to direct entries of the `converters` object, so `\"crt.X\"` keys inside a lookup map declared in a converter's closure are not flagged.
+  - `converter-crt-prefix-reserved` — any converter key that is a direct entry of the `converters` object and starts with `crt.` (the reserved built-in namespace). Rename it into the package's custom namespace (`page-schema-handlers`, "Custom namespace"; `usr.<Name>` when the package has none). The rule is scoped to direct entries of the `converters` object, so `\"crt.X\"` keys inside a lookup map declared in a converter's closure are not flagged.
 - WARNING (reported alongside the response, write still proceeds):
   - `converter-fetch-call` — direct `fetch(...)`, `globalThis.fetch(...)`, or `window.fetch(...)` invoked anywhere inside the `converters` subtree. Replace with a cached SDK service such as `SysSettingsService` (see the template above) — converters fire on every render of the bound control.
 - Fix the underlying converter body to clear a finding; do not strip the offending converter to silence the diagnostic.

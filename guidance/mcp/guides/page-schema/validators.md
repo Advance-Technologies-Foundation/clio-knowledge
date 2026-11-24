@@ -20,7 +20,7 @@ Decision tree
 
 Standard validator decision table
 - Prefer a standard Creatio validator when it already matches the requirement. Do NOT create a custom validator when a standard validator is sufficient.
-- Use this table as the first-match decision rule before creating any `usr.*Validator`.
+- Use this table as the first-match decision rule before creating any custom (non-`crt.`) validator.
   | Requirement pattern | Prefer | Parameters | Custom validator needed |
   | --- | --- | --- | --- |
   | field must be filled | `crt.Required` | none | no |
@@ -29,8 +29,8 @@ Standard validator decision table
   | maximum string length | `crt.MaxLength` | `maxLength` | no |
   | minimum numeric value | `crt.Min` | `min` | no |
   | maximum numeric value | `crt.Max` | `max` | no |
-  | requirement is not covered by rows above | custom `usr.*Validator` | custom | yes |
-- Create a custom `usr.*Validator` only when the requirement is not covered by `crt.Required`, `crt.EmptyOrWhiteSpace`, `crt.MinLength`, `crt.MaxLength`, `crt.Min`, or `crt.Max`, or when the validation logic is genuinely domain-specific.
+  | requirement is not covered by rows above | custom `<namespace>.*Validator` | custom | yes |
+- Create a custom `<namespace>.*Validator` only when the requirement is not covered by `crt.Required`, `crt.EmptyOrWhiteSpace`, `crt.MinLength`, `crt.MaxLength`, `crt.Min`, or `crt.Max`, or when the validation logic is genuinely domain-specific.
 - All `crt.*` validators accept an optional `message` param to override the built-in localized error text (e.g., `"message": "#ResourceString(SomeKey)#"`). Omit `message` to use the automatic built-in error text. Only add `message` when you specifically need to override the default error.
 
 Server-side compilation
