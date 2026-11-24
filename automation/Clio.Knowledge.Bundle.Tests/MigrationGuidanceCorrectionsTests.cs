@@ -107,6 +107,36 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "the warning points to the alternative");
     }
 
+    [Test]
+    [Description("Page-rule operands match clio, entity-rule scope is stated, and the handler path is EXPERIMENTAL.")]
+    public void BusinessRulesGuidance_ShouldStateOperandsScopeAndExperimentalHandlerPath()
+    {
+        // Arrange
+        string guidance = ReadGuide("business-rules", "business-rules.md");
+
+        // Act
+        bool claimsAnyAttribute = guidance.Contains(
+            "Condition attribute names come from bundle.viewModelConfig.attributes", StringComparison.Ordinal);
+
+        // Assert
+        claimsAnyAttribute.Should().BeFalse(
+            because: "clio rejects virtual, collection and multi-segment attributes that viewModelConfig lists");
+        guidance.Should().Contain("clio commit `a35201cdb`",
+                because: "the operand list must name the clio source it mirrors")
+            .And.Contain("Condition attributes clio rejects (\"Unknown or unsupported datasource-bound page attribute\")",
+                because: "agents need the rejected kinds, with the message they will see")
+            .And.Contain("There is no operand for an operation right (`CanEditX`) or a feature toggle.",
+                because: "rights and features were the conditions the migration could not express")
+            .And.Contain("Scope warning: an entity rule changes EVERY page and list of the object",
+                because: "page-scoped requirements were silently widened to the whole object")
+            .And.Contain("Conditions a page rule cannot express (EXPERIMENTAL)",
+                because: "the handler path is unconfirmed platform API and must say so")
+            .And.Contain("It is not confirmed as public devkit API for configuration pages",
+                because: "the limit of the evidence must travel with the pattern")
+            .And.Contain("narrows the DROPDOWN only",
+                because: "the _List_DS LoadDataRequest pattern does not reach the selection window");
+    }
+
     private static string ReadGuide(params string[] relativePath)
     {
         string[] parts = [FindRepositoryRoot(), "guidance", "mcp", "guides", .. relativePath];
