@@ -85,6 +85,28 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "a select-all state has no selected list");
     }
 
+    [Test]
+    [Description("The Designer-save section warns that the Read-only checkbox flattens a bound readonly.")]
+    public void OverviewGuidance_ShouldWarnAboutReadOnlyToggle_WhenReadonlyIsBound()
+    {
+        // Arrange
+        string guidance = ReadGuide("pages", "modification", "overview.md");
+
+        // Act
+        int sectionIndex = guidance.IndexOf("What survives an Interface Designer save (web pages)", StringComparison.Ordinal);
+        int warningIndex = guidance.IndexOf("A bound `readonly` survives an ordinary save, but NOT a touch of the Read-only checkbox.", StringComparison.Ordinal);
+
+        // Assert
+        warningIndex.Should().BeGreaterThan(sectionIndex,
+            because: "the warning belongs to the Designer-save section agents are routed to");
+        guidance.Should().Contain("writes the literal `\"readonly\": true` to EVERY element bound to the same attribute",
+                because: "the literal spreads to every element of the attribute")
+            .And.Contain("Evidence: Creatio 10.2.959.0",
+                because: "the claim must keep its stand evidence")
+            .And.Contain("(\"Conditions a page rule cannot express\")",
+                because: "the warning points to the alternative");
+    }
+
     private static string ReadGuide(params string[] relativePath)
     {
         string[] parts = [FindRepositoryRoot(), "guidance", "mcp", "guides", .. relativePath];
