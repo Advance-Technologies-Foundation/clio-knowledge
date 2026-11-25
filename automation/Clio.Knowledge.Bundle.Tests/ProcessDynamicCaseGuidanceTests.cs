@@ -523,7 +523,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the user checks the version in the case designer before deciding to activate it");
             guide.Should().Contain("ASK the user whether to make it active: a decision of its own, never part of the yes to create it",
                 because: "the case designer asks separately whether a new version becomes actual, and the tool never activates");
-            guide.Should().Contain("`set-active-dynamic-case-version { environment-name, version-name | version-uid, dry-run? }`, destructive",
+            guide.Should().Contain("`set-active-dynamic-case-version { environment-name, version-name | version-uid, confirm-package-position?, dry-run? }`, destructive",
                 because: "the switch changes what new records start");
             guide.Should().Contain("`unchanged`: it is active already, nothing written",
                 because: "the switch is idempotent, so a repeat is answered unchanged");
@@ -535,8 +535,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "activation does not change enabled, so a disabled family stays silent after the switch");
             guide.Should().Contain("may not become the one new records start",
                 because: "a member in a non-editable package is never written False, and the platform's pick then falls to the package rank");
-            guide.Should().Contain("the remedy is a dependency of the version's package on that member's package, after the user's yes",
-                because: "a dependency ranks the version's package higher, and a package change is the user's to approve");
+            guide.Should().Contain("The switch is then refused `package-position-confirmation-required`",
+                because: "a switch a foreign member may outrank is refused until the user's yes, like the other confirmations");
+            guide.Should().Contain("the remedy is a dependency of the version's package on that member's package, or `confirm-package-position: true` to switch anyway, each only after the user's yes to it",
+                because: "a dependency ranks the version's package higher, switching anyway may leave new records on a member nobody chose, and both are the user's to approve");
             guide.Should().Contain("it does not travel with any package (a note); tell the user",
                 because: "a switch to a member in a non-editable package is kept as a setting of this environment only");
             guide.Should().Contain("it is never undone, and the same call can be repeated once the cause is fixed",

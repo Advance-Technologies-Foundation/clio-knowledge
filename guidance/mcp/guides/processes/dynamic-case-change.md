@@ -112,11 +112,11 @@ been written - describe the case before retrying. No compile or restart; F5.
 - Needs clio <CLIO-TBD> or later: if `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
   clio is older: tell the user to update clio, or to save the new version and make it actual in the case designer.
   An older clio's describe has no `versions`: a missing list there does not mean the case has no other version.
-- A version is a separate case schema of the case's family. At most one member is ACTIVE: new records start that
-  one (`process-versions` owns the version model). `describe-dynamic-case` takes any member by `case-name` /
-  `case-uid` (one that is not active gets a note naming the active one; `entity-schema-name` reads the active one)
-  and lists the family in `versions` (`name`, `uId`, `version`, `packageName`, `packageReadOnly`, `active`,
-  `runningInstances`, `hasLinkRow`, `isDelivered`); the list is absent for a case with no other version.
+- A version is a separate case schema of the case's family. At most one member is ACTIVE: new records start that one
+  (`process-versions` owns the version model). `describe-dynamic-case` takes any member by `case-name` / `case-uid`
+  (one that is not active gets a note naming the active one; `entity-schema-name` reads the active one) and lists the
+  family in `versions` (each member's package, `active`, running cases, link row); the list is absent for a case with
+  no other version.
 - A member that is not active is a draft: `modify-dynamic-case` by its `case-name` / `case-uid` changes it in place
   (`case.activeVersion: false`, a note); new records do not see it until it is made active. Not fully apart: a stage
   caption on it still renames the shared value at once, and a member that was active before may still have running
@@ -125,50 +125,51 @@ been written - describe the case before retrying. No compile or restart; F5.
 - Offer a new version when the user wants the change prepared without new records seeing it yet, when the case's
   package is not editable (`package-read-only`), or when running cases sit in a stage to remove (`stage-in-use`).
 1. Make it: `modify-dynamic-case-as-new-version { environment-name, case-name | case-uid | entity-schema-name,
-   package-name?, stages?, caption?, filter?, remove-filter?, confirm-stage-records?, confirm-value-rename?,
-   dry-run? }` copies the family's ACTIVE member (another member is refused, naming the active one) into a new
-   version that is NOT active, and applies `stages`, `caption` and `filter` to it with the shapes and the
-   confirmations of `modify-dynamic-case` (no `enabled`; running cases are not asked about: they keep their
-   version). `package-name` left out: the case's own package when it is editable, otherwise refused
-   `package-name-required`: ask the user which editable package (the message may offer the current one; use it only
-   after their yes). `dependencies-missing`: the package must depend on the packages the message names; add them
-   only after the user's yes. `steps-not-supported`: a case with steps gets a version only in its own package (or in
-   the case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write
-   only after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot
-   delete a version.
+   package-name?, stages?, caption?, filter?, remove-filter?, confirm-stage-records?, confirm-value-rename?, dry-run?
+   }` copies the family's ACTIVE member (another member is refused, naming the active one) into a new version that is
+   NOT active, and applies `stages`, `caption` and `filter` to it with the shapes and the confirmations of
+   `modify-dynamic-case` (no `enabled`; running cases are not asked about: they keep their version). `package-name`
+   left out: the case's own package when it is editable, otherwise refused `package-name-required`: ask the user which
+   editable package. `dependencies-missing`: the package must depend on the packages the message names; add them only
+   after the user's yes. `steps-not-supported`: a case with steps gets a version only in its own package (or in the
+   case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
+   after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version.
    A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active
    case and every record too - say so before the yes. A FIRST filter would set the object's filter column for every
    case at once, so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case`
    first, or leave the version without one). The checks against the object's other cases run at activation; here
    they are notes.
-   Outcomes: `version-created` with `version` (`name`, `uId`, `version`, `packageName`, `active: false`);
-   `failed-rolled-back`: nothing of the version stays; `failed-leftover` WITH a `version` (`version-number-taken` when
-   another writer took its number): the version was saved and is KEPT, named in `leftovers` with its link row - do not
-   activate it, tell the user; no tool removes it, the user can delete it in the case library; `failed-leftover`
-   WITHOUT a `version`: nothing was saved, but a row or a value rename could not be undone - relay `leftovers` (a
-   value left renamed: offer to rename it back); `unknown`: the reply was lost.
-   After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version.
+   Outcomes: `version-created` with the inactive `version`; `failed-rolled-back`: nothing of the version stays;
+   `failed-leftover` WITH a `version` (`version-number-taken` when another writer took its number): the version was
+   saved and is KEPT, named in `leftovers` with its link row - do not activate it, tell the user; no tool removes it,
+   the user can delete it in the case library; `failed-leftover` WITHOUT a `version`: nothing was saved, but a row or
+   a value rename could not be undone - relay `leftovers` (a value left renamed: offer to rename it back); `unknown`:
+   the reply was lost. After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes
+   another version.
 2. Check it: `describe-dynamic-case { case-name: version.name }` and give the user its `designerUrl` to open the
    version in the case designer.
 3. ASK the user whether to make it active: a decision of its own, never part of the yes to create it.
-4. Make it active: `set-active-dynamic-case-version { environment-name, version-name | version-uid, dry-run? }`,
-   destructive, any member of the family (the first one too: that is the way back). `version-not-found`: describe
-   the case by its object (`entity-schema-name`) and name the family's `versions` to the user; never guess a name.
-   First `dry-run: true`. Asked for the switch ("switch orders to it")? That is the yes: notes only - switch, relay
-   them with the result; warnings - show them, wait for the yes. Not asked: step 3. `unchanged`: it is active already,
-   nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
-   `unfiltered-case-exists`, `filter-required` (as in "Several cases on one object"; the family's own members do not
-   count). Tell the user what the switch does: new records start the active version (once the family is enabled);
-   running cases and existing records keep the version they started on, and a record moves only with Change case on
-   its page, which cancels its current case; open pages need F5. Relay the notes on records in stages the new version
+4. Make it active: `set-active-dynamic-case-version { environment-name, version-name | version-uid,
+   confirm-package-position?, dry-run? }`, destructive, any member of the family (the first one too: that is the way
+   back). `version-not-found`: describe the case by its object (`entity-schema-name`) and name the family's `versions`
+   to the user; never guess a name. First `dry-run: true`. Asked for the switch ("switch orders to it")? That is the
+   yes: notes only - switch, relay them with the result; warnings - show them, wait for the yes. Not asked: step 3.
+   `unchanged`: it is active already, nothing written. Refused before any write: `settings-conflict`, `case-exists`,
+   `filter-overlap`, `unfiltered-case-exists`, `filter-required` (as in "Several cases on one object"; the family's
+   own members do not count). Tell the user what the switch does: new records start the active version (once the
+   family is enabled); running cases and existing records keep the version they started on, and a record moves only
+   with Change case on its page, which cancels its current case; open pages need F5. Relay the notes on records in
+   stages the new version
    lacks.
    - A disabled family is switched too, and starts nothing until `modify-dynamic-case { enabled: true }` on the
      new active member, alone, after the user's yes.
-   - Package position: a version whose package ranks at or below a member in a non-editable package that still
-     reads active may not become the one new records start (a warning at creation, in the dry run and at the
-     switch; `decidedByPackagePosition` names such members). Relay it: the remedy is a dependency of the version's
-     package on that member's package, after the user's yes. A switch to a member in a non-editable package is kept
-     on this environment only: it does not travel with any package (a note); tell the user.
+   - Package position: a version whose package ranks at or below a member in a non-editable package that still reads
+     active may not become the one new records start (a warning at creation and in the dry run;
+     `decidedByPackagePosition` names such members). The switch is then refused
+     `package-position-confirmation-required`; relay it: the remedy is a dependency of the version's package on that
+     member's package, or `confirm-package-position: true` to switch anyway, each only after the user's yes to it. A
+     switch to a member in a non-editable package is kept on this environment only: it does not travel with any
+     package (a note); tell the user.
    Outcomes: `activated`; `failed-not-restored` (`write-failed`): the switch did not read back (relay
    `activeVersion` and `siblingsStillFlagged`); it is never undone, and the same call can be repeated once the cause
    is fixed; `failed-leftover`: no switch, a link row it added could not be removed - relay `leftovers`; `unknown`:
