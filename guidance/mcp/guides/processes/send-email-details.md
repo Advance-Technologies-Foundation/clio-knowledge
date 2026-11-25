@@ -5,10 +5,10 @@ This article is the authoritative owner of the evidence and rare cases behind th
 Add data emulation cannot write, the acceptance tests behind the run-time-only sender, why a no-mode element
 runs as a template, the subject-only element, why the mailbox record survives an address change, the
 sender-discipline observation, the `bodyFormat` stand run, why a lookup column cannot be drilled deeper, the
-tests that make the subject write order a stated contract, the designer-removal exceptions, the recipient
-idempotence run and the describe decode's fallback. Split out of `process-send-email`, which keeps the `email`
-block, sender and recipients with their ranked sources, the auto-mode checklist, the custom body and its
-macros, and every rule these facts back; read that first.
+source path behind the as-is macro value, the tests that make the subject write order a stated contract, the
+designer-removal exceptions, the recipient idempotence run and the describe decode's fallback. Split out of
+`process-send-email`, which keeps the `email` block, sender and recipients with their ranked sources, the
+auto-mode checklist, the custom body and its macros, and every rule these facts back; read that first.
 
 - What an Add data cannot write: in manual mode, the activity's binding to this process element with its
   completion listener, so nothing waits for the email; in manual mode, and in auto mode only with
@@ -49,6 +49,16 @@ macros, and every rule these facts back; read that first.
   entity schema "<root>"`).
   Reviewing this needs a SENT message: the schema validates, the process runs green, and no macro is left
   unresolved, so every check short of reading the delivered email passes.
+- The as-is macro value in `process-send-email`, from the platform sources (read 2026-11-25): a custom message
+  sends its stored `Body` with `IsHtmlBody = true` (`EmailProcessTemplateUserTaskMessageProvider.GetEmailBody`),
+  `ProcessEmailUserTaskMacrosWorker.Proceed` turns each macro into `DataValueType.GetDisplayValue(value)` (the
+  `Feature-EmailMacrosParametersEvaluation` path, on by default) or `value.ToString()`, and
+  `ProcessEmailUserTaskMacrosHelper.ReplaceMacros` swaps the whole `<img data-value=…>` token for that string with
+  `string.Replace`, in auto and manual mode alike (CrtProcessDesigner 7.8.0). In Terrasoft.Core `GetDisplayValue`
+  returns `value.ToString()` and only the Date and Time types override it, so no text type encodes its value,
+  Rich text included (Creatio 8.3.4, 10.0.0 and the development line). Observed in a manual test on a cloud stand
+  (2026-11-23): a Script task joined record URLs with `<br>` into a Text parameter, and the custom body mailed one
+  URL per line.
 - The subject write order in `process-send-email` is now a STATED CONTRACT
   rather than an observed implementation order: the server's `email.subject` member documents both paths, and
   two tests pin them — a build asserting the mapping phase runs before the email block, and a modify asserting
