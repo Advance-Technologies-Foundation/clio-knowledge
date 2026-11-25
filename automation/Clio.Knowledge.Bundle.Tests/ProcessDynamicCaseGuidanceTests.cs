@@ -26,6 +26,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
     private const string ChangeArticlePath = "guidance/mcp/guides/processes/dynamic-case-change.md";
     private const string ModelingPath = "guidance/mcp/guides/processes/process-modeling.md";
     private const string RoutingPath = "guidance/mcp/guides/routing.md";
+    private const string VersionsPath = "guidance/mcp/guides/processes/versions.md";
 
     /// <summary>A clio version boundary: the release placeholder until the release, then the version it shipped in.</summary>
     private const string ClioVersion = @"(<[A-Z][A-Z0-9-]*TBD>|\d+(\.\d+){3})";
@@ -219,7 +220,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
         using (new AssertionScope())
         {
             guide.Should().MatchRegex(
-                $@"Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio {ClioVersion} or later\. If `get-tool-contract` does not list `describe-dynamic-case`, the clio serving you is older: stop here",
+                $@"Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio {ClioVersion} or later\. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here",
                 because: "the tools ship with a clio release, and the guide publishes to every clio at once");
             guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal).Should().BeLessThan(
                 guide.IndexOf("== Change an existing case ==", StringComparison.Ordinal),
@@ -248,7 +249,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a new lookup value shows in every record's choice list");
             guide.Should().Contain("`color` (`#RRGGBB`) recolours the stage",
                 because: "the colour is changed through the tool, not left to the designer");
-            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.185",
+            guide.Should().Contain("A clio whose `modify-dynamic-case` takes `confirm-value-rename` refuses both tools below 1.6.6.185",
                 because: "a clio with the confirmations floors describe and modify at the package that asks for them");
             guide.Should().Contain("An older clio (no `confirm-value-rename`) works the older way",
                 because: "a knowledge release reaches every clio at once, and an older one renames only the stage and refuses no removal");
@@ -332,7 +333,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the get-guidance catalog shows the boundary before the article is opened");
             createResource.GetProperty("description").GetString().Should().Contain(ChangeItemId,
                 because: "the catalog entry of the create guide must not advertise only create");
-            routing.Should().Contain("an object that already has a case: read, change (stages, order, groups), disable or re-enable it",
+            routing.Should().Contain("an object that already has a case: read, change, disable or re-enable it",
                 because: "a change to an existing case goes straight to the guide that owns it");
             routing.Should().Contain("disable or re-enable it, make a new version or switch the active one, or split its records",
                 because: "a case version request must reach the case guide, not the process version row");
@@ -349,6 +350,24 @@ public sealed class ProcessDynamicCaseGuidanceTests
     }
 
     [Test]
+    [Description("A request to switch an object's status flow to a new version reaches the case guide, not the process version guides: a run read process-versions and the library view before it found the case.")]
+    public void CaseVersionWording_ShouldNotRouteToProcessVersions()
+    {
+        // Arrange & Act
+        string routing = ReadCollapsed(RoutingPath);
+        string versions = ReadCollapsed(VersionsPath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            routing.Should().Contain($"which one runs (not an object's stages: name={ChangeItemId}), or editing or launching ANY existing process",
+                because: "the process version row matched \"switch orders to the new flow\" and sent the agent to the process version model");
+            versions.Should().Contain($"Versions of a dynamic case (an object's stages or status flow) are not here: `{ChangeItemId}`.",
+                because: "an agent that reached the process version guide anyway is sent back at its first lines");
+        }
+    }
+
+    [Test]
     [Description("A request about the order or outcomes of an object's status values reaches the case without the word \"stage\": a stand run had one agent draw a diagram and another add an order column to the lookup instead of reading the case.")]
     public void StatusFlowWording_ShouldRouteToTheCase()
     {
@@ -361,8 +380,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
         {
             routing.Should().Contain("or the order records move through its status values / how that flow ends (no \"stage\" needed; not the sort order of a lookup in lists or dropdowns)",
                 because: "routing is what an agent reads first, the failing prompts never said stage, and sorting a lookup in a list is not a case");
-            routing.Should().Contain("the user names the object by its caption: `find-entity-schema`, then `list-apps` / `get-app-info`",
-                because: "a run that went to find-app after entity-not-found never found an object in no app; find-entity-schema comes first, the app tools catch a caption it misses");
+            routing.Should().Contain("pass the user's word for the object, `find-entity-schema` if not found",
+                because: "the package resolves a unique caption and lists candidates, so a schema-name search first only costs calls; it stays the fallback for an older package");
             guide.Should().Contain("the order records move through status values or how that flow ends (not a lookup's sort order in lists or dropdowns)",
                 because: "the scope names the wording that belongs to a case, and the one that does not");
             guide.Should().Contain("stages or status flow (\"ends Approved or Rejected\", \"move X before Y\")",
@@ -460,7 +479,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             section.Should().BeGreaterThan(guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal),
                 because: "the article-wide boundary still gates the version section, which adds its own");
             guide.Should().MatchRegex(
-                $@"== Versions of a case == - Needs clio {ClioVersion} or later: if `get-tool-contract` does not list `modify-dynamic-case-as-new-version`, the clio is older",
+                $@"== Versions of a case == - Needs clio {ClioVersion} or later: if `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the clio is older",
                 because: "the version tools ship in a later clio than the change tools, and the boundary leads the section it gates");
             guide.Should().Contain("a missing list there does not mean the case has no other version",
                 because: "an older clio drops versions from describe, and an agent must not read that as a family of one");
@@ -492,8 +511,12 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the toolkit has no case deletion, and the case library's removal is the user's way to drop it");
             guide.Should().Contain("After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version",
                 because: "a retry after a saved or possibly saved version adds one more version");
-            guide.Should().Contain("`entity-schema-name` is the object's schema NAME (e.g. `UsrOrder`), not the user's word; on `entity-not-found` find the object",
-                because: "every isolated run passed the user's word (\"Order\") and got entity-not-found; one stopped there");
+            guide.Should().Contain("`entity-schema-name`: the schema name or the user's word (a unique caption is resolved). `entity-not-found` or several matches list `Name (caption)` candidates: pick one or ask. None listed (older package): `find-entity-schema`",
+                because: "the package resolves a unique caption, so a find-entity-schema call first only adds a call; candidates replace the search, which stays for an older package");
+            guide.Should().Contain("Asked for the switch (\"switch orders to it\")? That is the yes: notes only - switch, relay them with the result; warnings - show them, wait for the yes. Not asked: step 3",
+                because: "the owner decided that a request to switch is the consent after a dry run without warnings, while a version only created still needs its own question");
+            guide.Should().Contain("new records start the active version (once the family is enabled)",
+                because: "a disabled family starts nothing whichever member is active");
             guide.Should().Contain("`version-not-found`: describe the case by its object (`entity-schema-name`) and name the family's `versions` to the user; never guess a name",
                 because: "a run that left for find-app after version-not-found never named the existing versions");
             guide.Should().Contain("give the user its `designerUrl`",

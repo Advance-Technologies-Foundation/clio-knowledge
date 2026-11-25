@@ -10,8 +10,8 @@ how a guide points at a rule it does not own. Other backticks are ordinary code 
 page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
 precondition kept next to the instruction it guards — names that guide as the owner.
 
-- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM, clio 8.1.0.150+; the user names the object by its caption: `find-entity-schema`, then `list-apps` / `get-app-info`) -> name=process-dynamic-case
-  - an object that already has a case: read, change (stages, order, groups), disable or re-enable it, make a new version or switch the active one, or split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-change
+- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM, clio 8.1.0.150+; pass the user's word for the object, `find-entity-schema` if not found) -> name=process-dynamic-case
+  - an object that already has a case: read, change, disable or re-enable it, make a new version or switch the active one, or split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-change
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -152,8 +152,8 @@ precondition kept next to the instruction it guards — names that guide as the 
     registered -> name=process-activity-connections-details
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading or which one runs, or editing or launching ANY existing
-    process -> name=process-versions first (a handed code is usually the family root, which does not
+  - which VERSION of a process you are reading or which one runs (not an object's stages:
+    name=process-dynamic-case-change), or editing or launching ANY existing process -> name=process-versions first (a handed code is usually the family root, which does not
     run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
     re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
     it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can

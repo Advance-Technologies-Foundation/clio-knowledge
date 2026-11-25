@@ -9,25 +9,25 @@ version (`modify-dynamic-case-as-new-version`) and the switch of the active one 
 Building a case, the bar, the other refusals of `create-dynamic-case` and the undo: `process-dynamic-case`.
 
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
-later. If `get-tool-contract` does not list `describe-dynamic-case`, the clio serving you is older: stop here and
+later. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here and
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
-`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the
-environment: an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
-`install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose
-`modify-dynamic-case` takes `confirm-value-rename` (`get-tool-contract`) refuses both tools below 1.6.6.185 the same
-way, and one that lists `modify-dynamic-case-as-new-version` below 1.6.6.194. An older clio (no `confirm-value-rename`) works the older way, so read steps 1-3 with that: describe has no
-`records` (absent is not 0: count the records with the data tools); an item's `caption` renames only the stage in the
-case, which the bar and the designer do not show, so do not offer it, and to rename a stage tell the user to update
-clio; removing a stage that records hold is not refused, so check them with the data tools and ask the user first.
+`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.179 or later on the environment:
+an older one refuses them (`process-builder-without-case-change` when it has no such operation), and
+`install-process-builder`, once the user approves it (`core-rules`), is the remedy. A clio whose `modify-dynamic-case`
+takes `confirm-value-rename` refuses both tools below 1.6.6.185 the same way, and one with
+`modify-dynamic-case-as-new-version` below the version its refusal names. An older clio (no `confirm-value-rename`)
+works the older way: describe has no `records` (absent is not 0: count them with the data tools); an item's `caption`
+renames only the case stage (do not offer it; to rename one, update clio); removing a stage that records hold is not
+refused (check them and ask the user first).
 
 == Change an existing case ==
-1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
-   in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, `records` (the records holding
-   its value, finished cases included), and `enabled`. Several cases on the object: name one with `case-name`
-   (modify by object answers `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the
-   designer show the value's name, not the stage caption; a rename (step 2) fixes it. `entity-schema-name` is the
-   object's schema NAME (e.g. `UsrOrder`), not the user's word; on `entity-not-found` find the object
-   (`find-entity-schema`, or the `Name (caption)` candidates the refusal lists; several: ask which), describe again.
+1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages in
+   order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, `records` (the records holding its
+   value, finished cases included), and `enabled`. Several cases on the object: name one with `case-name` (modify by
+   object answers `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the designer show the
+   value's name, not the stage caption; a rename (step 2) fixes it. `entity-schema-name`: the schema name or the
+   user's word (a unique caption is resolved). `entity-not-found` or several matches list `Name (caption)` candidates:
+   pick one or ask. None listed (older package): `find-entity-schema`.
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
    remove-filter?, enabled?, confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }`
    writes; the top-level `caption` renames the CASE. `stages` is the WHOLE new list of items `{"value": Id or exact
@@ -109,7 +109,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   `askUserToChangeSchema` is true; offer that page change, do not make it unasked.
 
 == Versions of a case ==
-- Needs clio <CLIO-TBD> or later: if `get-tool-contract` does not list `modify-dynamic-case-as-new-version`, the
+- Needs clio <CLIO-TBD> or later: if `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
   clio is older: tell the user to update clio, or to save the new version and make it actual in the case designer.
   An older clio's describe has no `versions`: a missing list there does not mean the case has no other version.
 - A version is a separate case schema of the case's family. At most one member is ACTIVE: new records start that
@@ -154,12 +154,14 @@ been written - describe the case before retrying. No compile or restart; F5.
 4. Make it active: `set-active-dynamic-case-version { environment-name, version-name | version-uid, dry-run? }`,
    destructive, any member of the family (the first one too: that is the way back). `version-not-found`: describe
    the case by its object (`entity-schema-name`) and name the family's `versions` to the user; never guess a name.
-   First `dry-run: true`, relay its notes and warnings, then the call after the user's yes; `unchanged`: it is
-   active already, nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
-   `unfiltered-case-exists`, `filter-required` (as in "Several cases on one object"; the family's own members do
-   not count). Tell the user what the switch does: new records start the active version; running cases and
-   existing records keep the version they started on, and a record moves only with Change case on its page, which
-   cancels its current case; open pages need F5. Relay the notes on records in stages the new version lacks.
+   First `dry-run: true`. Asked for the switch ("switch orders to it")? That is the yes: notes only - switch, relay
+   them with the result; warnings - show them, wait for the yes. Not asked: step 3. `unchanged`: it is active already,
+   nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
+   `unfiltered-case-exists`, `filter-required` (as in "Several cases on one object"; the family's own members do not
+   count). Tell the user what the switch does: new records start the active version (once the family is enabled);
+   running cases and existing records keep the version they started on, and a record moves only with Change case on
+   its page, which cancels its current case; open pages need F5. Relay the notes on records in stages the new version
+   lacks.
    - A disabled family is switched too, and starts nothing until `modify-dynamic-case { enabled: true }` on the
      new active member, alone, after the user's yes.
    - Package position: a version whose package ranks at or below a member in a non-editable package that still

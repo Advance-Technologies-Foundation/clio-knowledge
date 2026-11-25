@@ -1,5 +1,7 @@
 clio MCP process-versions guide — read which version of a process you are looking at, and which one runs
 
+Versions of a dynamic case (an object's stages or status flow) are not here: `process-dynamic-case-change`.
+
 Part of the process guide set. A build starts at `process-digest`; open `process-modeling` only when
 the card or this article sends you there.
 This article is the authoritative owner of the version MODEL and of the version fields of
