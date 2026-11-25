@@ -356,7 +356,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "settings-conflict and other refusals of the switch name no other case");
             resource.GetProperty("description").GetString().Should().Contain("set-active-dynamic-case-version",
                 because: "the catalog entry must show that the guide owns the case version tools");
-            routing.Should().Contain($"split its records into several cases by a type (different stages for B2B and B2C orders) -> name={FiltersItemId}",
+            routing.Should().Contain($"split its records into cases by type (B2B vs B2C orders) -> name={FiltersItemId}",
                 because: "a request for different stages per type must reach the guide that owns filters");
             routing.Should().Contain("set up on an object with no case yet, or only asked about",
                 because: "change and disable requests matched both rows and took a hop through the create guide");
