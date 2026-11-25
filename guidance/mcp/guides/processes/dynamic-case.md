@@ -48,9 +48,9 @@ other means.
   the toggle changes it.
 
 == Not supported yet ==
-Steps inside stages (tasks, approvals, pages, sub-processes), stage conditions and permissions, transition rules,
-a start condition other than one filter column, a new version of a case, deleting a case or changing its stage or
-filter column: the case designer does those. No mobile page, mini page or Classic page bar.
+Steps inside stages (a Perform task: `process-dynamic-case-change`; approvals, pages, sub-processes), stage
+conditions and permissions, transition rules, a start condition other than one filter column, a new version of a
+case, deleting a case or changing its stage or filter column: the case designer does those. No mobile page, mini page or Classic page bar.
 
 == Before the call ==
 - The object and the lookup column are PUBLISHED: a column saved and not published is refused `column-not-published`

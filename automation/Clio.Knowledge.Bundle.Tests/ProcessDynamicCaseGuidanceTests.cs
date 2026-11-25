@@ -460,4 +460,35 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the edit right a filter needs is owned by process-dynamic-case-change");
         }
     }
+
+    [Test]
+    [Description("The change guide owns the steps inside a stage: the clio and package boundary, the whole-list rule, the value forms a case has, the step refusals, and the user's yes before steps start on live records (ENG-107646).")]
+    public void ChangeGuide_ShouldGuideTheStepsInsideAStage()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+        string createGuide = ReadCollapsed(ArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().MatchRegex($@"== Steps inside a stage == - Needs clio {ClioVersion} or later",
+                because: "steps ship with a clio release, and the guide publishes to every clio at once");
+            guide.Should().Contain("and CrtProcessBuilder 1.6.6.200",
+                because: "an older package refuses a stage's steps");
+            guide.Should().Contain("A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them",
+                because: "a stored step left out of the list is removed");
+            guide.Should().Contain("`[#Record.<Column>#]`: a case has no process parameters (`step-value-source-unsupported`)",
+                because: "a case has no process parameters or earlier elements to read");
+            guide.Should().Contain("Show the dry run's `diff.steps` and notes and write only after the user's yes",
+                because: "steps start on live records at stage entry");
+            guide.Should().Contain("`step-in-use`", because: "a running case waits in the step forever once it is removed (S7)");
+            guide.Should().Contain("`transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`",
+                because: "the wire names of when a stage moves on are the package's");
+            guide.Should().NotContain("`stage-has-steps` (it has steps",
+                because: "a removed stage now takes its steps with it; only an older package still answers stage-has-steps");
+            createGuide.Should().Contain("Steps inside stages (a Perform task: `process-dynamic-case-change`",
+                because: "a case is built without steps, and the change guide owns them");
+        }
+    }
 }

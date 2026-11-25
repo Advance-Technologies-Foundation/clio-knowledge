@@ -2,7 +2,8 @@ clio MCP process-dynamic-case-change guide - change an existing dynamic case, an
 
 Scope
 Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` and `modify-dynamic-case`: its stages,
-their order, groups, captions and colours, the case caption, its filter, and whether it is enabled. Splits an
+their order, groups, captions and colours, the steps inside a stage and when it moves on, the case caption, its
+filter, and whether it is enabled. Splits an
 object's records between several cases by one lookup column (for example B2B and B2C orders with stages of their
 own), and owns the filter rules of `create-dynamic-case` too. Building a case, the bar, the other refusals of
 `create-dynamic-case` and the undo: `process-dynamic-case`.
@@ -22,7 +23,7 @@ clio; removing a stage that records hold is not refused, so check them with the 
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages
    in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, `records` (the records holding
-   its value, finished cases included), and `enabled`. Several cases on the object: name one with `case-name`
+   its value, finished cases included), `steps` and `transitionType` ("Steps inside a stage"), and `enabled`. Several cases on the object: name one with `case-name`
    (modify by object answers `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the
    designer show the value's name, not the stage caption; a rename (step 2) fixes it.
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
@@ -55,13 +56,39 @@ clio; removing a stage that records hold is not refused, so check them with the 
    `filter-required` (give it a filter first). `settings-conflict` on re-enabling: the object's case settings name
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
-the cases end - never change records' stage on your own. `stage-has-steps` (it has steps or a step condition
-targets it: the case designer), `package-read-only` (a new version is not supported yet), `invalid-request` for a
+the cases end - never change records' stage on your own. `stage-has-steps` (an older package: it has steps or a step
+condition targets it: the case designer), `stage-is-condition-target` (a step condition moves records to it) and
+`step-has-conditions` (a removed stage's step has conditions): the case designer; `package-read-only` (a new version is not supported yet), `invalid-request` for a
 case that is not the active version (name the active one the message gives) or not a case of `entity-schema-name`,
 `stage-list-duplicate` for a case with two stages on one value (the case designer fixes it).
 Outcomes: `failed-restored`: the save did not take, the case is as before; `failed-leftover`: relay its `leftovers`
 and have the user check the case in the designer; `unknown`: the reply was lost, so the change may or may not have
 been written - describe the case before retrying. No compile or restart; F5.
+
+== Steps inside a stage ==
+- Needs clio <CLIO-STEPS-TBD> or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
+  and CrtProcessBuilder 1.6.6.200 (`install-process-builder` once the user approves it). Older: the case designer.
+- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `hasConditions`,
+  `runningInstances`; a Perform task also `performer`, `activity`, `category`, `hint`, `useBackgroundMode`) and
+  `transitionType`.
+- A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
+  matched by `uId`, else by caption, and one left out is REMOVED (the step that waited for it then starts with the
+  stage). A new step, e.g. `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft
+  check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,
+  "unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`; optional by default, a task of To do and
+  Medium for the current user, linked to the record (a note says when tasks have no connection to the object). Only
+  `performTask` is written: another type (the refusal lists the offered ones) keeps its settings, and the case
+  designer changes them; its caption, `required` and `after` still change here.
+- `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
+  constant, `[#SysVariable.CurrentUserContact#]`, or a column of the case's record `[#Record.<Column>#]`: a case has
+  no process parameters (`step-value-source-unsupported`).
+- `transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`. A note warns
+  when the stage would be passed at once (no required step) or cannot move on (last stage, no later connection).
+- Steps create work on real records: an added step starts for records that ENTER the stage from now on. Show the
+  dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
+  removed step (the count; they never move on), so keep it or wait until they end. `step-has-conditions`: the case
+  designer changes it. Other refusals name the stage and step: `step-invalid`, `step-after-invalid`,
+  `step-type-not-supported`.
 
 == Several cases on one object ==
 - Needs clio 8.1.0.154 or later: an older clio has no `filter`, `remove-filter` or `deactivate-unfiltered`.
