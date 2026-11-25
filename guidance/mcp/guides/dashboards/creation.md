@@ -16,8 +16,9 @@ failure modes) read `page-creation`; this guide adds only the dashboard specific
    until it is. Skip the proposal only when the user explicitly delegates the choice. Add the
    approved widgets after creation per `dashboard-and-home-page-layout`.
 3. `create-page` with `template` = `BaseDashboardTemplate`, a `schema-name` (active prefix, e.g.
-   `UsrMyDashboard`), the target `package-name`, and `optional-properties` carrying the three
-   properties below.
+   `UsrMyDashboard`), the target `package-name`, a `caption` — the human-readable dashboard title
+   the user sees, never the schema name (without it the title shows the schema name, and current
+   clio refuses the call) — and `optional-properties` carrying the three properties below.
 4. `get-page` to verify the schema reads back; its `bundle.json` `optionalProperties` array holds the
    values you set.
 

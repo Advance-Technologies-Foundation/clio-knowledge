@@ -32,7 +32,9 @@ Required inputs
 - `package-name`: target package name. The package must already exist in the environment.
 
 Optional inputs
-- `caption`: human-readable caption. Defaults to `schema-name` when omitted.
+- `caption`: human-readable caption — the title the user sees. Pass the name the user gave the page. Defaults to `schema-name` when omitted, which puts the technical name in front of the user.
+  * REQUIRED for `BaseHomePage` and `BaseDashboardTemplate`, whose caption is the page header title: current clio refuses these templates when `caption` is missing or equals `schema-name`, before anything is written.
+  * Set the caption at creation. Updating `SysSchema.Caption` through OData afterwards does not change the page header.
 - `description`: free-form description.
 - `entity-schema-name`: existing entity schema the page is bound to; leave blank for template-pure pages (dashboards, desktops, blank pages, custom pages). From clio 8.1.0.142, a WEB page created with it carries a data source bound to the entity, chosen by the template:
   * a template with no primary data source (tabbed, mini, blank page templates) gets a page-scoped `PDS` that becomes `primaryDataSourceName` — the shape of stock record pages such as `Accounts_FormPage`;

@@ -29,7 +29,10 @@ workplace binding.
      owns workplace creation and the elicitation script. Step 5 then only applies the answer. When you
      cannot ask, `core-rules` (Navigation placement) applies: leave the page unbound; say so.
 2. `create-page` with `template` = `BaseHomePage`, a `schema-name` (active prefix, e.g.
-   `UsrMyHomePage`), and the target `package-name`. Capture the returned `schemaUId` — that UId is
+   `UsrMyHomePage`), the target `package-name`, and a `caption` — the human-readable title shown in
+   the page header, i.e. the name the user gave the home page (e.g. "IT Requests overview"), never
+   the schema name. Without `caption` the header shows the schema name, and current clio refuses
+   the call. Capture the returned `schemaUId` — that UId is
    the value you bind in step 6. `create-page` assigns the home-page schema group automatically
    from the template, so there is no separate group step.
 3. `get-page` to verify the schema reads back.
