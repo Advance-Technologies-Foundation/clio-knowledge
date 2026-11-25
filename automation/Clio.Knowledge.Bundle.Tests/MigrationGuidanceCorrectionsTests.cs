@@ -184,11 +184,20 @@ public sealed class MigrationGuidanceCorrectionsTests
             "its opposite rule needs",
             "Use an explicit inverse rule",
             "must also return through an explicit inverse rule",
+            "State-changing actions are one-way",
+            "does not automatically roll back",
+            "automatically reverses itself",
         ];
         staleWording.Should().AllSatisfy(stale => guidance.Should().NotContain(stale,
             because: "agents saved opposite rule pairs because the guide told them to"));
-        Regex.Matches(guidance, "no opposite rule \\(\"State actions revert by themselves\"\\)").Should().HaveCount(3,
-            because: "the stepper, role and workflow lines point to the owner section instead of restating it");
+        Regex.Matches(guidance, "\\(\"State actions revert by themselves\"\\)").Should().HaveCount(4,
+            because: "the stepper, role, workflow and common-mistakes lines point to the owner section instead of restating it");
+        section.Should().Contain("EXPERIMENTAL (from source, not tested on a stand): a field that is read-only or hidden by default",
+                because: "the untested default-state case must be marked where it is stated")
+            .And.Contain("the condition that the user is NOT an administrator → hide-element",
+                because: "a show-element rule on a field visible by default never hides it");
+        guidance.Should().Contain("CurrentUserRoles NOT_CONTAIN <role id> → hide-element",
+            because: "the role example must still hide the field from other users with one rule");
     }
 
     [Test]
