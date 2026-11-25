@@ -146,7 +146,11 @@ result contradicts a rule here or a user disputes one.
   `00000000-0000-0000-0000-000000000000` rather than a blank. So do NOT put a lookup column in a body a human
   reads. Email a TEXT column that carries the same information instead — on `Employee`, `FullJobTitle` mails
   `Developer` while `Job` mails a GUID — and when only the lookup exists, say the value cannot be rendered
-  rather than shipping an Id. A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
+  rather than shipping an Id. A macro's value goes into the HTML AS IS, NOT HTML-escaped, whatever its type
+  (Rich text escapes nothing either): markup in it renders, and `<`, `>` and `&` in user text are parsed as HTML
+  (CrtProcessDesigner 7.8.0 and Terrasoft.Core source, read 2026-11-25). So encode text that must show literally
+  before it reaches the parameter, e.g. with `System.Net.WebUtility.HtmlEncode` in the Script task that sets it.
+  A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
   parameter (verified: zero specimens of `[Parameter].[EntityColumn]` without an `[Element]`; the designer
   offers column drill only on the Elements tab), so to email a record's column read it with a data element
   FIRST and drill THAT output. An unknown parameter/element/column is REJECTED naming what was missing, so

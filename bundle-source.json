@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.254",
+  "libraryVersion": "1.15.255",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -1911,7 +1911,7 @@
     {
       "itemId": "process-send-email",
       "title": "Send email element",
-      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros for parameter and element values, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template; the files the email sends (email.attachments, a sent list replaces them) by process-send-email-attachments. Its evidence and rare cases moved to process-send-email-details.",
+      "description": "Owns the Creatio Send email element (sendEmail / EmailTemplateUserTask): the email block, auto and manual send mode, the auto-mode mandatory fields and the missing-message run-time trap explained from the platform's mode dispatch (and the describe shape that reveals it), sender resolution (a missing sender fails at run time, a malformed one fails the build), the ranked recipient sources and the matching sender discipline, recipients' match-or-append semantics with no removal path, the html-only body format, and the CUSTOM message's body macros, which insert parameter and element values unescaped, including the lookup column that renders a record Id. The TEMPLATE message (template, templateEntity, their refusals, the subject override, mode switching, the template read-back) is owned by process-send-email-template; the files the email sends (email.attachments, a sent list replaces them) by process-send-email-attachments. Its evidence and rare cases moved to process-send-email-details.",
       "topicId": "creatio.process-send-email",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email",
@@ -1925,7 +1925,7 @@
     {
       "itemId": "process-send-email-details",
       "title": "Send email details",
-      "description": "The evidence and rare cases behind the Send email element's rules: what an Add data emulation of an email Activity cannot write, and the agent run that built one; the acceptance tests (RND-T26743/T26744) behind the rule that a sender is required only at run time; the platform's mode dispatch, which makes an element with no stored mode RUN as a template (the mechanism of the missing-message trap), and the unmeasured subject-only element; why the mailbox record survives an address change, and the sender-discipline observation; the bodyFormat stand run, and why a lookup body macro cannot be drilled deeper; the tests that make the subject write order a stated contract; the two designer-removal exceptions (the last To row, a still-referenced parameter) and the recipient idempotence run; and describe's fallback for a macro that no longer resolves. Split out of process-send-email; read that first. An ordinary build or edit does not need this article.",
+      "description": "The evidence and rare cases behind the Send email element's rules: what an Add data emulation of an email Activity cannot write, and the agent run that built one; the acceptance tests (RND-T26743/T26744) behind the rule that a sender is required only at run time; the platform's mode dispatch, which makes an element with no stored mode RUN as a template (the mechanism of the missing-message trap), and the unmeasured subject-only element; why the mailbox record survives an address change, and the sender-discipline observation; the bodyFormat stand run, why a lookup body macro cannot be drilled deeper, and why macro values go in unescaped; the tests that make the subject write order a stated contract; the two designer-removal exceptions (the last To row, a still-referenced parameter) and the recipient idempotence run; and describe's fallback for a macro that no longer resolves. Split out of process-send-email; read that first. An ordinary build or edit does not need this article.",
       "topicId": "creatio.process-send-email-details",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-send-email-details",
