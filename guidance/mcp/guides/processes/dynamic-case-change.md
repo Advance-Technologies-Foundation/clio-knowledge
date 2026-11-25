@@ -82,8 +82,9 @@ been written - describe the case before retrying. No compile or restart; F5.
 - `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
   constant, `[#SysVariable.CurrentUserContact#]`, or a column of the case's record `[#Record.<Column>#]`: a case has
   no process parameters (`step-value-source-unsupported`).
-- `transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`. A note warns
-  when the stage would be passed at once (no required step) or cannot move on (last stage, no later connection).
+- `transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`. A stage also
+  waits for its steps with conditions. A note warns when there is no step to wait for (an automatic move passes over
+  the stage; a record put into it stays) or it cannot move on (last stage, no later connection).
 - Steps create work on real records: an added step starts for records that ENTER the stage from now on. Show the
   dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
   removed step (the count; they never move on), so keep it or wait until they end. `step-has-conditions`: the case
