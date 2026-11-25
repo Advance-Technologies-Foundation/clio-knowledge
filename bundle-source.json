@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.241",
+  "libraryVersion": "1.15.254",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -70,6 +70,7 @@
       "dashboard-rights",
       "dashboards",
       "data-bindings",
+      "data-bindings-details",
       "dataservice-upsert",
       "dataforge-orchestration",
       "deploy-lifecycle",
@@ -93,9 +94,11 @@
       "indicator-widget",
       "integration-testing",
       "localizable-values",
+      "lookup-colors",
       "knowledge-feedback",
       "mobile-page-modification",
       "package-dependencies",
+      "assembly-package",
       "page-creation",
       "page-modification",
       "page-modification-components",
@@ -141,7 +144,9 @@
       "process-send-email-template",
       "process-send-email-attachments",
       "process-web-service",
+      "process-web-service-details",
       "process-send-chat-message",
+      "process-timer-start",
       "process-dynamic-case",
       "process-dynamic-case-change",
       "process-approval",
@@ -223,7 +228,9 @@
       "virtual-entities",
       "websocket-messaging",
       "web-service-registration",
+      "web-service-maintenance",
       "web-service-soap",
+      "web-service-soap-details",
       "when-to-use-requests",
       "widget-color-and-icon",
       "list-widget",
@@ -284,6 +291,7 @@
       "docs://knowledge/com.creatio.clio/dashboard-rights",
       "docs://knowledge/com.creatio.clio/dashboards",
       "docs://knowledge/com.creatio.clio/data-bindings",
+      "docs://knowledge/com.creatio.clio/data-bindings-details",
       "docs://knowledge/com.creatio.clio/dataservice-upsert",
       "docs://knowledge/com.creatio.clio/dataforge-orchestration",
       "docs://knowledge/com.creatio.clio/deploy-lifecycle",
@@ -307,9 +315,11 @@
       "docs://knowledge/com.creatio.clio/indicator-widget",
       "docs://knowledge/com.creatio.clio/integration-testing",
       "docs://knowledge/com.creatio.clio/localizable-values",
+      "docs://knowledge/com.creatio.clio/lookup-colors",
       "docs://knowledge/com.creatio.clio/knowledge-feedback",
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
+      "docs://knowledge/com.creatio.clio/assembly-package",
       "docs://knowledge/com.creatio.clio/page-creation",
       "docs://knowledge/com.creatio.clio/page-modification",
       "docs://knowledge/com.creatio.clio/page-modification-components",
@@ -355,7 +365,9 @@
       "docs://knowledge/com.creatio.clio/process-send-email-template",
       "docs://knowledge/com.creatio.clio/process-send-email-attachments",
       "docs://knowledge/com.creatio.clio/process-web-service",
+      "docs://knowledge/com.creatio.clio/process-web-service-details",
       "docs://knowledge/com.creatio.clio/process-send-chat-message",
+      "docs://knowledge/com.creatio.clio/process-timer-start",
       "docs://knowledge/com.creatio.clio/process-dynamic-case",
       "docs://knowledge/com.creatio.clio/process-dynamic-case-change",
       "docs://knowledge/com.creatio.clio/process-approval",
@@ -437,7 +449,9 @@
       "docs://knowledge/com.creatio.clio/virtual-entities",
       "docs://knowledge/com.creatio.clio/websocket-messaging",
       "docs://knowledge/com.creatio.clio/web-service-registration",
+      "docs://knowledge/com.creatio.clio/web-service-maintenance",
       "docs://knowledge/com.creatio.clio/web-service-soap",
+      "docs://knowledge/com.creatio.clio/web-service-soap-details",
       "docs://knowledge/com.creatio.clio/when-to-use-requests",
       "docs://knowledge/com.creatio.clio/widget-color-and-icon",
       "docs://knowledge/com.creatio.clio/list-widget",
@@ -702,7 +716,7 @@
     {
       "itemId": "business-rule-filters",
       "title": "Business rule filters",
-      "description": "Defines the apply-static-filter friendly filter contract for Freedom UI business rules: leaf comparisons, lookup values, forward paths, nested groups, backward EXISTS/NOT_EXISTS and COUNT/SUM/AVG/MIN/MAX aggregations, relative-date and current-user macros, age/birthday translation, multilingual handling, and the discovery flow.",
+      "description": "Defines the apply-static-filter friendly filter contract for Freedom UI business rules: leaf comparisons, lookup values, forward paths, nested groups, backward EXISTS/NOT_EXISTS and COUNT/SUM/AVG/MIN/MAX aggregations, relative-date and current-user macros, age/birthday translation, multilingual handling, the discovery flow, and checking what the filter keeps: the filterMatchCount a newer clio reports, or an execute-esq dry run before create on a clio that does not report it.",
       "topicId": "creatio.business-rule-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/business-rule-filters",
@@ -974,6 +988,17 @@
       ],
       "sourcePath": "guidance/mcp/guides/pages/data-bindings.md",
       "bundlePath": "resources/data-bindings.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "data-bindings-details",
+      "title": "Data bindings details",
+      "description": "Owns writing one database binding to disk in file system mode: what create-data-binding with from-environment writes into descriptor.json, data.json and Localization, with its MSSQL and PostgreSQL evidence; and the steps, traps and evidence of the by-hand route (read-data-binding-db, create-data-binding, the descriptor UId, add-data-binding-row) for a clio without from-environment. Split out of data-bindings.",
+      "topicId": "creatio.data-bindings-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/data-bindings-details",
+      "sourcePath": "guidance/mcp/guides/pages/data-bindings-details.md",
+      "bundlePath": "resources/data-bindings-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1338,6 +1363,17 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "assembly-package",
+      "title": "Assembly packages",
+      "description": "Server-side C# in an assembly package (SysPackage.Type 1, Files/<Name>.csproj, its own DLL): when to choose one over SourceCode schemas in an ordinary package; registration carried by descriptor.json, the read-back after install and the descriptor repair of a reset type; the compilable-content rule (a compile skips a package without a SourceCode, process or user-task schema or a reference assembly, as the add-package template is) and the add-schema fix; the full compile a converted package needs; precompiled delivery and the stale shipped DLL; references, Newtonsoft vs the wrapper; empty Assembly.Location; C# background jobs (IJobExecutor contract, parameters, identity, idempotent scheduling, Quartz cron), with schedules defaulting to a timer-start process.",
+      "topicId": "creatio.assembly-package",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/assembly-package",
+      "sourcePath": "guidance/mcp/guides/backend/assembly-package.md",
+      "bundlePath": "resources/assembly-package.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "page-creation",
       "title": "Page creation",
       "description": "Canonical MCP guidance for creating Freedom UI pages from supported templates via create-page: the list-page-templates -> create-page -> get-page flow, the supported web/mobile template catalog, required and optional inputs, validation/failure modes, and designer-type mapping.",
@@ -1533,7 +1569,7 @@
     {
       "itemId": "process-modeling",
       "title": "Process modeling",
-      "description": "Process build lifecycle: tools, descriptor, recipe, modify safety; start: process-digest. Routes: process-element-catalog, process-element-catalog-details, process-multi-start, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-send-email-attachments, process-send-chat-message, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to read whole; rare cases: process-modeling-details.",
+      "description": "Tools, descriptor, build recipe, edit safety; start: process-digest. Routes: process-element-catalog, process-element-catalog-details, process-multi-start, process-timer-start, process-naming, process-data-elements, process-read-data, process-add-data, process-delete-data, process-data-source-filters, process-parameters, process-formulas, process-branch-conditions, process-activity-result-branches, process-perform-task, process-access-rights, process-task-performer, process-task-category, process-open-edit-page, process-send-email, process-send-email-template, process-send-email-attachments, process-send-chat-message, process-approval, process-preconfigured-page, process-sub-process, process-sub-process-when, process-activity-connections, process-activity-connections-details, process-diagram-layout, process-custom-elements, process-custom-element-families, process-versions and process-version-writes. Each article in the set is sized to read whole; rare cases: process-modeling-details.",
       "topicId": "creatio.process-modeling",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-modeling",
@@ -1569,7 +1605,7 @@
     {
       "itemId": "process-element-catalog",
       "title": "Process element catalog",
-      "description": "Owns what create-business-process can build TODAY and what it cannot: starts, end, user tasks, Send email (custom and template), flows (kind, condition, label), parameters and mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all four Read data modes, the exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess), Script task (scriptTask), Open edit page, Approval, Pre-configured page, Process file (fileProcessing), Call web service (webService, only when the FULL contract names it; owner process-web-service) and Send chat message (sendChatMessage; owner process-send-chat-message) -- while inclusive/event-based gateways and timer/message and intermediate events remain read-only. A read collection IS consumed: a multi-instance Sub-process iterates one (from 1.6.6.14). Also owns the data-id -> build type map and the custom user-task compile rule. The data-id catalog and its READ-ONLY markers: process-element-catalog-details.",
+      "description": "Owns what create-business-process builds TODAY and what it cannot: starts (Timer start: timerStart, contract-gated; owner process-timer-start), end, user tasks, Send email (custom/template), flows (kind, condition, label), parameters, mappings, useBackgroundMode, the readData/changeData/addData/deleteData blocks, all 4 Read data modes, exclusive/parallel gateways, Formula (formulaTask), Sub-process (subProcess), Script task (scriptTask), Open edit page, Approval, Pre-configured page, Process file (fileProcessing), Call web service (webService, only when the FULL contract names it; owner process-web-service) and Send chat message (sendChatMessage; owner process-send-chat-message) -- while inclusive/event-based gateways, message starts and intermediate events remain read-only. A multi-instance Sub-process consumes a read collection (from 1.6.6.14). Also the data-id -> build type map, custom user-task compile rule. Data-id catalog, READ-ONLY markers: process-element-catalog-details.",
       "topicId": "creatio.process-element-catalog",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-element-catalog",
@@ -1925,12 +1961,23 @@
     {
       "itemId": "process-web-service",
       "title": "Call web service element",
-      "description": "Owns the webService block of the Creatio Call web service process element (CrtProcessBuilder 1.6.6.150 or newer; only when the FULL create-business-process contract names webService): {service, method, timeoutSeconds?, ignoreErrors?} on create, addElement and setElement, for a REST or SOAP service registered in Studio > Web services; resolution and its refusals; a task that names no service (ask, or stop); the generated parameters (<name>_In, <name>_Out, Success, Response, StatusCode, RequestBody) and request values through mappings; an object-array response into a declared Collection; retarget (parameters replaced, the three result parameters kept, dropped bindings listed with values, refused while anything reads another parameter); drift and the designer save that deletes the parameters; run time (HTTP error vs no answer, ignoreErrors, timeout, the inner-list defect); notices; read-back. Keys never as constants.",
+      "description": "Owns the webService block of the Creatio Call web service process element (CrtProcessBuilder 1.6.6.150 or newer; only when the FULL create-business-process contract names webService): {service, method, timeoutSeconds?, ignoreErrors?} on create, addElement and setElement, for a REST or SOAP service registered in Studio > Web services; resolution and its refusals; a task that names no service (ask, or stop); the generated parameters (<name>_In, <name>_Out, Success, Response, StatusCode, RequestBody) and request values through mappings; an object-array response into a declared Collection; retarget (parameters replaced, the three result parameters kept, dropped bindings listed with values, refused while anything reads another parameter); drift and the designer save that deletes the parameters; run time (HTTP error vs no answer, ignoreErrors, timeout); notices; read-back. Keys never as constants. Rarer refusals, multi-instance, list shapes, evidence: process-web-service-details.",
       "topicId": "creatio.process-web-service",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-web-service",
       "sourcePath": "guidance/mcp/guides/processes/web-service.md",
       "bundlePath": "resources/process-web-service.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-web-service-details",
+      "title": "Call web service element details",
+      "description": "Owns two run-time list shapes of the Creatio Call web service element (webService): an inner list with no source of its own while its items are bound sends no value on a Creatio without the nested-array fix or with DisableParametersWithNestedArrays on, and a name or tag repeated in one top-level list's tree under Feature-ProcessParameterCollections; the rarer setElement refusals of the webService block, the multi-instance limit and the issues describe reports; also the evidence behind process-web-service. Split out of process-web-service.",
+      "topicId": "creatio.process-web-service-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-web-service-details",
+      "sourcePath": "guidance/mcp/guides/processes/web-service-details.md",
+      "bundlePath": "resources/process-web-service-details.md",
       "mediaType": "text/plain"
     },
     {
@@ -1942,6 +1989,17 @@
       "uri": "docs://knowledge/com.creatio.clio/process-send-chat-message",
       "sourcePath": "guidance/mcp/guides/processes/send-chat-message.md",
       "bundlePath": "resources/process-send-chat-message.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-timer-start",
+      "title": "Timer start element",
+      "description": "Only when the create-business-process contract names timerStart (the short reply names it). Owns the timer block of the Creatio Timer start process element and the setTimer op: the kinds (once, minute, hour, day, week, month, year, cron) built in the designer's cron shapes; every N as a calendar-aligned cron step, not an interval, with a cadence notice; every N weeks refused, also as a day or cron day-of-month step that is a multiple of 7; wall-clock start and end in the timer's zone, the dropped past start and the possible immediate run; timeZone as a lookup Code, by default the profile zone, else DefaultTimeZone, else refused; a run as the System operations user with system access and no process parameters; the confirmation owed before any save that schedules runs, activation included; adding a timer next to the Simple start, or replacing it only after a caller check; read-back, the scheduled state and the notices. A timer inside an event sub-process is not handled.",
+      "topicId": "creatio.process-timer-start",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-timer-start",
+      "sourcePath": "guidance/mcp/guides/processes/timer-start.md",
+      "bundlePath": "resources/process-timer-start.md",
       "mediaType": "text/plain"
     },
     {
@@ -2225,6 +2283,17 @@
       "uri": "docs://knowledge/com.creatio.clio/column-rights",
       "sourcePath": "guidance/mcp/guides/operations/column-rights.md",
       "bundlePath": "resources/column-rights.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "lookup-colors",
+      "title": "Lookup value colors",
+      "description": "Needs clio 8.1.0.118 or later. EXPERIMENTAL. Owns coloring lookup values on Freedom UI pages: the color column (the object's Color setting, which must be of the Color type, whatever its name), checking it with get-entity-schema-properties, asking for the package before adding the column (to the schema the package holds, or through a replacing object) and the manual Object Designer step clio cannot do, reading every value with execute-esq, the #RRGGBB check, the Creatio Academy palette and its first-unused pick order, writing with upsert-data-binding-row-db instead of odata-update or execute-dataservice-batch, colors not transferring to records that already exist on the target, and the execute-esq read-back.",
+      "topicId": "creatio.lookup-colors",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/lookup-colors",
+      "sourcePath": "guidance/mcp/guides/applications/lookup-colors.md",
+      "bundlePath": "resources/lookup-colors.md",
       "mediaType": "text/plain"
     },
     {
@@ -3014,7 +3083,7 @@
     {
       "itemId": "web-service-registration",
       "title": "Web service registration",
-      "description": "Needs clio 8.1.0.150 or later. Owns the clio tools that register, read, change and test-call a REST or SOAP web service in Creatio Studio > Web services (register-web-service, list-web-services, describe-web-service, modify-web-service, test-web-service-method): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), the real-request warning for test calls, and the usage guard that refuses changing or removing a method a process calls until the user acknowledges the named processes.",
+      "description": "Needs clio 8.1.0.150 or later. Owns the clio tools that register and read a REST or SOAP web service in Creatio Studio > Web services (register-web-service, list-web-services with filter, describe-web-service with usages and methods): reuse before registering, the prefixed unique service code, prefixed method and parameter codes with the wire name in path, method and parameter arguments, the credential rule (system-setting references only, no constant secret defaults, every referenced setting must exist), the follow-up steps the user owns (setting values, data binding, package dependency), and a reply that lists methods by code in methods-not-shown. Test calls and changes of a registered service moved to web-service-maintenance.",
       "topicId": "creatio.web-service-registration",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/web-service-registration",
@@ -3023,14 +3092,36 @@
       "mediaType": "text/plain"
     },
     {
+      "itemId": "web-service-maintenance",
+      "title": "Web service test calls and changes",
+      "description": "Needs clio 8.1.0.150 or later. Owns test-web-service-method and modify-web-service for a REST or SOAP web service registered in Creatio Studio > Web services: the test call as one real request the user agrees to first (user-confirmed), what its reply returns, masks, withholds or cuts, and 401/403 and OAuth failures; modify operations (addMethod, setMethod as a full replacement, removeMethod, setBaseUri, setRetryCount, setAuth and use-auth, setDescription), sending describe output back, and the usage guard that refuses changing a method, the base URI or the authentication a process uses until the user acknowledges the named processes. Also the evidence of the web service tools. Split out of web-service-registration.",
+      "topicId": "creatio.web-service-maintenance",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-maintenance",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-maintenance.md",
+      "bundlePath": "resources/web-service-maintenance.md",
+      "mediaType": "text/plain"
+    },
+    {
       "itemId": "web-service-soap",
       "title": "SOAP web service registration",
-      "description": "What differs when a SOAP 1.1 or SOAP 1.2 web service is registered or changed with register-web-service and modify-web-service: the service type, the namespaces and the default one, the method's message element, the SOAP action taken from the WSDL or the user and never made up, element paths with declared prefixes instead of JSONPath, SOAP header parameters bound to system settings (WS-Security), array item elements, the base URI stored without an added trailing slash, and setNamespaces and setType under the usage guard.",
+      "description": "What differs when a SOAP 1.1 or SOAP 1.2 web service is registered or changed with register-web-service and modify-web-service: the service type, the namespaces and the default one, the method's message element, the SOAP action taken from the WSDL or the user and never made up, element paths with declared prefixes instead of JSONPath, SOAP header parameters bound to system settings (WS-Security), array item elements, the base URI stored without an added trailing slash, and setNamespaces and setType under the usage guard, and the read-wsdl reply (one port in full and the others by operation name when every port does not fit). Why some ports cannot be called and the measurements moved to web-service-soap-details.",
       "topicId": "creatio.web-service-soap",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/web-service-soap",
       "sourcePath": "guidance/mcp/guides/integration/web-service-soap.md",
       "bundlePath": "resources/web-service-soap.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "web-service-soap-details",
+      "title": "SOAP web service details",
+      "description": "Why the platform cannot call some SOAP ports as a WSDL describes them (a SOAP 1.2 action sent only as a SOAPAction header, no WS-Addressing headers, no WS-Security message security) and the measurements behind web-service-soap: an ASMX and a WCF host, read-wsdl against Studio's quick setup, isolated agent runs. Owns no rule. Split out of web-service-soap.",
+      "topicId": "creatio.web-service-soap-details",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/web-service-soap-details",
+      "sourcePath": "guidance/mcp/guides/integration/web-service-soap-details.md",
+      "bundlePath": "resources/web-service-soap-details.md",
       "mediaType": "text/plain"
     },
     {

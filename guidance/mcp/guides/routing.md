@@ -41,6 +41,8 @@ precondition kept next to the instruction it guards — names that guide as the 
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=page-schema-translation (the `update-app-section` contract check: name=existing-app-maintenance); lookup values -> name=data-bindings (lookup value translations)
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
+- Creatio work ON A SCHEDULE or at a set time -> a timer-start process: name=process-digest, then
+  name=process-timer-start. NEVER your client's own cron or scheduler tool
 - Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
@@ -126,9 +128,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-send-email-attachments (after name=process-send-email)
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
-  - CALL a REST or SOAP web service registered in Studio > Web services from a process — the Call web service element
-    (`webService`; build it only when the FULL contract names it): service and method, request values, the response,
-    switching the method -> name=process-web-service; no registered service fits and clio lists
+  - CALL a REST or SOAP web service registered in Studio > Web services from a process: the Call web service element
+    (`webService`; build it only when the FULL contract names it): service, method, values, response, retarget ->
+    name=process-web-service; rare cases -> name=process-web-service-details; no service fits and clio lists
     `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
@@ -178,20 +180,21 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
-  - lookup seeding / data bindings -> name=data-bindings
+  - lookup seeding / data bindings -> name=data-bindings; lookup value colors -> name=lookup-colors
   - create, change, or SHIP a system setting (sys-setting) -> name=sys-settings; a setting that package
-    code, pages or processes read must ship with that package as a binding pair, which sys-settings owns
-    (`SysSettings_<Code>` + `SysSettingsValue_<Code>`); add name=data-bindings for the binding mechanics
+    code, pages or processes read must ship with that package as a binding pair, which sys-settings owns;
+    add name=data-bindings for the binding mechanics
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
 - Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
+  - assembly package (own csproj/DLL), C# background job (IJobExecutor) -> name=assembly-package
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
-  - register, read, change or test-call a REST or SOAP web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration; for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
+  - register or read a web service in Studio > Web services -> name=web-service-registration; test-call or change it -> name=web-service-maintenance; for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces

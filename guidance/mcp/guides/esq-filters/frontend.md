@@ -6,6 +6,17 @@
 - This guide covers the filter contract exhaustively: every filter type, every comparison operator, the value shape required for every column data type, the complete date/time macro catalog, forward and backward references, and nested logical groups.
 - Read `esq` first for the surrounding query envelope (root schema, columns, aggregation, expression building blocks, and the master enum tables). This guide focuses only on the `filters` tree and the leaf filters inside it.
 - Shape in one line: filters are JSON with NUMERIC enum values (`filterType`/`comparisonType`/`dataValueType` are integers, never strings) and values wrapped in a `parameter` envelope — the exact shape stored in Creatio page bodies and DataService SelectQuery bodies.
+- Handler code is not a stored tree. When a page handler builds a filter at runtime (for example to scope a model load), build it with `sdk.FilterGroup` and name every operator with a member of `sdk.ComparisonType`, never a bare integer; the member names are exactly the names in the Operators table below (`sdk.ComparisonType.Equal`, `sdk.ComparisonType.Greater_or_equal`; devkit `comparison-type.enum.ts`, creatio-ui commit `cc78bd8be9b`); read `page-schema-creatio-devkit-common` for the calls. Do not hand-write this guide's numeric JSON inside handler code: nothing checks the integers there, and a related list scoped to the open record needs no handler filter at all (`related-list`, `modelConfig.dependencies`).
+
+## Operators (`comparisonType`)
+- Pick the operator by its NAME, then take its number; never pick a number from memory.
+- 0 = Between, 1 = Is_null, 2 = Is_not_null, 3 = Equal, 4 = Not_equal, 5 = Less, 6 = Less_or_equal, 7 = Greater, 8 = Greater_or_equal, 9 = Start_with, 10 = Not_start_with, 11 = Contain, 12 = Not_contain, 13 = End_with, 14 = Not_end_with, 15 = Exists, 16 = Not_exists.
+- Which operators are valid per column family (mirror of the platform filter-builder):
+  - Text/string columns: 3, 4, 9, 10, 11, 12, 13, 14, 1, 2 (equal/not-equal/starts/contains/ends + null tests).
+  - Number/Money/Float/Integer columns: 3, 4, 5, 6, 7, 8, 1, 2 (and 0 Between).
+  - Date/DateTime/Time columns: 3, 4, 5 (Before), 6 (OnOrBefore), 7 (After), 8 (OnOrAfter), 0 (Between), 1, 2.
+  - Lookup columns: 3, 4, 1, 2 only. NEVER use 11 (Contain) on a lookup column. (Exists/Not_exists 15/16 apply only to the backward-reference Exists leaf, not to a direct lookup column compare.)
+  - Boolean columns: 3 (= true) and 4 (= false) only — there is no dedicated boolean operator; compare against a boolean parameter value.
 
 ## Filter tree structure
 - A filter tree is built from GROUPS (filterType 6) that nest leaves and other groups, plus the leaves that do the actual comparing. This section covers the group envelope, AND/OR nesting, and the fields every leaf shares; the leaf KINDS are in Filter types below.
@@ -71,15 +82,6 @@
 
 ### Segment (filterType 7)
 - Membership in a saved SysDataSegment: `{ "filterType": 7, "comparisonType": 15|16, "isEnabled": true, "segmentFilterOptions": { "segmentId": "<SysDataSegment.Id>" } }`. comparisonType 15 = IN segment, 16 = NOT IN.
-
-## Operators (`comparisonType`)
-- 0 = Between, 1 = Is_null, 2 = Is_not_null, 3 = Equal, 4 = Not_equal, 5 = Less, 6 = Less_or_equal, 7 = Greater, 8 = Greater_or_equal, 9 = Start_with, 10 = Not_start_with, 11 = Contain, 12 = Not_contain, 13 = End_with, 14 = Not_end_with, 15 = Exists, 16 = Not_exists.
-- Which operators are valid per column family (mirror of the platform filter-builder):
-  - Text/string columns: 3, 4, 9, 10, 11, 12, 13, 14, 1, 2 (equal/not-equal/starts/contains/ends + null tests).
-  - Number/Money/Float/Integer columns: 3, 4, 5, 6, 7, 8, 1, 2 (and 0 Between).
-  - Date/DateTime/Time columns: 3, 4, 5 (Before), 6 (OnOrBefore), 7 (After), 8 (OnOrAfter), 0 (Between), 1, 2.
-  - Lookup columns: 3, 4, 1, 2 only. NEVER use 11 (Contain) on a lookup column. (Exists/Not_exists 15/16 apply only to the backward-reference Exists leaf, not to a direct lookup column compare.)
-  - Boolean columns: 3 (= true) and 4 (= false) only — there is no dedicated boolean operator; compare against a boolean parameter value.
 
 ## Column paths & references
 - A `columnPath` points at a column relative to the group's `rootSchemaName`. It has three shapes: a DIRECT column, a FORWARD reference (to-one, dotted), or a BACKWARD reference (to-many, bracketed). See `esq` for the full reference grammar.

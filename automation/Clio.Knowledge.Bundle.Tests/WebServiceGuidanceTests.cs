@@ -39,6 +39,8 @@ public sealed class WebServiceGuidanceTests
 
     private const string ArticlePath = "guidance/mcp/guides/processes/web-service.md";
 
+    private const string DetailsPath = "guidance/mcp/guides/processes/web-service-details.md";
+
     private const string CatalogPath = "guidance/mcp/guides/processes/element-catalog.md";
 
     private const string CatalogDetailsPath = "guidance/mcp/guides/processes/element-catalog-details.md";
@@ -182,9 +184,9 @@ public sealed class WebServiceGuidanceTests
             "the list is bound to that collection too, one request item per source row (rule P1, `process-files`)",
             "An item fed by a FORMULA that reads row items does NOT bind its list: map the list itself to the source collection as well, or the formula is evaluated outside any row. Nothing warns about this for a top-level list; an inner list draws the unsourced-inner-list notice.",
             "when non-null it REPLACES the whole body the element would build from its body parameters; headers, query, path and cookies are still built from theirs.",
-            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
             "Use it for a method with no body parameter (as the shipped `ActionGeminiSearch` does with a formula)",
-            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound."
+            "An empty string from a formula or parameter replaces it too (an empty body is sent); a constant \"\" counts as unset.",
+            "Nothing checks it as JSON, and nothing warns when it and body parameters are both bound.",
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -243,7 +245,6 @@ public sealed class WebServiceGuidanceTests
             "the Process Designer adds that dependency when it saves (while `AutoAddPackageDependenciesInProcesses` is on, the default), this tool does not.",
             "REFUSED, nothing written, while anything - another element, a process parameter, a flow condition, a formula - reads ANY other parameter of the element: an output, a nested item, an input, `RequestBody`.",
             "Remove or re-point those uses in a SEPARATE, earlier call",
-            "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
             "UNLESS the stored method differs in case from the service's: then it is a retarget, guarded as below.",
             "`Success`, `Response` and `StatusCode` keep their identity here, so their readers stay valid (the designer re-creates those three under new ids, leaving their readers dangling)",
             "`describe-business-process` reports `serviceResolved: false` or `methodResolved: false` with a sentence in `issues`: the call fails at run time, `ignoreErrors` or not. An issue saying the service could not be read or checked means UNKNOWN, not failing.",
@@ -257,8 +258,6 @@ public sealed class WebServiceGuidanceTests
             "`methodResolved: false` is the signal (an unreadable service: unknown, above).",
             "`setElement` with `elementName` and `elementUpdate.webService`, top-level elements only (a nested one: the designer):",
             "Omitted members keep their stored values (a service change resets the timeout, below). `method` alone: another method of the same service, refused while the stored service is not registered or readable.",
-            "`service` naming ANOTHER service without `method`: refused with that service's methods; the SAME service and nothing else: refused, nothing to change.",
-            "an element or parameter marked invalid (e.g. a required input not set)"
         ];
         string[] missing = [.. clauses.Where(clause => !guide.Contains(clause, StringComparison.Ordinal))];
 
@@ -284,9 +283,14 @@ public sealed class WebServiceGuidanceTests
             "While feature `DisableIgnoreErrorsInWebServiceUserTask` is on, `ignoreErrors: true` is saved, with a notice, but a failing call still stops the process.",
             "It does NOT cover computing the inputs (an empty system setting behind `[#SysSettings.<Code>#]` fails the element), an unresolved service or method, or reading the response.",
             "Timeout: absent or `0`, only the method's own timeout applies, to each attempt, and retries repeat it. `timeoutSeconds` adds an overall limit over the whole call, retries included; it cannot lengthen an attempt beyond the method's timeout. When it expires, the call fails like a call with no answer, unless an earlier attempt had an HTTP error answer: that answer completes the element.",
+            "A compiled (not interpretable) process applies neither `timeoutSeconds` nor `ignoreErrors`.",
+            "`process-web-service-details` owns both. The notices name them."
+        ];
+        string details = ReadCollapsed(DetailsPath);
+        string[] detailClauses =
+        [
             "Creatio builds without the platform fix for arrays inside arrays (10.1.37 among them), or with feature `DisableParametersWithNestedArrays` on, send NO value for that inner list. Bind the inner list itself to a collection, or build the body in `RequestBody`.",
             "While application setting `Feature-ProcessParameterCollections` is on, a name or tag repeated in one top-level list's tree: in a request list a repeated name stops the element once two of those items carry a value, a repeated tag sends one value; in a response list a repeated tag stops it when the result is stored, a repeated name keeps one value.",
-            "A compiled (not interpretable) process applies neither `timeoutSeconds` nor `ignoreErrors`.",
             "Measured on Creatio 10.1.37 (.NET Framework) on 2026-11-03 (designer-built elements):",
             "Every other run-time rule is read from the Creatio core source and the designer client code, not measured."
         ];
@@ -295,6 +299,9 @@ public sealed class WebServiceGuidanceTests
         // Assert
         missing.Should().BeEmpty(
             because: "none of these is visible from a green build. Missing: " + string.Join(" | ", missing));
+        string[] missingDetails = [.. detailClauses.Where(clause => !details.Contains(clause, StringComparison.Ordinal))];
+        missingDetails.Should().BeEmpty(
+            because: "the rare list shapes and the evidence moved to the details article. Missing: " + string.Join(" | ", missingDetails));
     }
 
     [Test]
@@ -453,6 +460,30 @@ public sealed class WebServiceGuidanceTests
             because: "a larger addition should be reviewed, or split, rather than absorbed");
         replyBytes.Should().BeLessThanOrEqualTo(GuidanceInlineReplyBudgetTests.InlineReplyBudgetBytes,
             because: "a reply over the inline rule is spilled to a file and read back in pieces");
+    }
+
+    [Test]
+    [Description("The details article carries the rarer refusals of the block, the multi-instance limit and the issues describe reports, and the guide points there.")]
+    public void Details_ShouldCarryTheRarerRefusalsAndEdgeCases()
+    {
+        // Arrange
+        string guide = ReadCollapsed(ArticlePath);
+        string details = ReadCollapsed(DetailsPath);
+
+        // Act
+        string[] clauses =
+        [
+            "A multi-instance Call web service element refuses the `webService` block; mappings onto it still apply, and describe shows it with an issue.",
+            "`service` naming ANOTHER service without `method`: refused with that service's methods; the SAME service and nothing else: refused, nothing to change.",
+            "an element or parameter marked invalid (e.g. a required input not set)",
+        ];
+        string[] missing = [.. clauses.Where(clause => !details.Contains(clause, StringComparison.Ordinal))];
+
+        // Assert
+        missing.Should().BeEmpty(
+            because: "these moved to the details article to keep the guide inline. Missing: " + string.Join(" | ", missing));
+        guide.Should().Contain("The other refusals of the block, and a multi-instance element: `process-web-service-details`.",
+            because: "the guide sends the agent to the details article for them");
     }
 
     private static string ReadCollapsed(string relativePath) =>

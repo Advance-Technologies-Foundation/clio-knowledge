@@ -127,7 +127,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
    setFilter / clearFilter / setSignal (a signalStart's trigger + tracked columns, in place) / setFlow /
    setFlowCondition / setFlowResults (`process-activity-result-branches`) / setConnections /
    clearConnections ("Connected to" links, `process-activity-connections`) / addUsing / removeUsing /
-   setMethods / setElement, which changes element-level fields in place:
+   setTimer (`process-timer-start`) / setMethods / setElement, which changes element-level fields in place:
    * `useBackgroundMode` where the element OFFERS it (four kinds do not:
      `process-element-catalog`);
    * `readData` / `changeData` / `addData` on the matching data element only (partial-update,
@@ -177,7 +177,7 @@ you MUST also check the D1/D2/D4 triggers of `process-sub-process-when` first (i
   `process-branch-conditions` owns the same rule for `setFlow` and `setFlowCondition`.
 - Before removals, run `validate-process-graph` on the graph AS IT WILL BE after your operations
   (describe output + your planned ops applied), and confirm destructive removals with the user.
-- Constructs the builder cannot create (inclusive/event-based gateways, timer/message starts,
+- Constructs the builder cannot create (inclusive/event-based gateways, message starts,
   intermediate events; full list in `process-element-catalog`) survive a save untouched
   as data - but you CAN still remove or rewire them by name and nothing will warn you. Gateway
   ELEMENTS, DEFAULT flows and the Formula element are buildable and NOT on that list

@@ -111,7 +111,8 @@ whether you OFFER activation once a version exists, and it authorises no call. E
 and the environment -- a session answer is never that request, per `core-rules`, where an answer given
 earlier in the session is not standing consent for a high-impact write. Before each such call, say
 which version becomes actual and that the call re-saves the whole family; call it on the answer to
-THAT, not on the answer to Q2.
+THAT, not on the answer to Q2. Activating a version that carries a timer, a rollback included, or enabling
+a disabled process that has one, owes the confirmation of `process-timer-start` first.
 
 A layout refusal RE-OPENS Q1 for that one edit, whatever the session answer was. From CrtProcessBuilder
 1.6.5.14 `modify-business-process` refuses an edit that would re-draw the diagram rather than extend it,

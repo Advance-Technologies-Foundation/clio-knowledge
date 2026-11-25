@@ -16,8 +16,9 @@ When to reach for a request
   `handlers` entry for it that ends with `return next?.handle(request);` — do not clone the
   behavior under a `usr.*` name. Returning without calling `next` swallows the request and
   the built-in action never runs.
-- Genuinely custom domain workflow no built-in request covers: a `usr.*Request` plus a
-  custom handler (authoring rules in `page-schema-handlers`).
+- Genuinely custom domain workflow no built-in request covers: a custom request in the
+  package's namespace plus a custom handler (`page-schema-handlers` owns both, including
+  "Custom namespace").
 - Run a business process: resolve the process with `get-process-signature` FIRST, then
   `get-request-info request-type=crt.RunBusinessProcessRequest` - its `parameters` and
   `documentation` carry the full contract (parameter keys are CODES, not captions).
