@@ -57,8 +57,8 @@ clio; removing a stage that records hold is not refused, so check them with the 
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own. `stage-has-steps` (an older package: it has steps or a step
-condition targets it: the case designer), `stage-is-condition-target` (a step condition moves records to it) and
-`step-has-conditions` (a removed stage's step has conditions): the case designer; `package-read-only` (a new version is not supported yet), `invalid-request` for a
+condition targets it: the case designer), `stage-is-condition-target` (a kept step's condition moves records to it:
+drop that condition in the same change, or keep the stage); `package-read-only` (a new version is not supported yet), `invalid-request` for a
 case that is not the active version (name the active one the message gives) or not a case of `entity-schema-name`,
 `stage-list-duplicate` for a case with two stages on one value (the case designer fixes it).
 Outcomes: `failed-restored`: the save did not take, the case is as before; `failed-leftover`: relay its `leftovers`
@@ -68,7 +68,7 @@ been written - describe the case before retrying. No compile or restart; F5.
 == Steps inside a stage ==
 - Needs clio <CLIO-STEPS-TBD> or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
   and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
-- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `hasConditions`,
+- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `conditions`,
   `runningInstances`; a Perform task also `performer`, `activity`, `category`, `hint`, `useBackgroundMode`) and
   `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
@@ -87,9 +87,17 @@ been written - describe the case before retrying. No compile or restart; F5.
   the stage; a record put into it stays) or it cannot move on (last stage, no later connection).
 - Steps create work on real records: an added step starts for records that ENTER the stage from now on. Show the
   dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
-  removed step (the count; they never move on), so keep it or wait until they end. `step-has-conditions`: the case
-  designer changes it. Other refusals name the stage and step: `step-invalid`, `step-after-invalid`,
-  `step-type-not-supported`.
+  removed step (the count; they never move on), so keep it or wait until they end. Other refusals name the stage
+  and step: `step-invalid`, `step-after-invalid`, `step-type-not-supported`.
+- Conditions (clio <CLIO-CONDITIONS-TBD>, CrtProcessBuilder 1.6.6.206): a Perform task step's `conditions` is its
+  WHOLE list, e.g. `[{"result":"Rejected","nextStage":"Cancelled"}]`; leave it out to keep them, `[]` removes
+  them. `result` is a result of the step's task category (caption or Id; the refusal lists the category's
+  results), `nextStage` another stage (value, display value or caption; an earlier one too, never its own). One
+  condition per result; several results may lead to one stage. A new `category` without `conditions` clears them,
+  as the designer does. A named result moves the record to that stage; any other result counts as done for
+  `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
+  conditions. `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,
+  or one this change removes), `step-condition-not-supported` (another step type: the case designer).
 
 == Several cases on one object ==
 - Needs clio 8.1.0.154 or later: an older clio has no `filter`, `remove-filter` or `deactivate-unfiltered`.

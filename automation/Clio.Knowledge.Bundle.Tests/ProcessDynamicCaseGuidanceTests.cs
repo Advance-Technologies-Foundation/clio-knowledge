@@ -498,4 +498,31 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a stage's transitionType is set through modify-dynamic-case, not only in the designer");
         }
     }
+
+    [Test]
+    [Description("The change guide owns a step's conditions: the clio and package boundary, the whole-list rule, results of the step's task category, the category rule, how a condition meets the stage's automatic move, and the condition refusals; step-has-conditions is gone (ENG-107647).")]
+    public void ChangeGuide_ShouldGuideAStepsConditions()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().MatchRegex($@"- Conditions \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.206\)",
+                because: "conditions ship with a clio release and an older package refuses them");
+            guide.Should().Contain("a Perform task step's `conditions` is its WHOLE list",
+                because: "the stored conditions a list leaves out are removed");
+            guide.Should().Contain("`result` is a result of the step's task category",
+                because: "the results come from the category, as the designer lists them");
+            guide.Should().Contain("A new `category` without `conditions` clears them",
+                because: "the designer clears a step's conditions when its category changes");
+            guide.Should().Contain("any other result counts as done for `transitionType`",
+                because: "the stage's automatic move joins a conditioned step's other results (measured)");
+            guide.Should().Contain("`step-condition-invalid`").And.Contain("`step-condition-target-unknown`")
+                .And.Contain("`step-condition-not-supported`");
+            guide.Should().NotContain("`step-has-conditions`",
+                because: "a step or a stage with conditions is now removed with them");
+        }
+    }
 }
