@@ -157,6 +157,39 @@ public sealed class MigrationGuidanceCorrectionsTests
     }
 
     [Test]
+    [Description("State rules revert by themselves, so the guide asks for no opposite rule; set-values does not revert.")]
+    public void BusinessRulesGuidance_ShouldSayStateRulesRevert_AndNotAskForOppositeRules()
+    {
+        // Arrange
+        string guidance = ReadGuide("business-rules/business-rules.md");
+
+        // Act
+        string section = Section(guidance, "State actions revert by themselves; set-values does not");
+
+        // Assert
+        section.Should().Contain("do NOT write an opposite rule",
+                because: "agents wrote opposite pairs because the guide told them to")
+            .And.Contain("resets that property to the element's own state",
+                because: "a rule reverts to the element's default, not to the opposite action")
+            .And.Contain("`set-values` does NOT revert",
+                because: "a value a rule set stays, so clearing it is a rule of its own")
+            .And.Contain("`Terrasoft.Core/BusinessRules/BusinessRuleEngine.cs`",
+                because: "the runtime claim needs its source evidence")
+            .And.Contain("Not tested on a stand:",
+                because: "the untested cases must travel with the rule");
+        guidance.Should().NotContain("create an explicit inverse business rule",
+                because: "the old one-way section is the instruction agents followed")
+            .And.NotContain("plus the inverse NOT_CONTAIN",
+                because: "a role-based state rule reverts like any other")
+            .And.NotContain("its opposite rule needs",
+                because: "a stepper rule reverts like any other")
+            .And.NotContain("Use an explicit inverse rule",
+                because: "the common-mistakes list must not restate the old rule")
+            .And.NotContain("must also return through an explicit inverse rule",
+                because: "the workflow must not restate the old rule");
+    }
+
+    [Test]
     [Description("The handler guide owns the EXPERIMENTAL read-only pattern with its evidence and limits.")]
     public void HandlersGuidance_ShouldOwnExperimentalReadOnlyPattern_WithItsLimits()
     {
