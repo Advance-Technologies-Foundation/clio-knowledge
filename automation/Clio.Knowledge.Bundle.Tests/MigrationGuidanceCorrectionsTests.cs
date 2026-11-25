@@ -201,7 +201,11 @@ public sealed class MigrationGuidanceCorrectionsTests
             .And.Contain("the condition that the user is NOT an administrator → hide-element",
                 because: "a show-element rule on a field visible by default never hides it");
         guidance.Should().Contain("CurrentUserRoles NOT_CONTAIN <role id> → hide-element",
-            because: "the role example must still hide the field from other users with one rule");
+                because: "the role example must still hide the field from other users with one rule")
+            .And.Contain("one hide-element rule on `RentalStepper_ActiveStep is filled in AND RentalStepper_ActiveStep not-equal <FirstStepName>`",
+                because: "a show-element rule never hides a default-visible element on the later steps")
+            .And.NotContain("must differ from both the rule's state and the element's own state",
+                because: "every state action is binary, so no state differs from both");
     }
 
     [Test]
