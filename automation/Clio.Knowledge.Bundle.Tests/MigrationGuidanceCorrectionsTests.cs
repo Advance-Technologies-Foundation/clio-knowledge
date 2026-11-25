@@ -177,16 +177,18 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "the runtime claim needs its source evidence")
             .And.Contain("Not tested on a stand:",
                 because: "the untested cases must travel with the rule");
-        guidance.Should().NotContain("create an explicit inverse business rule",
-                because: "the old one-way section is the instruction agents followed")
-            .And.NotContain("plus the inverse NOT_CONTAIN",
-                because: "a role-based state rule reverts like any other")
-            .And.NotContain("its opposite rule needs",
-                because: "a stepper rule reverts like any other")
-            .And.NotContain("Use an explicit inverse rule",
-                because: "the common-mistakes list must not restate the old rule")
-            .And.NotContain("must also return through an explicit inverse rule",
-                because: "the workflow must not restate the old rule");
+        string[] staleWording =
+        [
+            "create an explicit inverse business rule",
+            "plus the inverse NOT_CONTAIN",
+            "its opposite rule needs",
+            "Use an explicit inverse rule",
+            "must also return through an explicit inverse rule",
+        ];
+        staleWording.Should().AllSatisfy(stale => guidance.Should().NotContain(stale,
+            because: "agents saved opposite rule pairs because the guide told them to"));
+        Regex.Matches(guidance, "no opposite rule \\(\"State actions revert by themselves\"\\)").Should().HaveCount(3,
+            because: "the stepper, role and workflow lines point to the owner section instead of restating it");
     }
 
     [Test]
