@@ -474,7 +474,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
         {
             guide.Should().MatchRegex($@"== Steps inside a stage == - Needs clio {ClioVersion} or later",
                 because: "steps ship with a clio release, and the guide publishes to every clio at once");
-            guide.Should().Contain("and CrtProcessBuilder 1.6.6.200",
+            guide.Should().Contain("and CrtProcessBuilder 1.6.6.201",
                 because: "an older package refuses a stage's steps");
             guide.Should().Contain("A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them",
                 because: "a stored step left out of the list is removed");
