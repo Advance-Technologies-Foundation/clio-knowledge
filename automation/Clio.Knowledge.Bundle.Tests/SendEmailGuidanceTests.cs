@@ -317,4 +317,33 @@ public sealed class SendEmailGuidanceTests
 			because: "the package bounds an expanded performer contact again, as it bounds a condition and a Formula body, so a short by-name contact can still be refused for length");
 	}
 
+	[Test]
+	[Description("A custom-body macro's value goes into the HTML as is, for every type including Rich text: the entry article states it with its evidence and the advice to encode user text, and the details article keeps the send-time path behind it.")]
+	public void Guide_ShouldSayABodyMacroValueIsInsertedUnescaped()
+	{
+		// Arrange
+		string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+		string details = Regex.Replace(
+			ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), DetailsArticle), @"\s+", " ");
+
+		// Act
+		const string rule = "A macro's value goes into the HTML AS IS, NOT HTML-escaped, whatever its type (Rich text escapes nothing either)";
+		const string evidence = "(CrtProcessDesigner 7.8.0 and Terrasoft.Core source, read 2026-11-25)";
+		const string encode = "So encode text that must show literally before it reaches the parameter, e.g. with `System.Net.WebUtility.HtmlEncode`";
+		const string replacement = "`ProcessEmailUserTaskMacrosHelper.ReplaceMacros` swaps the whole `<img data-value=…>` token for that string with `string.Replace`";
+		const string noTextTypeEncodes = "only the Date and Time types override it, so no text type encodes its value, Rich text included";
+
+		// Assert
+		guide.Should().Contain(rule,
+			because: "the article said only that the body is HTML and a parameter is inserted whole, so agents guessed whether <br> in a Text value renders and switched to a Rich text parameter to be safe");
+		guide.Should().Contain(evidence,
+			because: "a behavioral claim names its evidence and when it was read (AGENTS.md)");
+		guide.Should().Contain(encode,
+			because: "markup or a stray < or & in user-supplied text reaches the sent email as HTML unless the process encodes it first");
+		details.Should().Contain(replacement,
+			because: "the send-time replacement splices the value into the body without encoding, which is the mechanism behind the rule (CrtProcessDesigner 7.8.0)");
+		details.Should().Contain(noTextTypeEncodes,
+			because: "Terrasoft.Core DataValueType.GetDisplayValue is value.ToString() for every text type, so changing the parameter type cannot change the outcome");
+	}
+
 }
