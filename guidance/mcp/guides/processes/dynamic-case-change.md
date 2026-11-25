@@ -25,7 +25,9 @@ clio; removing a stage that records hold is not refused, so check them with the 
    in order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, `records` (the records holding
    its value, finished cases included), and `enabled`. Several cases on the object: name one with `case-name`
    (modify by object answers `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the
-   designer show the value's name, not the stage caption; a rename (step 2) fixes it.
+   designer show the value's name, not the stage caption; a rename (step 2) fixes it. `entity-schema-name` is the
+   object's schema NAME (e.g. `UsrOrder`), not the user's word; on `entity-not-found` find the object
+   (`find-entity-schema`, or the `Name (caption)` candidates the refusal lists; several: ask which), describe again.
 2. `modify-dynamic-case { environment-name, case-name | case-uid | entity-schema-name, stages?, caption?, filter?,
    remove-filter?, enabled?, confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }`
    writes; the top-level `caption` renames the CASE. `stages` is the WHOLE new list of items `{"value": Id or exact
@@ -132,7 +134,8 @@ been written - describe the case before retrying. No compile or restart; F5.
    after their yes). `dependencies-missing`: the package must depend on the packages the message names; add them
    only after the user's yes. `steps-not-supported`: a case with steps gets a version only in its own package (or in
    the case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write
-   only after their yes. NOT idempotent: every write makes one more version, and a saved version is never removed.
+   only after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot
+   delete a version.
    A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active
    case and every record too - say so before the yes. A FIRST filter would set the object's filter column for every
    case at once, so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case`
@@ -149,7 +152,8 @@ been written - describe the case before retrying. No compile or restart; F5.
    version in the case designer.
 3. ASK the user whether to make it active: a decision of its own, never part of the yes to create it.
 4. Make it active: `set-active-dynamic-case-version { environment-name, version-name | version-uid, dry-run? }`,
-   destructive, any member of the family (the first one too: that is the way back; `version-not-found` otherwise).
+   destructive, any member of the family (the first one too: that is the way back). `version-not-found`: describe
+   the case by its object (`entity-schema-name`) and name the family's `versions` to the user; never guess a name.
    First `dry-run: true`, relay its notes and warnings, then the call after the user's yes; `unchanged`: it is
    active already, nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
    `unfiltered-case-exists`, `filter-required` (as in "Several cases on one object"; the family's own members do

@@ -361,8 +361,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
         {
             routing.Should().Contain("or the order records move through its status values / how that flow ends (no \"stage\" needed; not the sort order of a lookup in lists or dropdowns)",
                 because: "routing is what an agent reads first, the failing prompts never said stage, and sorting a lookup in a list is not a case");
-            routing.Should().Contain("the user names the object by its caption: `list-apps` / `get-app-info` when a schema-name search misses",
-                because: "a rerun reached the routing and still stopped: find-entity-schema matches schema names, not \"purchase requests\"");
+            routing.Should().Contain("the user names the object by its caption: `find-entity-schema`, then `list-apps` / `get-app-info`",
+                because: "a run that went to find-app after entity-not-found never found an object in no app; find-entity-schema comes first, the app tools catch a caption it misses");
             guide.Should().Contain("the order records move through status values or how that flow ends (not a lookup's sort order in lists or dropdowns)",
                 because: "the scope names the wording that belongs to a case, and the one that does not");
             guide.Should().Contain("stages or status flow (\"ends Approved or Rejected\", \"move X before Y\")",
@@ -480,8 +480,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the version goes to the source's package only when it is editable, and the target package is the user's choice");
             guide.Should().Contain("First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only after their yes",
                 because: "every write makes one more version that no tool removes");
-            guide.Should().Contain("NOT idempotent: every write makes one more version, and a saved version is never removed",
-                because: "a saved version is kept even when the call fails after the save, so a careless retry leaves another version behind");
+            guide.Should().Contain("NOT idempotent: every write makes one more version, and the toolkit cannot delete a version",
+                because: "a saved version is kept even when the call fails after the save, and the platform can delete a version while the toolkit cannot, so an agent must not claim a version can never be removed");
             guide.Should().Contain("A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active case and every record too - say so before the yes",
                 because: "a lookup value rename is written at once, not at activation");
             guide.Should().Contain("so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case` first, or leave the version without one)",
@@ -492,6 +492,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the toolkit has no case deletion, and the case library's removal is the user's way to drop it");
             guide.Should().Contain("After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version",
                 because: "a retry after a saved or possibly saved version adds one more version");
+            guide.Should().Contain("`entity-schema-name` is the object's schema NAME (e.g. `UsrOrder`), not the user's word; on `entity-not-found` find the object",
+                because: "every isolated run passed the user's word (\"Order\") and got entity-not-found; one stopped there");
+            guide.Should().Contain("`version-not-found`: describe the case by its object (`entity-schema-name`) and name the family's `versions` to the user; never guess a name",
+                because: "a run that left for find-app after version-not-found never named the existing versions");
             guide.Should().Contain("give the user its `designerUrl`",
                 because: "the user checks the version in the case designer before deciding to activate it");
             guide.Should().Contain("ASK the user whether to make it active: a decision of its own, never part of the yes to create it",
