@@ -167,7 +167,7 @@ public sealed class MigrationGuidanceCorrectionsTests
         string section = Section(guidance, "State actions revert by themselves; set-values does not");
 
         // Assert
-        section.Should().Contain("do NOT write an opposite rule",
+        section.Should().Contain("do NOT write a second, opposite rule",
                 because: "agents wrote opposite pairs because the guide told them to")
             .And.Contain("resets that property to the element's own state",
                 because: "a rule reverts to the element's default, not to the opposite action")
@@ -175,7 +175,11 @@ public sealed class MigrationGuidanceCorrectionsTests
                 because: "a value a rule set stays, so clearing it is a rule of its own")
             .And.Contain("`Terrasoft.Core/BusinessRules/BusinessRuleEngine.cs`",
                 because: "the runtime claim needs its source evidence")
-            .And.Contain("Not tested on a stand:",
+            .And.Contain("EXPERIMENTAL (from source, not tested on a stand): entity rules run in the same engine",
+                because: "the entity half rests on source only and must be labelled where it is stated")
+            .And.Contain("add `OR <field> is-not-filled-in`, or the rule does not fire while the field is empty",
+                because: "the one negated rule must still fire on a new record with an empty field")
+            .And.Contain("Not tested on a stand: entity rules, and a field that is read-only or hidden by default.",
                 because: "the untested cases must travel with the rule");
         string[] staleWording =
         [
