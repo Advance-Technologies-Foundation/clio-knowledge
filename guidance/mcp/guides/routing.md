@@ -10,8 +10,8 @@ how a guide points at a rule it does not own. Other backticks are ordinary code 
 page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
 precondition kept next to the instruction it guards — names that guide as the owner.
 
-- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM, clio 8.1.0.150+; pass the user's word for the object, `find-entity-schema` if not found) -> name=process-dynamic-case
-  - an object that already has a case: read, change, disable or re-enable it, make a new version or switch the active one, or split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-change
+- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM; pass the user's word for the object, `find-entity-schema` if not found) -> name=process-dynamic-case
+  - an object that already has a case: read, change (stages, order, groups), disable or re-enable it, make a new version or switch the active one -> name=process-dynamic-case-change; split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-filters
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -21,7 +21,7 @@ precondition kept next to the instruction it guards — names that guide as the 
     Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
     to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
   - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
-  - a stage progress bar (crt.EntityStageProgressBar) shows only for an object with a case -> name=process-dynamic-case
+  - a stage progress bar (crt.EntityStageProgressBar) -> name=process-dynamic-case
   - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
     requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)

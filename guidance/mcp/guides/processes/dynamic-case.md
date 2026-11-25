@@ -7,24 +7,24 @@ the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI
 asks for "stages", "a status lifecycle", the order records move through status values or how that flow ends (not
 a lookup's sort order in lists or dropdowns), "a progress bar on the record page" or "a case".
 "When X happens, do Y" is a business process: `process-digest`. A case is not the `Case` object. Reading and
-changing an existing case (`describe-dynamic-case`, `modify-dynamic-case`), its versions, and several cases on one
-object split by a filter: `process-dynamic-case-change`.
+changing an existing case (`describe-dynamic-case`, `modify-dynamic-case`) and its versions:
+`process-dynamic-case-change`; several cases on one object split by a filter: `process-dynamic-case-filters`.
 
-Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `get-tool-contract`
-does not list it, the clio serving you is older: stop here and tell the user to update clio - do not build a case by
-other means.
+Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `clio-run` answers
+`unknown tool` for it, the clio serving you is older: stop here and tell the user to update clio - do not build a
+case by other means.
 
 == Answer the user from the tool ==
 - Anything about an EXISTING object's stages or status flow ("ends Approved or Rejected", "move X before Y"),
   even "just tell me, change nothing": answer only after
-  `describe-dynamic-case { entity-schema-name }` (read-only). When `get-tool-contract` does not list
+  `describe-dynamic-case { entity-schema-name }` (read-only). When `clio-run` answers `unknown tool` for
   `describe-dynamic-case` (clio older than 8.1.0.153), answer only after the call with `dry-run: true` (it writes
   nothing) in any editable package and WITHOUT `stages` (a stage list is checked before the object's case). A newer
-  clio refuses both for a CrtProcessBuilder older than 1.6.6.179: `install-process-builder` restarts the site, so
-  only once the user approves it (`core-rules`). A clio whose `modify-dynamic-case` takes `confirm-value-rename`
-  refuses describe below 1.6.6.185.
+  clio refuses both for an older CrtProcessBuilder, naming the version it needs: `install-process-builder` restarts
+  the site, so only once the user approves it (`core-rules`).
   Schema reads cannot see a case. An object that has one gets it CHANGED ("Change an existing case" in
-  `process-dynamic-case-change`), never a second one unless the user splits its records by a filter (same guide);
+  `process-dynamic-case-change`), never a second one unless the user splits its records by a filter
+  (`process-dynamic-case-filters`);
   on an older clio its `case-exists` or `settings-conflict` refusal IS the answer. Never offer to rename, replace or
   add lookup values, or another column (an order column), to get around an existing case; adding a value the user
   asked to make a stage is part of changing the case.
@@ -61,7 +61,7 @@ designer does those. No mobile page, mini page or Classic page bar.
   `add-package-dependencies: false` it refuses `dependencies-missing` and reports them in `dependencies.missing`.
 - The call runs as a General user with `CanManageDcm`, `CanManageSolution` and the right to add `SysDcmSettings` and
   `SysDcmSchemaInSettings` records (by default only System administrators); it is refused `rights-missing` naming
-  the missing one, before anything is read (a `filter` needs one more: `process-dynamic-case-change`).
+  the missing one, before anything is read (a `filter` needs one more: `process-dynamic-case-filters`).
   `CanManageProcessDesign` is not needed.
 
 == The call ==
@@ -69,7 +69,7 @@ designer does those. No mobile page, mini page or Classic page bar.
 deactivate-unfiltered?, order-column?, name?, caption?, add-progress-bar = true, page-schema-name?,
 add-package-dependencies = true, dry-run = false }`; it writes, so it is destructive (clio 8.1.0.150 or later: see
 Scope). `deactivate-unfiltered` disables the object's unfiltered case: pass it only after the user chose that, never
-on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dynamic-case-change`.
+on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dynamic-case-filters`.
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
   pass `stages` (2 to 20 values in order, by Id or exact display value) whenever the business order matters.
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
@@ -131,7 +131,7 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
 - `settings-conflict`: the object's case settings use another stage column, or there are several rows (when
   another call created a row at the same moment this call removes its own: retry), or the cases are split by another
   filter column: that one and the other filter refusals (`unfiltered-case-exists`, `filter-required`,
-  `filter-overlap`, ...) are in `process-dynamic-case-change`.
+  `filter-overlap`, ...) are in `process-dynamic-case-filters`.
 - Page refusals, all BEFORE anything is written: `record-page-not-found` (no record page could be found: pass
   `page-schema-name`), `record-page-ambiguous` (a typed page set such as Activity: pass `page-schema-name`),
   `record-page-not-freedom` (a Classic page: create a Freedom UI page and its related-page add-on first),
@@ -186,7 +186,7 @@ environment and rows first (`core-rules`). Take every name from the result, neve
    ONLY when `dependencies.status` is `added` or `left-after-failure`; for `kept-for-leftovers` only after the
    leftovers are gone; `removed-after-failure` needs nothing.
 After `deactivatedCases`, also re-enable those cases (`modify-dynamic-case { enabled: true }`, alone, after the
-user's yes); the filter column the call set stays: `process-dynamic-case-change`.
+user's yes); the filter column the call set stays: `process-dynamic-case-filters`.
 
 Troubleshooting: no bar after F5 - the object has no enabled active-version case, or the feature
 `DisableEntityStageProgressBarPreprocessing` is ON on the environment (the bar is then not wired).
