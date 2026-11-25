@@ -73,7 +73,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
   matched by `uId`, else by caption, and one left out is REMOVED (the step that waited for it then starts with the
-  stage). A new step, e.g. `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft
+  stage). Send a kept step as its `uId` plus only what changes: every block sent rewrites it and lists it changed. A new step, e.g. `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft
   check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,
   "unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`; optional by default, a task of To do and
   Medium for the current user, linked to the record (a note says when tasks have no connection to the object). Only
