@@ -346,4 +346,35 @@ public sealed class SendEmailGuidanceTests
 			because: "Terrasoft.Core DataValueType.GetDisplayValue is value.ToString() for every text type, so changing the parameter type cannot change the outcome");
 	}
 
+	[Test]
+	[Description("An empty custom-body macro value is not substituted, and the send mode decides what replaces it: auto mails a blank, manual shows the macro's caption on yellow. The entry article states it with its evidence and the advice for a value that can be empty; the details article keeps the source path and the stand run behind it.")]
+	public void Guide_ShouldSayWhatAnEmptyBodyMacroValueBecomesInEachSendMode()
+	{
+		// Arrange
+		string guide = Regex.Replace(ReadGuide(), @"\s+", " ");
+		string details = Regex.Replace(
+			ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), DetailsArticle), @"\s+", " ");
+
+		// Act
+		const string rule = "AUTO drops it and mails a blank, with no error or warning; MANUAL puts the macro's caption on a yellow background (`[#Links#]` for a parameter captioned Links) into the email the performer opens";
+		const string evidence = "(CrtProcessDesigner 7.8.0 source and a stand run, 2026-11-25)";
+		const string advice = "So give a parameter that can be empty a fallback text in the step that sets it, or route around the email with a gateway.";
+		const string mechanism = "`ProcessEmailUserTaskMacrosWorker.Proceed` starts each macro from `GetDefaultMacrosValue`";
+		const string standRun = "auto stored `Links=;` and `Notes=;`";
+
+		// Assert
+		guide.Should().Contain(rule,
+			because: "the article was silent on empty values, so an agent assumed a blank in every mode and read a manual email's leftover [#Links#] as a hand-typed macro");
+		guide.Should().Contain(evidence,
+			because: "a behavioral claim names its evidence and when it was read (AGENTS.md)");
+		guide.Should().Contain(advice,
+			because: "nothing at build or run time reports an empty value, so the process has to supply the fallback itself");
+		details.Should().Contain(mechanism,
+			because: "the worker's per-mode default is the mechanism behind the rule (CrtProcessDesigner 7.8.0)");
+		details.Should().Contain(standRun,
+			because: "the auto-mode blank is a measured result, not only a reading of the source");
+		ShouldNotClaim(guide, @"as in template mode[^.]{0,120}literal", "process-send-email",
+			"the template-mode literal comes from another code path, and an auto email with a custom body mails a blank instead");
+	}
+
 }
