@@ -238,7 +238,7 @@ Wire it in three pieces — a button, a handler, and the same `dependencies`-sco
 guide describes over the JUNCTION entity:
 
 1. A `crt.Button` in the detail's toolbar whose `clicked` dispatches your own request, e.g.
-   `{ "request": "usr.AddExistingSkillsRequest" }`. A custom `usr.*` name is correct here: the platform has
+   `{ "request": "usr.AddExistingSkillsRequest" }`. A custom request name (the package's namespace, `page-schema-handlers` "Custom namespace") is correct here: the platform has
    no declarative request that both opens the window and writes the links, so a handler has to sit between.
    This button REPLACES the "Expanded list" composite's default header add button — it does not coexist with
    it. Either rebind the composite's own add button (point its `clicked` at the `usr.*` request) or remove it
@@ -348,6 +348,26 @@ When `filterAttributes` IS appropriate (NOT for record scoping)
   master-record scope. The designer emits these alongside `dependencies`, never instead of it. Use
   `dependencies` for "records that belong to the open record"; use `filterAttributes` only for a
   user-driven filter on top.
+
+Acting on the rows the user selected (row selection)
+- Checkboxes appear when the grid has `features.rows.selection: { "enable": true, "multiple": true }`
+  (the Designer sets it on every dropped list).
+- The selection lives in a page attribute that the grid binds with `selectionState`, by convention
+  `"selectionState": "$<GridName>_SelectionState"`. The Designer also writes
+  `"_selectionOptions": { "attribute": "<GridName>_SelectionState" }` (the same name, without `$`). Write both, so
+  the body has the shape the Designer gives it. A `crt.DataGrid` or `crt.ListWidget` whose body has the
+  `selectionState` binding but no `_selectionOptions` is NOT broken: at page load the platform derives
+  `_selectionOptions` from that binding and declares the attribute (creatio-ui commit `cc78bd8be9b`,
+  `DataGridSelectionOptionsBackwardCompatibilityPreprocessor`, since July 2023). Do not "fix" a missing
+  `_selectionOptions`: look for the cause in the handler or the button.
+- The attribute holds `{ "type": "specific", "selected": [<ids>] }`, or `{ "type": "all", "unselected": [<ids>] }`
+  after "select all" (`selection-state.model.ts`, same commit). Code that reads it (`await request.$context.<GridName>_SelectionState`) handles BOTH types; reading only
+  `selected` misses every "select all".
+- To act on the selected rows from a bulk action or a button, pass the selection as filters with the converter chain
+  `$<items> | crt.ToCollectionFilters : '<items>' : $<sel> | crt.SkipIfSelectionEmpty : $<sel>`.
+  `get-component-info component-type="crt.DataGrid"` owns the bulk-action recipe and how the runtime picks `<sel>`;
+  use it rather than a hand-written loop over the ids.
+- Verify selection-dependent behavior by selecting rows in a browser session; a body read-back cannot prove it.
 
 Common mistakes (these are why a detail shows ALL records or none — or the page will not render)
 - Inserting the `crt.ExpansionPanel` (or any wrapping container) without `"items": []` in its

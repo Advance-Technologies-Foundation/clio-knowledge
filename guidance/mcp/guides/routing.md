@@ -24,7 +24,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - a stage progress bar (crt.EntityStageProgressBar) shows only for an object with a case -> name=process-dynamic-case
   - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
     requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
-  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
+  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / widget-color-and-icon / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
   - a record's connections / "Connected to" block on a page -> name=page-modification-field-contract (CONNECTIONS ARE NOT INSERTED FIELDS) + get-component-info crt.Connections
@@ -129,9 +129,9 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-send-email-attachments (after name=process-send-email)
   - the Approval element — the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
-  - CALL a REST or SOAP web service registered in Studio > Web services from a process — the Call web service element
-    (`webService`; build it only when the FULL contract names it): service and method, request values, the response,
-    switching the method -> name=process-web-service; no registered service fits and clio lists
+  - CALL a REST or SOAP web service registered in Studio > Web services from a process: the Call web service element
+    (`webService`; build it only when the FULL contract names it): service, method, values, response, retarget ->
+    name=process-web-service; rare cases -> name=process-web-service-details; no service fits and clio lists
     `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
@@ -181,20 +181,21 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Data: raw ESQ queries or filter work -> name=esq AND name=esq-filters
   - esq-filters is the entry router; it selects name=esq-filters-frontend (JavaScript/page JSON/DataService), name=esq-filters-backend (native backend C# construction), or name=esq-filter-parsing (runtime C# interpretation)
   - DataService UpdateQuery with IsUpsert, update-or-insert, external-key matching, or duplicate-key handling -> name=dataservice-upsert
-  - lookup seeding / data bindings -> name=data-bindings
+  - lookup seeding / data bindings -> name=data-bindings; lookup value colors -> name=lookup-colors
   - create, change, or SHIP a system setting (sys-setting) -> name=sys-settings; a setting that package
-    code, pages or processes read must ship with that package as a binding pair, which sys-settings owns
-    (`SysSettings_<Code>` + `SysSettingsValue_<Code>`); add name=data-bindings for the binding mechanics
+    code, pages or processes read must ship with that package as a binding pair, which sys-settings owns;
+    add name=data-bindings for the binding mechanics
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
 - Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
   - implement application or session lifecycle hooks with IAppEventListener / AppEventListenerBase -> name=application-listener
+  - assembly package (own csproj/DLL), C# background job (IJobExecutor) -> name=assembly-package
   - backend localizable values, schema ownership, culture fallback, or localization tests -> name=localizable-values; for Freedom UI page resources also read name=page-schema-resources
   - create or test a Freedom UI Angular remote-module project with new-ui-project -> name=ui-project
   - integration tests / ATF.Repository / Allure / process tests -> name=integration-testing
-  - register, read, change or test-call a REST or SOAP web service in Studio > Web services (the service a Call web service element calls) -> name=web-service-registration; for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
+  - register or read a web service in Studio > Web services -> name=web-service-registration; test-call or change it -> name=web-service-maintenance; for a SOAP service (SOAP 1.1 / 1.2, a WSDL to read with read-wsdl, namespaces, message element, SOAP action, WS-Security header) also name=web-service-soap
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
