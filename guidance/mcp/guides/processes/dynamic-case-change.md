@@ -67,13 +67,13 @@ been written - describe the case before retrying. No compile or restart; F5.
 
 == Steps inside a stage ==
 - Needs clio <CLIO-STEPS-TBD> or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
-  and CrtProcessBuilder 1.6.6.201 (`install-process-builder` once the user approves it). Older: the case designer.
+  and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
 - Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `hasConditions`,
   `runningInstances`; a Perform task also `performer`, `activity`, `category`, `hint`, `useBackgroundMode`) and
   `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
   matched by `uId`, else by caption, and one left out is REMOVED (the step that waited for it then starts with the
-  stage). A kept step may be sent back as describe returns it: only what differs from the stored step changes. A new step, e.g. `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft
+  stage). A kept step may be sent back as describe returns it (its `name`, `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step, e.g. `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft
   check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,
   "unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`; optional by default, a task of To do and
   Medium for the current user, linked to the record (a note says when tasks have no connection to the object). Only

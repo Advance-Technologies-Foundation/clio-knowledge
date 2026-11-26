@@ -474,8 +474,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
         {
             guide.Should().MatchRegex($@"== Steps inside a stage == - Needs clio {ClioVersion} or later",
                 because: "steps ship with a clio release, and the guide publishes to every clio at once");
-            guide.Should().Contain("and CrtProcessBuilder 1.6.6.201",
-                because: "an older package refuses a stage's steps");
+            guide.Should().Contain("and CrtProcessBuilder 1.6.6.204",
+                because: "an older package refuses a stage's steps, or a step copied from describe");
+            guide.Should().Contain("A kept step may be sent back as describe returns it (its `name`, `hasConditions` and `runningInstances` are ignored)",
+                because: "the whole-list rule makes the agent copy a stage's other steps from describe");
             guide.Should().Contain("A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them",
                 because: "a stored step left out of the list is removed");
             guide.Should().Contain("`[#Record.<Column>#]`: a case has no process parameters (`step-value-source-unsupported`)",
@@ -487,8 +489,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the wire names of when a stage moves on are the package's");
             guide.Should().NotContain("`stage-has-steps` (it has steps",
                 because: "a removed stage now takes its steps with it; only an older package still answers stage-has-steps");
-            createGuide.Should().Contain("Steps inside stages (a Perform task: `process-dynamic-case-change`",
-                because: "a case is built without steps, and the change guide owns them");
+            createGuide.Should().Contain("Steps inside stages (a Perform task and a stage's `transitionType`: `process-dynamic-case-change`",
+                because: "a case is built without steps, and the change guide owns them and the stage's transition");
+            createGuide.Should().NotContain("transition rules",
+                because: "a stage's transitionType is set through modify-dynamic-case, not only in the designer");
         }
     }
 }
