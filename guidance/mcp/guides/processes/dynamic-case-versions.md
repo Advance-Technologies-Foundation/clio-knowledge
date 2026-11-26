@@ -42,8 +42,9 @@ the version it needs, and `install-process-builder`, once the user approves it (
    `transitionType` sent with it are refused: change them on the version afterwards (`modify-dynamic-case` by its
    `case-name`, or the case designer); and a case with steps gets a version only in its own package (or in the case
    designer). `stage-is-condition-target` (a step condition moves records to a stage the version removes): keep the
-   stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name` (send that
-   step's `conditions` without that stage, and remove the stage there), or keep the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
+   stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform
+   task, send that step's `conditions` without that stage together with the stages without it; for another step,
+   remove the step or change its conditions in the case designer on the version, then remove the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
    after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version; it is
    saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted
    already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further

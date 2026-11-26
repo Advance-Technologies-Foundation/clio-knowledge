@@ -783,7 +783,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "this is the only refusal of a stage removal that the steps cause, and its remedy is the package's in-place one");
             guide.Should().Contain("with `hasSteps` too, no version can be made (a case with steps gets one only in its own package): the case designer makes that change, say so before offering a version",
                 because: "a read-only package is answered by a version, which a case with steps cannot get outside its own package");
-            versions.Should().Contain("keep the stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name` (send that step's `conditions` without that stage, and remove the stage there), or keep the stage",
+            versions.Should().Contain("keep the stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform task, send that step's `conditions` without that stage together with the stages without it; for another step, remove the step or change its conditions in the case designer on the version, then remove the stage",
                 because: "on a new version the package answers a removed stage a step condition targets with the in-place change of the version");
             versions.Should().Contain("Never for a case with steps (`hasSteps`) in a package that is not editable",
                 because: "a case with steps gets a version only in its own package, so offering one there is a dead end");
