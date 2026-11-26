@@ -232,8 +232,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal).Should().BeLessThan(
                 guide.IndexOf("== Change an existing case ==", StringComparison.Ordinal),
                 because: "an agent on an older clio must meet the boundary before it reads how to call the tools");
-            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.211 or later on the environment: clio refuses an older one, naming the version it needs",
-                because: "the tools refuse an older package although the clio has them, and the floor is the one the versions need");
+            guide.Should().Contain("They also need a recent CrtProcessBuilder on the environment: clio refuses an older one, naming the version it needs",
+                because: "the tools refuse an older package although the clio has them; the clio names the floor it needs, so a released clio is never told to need a package it cannot install");
+            guide.Should().NotContain("1.6.6.211",
+                because: "only the version tools need 1.6.6.211, and their floor lives in process-dynamic-case-versions");
             guide.Should().Contain("`process-builder-without-case-change`",
                 because: "clio names this code, and the guide that owns describe and modify must give its remedy");
             createGuide.Should().Contain("Its twin for describe and modify, `process-builder-without-case-change`: `process-dynamic-case-change`",
