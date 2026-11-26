@@ -58,7 +58,9 @@ the generator recognises is a complex field whose runs are siblings in one parag
 With an argument: <Caption>[#Token|arg#]. A chain: <Caption>[#A#][#B|x#]. The pipe is written as is.
 - One configured column serves the bare field and every macro variant of it.
 - A mis-cased caption (`name` for `Name`) prints an empty field (measured).
-- No space before `[#`: `Name [#Upper#]` matches nothing and prints empty (measured).
+- No space before `[#`: `Name [#Upper#]` matches nothing and prints empty (measured). When a bare `Name` field comes
+  EARLIER in the template, it is worse: the whole document fails with HTTP 400 and an `ArgumentException` "An item
+  with the same key has already been added" in `WordReportGenerator.AddColumnToEntitySchemaQuery` (measured).
 - A macro needs a configured column. For a value that depends on none (today's date), add any column (for example
   `Id`) to the printable and write its caption before `[#`. Macros work on any column, not only `Id` (measured).
 - Tokens are case-sensitive: `[#upper#]` prints empty (measured). An unknown token alone or FIRST in a chain prints

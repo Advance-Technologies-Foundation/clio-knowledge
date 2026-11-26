@@ -49,7 +49,9 @@ Read before you change anything, and keep what you read as the baseline and the 
    Record the object, every column caption, every table part caption and its object.
 3. The field list the template may use: `clio call-service -e <env> --service-path
    rest/WordReportingDesignService/GetWordReportSettings -b '{"reportId":"<templateId>"}'` (CLI) returns the object
-   and table parts with their `MacrosCollection` (captions and paths). An unknown id answers 404.
+   and table parts with their `MacrosCollection` (captions and paths). An unknown id answers HTTP 404 with an empty
+   body, which `clio call-service` shows as no output at all with exit code 0 (clio 8.1.0.130, measured): empty output
+   means a wrong id, so take it from `list-printables`.
 4. The template: `GET /0/rest/WordReportingDesignService/DownloadReportTemplate/<templateId>` returns `File` as
    `<Caption>.docx`. MUST NOT download it with `clio call-service`: it decodes the body as text and the saved file is
    not a valid .docx (measured). Use an HTTP client from a shell (log in through `ServiceModel/AuthService.svc/Login`,

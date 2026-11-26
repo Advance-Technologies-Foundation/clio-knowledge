@@ -68,7 +68,7 @@ public sealed class WordPrintableGuidanceTests
                 because: "the requirement lists the canonical route next to the item id");
         }
 
-        routing.Should().Contain("- MS Word printable (build, change, ship, fix) -> name=word-printable",
+        routing.Should().Contain("- MS Word printables -> name=word-printable",
             because: "a printable task that is not about a page button must still find the entry guide");
         filesReport.Should().Contain(
             "Building or changing a printable (its columns, template, converter, package): `get-guidance name=word-printable`.",
@@ -88,6 +88,7 @@ public sealed class WordPrintableGuidanceTests
             "MUST write `MERGEFIELD` in upper case and follow the name with a switch",
             "Without a switch the field is replaced by an empty `w:fldSimple` and prints NOTHING",
             "No space before `[#`: `Name [#Upper#]` matches nothing and prints empty (measured).",
+            "When a bare `Name` field comes EARLIER in the template, it is worse: the whole document fails with HTTP 400",
             "The argument is the second non-empty `|`-separated segment",
             "With an argument: <Caption>[#Token|arg#]. A chain: <Caption>[#A#][#B|x#]. The pipe is written as is.",
             "BirthDate[#Date|yyyy-MM-dd#] printed 1986-01-20 (measured).",
@@ -155,7 +156,7 @@ public sealed class WordPrintableGuidanceTests
     }
 
     [Test]
-    [Description("Troubleshooting: errors are in Error.log, the trace is start/finish only, and rights are never widened without a yes.")]
+    [Description("Troubleshooting: errors are in Error.log, the trace counts table part records, and rights are never widened without a yes.")]
     public void Troubleshooting_ShouldStateWhereErrorsAreAndTheRightsRule()
     {
         // Arrange
@@ -165,6 +166,8 @@ public sealed class WordPrintableGuidanceTests
         string[] clauses =
         [
             "Generator errors do NOT go to `MSWordLog.log` (measured).",
+            "for each table part `Count of records for table part with Entity <TableCaption> is <n>` (all measured)",
+            "| `ArgumentException` \"An item with the same key has already been added\" in `WordReportGenerator.AddColumnToEntitySchemaQuery` |",
             "MUST reproduce with one record, AS the user who reported it",
             "MUST NOT widen object, column or record rights to make a printable fill"
         ];

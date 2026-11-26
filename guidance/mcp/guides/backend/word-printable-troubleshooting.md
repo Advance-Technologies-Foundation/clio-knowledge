@@ -22,9 +22,11 @@ the generator saw and could not fill; an untouched field with its placeholder is
 - `MSWordLog.log` is a trace, not an error log (verified on 10.2.444 and 10.3.1152 source and on a 10.3.1152 run;
   earlier versions unknown: an empty or missing file there proves nothing). Create feature `EnableMSWordLog` (it is
   not shipped) and turn it on;
-  a run then writes `Start generating report for template …` and `Finish generating report …` (measured), and image
-  load failures are logged there. A Start line with no Finish line means the run failed: read `Error.log` for the
-  reason. Turn the feature off again afterwards.
+  a run then writes `Start generating report for template …` and `Finish generating report …`, and for each table
+  part `Count of records for table part with Entity <TableCaption> is <n>` (all measured); image load failures are
+  logged there too. A Start line with no Finish line means the run failed: read `Error.log` for the reason. A count
+  of 0 means the table part query found no record the generating user can read. Turn the feature off again
+  afterwards.
 - On Creatio cloud there is no file to read: the logs go to the database log appender. Ask whoever operates the
   environment for the error entry.
 
@@ -35,10 +37,12 @@ the generator saw and could not fill; an untouched field with its placeholder is
 | `ItemNotFoundException` naming the printable's Id | the row is missing on this environment, or the user cannot read `SysModuleReport` | check the row; for rights, see Rights below |
 | `NullReferenceException` in `ExpressionConverterHelper.CreateExpressionConverter` | a converter that is not a top-level class in `Terrasoft.Configuration` (measured) | fix the namespace |
 | `NullReferenceException` in `WordFieldUtility.FillWordFieldsInElement` | a converter returned `null` (measured), or a hand-written `MacrosSettings` entry lacks `caption` / `metaPathCaption` | return `""`; restore both keys |
+| `ArgumentException` "An item with the same key has already been added" in `WordReportGenerator.AddColumnToEntitySchemaQuery` | a `<Caption> [#Token#]` field (a space before `[#`) after a bare `<Caption>` field (measured) | remove the space |
 | `NullReferenceException` when printing several records | a list or filter generation with a missing template Id | pass a `templateId` from `list-printables` |
 | error opening the template | `File` is empty or not a .docx | upload a .docx |
 | a field prints nothing | no switch after the name; a caption that does not match exactly (case included); a space before `[#`; an unknown or mis-cased token first in a chain; a detail field with no records | compare the field with `GetWordReportSettings` captions and the token with the converter's attribute |
 | a field stays a field with its placeholder | lower-case `mergefield`; a nested field; a field split by tracked changes, a hyperlink or a content control | re-insert it through the add-in or Insert -> Field |
+| a table prints one empty template row | its table part found no record the user can read: the trace counts 0 (measured) | count the detail records as an administrator; if they exist, see Rights below |
 | a field ignores the second macro | an unknown token later in a chain passes the value through | fix the token name |
 | a macro argument is lost | the argument is only the second non-empty pipe-separated segment | use one segment; split values with another separator |
 | values blank for a user, filled for an administrator | the generator reads the record, its joins and the table parts with the user's rights | name the objects and columns the user cannot read; see Rights below |
@@ -66,7 +70,7 @@ owner whether that user should see them, and change rights only after an explici
 | Name | Kind | Effect |
 |---|---|---|
 | `Use7xFiltersForWordReports` | feature, shipped on | `MacrosSettings` / `FilterSettings` are authoritative; off, the legacy `MacrosList` is read |
-| `EnableMSWordLog` | feature, not shipped | the start/finish trace in `MSWordLog.log` |
+| `EnableMSWordLog` | feature, not shipped | the trace in `MSWordLog.log`: start, finish, records per table part |
 | `DisableUnusedFieldsRemoval` | feature | keeps the placeholder of an empty bound picture |
 | `DisableFillingTableFieldsOutsideTables` | system setting, Boolean, not shipped | turns pass 3 off |
 | `IgnorePictureAspectRatio` | system setting | keeps the template's picture size |
