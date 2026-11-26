@@ -13,7 +13,7 @@ refusal of these tools whose fix changes a filter: relay it, the user picks the 
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here and
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
-`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.207 or later on the
+`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.208 or later on the
 environment: clio refuses an older one, naming the version it needs (`process-builder-without-case-change` when it
 has no such operation), and `install-process-builder`, once the user approves it (`core-rules`), is the remedy. An
 older clio (no `confirm-value-rename`) works the older way: its describe has no `records` (absent is not 0), and
@@ -65,8 +65,8 @@ removing a stage that records hold is not refused: count them with the data tool
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
-("Versions of a case"): running cases keep the version they started on. `stage-has-steps` (it has steps or a step
-condition targets it: the case designer), `package-read-only` (the case's package is not editable: offer the change
+("Versions of a case"): running cases keep the version they started on. `stage-is-condition-target` (a step
+condition moves records to that stage: change the step in the case designer first, or keep the stage), `package-read-only` (the case's package is not editable: offer the change
 as a new version in an editable package, "Versions of a case"), `invalid-request` for `enabled` on a case that is
 not the active version (name the active one the message gives) or for a case not of `entity-schema-name`,
 `not-in-version` (a first filter on a member that is not active: "Versions of a case"), `stage-list-duplicate` for
@@ -100,8 +100,9 @@ been written - describe the case before retrying. No compile or restart; F5.
    `modify-dynamic-case` (no `enabled`; running cases are not asked about: they keep their version). `package-name`
    left out: the case's own package when it is editable, otherwise refused `package-name-required`: ask the user which
    editable package. `dependencies-missing`: the package must depend on the packages the message names; add them only
-   after the user's yes. `steps-not-supported`: a case with steps gets a version only in its own package (or in the
-   case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
+   after the user's yes. `steps-not-supported`: a version copies the source's steps as they are, so steps or `transitionType`
+   sent with it are refused (change them on the version afterwards), and a case with steps gets a version only
+   in its own package (or in the case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
    after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version; it is
    saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted
    already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further
