@@ -6,8 +6,9 @@ their order, groups, captions and colours, the case caption, and whether it is e
 change saved as a new version (`modify-dynamic-case-as-new-version`) and the switch of the active one
 (`set-active-dynamic-case-version`). Building a case, the bar, the other refusals of `create-dynamic-case` and the
 undo: `process-dynamic-case`. Several cases on one object split by a lookup column (B2B and B2C orders with stages
-of their own), a `filter`, `remove-filter` or `deactivate-unfiltered`, and a filter refusal whose remedy is a
-filter change: read `process-dynamic-case-filters` first.
+of their own), a `filter`, `remove-filter` or `deactivate-unfiltered`: read `process-dynamic-case-filters` first. A
+refusal of these tools whose fix changes a filter: relay it, the user picks the fix, then read
+`process-dynamic-case-filters` before that fix's dry run.
 
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here and
@@ -48,14 +49,16 @@ removing a stage that records hold is not refused: count them with the data tool
    every one still missing: `running-instances-confirmation-required` (cases run: how many, in which stages; they
    continue, possibly on the stages as they were) -> `confirm-running-instances: true`;
    `stage-records-confirmation-required` (records hold a removed stage's value: all keep their data; those without
-   a running case show no current stage, one whose case runs keeps its version while it runs; for a version, once
+   a running case show no current stage while the case is enabled, and no bar of it while it is disabled (another
+   enabled case they fit shows its own); one whose case runs keeps its version while it runs; for a version, once
    it is active; relay the note's split) -> `confirm-stage-records: true`; `value-rename-confirmation-required`
-   (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`. Tell the user each reason, and
-   pass each flag only after they say yes to it, NEVER on your own.
+   (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`. Tell the user each
+   reason, and pass each flag only after they say yes to it, NEVER on your own.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
    nothing is deleted; new records start no case of it (one that fits another enabled case of the object starts
    that one); its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at
-   its record's next change of the stage or filter column (the note says so; tell the user before their yes).
+   its record's next change of the stage or filter column, and the record starts the enabled case it fits, or none
+   (the note says so; tell the user before their yes).
    Re-enabling next to another enabled case that would start for the same records: `case-exists` or
    `filter-overlap`; ask the user whether to disable that case first or keep this one disabled. A case without a filter while the cases are split by a column:
    `filter-required` (give it a filter first). `settings-conflict` on re-enabling: the object's case settings name
@@ -76,8 +79,9 @@ been written - describe the case before retrying. No compile or restart; F5.
 - Needs clio <CLIO-TBD> or later: if `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
   clio is older: tell the user to update clio, or to save the new version and make it actual in the case designer.
   An older clio's describe has no `versions`: a missing list there does not mean the case has no other version.
-- A version is a separate case schema of the case's family. At most one member is ACTIVE: new records start that one
-  (`process-versions` owns the version model). `describe-dynamic-case` takes any member by `case-name` / `case-uid`
+- A version is a separate case schema of the case's family. At most one member is ACTIVE: while the family is
+  enabled, new records start that one (if it has a filter, only those it is for; Package position, below, is the
+  exception; `process-versions` owns the version model). `describe-dynamic-case` takes any member by `case-name` / `case-uid`
   (one that is not active gets a note naming the active one; `entity-schema-name` reads the active one) and lists the
   family in `versions` (each member's package, `active`, running cases, link row); the list is absent for a case with
   no other version.
@@ -98,16 +102,21 @@ been written - describe the case before retrying. No compile or restart; F5.
    editable package. `dependencies-missing`: the package must depend on the packages the message names; add them only
    after the user's yes. `steps-not-supported`: a case with steps gets a version only in its own package (or in the
    case designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
-   after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version.
-   A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active
-   case and every record too - say so before the yes. A FIRST filter would set the object's filter column for every
+   after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version; it is
+   saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted
+   already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further
+   version). A stage value rename
+   (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active case and every
+   record too - say so before the yes; activating then changes no stage name on the bar or in the designer. A FIRST
+   filter would set the object's filter column for every
    case at once, so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case`
    first, or leave the version without one). The checks against the object's other cases run at activation; here
    they are notes.
    Outcomes: `version-created` with the inactive `version`; `failed-rolled-back`: nothing of the version stays;
    `failed-leftover` WITH a `version` (`version-number-taken` when another writer took its number): the version was
-   saved and is KEPT, named in `leftovers` with its link row - do not activate it, tell the user; no tool removes it,
-   the user can delete it in the case library; `failed-leftover` WITHOUT a `version`: nothing was saved, but a row or
+   saved and is KEPT, named in `leftovers` with its link row - do not activate it; relay `leftovers` in full (a value
+   left renamed stays renamed: offer to rename it back) and describe the family before telling the user what changed;
+   no tool removes the version; `failed-leftover` WITHOUT a `version`: nothing was saved, but a row or
    a value rename could not be undone - relay `leftovers` (a value left renamed: offer to rename it back); `unknown`:
    the reply was lost. After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes
    another version.
@@ -120,23 +129,26 @@ been written - describe the case before retrying. No compile or restart; F5.
    to the user; never guess a name. First `dry-run: true`; do not describe that member to prepare the switch (step
    2's check aside): the dry run checks it, and its notes count the records sitting in stages of the active version
    that it lacks; describe it (`case-name`) only when the user asks what it holds or which member they meant is
-   unclear. Asked for the switch ("switch orders to it")? That is the yes: notes only - switch, relay them with the
-   result; warnings - show them, wait for the yes. Not asked: step 3. `unchanged`: it is active already, nothing
-   written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`, `unfiltered-case-exists`,
-   `filter-required` (the family's own members do not count): the message says what conflicts and, except for
-   `settings-conflict` (the case designer settles it), how to fix it; relay it without describing again, and run a
-   fix that changes a filter (`process-dynamic-case-filters`) or disables another case only after the user's yes.
-   Tell the user what the switch does: new records start the active version (once the
-   family is enabled); a record with no running case shows it at once (no current stage if it holds a stage value
-   the version lacks); a running case keeps its version while it runs, and Change case on the record's page cancels
-   it and starts the enabled case the record fits, if any (with this family enabled and the record fitting it: the
-   new version, from its first stage, written into the record); open pages need F5. Relay the notes' split of the
-   records in stages the new version lacks, never "the records show no current stage".
+   unclear. Asked for the switch ("switch orders to it")? That is the yes: notes only - switch, relay every note in
+   full with the result; warnings - show them, wait for the yes. Not asked: step 3. `unchanged`: it is active
+   already, nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
+   `unfiltered-case-exists`, `filter-required` (the family's own members do not count): the message says what
+   conflicts and, except for `settings-conflict` (the case designer settles it), how to fix it; relay it without
+   describing again, and the user picks the fix; for one that changes a filter, read `process-dynamic-case-filters`
+   before its dry run; run a fix (a filter change, or disabling another case) only after the user's yes.
+   Tell the user what the switch does, for the records that fit the version's filter (if any): new ones start it once
+   the family is enabled (unless Package position, below, applies); while the family is enabled, one with no running
+   case shows the version at once (no current stage if it holds a stage value the version lacks); a running case
+   keeps its version while it runs, and Change case on the record's page cancels it and starts the enabled case the
+   record fits, if any (with this family enabled and the record fitting it: the new version, from its first stage,
+   written into the record); open pages need F5. Relay the notes' split of the records in stages the new version
+   lacks, never "the records show no current stage".
    - A disabled family is switched too, and starts nothing until `modify-dynamic-case { enabled: true }` on the
-     new active member, alone, after the user's yes. Until then a record without a running case shows no bar of it;
-     Change case cancels the record's running case and starts only an enabled case the record fits, never a version
-     of this family; and if another case of the object is enabled, the family's running cases are cancelled at their
-     record's next change of the stage or filter column (the notes say so).
+     new active member, alone, after the user's yes. Until then a record without a running case shows no bar of it
+     (an enabled case it fits shows its own); Change case cancels the record's running case and starts only an
+     enabled case the record fits, never a version of this family; and if another case of the object is enabled, the
+     family's running cases are cancelled at their record's next change of the stage or filter column, and the record
+     then starts the enabled case it fits, or none (the notes say so).
    - Package position: a version whose package ranks at or below a member in a non-editable package that still reads
      active may not become the one new records start (a warning at creation and in the dry run;
      `decidedByPackagePosition` names such members). The switch is then refused

@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.257",
+  "libraryVersion": "1.15.258",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2029,7 +2029,7 @@
     {
       "itemId": "process-dynamic-case-filters",
       "title": "Several dynamic cases on one object",
-      "description": "Needs clio 8.1.0.154 or later. Read after process-dynamic-case-change, before a filter, remove-filter or deactivate-unfiltered call, for a request to split an object's records into several dynamic cases (DCM) by a lookup column, or for a filter refusal whose remedy is a filter change. Owns several cases on one object: one filter column, filter {column, values | empty}, stages per case, from one unfiltered case (a filter on it, or deactivate-unfiltered after the user's yes), the filter refusals, the edit right, values no case is for, a filter affects only new records.",
+      "description": "Needs clio 8.1.0.154 or later. Read after process-dynamic-case-change, before a filter, remove-filter or deactivate-unfiltered call, for a request to split an object's records into several dynamic cases (DCM) by a lookup column, before the first answer to create-dynamic-case's unfiltered-case-exists, or, for another filter refusal, after relaying it and once the user picks a filter change, before its dry run. Owns several cases on one object: one filter column, filter {column, values | empty}, stages per case, from one unfiltered case (a filter on it, or deactivate-unfiltered after the user's yes), the filter refusals, the edit right, values no case is for, a filter affects only new records.",
       "topicId": "creatio.process-dynamic-case-filters",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-filters",

@@ -258,8 +258,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the bar and the designer show the value's name, so a stage renamed alone is shown nowhere (dev testing A6)");
             guide.Should().Contain("`value-rename-confirmation-required` (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`",
                 because: "a value rename shows on every record of the object, so the user agrees first");
-            guide.Should().Contain("`stage-records-confirmation-required` (records hold a removed stage's value: all keep their data; those without a running case show no current stage, one whose case runs keeps its version while it runs",
-                because: "a record with no running case loses its current stage (dev testing A13, measured), while a running case keeps showing its own version");
+            guide.Should().Contain("`stage-records-confirmation-required` (records hold a removed stage's value: all keep their data; those without a running case show no current stage while the case is enabled, and no bar of it while it is disabled (another enabled case they fit shows its own); one whose case runs keeps its version while it runs",
+                because: "measured: a record with no running case shows the bar with no current stage while the case is enabled (dev testing A13) and no bar of it while it is disabled (round 4, M2), and a running case keeps showing its own version; that another enabled case the record fits draws its own bar follows from the bar's source rule (the record's running case draws it) and was not measured");
             guide.Should().Contain("`records` (the records holding its value, finished cases included)",
                 because: "describe counts the records per stage, so the agent can tell the user before a removal");
             guide.Should().Contain("add it with the data tools first, only after the user agreed to that new value, never unasked",
@@ -288,8 +288,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "every confirmation flag stands for the user's own yes");
             guide.Should().Contain("new records start no case of it (one that fits another enabled case of the object starts that one)",
                 because: "a disabled case starts nothing, but a record that fits another enabled case of the object starts that case");
-            guide.Should().Contain("its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at its record's next change of the stage or filter column",
-                because: "measured on both stands: the platform cancels a disabled case's running instances when another case of the object is enabled (dev testing X7)");
+            guide.Should().Contain("its running cases continue, unless another case of the object stays enabled: then each is CANCELLED at its record's next change of the stage or filter column, and the record starts the enabled case it fits, or none",
+                because: "measured: the platform cancels a disabled case's running instances when another case of the object is enabled, at a change of the stage column (dev testing X7, round 4 M3) and of the filter column (round 5 M4, 2026-11-26), and the record then starts the enabled case it fits (M4) or none (M3)");
             guide.Should().Contain("goes ALONE (`invalid-request` otherwise)",
                 because: "switching a case on or off is a save of its own");
             guide.Should().Contain("`filter-overlap`; ask the user whether to disable that case first or keep this one disabled",
@@ -410,6 +410,16 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "every process article is named in routing, and a split request goes straight to its owner");
             changeGuide.Should().Contain($"read `{FiltersItemId}` first",
                 because: "the change guide every case run reads points at the filter rules it no longer carries");
+            changeGuide.Should().Contain($"A refusal of these tools whose fix changes a filter: relay it, the user picks the fix, then read `{FiltersItemId}` before that fix's dry run",
+                because: "a run met 'read the filters guide first' in the scope and 'relay the refusal' in the step, so the scope names the one order: relay, the user's pick, the read, the dry run");
+            changeGuide.Should().Contain($"relay it without describing again, and the user picks the fix; for one that changes a filter, read `{FiltersItemId}` before its dry run",
+                because: "the switch step names the same order as the scope, so neither line can be read as reading the filters guide before the refusal is relayed");
+            changeGuide.Should().NotContain("a filter refusal whose remedy is a filter change: read",
+                because: "that scope line told the agent to read the filters guide before relaying the refusal");
+            resource.GetProperty("description").GetString().Should().Contain("or, for another filter refusal, after relaying it and once the user picks a filter change, before its dry run",
+                because: "the catalog entry names the same order as the change guide, and keeps the read before the first answer that create's unfiltered-case-exists needs");
+            resource.GetProperty("description").GetString().Should().Contain("before the first answer to create-dynamic-case's unfiltered-case-exists",
+                because: "the filters guide's first answer to that refusal offers the case designer's two ways, each with its dry run, so it is read before that answer");
             changeGuide.Should().NotContain("== Several cases on one object ==",
                 because: "the filter rules have one owner, so they cannot drift apart");
             filters.Should().Contain("Split out of `process-dynamic-case-change`",
@@ -501,8 +511,14 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "turning the existing case off changes which case new records start; the user decides");
             guide.Should().Contain("(1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then `create-dynamic-case { filter, stages }` for the others; nothing is disabled",
                 because: "the designer's first way keeps the existing case for its values and disables nothing");
-            guide.Should().Contain("disables that case: new records start only the filtered cases, and each running case of it is CANCELLED at its record's next status change",
-                because: "measured on a stand: after deactivate-unfiltered both running cases of the disabled case were Canceled at their record's next status change");
+            guide.Should().Contain("disables that case: new records start only the filtered cases, and each running case of it is CANCELLED at its record's next change of the stage or filter column",
+                because: "measured on a stand: after deactivate-unfiltered both running cases of the disabled case were Canceled at their record's next status change, and a change of the filter column alone cancels such a case too (round 5, M4, 2026-11-26)");
+            guide.Should().NotContain("next status change",
+                because: "a change of the filter column cancels the disabled case's running instance before any status change (round 5, M4, 2026-11-26)");
+            guide.Should().Contain("its records start no case, and one without a running case shows no stage bar",
+                because: "measured: a record still running a case of a disabled family keeps that case's bar (round 4, M2 control)");
+            guide.Should().Contain("A record whose filter value changes keeps its case while that case is enabled",
+                because: "measured: a filter-value change cancels a disabled case's running instance when another case of the object is enabled (round 5, M4, 2026-11-26), while an enabled case keeps running");
             guide.Should().Contain("starts the filtered case its value fits, in its current status, or none",
                 because: "measured: the B2B record started the B2B case at its new status, the B2C record was left without a case");
             guide.Should().Contain("Say so, with the running count from describe, before the user chooses",
@@ -530,7 +546,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("right to edit `SysDcmSettings` records",
                 because: "the first filter sets the filter column on the case settings with the caller's rights");
             guide.Should().Contain("There is no catch-all case",
-                because: "records of a value no case is for start no case and show no bar");
+                because: "records of a value no case is for start no case, and one without a running case shows no bar");
             guide.Should().Contain("A filter decides only which NEW records start a case: running cases continue",
                 because: "a filter added to a case does not move the records already going through it");
             guide.Should().Contain("`askUserToChangeSchema`", because: "the bar's switch offer is a page change the user may want");
@@ -574,23 +590,33 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only after their yes",
                 because: "every write makes one more version that no tool removes");
             guide.Should().Contain("NOT idempotent: every write makes one more version, and the toolkit cannot delete a version",
-                because: "a saved version is kept even when the call fails after the save, and the platform can delete a version while the toolkit cannot, so an agent must not claim a version can never be removed");
+                because: "a saved version is kept even when the call fails after the save, and no clio tool removes one");
+            guide.Should().Contain("it is saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further version)",
+                because: "a run presented a new version as irreversible, while new records keep starting the active case until a switch and a member that is not active is changed in place; a confirmed value rename is written before the save, so the version is not free of effect");
+            guide.Should().Contain("say so before the yes; activating then changes no stage name on the bar or in the designer",
+                because: "a run gave the rename as a reason to activate, while the bar and the designer show the value's name, renamed at the write (dev testing A6); other surfaces were not measured");
             guide.Should().Contain("A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active case and every record too - say so before the yes",
                 because: "a lookup value rename is written at once, not at activation");
             guide.Should().Contain("so it is refused `not-in-version` (set the filter on the active case with `modify-dynamic-case` first, or leave the version without one)",
                 because: "a first filter sets the object-wide filter column, which would split the live cases at once");
             guide.Should().Contain("the version was saved and is KEPT, named in `leftovers` with its link row - do not activate it",
                 because: "a failure after the save keeps the version, and it may read back wrong");
-            guide.Should().Contain("no tool removes it, the user can delete it in the case library",
-                because: "the toolkit has no case deletion, and the case library's removal is the user's way to drop it");
+            guide.Should().Contain("do not activate it; relay `leftovers` in full (a value left renamed stays renamed: offer to rename it back) and describe the family before telling the user what changed; no tool removes the version;",
+                because: "a confirmed value rename stays on failed-leftover and is listed in leftovers, and this outcome is also reached when the saved version reads as active or the save flipped the family's enabled flag, so the agent reads the family before saying what changed; the toolkit has no case deletion");
+            guide.Should().NotContain("in the case library",
+                because: "the case library hides Delete on its rows and on its Versions tab (VwDcmLibSection, ProcessVersionsDetail.getDeleteRecordMenuItem), so the guide names no deletion route there");
             guide.Should().Contain("After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version",
                 because: "a retry after a saved or possibly saved version adds one more version");
             guide.Should().Contain("`entity-schema-name`: the schema name or the user's word (a unique caption is resolved). `entity-not-found` or several matches list `Name (caption)` candidates: pick one or ask. None listed (older package): `find-entity-schema`",
                 because: "the package resolves a unique caption, so a find-entity-schema call first only adds a call; candidates replace the search, which stays for an older package");
-            guide.Should().Contain("Asked for the switch (\"switch orders to it\")? That is the yes: notes only - switch, relay them with the result; warnings - show them, wait for the yes. Not asked: step 3",
-                because: "the owner decided that a request to switch is the consent after a dry run without warnings, while a version only created still needs its own question");
-            guide.Should().Contain("new records start the active version (once the family is enabled)",
-                because: "a disabled family starts nothing whichever member is active");
+            guide.Should().Contain("Asked for the switch (\"switch orders to it\")? That is the yes: notes only - switch, relay every note in full with the result; warnings - show them, wait for the yes. Not asked: step 3",
+                because: "the owner decided that a request to switch is the consent after a dry run without warnings, while a version only created still needs its own question; a run that condensed a note dropped its sentences about the records they applied to");
+            guide.Should().Contain("Tell the user what the switch does, for the records that fit the version's filter (if any): new ones start it once the family is enabled (unless Package position, below, applies)",
+                because: "a disabled family starts nothing whichever member is active, and a filtered version starts only for the records its filter is for (a run told the user every new record starts the new version)");
+            guide.Should().Contain("At most one member is ACTIVE: while the family is enabled, new records start that one (if it has a filter, only those it is for; Package position, below, is the exception;",
+                because: "the version model names the active member as the one new records start, which holds only while the family is enabled, only for the values of its filter, and only where no member outranks it by package position");
+            guide.Should().NotContain("new records start the active version",
+                because: "that sentence holds only for an enabled family and for the records the version's filter is for");
             guide.Should().Contain("`version-not-found`: describe the case by its object (`entity-schema-name`) and name the family's `versions` to the user; never guess a name",
                 because: "a run that left for find-app after version-not-found never named the existing versions");
             guide.Should().Contain("give the user its `designerUrl`",
@@ -611,16 +637,16 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "settings-conflict and the first filter-required branch name no other case");
             guide.Should().Contain("a running case keeps its version while it runs, and Change case on the record's page cancels it and starts the enabled case the record fits, if any (with this family enabled and the record fitting it: the new version, from its first stage, written into the record); open pages need F5",
                 because: "a switch never migrates running cases, and Change case starts only an enabled case the record fits (measured)");
-            guide.Should().Contain("a record with no running case shows it at once (no current stage if it holds a stage value the version lacks)",
-                because: "a record without a running case follows the active version at the switch itself (measured)");
+            guide.Should().Contain("while the family is enabled, one with no running case shows the version at once (no current stage if it holds a stage value the version lacks)",
+                because: "measured: a record without a running case follows the active version at the switch itself while the family is enabled, and shows no bar of it while it is disabled (round 4, M2)");
             guide.Should().Contain("never \"the records show no current stage\"",
                 because: "only records without a running case lose their current stage");
             guide.Should().Contain("Change case cancels the record's running case and starts only an enabled case the record fits, never a version of this family",
                 because: "the package's note: a disabled family is never started by Change case");
-            guide.Should().Contain("the family's running cases are cancelled at their record's next change of the stage or filter column",
-                because: "a case is re-evaluated on a change of either column");
-            guide.Should().Contain("Until then a record without a running case shows no bar of it;",
-                because: "a disabled family draws no bar for a caseless record and Change case starts none of its versions (measured)");
+            guide.Should().Contain("the family's running cases are cancelled at their record's next change of the stage or filter column, and the record then starts the enabled case it fits, or none",
+                because: "measured: a change of the stage column (round 4, M3) or of the filter column (round 5, M4, 2026-11-26) cancels a disabled family's running case while another case of the object is enabled, and the record then starts the enabled case it fits (M4) or none (M3)");
+            guide.Should().Contain("Until then a record without a running case shows no bar of it (an enabled case it fits shows its own);",
+                because: "a disabled family draws no bar for a caseless record, and Change case starts none of its versions (measured, round 4 M2); that another enabled case the record fits draws its own bar follows from the bar's source rule (the record's running case draws it) and was not measured");
             guide.Should().Contain("A disabled family is switched too, and starts nothing until `modify-dynamic-case { enabled: true }` on the new active member, alone, after the user's yes",
                 because: "activation does not change enabled, so a disabled family stays silent after the switch");
             guide.Should().Contain("may not become the one new records start",

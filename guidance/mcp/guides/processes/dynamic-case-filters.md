@@ -23,8 +23,8 @@ every confirmation; read it first. This article owns the filter rules of `modify
   (1) keep the existing stages for some values: `modify-dynamic-case { filter }` on that case, then
   `create-dynamic-case { filter, stages }` for the others; nothing is disabled. (2) turn the existing stages off:
   `create-dynamic-case { filter, stages, deactivate-unfiltered: true }` disables that case: new records start only
-  the filtered cases, and each running case of it is CANCELLED at its record's next status change; the record then
-  starts the filtered case its value fits, in its current status, or none. Say so, with the running count from
+  the filtered cases, and each running case of it is CANCELLED at its record's next change of the stage or filter
+  column; the record then starts the filtered case its value fits, in its current status, or none. Say so, with the running count from
   describe, before the user chooses. Pass `deactivate-unfiltered` ONLY after the user chose (2), never on your own.
   Undoing (2) (the undo in `process-dynamic-case`) also re-enables that case (cancelled cases stay cancelled):
   `modify-dynamic-case { enabled: true }`, alone, after the user's yes. The filter column the create set stays (no
@@ -40,9 +40,9 @@ every confirmation; read it first. This article owns the filter rules of `modify
 - The first filter sets the filter column on the object's case settings (`settings.filterColumnSet`): from then on
   every case of the object needs one. A call with a filter needs the right to edit `SysDcmSettings` records too
   (`rights-missing` otherwise).
-- A value no enabled case is for (a note names it): its records start no case and show no stage bar. There is no
-  catch-all case; a type that should have no stages gets no case: create nothing and say so.
+- A value no enabled case is for (a note names it): its records start no case, and one without a running case shows
+  no stage bar. There is no catch-all case; a type that should have no stages gets no case: create nothing and say so.
 - A filter decides only which NEW records start a case: running cases continue, and an existing record without a
   case gets the matching one at its next change of the stage or filter column. A record whose filter value changes
-  keeps its case. The record page is not changed: the bar switches to the matching case only when its
+  keeps its case while that case is enabled. The record page is not changed: the bar switches to the matching case only when its
   `askUserToChangeSchema` is true; offer that page change, do not make it unasked.

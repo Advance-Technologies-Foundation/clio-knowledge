@@ -82,7 +82,8 @@ on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dy
   `{"value":"Rejected","group":"Approved","successful":false}`; else `stage-group-invalid`.
 - A value named twice and an unknown or ambiguous value are refused (`stage-list-duplicate`,
   `stage-value-unknown`, `stage-value-ambiguous`). A value left out of `stages` is not a stage (clio 8.1.0.154+;
-  older: `stage-list-incomplete`): a note names it, and a record holding it shows no current stage. Tell the user.
+  older: `stage-list-incomplete`): a note names it, and a record holding it that runs no case shows no current
+  stage. Tell the user.
 
 == What one call writes ==
 - The case schema in the package: one EMPTY stage per value (`Stage1..N`, caption = the display value, colour
@@ -111,7 +112,7 @@ on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dy
 
 == Tell the user (relay the notes) ==
 - Existing records get a case on their next change of the stage column; new records start one on insert. A record
-  whose stage column is empty, or holds a value that is not a stage, shows no current stage. Offer (do not do it
+  that runs no case and whose stage column is empty, or holds a value that is not a stage, shows no current stage. Offer (do not do it
   unasked) to set the column's default to the first stage with the entity tools.
 - The lookup values are referenced by Id and NOT bound to the package: another environment needs the same value
   Ids. A value added to the lookup LATER has no stage until the case is changed (`process-dynamic-case-change`).
