@@ -5,9 +5,10 @@ Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` an
 their order, groups, captions and colours, the steps inside a stage and when it moves on, the case caption, and
 whether it is enabled. Make the change as a new version or switch the active one: read
 `process-dynamic-case-versions` first. Building a case, the bar, the other refusals of
-`create-dynamic-case` and the undo: `process-dynamic-case`. Several cases on one object split by a lookup column (B2B
-and B2C orders with stages of their own), a `filter`, `remove-filter` or `deactivate-unfiltered`: read
-`process-dynamic-case-filters` first. A refusal of these tools whose fix changes a filter: relay it, the user picks
+`create-dynamic-case` and the undo: `process-dynamic-case`. Sending `filter`, `remove-filter` or
+`deactivate-unfiltered`, or splitting an object's records into cases by a lookup column (B2B and B2C orders with
+stages of their own): read `process-dynamic-case-filters` first; a stage change on one of several filtered cases
+does not need it. A refusal of these tools whose fix changes a filter: relay it, the user picks
 the fix, then read `process-dynamic-case-filters` before that fix's dry run.
 
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or

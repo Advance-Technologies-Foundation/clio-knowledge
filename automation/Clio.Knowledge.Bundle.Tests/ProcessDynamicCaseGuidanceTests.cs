@@ -352,18 +352,18 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the get-guidance catalog shows the boundary before the article is opened");
             createResource.GetProperty("description").GetString().Should().Contain(ChangeItemId,
                 because: "the catalog entry of the create guide must not advertise only create");
-            routing.Should().Contain("an object with a case: read, change (stages, order, groups), disable/re-enable it",
+            routing.Should().Contain("a case: read or change stages, disable/enable it",
                 because: "a change request read both case guides after the words naming what a change touches were dropped");
-            routing.Should().Contain($"disable/re-enable it -> name={ChangeItemId}; a new version or the active one -> name={CaseVersionsItemId}",
-                because: "a case version request must reach the case guide, not the process version row");
+            routing.Should().Contain($"disable/enable it -> name={ChangeItemId}; switch versions -> name={CaseVersionsItemId}; change as a new version: both in one message;",
+                because: "a case version request must reach the case guide, not the process version row; a switch needs only the versions guide, and a run that made a change as a new version read the second guide in a call of its own");
             resource.GetProperty("description").GetString().Should().NotContain("names the conflicting case",
                 because: "settings-conflict and other refusals of the switch name no other case");
             resource.GetProperty("description").GetString().Should().Contain("(set-active-dynamic-case-version): process-dynamic-case-versions",
                 because: "a version request that reaches the change guide's catalog entry must find the version tools and the guide that owns them");
-            routing.Should().Contain($"split its records into cases by type (B2B/B2C orders) -> name={FiltersItemId}",
-                because: "a request for different stages per type must reach the guide that owns filters");
-            routing.Should().Contain("set up on an object with no case yet, or only asked about",
-                because: "change and disable requests matched both rows and took a hop through the create guide");
+            routing.Should().Contain($"send filter, remove-filter or deactivate-unfiltered, or split by type (B2B/B2C) -> name={FiltersItemId}",
+                because: "a request for different stages per type must reach the guide that owns filters, and a run read it for a stage change that sent no filter");
+            routing.Should().Contain("DCM: first describe-dynamic-case, even if unsure one exists (pass the user's word for the object, `find-entity-schema` if not found). None, or only asked about -> name=process-dynamic-case",
+                because: "change and disable requests matched both rows and took a hop through the create guide, a run that could not tell whether a case existed read the create guide too, and a run searched find-entity-schema before describing by the user's word, then described every match");
             Regex.Matches(routing, $"name={ChangeItemId}\\b").Count.Should().BeGreaterThanOrEqualTo(1,
                 because: "routing is what an agent reads first");
             createGuide.Should().Contain($"`{ChangeItemId}`", because: "the create guide hands changes and filters over");
@@ -414,6 +414,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "every process article is named in routing, and a split request goes straight to its owner");
             changeGuide.Should().Contain($"read `{FiltersItemId}` first",
                 because: "the change guide every case run reads points at the filter rules it no longer carries");
+            changeGuide.Should().Contain($"Sending `filter`, `remove-filter` or `deactivate-unfiltered`, or splitting an object's records into cases by a lookup column (B2B and B2C orders with stages of their own): read `{FiltersItemId}` first; a stage change on one of several filtered cases does not need it.",
+                because: "a run read the filters guide for a stage change that sent no filter, so the trigger is the action, not the object having filtered cases");
             changeGuide.Should().Contain($"A refusal of these tools whose fix changes a filter: relay it, the user picks the fix, then read `{FiltersItemId}` before that fix's dry run",
                 because: "a run met 'read the filters guide first' in the scope and 'relay the refusal' in the step, so the scope names the one order: relay, the user's pick, the read, the dry run");
             ReadCollapsed(CaseVersionsArticlePath).Should().Contain($"relay it without describing again, and the user picks the fix; for one that changes a filter, read `{FiltersItemId}` before its dry run",
@@ -476,7 +478,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the catalog entry must show that the guide owns the switch");
             guide.Should().NotContain(ProcessGuideSet.SetBanner,
                 because: "a banner obliges process-modeling to index the guide, and that article has no room left");
-            routing.Should().Contain($"a new version or the active one -> name={CaseVersionsItemId}",
+            routing.Should().Contain($"switch versions -> name={CaseVersionsItemId}",
                 because: "routing names every process article, so version work goes straight to the guide that owns it");
             changeGuide.Should().Contain($"Make the change as a new version or switch the active one: read `{CaseVersionsItemId}` first",
                 because: "the change guide every case run reads points at the version rules it no longer carries");
@@ -490,6 +492,14 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the split article names the entry point that owns describing, changing and every confirmation");
             versions.Should().Contain("with the shapes and the confirmations of `modify-dynamic-case` (`process-dynamic-case-change`;",
                 because: "the version tool takes modify's shapes and confirmations, which the change guide owns");
+            versions.Should().Contain("`stages` is the WHOLE new list, as there: send every stage, a renamed one too; a stage left out is removed.",
+                because: "a run sent only the renamed stage to the new-version call after the WHOLE-list rule moved out of the guide it read for that call");
+            versions.Should().Contain("A switch of the active version needs nothing from it; a change made as a new version needs both articles: read them together, in one message.",
+                because: "the scope said to read the change guide first while routing sends a switch straight here, and a change made as a new version read the second guide in a call of its own");
+            versions.Should().NotContain("`modify-dynamic-case`; read it first",
+                because: "a switch needs nothing from the change guide, so the scope names no reading order that routing contradicts");
+            description.Should().Contain("switches its active version (this guide alone) or a change is made as a new version (together with process-dynamic-case-change, in one message)",
+                because: "the catalog entry names the same reading order as routing and the scope");
         }
     }
 
@@ -504,8 +514,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            routing.Should().Contain($"which one runs (not an object's stages: name={CaseVersionsItemId}), or editing or launching ANY existing process",
+            routing.Should().Contain("which one runs (not a DCM: first row), or editing or launching ANY existing process",
                 because: "the process version row matched \"switch orders to the new flow\" and sent the agent to the process version model");
+            ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), RoutingPath).Split('\n').Single(line => line.Contains("which VERSION of a process")).Should().NotContain(CaseVersionsItemId,
+                because: "a run read process-versions after the exclusion in its row named process-dynamic-case-versions, a name that reads as a sub-guide of process-versions");
             versions.Should().Contain($"Versions of a dynamic case (an object's stages or status flow) are not here: `{CaseVersionsItemId}`.",
                 because: "an agent that reached the process version guide anyway is sent back at its first lines");
         }
@@ -664,8 +676,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "run 5 told the user a version cannot be deleted, while delete-schema with remote plus the link-row binding removal deleted inactive versions on the stand; only the case tools and the Case library offer no deletion");
             guide.Should().NotContain("cannot delete a version",
                 because: "an inactive version can be removed the way a case is undone");
-            guide.Should().Contain("it is saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further version)",
-                because: "a run presented a new version as irreversible, while new records keep starting the active case until a switch and a member that is not active is changed in place; a confirmed value rename is written before the save, so the version is not free of effect");
+            guide.Should().Contain("it is saved inactive, so until a switch the new records the active case's filter fits (every new record when it has none) keep starting the active case while the family is enabled (a confirmed value rename has acted already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further version)",
+                because: "a run presented a new version as irreversible, while new records keep starting the active case until a switch (only those its filter fits, and only while the family is enabled) and a member that is not active is changed in place; a confirmed value rename is written before the save, so the version is not free of effect");
             guide.Should().Contain("say so before the yes; activating then changes no stage name on the bar or in the designer",
                 because: "a run gave the rename as a reason to activate, while the bar and the designer show the value's name, renamed at the write (dev testing A6); other surfaces were not measured");
             guide.Should().Contain("A stage value rename (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active case and every record too - say so before the yes",
@@ -682,8 +694,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a retry after a saved or possibly saved version adds one more version");
             changeGuide.Should().Contain("`entity-schema-name`: the schema name or the user's word (a unique caption is resolved). `entity-not-found` or several matches list `Name (caption)` candidates: pick one or ask. None listed (older package): `find-entity-schema`",
                 because: "the package resolves a unique caption, so a find-entity-schema call first only adds a call; candidates replace the search, which stays for an older package");
-            guide.Should().Contain("Asked for the switch (\"switch orders to it\")? That is the yes: notes only - switch, relay every note in full with the result; warnings - show them, wait for the yes. Not asked: step 3",
-                because: "the owner decided that a request to switch is the consent after a dry run without warnings, while a version only created still needs its own question; a run that condensed a note dropped its sentences about the records they applied to");
+            guide.Should().Contain("Asked for the switch (\"switch orders to it\")? That is the yes: notes only - switch; with the result, relay every note sentence about the user's records as written, none dropped or merged (a tool call in a note is for you: offer it as the user's next step in plain words); warnings - show them, wait for the yes. Not asked: step 3",
+                because: "the owner decided that a request to switch is the consent after a dry run without warnings, while a version only created still needs its own question; a run that condensed a note dropped its sentences about the records they applied to, so the rule names what is relayed as written, and a note addressed to the agent is said as the user's step");
+            guide.Should().NotContain("relay every note in full",
+                because: "two runs condensed the notes under that rule, and the test case accepted the summary, so the rule was not followable");
             guide.Should().Contain("Tell the user what the switch does, for the records that fit the version's filter (if any): new ones start it once the family is enabled (unless Package position, below, applies)",
                 because: "a disabled family starts nothing whichever member is active, and a filtered version starts only for the records its filter is for (a run told the user every new record starts the new version)");
             guide.Should().Contain("At most one member is ACTIVE: while the family is enabled, new records start that one (if it has a filter, only those it is for; Package position, below, is the exception)",

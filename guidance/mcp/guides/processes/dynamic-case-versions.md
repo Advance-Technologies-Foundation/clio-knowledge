@@ -2,8 +2,9 @@ clio MCP process-dynamic-case-versions guide - make a new version of a dynamic c
 
 Scope
 Split out of `process-dynamic-case-change`, which owns describing and changing a case, the shapes of `stages`
-and `caption`, and every confirmation of `modify-dynamic-case`; read it first. A `filter` or `remove-filter`:
-`process-dynamic-case-filters`. This article owns a case's
+and `caption`, and every confirmation of `modify-dynamic-case`. A switch of the active version needs nothing from it;
+a change made as a new version needs both articles: read them together, in one message. A `filter` or
+`remove-filter`: `process-dynamic-case-filters`. This article owns a case's
 versions: the `versions` list of `describe-dynamic-case`, a member that is not active changed in place, a change
 saved as a new version (`modify-dynamic-case-as-new-version`) and the switch of the active one
 (`set-active-dynamic-case-version`).
@@ -35,7 +36,8 @@ the version it needs, and `install-process-builder`, once the user approves it (
    package-name?, stages?, caption?, filter?, remove-filter?, confirm-stage-records?, confirm-value-rename?, dry-run?
    }` copies the family's ACTIVE member (another member is refused, naming the active one) into a new version that is
    NOT active, and applies `stages`, `caption` and `filter` to it with the shapes and the confirmations of
-   `modify-dynamic-case` (`process-dynamic-case-change`; `filter` or `remove-filter`: MUST read `process-dynamic-case-filters` first; no `enabled`; running cases are not asked about: they keep their version). `package-name`
+   `modify-dynamic-case` (`process-dynamic-case-change`; `filter` or `remove-filter`: MUST read `process-dynamic-case-filters` first; no `enabled`; running cases are not asked about: they keep their version). `stages` is the WHOLE
+   new list, as there: send every stage, a renamed one too; a stage left out is removed. `package-name`
    left out: the case's own package when it is editable, otherwise refused `package-name-required`: ask the user which
    editable package. `dependencies-missing`: the package must depend on the packages the message names; add them only
    after the user's yes. `steps-not-supported`: a version copies the source's steps as they are, so steps or
@@ -46,8 +48,9 @@ the version it needs, and `install-process-builder`, once the user approves it (
    task, send that step's `conditions` without that stage together with the stages without it; for another step,
    remove the step or change its conditions in the case designer on the version, then remove the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
    after their yes. NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes); it is
-   saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted
-   already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further
+   saved inactive, so until a switch the new records the active case's filter fits (every new record when it has
+   none) keep starting the active case while the family is enabled (a confirmed value rename has acted already,
+   below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further
    version). A stage value rename
    (`confirm-value-rename`) acts AT ONCE, not at activation: it renames the value for the active case and every
    record too - say so before the yes; activating then changes no stage name on the bar or in the designer. A FIRST
@@ -72,8 +75,9 @@ the version it needs, and `install-process-builder`, once the user approves it (
    to the user; never guess a name. First `dry-run: true`; do not describe that member to prepare the switch (step
    2's check aside): the dry run checks it, and its notes count the records sitting in stages of the active version
    that it lacks; describe it (`case-name`) only when the user asks what it holds or which member they meant is
-   unclear. Asked for the switch ("switch orders to it")? That is the yes: notes only - switch, relay every note in
-   full with the result; warnings - show them, wait for the yes. Not asked: step 3. `unchanged`: it is active
+   unclear. Asked for the switch ("switch orders to it")? That is the yes: notes only - switch; with the
+   result, relay every note sentence about the user's records as written, none dropped or merged (a tool call in a
+   note is for you: offer it as the user's next step in plain words); warnings - show them, wait for the yes. Not asked: step 3. `unchanged`: it is active
    already, nothing written. Refused before any write: `settings-conflict`, `case-exists`, `filter-overlap`,
    `unfiltered-case-exists`, `filter-required` (the family's own members do not count): the message says what
    conflicts and, except for `settings-conflict` (the case designer settles it), how to fix it; relay it without
