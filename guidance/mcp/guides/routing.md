@@ -153,7 +153,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
   - which VERSION of a process you are reading or which one runs (not an object's stages:
-    name=process-dynamic-case-change), or editing or launching ANY existing process -> name=process-versions first (a handed code is usually the family root, which does not
+    name=process-dynamic-case-versions), or editing or launching ANY existing process -> name=process-versions first (a handed code is usually the family root, which does not
     run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
     re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
     it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can

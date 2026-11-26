@@ -13,7 +13,7 @@ the fix, then read `process-dynamic-case-filters` before that fix's dry run.
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here and
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
-`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.210 or later on the
+`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.211 or later on the
 environment: clio refuses an older one, naming the version it needs (`process-builder-without-case-change` when it
 has no such operation), and `install-process-builder`, once the user approves it (`core-rules`), is the remedy. An
 older clio (no `confirm-value-rename`) works the older way: its describe has no `records` (absent is not 0), and
@@ -26,7 +26,8 @@ removing a stage that records hold is not refused: count them with the data tool
    value, finished cases included), `steps` and `transitionType` ("Steps inside a stage"), and `enabled`.
    `packageReadOnly: true` (the package is not editable): a change to
    its stages, captions or filter goes straight to a new version (`process-dynamic-case-versions`), never through step 2
-   (`package-read-only`). Several cases on the object: name one with `case-name` (modify by object answers
+   (`package-read-only`); with `hasSteps` too, no version can be made (a case with steps gets one only in its own
+   package): the case designer makes that change, say so before offering a version. Several cases on the object: name one with `case-name` (modify by object answers
    `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the designer show the value's name,
    not the stage caption; a rename (step 2) fixes it. `entity-schema-name`: the schema name or the user's word (a
    unique caption is resolved). `entity-not-found` or several matches list `Name (caption)` candidates: pick one or
@@ -67,8 +68,9 @@ removing a stage that records hold is not refused: count them with the data tool
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
-(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (a step
-condition moves records to it): the case designer, or keep the stage; `package-read-only` (the case's package is not editable: offer the change
+(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (a kept step's condition moves records to it): a Perform task: send that step's
+`conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the
+stage; `package-read-only` (the case's package is not editable: offer the change
 as a new version in an editable package, `process-dynamic-case-versions`), `invalid-request` for `enabled` on a case that is
 not the active version (name the active one the message gives) or for a case not of `entity-schema-name`,
 `not-in-version` (a first filter on a member that is not active: `process-dynamic-case-versions`), `stage-list-duplicate` for

@@ -1,8 +1,8 @@
 clio MCP process-dynamic-case-filters guide - several dynamic cases on one object split by a filter
 
 Scope
-Split out of `process-dynamic-case-change`, which owns describing, changing, disabling and versioning a case and
-every confirmation; read it first. This article owns the filter rules of `modify-dynamic-case` and
+Split out of `process-dynamic-case-change`, which owns describing, changing and disabling a case and every
+confirmation; read it first (versions: `process-dynamic-case-versions`). This article owns the filter rules of `modify-dynamic-case` and
 `create-dynamic-case` (several cases on one object split by one lookup column, `filter`, `remove-filter`,
 `deactivate-unfiltered`, the filter refusals and their remedies).
 

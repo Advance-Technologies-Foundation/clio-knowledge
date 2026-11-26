@@ -1,8 +1,9 @@
 clio MCP process-dynamic-case-versions guide - make a new version of a dynamic case and switch the active one
 
 Scope
-Split out of `process-dynamic-case-change`, which owns describing and changing a case, the shapes of `stages`,
-`caption` and `filter`, and every confirmation of `modify-dynamic-case`; read it first. This article owns a case's
+Split out of `process-dynamic-case-change`, which owns describing and changing a case, the shapes of `stages`
+and `caption`, and every confirmation of `modify-dynamic-case`; read it first. A `filter` or `remove-filter`:
+`process-dynamic-case-filters`. This article owns a case's
 versions: the `versions` list of `describe-dynamic-case`, a member that is not active changed in place, a change
 saved as a new version (`modify-dynamic-case-as-new-version`) and the switch of the active one
 (`set-active-dynamic-case-version`).
@@ -11,7 +12,7 @@ Version boundary, before anything else: `modify-dynamic-case-as-new-version` and
 need clio <CLIO-TBD> or later. If `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
 clio is older: stop here and tell the user to update clio, or to save the new version and make it actual in the case
 designer. An older clio's describe has no `versions`: a missing list there does not mean the case has no other
-version. They also need CrtProcessBuilder 1.6.6.210 or later on the environment: clio refuses an older one, naming
+version. They also need CrtProcessBuilder 1.6.6.211 or later on the environment: clio refuses an older one, naming
 the version it needs, and `install-process-builder`, once the user approves it (`core-rules`), is the remedy.
 
 == Versions of a case ==
@@ -28,18 +29,21 @@ the version it needs, and `install-process-builder`, once the user approves it (
   it for the active one.
 - Offer a new version when the user wants the change prepared without new records seeing it yet, when the case's
   package is not editable (`packageReadOnly: true`, or `package-read-only`), or when running cases sit in a stage to
-  remove (`stage-in-use`).
+  remove (`stage-in-use`). Never for a case with steps (`hasSteps`) in a package that is not editable: such a case
+  gets a version only in its own package, so the case designer makes that change; say so instead.
 1. Make it: `modify-dynamic-case-as-new-version { environment-name, case-name | case-uid | entity-schema-name,
    package-name?, stages?, caption?, filter?, remove-filter?, confirm-stage-records?, confirm-value-rename?, dry-run?
    }` copies the family's ACTIVE member (another member is refused, naming the active one) into a new version that is
    NOT active, and applies `stages`, `caption` and `filter` to it with the shapes and the confirmations of
-   `modify-dynamic-case` (`process-dynamic-case-change`; no `enabled`; running cases are not asked about: they keep their version). `package-name`
+   `modify-dynamic-case` (`process-dynamic-case-change`; `filter` or `remove-filter`: MUST read `process-dynamic-case-filters` first; no `enabled`; running cases are not asked about: they keep their version). `package-name`
    left out: the case's own package when it is editable, otherwise refused `package-name-required`: ask the user which
    editable package. `dependencies-missing`: the package must depend on the packages the message names; add them only
    after the user's yes. `steps-not-supported`: a version copies the source's steps as they are, so steps or
    `transitionType` sent with it are refused: change them on the version afterwards (`modify-dynamic-case` by its
    `case-name`, or the case designer); and a case with steps gets a version only in its own package (or in the case
-   designer). First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
+   designer). `stage-is-condition-target` (a step condition moves records to a stage the version removes): keep the
+   stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name` (send that
+   step's `conditions` without that stage, and remove the stage there), or keep the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
    after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version; it is
    saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted
    already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further

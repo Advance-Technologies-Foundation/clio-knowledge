@@ -164,7 +164,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "deletion and the stage column are still the case designer's");
             guide.Should().NotContain("a new version of a case",
                 because: "a version is made and switched by the change guide's tools now, so the guide must not send the user to the designer for it");
-            guide.Should().Contain("(`describe-dynamic-case`, `modify-dynamic-case`) and its versions: `process-dynamic-case-change`",
+            guide.Should().Contain("changing an existing case: `process-dynamic-case-change`; its versions: `process-dynamic-case-versions`",
                 because: "an agent reaching the create guide with a version request must find the guide that owns versions");
             guide.Should().NotContain("Part of the process guide set",
                 because: "a banner would make process-modeling index the guide, which has no room");
@@ -232,7 +232,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal).Should().BeLessThan(
                 guide.IndexOf("== Change an existing case ==", StringComparison.Ordinal),
                 because: "an agent on an older clio must meet the boundary before it reads how to call the tools");
-            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.210 or later on the environment: clio refuses an older one, naming the version it needs",
+            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.211 or later on the environment: clio refuses an older one, naming the version it needs",
                 because: "the tools refuse an older package although the clio has them, and the floor is the one the versions need");
             guide.Should().Contain("`process-builder-without-case-change`",
                 because: "clio names this code, and the guide that owns describe and modify must give its remedy");
@@ -357,7 +357,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             resource.GetProperty("description").GetString().Should().NotContain("names the conflicting case",
                 because: "settings-conflict and other refusals of the switch name no other case");
             resource.GetProperty("description").GetString().Should().Contain("(set-active-dynamic-case-version): process-dynamic-case-versions",
-                because: "routing sends version work to the change guide, so its catalog entry names the version tools and the guide that owns them");
+                because: "a version request that reaches the change guide's catalog entry must find the version tools and the guide that owns them");
             routing.Should().Contain($"split its records into cases by type (B2B/B2C orders) -> name={FiltersItemId}",
                 because: "a request for different stages per type must reach the guide that owns filters");
             routing.Should().Contain("set up on an object with no case yet, or only asked about",
@@ -466,7 +466,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 .Should().Contain(CaseVersionsItemId, because: "the library requires every guide it ships");
             requiredUris.Should().Contain(resource.GetProperty("uri").GetString(),
                 because: "the requirement lists the canonical route next to the item id");
-            description.Should().MatchRegex($@"^Needs clio {ClioVersion} or later with CrtProcessBuilder 1\.6\.6\.210 or later\.",
+            description.Should().MatchRegex($@"^Needs clio {ClioVersion} or later with CrtProcessBuilder 1\.6\.6\.211 or later\.",
                 because: "the get-guidance catalog shows the boundary of the version tools before the article is opened");
             description.Should().Contain("modify-dynamic-case-as-new-version",
                 because: "the catalog entry must show that the guide owns the new-version tool");
@@ -502,9 +502,9 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            routing.Should().Contain($"which one runs (not an object's stages: name={ChangeItemId}), or editing or launching ANY existing process",
+            routing.Should().Contain($"which one runs (not an object's stages: name={CaseVersionsItemId}), or editing or launching ANY existing process",
                 because: "the process version row matched \"switch orders to the new flow\" and sent the agent to the process version model");
-            versions.Should().Contain($"Versions of a dynamic case (an object's stages or status flow) are not here: `{ChangeItemId}`.",
+            versions.Should().Contain($"Versions of a dynamic case (an object's stages or status flow) are not here: `{CaseVersionsItemId}`.",
                 because: "an agent that reached the process version guide anyway is sent back at its first lines");
         }
     }
@@ -636,7 +636,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().MatchRegex(
                 $@"Version boundary, before anything else: `modify-dynamic-case-as-new-version` and `set-active-dynamic-case-version` need clio {ClioVersion} or later\. If `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the clio is older: stop here",
                 because: "the version tools ship in a later clio than the change tools, and the boundary leads the article it gates");
-            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.210 or later on the environment: clio refuses an older one, naming the version it needs",
+            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.211 or later on the environment: clio refuses an older one, naming the version it needs",
                 because: "the version tools refuse an older package although the clio has them");
             changeGuide.Should().NotContain("== Versions of a case ==",
                 because: "the version rules have one owner, process-dynamic-case-versions, so they cannot drift apart");
@@ -779,8 +779,18 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the package removes a stage together with its steps, and the steps section owns relaying the dry run's diff.steps before the yes");
             guide.Should().NotContain("relay them before the yes",
                 because: "the yes over diff.steps has one owner, the steps section");
-            guide.Should().Contain("`stage-is-condition-target` (a step condition moves records to it): the case designer, or keep the stage",
-                because: "this is the only refusal of a stage removal that the steps cause");
+            guide.Should().Contain("`stage-is-condition-target` (a kept step's condition moves records to it): a Perform task: send that step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the stage;",
+                because: "this is the only refusal of a stage removal that the steps cause, and its remedy is the package's in-place one");
+            guide.Should().Contain("with `hasSteps` too, no version can be made (a case with steps gets one only in its own package): the case designer makes that change, say so before offering a version",
+                because: "a read-only package is answered by a version, which a case with steps cannot get outside its own package");
+            versions.Should().Contain("keep the stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name` (send that step's `conditions` without that stage, and remove the stage there), or keep the stage",
+                because: "on a new version the package answers a removed stage a step condition targets with the in-place change of the version");
+            versions.Should().Contain("Never for a case with steps (`hasSteps`) in a package that is not editable",
+                because: "a case with steps gets a version only in its own package, so offering one there is a dead end");
+            versions.Should().Contain("`filter` or `remove-filter`: MUST read `process-dynamic-case-filters` first",
+                because: "a first filter is irreversible, and its precondition must be where the version tool takes it");
+            versions.Should().NotContain("the shapes of `stages`, `caption` and `filter`",
+                because: "the filter shape is owned by process-dynamic-case-filters, not the change guide");
             guide.Should().NotContain("step-has-conditions",
                 because: "the package that takes step conditions no longer refuses a step or a stage removal for them");
             guide.Should().NotContain("stage-has-steps",

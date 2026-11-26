@@ -7,8 +7,8 @@ the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI
 asks for "stages", "a status lifecycle", the order records move through status values or how that flow ends (not
 a lookup's sort order in lists or dropdowns), "a progress bar on the record page" or "a case".
 "When X happens, do Y" is a business process: `process-digest`. A case is not the `Case` object. Reading and
-changing an existing case (`describe-dynamic-case`, `modify-dynamic-case`) and its versions:
-`process-dynamic-case-change`; several cases on one object split by a filter: `process-dynamic-case-filters`.
+changing an existing case: `process-dynamic-case-change`; its versions: `process-dynamic-case-versions`;
+several cases on one object split by a filter: `process-dynamic-case-filters`.
 
 Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `clio-run` answers
 `unknown tool` for it, the clio serving you is older: stop here and tell the user to update clio - do not build a
