@@ -659,9 +659,11 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("otherwise refused `package-name-required`: ask the user which editable package",
                 because: "the version goes to the source's package only when it is editable, and the target package is the user's choice");
             guide.Should().Contain("First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only after their yes",
-                because: "every write makes one more version that no tool removes");
-            guide.Should().Contain("NOT idempotent: every write makes one more version, and the toolkit cannot delete a version",
-                because: "a saved version is kept even when the call fails after the save, and no clio tool removes one");
+                because: "every write makes one more version, and no case tool removes it");
+            guide.Should().Contain("NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes)",
+                because: "run 5 told the user a version cannot be deleted, while delete-schema with remote plus the link-row binding removal deleted inactive versions on the stand; only the case tools and the Case library offer no deletion");
+            guide.Should().NotContain("cannot delete a version",
+                because: "an inactive version can be removed the way a case is undone");
             guide.Should().Contain("it is saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further version)",
                 because: "a run presented a new version as irreversible, while new records keep starting the active case until a switch and a member that is not active is changed in place; a confirmed value rename is written before the save, so the version is not free of effect");
             guide.Should().Contain("say so before the yes; activating then changes no stage name on the bar or in the designer",
@@ -672,8 +674,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a first filter sets the object-wide filter column, which would split the live cases at once");
             guide.Should().Contain("the version was saved and is KEPT, named in `leftovers` with its link row - do not activate it",
                 because: "a failure after the save keeps the version, and it may read back wrong");
-            guide.Should().Contain("do not activate it; relay `leftovers` in full (a value left renamed stays renamed: offer to rename it back) and describe the family before telling the user what changed; no tool removes the version;",
-                because: "a confirmed value rename stays on failed-leftover and is listed in leftovers, and this outcome is also reached when the saved version reads as active or the save flipped the family's enabled flag, so the agent reads the family before saying what changed; the toolkit has no case deletion");
+            guide.Should().Contain("do not activate it; relay `leftovers` in full (a value left renamed stays renamed: offer to rename it back) and describe the family before telling the user what changed; to remove it: undo steps 1-2 of `process-dynamic-case`, after the user's yes;",
+                because: "a confirmed value rename stays on failed-leftover and is listed in leftovers, and this outcome is also reached when the saved version reads as active or the save flipped the family's enabled flag, so the agent reads the family before saying what changed; a kept version is removed only as a case is undone, with the user's yes");
             guide.Should().NotContain("in the case library",
                 because: "the case library hides Delete on its rows and on its Versions tab (VwDcmLibSection, ProcessVersionsDetail.getDeleteRecordMenuItem), so the guide names no deletion route there");
             guide.Should().Contain("After `failed-leftover`, `unknown` or no reply at all (a timeout), describe the family before any retry: a retry makes another version",

@@ -45,7 +45,7 @@ the version it needs, and `install-process-builder`, once the user approves it (
    stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform
    task, send that step's `conditions` without that stage together with the stages without it; for another step,
    remove the step or change its conditions in the case designer on the version, then remove the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
-   after their yes. NOT idempotent: every write makes one more version, and the toolkit cannot delete a version; it is
+   after their yes. NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes); it is
    saved inactive, so new records keep starting the active case until a switch (a confirmed value rename has acted
    already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further
    version). A stage value rename
@@ -59,7 +59,7 @@ the version it needs, and `install-process-builder`, once the user approves it (
    `failed-leftover` WITH a `version` (`version-number-taken` when another writer took its number): the version was
    saved and is KEPT, named in `leftovers` with its link row - do not activate it; relay `leftovers` in full (a value
    left renamed stays renamed: offer to rename it back) and describe the family before telling the user what changed;
-   no tool removes the version; `failed-leftover` WITHOUT a `version`: nothing was saved, but a row or
+   to remove it: undo steps 1-2 of `process-dynamic-case`, after the user's yes; `failed-leftover` WITHOUT a `version`: nothing was saved, but a row or
    a value rename could not be undone - relay `leftovers` (a value left renamed: offer to rename it back); `unknown`:
    the reply was lost. After `failed-leftover`, `unknown` or no reply at all (a timeout), describe the family before any retry: a retry makes
    another version.
