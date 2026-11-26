@@ -75,7 +75,8 @@ public sealed class GuidanceMigrationTests
         "widget-color-and-icon",
         "word-printable",
         "word-printable-template",
-        "word-printable-troubleshooting"
+        "word-printable-troubleshooting",
+        "csharp-platform-checks"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

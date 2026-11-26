@@ -6,6 +6,7 @@ when to choose one, registration, how its C# gets built or shipped, references, 
 (`IJobExecutor`). Other owners: `configuration-webservice` (service classes, routes, CSRF), `core-rules` (compile
 confirmation, restart), `core-rules-details` (precompiled delivery, `--wait` exit codes),
 `backend-deployment-troubleshooting`, `process-timer-start` (schedules), `process-script-task`.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 Delivery checklist (each step is explained below): keep `"Type": 1` and `ProjectPath` in `descriptor.json` -> give
 the package compilable content, or ship a freshly built DLL -> install it (`push-pkg` / `push-workspace`; a workspace

@@ -7,6 +7,7 @@ validate the complete runtime path. For Creatio 10.0 and later, it also covers v
 writes through `EntityEventListener`. Filter creation and parsing remain in their dedicated
 ESQ guides, and generic listener mechanics remain in
 `configuration-entity-event-listener`.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 ## CRITICAL COMPATIBILITY FINDING: virtual writes require Creatio 10.0 or later
 Entity-level virtual CRUD support was introduced in Creatio 10.0. It does not exist in

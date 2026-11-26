@@ -5,6 +5,7 @@ Use this guide only to CREATE filters with Creatio's native backend C#
 `EntitySchemaQuery` API. For JavaScript, page JSON, or DataService request JSON, read
 `esq-filters-frontend`. To interpret `esq.Filters` inside a query executor or other
 runtime backend code, read `esq-filter-parsing`.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 The examples below are intentionally limited to behavior verified in the clio Virtual
 Entity guidance lab by comparing the complete runtime filter tree produced by native C#

@@ -4,6 +4,7 @@ Use this guide when implementing, publishing, reviewing, or troubleshooting a cu
 hosted directly by Creatio through `CrtMCPPublishingApp`. It covers source-code actions, `McpServer`
 and `McpTool` package data, direct Streamable HTTP MCP consumption, catalogue refresh behavior, and
 tests.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 ## Applicability and boundaries
 

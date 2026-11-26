@@ -3,6 +3,7 @@
 ## Scope And Ownership
 
 - Use this guide when package C# must react to Creatio application start/end or web-session start/end.
+- Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 - `IAppEventListener` is the platform interface. `AppEventListenerBase` is its no-op base implementation and is the preferred extension point when only selected hooks are needed.
 - This guide owns listener discovery, instance lifetime, all four lifecycle hooks, delegation to package-owned state, failure behavior, and tests.
 - Also read `creatio-composable-app-development` for package ownership and placement. The package must supply the application/service root represented by the placeholders below.

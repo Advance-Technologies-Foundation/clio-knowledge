@@ -4,6 +4,7 @@ Use `SspServiceRoute` to register an authenticated external-user route for a cus
 web service. Use `DefaultServiceRoute` as well when employees must call the same service.
 The attributes select routes; they do not create, convert or impersonate a user connection.
 For the general service shape, DTOs and package composition, read `configuration-webservice`.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 ## Choose the routes
 

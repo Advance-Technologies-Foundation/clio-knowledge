@@ -3,6 +3,7 @@ clio MCP process ScriptTask C# guide
 Scope
 Use this guide before adding a ScriptTask to a process, and when writing or repairing the C# inside one. The graph itself belongs to `process-modeling`.
 Moved to `process-script-task-details`: evidence, reasoning and rare-case fixes. Read it when a rule here needs its why, or a multi-line `@"..."` string must keep its exact value.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 Decide first: a ScriptTask costs a compile
 A ScriptTask is the ONE element of a clio-built process that makes it need `compile-creatio` before it runs: the platform turns every ScriptTask body into a method of a generated class, and the process refuses to start until that class is compiled. So choose it last, in this order:

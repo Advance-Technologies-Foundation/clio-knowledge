@@ -2,6 +2,7 @@
 
 ## Non-Negotiable Rules
 
+- Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 - Inherit `Terrasoft.Core.Entities.Events.BaseEntityEventListener`.
 - Add `[EntityEventListener(SchemaName = "<EntitySchemaName>")]` with the exact schema code.
 - Name the class `<EntitySchemaName>EntityEventListener` unless the package already uses another convention.

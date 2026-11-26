@@ -2,6 +2,7 @@ clio MCP WebSocket messaging guide
 
 Scope and ownership
 - Use this guide when Creatio backend C# must notify a Freedom UI page, or when a Freedom UI page must bridge a message to the same user's connections or broadcast an announcement through Creatio's built-in message channel.
+- Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 - This guide owns backend user-channel selection, `SimpleMessage` construction, frontend `PTP` and `BROADCAST` routing, sender/body routing, frontend subscription lifecycle, transient-delivery semantics, and live acceptance.
 - For the configuration web-service envelope, read `configuration-webservice`; for its focused tests, read `configuration-webservice-tests`.
 - For page-body mechanics, also read `page-schema-handlers` and `page-schema-creatio-devkit-common`.
