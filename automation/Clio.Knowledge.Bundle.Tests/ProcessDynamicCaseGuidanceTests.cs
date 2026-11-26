@@ -535,7 +535,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.207\)",
+            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.212\)",
                 because: "the step types ship with a clio release and an older package refuses them");
             guide.Should().Contain("{\"type\":\"approval\"").And.Contain("{\"type\":\"openEditPage\"")
                 .And.Contain("{\"type\":\"subProcess\"").And.Contain("{\"type\":\"sendEmail\"")
