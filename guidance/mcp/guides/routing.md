@@ -24,7 +24,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - a stage progress bar (crt.EntityStageProgressBar) -> name=process-dynamic-case
   - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
     requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
-  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / dashboard-design / dashboard-rights)
+  - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / widget-color-and-icon / dashboard-design / dashboard-rights)
   - create a home page, or set a workplace's home page (BaseHomePage + SysWorkplace.HomePageUId binding) -> name=home-page
   - desktop pages (create/edit a desktop-selector workspace, CentralAreaDesktopTemplate, group Desktop) -> name=desktop-page
   - a record's connections / "Connected to" block on a page -> name=page-modification-field-contract (CONNECTIONS ARE NOT INSERTED FIELDS) + get-component-info crt.Connections

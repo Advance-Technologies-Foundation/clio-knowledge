@@ -146,13 +146,25 @@ result contradicts a rule here or a user disputes one.
   `00000000-0000-0000-0000-000000000000` rather than a blank. So do NOT put a lookup column in a body a human
   reads. Email a TEXT column that carries the same information instead — on `Employee`, `FullJobTitle` mails
   `Developer` while `Job` mails a GUID — and when only the lookup exists, say the value cannot be rendered
-  rather than shipping an Id. A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
+  rather than shipping an Id. A macro's value goes into the HTML AS IS, NOT HTML-escaped, whatever its type
+  (Rich text escapes nothing either): markup in it renders, and `<`, `>` and `&` in user text are parsed as HTML
+  (CrtProcessDesigner 7.8.0 and Terrasoft.Core source, read 2026-11-25). So encode text that must show literally
+  before it reaches the parameter, e.g. with `System.Net.WebUtility.HtmlEncode` in the Script task that sets it.
+  A process parameter can only be inserted WHOLE — Creatio has NO column drill on a bare
   parameter (verified: zero specimens of `[Parameter].[EntityColumn]` without an `[Element]`; the designer
   offers column drill only on the Elements tab), so to email a record's column read it with a data element
   FIRST and drill THAT output. An unknown parameter/element/column is REJECTED naming what was missing, so
   DISCOVER exact names with `describe-business-process mode=full` (or define the parameter) first — do not guess; column
   names are matched case-sensitively. A whole raw `<img data-value="[#…#]">` token (or a bare `[#…#]` formula)
-  written by hand passes through unchanged (the escape hatch). NOTE `{{…}}` is NOT clio macro syntax — that is
+  written by hand passes through unchanged (the escape hatch).
+  Apart from the empty lookup above, an EMPTY value (null, or an empty string such as a Script task's join of
+  no records) is not substituted, and what takes the macro's place depends on the send mode: AUTO drops it and
+  mails a blank, with no error or warning; MANUAL puts the macro's caption on a yellow background (`[#Links#]`
+  for a parameter captioned Links) into the email the performer opens, and the recipient gets that text unless
+  the performer edits it (CrtProcessDesigner 7.8.0 source and a stand run, 2026-11-25). So give a parameter
+  that can be empty a fallback text in the step that sets it, or route around the email with a gateway. A raw
+  `[#…#]` in a received email is that manual-mode caption or text typed into the body: check the value before
+  suspecting how the macro was inserted. NOTE `{{…}}` is NOT clio macro syntax — that is
   the content designer's editable template fields (`{{#index::Title#}}`, New String/Text/Picture/Color), a
   different, design-time feature that is not process data. `importance` has NO `medium` token: the designer LABELS
   `normal` as "Medium" (its caption in the element's card — the product's acceptance tests assert `EN=Medium`),
