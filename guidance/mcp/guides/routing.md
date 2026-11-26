@@ -5,10 +5,10 @@ Pick the domain, then the row (get-guidance name=...). From clio 8.1.0.141, `get
 catalog, one `name: purpose` line per guide, and an unknown name fails with the closest names (an older
 clio answers any unknown name, `list` included, with the bare `availableGuides` list).
 READING CONVENTION: a guide names a SIBLING GUIDE in backticks (`process-naming`,
-`esq-filters-backend`) — that is a get-guidance topic to fetch, not a heading to scroll to, and it is
+`esq-filters-backend`) - that is a get-guidance topic to fetch, not a heading to scroll to, and it is
 how a guide points at a rule it does not own. Other backticks are ordinary code (columns, ops,
-page-body sections such as `handlers`). A guide restating another guide's rule — a destructive
-precondition kept next to the instruction it guards — names that guide as the owner.
+page-body sections such as `handlers`). A guide restating another guide's rule - a destructive
+precondition kept next to the instruction it guards - names that guide as the owner.
 
 - Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns), DCM: first describe-dynamic-case, even if unsure one exists (pass the user's word for the object, `find-entity-schema` if not found). None, or only asked about -> name=process-dynamic-case
   - a case: read or change stages, disable/enable it -> name=process-dynamic-case-change; switch versions -> name=process-dynamic-case-versions; change as a new version: both in one message; send filter, remove-filter or deactivate-unfiltered, or split by type (B2B/B2C) -> name=process-dynamic-case-filters
@@ -37,13 +37,13 @@ precondition kept next to the instruction it guards — names that guide as the 
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser", which says when the placeholder is a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
-  - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables — for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
+  - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables - for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=page-schema-translation (the `update-app-section` contract check: name=existing-app-maintenance); lookup values -> name=data-bindings (lookup value translations)
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
 - Creatio work ON A SCHEDULE or at a set time -> a timer-start process: name=process-digest, then
   name=process-timer-start. NEVER your client's own cron or scheduler tool
-- Business processes (BPMN): build or change a process — elements, flows, parameters, mappings, formulas,
+- Business processes (BPMN): build or change a process - elements, flows, parameters, mappings, formulas,
   filters, record signals, and the "Connected to" links of the activity a task creates -> name=process-digest
   ALONE and FIRST: request it in a call of its own and read it before you request any other process
   article, then the article of each element you use (the rows below)
@@ -83,7 +83,7 @@ precondition kept next to the instruction it guards — names that guide as the 
     levels, one sub-process run per file) -> name=process-files (after name=process-parameters)
   - a Process file element (`fileProcessing`: copy a record's attachments or a process's files, or hand them to
     the next elements) -> name=process-files
-    - a GENERATED REPORT (its `report` group: the printable, the records, the file names, temporary files) ->
+    - a GENERATED REPORT (its report group: the printable, the records, the file names, temporary files) ->
       name=process-files-report (after name=process-files)
     - copy the files the PROCESS holds to a record's attachments (its `files` group: the one source, both levels,
       a single File) -> name=process-files-parameter (after name=process-files)
@@ -96,7 +96,7 @@ precondition kept next to the instruction it guards — names that guide as the 
       rule -> name=process-branch-conditions-details
   - branch on WHICH RESULT an activity was completed with - an approval's verdict, a perform task's
     result, a page's completing button - a SELECTION and not a formula -> name=process-activity-result-branches
-  - the Perform task element — a human step, what it produces, its parameter table ->
+  - the Perform task element - a human step, what it produces, its parameter table ->
     name=process-perform-task
   - WHO performs a task: assign it to a team or a role, to a contact's manager, or to one named person ->
     name=process-task-performer
@@ -106,7 +106,7 @@ precondition kept next to the instruction it guards — names that guide as the 
     plain value", or a package-convergence message) -> name=process-perform-task for the refusal texts,
     the remedy and the ids; the fix the refusal itself suggests is not the safe one -- read
     name=process-task-category before following it
-  - show a record's edit page to a user and wait — collect or confirm field values on a form, in add or
+  - show a record's edit page to a user and wait - collect or confirm field values on a form, in add or
     edit mode, optionally gated on a completion condition -> name=process-open-edit-page
     - a step that will not complete although its condition is met, the evidence behind its defaults, or
       feeding its `describe` read-back into a write -> name=process-open-edit-page-details
@@ -114,19 +114,19 @@ precondition kept next to the instruction it guards — names that guide as the 
     name=process-access-rights; add name=process-access-rights-details only when the environment's
     CrtProcessBuilder (or the one your clio bundles) may predate 1.6.0.2, or to decide what a MISSING
     read-back warning proves
-  - the Send email element — mode, sender, recipients, subject, the custom HTML body and its macros, `ignoreErrors`
+  - the Send email element - mode, sender, recipients, subject, the custom HTML body and its macros, `ignoreErrors`
     and what a failed send does to the run ->
     name=process-send-email
     - the evidence behind a Send email rule, or a result that contradicts one (a no-mode element running as a
       template, the designer-removal exceptions) -> name=process-send-email-details
-  - a Send email element that sends an existing EMAIL TEMPLATE — the template, the record its macros resolve
+  - a Send email element that sends an existing EMAIL TEMPLATE - the template, the record its macros resolve
     against, the refusals, the subject override, switching modes -> name=process-send-email-template
   - FILES a Send email element attaches (`email.attachments`; send it only when the FULL contract names
     `attachments`): a Process file element's output, a FileCollection or a File, the order rule, replacing the list
     on modify, which files an existing email sends (its rows vs the designer), an email that arrives without its
     files ->
     name=process-send-email-attachments (after name=process-send-email)
-  - the Approval element — the record under approval, who approves, delegation, the two notifications ->
+  - the Approval element - the record under approval, who approves, delegation, the two notifications ->
     name=process-approval
   - CALL a REST or SOAP web service registered in Studio > Web services from a process: the Call web service element
     (`webService`; build it only when the FULL contract names it): service, method, values, response, retarget ->
@@ -134,12 +134,12 @@ precondition kept next to the instruction it guards — names that guide as the 
     `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
-  - SEND a chat message (Telegram, WhatsApp, SMS and the like) to ONE contact, from a process or now — the Send chat message
+  - SEND a chat message (Telegram, WhatsApp, SMS and the like) to ONE contact, from a process or now - the Send chat message
     element (`sendChatMessage`; the default create contract lists it): channel, recipient, chat template or
     custom text, `ignoreErrors` and the send status -> name=process-send-chat-message
-  - run ANOTHER process from this one and pass values in and out — the Sub-process element / BPMN call
+  - run ANOTHER process from this one and pass values in and out - the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
-  - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
+  - run that called process ONCE PER ITEM of a collection - "for each record", "iterate", multi-instance:
     converting an element, where the callee's contract moves to -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
     and which execution mode it takes)
   - a called process CHANGED its parameters and the CALLERS have to be fixed -> name=process-parameters-details
@@ -185,6 +185,7 @@ precondition kept next to the instruction it guards — names that guide as the 
     add name=data-bindings for the binding mechanics
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
 - Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
+- MS Word printables (SysModuleReport): build, template, ship, fix -> name=word-printable
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
@@ -197,7 +198,7 @@ precondition kept next to the instruction it guards — names that guide as the 
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
-  - make a Freedom UI section reachable by PORTAL / self-service (external) users — the end-to-end flow that sequences page binding, workplace placement, object-access grant, and default record rules for the All external users audience (deny-by-default) -> name=portal-sections
+  - make a Freedom UI section reachable by PORTAL / self-service (external) users - the end-to-end flow that sequences page binding, workplace placement, object-access grant, and default record rules for the All external users audience (deny-by-default) -> name=portal-sections
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
@@ -212,12 +213,8 @@ precondition kept next to the instruction it guards — names that guide as the 
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 - Access rights (default record rules): turn record permissions on/off for an object, set which rights a NEW record gets by who created it ("records created by role X are visible to role Y"), or apply those rules to existing records -> name=default-record-rights
 - Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer; get-object-rights / set-object-rights), including making a portal section's object available to external users -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
-- Access rights (column-level): who may see or edit one COLUMN (field) of an object, per role — the "Column permissions" layer and its switch (get-column-rights / set-column-rights) -> name=column-rights; a field's visibility or editability on pages only (the control's state, the data stays reachable) -> name=business-rules
-
+- Access rights (column-level): who may see or edit one COLUMN (field) of an object, per role - the "Column permissions" layer and its switch (get-column-rights / set-column-rights) -> name=column-rights; a field's visibility or editability on pages only (the control's state, the data stays reachable) -> name=business-rules
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
-
 - SQL views exposed as entities, IsDBView, or packaging a database view -> name=db-view-entities
-
 - Entity CRUD access supplied by system operations (AdministratedByOperations / SysEntityRightByAdminOperation) -> name=entity-operation-access
-
 - Saved C# differs from running behavior, stale DLLs, or compilation diagnostics -> name=backend-deployment-troubleshooting

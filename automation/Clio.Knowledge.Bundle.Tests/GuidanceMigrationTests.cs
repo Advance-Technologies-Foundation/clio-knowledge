@@ -74,7 +74,10 @@ public sealed class GuidanceMigrationTests
         "data-bindings-details",
         "assembly-package",
         "lookup-colors",
-        "widget-color-and-icon"
+        "widget-color-and-icon",
+        "word-printable",
+        "word-printable-template",
+        "word-printable-troubleshooting"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the

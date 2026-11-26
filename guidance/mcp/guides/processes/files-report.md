@@ -26,7 +26,8 @@ its filter selects, then saves the files to a record's attachments or hands them
   printable with no object (neither its own nor its section's).
 - A printable that does not exist on this environment is refused with "create it in System Designer -> Report setup":
   the element cannot create one, so ask the user to, then retry. The refusal lists up to 10 MS Word printables by
-  `templateId`, of the record's object when it can be told. Nothing is created or picked for you.
+  `templateId`, of the record's object when it can be told. Nothing is created or picked for you. Building or changing
+  a printable (its columns, template, converter, package): `get-guidance name=word-printable`.
 - `report.type` and `report.object` are identity checks derived from the printable, never settings: drop them, or
   send the derived value.
 - Rights: the printable lookup and the record selection apply NO record permissions (`UseAdminRights = false` in

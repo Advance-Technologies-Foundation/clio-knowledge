@@ -10,7 +10,7 @@ saved as a new version (`modify-dynamic-case-as-new-version`) and the switch of 
 (`set-active-dynamic-case-version`).
 
 Version boundary, before anything else: `modify-dynamic-case-as-new-version` and `set-active-dynamic-case-version`
-need clio <CLIO-TBD> or later. If `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
+need clio 8.1.0.160 or later. If `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
 clio is older: stop here and tell the user to update clio, or to save the new version and make it actual in the case
 designer. An older clio's describe has no `versions`: a missing list there does not mean the case has no other
 version. They also need CrtProcessBuilder 1.6.6.217 or later on the environment: clio refuses an older one, naming

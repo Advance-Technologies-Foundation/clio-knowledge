@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.267",
+  "libraryVersion": "1.15.268",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -225,6 +225,9 @@
       "sys-setting",
       "sys-setting-tests",
       "sys-settings",
+      "word-printable",
+      "word-printable-template",
+      "word-printable-troubleshooting",
       "theming",
       "ui-project",
       "virtual-entities",
@@ -448,6 +451,9 @@
       "docs://knowledge/com.creatio.clio/sys-setting",
       "docs://knowledge/com.creatio.clio/sys-setting-tests",
       "docs://knowledge/com.creatio.clio/sys-settings",
+      "docs://knowledge/com.creatio.clio/word-printable",
+      "docs://knowledge/com.creatio.clio/word-printable-template",
+      "docs://knowledge/com.creatio.clio/word-printable-troubleshooting",
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
@@ -2042,7 +2048,7 @@
     {
       "itemId": "process-dynamic-case-versions",
       "title": "Versions of a dynamic case",
-      "description": "Needs clio <CLIO-TBD> or later with CrtProcessBuilder 1.6.6.217 or later. Read before a dynamic case (DCM) switches its active version (this guide alone) or a change is made as a new version (together with process-dynamic-case-change, in one message). Owns a case's versions: the versions list of describe-dynamic-case, a member that is not active changed in place with modify-dynamic-case, modify-dynamic-case-as-new-version (dry run, never activates or deletes, copies the steps as they are), ask, then set-active-dynamic-case-version (dry run first; relay a refusal as it stands; a disabled family; package position) and the outcomes of both.",
+      "description": "Needs clio 8.1.0.160 or later with CrtProcessBuilder 1.6.6.217 or later. Read before a dynamic case (DCM) switches its active version (this guide alone) or a change is made as a new version (together with process-dynamic-case-change, in one message). Owns a case's versions: the versions list of describe-dynamic-case, a member that is not active changed in place with modify-dynamic-case, modify-dynamic-case-as-new-version (dry run, never activates or deletes, copies the steps as they are), ask, then set-active-dynamic-case-version (dry run first; relay a refusal as it stands; a disabled family; package position) and the outcomes of both.",
       "topicId": "creatio.process-dynamic-case-versions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-versions",
@@ -3062,6 +3068,39 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/sys-settings.md",
       "bundlePath": "resources/sys-settings.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "word-printable",
+      "title": "MS Word printable: build, change, show and ship",
+      "description": "Building and changing an MS Word printable (SysModuleReport / SysModuleReportTable and its .docx template): reading what exists, configuring columns in the Report setup designer, the shell-only API route, offering it on Freedom UI and Classic pages, shipping it as data bindings with force-updated File and MacrosSettings, and proving it as the printing user.",
+      "topicId": "creatio.word-printable",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/word-printable",
+      "sourcePath": "guidance/mcp/guides/backend/word-printable.md",
+      "bundlePath": "resources/word-printable.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "word-printable-template",
+      "title": "MS Word printable template, macros and custom converters",
+      "description": "What the MS Word generator reads from a .docx template: MERGEFIELD switch rules, case-sensitive caption binding, value formats, the six out-of-the-box tokens and macro argument grammar, detail tables, images, PDF, and the IExpressionConverter contract (namespace, null return, registration, activation, tests).",
+      "topicId": "creatio.word-printable-template",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/word-printable-template",
+      "sourcePath": "guidance/mcp/guides/backend/word-printable-template.md",
+      "bundlePath": "resources/word-printable-template.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "word-printable-troubleshooting",
+      "title": "MS Word printable troubleshooting",
+      "description": "Diagnosing an MS Word printable: Error.log versus the MSWordLog start/finish trace, a symptom-to-cause table for blank fields, converter exceptions, rights, images, PDF and stale templates after delivery, and the settings and features that change generation.",
+      "topicId": "creatio.word-printable-troubleshooting",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/word-printable-troubleshooting",
+      "sourcePath": "guidance/mcp/guides/backend/word-printable-troubleshooting.md",
+      "bundlePath": "resources/word-printable-troubleshooting.md",
       "mediaType": "text/plain"
     },
     {
