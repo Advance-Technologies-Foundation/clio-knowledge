@@ -552,6 +552,12 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "an access-rights step without a filter changes every record of its object");
             guide.Should().Contain("`step-acts-on-all-records` names each such step; tell the user which",
                 because: "one confirm-all-records yes covers every unfiltered rights step of the change");
+            guide.Should().Contain("`step-acts-on-all-records` (an access-rights step without a filter, \"Steps inside a stage\") -> `confirm-all-records: true`",
+                because: "the list of separate yeses names every confirmation flag (review of #365)");
+            guide.Should().Contain("`email`; `accessRights` + `filter`",
+                because: "describe returns every step type's block, and a kept step is copied from it");
+            guide.Should().Contain("for an approval `Positive` or `Negative`",
+                because: "an approval's conditions name its results, not a task category's");
         }
     }
 }
