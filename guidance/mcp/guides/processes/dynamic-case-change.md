@@ -2,13 +2,13 @@ clio MCP process-dynamic-case-change guide - change an existing dynamic case, ma
 
 Scope
 Reads and changes an existing dynamic case (DCM) with `describe-dynamic-case` and `modify-dynamic-case`: its stages,
-their order, groups, captions and colours, the case caption, and whether it is enabled. Owns a case's versions: a
-change saved as a new version (`modify-dynamic-case-as-new-version`) and the switch of the active one
-(`set-active-dynamic-case-version`). Building a case, the bar, the other refusals of `create-dynamic-case` and the
-undo: `process-dynamic-case`. Several cases on one object split by a lookup column (B2B and B2C orders with stages
-of their own), a `filter`, `remove-filter` or `deactivate-unfiltered`: read `process-dynamic-case-filters` first. A
-refusal of these tools whose fix changes a filter: relay it, the user picks the fix, then read
-`process-dynamic-case-filters` before that fix's dry run.
+their order, groups, captions and colours, the steps inside a stage and when it moves on, the case caption, and
+whether it is enabled. Owns a case's versions: a change saved as a new version (`modify-dynamic-case-as-new-version`)
+and the switch of the active one (`set-active-dynamic-case-version`). Building a case, the bar, the other refusals of
+`create-dynamic-case` and the undo: `process-dynamic-case`. Several cases on one object split by a lookup column (B2B
+and B2C orders with stages of their own), a `filter`, `remove-filter` or `deactivate-unfiltered`: read
+`process-dynamic-case-filters` first. A refusal of these tools whose fix changes a filter: relay it, the user picks
+the fix, then read `process-dynamic-case-filters` before that fix's dry run.
 
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here and
@@ -23,7 +23,8 @@ removing a stage that records hold is not refused: count them with the data tool
 == Change an existing case ==
 1. `describe-dynamic-case { environment-name, entity-schema-name | case-name | case-uid }` (read-only): the stages in
    order with `group`, `successful`, `isFinal`, `hasSteps`, `runningInstances`, `records` (the records holding its
-   value, finished cases included), and `enabled`. `packageReadOnly: true` (the package is not editable): a change to
+   value, finished cases included), `steps` and `transitionType` ("Steps inside a stage"), and `enabled`.
+   `packageReadOnly: true` (the package is not editable): a change to
    its stages, captions or filter goes straight to a new version ("Versions of a case", step 1), never through step 2
    (`package-read-only`). Several cases on the object: name one with `case-name` (modify by object answers
    `case-ambiguous`). A warning that a stage "shows as" another name: the bar and the designer show the value's name,
@@ -76,6 +77,32 @@ a case with two stages on one value (the case designer fixes it).
 Outcomes: `failed-restored`: the save did not take, the case is as before; `failed-leftover`: relay its `leftovers`
 and have the user check the case in the designer; `unknown`: the reply was lost, so the change may or may not have
 been written - describe the case before retrying. No compile or restart; F5.
+
+== Steps inside a stage ==
+- Needs clio 8.1.0.159 or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
+  and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
+- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `hasConditions`,
+  `runningInstances`; a Perform task also `performer`, `activity`, `category`, `hint`, `useBackgroundMode`) and
+  `transitionType`.
+- A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
+  matched by `uId`, else by caption among the steps of its type, and one left out is REMOVED (the step that waited
+  for it then starts with the stage). A kept step may be sent back as describe returns it (its `name`,
+  `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step:
+  `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,"unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`;
+  optional by default, a task of To do and Medium for the current user, linked to the record (a note says when tasks have no connection to the object). Only
+  `performTask` is written: another type (the refusal lists the offered ones) keeps its settings, and the case
+  designer changes them; its caption, `required` and `after` still change here.
+- `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
+  constant, `[#SysVariable.CurrentUserContact#]`, or a column of the case's record `[#Record.<Column>#]`: a case has
+  no process parameters (`step-value-source-unsupported`).
+- `transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`. A stage also
+  waits for its steps with conditions. A note warns when there is no step to wait for (an automatic move passes over
+  the stage; a record put into it stays) or it cannot move on (last stage, no later connection).
+- Steps create work on real records: an added step starts for records that ENTER the stage from now on. Show the
+  dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
+  removed step (the count; they never move on), so keep it or wait until they end. `step-has-conditions`: the case
+  designer changes it. Other refusals name the stage and step: `step-invalid`, `step-after-invalid`,
+  `step-type-not-supported`.
 
 == Versions of a case ==
 - Needs clio <CLIO-TBD> or later: if `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
