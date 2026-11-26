@@ -174,6 +174,7 @@ public sealed class WordPrintableGuidanceTests
             "for each table part `Count of records for table part with Entity <TableCaption> is <n>` (all measured)",
             "| `ArgumentException` \"An item with the same key has already been added\" in `WordReportGenerator.AddColumnToEntitySchemaQuery` |",
             "MUST reproduce with one record, AS the user who reported it",
+            "the page has no button wired to `crt.PrintablesRequest` (the product Contact page has none, measured)",
             "MUST NOT ask for, reset or use another user's password.",
             "creating a user or giving one roles needs the owner's explicit yes.",
             "`entity-operation-access` for an object administered by operations, such as `SysModuleReport` itself.",
