@@ -160,8 +160,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "several cases are split by one filter column only; any other start condition is the case designer's");
             guide.Should().Contain("A value left out of `stages` is not a stage",
                 because: "a case may take some of the lookup's values, and a record holding another shows no current stage");
-            guide.Should().Contain("a start condition other than one filter column, deleting a case or changing its stage or filter column",
-                because: "deletion and the stage column are still the case designer's");
+            guide.Should().Contain("a start condition other than one filter column, deleting a case other than by Undo (below) or changing its stage or filter column",
+                because: "deletion beyond what the toolkit wrote and the stage column are still the case designer's, and the undo removes a case or a version this toolkit saved");
+            guide.Should().Contain("Steps 1-2 also remove an inactive version this toolkit saved (`version-created`, or a `failed-leftover` naming one), never the family root (every version's parent) or a member that runs cases.",
+                because: "the versions guide sends a version's removal to these steps, while they were limited to a created case; the root is every version's parent, and a member that runs cases still carries records");
             guide.Should().NotContain("a new version of a case",
                 because: "a version is made and switched by the change guide's tools now, so the guide must not send the user to the designer for it");
             guide.Should().Contain("changing an existing case: `process-dynamic-case-change`; its versions: `process-dynamic-case-versions`",
@@ -480,8 +482,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a banner obliges process-modeling to index the guide, and that article has no room left");
             routing.Should().Contain($"switch versions -> name={CaseVersionsItemId}",
                 because: "routing names every process article, so version work goes straight to the guide that owns it");
-            changeGuide.Should().Contain($"Make the change as a new version or switch the active one: read `{CaseVersionsItemId}` first",
-                because: "the change guide every case run reads points at the version rules it no longer carries");
+            changeGuide.Should().Contain($"Switch the active version: `{CaseVersionsItemId}` alone; make the change as a new version: read that guide together with this one, in one message.",
+                because: "the change guide points at the version rules it no longer carries, in the same reading order as routing and the versions scope");
             changeGuide.Should().Contain($"goes straight to a new version (`{CaseVersionsItemId}`), never through step 2",
                 because: "a read-only package is answered by a version, and the agent must find the guide that makes one");
             changeGuide.Should().Contain($"offer the change as a new version in an editable package, `{CaseVersionsItemId}`",
@@ -672,8 +674,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the version goes to the source's package only when it is editable, and the target package is the user's choice");
             guide.Should().Contain("First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only after their yes",
                 because: "every write makes one more version, and no case tool removes it");
-            guide.Should().Contain("NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes)",
-                because: "run 5 told the user a version cannot be deleted, while delete-schema with remote plus the link-row binding removal deleted inactive versions on the stand; only the case tools and the Case library offer no deletion");
+            guide.Should().Contain("NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes; never the family root, every version's parent, or a member that runs cases)",
+                because: "run 5 told the user a version cannot be deleted, while delete-schema with remote plus the link-row binding removal deleted inactive versions on the stand; only the case tools and the Case library offer no deletion; the root is every version's parent, and a member that runs cases still carries records");
             guide.Should().NotContain("cannot delete a version",
                 because: "an inactive version can be removed the way a case is undone");
             guide.Should().Contain("it is saved inactive, so until a switch the new records the active case's filter fits (every new record when it has none) keep starting the active case while the family is enabled (a confirmed value rename has acted already, below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further version)",

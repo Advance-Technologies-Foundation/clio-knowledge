@@ -50,7 +50,7 @@ case by other means.
 == Not supported yet ==
 Steps inside stages (a Perform task and a stage's `transitionType`: `process-dynamic-case-change`;
 approvals, pages, sub-processes), stage conditions and permissions, a start condition other than one filter column,
-deleting a case or changing its stage or filter column: the case designer does those. No mobile page, mini page or
+deleting a case other than by Undo (below) or changing its stage or filter column: the case designer does those. No mobile page, mini page or
 Classic page bar.
 
 == Before the call ==
@@ -74,8 +74,8 @@ on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dy
 - ORDER. Nothing on the platform orders a lookup's values, and the bar shows the stages in the stored order, so
   pass `stages` (2 to 20 values in order, by Id or exact display value) whenever the business order matters.
   Without it: `order-column` (an integer column of the lookup) > `Position` > `StageOrder` (then
-  `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order turns "New, In progress, Done" into
-  "Done, In progress, New". The result ALWAYS states `case.orderSource` and the ordered captions: read them back to
+  `StageInnerOrder`) > `Number` > `StageNumber` > display value. Display order puts Done before New. The
+  result ALWAYS states `case.orderSource` and the ordered captions: read them back to
   the user. The dry run returns the whole plan: confirm the order with it first.
 - GROUPS (clio 8.1.0.153+ with CrtProcessBuilder 1.6.6.179+; an older clio refuses them: `unknown-keys`): an item may
   name `group` (another stage's value: they share one bar slot, the member right after it; one level) and
@@ -104,7 +104,7 @@ on your own; `filter` and `deactivate-unfiltered` (clio 8.1.0.154+): `process-dy
   `saveOnChange: true`, `askUserToChangeSchema: false`, no `page.saveOnChange`). Tell the user which mode, naming
   the toggle (Saving, above, says what each does). A bar that was already there (`already-present`) keeps its own
   mode: `save-on-change` does not change it, the toggle does.
-- NO compile and NO restart, on .NET Framework and on .NET 8: a case is interpreted. `obligations.compileRequired` and
+- NO compile and NO restart, on either runtime: a case is interpreted. `obligations.compileRequired` and
   `restartRequired` are false; do not run `compile-creatio` or `restart` after it. One exception: with
   `dependencies.compilationRequired: true` the dependency save asked for a compilation, `obligations` lists
   `package-dependencies`, and a configuration compile (`compile-creatio` without `package-name`) is due. Tell the
@@ -130,8 +130,8 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
   `process-dynamic-case-change` says. A re-run, filtered creates included, is `already-present` only with the SAME
   object, column, stages in order, groups and filter (a call without a filter matches only a case without one); it
   writes nothing to the case (it still adds the bar when the page has none), so a failed call is safe to repeat.
-- `settings-conflict`: the object's case settings use another stage column, or there are several rows (when
-  another call created a row at the same moment this call removes its own: retry), or the cases are split by another
+- `settings-conflict`: the object's case settings use another stage column, or there are several rows (a
+  concurrent call's: retry), or the cases are split by another
   filter column: that one and the other filter refusals (`unfiltered-case-exists`, `filter-required`,
   `filter-overlap`, ...) are in `process-dynamic-case-filters`.
 - Page refusals, all BEFORE anything is written: `record-page-not-found` (no record page could be found: pass
@@ -144,8 +144,8 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
   answers `already-present` for the case and adds the bar.
 - `dependency-cycle` (the package storage refused the added dependencies) and `dependency-add-failed`: settle
   the package's dependencies with the user, or pass a package that already reaches the object.
-- `request-failed`: BuildCase could not be called, or answered something that is not its result (an error or a
-  login page); read the message and retry once the environment answers.
+- `request-failed`: BuildCase could not be called or gave no result; read the message, retry once the environment
+  answers.
 - `process-builder-without-build-case`: BuildCase answered 404, so the environment's CrtProcessBuilder has no
   dynamic-case operation (it needs 1.6.6.165 or later); `install-process-builder`, once the user approves it
   (`core-rules`), is the remedy. Its twin for describe and modify, `process-builder-without-case-change`:
@@ -153,10 +153,9 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
 
 == Partial and unknown outcomes ==
 - `unknown`: the reply to the writing pass was lost, so the case may or may not exist. Re-run the call with
-  `dry-run: true` before anything else (it writes nothing), and KEEP this result's `dependencies.added`: no later
+  `dry-run: true` before anything else, and KEEP this result's `dependencies.added`: no later
   result reports them. `case.status: already-present` means the case was written, but that answer names no link
-  row or binding, so undo steps 1-3 cannot be driven from it: tell the user it can be removed in the case
-  designer. `planned` means it was not: with the user's agreement run the real call, or remove those dependencies
+  row or binding to undo: tell the user it can be removed in the case designer. `planned` means it was not: with the user's agreement run the real call, or remove those dependencies
   (step 5). Never undo from the `unknown` result itself.
 - `created-page-failed`: the case is in place (`case.status` `created` or `already-present`) and kept; the bar is
   not. `page.retry` carries the exact `update-page` call; for a full-form page that is a `replace` of the whole
@@ -168,7 +167,8 @@ another outcome (`request-failed` with `unknown`, `page-append-rejected` with `c
 
 == Undo (sequential, in this order; stop at the first failure) ==
 Steps 1-3 ONLY for a call whose `case.status` is `created`; after `already-present` this call wrote no case, so
-never remove the case or its link row. Steps 4 and 5 follow `page.status` and `dependencies.status` alone. Each
+never remove the case or its link row. Steps 1-2 also remove an inactive version this toolkit saved (`version-created`,
+or a `failed-leftover` naming one), never the family root (every version's parent) or a member that runs cases. Steps 4 and 5 follow `page.status` and `dependencies.status` alone. Each
 step deletes live data and none asks for confirmation: it MUST have the user's explicit agreement for the named
 environment and rows first (`core-rules`). Take every name from the result, never compose one from an Id.
 1. `delete-schema { schema-name: case.schemaName, environment-name, remote: true }` (without `remote` it acts

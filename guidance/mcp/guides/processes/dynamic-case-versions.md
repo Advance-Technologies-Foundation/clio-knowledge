@@ -47,7 +47,7 @@ the version it needs, and `install-process-builder`, once the user approves it (
    stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform
    task, send that step's `conditions` without that stage together with the stages without it; for another step,
    remove the step or change its conditions in the case designer on the version, then remove the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
-   after their yes. NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes); it is
+   after their yes. NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes; never the family root, every version's parent, or a member that runs cases); it is
    saved inactive, so until a switch the new records the active case's filter fits (every new record when it has
    none) keep starting the active case while the family is enabled (a confirmed value rename has acted already,
    below), and a later change to it is `modify-dynamic-case` by its `case-name`, in place (no further
