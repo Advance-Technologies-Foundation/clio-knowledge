@@ -696,7 +696,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
     }
 
     [Test]
-    [Description("The change guide states what a stage's steps do to a change: a removed stage takes its steps and the dry run names them, a removal is refused only for a step condition, and a new version copies the source's steps and refuses steps sent with it.")]
+    [Description("The change guide states what a stage's steps do to a change: a removed stage takes its steps, a removal is refused only for a step condition that moves records to it, and a new version copies the source's steps and refuses steps sent with it.")]
     public void ChangeGuide_ShouldCarryTheStepRulesOfAStageChangeAndAVersion()
     {
         // Arrange & Act
@@ -705,10 +705,14 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().Contain("a stage left out is REMOVED with its steps (the dry run's `diff.steps` names them: relay them before the yes)",
-                because: "the package removes a stage together with its steps and names them in the dry run, so the user must hear which work goes before the yes");
-            guide.Should().Contain("`stage-is-condition-target` (a step condition moves records to that stage) and `step-has-conditions` (a step of that stage has conditions)",
-                because: "these are the only two refusals of a stage removal that the steps cause");
+            guide.Should().Contain("a stage left out is REMOVED with its steps (\"Steps inside a stage\")",
+                because: "the package removes a stage together with its steps, and the steps section owns relaying the dry run's diff.steps before the yes");
+            guide.Should().NotContain("relay them before the yes",
+                because: "the yes over diff.steps has one owner, the steps section");
+            guide.Should().Contain("`stage-is-condition-target` (a step condition moves records to it): the case designer, or keep the stage",
+                because: "this is the only refusal of a stage removal that the steps cause");
+            guide.Should().NotContain("step-has-conditions",
+                because: "the package that takes step conditions no longer refuses a step or a stage removal for them");
             guide.Should().NotContain("stage-has-steps",
                 because: "the package no longer refuses a stage only because it has steps");
             guide.Should().Contain("a version copies the source's steps as they are, so steps or `transitionType` sent with it are refused: change them on the version afterwards (`modify-dynamic-case` by its `case-name`, or the case designer)",

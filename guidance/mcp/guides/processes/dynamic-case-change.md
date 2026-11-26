@@ -35,8 +35,8 @@ removing a stage that records hold is not refused: count them with the data tool
    remove-filter?, enabled?, confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }`
    writes; the top-level `caption` renames the CASE. `stages` is the WHOLE new list of items `{"value": Id or exact
    display value, "caption"?, "color"?, "group"?, "successful"?}`, e.g.
-   `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is REMOVED with its steps (the dry
-   run's `diff.steps` names them: relay them before the yes), a value not yet a stage
+   `{"value":"Rejected","group":"Approved","successful":false}`: a stage left out is REMOVED with its steps ("Steps
+   inside a stage"), a value not yet a stage
    is ADDED (it must be in the lookup: add it with the data tools first, only after the user agreed to that new
    value, never unasked; the user asked for that stage, so this changes the case, it does not get around it). Fields
    an item leaves out keep their values; `group: null` ungroups; `color` (`#RRGGBB`) recolours the stage; an item's
@@ -68,8 +68,7 @@ removing a stage that records hold is not refused: count them with the data tool
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
 ("Versions of a case"): running cases keep the version they started on. `stage-is-condition-target` (a step
-condition moves records to that stage) and `step-has-conditions` (a step of that stage has conditions): change
-the step in the case designer first, or keep the stage; `package-read-only` (the case's package is not editable: offer the change
+condition moves records to it): the case designer, or keep the stage; `package-read-only` (the case's package is not editable: offer the change
 as a new version in an editable package, "Versions of a case"), `invalid-request` for `enabled` on a case that is
 not the active version (name the active one the message gives) or for a case not of `entity-schema-name`,
 `not-in-version` (a first filter on a member that is not active: "Versions of a case"), `stage-list-duplicate` for
@@ -100,9 +99,8 @@ been written - describe the case before retrying. No compile or restart; F5.
   the stage; a record put into it stays) or it cannot move on (last stage, no later connection).
 - Steps create work on real records: an added step starts for records that ENTER the stage from now on. Show the
   dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
-  removed step (the count; they never move on), so keep it or wait until they end. `step-has-conditions`: the case
-  designer changes it. Other refusals name the stage and step: `step-invalid`, `step-after-invalid`,
-  `step-type-not-supported`.
+  removed step (the count; they never move on), so keep it or wait until they end. Other refusals name the stage
+  and step: `step-invalid`, `step-after-invalid`, `step-type-not-supported`.
 
 == Versions of a case ==
 - Needs clio <CLIO-TBD> or later: if `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
