@@ -491,6 +491,9 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a removed stage now takes its steps with it; only an older package still answers stage-has-steps");
             createGuide.Should().Contain("Steps inside stages (a Perform task and a stage's `transitionType`: `process-dynamic-case-change`",
                 because: "a case is built without steps, and the change guide owns them and the stage's transition");
+            ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ChangeArticlePath).Should().Contain(
+                "{\"type\":\"performTask\",\"caption\":\"Check the order\",\"required\":true,\"after\":\"Draft check\",\"performer\":",
+                because: "the guide is served raw, and a line break inside the example's strings would be copied into the request");
             createGuide.Should().NotContain("transition rules",
                 because: "a stage's transitionType is set through modify-dynamic-case, not only in the designer");
         }

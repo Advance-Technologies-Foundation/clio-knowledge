@@ -72,11 +72,11 @@ been written - describe the case before retrying. No compile or restart; F5.
   `runningInstances`; a Perform task also `performer`, `activity`, `category`, `hint`, `useBackgroundMode`) and
   `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
-  matched by `uId`, else by caption, and one left out is REMOVED (the step that waited for it then starts with the
-  stage). A kept step may be sent back as describe returns it (its `name`, `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step, e.g. `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft
-  check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,
-  "unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`; optional by default, a task of To do and
-  Medium for the current user, linked to the record (a note says when tasks have no connection to the object). Only
+  matched by `uId`, else by caption among the steps of its type, and one left out is REMOVED (the step that waited
+  for it then starts with the stage). A kept step may be sent back as describe returns it (its `name`,
+  `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step:
+  `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,"unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`;
+  optional by default, a task of To do and Medium for the current user, linked to the record (a note says when tasks have no connection to the object). Only
   `performTask` is written: another type (the refusal lists the offered ones) keeps its settings, and the case
   designer changes them; its caption, `required` and `after` still change here.
 - `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
