@@ -157,6 +157,58 @@ public sealed class MigrationGuidanceCorrectionsTests
     }
 
     [Test]
+    [Description("State rules revert by themselves, so the guide asks for no opposite rule; set-values does not revert.")]
+    public void BusinessRulesGuidance_ShouldSayStateRulesRevert_AndNotAskForOppositeRules()
+    {
+        // Arrange
+        string guidance = ReadGuide("business-rules/business-rules.md");
+
+        // Act
+        string section = Section(guidance, "State actions revert by themselves; set-values does not");
+
+        // Assert
+        section.Should().Contain("do NOT write a second, opposite rule",
+                because: "agents wrote opposite pairs because the guide told them to")
+            .And.Contain("resets that property to the element's own state",
+                because: "a rule reverts to the element's default, not to the opposite action")
+            .And.Contain("`set-values` does NOT revert",
+                because: "a value a rule set stays, so clearing it is a rule of its own")
+            .And.Contain("`Terrasoft.Core/BusinessRules/BusinessRuleEngine.cs`",
+                because: "the runtime claim needs its source evidence")
+            .And.Contain("EXPERIMENTAL (from source, not tested on a stand): entity rules run in the same engine",
+                because: "the entity half rests on source only and must be labelled where it is stated")
+            .And.Contain("add `OR <field> is-not-filled-in`, or the rule does not fire while the field is empty",
+                because: "the one negated rule must still fire on a new record with an empty field")
+            .And.Contain("Not tested on a stand: entity rules, and a field that is read-only or hidden by default.",
+                because: "the untested cases must travel with the rule");
+        string[] staleWording =
+        [
+            "create an explicit inverse business rule",
+            "plus the inverse NOT_CONTAIN",
+            "its opposite rule needs",
+            "Use an explicit inverse rule",
+            "must also return through an explicit inverse rule",
+            "State-changing actions are one-way",
+            "does not automatically roll back",
+            "automatically reverses itself",
+        ];
+        staleWording.Should().AllSatisfy(stale => guidance.Should().NotContain(stale,
+            because: "agents saved opposite rule pairs because the guide told them to"));
+        Regex.Matches(guidance, "\\(\"State actions revert by themselves\"\\)").Should().HaveCount(4,
+            because: "the stepper, role, workflow and common-mistakes lines point to the owner section instead of restating it");
+        section.Should().Contain("EXPERIMENTAL (from source, not tested on a stand): a field that is read-only or hidden by default",
+                because: "the untested default-state case must be marked where it is stated")
+            .And.Contain("the condition that the user is NOT an administrator → hide-element",
+                because: "a show-element rule on a field visible by default never hides it");
+        guidance.Should().Contain("CurrentUserRoles NOT_CONTAIN <role id> → hide-element",
+                because: "the role example must still hide the field from other users with one rule")
+            .And.Contain("one hide-element rule on `RentalStepper_ActiveStep is filled in AND RentalStepper_ActiveStep not-equal <FirstStepName>`",
+                because: "a show-element rule never hides a default-visible element on the later steps")
+            .And.NotContain("must differ from both the rule's state and the element's own state",
+                because: "every state action is binary, so no state differs from both");
+    }
+
+    [Test]
     [Description("The handler guide owns the EXPERIMENTAL read-only pattern with its evidence and limits.")]
     public void HandlersGuidance_ShouldOwnExperimentalReadOnlyPattern_WithItsLimits()
     {
