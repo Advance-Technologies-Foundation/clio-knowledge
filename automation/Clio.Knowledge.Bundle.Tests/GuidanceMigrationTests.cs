@@ -65,6 +65,7 @@ public sealed class GuidanceMigrationTests
         "process-dynamic-case",
         "process-dynamic-case-change",
         "process-dynamic-case-filters",
+        "process-dynamic-case-versions",
         "web-service-registration",
         "web-service-maintenance",
         "web-service-soap",

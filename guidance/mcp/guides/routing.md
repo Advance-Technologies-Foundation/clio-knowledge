@@ -11,7 +11,7 @@ page-body sections such as `handlers`). A guide restating another guide's rule â
 precondition kept next to the instruction it guards â€” names that guide as the owner.
 
 - Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM; pass the user's word for the object, `find-entity-schema` if not found) -> name=process-dynamic-case
-  - an object that already has a case: read, change (stages, order, groups), disable or re-enable it, make a new version or switch the active one -> name=process-dynamic-case-change; split its records into cases by type (B2B vs B2C orders) -> name=process-dynamic-case-filters
+  - an object with a case: read, change (stages, order, groups), disable/re-enable it -> name=process-dynamic-case-change; a new version or the active one -> name=process-dynamic-case-versions; split its records into cases by type (B2B/B2C orders) -> name=process-dynamic-case-filters
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
