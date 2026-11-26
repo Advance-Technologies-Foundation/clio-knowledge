@@ -67,7 +67,7 @@ and have the user check the case in the designer; `unknown`: the reply was lost,
 been written - describe the case before retrying. No compile or restart; F5.
 
 == Steps inside a stage ==
-- Needs clio <CLIO-STEPS-TBD> or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
+- Needs clio 8.1.0.159 or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
   and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
 - Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `conditions`,
   `runningInstances`, and the type's block: a Perform task's `performer`, `activity`, `category`, `hint`; an
