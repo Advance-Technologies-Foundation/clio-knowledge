@@ -134,7 +134,7 @@ namespace Terrasoft.Configuration                 // exactly this namespace, a t
 	public class UsrAmountInWordsConverter : IExpressionConverter
 	{
 		public string Evaluate(object value, string arguments = "") {
-			string text = value as string ?? string.Empty;   // bytes for a binary column
+			string text = value as string ?? string.Empty;   // a binary column arrives as byte[]; this sample handles text only
 			string argument = arguments ?? string.Empty;     // null when the template gives no argument
 			return Format(text, argument) ?? string.Empty;   // never null
 		}
