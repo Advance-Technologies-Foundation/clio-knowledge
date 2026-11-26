@@ -18,7 +18,7 @@ the version it needs, and `install-process-builder`, once the user approves it (
 == Versions of a case ==
 - A version is a separate case schema of the case's family. At most one member is ACTIVE: while the family is
   enabled, new records start that one (if it has a filter, only those it is for; Package position, below, is the
-  exception; `process-versions` owns the version model). `describe-dynamic-case` takes any member by `case-name` / `case-uid`
+  exception). `describe-dynamic-case` takes any member by `case-name` / `case-uid`
   (one that is not active gets a note naming the active one; `entity-schema-name` reads the active one) and lists the
   family in `versions` (each member's package, `active`, running cases, link row); the list is absent for a case with
   no other version.
@@ -61,7 +61,7 @@ the version it needs, and `install-process-builder`, once the user approves it (
    left renamed stays renamed: offer to rename it back) and describe the family before telling the user what changed;
    no tool removes the version; `failed-leftover` WITHOUT a `version`: nothing was saved, but a row or
    a value rename could not be undone - relay `leftovers` (a value left renamed: offer to rename it back); `unknown`:
-   the reply was lost. After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes
+   the reply was lost. After `failed-leftover`, `unknown` or no reply at all (a timeout), describe the family before any retry: a retry makes
    another version.
 2. Check it: `describe-dynamic-case { case-name: version.name }` and give the user its `designerUrl` to open the
    version in the case designer.

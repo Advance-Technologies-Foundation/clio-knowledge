@@ -676,7 +676,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a confirmed value rename stays on failed-leftover and is listed in leftovers, and this outcome is also reached when the saved version reads as active or the save flipped the family's enabled flag, so the agent reads the family before saying what changed; the toolkit has no case deletion");
             guide.Should().NotContain("in the case library",
                 because: "the case library hides Delete on its rows and on its Versions tab (VwDcmLibSection, ProcessVersionsDetail.getDeleteRecordMenuItem), so the guide names no deletion route there");
-            guide.Should().Contain("After `failed-leftover` or `unknown`, describe the family before any retry: a retry makes another version",
+            guide.Should().Contain("After `failed-leftover`, `unknown` or no reply at all (a timeout), describe the family before any retry: a retry makes another version",
                 because: "a retry after a saved or possibly saved version adds one more version");
             changeGuide.Should().Contain("`entity-schema-name`: the schema name or the user's word (a unique caption is resolved). `entity-not-found` or several matches list `Name (caption)` candidates: pick one or ask. None listed (older package): `find-entity-schema`",
                 because: "the package resolves a unique caption, so a find-entity-schema call first only adds a call; candidates replace the search, which stays for an older package");
