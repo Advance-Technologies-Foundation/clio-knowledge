@@ -684,7 +684,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the owner decided that a request to switch is the consent after a dry run without warnings, while a version only created still needs its own question; a run that condensed a note dropped its sentences about the records they applied to");
             guide.Should().Contain("Tell the user what the switch does, for the records that fit the version's filter (if any): new ones start it once the family is enabled (unless Package position, below, applies)",
                 because: "a disabled family starts nothing whichever member is active, and a filtered version starts only for the records its filter is for (a run told the user every new record starts the new version)");
-            guide.Should().Contain("At most one member is ACTIVE: while the family is enabled, new records start that one (if it has a filter, only those it is for; Package position, below, is the exception;",
+            guide.Should().Contain("At most one member is ACTIVE: while the family is enabled, new records start that one (if it has a filter, only those it is for; Package position, below, is the exception)",
                 because: "the version model names the active member as the one new records start, which holds only while the family is enabled, only for the values of its filter, and only where no member outranks it by package position");
             guide.Should().NotContain("new records start the active version",
                 because: "that sentence holds only for an enabled family and for the records the version's filter is for");
