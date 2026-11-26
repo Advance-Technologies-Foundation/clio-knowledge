@@ -256,7 +256,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "adding a missing value the user asked for is part of the change, still after their yes");
             guide.Should().Contain("First `dry-run: true`: show the user `diff` and the notes, write only after their yes",
                 because: "agents answered about existing cases without a dry run and missed what would change");
-            guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }",
+            guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, confirm-all-records?, dry-run }",
                 because: "an agent builds its call from the signature, so every flag the tool takes is listed there");
             guide.Should().Contain("`invalid-request` for a case that is not the active version (name the active one the message gives)",
                 because: "the package refuses an inactive version and names the active one (phase A follow-up P3)");
@@ -523,6 +523,34 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 .And.Contain("`step-condition-not-supported`");
             guide.Should().NotContain("`step-has-conditions`",
                 because: "a step or a stage with conditions is now removed with them");
+        }
+    }
+    [Test]
+    [Description("The change guide owns the other step types: the clio and package boundary, one example per type, the approver the user is asked for, approval conditions on Positive or Negative, the sub-process inputs, the sender a mailbox, and an access-rights step on every record only after the user's separate yes (ENG-107648).")]
+    public void ChangeGuide_ShouldGuideTheOtherStepTypes()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.207\)",
+                because: "the step types ship with a clio release and an older package refuses them");
+            guide.Should().Contain("{\"type\":\"approval\"").And.Contain("{\"type\":\"openEditPage\"")
+                .And.Contain("{\"type\":\"subProcess\"").And.Contain("{\"type\":\"sendEmail\"")
+                .And.Contain("{\"type\":\"changeAccessRights\"");
+            guide.Should().Contain("ask the user who approves",
+                because: "the case designer requires an approver and sets none");
+            guide.Should().Contain("conditions on Positive or Negative only",
+                because: "the case designer offers no condition on a cancelled approval");
+            guide.Should().Contain("\"inputs\":[{\"parameter\":",
+                because: "a sub-process step's inputs are a list of the called process's parameters");
+            guide.Should().Contain("sender a mailbox, never a record column",
+                because: "the case designer maps no record column to the sender");
+            guide.Should().Contain("ask SEPARATELY, and only after that yes send `confirm-all-records: true`",
+                because: "an access-rights step without a filter changes every record of its object");
+            guide.Should().Contain("`step-acts-on-all-records`");
         }
     }
 }
