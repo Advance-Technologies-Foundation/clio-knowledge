@@ -11,7 +11,8 @@ Framework / MSSQL environment. Creatio 8.x is not verified.
 
 == Reproduce first ==
 MUST reproduce with one record, AS the user who reported it (the generator reads with that user's rights), before
-naming a cause, and keep the generated file. Unzip it and read `word/document.xml`: an empty `w:fldSimple` where a value was expected is a field
+naming a cause, and keep the generated file. Do it without that user's password: ask the user to print the record and
+share the file, or use a test user with the same roles. MUST NOT ask for, reset or use another user's password. Unzip it and read `word/document.xml`: an empty `w:fldSimple` where a value was expected is a field
 the generator saw and could not fill; an untouched field with its placeholder is a field it never recognised.
 
 == Where the error is ==
@@ -20,7 +21,8 @@ the generator saw and could not fill; an untouched field with its placeholder is
   an on-site .NET Framework host). Read the exception and the name it gives (a column UId, a converter, a record Id).
   Generator errors do NOT go to `MSWordLog.log` (measured).
 - `MSWordLog.log` is a trace, not an error log (verified on 10.2.444 and 10.3.1152 source and on a 10.3.1152 run;
-  earlier versions unknown: an empty or missing file there proves nothing). Create feature `EnableMSWordLog` (it is
+  earlier versions unknown, an 8.2.3 boundary from another source was not verified: an empty or missing file there
+  proves nothing). Create feature `EnableMSWordLog` (it is
   not shipped) and turn it on;
   a run then writes `Start generating report for template …` and `Finish generating report …`, and for each table
   part `Count of records for table part with Entity <TableCaption> is <n>` (all measured); image load failures are

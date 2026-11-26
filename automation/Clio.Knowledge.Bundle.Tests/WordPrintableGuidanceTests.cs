@@ -43,7 +43,6 @@ public sealed class WordPrintableGuidanceTests
         string[] requiredUris = [.. requirements.GetProperty("resourceUris").EnumerateArray().Select(uri => uri.GetString()!)];
 
         // Act
-        string routing = ReadCollapsed("guidance/mcp/guides/routing.md");
         string filesReport = ReadCollapsed("guidance/mcp/guides/processes/files-report.md");
 
         // Assert
@@ -68,8 +67,10 @@ public sealed class WordPrintableGuidanceTests
                 because: "the requirement lists the canonical route next to the item id");
         }
 
-        routing.Should().Contain("- MS Word printables -> name=word-printable",
-            because: "a printable task that is not about a page button must still find the entry guide");
+        ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), "guidance/mcp/guides/routing.md").Replace("\r\n", "\n")
+            .Should().Contain("\n- MS Word printables (SysModuleReport): build, template, ship, fix -> name=word-printable\n",
+                because: "a printable task that is not about a page button must still find the entry guide, so the row is a "
+                    + "top-level domain row and not nested under Pages");
         filesReport.Should().Contain(
             "Building or changing a printable (its columns, template, converter, package): `get-guidance name=word-printable`.",
             because: "the process element refuses a missing printable; the agent must learn where building one is owned");
@@ -144,7 +145,9 @@ public sealed class WordPrintableGuidanceTests
             "a row that exists takes ONLY the force-update columns",
             "an archive whose binding has the same `ModifiedOnUtc` as the installed one applies nothing, forced or not;",
             "The package export carries the binding's copy as of its last save, not the current `File` (measured).",
-            "MUST NOT download it with `clio call-service`"
+            "MUST NOT download it with `clio call-service`",
+            "FastReport (`SysModuleReport.Type` `8def0f6d-…`) and DevExpress (`32f72c9c-…`) are different engines. Stop and say so; nothing here applies to them.",
+            "run the login from a script that reads the settings at run time, never as a command line that carries the password."
         ];
 
         // Assert
@@ -169,6 +172,10 @@ public sealed class WordPrintableGuidanceTests
             "for each table part `Count of records for table part with Entity <TableCaption> is <n>` (all measured)",
             "| `ArgumentException` \"An item with the same key has already been added\" in `WordReportGenerator.AddColumnToEntitySchemaQuery` |",
             "MUST reproduce with one record, AS the user who reported it",
+            "MUST NOT ask for, reset or use another user's password.",
+            "Create feature `EnableMSWordLog` (it is not shipped) and turn it on",
+            "Turn the feature off again afterwards.",
+            "an 8.2.3 boundary from another source was not verified: an empty or missing file there proves nothing",
             "MUST NOT widen object, column or record rights to make a printable fill"
         ];
 

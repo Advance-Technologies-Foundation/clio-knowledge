@@ -30,7 +30,6 @@ precondition kept next to the instruction it guards - names that guide as the ow
   - a record's connections / "Connected to" block on a page -> name=page-modification-field-contract (CONNECTIONS ARE NOT INSERTED FIELDS) + get-component-info crt.Connections
   - page business rules (create/change/remove; visibility/required/value) -> name=business-rules
   - wire a button/menu action to a platform request (crt.*Request: print, close, cancel, ...) -> get-request-info + name=when-to-use-requests
-  - MS Word printables -> name=word-printable
   - add a button/menu item that runs a business process -> name=run-process-button, plus get-process-signature FIRST + get-request-info (crt.RunBusinessProcessRequest)
   - bind which page opens for a record / which page adds a record (related pages) -> name=related-page-binding
   - change the size of a modal window / popup / mini page -> name=page-modal-size (the size is an add-on setting, not the page body)
@@ -38,7 +37,7 @@ precondition kept next to the instruction it guards - names that guide as the ow
   - add, filter, or verify a DETAIL / related list on a page (a `crt.DataGrid` over a child entity) -> name=related-list
   - a list or a section grid renders only a placeholder and shows no rows -> name=related-list ("Verifying a list in the browser", which says when the placeholder is a real failure)
   - send or receive page messages through WebSockets / `MessageChannelService` -> name=websocket-messaging; add name=page-schema-handlers and name=page-schema-creatio-devkit-common for page-body mechanics
-  - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables — for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
+  - add JavaScript to a web page outside a handler/converter/validator function (helper functions, constants, caches, string tables - for one page or several), or a page broke after an Interface Designer save (e.g. after adding a business rule) because a helper disappeared -> name=shared-client-logic (why: name=page-modification-overview, "What survives an Interface Designer save")
   - translate a page or an app / add a language to it (page captions, page title) -> name=page-schema-translation + name=localizable-values; object or column titles and the section title -> name=page-schema-translation (the `update-app-section` contract check: name=existing-app-maintenance); lookup values -> name=data-bindings (lookup value translations)
 - Custom BPMN user tasks with Classic parameter panels, icons and toolbox registration -> name=process-custom-elements
   - one toolbox element selecting separate tasks and pages -> name=process-custom-element-families
@@ -135,12 +134,12 @@ precondition kept next to the instruction it guards - names that guide as the ow
     `register-web-service` -> register it first by name=web-service-registration;
     writing a C# configuration web service that Creatio exposes is not this -> name=configuration-webservice (tests:
     name=configuration-webservice-tests; portal routes: name=portal-service-routing)
-  - SEND a chat message (Telegram, WhatsApp, SMS and the like) to ONE contact, from a process or now — the Send chat message
+  - SEND a chat message (Telegram, WhatsApp, SMS and the like) to ONE contact, from a process or now - the Send chat message
     element (`sendChatMessage`; the default create contract lists it): channel, recipient, chat template or
     custom text, `ignoreErrors` and the send status -> name=process-send-chat-message
   - run ANOTHER process from this one and pass values in and out - the Sub-process element / BPMN call
     activity, and how to build it -> name=process-sub-process
-  - run that called process ONCE PER ITEM of a collection — "for each record", "iterate", multi-instance:
+  - run that called process ONCE PER ITEM of a collection - "for each record", "iterate", multi-instance:
     converting an element, where the callee's contract moves to -> name=process-sub-process (and name=process-sub-process-when for whether a loop is needed at all,
     and which execution mode it takes)
   - a called process CHANGED its parameters and the CALLERS have to be fixed -> name=process-parameters-details
@@ -187,6 +186,7 @@ precondition kept next to the instruction it guards - names that guide as the ow
     add name=data-bindings for the binding mechanics
 - Sales engagement: sequence definitions, steps, enrollment, lifecycle, scheduling or sequence packaging -> name=sequences
 - Creatio.ai add-in for Microsoft 365 (Outlook/Teams CRM panel): add or remove an object in the panel, choose or order the fields on its record page, list item or Create popup, order its tabs, search tabs or Create menu, or ship that configuration in a package -> name=m365-addin-customization
+- MS Word printables (SysModuleReport): build, template, ship, fix -> name=word-printable
 - Email content: read, edit, or copy a marketing email (`BulkEmail`) or message template (`EmailTemplate`), including Beefree `BfEmailTemplate` and legacy `TemplateConfig` variants -> name=email-templates
 - Applications, deploy & ops: deploy & provisioning -> name=deploy-lifecycle
   - switch a registered environment's file system mode (FSM) on/off (get-fsm-mode / set-fsm-mode), or link/unlink packages from a local repository (link-from-repository-*) -> name=fsm-mode
@@ -199,7 +199,7 @@ precondition kept next to the instruction it guards - names that guide as the ow
   - create, publish, consume, or troubleshoot a custom C# MCP source-code action -> name=custom-mcp-tools; add name=server-to-server-oauth when creating or using OAuth client credentials
   - send a Creatio backend C# message to Freedom UI, bridge a frontend message to the same user's connections, or broadcast a frontend announcement through WebSockets / MessageChannelService -> name=websocket-messaging
   - manage navigation workplaces (place a section in a workplace or move it out of My applications, grant/remove role visibility, create/update/delete a workplace) -> name=workplaces
-  - make a Freedom UI section reachable by PORTAL / self-service (external) users — the end-to-end flow that sequences page binding, workplace placement, object-access grant, and default record rules for the All external users audience (deny-by-default) -> name=portal-sections
+  - make a Freedom UI section reachable by PORTAL / self-service (external) users - the end-to-end flow that sequences page binding, workplace placement, object-access grant, and default record rules for the All external users audience (deny-by-default) -> name=portal-sections
   - environment inspection (version / db engine / framework / product / license) -> name=describe-environment
   - executing an approved plan -> name=agent-execution
   - identity assertion / Identity Service V3 -> name=identity-assertion
@@ -214,7 +214,7 @@ precondition kept next to the instruction it guards - names that guide as the ow
 - Access rights (record-level): who can read/edit/delete a record, or grant/revoke that access NOW -> name=record-rights; to grant/revoke from inside a running business process instead -> name=process-access-rights; for a DASHBOARD's access rights (and shipping them with the package so they survive a transfer) -> name=dashboard-rights
 - Access rights (default record rules): turn record permissions on/off for an object, set which rights a NEW record gets by who created it ("records created by role X are visible to role Y"), or apply those rules to existing records -> name=default-record-rights
 - Access rights (object-level): who may read/create/edit/delete ANY record of an entity (the "Object permissions" / SysEntitySchemaOperationRight layer; get-object-rights / set-object-rights), including making a portal section's object available to external users -> name=object-rights; for CRUD access supplied by SYSTEM operations instead -> name=entity-operation-access
-- Access rights (column-level): who may see or edit one COLUMN (field) of an object, per role — the "Column permissions" layer and its switch (get-column-rights / set-column-rights) -> name=column-rights; a field's visibility or editability on pages only (the control's state, the data stays reachable) -> name=business-rules
+- Access rights (column-level): who may see or edit one COLUMN (field) of an object, per role - the "Column permissions" layer and its switch (get-column-rights / set-column-rights) -> name=column-rights; a field's visibility or editability on pages only (the control's state, the data stays reachable) -> name=business-rules
 - Web ListWidget / entity-backed DataGrid binding, cloning, or a persistent loading placeholder -> name=list-widget
 - SQL views exposed as entities, IsDBView, or packaging a database view -> name=db-view-entities
 - Entity CRUD access supplied by system operations (AdministratedByOperations / SysEntityRightByAdminOperation) -> name=entity-operation-access

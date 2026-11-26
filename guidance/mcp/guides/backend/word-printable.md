@@ -57,7 +57,8 @@ Read before you change anything, and keep what you read as the baseline and the 
    not a valid .docx (measured). Use an HTTP client from a shell (log in through `ServiceModel/AuthService.svc/Login`,
    replay the `BPMCSRF` cookie as a header), or ask the user to click Download template in the designer. Read the
    login from the registered clio environment settings, never from the conversation, and never print or store the
-   password, the session cookies or `BPMCSRF`.
+   password, the session cookies or `BPMCSRF`: run the login from a script that reads the settings at run time,
+   never as a command line that carries the password.
 5. Whether a package already ships the row: `execute-esq` on `SysPackageSchemaData` filtered by `Name` starting with
    `SysModuleReport` (product printables ship as `SysModuleReport_<Name>` / `SysModuleReportTable_<Name>`).
 
@@ -79,8 +80,10 @@ Read before you change anything, and keep what you read as the baseline and the 
 
 Without a designer (shell only, measured on 10.3.1152): when no user can open the designer and you have an HTTP
 client, a printable can be created and filled by API. Use it only then, and say that you did.
-1. Column UIds: `POST /0/DataService/json/SyncReply/RuntimeEntitySchemaRequest` `{"Name":"<Object>"}` ->
-   `schema.columns.Items[*].uId`. clio has no tool that returns column UIds.
+1. Column UIds: `clio call-service -e <env> --service-path DataService/json/SyncReply/RuntimeEntitySchemaRequest -b
+   '{"Name":"<Object>"}'` (CLI) -> `schema.columns.Items[*].uId` (clio 8.1.0.130, measured). clio has no MCP tool that
+   returns column UIds. The upload, the download and the generation below still need your own HTTP client (binary
+   bodies).
 2. The row: `odata-create` on `SysModuleReport` with `Caption`, `TypeId` (Word), `SysEntitySchemaId` (the object's
    UId), `ShowInCard` / `ShowInSection`, and `MacrosSettings` with one entry per column:
    `{"caption":"<Caption>","metaPath":"<colUId>[.<colUId>]","metaPathCaption":"<Caption>","aggregationType":"None",
@@ -156,6 +159,7 @@ bindings, the way the product ships its own (`SysModuleReport_Invoice` and other
   file once (the key lives in the user session and is removed on first read). Without an HTTP client, ask the user to
   print it.
 - Generate it as a user who will print, not only as an administrator: the generator reads with that user's rights.
+  How to do that without that user's password is owned by `word-printable-troubleshooting` (Reproduce first).
 - On the target after delivery, download the template (or read `SysModuleReport.ModifiedOn` and the downloaded size)
   before calling the new template delivered.
 
