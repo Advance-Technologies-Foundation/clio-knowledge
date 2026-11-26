@@ -12,7 +12,7 @@ Version boundary, before anything else: `modify-dynamic-case-as-new-version` and
 need clio <CLIO-TBD> or later. If `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the
 clio is older: stop here and tell the user to update clio, or to save the new version and make it actual in the case
 designer. An older clio's describe has no `versions`: a missing list there does not mean the case has no other
-version. They also need CrtProcessBuilder 1.6.6.211 or later on the environment: clio refuses an older one, naming
+version. They also need CrtProcessBuilder 1.6.6.216 or later on the environment: clio refuses an older one, naming
 the version it needs, and `install-process-builder`, once the user approves it (`core-rules`), is the remedy.
 
 == Versions of a case ==

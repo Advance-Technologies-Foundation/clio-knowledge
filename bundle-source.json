@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.264",
+  "libraryVersion": "1.15.265",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2042,7 +2042,7 @@
     {
       "itemId": "process-dynamic-case-versions",
       "title": "Versions of a dynamic case",
-      "description": "Needs clio <CLIO-TBD> or later with CrtProcessBuilder 1.6.6.211 or later. Read after process-dynamic-case-change, before a change is made as a new version of a dynamic case (DCM) or its active version is switched. Owns a case's versions: the versions list of describe-dynamic-case, a member that is not active changed in place with modify-dynamic-case, modify-dynamic-case-as-new-version (dry run, never activates or deletes, copies the steps as they are), ask, then set-active-dynamic-case-version (dry run first; relay a refusal as it stands; a disabled family; package position) and the outcomes of both.",
+      "description": "Needs clio <CLIO-TBD> or later with CrtProcessBuilder 1.6.6.216 or later. Read after process-dynamic-case-change, before a change is made as a new version of a dynamic case (DCM) or its active version is switched. Owns a case's versions: the versions list of describe-dynamic-case, a member that is not active changed in place with modify-dynamic-case, modify-dynamic-case-as-new-version (dry run, never activates or deletes, copies the steps as they are), ask, then set-active-dynamic-case-version (dry run first; relay a refusal as it stands; a disabled family; package position) and the outcomes of both.",
       "topicId": "creatio.process-dynamic-case-versions",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-versions",
