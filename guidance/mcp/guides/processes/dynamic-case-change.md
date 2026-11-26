@@ -78,7 +78,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step:
   `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,"unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`;
   optional by default, a task of To do and Medium for the current user, linked to the record (a note says when tasks have no connection to the object).
-- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.212), each with its `create-business-process`
+- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.213), each with its `create-business-process`
   block and the case designer's defaults; what the designer requires is refused when missing (`step-invalid` names it):
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
@@ -92,7 +92,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   reads the record; no conditions);
   `{"type":"changeAccessRights","caption":"Set the order read-only","accessRights":{"object":"UsrOrder","remove":[{"operations":["edit","delete"],"grantee":{"type":"role","role":"Sales managers"}}]},"filter":{"conditions":[{"column":"Id","value":"[#Record.Id#]"}]}}`
   (without `filter` it changes EVERY record of the object each time a record enters the stage:
-  `step-acts-on-all-records`; tell the user, ask SEPARATELY, and only after that yes send `confirm-all-records: true`).
+  `step-acts-on-all-records` names each such step; tell the user which, ask SEPARATELY, and only after that yes send `confirm-all-records: true`).
   A pre-configured page or a script task cannot be a step (`step-type-not-supported` lists the offered types).
 - `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
   constant, `[#SysVariable.CurrentUserContact#]`, or a column of the case's record `[#Record.<Column>#]`: a case has

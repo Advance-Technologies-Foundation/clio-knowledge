@@ -535,7 +535,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.212\)",
+            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.213\)",
                 because: "the step types ship with a clio release and an older package refuses them");
             guide.Should().Contain("{\"type\":\"approval\"").And.Contain("{\"type\":\"openEditPage\"")
                 .And.Contain("{\"type\":\"subProcess\"").And.Contain("{\"type\":\"sendEmail\"")
@@ -550,7 +550,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the case designer maps no record column to the sender");
             guide.Should().Contain("ask SEPARATELY, and only after that yes send `confirm-all-records: true`",
                 because: "an access-rights step without a filter changes every record of its object");
-            guide.Should().Contain("`step-acts-on-all-records`");
+            guide.Should().Contain("`step-acts-on-all-records` names each such step; tell the user which",
+                because: "one confirm-all-records yes covers every unfiltered rights step of the change");
         }
     }
 }
