@@ -10,8 +10,8 @@ how a guide points at a rule it does not own. Other backticks are ordinary code 
 page-body sections such as `handlers`). A guide restating another guide's rule - a destructive
 precondition kept next to the instruction it guards - names that guide as the owner.
 
-- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns): set up on an object with no case yet, or only asked about (DCM, clio 8.1.0.150+; the user names the object by its caption: `list-apps` / `get-app-info` when a schema-name search misses) -> name=process-dynamic-case
-  - an object that already has a case: read, change (stages, order, groups), disable or re-enable it, or split its records into several cases by a type (different stages for B2B and B2C orders) -> name=process-dynamic-case-change
+- Stages of an object, a stage bar on its page, or the order records move through its status values / how that flow ends (no "stage" needed; not the sort order of a lookup in lists or dropdowns), DCM: first describe-dynamic-case, even if unsure one exists (pass the user's word for the object, `find-entity-schema` if not found). None, or only asked about -> name=process-dynamic-case
+  - a case: read or change stages, disable/enable it -> name=process-dynamic-case-change; switch versions -> name=process-dynamic-case-versions; change as a new version: both in one message; send filter, remove-filter or deactivate-unfiltered, or split by type (B2B/B2C) -> name=process-dynamic-case-filters
 
 - Knowledge feedback: observed behavior contradicts or requires deviation from guidance -> name=knowledge-feedback
 
@@ -21,7 +21,7 @@ precondition kept next to the instruction it guards - names that guide as the ow
     Designer) -> name=mobile-page-modification FIRST; it overrides the web page rules, and web rules applied
     to a mobile page can leave it unopenable. Analytics widgets on a mobile page are covered there too.
   - convert a web Freedom UI page to a mobile page -> name=freedom-page-web-to-mobile-conversion
-  - a stage progress bar (crt.EntityStageProgressBar) shows only for an object with a case -> name=process-dynamic-case
+  - a stage progress bar (crt.EntityStageProgressBar) -> name=process-dynamic-case
   - decode a reason code a conversion guide returned (drop-* / flag-* / skip-*, in droppedElements,
     requestConversions, pageBusinessRules or normalizations) -> name=freedom-page-mobile-reason-codes
   - dashboards (create a dashboard page, lay out / size / style analytics widgets, or set who can access a dashboard) -> name=dashboards (routes onward to dashboard-creation / dashboard-and-home-page-layout / widget-color-and-icon / dashboard-design / dashboard-rights)
@@ -152,8 +152,7 @@ precondition kept next to the instruction it guards - names that guide as the ow
     registered -> name=process-activity-connections-details
   - includes "create a task/activity attached to THIS record": that is a connection, and for a custom entity it
     needs a data-model step first — name=process-activity-connections carries the three-step recipe
-  - which VERSION of a process you are reading or which one runs, or editing or launching ANY existing
-    process -> name=process-versions first (a handed code is usually the family root, which does not
+  - which VERSION of a process you are reading or which one runs (not a DCM: first row), or editing or launching ANY existing process -> name=process-versions first (a handed code is usually the family root, which does not
     run); to edit, add name=process-modeling. NOT existing: a family YOU created in THIS task. Fix,
     re-save or run it from name=process-digest, with no isActiveVersion confirmation, unless you activate
     it, or it is active and any of its runs, from any start (record, timer, message, signal, manual), can
