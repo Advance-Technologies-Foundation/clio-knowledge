@@ -694,4 +694,27 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the edit right a filter needs is owned by process-dynamic-case-filters");
         }
     }
+
+    [Test]
+    [Description("The change guide states what a stage's steps do to a change: a removed stage takes its steps and the dry run names them, a removal is refused only for a step condition, and a new version copies the source's steps and refuses steps sent with it.")]
+    public void ChangeGuide_ShouldCarryTheStepRulesOfAStageChangeAndAVersion()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().Contain("a stage left out is REMOVED with its steps (the dry run's `diff.steps` names them: relay them before the yes)",
+                because: "the package removes a stage together with its steps and names them in the dry run, so the user must hear which work goes before the yes");
+            guide.Should().Contain("`stage-is-condition-target` (a step condition moves records to that stage) and `step-has-conditions` (a step of that stage has conditions)",
+                because: "these are the only two refusals of a stage removal that the steps cause");
+            guide.Should().NotContain("stage-has-steps",
+                because: "the package no longer refuses a stage only because it has steps");
+            guide.Should().Contain("a version copies the source's steps as they are, so steps or `transitionType` sent with it are refused: change them on the version afterwards (`modify-dynamic-case` by its `case-name`, or the case designer)",
+                because: "steps-not-supported on a version is answered by changing the version in place once it exists");
+            guide.Should().Contain("a case with steps gets a version only in its own package",
+                because: "a version in another package would miss the steps' own schemas, so the package refuses it");
+        }
+    }
 }
