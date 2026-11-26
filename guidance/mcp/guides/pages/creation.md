@@ -32,8 +32,8 @@ Required inputs
 - `package-name`: target package name. The package must already exist in the environment.
 
 Optional inputs
-- `caption`: human-readable caption — the title the user sees. Pass the name the user gave the page. Defaults to `schema-name` when omitted, which puts the technical name in front of the user.
-  * REQUIRED for `BaseHomePage` and `BaseDashboardTemplate`, whose caption is the page header title: clio newer than 8.1.0.158 refuses these templates when `caption` is missing or equals `schema-name`, before anything is written.
+- `caption`: human-readable caption — the title the user sees. Pass the name the user gave the page. When omitted it defaults to `schema-name`, which puts the technical name in front of the user.
+  * Always pass it for `BaseHomePage` and `BaseDashboardTemplate`: their caption is the page header title. Never set it to the schema name.
   * Set the caption at creation. Updating `SysSchema.Caption` through OData afterwards does not change the page header.
 - `description`: free-form description.
 - `entity-schema-name`: existing entity schema the page is bound to; leave blank for template-pure pages (dashboards, desktops, blank pages, custom pages). From clio 8.1.0.142, a WEB page created with it carries a data source bound to the entity, chosen by the template:
@@ -45,7 +45,6 @@ Optional inputs
 Validation and failure modes
 - Unknown template: `create-page` rejects the call with a readable error; always call `list-page-templates` first when unsure.
 - Missing package: `create-page` reports the missing package by name.
-- Home page or dashboard without a human caption: for `BaseHomePage` and `BaseDashboardTemplate`, clio newer than 8.1.0.158 refuses a missing `caption` or one equal to `schema-name`; retry with the title the user gave.
 - Duplicate schema-name: `create-page` refuses to overwrite an existing ClientUnit schema. Pick a new name or delete the existing schema first.
 - Missing entity: if `entity-schema-name` is supplied but the entity schema does not exist, the call is rejected before the page is created.
 - Post-create verification: `create-page` does not run AI sampling. Use `get-page` after success to confirm the schema loads.

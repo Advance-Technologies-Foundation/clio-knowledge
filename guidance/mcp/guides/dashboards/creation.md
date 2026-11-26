@@ -18,8 +18,7 @@ failure modes) read `page-creation`; this guide adds only the dashboard specific
 3. `create-page` with `template` = `BaseDashboardTemplate`, a `schema-name` (active prefix, e.g.
    `UsrMyDashboard`), the target `package-name`, a `caption` — the human-readable dashboard title
    the user sees, never the schema name — and `optional-properties` carrying the three properties
-   below. Without `caption` the title shows the schema name; clio newer than 8.1.0.158 refuses the
-   call.
+   below. Without `caption` the title shows the schema name.
 4. `get-page` to verify the schema reads back; its `bundle.json` `optionalProperties` array holds the
    values you set.
 
