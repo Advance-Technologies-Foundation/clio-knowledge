@@ -232,7 +232,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.IndexOf("Version boundary, before anything else", StringComparison.Ordinal).Should().BeLessThan(
                 guide.IndexOf("== Change an existing case ==", StringComparison.Ordinal),
                 because: "an agent on an older clio must meet the boundary before it reads how to call the tools");
-            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.209 or later on the environment: clio refuses an older one, naming the version it needs",
+            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.210 or later on the environment: clio refuses an older one, naming the version it needs",
                 because: "the tools refuse an older package although the clio has them, and the floor is the one the versions need");
             guide.Should().Contain("`process-builder-without-case-change`",
                 because: "clio names this code, and the guide that owns describe and modify must give its remedy");
@@ -466,7 +466,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 .Should().Contain(CaseVersionsItemId, because: "the library requires every guide it ships");
             requiredUris.Should().Contain(resource.GetProperty("uri").GetString(),
                 because: "the requirement lists the canonical route next to the item id");
-            description.Should().MatchRegex($@"^Needs clio {ClioVersion} or later with CrtProcessBuilder 1\.6\.6\.209 or later\.",
+            description.Should().MatchRegex($@"^Needs clio {ClioVersion} or later with CrtProcessBuilder 1\.6\.6\.210 or later\.",
                 because: "the get-guidance catalog shows the boundary of the version tools before the article is opened");
             description.Should().Contain("modify-dynamic-case-as-new-version",
                 because: "the catalog entry must show that the guide owns the new-version tool");
@@ -636,7 +636,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().MatchRegex(
                 $@"Version boundary, before anything else: `modify-dynamic-case-as-new-version` and `set-active-dynamic-case-version` need clio {ClioVersion} or later\. If `clio-run` answers `unknown tool` for `modify-dynamic-case-as-new-version`, the clio is older: stop here",
                 because: "the version tools ship in a later clio than the change tools, and the boundary leads the article it gates");
-            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.209 or later on the environment: clio refuses an older one, naming the version it needs",
+            guide.Should().Contain("They also need CrtProcessBuilder 1.6.6.210 or later on the environment: clio refuses an older one, naming the version it needs",
                 because: "the version tools refuse an older package although the clio has them");
             changeGuide.Should().NotContain("== Versions of a case ==",
                 because: "the version rules have one owner, process-dynamic-case-versions, so they cannot drift apart");

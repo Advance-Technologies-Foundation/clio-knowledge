@@ -13,7 +13,7 @@ the fix, then read `process-dynamic-case-filters` before that fix's dry run.
 Version boundary, before anything else: `describe-dynamic-case` and `modify-dynamic-case` need clio 8.1.0.153 or
 later. If `clio-run` answers `unknown tool` for `describe-dynamic-case`, the clio serving you is older: stop here and
 tell the user to update clio (until then the case designer changes a case); answer a question about the case as
-`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.209 or later on the
+`process-dynamic-case` says, from its dry run. They also need CrtProcessBuilder 1.6.6.210 or later on the
 environment: clio refuses an older one, naming the version it needs (`process-builder-without-case-change` when it
 has no such operation), and `install-process-builder`, once the user approves it (`core-rules`), is the remedy. An
 older clio (no `confirm-value-rename`) works the older way: its describe has no `records` (absent is not 0), and
