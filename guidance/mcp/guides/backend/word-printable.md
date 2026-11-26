@@ -76,7 +76,8 @@ Read before you change anything, and keep what you read as the baseline and the 
   template are entity writes on `SysModuleReport` / `SysModuleReportTable`, and the product grants only read on them
   to All employees (read in source; authoring as a non-administrator was not measured). If a user with
   `CanManageReports` cannot save, the missing piece is edit rights on those objects: tell the user, and grant them
-  only after the owner's explicit yes (`get-guidance name=entity-operation-access`).
+  only after the owner's explicit yes. Both objects are administered by operations (`administratedByOperations`,
+  measured on 10.3.1152), so those rights come from system operations: `get-guidance name=entity-operation-access`.
 
 Without a designer (shell only, measured on 10.3.1152): when no user can open the designer and you have an HTTP
 client, a printable can be created and filled by API. Use it only then, and say that you did.

@@ -12,7 +12,8 @@ Framework / MSSQL environment. Creatio 8.x is not verified.
 == Reproduce first ==
 MUST reproduce with one record, AS the user who reported it (the generator reads with that user's rights), before
 naming a cause, and keep the generated file. Do it without that user's password: ask the user to print the record and
-share the file, or use a test user with the same roles. MUST NOT ask for, reset or use another user's password. Unzip it and read `word/document.xml`: an empty `w:fldSimple` where a value was expected is a field
+share the file, or use an existing test user with the same roles; creating a user or giving one roles needs the owner's explicit
+yes. MUST NOT ask for, reset or use another user's password. Unzip it and read `word/document.xml`: an empty `w:fldSimple` where a value was expected is a field
 the generator saw and could not fill; an untouched field with its placeholder is a field it never recognised.
 
 == Where the error is ==
@@ -65,8 +66,9 @@ the generator saw and could not fill; an untouched field with its placeholder is
 == Rights ==
 A field that is blank only for some users is often the access model working as intended. MUST NOT widen object,
 column or record rights to make a printable fill: report which objects and columns the user cannot read, ask the
-owner whether that user should see them, and change rights only after an explicit yes
-(`get-guidance name=entity-operation-access` for object rights).
+owner whether that user should see them, and change rights only after an explicit yes. The owners: `object-rights`
+(an object), `column-rights` (a column), `record-rights` (a record); `entity-operation-access` for an object
+administered by operations, such as `SysModuleReport` itself.
 
 == Settings and features that change generation ==
 | Name | Kind | Effect |
