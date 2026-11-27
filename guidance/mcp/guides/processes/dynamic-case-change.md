@@ -59,7 +59,7 @@ removing a stage that records hold is not refused: count them with the data tool
    it is active; relay the note's split) -> `confirm-stage-records: true`; `value-rename-confirmation-required`
    (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`. Unlike those,
    `step-acts-on-all-records` (an access-rights step without a filter, "Steps inside a stage") comes as a refusal of
-   its own, on the dry run too (no `diff` until the user's yes or a filter) -> `confirm-all-records: true`. Tell the
+   its own, on the dry run too, and carries the `diff` -> `confirm-all-records: true`. Tell the
    user each reason, and pass each flag only after they say yes to it, NEVER on your own.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
    nothing is deleted; new records start no case of it (one that fits another enabled case of the object starts
@@ -102,7 +102,9 @@ been written - describe the case before retrying. No compile or restart; F5.
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
   `{"type":"openEditPage","caption":"Enter the delivery date","openEditPage":{"page":"UsrOrder_FormPage","editMode":"edit","recordId":{"value":"[#Record.Id#]"},"performer":{"type":"role","role":"Logistics"}}}`
-  (the performer gets a task that opens the page; no conditions);
+  (the performer gets a task that opens the page; `add` pre-fills with
+  `"defaultValues":[{"column":"UsrOrder","value":"[#Record.Id#]"}]`, each a `value` (a column of the record or
+  text), never `expression`; no conditions);
   `{"type":"subProcess","caption":"Create shipment","subProcess":{"processName":"UsrCreateShipment"},"inputs":[{"parameter":"Amount","value":"[#Record.UsrAmount#]"}]}`
   (the parameter of the case's object takes the record by itself; an unknown or output input is refused with the
   inputs; no conditions);
