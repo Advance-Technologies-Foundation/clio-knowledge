@@ -484,7 +484,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the whole-list rule makes the agent copy a stage's other steps from describe");
             guide.Should().Contain("A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them",
                 because: "a stored step left out of the list is removed");
-            guide.Should().Contain("a path (`[#Record.Customer.Email#]`): a case has no process parameters (`step-value-source-unsupported`)",
+            guide.Should().Contain("Not the sender: a case has no process parameters (`step-value-source-unsupported`)",
                 because: "a case has no process parameters or earlier elements to read");
             guide.Should().Contain("Show the dry run's `diff.steps` and notes and write only after the user's yes",
                 because: "steps start on live records at stage entry");
@@ -542,8 +542,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.219\)",
-                because: "the step types ship with a clio release, and a package older than the 1.6.6.219 cut refuses them");
+            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.220\)",
+                because: "the step types ship with a clio release, and a package older than the 1.6.6.220 cut refuses them");
             guide.Should().Contain("{\"type\":\"approval\"").And.Contain("{\"type\":\"openEditPage\"")
                 .And.Contain("{\"type\":\"subProcess\"").And.Contain("{\"type\":\"sendEmail\"")
                 .And.Contain("{\"type\":\"changeAccessRights\"",
@@ -593,12 +593,14 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().Contain("ONE column of the case's record `[#Record.<Column>#]` (the designer's \"Main record\") in any field that takes a value",
+            guide.Should().Contain("ONE column of the case's record `[#Record.<Column>#]`, also through its lookups `[#Record.Customer.Email#]` (the designer's \"Main record\"), in any field that takes a value",
                 because: "an agent that knows only the record id leaves the other Main record fields to the designer");
             guide.Should().Contain("a role column for a role, a user column for an approver (an owner is a contact)",
                 because: "a contact column names no user or role, so the package refuses it there");
-            guide.Should().Contain("Not the sender, an activity's times or a path (`[#Record.Customer.Email#]`)",
-                because: "the package refuses those, and the agent must not promise them");
+            guide.Should().Contain("an activity's time (`{\"expression\":\"[#Record.<Column>#]\",\"unit\":\"days\"}`)",
+                because: "a time from the record needs its unit, which the column does not carry");
+            guide.Should().Contain("`connections` `[{column, expression | recordId}]` sets others, an entry without a value clears one",
+                because: "the designer offers the record for every connection of the activity");
             guide.Should().Contain("A task, open-page or email step is linked to the case's record (\"Connected to\")",
                 because: "the user sees the step's activity on the record, as with a designer-made step");
         }

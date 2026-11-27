@@ -81,7 +81,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step:
   `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,"unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`;
   optional by default, a task of To do and Medium for the current user, linked to the record (a note says when tasks have no connection to the object).
-- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.219), each with its `create-business-process`
+- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.220), each with its `create-business-process`
   block and the case designer's defaults; what the designer requires is refused when missing (`step-invalid` names it):
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
@@ -99,13 +99,15 @@ been written - describe the case before retrying. No compile or restart; F5.
   send `confirm-all-records: true`; no conditions).
   A pre-configured page or a script task cannot be a step (`step-type-not-supported` lists the offered types).
 - `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
-  constant, `[#SysVariable.CurrentUserContact#]`, or ONE column of the case's record `[#Record.<Column>#]` (the
-  designer's "Main record") in any field that takes a value: a performer's contact or role, the record to approve or
-  open, an approving user or role, a purpose, hint, recommendation or subject, a new record's pre-filled value, an
-  input, a recipient, a filter value, a rights grantee. The column must fit the field: a role column for a role, a
-  user column for an approver (an owner is a contact), the same type as the field. Not the sender, an activity's
-  times or a path (`[#Record.Customer.Email#]`): a case has no process parameters (`step-value-source-unsupported`).
-  A task, open-page or email step is linked to the case's record ("Connected to"), as in the designer.
+  constant, `[#SysVariable.CurrentUserContact#]`, or ONE column of the case's record `[#Record.<Column>#]`, also
+  through its lookups `[#Record.Customer.Email#]` (the designer's "Main record"), in any field that takes a value: a
+  performer's contact or role, the record to approve or open, an approving user or role, a purpose, hint,
+  recommendation or subject, a new record's pre-filled value, an input, a recipient, a filter value, a rights
+  grantee, an activity's time (`{"expression":"[#Record.<Column>#]","unit":"days"}`). The column must fit the field:
+  a role column for a role, a user column for an approver (an owner is a contact), the same type as the field. Not
+  the sender: a case has no process parameters (`step-value-source-unsupported`). A Perform task takes `subject`
+  apart from its caption. A task, open-page or email step is linked to the case's record ("Connected to");
+  `connections` `[{column, expression | recordId}]` sets others, an entry without a value clears one.
 - `transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`. A stage also
   waits for its steps with conditions. A note warns when there is no step to wait for (an automatic move passes over
   the stage; a record put into it stays) or it cannot move on (last stage, no later connection).
