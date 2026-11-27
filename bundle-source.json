@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.265",
+  "libraryVersion": "1.15.270",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -149,6 +149,8 @@
       "process-timer-start",
       "process-dynamic-case",
       "process-dynamic-case-change",
+      "process-dynamic-case-filters",
+      "process-dynamic-case-versions",
       "process-approval",
       "process-preconfigured-page",
       "process-sub-process",
@@ -223,6 +225,9 @@
       "sys-setting",
       "sys-setting-tests",
       "sys-settings",
+      "word-printable",
+      "word-printable-template",
+      "word-printable-troubleshooting",
       "theming",
       "ui-project",
       "virtual-entities",
@@ -370,6 +375,8 @@
       "docs://knowledge/com.creatio.clio/process-timer-start",
       "docs://knowledge/com.creatio.clio/process-dynamic-case",
       "docs://knowledge/com.creatio.clio/process-dynamic-case-change",
+      "docs://knowledge/com.creatio.clio/process-dynamic-case-filters",
+      "docs://knowledge/com.creatio.clio/process-dynamic-case-versions",
       "docs://knowledge/com.creatio.clio/process-approval",
       "docs://knowledge/com.creatio.clio/process-preconfigured-page",
       "docs://knowledge/com.creatio.clio/process-sub-process",
@@ -444,6 +451,9 @@
       "docs://knowledge/com.creatio.clio/sys-setting",
       "docs://knowledge/com.creatio.clio/sys-setting-tests",
       "docs://knowledge/com.creatio.clio/sys-settings",
+      "docs://knowledge/com.creatio.clio/word-printable",
+      "docs://knowledge/com.creatio.clio/word-printable-template",
+      "docs://knowledge/com.creatio.clio/word-printable-troubleshooting",
       "docs://knowledge/com.creatio.clio/theming",
       "docs://knowledge/com.creatio.clio/ui-project",
       "docs://knowledge/com.creatio.clio/virtual-entities",
@@ -2005,7 +2015,7 @@
     {
       "itemId": "process-dynamic-case",
       "title": "Dynamic case from a lookup column",
-      "description": "Needs clio 8.1.0.150 or later. Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). Answering about an existing object's stages from describe-dynamic-case (older clio: the create dry run), the prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages, groups allowed; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty full-mesh stages, the settings and link rows and their bindings, the page fragment), no compile and no restart, the notes to relay, the refusals and their remedies, the undo order and what is not supported yet. Changing, disabling or regrouping an existing case, filters and several cases on one object: process-dynamic-case-change.",
+      "description": "Needs clio 8.1.0.150 or later. Owns create-dynamic-case: a minimal dynamic case (DCM) whose stages are the values of one lookup column of an object, plus the record-page stage progress bar (crt.EntityStageProgressBar). Answering about an existing object's stages from describe-dynamic-case (older clio: the create dry run), the prerequisites (published object and column, 2-20 values, an editable package, CanManageDcm + CanManageSolution + settings-table rights), the order rule (pass stages, groups allowed; order-column > Position > StageOrder > Number > StageNumber > display value; orderSource always reported; dry-run), what one call writes (empty full-mesh stages, the settings and link rows and their bindings, the page fragment), no compile or restart, the notes, the refusals and their remedies, the undo order and what is not supported yet. Changing a case: process-dynamic-case-change; versions: process-dynamic-case-versions; several cases on one object: process-dynamic-case-filters.",
       "topicId": "creatio.process-dynamic-case",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case",
@@ -2015,13 +2025,35 @@
     },
     {
       "itemId": "process-dynamic-case-change",
-      "title": "Change a dynamic case; several cases on one object",
-      "description": "Needs clio 8.1.0.153 or later with CrtProcessBuilder 1.6.6.179+ (1.6.6.185 for a clio with confirm-value-rename). Owns describe-dynamic-case and modify-dynamic-case: read a dynamic case (DCM) and its records per stage first, then change it in place after a dry run and the user's yes - the whole stage list, groups, a stage caption (it renames the lookup value), colours, the steps inside a stage (Perform task, approval, open edit page, sub-process, send email, change access rights) and their conditions, the case caption, its filter; confirm-* flags; enabled alone; refusals and outcomes. And several cases on one object split by one lookup filter column: filter {column, values | empty}, a stage subset per case, two ways from one unfiltered case to several (a filter on it, or deactivate-unfiltered), filter-overlap, filter-required, remove-filter, unfiltered-case-exists, the settings filter column and its edit right, values no case is for, and that a filter decides only for new records.",
+      "title": "Change a dynamic case",
+      "description": "Needs clio 8.1.0.153 or later with a recent CrtProcessBuilder. Owns describe-dynamic-case and modify-dynamic-case: read a dynamic case (DCM) and its records per stage, then change it in place after a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, a stage caption that renames its lookup value everywhere, colours, the case caption; confirm-* flags only after the user's yes; enabled alone; refusals and outcomes; what an older clio does; the steps inside a stage (Perform task, approval, open edit page, sub-process, send email, change access rights) and their conditions. A change made as a new version (modify-dynamic-case-as-new-version) or a switch of the active one (set-active-dynamic-case-version): process-dynamic-case-versions. Several cases on one object and filters: process-dynamic-case-filters.",
       "topicId": "creatio.process-dynamic-case-change",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-change",
       "sourcePath": "guidance/mcp/guides/processes/dynamic-case-change.md",
       "bundlePath": "resources/process-dynamic-case-change.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-dynamic-case-filters",
+      "title": "Several dynamic cases on one object",
+      "description": "Needs clio 8.1.0.154 or later. Read after process-dynamic-case-change, before a filter, remove-filter or deactivate-unfiltered call, for a request to split an object's records into several dynamic cases (DCM) by a lookup column, before the first answer to create-dynamic-case's unfiltered-case-exists, or, for another filter refusal, after relaying it and once the user picks a filter change, before its dry run. Owns several cases on one object: one filter column, filter {column, values | empty}, stages per case, from one unfiltered case (a filter on it, or deactivate-unfiltered after the user's yes), the filter refusals, the edit right, values no case is for, a filter affects only new records.",
+      "topicId": "creatio.process-dynamic-case-filters",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-filters",
+      "sourcePath": "guidance/mcp/guides/processes/dynamic-case-filters.md",
+      "bundlePath": "resources/process-dynamic-case-filters.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "process-dynamic-case-versions",
+      "title": "Versions of a dynamic case",
+      "description": "Needs clio 8.1.0.160 or later with CrtProcessBuilder 1.6.6.217 or later. Read before a dynamic case (DCM) switches its active version (this guide alone) or a change is made as a new version (together with process-dynamic-case-change, in one message). Owns a case's versions: the versions list of describe-dynamic-case, a member that is not active changed in place with modify-dynamic-case, modify-dynamic-case-as-new-version (dry run, never activates or deletes, copies the steps as they are), ask, then set-active-dynamic-case-version (dry run first; relay a refusal as it stands; a disabled family; package position) and the outcomes of both.",
+      "topicId": "creatio.process-dynamic-case-versions",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-versions",
+      "sourcePath": "guidance/mcp/guides/processes/dynamic-case-versions.md",
+      "bundlePath": "resources/process-dynamic-case-versions.md",
       "mediaType": "text/plain"
     },
     {
@@ -3036,6 +3068,39 @@
       ],
       "sourcePath": "guidance/mcp/guides/backend/sys-settings.md",
       "bundlePath": "resources/sys-settings.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "word-printable",
+      "title": "MS Word printable: build, change, show and ship",
+      "description": "Building and changing an MS Word printable (SysModuleReport / SysModuleReportTable and its .docx template): reading what exists, configuring columns in the Report setup designer, the shell-only API route, offering it on Freedom UI and Classic pages, shipping it as data bindings with force-updated File and MacrosSettings, and proving it as the printing user.",
+      "topicId": "creatio.word-printable",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/word-printable",
+      "sourcePath": "guidance/mcp/guides/backend/word-printable.md",
+      "bundlePath": "resources/word-printable.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "word-printable-template",
+      "title": "MS Word printable template, macros and custom converters",
+      "description": "What the MS Word generator reads from a .docx template: MERGEFIELD switch rules, case-sensitive caption binding, value formats, the six out-of-the-box tokens and macro argument grammar, detail tables, images, PDF, and the IExpressionConverter contract (namespace, null return, registration, activation, tests).",
+      "topicId": "creatio.word-printable-template",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/word-printable-template",
+      "sourcePath": "guidance/mcp/guides/backend/word-printable-template.md",
+      "bundlePath": "resources/word-printable-template.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "word-printable-troubleshooting",
+      "title": "MS Word printable troubleshooting",
+      "description": "Diagnosing an MS Word printable: Error.log versus the MSWordLog start/finish trace, a symptom-to-cause table for blank fields, converter exceptions, rights, images, PDF and stale templates after delivery, and the settings and features that change generation.",
+      "topicId": "creatio.word-printable-troubleshooting",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/word-printable-troubleshooting",
+      "sourcePath": "guidance/mcp/guides/backend/word-printable-troubleshooting.md",
+      "bundlePath": "resources/word-printable-troubleshooting.md",
       "mediaType": "text/plain"
     },
     {

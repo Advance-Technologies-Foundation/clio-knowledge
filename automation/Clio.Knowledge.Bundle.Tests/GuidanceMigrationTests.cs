@@ -64,6 +64,8 @@ public sealed class GuidanceMigrationTests
         "page-modal-size",
         "process-dynamic-case",
         "process-dynamic-case-change",
+        "process-dynamic-case-filters",
+        "process-dynamic-case-versions",
         "web-service-registration",
         "web-service-maintenance",
         "web-service-soap",
@@ -72,7 +74,10 @@ public sealed class GuidanceMigrationTests
         "data-bindings-details",
         "assembly-package",
         "lookup-colors",
-        "widget-color-and-icon"
+        "widget-color-and-icon",
+        "word-printable",
+        "word-printable-template",
+        "word-printable-troubleshooting"
     ];
 
     /// <summary>Legacy routes a resource declares; 0 when the property is absent. A METHOD because the
