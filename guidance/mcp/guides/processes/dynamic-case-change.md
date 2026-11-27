@@ -97,7 +97,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step:
   `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,"unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`;
   optional by default, a task of To do and Medium for the current user, linked to the record (a note says when tasks have no connection to the object).
-- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.222), each with its `create-business-process`
+- Other step types (clio 8.1.0.160, CrtProcessBuilder 1.6.6.222), each with its `create-business-process`
   block and the case designer's defaults; what the designer requires is refused when missing (`step-invalid` names it):
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
@@ -133,7 +133,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
   removed step (the count; they never move on), so keep it or wait until they end. Other refusals name the stage
   and step: `step-invalid`, `step-after-invalid`, `step-type-not-supported`.
-- Conditions (clio <CLIO-CONDITIONS-TBD>, CrtProcessBuilder 1.6.6.206): a Perform task step's `conditions` is its
+- Conditions (clio 8.1.0.160, CrtProcessBuilder 1.6.6.206): a Perform task step's `conditions` is its
   WHOLE list (an approval step's too), e.g. `[{"result":"Rejected","nextStage":"Cancelled"}]`; leave it out to keep
   them, `[]` removes them. `result` is a result of the step's task category, for an approval `Positive` or
   `Negative` (caption or Id; the refusal lists the results), `nextStage` another stage (value, display value or caption; an earlier one too, never its own). One
