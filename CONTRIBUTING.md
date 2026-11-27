@@ -229,8 +229,9 @@ library is updated apart from the clio that serves it: an agent on an older clio
 article, calls the tool and only then learns it is not there. So:
 
 - the article states the boundary right after its Scope paragraph, with how to tell (the tool, or the argument
-  that carries the feature, is missing from `get-tool-contract`) and what to do (stop and tell the user to update
-  clio); a check on the contract alone is enough while no released clio has the tool yet;
+  that carries the feature, is missing from `get-tool-contract`; for a long-tail tool, `clio-run` answering
+  `unknown tool` for it is the cheaper signal) and what to do (stop and tell the user to update clio); a check on
+  the contract alone is enough while no released clio has the tool yet;
 - the article's `description` in `bundle-source.json` starts with it (`Needs clio 8.1.0.150 or later.`), so the
   `get-guidance` catalog shows it before the article is opened;
 - the boundary is stated once there; a later mention points back to it.
