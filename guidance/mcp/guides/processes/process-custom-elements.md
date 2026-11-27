@@ -1,6 +1,7 @@
 # Custom business process elements
 
 Create a package-owned BPMN user task, a Classic parameter page, icons, and installation-time toolbox registration. This guide owns the custom-element artifact contract and acceptance checks. Read `process-modeling` for process construction, `process-parameters` for process mappings, `integration-testing` for test scaffolding, and `deploy-lifecycle` for deployment. For one element selecting between separate tasks and pages, read `process-custom-element-families`.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 ## Applicability and reference
 

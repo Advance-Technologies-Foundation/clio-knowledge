@@ -63,7 +63,8 @@ public sealed class GuidanceInlineReplyBudgetTests
     /// <summary>
     /// Articles allowed to exceed <see cref="InlineReplyBudgetBytes"/>, by itemId. Every other guidance article
     /// in the manifest is measured. These are the articles that were already over the budget when the check
-    /// started to cover the whole library; remove an entry once its article fits.
+    /// started to cover the whole library, plus the ones a one-line pointer to <c>csharp-platform-checks</c>
+    /// pushed over, which were exempted by agreement rather than split; remove an entry once its article fits.
     /// </summary>
     private static readonly string[] ExemptArticles =
     [
@@ -91,7 +92,8 @@ public sealed class GuidanceInlineReplyBudgetTests
         "page-modification-components",
         "custom-mcp-tools",
         "process-parameters-details",
-        "process-activity-connections"
+        "process-activity-connections",
+        "process-script-task"
     ];
 
     [Test]

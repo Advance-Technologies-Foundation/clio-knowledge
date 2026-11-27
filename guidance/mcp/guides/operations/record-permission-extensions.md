@@ -3,6 +3,7 @@ clio MCP record-permission-extensions guide
 Implement runtime record predicates only after reading `record-permissions`. This article owns the API,
 activation, combination and failure contract. `record-rights` owns stored-grant commands;
 `process-access-rights` owns process grant changes; `administration` owns identity/operation management.
+Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 
 APPLICABILITY: live-verified on Creatio 10.1.585.0, .NET 8, PostgreSQL, single node, using clio 8.1.0.130.
 This is a verified compatibility point, NOT an earliest-supported-version claim. Before targeting another

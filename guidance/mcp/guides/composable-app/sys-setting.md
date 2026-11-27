@@ -2,6 +2,7 @@
 
 ## Non-Negotiable Rules
 
+- Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 - Keep every sys-setting code string in `Constants.cs`. Prefer a nested holder such as `Constants.SysSettingCodes`, but extend the existing package constants layout when one is already established instead of introducing a competing holder.
 - Reuse the same constant from production code and tests. Do not repeat the raw sys-setting code in multiple files.
 - Use `Terrasoft.Core.Configuration.SysSettings` directly for reads.

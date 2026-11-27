@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.270",
+  "libraryVersion": "1.15.271",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -99,6 +99,7 @@
       "mobile-page-modification",
       "package-dependencies",
       "assembly-package",
+      "csharp-platform-checks",
       "page-creation",
       "page-modification",
       "page-modification-components",
@@ -325,6 +326,7 @@
       "docs://knowledge/com.creatio.clio/mobile-page-modification",
       "docs://knowledge/com.creatio.clio/package-dependencies",
       "docs://knowledge/com.creatio.clio/assembly-package",
+      "docs://knowledge/com.creatio.clio/csharp-platform-checks",
       "docs://knowledge/com.creatio.clio/page-creation",
       "docs://knowledge/com.creatio.clio/page-modification",
       "docs://knowledge/com.creatio.clio/page-modification-components",
@@ -1381,6 +1383,17 @@
       "uri": "docs://knowledge/com.creatio.clio/assembly-package",
       "sourcePath": "guidance/mcp/guides/backend/assembly-package.md",
       "bundlePath": "resources/assembly-package.md",
+      "mediaType": "text/plain"
+    },
+    {
+      "itemId": "csharp-platform-checks",
+      "title": "Creatio C# platform checks",
+      "description": "Before writing or reviewing Creatio C#: seven platform pitfalls. AddAllSchemaColumns, a DBExecutor transaction with no rollback or never disposed, a broadcast message meant for one user or with no permission check, HttpContext or a static UserConnection, a secret outside a SecureText setting, default Supervisor credentials and record rights skipped on work done for a user, each with its consequence and correct form.",
+      "topicId": "creatio.csharp-platform-checks",
+      "role": "guidance",
+      "uri": "docs://knowledge/com.creatio.clio/csharp-platform-checks",
+      "sourcePath": "guidance/mcp/guides/backend/csharp-platform-checks.md",
+      "bundlePath": "resources/csharp-platform-checks.md",
       "mediaType": "text/plain"
     },
     {

@@ -10,6 +10,7 @@
 
 ## Non-Negotiable Rules
 
+- Writing or reviewing C# here: first read `csharp-platform-checks` (Creatio-specific pitfalls).
 - Every repository model must inherit `ATF.Repository.BaseModel`.
 - Every repository model must be marked with `[Schema("<EntitySchemaName>")]`.
 - Every mapped scalar column must use `[SchemaProperty("<ColumnName>")]`.
