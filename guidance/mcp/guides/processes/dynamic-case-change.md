@@ -72,9 +72,9 @@ removing a stage that records hold is not refused: count them with the data tool
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
-(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (a kept step's condition moves records to it): a Perform task: send that step's
-`conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the
-stage; `package-read-only` (the case's package is not editable: offer the change
+(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (a kept step's condition moves records to it): a Perform task or approval: send that
+step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep
+the stage; `package-read-only` (the case's package is not editable: offer the change
 as a new version in an editable package, `process-dynamic-case-versions`), `invalid-request` for `enabled` on a case that is
 not the active version (name the active one the message gives) or for a case not of `entity-schema-name`,
 `not-in-version` (a first filter on a member that is not active: `process-dynamic-case-versions`), `stage-list-duplicate` for

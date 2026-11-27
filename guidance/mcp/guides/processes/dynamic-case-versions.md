@@ -45,7 +45,7 @@ the version it needs, and `install-process-builder`, once the user approves it (
    `case-name`, or the case designer); and a case with steps gets a version only in its own package (or in the case
    designer). `stage-is-condition-target` (a step condition moves records to a stage the version removes): keep the
    stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform
-   task, send that step's `conditions` without that stage together with the stages without it; for another step,
+   task or approval, send that step's `conditions` without that stage together with the stages without it; for another step,
    remove the step or change its conditions in the case designer on the version, then remove the stage. First `dry-run: true` (`planned`): show the user `diff`, the notes and the warnings, write only
    after their yes. NOT idempotent: every write makes one more version; no case tool or Case-library action deletes one (an inactive version goes as a case does, `process-dynamic-case` undo steps 1-2, after the user's yes; never the family root, every version's parent, or a member that runs cases); it is
    saved inactive, so until a switch the new records the active case's filter fits (every new record when it has
