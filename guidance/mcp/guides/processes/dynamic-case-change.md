@@ -46,10 +46,10 @@ clio; removing a stage that records hold is not refused, so check them with the 
    continue, possibly on the stages as they were) -> `confirm-running-instances: true`;
    `stage-records-confirmation-required` (records hold a removed stage's value, finished cases included: they keep
    their data and show no current stage) -> `confirm-stage-records: true`; `value-rename-confirmation-required`
-   (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`; and, on its own,
-   `step-acts-on-all-records` (an access-rights step without a filter, "Steps inside a stage") ->
-   `confirm-all-records: true`. Tell the user each reason, and pass each flag only after they say yes to it, NEVER on
-   your own.
+   (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`. Unlike those,
+   `step-acts-on-all-records` (an access-rights step without a filter, "Steps inside a stage") comes as a refusal of
+   its own, on the dry run too (no `diff` until the user's yes or a filter) -> `confirm-all-records: true`. Tell the
+   user each reason, and pass each flag only after they say yes to it, NEVER on your own.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
    nothing is deleted, new records start no case, and its running cases continue, unless another case of the
    object stays enabled: then each is CANCELLED at its record's next stage change (the note says so; tell the user
@@ -71,17 +71,17 @@ been written - describe the case before retrying. No compile or restart; F5.
 == Steps inside a stage ==
 - Needs clio 8.1.0.159 or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
   and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
-- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `conditions`,
-  `runningInstances`, and its type's block in the write shape: `performer`, `activity`, `category`, `hint` for a
-  Perform task; `approval`; `openEditPage`; `subProcess` + `inputs`; `email`; `accessRights` + `filter`) and
-  `transitionType`.
+- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `useBackgroundMode`,
+  `conditions`, `runningInstances`, and its type's block in the write shape: `performer`, `activity`, `category`,
+  `hint` for a Perform task; `approval`; `openEditPage`; `subProcess` + `inputs`; `email`; `accessRights` +
+  `filter`) and `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
   matched by `uId`, else by caption among the steps of its type, and one left out is REMOVED (the step that waited
   for it then starts with the stage). A kept step may be sent back as describe returns it (its `name`,
   `hasConditions` and `runningInstances` are ignored): only what differs from the stored step changes. A new step:
   `{"type":"performTask","caption":"Check the order","required":true,"after":"Draft check","performer":{"type":"user","contact":"[#Record.UsrOwner#]"},"activity":{"duration":{"value":2,"unit":"hours"},"priority":"High"},"category":"To do","hint":"..."}`;
   optional by default, a task of To do and Medium for the current user, linked to the record (a note says when tasks have no connection to the object).
-- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.213), each with its `create-business-process`
+- Other step types (clio <CLIO-STEP-TYPES-TBD>, CrtProcessBuilder 1.6.6.218), each with its `create-business-process`
   block and the case designer's defaults; what the designer requires is refused when missing (`step-invalid` names it):
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
@@ -95,7 +95,8 @@ been written - describe the case before retrying. No compile or restart; F5.
   reads the record; no conditions);
   `{"type":"changeAccessRights","caption":"Set the order read-only","accessRights":{"object":"UsrOrder","remove":[{"operations":["edit","delete"],"grantee":{"type":"role","role":"Sales managers"}}]},"filter":{"conditions":[{"column":"Id","value":"[#Record.Id#]"}]}}`
   (without `filter` it changes EVERY record of the object each time a record enters the stage:
-  `step-acts-on-all-records` names each such step; tell the user which, ask SEPARATELY, and only after that yes send `confirm-all-records: true`).
+  `step-acts-on-all-records` names each such step; tell the user which, ask SEPARATELY, and only after that yes
+  send `confirm-all-records: true`; no conditions).
   A pre-configured page or a script task cannot be a step (`step-type-not-supported` lists the offered types).
 - `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
   constant, `[#SysVariable.CurrentUserContact#]`, or a column of the case's record `[#Record.<Column>#]`: a case has

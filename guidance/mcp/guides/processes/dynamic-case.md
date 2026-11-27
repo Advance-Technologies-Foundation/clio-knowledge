@@ -7,8 +7,9 @@ the stage progress bar (`crt.EntityStageProgressBar`) to the object's Freedom UI
 asks for "stages", "a status lifecycle", the order records move through status values or how that flow ends (not
 a lookup's sort order in lists or dropdowns), "a progress bar on the record page" or "a case".
 "When X happens, do Y" is a business process: `process-digest`. A case is not the `Case` object. Reading and
-changing an existing case (`describe-dynamic-case`, `modify-dynamic-case`) and several cases on one object split
-by a filter: `process-dynamic-case-change`.
+changing an existing case (`describe-dynamic-case`, `modify-dynamic-case`), the steps in its stages (Perform task,
+approval, open edit page, sub-process, send email, change access rights), their conditions and a stage's
+`transitionType`, and several cases on one object split by a filter: `process-dynamic-case-change`.
 
 Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `get-tool-contract`
 does not list it, the clio serving you is older: stop here and tell the user to update clio - do not build a case by
@@ -48,9 +49,8 @@ other means.
   the toggle changes it.
 
 == Not supported yet ==
-Steps inside stages (a Perform task and a stage's `transitionType`: `process-dynamic-case-change`;
-approvals, pages, sub-processes), stage conditions and permissions, a start condition other than one filter column, a new version of a
-case, deleting a case or changing its stage or filter column: the case designer does those. No mobile page, mini page or Classic page bar.
+A start condition other than one filter column, a new version of a case, deleting a case or changing its stage or
+filter column: the case designer does those. No mobile page, mini page or Classic page bar.
 
 == Before the call ==
 - The object and the lookup column are PUBLISHED: a column saved and not published is refused `column-not-published`
