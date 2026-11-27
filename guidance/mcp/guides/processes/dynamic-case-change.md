@@ -104,7 +104,7 @@ been written - describe the case before retrying. No compile or restart; F5.
   dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
   removed step (the count; they never move on), so keep it or wait until they end. Other refusals name the stage
   and step: `step-invalid`, `step-after-invalid`, `step-type-not-supported`.
-- Conditions (clio <CLIO-CONDITIONS-TBD>, CrtProcessBuilder 1.6.6.206): a Perform task step's `conditions` is its
+- Conditions (clio 8.1.0.160, CrtProcessBuilder 1.6.6.206): a Perform task step's `conditions` is its
   WHOLE list, e.g. `[{"result":"Rejected","nextStage":"Cancelled"}]`; leave it out to keep them, `[]` removes
   them. `result` is a result of the step's task category (caption or Id; the refusal lists the category's
   results), `nextStage` another stage (value, display value or caption; an earlier one too, never its own). One
