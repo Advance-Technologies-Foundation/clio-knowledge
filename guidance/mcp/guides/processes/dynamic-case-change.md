@@ -111,6 +111,8 @@ been written - describe the case before retrying. No compile or restart; F5.
   condition per result; several results may lead to one stage. A new `category` without `conditions` clears them,
   as the designer does. A named result moves the record to that stage; any other result counts as done for
   `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
-  conditions. `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,
+  conditions. A designer-made `formula` condition (`{"formula":...,"nextStage":...}`) stays when `conditions` is
+  left out or sent as describe returns it; a list that changes it is refused: the case designer owns it.
+  `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,
   or one this change removes), `step-condition-not-supported` (another step type: the case designer).
 
