@@ -87,9 +87,10 @@ been written - describe the case before retrying. No compile or restart; F5.
 - Needs clio 8.1.0.159 or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
   and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
 - Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `useBackgroundMode`,
-  `conditions`, `runningInstances`, and its type's block in the write shape: `performer`, `activity`, `category`,
-  `hint` for a Perform task; `approval`; `openEditPage`; `subProcess` + `inputs`; `email`; `accessRights` +
-  `filter`) and `transitionType`.
+  `conditions`, `runningInstances`, and its type's block in the write shape: `performer`, `activity` (a time from a
+  column as `{"expression","unit"}`), `category`, `hint`, `subject` (when not the caption) for a Perform task;
+  `approval`; `openEditPage`; `subProcess` + `inputs`; `email`; `accessRights` + `filter`; `connections` on a task,
+  page or email) and `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
   matched by `uId`, else by caption among the steps of its type, and one left out is REMOVED (the step that waited
   for it then starts with the stage). A kept step may be sent back as describe returns it (its `name`,
@@ -114,15 +115,17 @@ been written - describe the case before retrying. No compile or restart; F5.
   send `confirm-all-records: true`; no conditions).
   A pre-configured page or a script task cannot be a step (`step-type-not-supported` lists the offered types).
 - `after` is the caption or `uId` of an EARLIER step of the stage; `""` makes it start with the stage. A value is a
-  constant, `[#SysVariable.CurrentUserContact#]`, or ONE column of the case's record `[#Record.<Column>#]`, also
-  through its lookups `[#Record.Customer.Email#]` (the designer's "Main record"), in any field that takes a value: a
-  performer's contact or role, the record to approve or open, an approving user or role, a purpose, hint,
-  recommendation or subject, a new record's pre-filled value, an input, a recipient, a filter value, a rights
-  grantee, an activity's time (`{"expression":"[#Record.<Column>#]","unit":"days"}`). The column must fit the field:
-  a role column for a role, a user column for an approver (an owner is a contact), the same type as the field. Not
-  the sender: a case has no process parameters (`step-value-source-unsupported`). A Perform task takes `subject`
-  apart from its caption. A task, open-page or email step is linked to the case's record ("Connected to");
-  `connections` `[{column, expression | recordId}]` sets others, an entry without a value clears one.
+  constant, the current user `[#SysVariable.CurrentUserContact#]` (in a field that takes a record, not text), or ONE
+  column of the case's record `[#Record.<Column>#]`, also through up to four of its lookups `[#Record.Customer.Email#]`
+  (the designer's "Main record"): a performer's contact or role, the record to approve or open, an approving user or
+  role, a purpose, hint, recommendation or subject, a new record's pre-filled value, an input, a recipient, a filter
+  value, a rights grantee, a connection, an activity's time (a whole-number column only:
+  `{"expression":"[#Record.<Column>#]","unit":"days"}`). The column must fit the field: a role column for a role, a
+  user column for an approver (an owner is a contact), the same type as the field. Not the sender; no text around a
+  macro (a formula) in any field; a case has no process parameters (`step-value-source-unsupported`). A Perform task
+  takes `subject` apart from its caption. A task, open-page or email step is linked to the case's record ("Connected
+  to"); `connections` `[{column, expression | recordId}]` sets the ones it names, one entry per column: it is not
+  the whole list, a connection left out stays and only an entry without a value clears one.
 - `transitionType`: `none` (moved by hand), `afterRequired` (after its required steps), `afterAll`. A stage also
   waits for its steps with conditions. A note warns when there is no step to wait for (an automatic move passes over
   the stage; a record put into it stays) or it cannot move on (last stage, no later connection).

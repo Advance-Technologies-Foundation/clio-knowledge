@@ -845,7 +845,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the whole-list rule makes the agent copy a stage's other steps from describe");
             guide.Should().Contain("A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them",
                 because: "a stored step left out of the list is removed");
-            guide.Should().Contain("Not the sender: a case has no process parameters (`step-value-source-unsupported`)",
+            guide.Should().Contain("Not the sender; no text around a macro (a formula) in any field; a case has no process parameters (`step-value-source-unsupported`)",
                 because: "a case has no process parameters or earlier elements to read");
             guide.Should().Contain("Show the dry run's `diff.steps` and notes and write only after the user's yes",
                 because: "steps start on live records at stage entry");
@@ -954,14 +954,24 @@ public sealed class ProcessDynamicCaseGuidanceTests
         // Assert
         using (new AssertionScope())
         {
-            guide.Should().Contain("ONE column of the case's record `[#Record.<Column>#]`, also through its lookups `[#Record.Customer.Email#]` (the designer's \"Main record\"), in any field that takes a value",
+            guide.Should().Contain("ONE column of the case's record `[#Record.<Column>#]`, also through up to four of its lookups `[#Record.Customer.Email#]` (the designer's \"Main record\")",
                 because: "an agent that knows only the record id leaves the other Main record fields to the designer");
+            guide.Should().Contain("the current user `[#SysVariable.CurrentUserContact#]` (in a field that takes a record, not text)",
+                because: "a text field shows a platform macro as written, so the package refuses it there (review of #365)");
+            guide.Should().Contain("no text around a macro (a formula) in any field",
+                because: "the package refuses a formula in every step field (review of #140)");
+            guide.Should().Contain("an activity's time (a whole-number column only:",
+                because: "an activity's start, duration and reminder take a column only, a whole number, with its unit");
             guide.Should().Contain("a role column for a role, a user column for an approver (an owner is a contact)",
                 because: "a contact column names no user or role, so the package refuses it there");
-            guide.Should().Contain("an activity's time (`{\"expression\":\"[#Record.<Column>#]\",\"unit\":\"days\"}`)",
+            guide.Should().Contain("`{\"expression\":\"[#Record.<Column>#]\",\"unit\":\"days\"}`",
                 because: "a time from the record needs its unit, which the column does not carry");
-            guide.Should().Contain("`connections` `[{column, expression | recordId}]` sets others, an entry without a value clears one",
-                because: "the designer offers the record for every connection of the activity");
+            guide.Should().Contain("`connections` `[{column, expression | recordId}]` sets the ones it names, one entry per column: it is not the whole list, a connection left out stays and only an entry without a value clears one",
+                because: "unlike steps, conditions, inputs and recipients, a connection left out is kept (review of #365)");
+            guide.Should().Contain("`subject` (when not the caption) for a Perform task",
+                because: "describe gives every member an agent sends back (review of #365)");
+            guide.Should().Contain("`connections` on a task, page or email) and `transitionType`",
+                because: "describe gives every member an agent sends back (review of #365)");
             guide.Should().Contain("A task, open-page or email step is linked to the case's record (\"Connected to\")",
                 because: "the user sees the step's activity on the record, as with a designer-made step");
         }
