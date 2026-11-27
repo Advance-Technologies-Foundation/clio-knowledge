@@ -123,8 +123,9 @@ been written - describe the case before retrying. No compile or restart; F5.
   role, a purpose, hint, recommendation or subject, a new record's pre-filled value, an input, a recipient, a filter
   value, a rights grantee, a connection, an activity's time (a whole-number column only:
   `{"expression":"[#Record.<Column>#]","unit":"days"}`). The column must fit the field: a role column for a role, a
-  user column for an approver (an owner is a contact), the same type as the field. Not the sender; no text around a
-  macro (a formula) in any field; a case has no process parameters (`step-value-source-unsupported`). A Perform task
+  user column for an approver (an owner is a contact), the same type as the field. Not the sender or an approval's
+  author address; no text around a macro (a formula) in any field; a case has no process parameters
+  (`step-value-source-unsupported`). A Perform task
   takes `subject` apart from its caption. A task, open-page or email step is linked to the case's record ("Connected
   to"); `connections` `[{column, expression | recordId}]` sets the ones it names, one entry per column: it is not
   the whole list, a connection left out stays and only an entry without a value clears one.
