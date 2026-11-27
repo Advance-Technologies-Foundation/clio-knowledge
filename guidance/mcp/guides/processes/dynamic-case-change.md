@@ -141,8 +141,8 @@ been written - describe the case before retrying. No compile or restart; F5.
   as the designer does (an edit copied from describe: leave the old `conditions` out). A named result moves the
   record to an EARLIER stage at once, to a later one ONLY if no other required step of the stage is still open;
   else it moves nothing and the record stays until moved by hand (an automatic move then never comes). Reliable:
-  the conditioned step starts `after` the stage's other required steps, or they are optional; any other result
-  counts as done for `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
+  the conditioned step is the stage's only required step, or starts `after` all the others and none waits for it;
+  any other result counts as done for `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
   conditions. A designer-made `formula` condition (`{"formula":...,"nextStage":...}`) stays when `conditions` is
   left out or sent as describe returns it; a list that changes it is refused: the case designer owns it.
   `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,

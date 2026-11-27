@@ -887,8 +887,9 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("A named result moves the record to an EARLIER stage at once, to a later one ONLY if "
                 + "no other required step of the stage is still open",
                 because: "the runtime moves forward only with no required step running (dev testing of ENG-107647, F2)");
-            guide.Should().Contain("Reliable: the conditioned step starts `after` the stage's other required steps, or they "
-                + "are optional", because: "a case built the other way gets records stuck in the stage");
+            guide.Should().Contain("Reliable: the conditioned step is the stage's only required step, or starts `after` all "
+                + "the others and none waits for it", because: "a case built the other way gets records stuck in the stage "
+                + "(measured: a required step that waits for it blocks the move too)");
             guide.Should().Contain("any other result counts as done for `transitionType`",
                 because: "the stage's automatic move joins a conditioned step's other results (measured)");
             guide.Should().Contain("`step-condition-invalid`").And.Contain("`step-condition-target-unknown`")
