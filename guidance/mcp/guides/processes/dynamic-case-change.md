@@ -72,7 +72,7 @@ removing a stage that records hold is not refused: count them with the data tool
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
-(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (a kept step's condition moves records to it): a Perform task or approval: send that
+(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (it names every kept step whose condition moves records to it): a Perform task or approval: send that
 step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep
 the stage; `package-read-only` (the case's package is not editable: offer the change
 as a new version in an editable package, `process-dynamic-case-versions`), `invalid-request` for `enabled` on a case that is
@@ -138,8 +138,11 @@ been written - describe the case before retrying. No compile or restart; F5.
   them, `[]` removes them. `result` is a result of the step's task category, for an approval `Positive` or
   `Negative` (caption or Id; the refusal lists the results), `nextStage` another stage (value, display value or caption; an earlier one too, never its own). One
   condition per result; several results may lead to one stage. A new `category` without `conditions` clears them,
-  as the designer does. A named result moves the record to that stage; any other result counts as done for
-  `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
+  as the designer does (an edit copied from describe: leave the old `conditions` out). A named result moves the
+  record to an EARLIER stage at once, to a later one ONLY if no other required step of the stage is still open;
+  else it moves nothing and the record stays until moved by hand (an automatic move then never comes). Reliable:
+  the conditioned step is the stage's only required step, or starts `after` all the others and none waits for it;
+  any other result counts as done for `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
   conditions. A designer-made `formula` condition (`{"formula":...,"nextStage":...}`) stays when `conditions` is
   left out or sent as describe returns it; a list that changes it is refused: the case designer owns it.
   `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,

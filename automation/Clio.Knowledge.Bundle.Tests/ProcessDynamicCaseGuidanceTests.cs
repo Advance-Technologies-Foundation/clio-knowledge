@@ -803,7 +803,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the package removes a stage together with its steps, and the steps section owns relaying the dry run's diff.steps before the yes");
             guide.Should().NotContain("relay them before the yes",
                 because: "the yes over diff.steps has one owner, the steps section");
-            guide.Should().Contain("`stage-is-condition-target` (a kept step's condition moves records to it): a Perform task or approval: send that step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the stage;",
+            guide.Should().Contain("`stage-is-condition-target` (it names every kept step whose condition moves records to it): a Perform task or approval: send that step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the stage;",
                 because: "this is the only refusal of a stage removal that the steps cause, and its remedy is the package's in-place one for every type that takes conditions (review of #365)");
             guide.Should().Contain("with `hasSteps` too, no version can be made (a case with steps gets one only in its own package): the case designer makes that change, say so before offering a version",
                 because: "a read-only package is answered by a version, which a case with steps cannot get outside its own package");
@@ -884,6 +884,12 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the results come from the category, as the designer lists them");
             guide.Should().Contain("A new `category` without `conditions` clears them",
                 because: "the designer clears a step's conditions when its category changes");
+            guide.Should().Contain("A named result moves the record to an EARLIER stage at once, to a later one ONLY if "
+                + "no other required step of the stage is still open",
+                because: "the runtime moves forward only with no required step running (dev testing of ENG-107647, F2)");
+            guide.Should().Contain("Reliable: the conditioned step is the stage's only required step, or starts `after` all "
+                + "the others and none waits for it", because: "a case built the other way gets records stuck in the stage "
+                + "(measured: a required step that waits for it blocks the move too)");
             guide.Should().Contain("any other result counts as done for `transitionType`",
                 because: "the stage's automatic move joins a conditioned step's other results (measured)");
             guide.Should().Contain("`step-condition-invalid`").And.Contain("`step-condition-target-unknown`")
