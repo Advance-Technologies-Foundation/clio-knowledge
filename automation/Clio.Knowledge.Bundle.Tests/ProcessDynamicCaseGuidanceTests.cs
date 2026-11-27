@@ -933,8 +933,8 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "an access-rights step without a filter changes every record of its object, and the condition refusal points at the types marked no conditions");
             guide.Should().Contain("`step-acts-on-all-records` names each such step; tell the user which",
                 because: "one confirm-all-records yes covers every unfiltered rights step of the change");
-            guide.Should().Contain("Unlike those, `step-acts-on-all-records` (an access-rights step without a filter, \"Steps inside a stage\") comes as a refusal of its own, on the dry run too (no `diff` until the user's yes or a filter) -> `confirm-all-records: true`",
-                because: "the rights refusal is not among the confirmations one refusal names together, and it stops the dry run too (review of #365)");
+            guide.Should().Contain("Unlike those, `step-acts-on-all-records` (an access-rights step without a filter, \"Steps inside a stage\") comes as a refusal of its own, on the dry run too, and carries the `diff` -> `confirm-all-records: true`",
+                because: "the rights refusal is not among the confirmations one refusal names together, it stops the dry run too (review of #365), and like every refusal after the plan it carries the planned diff (dev testing of ENG-107648)");
             guide.Should().Contain("`after`, `useBackgroundMode`, `conditions`",
                 because: "describe returns useBackgroundMode for every step type, and a kept step is copied from it");
             guide.Should().Contain("`email`; `accessRights` + `filter`",
