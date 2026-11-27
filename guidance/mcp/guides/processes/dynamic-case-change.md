@@ -83,7 +83,7 @@ been written - describe the case before retrying. No compile or restart; F5.
 == Steps inside a stage ==
 - Needs clio 8.1.0.159 or later (its `modify-dynamic-case` stage item takes `steps` in `get-tool-contract`)
   and CrtProcessBuilder 1.6.6.204 (`install-process-builder` once the user approves it). Older: the case designer.
-- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `hasConditions`,
+- Describe first: each stage's `steps` (`uId`, `caption`, `type`, `required`, `after`, `conditions`,
   `runningInstances`; a Perform task also `performer`, `activity`, `category`, `hint`, `useBackgroundMode`) and
   `transitionType`.
 - A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them. A stored step is
@@ -104,3 +104,15 @@ been written - describe the case before retrying. No compile or restart; F5.
   dry run's `diff.steps` and notes and write only after the user's yes. `step-in-use`: running cases wait in the
   removed step (the count; they never move on), so keep it or wait until they end. Other refusals name the stage
   and step: `step-invalid`, `step-after-invalid`, `step-type-not-supported`.
+- Conditions (clio 8.1.0.160, CrtProcessBuilder 1.6.6.206): a Perform task step's `conditions` is its
+  WHOLE list, e.g. `[{"result":"Rejected","nextStage":"Cancelled"}]`; leave it out to keep them, `[]` removes
+  them. `result` is a result of the step's task category (caption or Id; the refusal lists the category's
+  results), `nextStage` another stage (value, display value or caption; an earlier one too, never its own). One
+  condition per result; several results may lead to one stage. A new `category` without `conditions` clears them,
+  as the designer does. A named result moves the record to that stage; any other result counts as done for
+  `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
+  conditions. A designer-made `formula` condition (`{"formula":...,"nextStage":...}`) stays when `conditions` is
+  left out or sent as describe returns it; a list that changes it is refused: the case designer owns it.
+  `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,
+  or one this change removes), `step-condition-not-supported` (another step type: the case designer).
+
