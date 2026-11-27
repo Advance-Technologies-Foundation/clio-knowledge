@@ -59,7 +59,7 @@ removing a stage that records hold is not refused: count them with the data tool
    it is active; relay the note's split) -> `confirm-stage-records: true`; `value-rename-confirmation-required`
    (a caption renames the lookup's value wherever it is used) -> `confirm-value-rename: true`. Unlike those,
    `step-acts-on-all-records` (an access-rights step without a filter, "Steps inside a stage") comes as a refusal of
-   its own, on the dry run too (no `diff` until the user's yes or a filter) -> `confirm-all-records: true`. Tell the
+   its own, on the dry run too, and carries the `diff` -> `confirm-all-records: true`. Tell the
    user each reason, and pass each flag only after they say yes to it, NEVER on your own.
 4. `enabled: false` / `true` disables or re-enables the case and goes ALONE (`invalid-request` otherwise). Disabled:
    nothing is deleted; new records start no case of it (one that fits another enabled case of the object starts
@@ -72,7 +72,7 @@ removing a stage that records hold is not refused: count them with the data tool
    another stage column or another filter column, or there are several rows; the case designer settles that.
 Refusals: `stage-in-use`: tell the user how many records sit there; they move them to another stage or wait until
 the cases end - never change records' stage on your own - or, after their yes, make the change as a new version
-(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (a kept step's condition moves records to it): a Perform task or approval: send that
+(read `process-dynamic-case-versions` first): running cases keep the version they started on. `stage-is-condition-target` (it names every kept step whose condition moves records to it): a Perform task or approval: send that
 step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep
 the stage; `package-read-only` (the case's package is not editable: offer the change
 as a new version in an editable package, `process-dynamic-case-versions`), `invalid-request` for `enabled` on a case that is
@@ -102,7 +102,9 @@ been written - describe the case before retrying. No compile or restart; F5.
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
   `{"type":"openEditPage","caption":"Enter the delivery date","openEditPage":{"page":"UsrOrder_FormPage","editMode":"edit","recordId":{"value":"[#Record.Id#]"},"performer":{"type":"role","role":"Logistics"}}}`
-  (the performer gets a task that opens the page; no conditions);
+  (the performer gets a task that opens the page; `add` pre-fills with
+  `"defaultValues":[{"column":"UsrOrder","value":"[#Record.Id#]"}]`, each a `value` (a column of the record or
+  text), never `expression`; no conditions);
   `{"type":"subProcess","caption":"Create shipment","subProcess":{"processName":"UsrCreateShipment"},"inputs":[{"parameter":"Amount","value":"[#Record.UsrAmount#]"}]}`
   (the parameter of the case's object takes the record by itself; an unknown or output input is refused with the
   inputs; no conditions);
@@ -121,8 +123,9 @@ been written - describe the case before retrying. No compile or restart; F5.
   role, a purpose, hint, recommendation or subject, a new record's pre-filled value, an input, a recipient, a filter
   value, a rights grantee, a connection, an activity's time (a whole-number column only:
   `{"expression":"[#Record.<Column>#]","unit":"days"}`). The column must fit the field: a role column for a role, a
-  user column for an approver (an owner is a contact), the same type as the field. Not the sender; no text around a
-  macro (a formula) in any field; a case has no process parameters (`step-value-source-unsupported`). A Perform task
+  user column for an approver (an owner is a contact), the same type as the field. Not the sender or an approval's
+  author address; no text around a macro (a formula) in any field; a case has no process parameters
+  (`step-value-source-unsupported`). A Perform task
   takes `subject` apart from its caption. A task, open-page or email step is linked to the case's record ("Connected
   to"); `connections` `[{column, expression | recordId}]` sets the ones it names, one entry per column: it is not
   the whole list, a connection left out stays and only an entry without a value clears one.
@@ -138,8 +141,11 @@ been written - describe the case before retrying. No compile or restart; F5.
   them, `[]` removes them. `result` is a result of the step's task category, for an approval `Positive` or
   `Negative` (caption or Id; the refusal lists the results), `nextStage` another stage (value, display value or caption; an earlier one too, never its own). One
   condition per result; several results may lead to one stage. A new `category` without `conditions` clears them,
-  as the designer does. A named result moves the record to that stage; any other result counts as done for
-  `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
+  as the designer does (an edit copied from describe: leave the old `conditions` out). A named result moves the
+  record to an EARLIER stage at once, to a later one ONLY if no other required step of the stage is still open;
+  else it moves nothing and the record stays until moved by hand (an automatic move then never comes). Reliable:
+  the conditioned step is the stage's only required step, or starts `after` all the others and none waits for it;
+  any other result counts as done for `transitionType`, and in a stage moved by hand it leaves the record there. A removed step (or stage) takes its
   conditions. A designer-made `formula` condition (`{"formula":...,"nextStage":...}`) stays when `conditions` is
   left out or sent as describe returns it; a list that changes it is refused: the case designer owns it.
   `step-condition-invalid` (result, shape, own stage), `step-condition-target-unknown` (no such stage,
