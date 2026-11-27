@@ -7,17 +7,17 @@ using NUnit.Framework;
 namespace Clio.Knowledge.Bundle.Tests;
 
 /// <summary>
-/// Pins the csharp-platform-checks guide: the eight Creatio-specific checks for C# an agent writes or reviews, in
+/// Pins the csharp-platform-checks guide: the seven Creatio-specific checks for C# an agent writes or reviews, in
 /// the form read in platform source, and the way agents reach it. It is reached only through a one-sentence
-/// pointer in the guides where C# is written, never through routing or another guide every task reads, so an
-/// agent fetches it when it is about to write or review C# and not just in case.
+/// pointer in the guides listed in <see cref="PointerGuides"/>, never through routing or another guide every task
+/// reads, so an agent fetches it when it is about to write or review C# and not just in case.
 /// </summary>
 [TestFixture]
 public sealed class CSharpPlatformChecksGuidanceTests
 {
     private const string ItemId = "csharp-platform-checks";
 
-    /// <summary>The guides where C# is or may be written, each of which carries the pointer.</summary>
+    /// <summary>The guides chosen to carry the pointer, among those where C# is or may be written.</summary>
     private static readonly string[] PointerGuides =
     [
         "guidance/mcp/guides/processes/process-script-task.md",
@@ -53,21 +53,30 @@ public sealed class CSharpPlatformChecksGuidanceTests
         string[] requiredFacts =
         [
             "`AddAllSchemaColumns()`",
+            "joins the table of every lookup for its display value",
             "`AddColumn(\"<column path>\")` for each column the code reads",
-            "`.WithHints(Hints.NoLock)`",
-            "A `CustomQuery` cannot take a hint",
+            "`Save()` throws `RequiredColumnsEmptyValuesException` for a required column that was not loaded",
+            "`StartTransaction()` with no `RollbackTransaction()` in a catch",
             "`using (DBExecutor dbExecutor = UserConnection.EnsureDBConnection())`",
-            "`RollbackTransaction()` in the catch",
-            "Disposing the executor rolls back what is still open",
+            "`RollbackTransaction()` in the catch, then rethrow",
+            "inside a transaction an outer level started, both calls do nothing",
+            "Only the dispose that closes the outermost level rolls back a transaction still open",
             "`MsgChannelUtilities.PostMessageToAll(`",
-            "`MsgChannelUtilities.PostMessage(UserConnection, sender, text)`",
+            "`PostToAll(` on a `MsgChannelManager` or `IMsgChannelManager`",
+            "`MsgChannelUtilities.PostMessage(UserConnection, ...)` posts to the current user only and is not a broadcast",
+            "behind an operation-permission check",
             "inherits `BaseService` and uses its `UserConnection`",
             "uses the `UserConnection` passed to `Execute`",
-            "There is no DI registration for `UserConnection`",
-            "a `SecureText` system setting read through `SysSettings`",
+            "inject a `Func<UserConnection>` accessor, never the connection itself",
+            "a `SecureText` system setting (`sys-settings`) read through `SysSettings` (`sys-setting`)",
             "`Supervisor` / `Supervisor`",
+            "`localhost` is no exception",
             "`UseAdminRights = false`",
-            "keep the default `UseAdminRights = true`"
+            "a raw `Select`, `Update` or `Delete` that does not apply the caller's rights itself",
+            "`SystemUserConnection` in place of the caller's connection",
+            "the default `UseAdminRights = true`, which applies the user's record rights",
+            "A raw query that enforces the caller's rights itself and fails closed (`virtual-entities`)",
+            "a `Select` inside the condition a record-permission extension returns (`record-permission-extensions`) are not hits"
         ];
 
         // Act
@@ -75,23 +84,28 @@ public sealed class CSharpPlatformChecksGuidanceTests
 
         // Assert
         guide.Should().ContainAll(requiredFacts,
-            because: "each correct form was read in the platform source and is what an agent must write instead of the defect");
-        guide.Should().NotContain("WithHints(\"NOLOCK\")",
-            because: "the hint is Hints.NoLock; a string hint does not exist in the platform API");
+            because: "each fact was read in the platform source, the named package or an owner guide, and each correct "
+                + "form is what an agent must write instead of the defect");
         guide.Should().NotContain("resolved through DI",
-            because: "UserConnection has no DI registration; a web service takes it from BaseService");
+            because: "a UserConnection is never resolved from the container; DI code takes a Func<UserConnection> accessor");
+        guide.Should().NotContain("There is no DI registration",
+            because: "configuration-webservice registers a Func<UserConnection> accessor, so the guide must not deny it");
+        guide.Should().NotContain("PostMessage(UserConnection, sender, text)",
+            because: "a Freedom UI page drops a message body that is not JSON, so plain text is not a correct form");
+        guide.Should().NotContain("every host beyond",
+            because: "a default credential is a defect on localhost too: shipped code runs on the customer's server");
     }
 
     [Test]
-    [Description("The NoLock check is advice for MS SQL only, not a defect on every database.")]
-    public void Guide_ShouldReportNoLockAsAdviceForMsSqlOnly()
+    [Description("Read locks are not a check: the platform already reads with NOLOCK on MS SQL, so the guide asks for no hint.")]
+    public void Guide_ShouldNotAskForANoLockHint()
     {
         // Arrange
         string[] requiredFacts =
         [
-            "Check 2 is advice, not a defect",
-            "only for code that runs on MS SQL",
-            "MS SQL only: PostgreSQL and Oracle render no hint"
+            "Read locks are not a check",
+            "already read with `NOLOCK` by default",
+            "Do not add `Hints.NoLock` and do not report its absence"
         ];
 
         // Act
@@ -99,7 +113,9 @@ public sealed class CSharpPlatformChecksGuidanceTests
 
         // Assert
         guide.Should().ContainAll(requiredFacts,
-            because: "only the MS SQL engine renders the hint, and it trades locks for dirty reads, so a missing hint is not a defect");
+            because: "Select and EntitySchemaQuery default CanReadUncommitedData to true, and Select renders NOLOCK on MS SQL from it");
+        guide.Should().NotContain("WithHints(",
+            because: "a hint the platform already renders changes nothing, so the guide must not ask for one");
     }
 
     [Test]
@@ -170,6 +186,7 @@ public sealed class CSharpPlatformChecksGuidanceTests
             "sys-settings",
             "sys-setting",
             "record-permission-extensions",
+            "virtual-entities",
             "assembly-package",
             "server-to-server-oauth",
             "esq-filters-backend"

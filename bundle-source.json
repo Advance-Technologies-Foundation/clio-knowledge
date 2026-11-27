@@ -1388,7 +1388,7 @@
     {
       "itemId": "csharp-platform-checks",
       "title": "Creatio C# platform checks",
-      "description": "Before writing or reviewing Creatio C#: eight platform pitfalls. AddAllSchemaColumns, a NoLock hint for long MS SQL reads, a DBExecutor transaction that is never disposed, PostMessageToAll, HttpContext or a static UserConnection, a secret outside a SecureText setting, default Supervisor credentials and UseAdminRights = false on work done for a user, each with its consequence and correct form.",
+      "description": "Before writing or reviewing Creatio C#: seven platform pitfalls. AddAllSchemaColumns, a DBExecutor transaction with no rollback or never disposed, a broadcast message meant for one user or with no permission check, HttpContext or a static UserConnection, a secret outside a SecureText setting, default Supervisor credentials and record rights skipped on work done for a user, each with its consequence and correct form.",
       "topicId": "creatio.csharp-platform-checks",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/csharp-platform-checks",
