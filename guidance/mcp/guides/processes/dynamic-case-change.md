@@ -102,7 +102,9 @@ been written - describe the case before retrying. No compile or restart; F5.
   `{"type":"approval","caption":"Approve the order","approval":{"object":"UsrOrder","recordId":{"recordId":"[#Record.Id#]"},"approver":{"type":"role","role":"Head of sales"}},"conditions":[{"result":"Positive","nextStage":"Delivery"},{"result":"Negative","nextStage":"Cancelled"}]}`
   (required by default; ask the user who approves; conditions on Positive or Negative only);
   `{"type":"openEditPage","caption":"Enter the delivery date","openEditPage":{"page":"UsrOrder_FormPage","editMode":"edit","recordId":{"value":"[#Record.Id#]"},"performer":{"type":"role","role":"Logistics"}}}`
-  (the performer gets a task that opens the page; no conditions);
+  (the performer gets a task that opens the page; `add` pre-fills with
+  `"defaultValues":[{"column":"UsrOrder","value":"[#Record.Id#]"}]`, each a `value` (a column of the record or
+  text), never `expression`; no conditions);
   `{"type":"subProcess","caption":"Create shipment","subProcess":{"processName":"UsrCreateShipment"},"inputs":[{"parameter":"Amount","value":"[#Record.UsrAmount#]"}]}`
   (the parameter of the case's object takes the record by itself; an unknown or output input is refused with the
   inputs; no conditions);
