@@ -8,7 +8,9 @@ asks for "stages", "a status lifecycle", the order records move through status v
 a lookup's sort order in lists or dropdowns), "a progress bar on the record page" or "a case".
 "When X happens, do Y" is a business process: `process-digest`. A case is not the `Case` object. Reading and
 changing an existing case: `process-dynamic-case-change`; its versions: `process-dynamic-case-versions`;
-several cases on one object split by a filter: `process-dynamic-case-filters`.
+several cases on one object split by a filter: `process-dynamic-case-filters`; the steps in its stages (Perform
+task, approval, open edit page, sub-process, send email, change access rights), their conditions and a stage's
+`transitionType`: `process-dynamic-case-change`.
 
 Version boundary, before anything else: `create-dynamic-case` needs clio 8.1.0.150 or later. If `clio-run` answers
 `unknown tool` for it, the clio serving you is older: stop here and tell the user to update clio - do not build a
@@ -48,10 +50,8 @@ case by other means.
   the toggle changes it.
 
 == Not supported yet ==
-Steps inside stages (a Perform task and a stage's `transitionType`: `process-dynamic-case-change`;
-approvals, pages, sub-processes), stage conditions and permissions, a start condition other than one filter column,
-deleting a case other than by Undo (below) or changing its stage or filter column: the case designer does those. No mobile page, mini page or
-Classic page bar.
+Only the case designer does a start condition other than one filter column, deleting a case other than by Undo
+(below) or changing its stage or filter column. No mobile page, mini page or Classic page bar.
 
 == Before the call ==
 - The object and the lookup column are PUBLISHED: a column saved and not published is refused `column-not-published`

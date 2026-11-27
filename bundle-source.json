@@ -3,7 +3,7 @@
   "contractVersion": "1.0.0",
   "bundleSchemaVersion": "1.0.0",
   "libraryId": "com.creatio.clio",
-  "libraryVersion": "1.15.269",
+  "libraryVersion": "1.15.270",
   "compatibility": {
     "clio": {
       "min": "8.1.0",
@@ -2026,7 +2026,7 @@
     {
       "itemId": "process-dynamic-case-change",
       "title": "Change a dynamic case",
-      "description": "Needs clio 8.1.0.153 or later with a recent CrtProcessBuilder. Owns describe-dynamic-case and modify-dynamic-case: read a dynamic case (DCM) and its records per stage, then change it in place after a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, a stage caption that renames its lookup value everywhere, colours, the case caption; confirm-* flags only after the user's yes; enabled alone; refusals and outcomes; what an older clio does; the steps inside a stage. A change made as a new version (modify-dynamic-case-as-new-version) or a switch of the active one (set-active-dynamic-case-version): process-dynamic-case-versions. Several cases on one object and filters: process-dynamic-case-filters.",
+      "description": "Needs clio 8.1.0.153 or later with a recent CrtProcessBuilder. Owns describe-dynamic-case and modify-dynamic-case: read a dynamic case (DCM) and its records per stage, then change it in place after a dry run and the user's yes - the whole stage list (a stage left out is removed), groups, a stage caption that renames its lookup value everywhere, colours, the case caption; confirm-* flags only after the user's yes; enabled alone; refusals and outcomes; what an older clio does; the steps inside a stage (Perform task, approval, open edit page, sub-process, send email, change access rights) and their conditions. A change made as a new version (modify-dynamic-case-as-new-version) or a switch of the active one (set-active-dynamic-case-version): process-dynamic-case-versions. Several cases on one object and filters: process-dynamic-case-filters.",
       "topicId": "creatio.process-dynamic-case-change",
       "role": "guidance",
       "uri": "docs://knowledge/com.creatio.clio/process-dynamic-case-change",

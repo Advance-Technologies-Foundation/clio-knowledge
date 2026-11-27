@@ -154,9 +154,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().MatchRegex(
                 @"1\. `delete-schema \{ schema-name: case\.schemaName, environment-name, remote: true \}` .* 2\. `remove-data-binding-row-db` on the `SysDcmSchemaInSettings` entry of `settings\.bindings`, package-name `case\.packageName`, key .* 3\. `remove-data-binding-row-db` on the `SysDcmSettings` entry of `settings\.bindings`, package-name `case\.packageName`, key .* 4\. ONLY when `page\.status` is `inserted`: remove the two inserted items .* `update-page` with `mode: replace` .* 5\. `remove-package-dependency` for each of `dependencies\.added`",
                 because: "the case goes first as the server's own rollback does (an enabled case without its settings rows keeps starting and cannot be opened), delete-schema reaches an environment only with remote: true, remove-data-binding-row-db requires the package the server bound the rows to, append cannot remove the bar, and the dependencies go last");
-            guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise steps or transitions");
-            guide.Should().Contain("Steps inside stages", because: "the case is minimal: its stages are empty");
-            guide.Should().Contain("a start condition other than one filter column",
+            guide.Should().Contain("== Not supported yet ==", because: "an agent must not promise what only the case designer does");
+            guide.Should().NotContain("Steps inside stages",
+                because: "every step type and its conditions are added by changing the case, so none is listed as not supported (review of #365)");
+            guide.Should().Contain("start condition other than one filter column",
                 because: "several cases are split by one filter column only; any other start condition is the case designer's");
             guide.Should().Contain("A value left out of `stages` is not a stage",
                 because: "a case may take some of the lookup's values, and a record holding another shows no current stage");
@@ -208,7 +209,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
             guide.Should().Contain("Stages need a field with a fixed list of values (a lookup)",
                 because: "an agent asked a clarifying question instead of saying an amount cannot be stages");
             guide.Should().Contain("is not supported yet; the case designer does that",
-                because: "an agent planned a task inside a stage instead of saying steps are not supported");
+                because: "an agent planned what only the case designer does instead of saying it is not supported");
             guide.Should().Contain("Name the toggle", because: "an agent answered the save question without the Save on change toggle");
             guide.IndexOf("== Answer the user from the tool ==", StringComparison.Ordinal).Should().BeLessThan(
                 guide.IndexOf("== Before the call ==", StringComparison.Ordinal),
@@ -280,7 +281,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "adding a missing value the user asked for is part of the change, still after their yes");
             guide.Should().Contain("First `dry-run: true`: show the user `diff` and the notes, write only after their yes",
                 because: "agents answered about existing cases without a dry run and missed what would change");
-            guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, dry-run }",
+            guide.Should().Contain("confirm-running-instances?, confirm-stage-records?, confirm-value-rename?, confirm-all-records?, dry-run }",
                 because: "an agent builds its call from the signature, so every flag the tool takes is listed there");
             guide.Should().Contain("`invalid-request` for `enabled` on a case that is not the active version (name the active one the message gives)",
                 because: "a member that is not active is changed in place now, and only enabled, which belongs to the whole family, is refused naming the active one");
@@ -366,6 +367,9 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "a request for different stages per type must reach the guide that owns filters, and a run read it for a stage change that sent no filter");
             routing.Should().Contain("DCM: first describe-dynamic-case, even if unsure one exists (pass the user's word for the object, `find-entity-schema` if not found). None, or only asked about -> name=process-dynamic-case",
                 because: "change and disable requests matched both rows and took a hop through the create guide, a run that could not tell whether a case existed read the create guide too, and a run searched find-entity-schema before describing by the user's word, then described every match");
+            resource.GetProperty("description").GetString().Should().Contain(
+                "the steps inside a stage (Perform task, approval, open edit page, sub-process, send email, change access rights) and their conditions",
+                because: "an agent picks the guide from the catalog, so the entry names the steps it owns (review of #365)");
             Regex.Matches(routing, $"name={ChangeItemId}\\b").Count.Should().BeGreaterThanOrEqualTo(1,
                 because: "routing is what an agent reads first");
             createGuide.Should().Contain($"`{ChangeItemId}`", because: "the create guide hands changes and filters over");
@@ -799,11 +803,11 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the package removes a stage together with its steps, and the steps section owns relaying the dry run's diff.steps before the yes");
             guide.Should().NotContain("relay them before the yes",
                 because: "the yes over diff.steps has one owner, the steps section");
-            guide.Should().Contain("`stage-is-condition-target` (a kept step's condition moves records to it): a Perform task: send that step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the stage;",
-                because: "this is the only refusal of a stage removal that the steps cause, and its remedy is the package's in-place one");
+            guide.Should().Contain("`stage-is-condition-target` (a kept step's condition moves records to it): a Perform task or approval: send that step's `conditions` without that stage in the same change; another step: the case designer, or remove the step; or keep the stage;",
+                because: "this is the only refusal of a stage removal that the steps cause, and its remedy is the package's in-place one for every type that takes conditions (review of #365)");
             guide.Should().Contain("with `hasSteps` too, no version can be made (a case with steps gets one only in its own package): the case designer makes that change, say so before offering a version",
                 because: "a read-only package is answered by a version, which a case with steps cannot get outside its own package");
-            versions.Should().Contain("keep the stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform task, send that step's `conditions` without that stage together with the stages without it; for another step, remove the step or change its conditions in the case designer on the version, then remove the stage",
+            versions.Should().Contain("keep the stage in the version, then change the version in place with `modify-dynamic-case` by its `case-name`: for a Perform task or approval, send that step's `conditions` without that stage together with the stages without it; for another step, remove the step or change its conditions in the case designer on the version, then remove the stage",
                 because: "on a new version the package answers a removed stage a step condition targets with the in-place change of the version");
             versions.Should().Contain("Never for a case with steps (`hasSteps`) in a package that is not editable",
                 because: "a case with steps gets a version only in its own package, so offering one there is a dead end");
@@ -841,7 +845,7 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the whole-list rule makes the agent copy a stage's other steps from describe");
             guide.Should().Contain("A stage item's `steps` is the WHOLE ordered step list of that stage; leave it out to keep them",
                 because: "a stored step left out of the list is removed");
-            guide.Should().Contain("`[#Record.<Column>#]`: a case has no process parameters (`step-value-source-unsupported`)",
+            guide.Should().Contain("Not the sender; no text around a macro (a formula) in any field; a case has no process parameters (`step-value-source-unsupported`)",
                 because: "a case has no process parameters or earlier elements to read");
             guide.Should().Contain("Show the dry run's `diff.steps` and notes and write only after the user's yes",
                 because: "steps start on live records at stage entry");
@@ -850,8 +854,10 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 because: "the wire names of when a stage moves on are the package's");
             guide.Should().NotContain("`stage-has-steps` (it has steps",
                 because: "a removed stage now takes its steps with it; only an older package still answers stage-has-steps");
-            createGuide.Should().Contain("Steps inside stages (a Perform task and a stage's `transitionType`: `process-dynamic-case-change`",
-                because: "a case is built without steps, and the change guide owns them and the stage's transition");
+            createGuide.Should().Contain("the steps in its stages (Perform task, approval, open edit page, sub-process, send email, change access rights), their conditions and a stage's `transitionType`: `process-dynamic-case-change`",
+                because: "a case is built without steps, and the change guide owns every step type, their conditions and the stage's transition (review of #365)");
+            createGuide.Should().NotContain("approvals, pages, sub-processes",
+                because: "every step type is supported through the change guide, so none is listed as not supported");
             ProcessGuideSet.Read(ProcessGuideSet.FindRepositoryRoot(), ChangeArticlePath).Should().Contain(
                 "{\"type\":\"performTask\",\"caption\":\"Check the order\",\"required\":true,\"after\":\"Draft check\",\"performer\":",
                 because: "the guide is served raw, and a line break inside the example's strings would be copied into the request");
@@ -884,6 +890,90 @@ public sealed class ProcessDynamicCaseGuidanceTests
                 .And.Contain("`step-condition-not-supported`");
             guide.Should().NotContain("`step-has-conditions`",
                 because: "a step or a stage with conditions is now removed with them");
+        }
+    }
+
+    [Test]
+    [Description("The change guide owns the other step types: the clio and package boundary, one example per type, the approver the user is asked for, approval conditions on Positive or Negative, the sub-process inputs, the sender a mailbox, and an access-rights step on every record only after the user's separate yes (ENG-107648).")]
+    public void ChangeGuide_ShouldGuideTheOtherStepTypes()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().MatchRegex($@"- Other step types \(clio {ClioVersion}, CrtProcessBuilder 1\.6\.6\.222\)",
+                because: "the step types ship with a clio release, and a package older than the 1.6.6.222 cut refuses them");
+            guide.Should().Contain("{\"type\":\"approval\"").And.Contain("{\"type\":\"openEditPage\"")
+                .And.Contain("{\"type\":\"subProcess\"").And.Contain("{\"type\":\"sendEmail\"")
+                .And.Contain("{\"type\":\"changeAccessRights\"",
+                    because: "the guide shows one example per step type the package takes");
+            guide.Should().Contain("\"approval\":{\"object\"",
+                because: "an approval step's settings go in its approval block, which starts with the object under approval");
+            guide.Should().Contain("\"openEditPage\":{\"page\"",
+                because: "an open-edit-page step's settings go in its openEditPage block, which names the page");
+            guide.Should().Contain("\"subProcess\":{\"processName\"",
+                because: "a sub-process step names the called process in its subProcess block");
+            guide.Should().Contain("\"inputs\":[{\"parameter\"",
+                because: "a sub-process step's inputs are a list of the called process's parameters, beside the subProcess block");
+            guide.Should().Contain("\"email\":{\"sender\"",
+                because: "a send-email step's settings go in its email block, not under the type's name");
+            guide.Should().Contain("\"accessRights\":{\"object\"",
+                because: "a change-access-rights step's settings go in its accessRights block, which names the object");
+            guide.Should().Contain(",\"filter\":{\"conditions\"",
+                because: "a rights step's filter sits beside its accessRights block and holds conditions on the record");
+            guide.Should().Contain("ask the user who approves",
+                because: "the case designer requires an approver and sets none");
+            guide.Should().Contain("conditions on Positive or Negative only",
+                because: "the case designer offers no condition on a cancelled approval");
+            guide.Should().Contain("sender a mailbox, never a record column",
+                because: "the case designer maps no record column to the sender");
+            guide.Should().Contain("ask SEPARATELY, and only after that yes send `confirm-all-records: true`; no conditions)",
+                because: "an access-rights step without a filter changes every record of its object, and the condition refusal points at the types marked no conditions");
+            guide.Should().Contain("`step-acts-on-all-records` names each such step; tell the user which",
+                because: "one confirm-all-records yes covers every unfiltered rights step of the change");
+            guide.Should().Contain("Unlike those, `step-acts-on-all-records` (an access-rights step without a filter, \"Steps inside a stage\") comes as a refusal of its own, on the dry run too (no `diff` until the user's yes or a filter) -> `confirm-all-records: true`",
+                because: "the rights refusal is not among the confirmations one refusal names together, and it stops the dry run too (review of #365)");
+            guide.Should().Contain("`after`, `useBackgroundMode`, `conditions`",
+                because: "describe returns useBackgroundMode for every step type, and a kept step is copied from it");
+            guide.Should().Contain("`email`; `accessRights` + `filter`",
+                because: "describe returns every step type's block, and a kept step is copied from it");
+            guide.Should().Contain("for an approval `Positive` or `Negative`",
+                because: "an approval's conditions name its results, not a task category's");
+        }
+    }
+
+    [Test]
+    [Description("Main record (2026-11-27): every step field the case designer offers \"Main record column\" for takes one column of the case's record, which must fit the field; the sender, an activity's times and a path do not, and a task, page or email step is linked to the case's record (ENG-107648).")]
+    public void ChangeGuide_ShouldSayWhereAColumnOfTheCasesRecordGoes()
+    {
+        // Arrange & Act
+        string guide = ReadCollapsed(ChangeArticlePath);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            guide.Should().Contain("ONE column of the case's record `[#Record.<Column>#]`, also through up to four of its lookups `[#Record.Customer.Email#]` (the designer's \"Main record\")",
+                because: "an agent that knows only the record id leaves the other Main record fields to the designer");
+            guide.Should().Contain("the current user `[#SysVariable.CurrentUserContact#]` (in a field that takes a record, not text)",
+                because: "a text field shows a platform macro as written, so the package refuses it there (review of #365)");
+            guide.Should().Contain("no text around a macro (a formula) in any field",
+                because: "the package refuses a formula in every step field (review of #140)");
+            guide.Should().Contain("an activity's time (a whole-number column only:",
+                because: "an activity's start, duration and reminder take a column only, a whole number, with its unit");
+            guide.Should().Contain("a role column for a role, a user column for an approver (an owner is a contact)",
+                because: "a contact column names no user or role, so the package refuses it there");
+            guide.Should().Contain("`{\"expression\":\"[#Record.<Column>#]\",\"unit\":\"days\"}`",
+                because: "a time from the record needs its unit, which the column does not carry");
+            guide.Should().Contain("`connections` `[{column, expression | recordId}]` sets the ones it names, one entry per column: it is not the whole list, a connection left out stays and only an entry without a value clears one",
+                because: "unlike steps, conditions, inputs and recipients, a connection left out is kept (review of #365)");
+            guide.Should().Contain("`subject` (when not the caption) for a Perform task",
+                because: "describe gives every member an agent sends back (review of #365)");
+            guide.Should().Contain("`connections` on a task, page or email) and `transitionType`",
+                because: "describe gives every member an agent sends back (review of #365)");
+            guide.Should().Contain("A task, open-page or email step is linked to the case's record (\"Connected to\")",
+                because: "the user sees the step's activity on the record, as with a designer-made step");
         }
     }
 }
